@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-logVerbosity: 6
+logVerbosity: 8
 
 image:
   repository: zillbilly/anchore-admission-controller
@@ -20,11 +20,24 @@ apiService:
   group: admission.anchore.io
   version: v1beta1
 
-# Use this value to pass the endpoint to use if you already have Anchore Engine/Enterprsie deployed
+# Use this value to pass the endpoint to use if you already have Anchore Engine/Enterprise deployed
 anchore:
+  # The name of the secret to use for conferring Anchore credentials to the webhook handler
+  credentialsSecret: null
   endpoint: null
-  username: admin
-  password: foobar
+  username: ""
+  password: ""
+  policybundle: ""
+
+# Only admit images that pass policy
+enableStrictGating: false
+
+# Only admit images that have been analyzed
+enableAnalysisGating: false
+
+# Request analysis of images if not already analyzed. This is the default if the above two are false, but is ignored if
+# strict gating or analysis gating are true
+requestAnalysis: true
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

@@ -15,19 +15,14 @@ items:
     config.json: |-
       {
         "validator": {
-          "enabled": true,
-          "analyzeIfNotPresent": false,
-          "analyzeTimeout": 0,
-          "validateStatus": true
+          "requireimaganalyzed": {{ .Values.enableAnalysisGating }},
+          "requirepasspolicy": {{ .Values.enableStrictGating }},
+          "requestanalysis": {{ .Values.requestAnalysis }}
         },
-        "mutator": {
-          "enabled": true,
-          "annotationName": "admission-controller.anchore.com/policy-status"
-        },
+
         "client": {
           "endpoint": "{{ .Values.anchore.endpoint }}",
-          "username": "{{ .Values.anchore.username }}",
-          "password": "{{ .Values.anchore.password }}"
+          "policybundle": "{{ .Values.anchore.policybundle }}"
         }
       }
 
@@ -73,7 +68,7 @@ items:
         - name: serving-cert
           secret:
             defaultMode: 420
-            secretName: {{ template "anchore-admission-controller.name" . }}
+            secretName: {{ template "anchore-admission-controller.name" . }}-certs
         - name: controller-config
           configMap:
             name: {{.Release.Name}}-controller-config
@@ -97,11 +92,31 @@ items:
           volumeMounts:
           - mountPath: /var/serving-cert
             name: serving-cert
+            readOnly: true
           - mountPath: /config
             name: controller-config
           env:
           - name: CONFIG_FILE_PATH
             value: /config/config.json
+          - name: ANCHORE_USERNAME
+            {{ if .Values.anchore.credentialsSecret }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.anchore.credentialsSecret }}
+                key: username
+            {{ else }}
+            value: {{ .Values.anchore.username }}
+            {{ end }}
+          - name: ANCHORE_PASSWORD
+            {{ if .Values.anchore.credentialsSecret }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.anchore.credentialsSecret }}
+                key: password
+            {{ else }}
+            value: {{ .Values.anchore.password }}
+            {{ end }}
+
           resources:
 {{ toYaml .Values.resources | indent 12 }}
   {{- if .Values.nodeSelector }}

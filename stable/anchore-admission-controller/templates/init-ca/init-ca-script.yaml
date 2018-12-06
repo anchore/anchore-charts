@@ -77,7 +77,7 @@ data:
     apiVersion: v1
     kind: Secret
     metadata:
-      name: {{ template "anchore-admission-controller.name" . }}
+      name: {{ template "anchore-admission-controller.name" . }}-certs
     type: kubernetes.io/tls
     data:
       tls.crt: TLS_SERVING_CERT

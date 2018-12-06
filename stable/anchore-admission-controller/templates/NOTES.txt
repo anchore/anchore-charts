@@ -1,9 +1,13 @@
-Anchore engine policy validator is now installed.
+Anchore admission controller is now installed.
 
-Create a validating webhook resources to start enforcement:
+Create a validating webhook resources to start enforcement using the included script:
+
+./files/get_validating_webhook_config.sh <releasename>
+kubectl apply -f validating-webhook.yaml
+
 
 KUBE_CA=$(kubectl config view --minify=true --flatten -o json | jq '.clusters[0].cluster."certificate-authority-data"' -r)
-cat > validating-webook.yaml <<EOF
+cat > validating-webhook.yaml <<EOF
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -26,6 +30,14 @@ webhooks:
     resources:
     - pods
   failurePolicy: Fail
+# Uncomment this and customize to exclude specific namespaces from the validation requirement
+#  namespaceSelector:
+#    matchExpressions:
+#      - key: exclude.admission.anchore.io
+#        operator: NotIn
+#        values: ["true"]
 EOF
 
-kubectl apply -f validating-webook.yaml
+
+
+
