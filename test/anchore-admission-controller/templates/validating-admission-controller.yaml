@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: List
+metadata:
+items:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{ .Release.Name }}-controller-config
+    labels:
+      app: {{ template "anchore-admission-controller.name" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+  data:
+    config.json: |-
+      {
+        "validator": {
+          "enabled": true,
+          "analyzeIfNotPresent": false,
+          "analyzeTimeout": 0,
+          "validateStatus": true
+        },
+        "mutator": {
+          "enabled": true,
+          "annotationName": "admission-controller.anchore.com/policy-status"
+        },
+        "client": {
+          "endpoint": "{{ .Values.anchore.endpoint }}",
+          "username": "{{ .Values.anchore.username }}",
+          "password": "{{ .Values.anchore.password }}"
+        }
+      }
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: {{ template "anchore-admission-controller.fullname" . }}
+    labels:
+      app: {{ template "anchore-admission-controller.name" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+  spec:
+    type: {{ .Values.service.type }}
+    ports:
+    - port: {{ .Values.service.externalPort }}
+      targetPort: {{ .Values.service.internalPort }}
+      protocol: TCP
+      name: {{ .Values.service.name }}
+    selector:
+      app: {{ template "anchore-admission-controller.name" . }}
+      release: {{ .Release.Name }}
+
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    name: {{ template "anchore-admission-controller.fullname" . }}
+    labels:
+      app: {{ template "anchore-admission-controller.name" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+  spec:
+    replicas: {{ .Values.replicaCount }}
+    template:
+      metadata:
+        labels:
+          app: {{ template "anchore-admission-controller.name" . }}
+          release: {{ .Release.Name }}
+      spec:
+        serviceAccountName: {{ template "anchore-admission-controller.fullname" . }}
+        volumes:
+        - name: serving-cert
+          secret:
+            defaultMode: 420
+            secretName: {{ template "anchore-admission-controller.name" . }}
+        - name: controller-config
+          configMap:
+            name: {{.Release.Name}}-controller-config
+        containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - "/anchore-kubernetes-admission-controller"
+          - "--audit-log-path=-"
+          - "--tls-cert-file=/var/serving-cert/tls.crt"
+          - "--tls-private-key-file=/var/serving-cert/tls.key"
+          - "--v={{ .Values.logVerbosity }}"
+          ports:
+          - containerPort: {{ .Values.service.internalPort }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.internalPort }}
+              scheme: HTTPS
+          volumeMounts:
+          - mountPath: /var/serving-cert
+            name: serving-cert
+          - mountPath: /config
+            name: controller-config
+          env:
+          - name: CONFIG_FILE_PATH
+            value: /config/config.json
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+  {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+  {{- end }}

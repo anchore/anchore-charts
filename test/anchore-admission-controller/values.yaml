@@ -1,0 +1,45 @@
+# Default values for anchore-admission-controller.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+logVerbosity: 6
+
+image:
+  repository: zillbilly/anchore-admission-controller
+  tag: dev
+  pullPolicy: Always
+
+service:
+  name: anchoreadmissioncontroller
+  type: ClusterIP
+  internalPort: 443
+  externalPort: 443
+
+apiService:
+  group: admission.anchore.io
+  version: v1beta1
+
+# Use this value to pass the endpoint to use if you already have Anchore Engine/Enterprsie deployed
+anchore:
+  endpoint: null
+  username: admin
+  password: foobar
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

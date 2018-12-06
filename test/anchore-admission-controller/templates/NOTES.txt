@@ -1,0 +1,31 @@
+Anchore engine policy validator is now installed.
+
+Create a validating webhook resources to start enforcement:
+
+KUBE_CA=$(kubectl config view --minify=true --flatten -o json | jq '.clusters[0].cluster."certificate-authority-data"' -r)
+cat > validating-webook.yaml <<EOF
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ template "anchore-admission-controller.fullname" . }}.admission.anchore.io
+webhooks:
+- name: {{ template "anchore-admission-controller.fullname" . }}.admission.anchore.io
+  clientConfig:
+    service:
+      namespace: default
+      name: kubernetes
+      path: /apis/admission.anchore.io/v1beta1/imagechecks
+    caBundle: $KUBE_CA
+  rules:
+  - operations:
+    - CREATE
+    apiGroups:
+    - ""
+    apiVersions:
+    - "*"
+    resources:
+    - pods
+  failurePolicy: Fail
+EOF
+
+kubectl apply -f validating-webook.yaml
