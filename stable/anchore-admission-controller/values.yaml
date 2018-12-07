@@ -3,11 +3,11 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-logVerbosity: 8
+logVerbosity: 6
 
 image:
-  repository: zillbilly/anchore-admission-controller
-  tag: dev
+  repository: anchore/kubernetes-admission-controller
+  tag: latest
   pullPolicy: Always
 
 service:
