@@ -15,15 +15,10 @@ items:
     config.json: |-
       {
         "validator": {
-          "requireimaganalyzed": {{ .Values.enableAnalysisGating }},
-          "requirepasspolicy": {{ .Values.enableStrictGating }},
           "requestanalysis": {{ .Values.requestAnalysis }}
         },
-
-        "client": {
-          "endpoint": "{{ .Values.anchore.endpoint }}",
-          "policybundle": "{{ .Values.anchore.policybundle }}"
-        }
+        "AnchoreEndpoint": "{{ .Values.anchoreEndpoint }}",
+        "PolicySelectors": {{ toJson .Values.policySelectors }}
       }
 
 - apiVersion: v1
@@ -72,10 +67,13 @@ items:
         - name: controller-config
           configMap:
             name: {{.Release.Name}}-controller-config
+        - name: anchore-auth
+          secret:
+            secretName: {{ .Values.credentialsSecret }}
         containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.image }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           command:
           - "/anchore-kubernetes-admission-controller"
           - "--audit-log-path=-"
@@ -95,28 +93,13 @@ items:
             readOnly: true
           - mountPath: /config
             name: controller-config
+          - mountPath: /credentials
+            name: anchore-auth
           env:
           - name: CONFIG_FILE_PATH
             value: /config/config.json
-          - name: ANCHORE_USERNAME
-            {{ if .Values.anchore.credentialsSecret }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.anchore.credentialsSecret }}
-                key: username
-            {{ else }}
-            value: {{ .Values.anchore.username }}
-            {{ end }}
-          - name: ANCHORE_PASSWORD
-            {{ if .Values.anchore.credentialsSecret }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.anchore.credentialsSecret }}
-                key: password
-            {{ else }}
-            value: {{ .Values.anchore.password }}
-            {{ end }}
-
+          - name: CREDENTIALS_FILE_PATH
+            value: /credentials/credentials.json
           resources:
 {{ toYaml .Values.resources | indent 12 }}
   {{- if .Values.nodeSelector }}

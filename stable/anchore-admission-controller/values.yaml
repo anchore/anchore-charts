@@ -5,10 +5,8 @@
 replicaCount: 1
 logVerbosity: 6
 
-image:
-  repository: anchore/kubernetes-admission-controller
-  tag: latest
-  pullPolicy: Always
+image: "anchore/kubernetes-admission-controller:v0.2.0"
+imagePullPolicy: IfNotPresent
 
 service:
   name: anchoreadmissioncontroller
@@ -20,20 +18,19 @@ apiService:
   group: admission.anchore.io
   version: v1beta1
 
-# Use this value to pass the endpoint to use if you already have Anchore Engine/Enterprise deployed
-anchore:
-  # The name of the secret to use for conferring Anchore credentials to the webhook handler
-  credentialsSecret: null
-  endpoint: null
-  username: ""
-  password: ""
-  policybundle: ""
-
-# Only admit images that pass policy
-enableStrictGating: false
-
-# Only admit images that have been analyzed
-enableAnalysisGating: false
+credentialsSecret: null
+anchoreEndpoint: ""
+policySelectors:
+  - Selector:
+      ResourceType: "image"
+      SelectorKeyRegex: ".*"
+      SelectorValueRegex: ".*"
+    PolicyReference:
+      Username: "admin"
+      # This is the default bundle id in anchore engine
+      PolicyBundleId: "2c53a13c-1765-11e8-82ef-23527761d060"
+    # Mode is one of: "policy", "analysis", or "breakglass". policy=>require policy pass, analysis=>require image analyzed, breakglass=>do nothing
+    Mode: breakglass
 
 # Request analysis of images if not already analyzed. This is the default if the above two are false, but is ignored if
 # strict gating or analysis gating are true
