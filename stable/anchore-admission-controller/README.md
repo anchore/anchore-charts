@@ -32,6 +32,8 @@ same namespace you will deploy the chart to. The file must be a json file with t
 }
 ```
 
+The file *must* be named `credentials.json`.
+
 Not all users in the anchore engine need to be specified, only those that will be referenced in the controller configuration.
 
 To create the secret:
@@ -57,6 +59,13 @@ policySelectors:
     Mode: breakglass
 ```
 
+Finally install the chart with:
+```
+helm install --name <release name> --repo https://charts.anchore.io/stable anchore-admission-controller -f <path to values.yaml>
+```
+
+If you need to delete and re-install the chart, you will find the [cleanup script](files/cleanup.sh) useful.
+It will remove kubernetes objects which are not removed by a helm delete. Pass the release name as an argument.
 
 ## Chart Configuration
 
