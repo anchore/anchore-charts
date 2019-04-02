@@ -39,7 +39,7 @@ Not all users in the anchore engine need to be specified, only those that will b
 To create the secret:
 
 ```
-kubectl create secret generic anchore-credentials --from-file=creds.json=credentials.json
+kubectl create secret generic anchore-credentials --from-file=creds.json --from-file=credentials.json --from-file=auth.json
 ```
 
 Next, create a _values.yaml_ for the chart with a minimum set of keys:
