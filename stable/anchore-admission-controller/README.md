@@ -32,14 +32,14 @@ same namespace you will deploy the chart to. The file must be a json file with t
 }
 ```
 
-The file *must* be named `credentials.json`.
+The file *must* be named `credentials.json` in the secret so that it mounts properly in the pod.
 
 Not all users in the anchore engine need to be specified, only those that will be referenced in the controller configuration.
 
 To create the secret:
 
 ```
-kubectl create secret generic anchore-credentials --from-file=creds.json=credentials.json
+kubectl create secret generic anchore-credentials --from-file=credentials.json
 ```
 
 Next, create a _values.yaml_ for the chart with a minimum set of keys:
