@@ -1,7 +1,8 @@
 #!/bin/bash
 
+set -e
 # Usage: build.sh <target dir> <bucket w/prefix>
-# Example: build.sh stable/ s3://charts.anchore.io
+# Example: build.sh stable/ charts.anchore.io/stable/
 
 # This script will sync and rebuild the index.yaml for the repo of the specified directory
 # This script requires:
