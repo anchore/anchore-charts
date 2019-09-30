@@ -2,7 +2,7 @@ name: anchore-admission-controller
 description: A kubernetes admission controller for validating and mutating webhooks that operates against Anchore Engine to make access decisions and annotations
 apiVersion: v1
 appVersion: 0.2.2
-version: 0.2.3
+version: 0.2.4
 maintainers:
   - name: zhill
     email: zach@anchore.com
