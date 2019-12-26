@@ -3,12 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: auth-delegator-{{ template "anchore-admission-controller.fullname" . }}-default
-  labels:
-    app.kubernetes.io/name: {{ template "name" . }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version \| replace "+" "_" }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
 roleRef:
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
@@ -22,12 +17,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: auth-delegator-{{ template "anchore-admission-controller.fullname" . }}-admin
-  labels:
-    app.kubernetes.io/name: {{ template "name" . }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version \| replace "+" "_" }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
 roleRef:
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
@@ -42,12 +32,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: {{ template "anchore-admission-controller.fullname" . }}-default
-  labels:
-    app.kubernetes.io/name: {{ template "name" . }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version \| replace "+" "_" }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
 roleRef:
   kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io

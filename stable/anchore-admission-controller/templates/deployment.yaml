@@ -2,18 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "anchore-admission-controller.fullname" . }}
-  labels:
-    app.kubernetes.io/name: {{ template "name" . }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version \| replace "+" "_" }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "name" . }}
+        app.kubernetes.io/name: {{ include "anchore-admission-controller.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ template "anchore-admission-controller.fullname" . }}
