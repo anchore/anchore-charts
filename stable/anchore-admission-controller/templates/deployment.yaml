@@ -5,11 +5,13 @@ metadata:
   labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "anchore-admission-controller.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
-      labels:
-        app.kubernetes.io/name: {{ include "anchore-admission-controller.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+      labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
     spec:
       serviceAccountName: {{ template "anchore-admission-controller.fullname" . }}
       volumes:
