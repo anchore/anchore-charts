@@ -11,27 +11,24 @@ jobs:
     if: github.ref != 'refs/heads/master'
     steps:
     - name: Checkout
-      uses: actions/checkout@v1.2.0
+      uses: actions/checkout@v2
     - name: Shellcheck
       uses: ludeeus/action-shellcheck@0.1.0
+    - name: Run chart-testing (lint)
+      id: lint
+      uses: helm/chart-testing-action@v1.0.0-alpha.3
+      with:
+        command: lint
+        config: ct-config.yaml
     - name: Install kind
       uses: helm/kind-action@v1.0.0-alpha.3
       with:
         node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
         config: kind-config.yaml
         install_local_path_provisioner: true
-    - name: Verify kind
-      run: |
-        kubectl cluster-info
-        kubectl get nodes -o wide
-        kubectl get pods -n kube-system
-    - name: Run chart-testing (lint)
-      uses: helm/chart-testing-action@v1.0.0-alpha.1
-      with:
-        command: lint
-        config: ct-config.yaml
+      if: steps.lint.outputs.changed == 'true'
     - name: Run chart-testing (install)
-      uses: helm/chart-testing-action@v1.0.0-alpha.1
+      uses: helm/chart-testing-action@v1.0.0-alpha.3
       with:
         command: install
         config: ct-config.yaml
