@@ -11,7 +11,7 @@ jobs:
     if: github.ref != 'refs/heads/master'
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v1
     - name: Shellcheck
       uses: ludeeus/action-shellcheck@0.1.0
     - name: Run chart-testing (lint)
