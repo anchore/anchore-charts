@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-controller-config
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+data:
+  config.json: |-
+    {
+      "validator": {
+        "requestanalysis": {{ .Values.requestAnalysis }}
+      },
+      "AnchoreEndpoint": "{{ .Values.anchoreEndpoint }}",
+      "PolicySelectors": {{ toJson .Values.policySelectors }}
+    }
