@@ -15,8 +15,18 @@ service:
   externalPort: 443
 
 apiService:
+  webhook:
+    enabled: true
+    failurePolicy: Ignore
+    # caBundle value can be obtained with: kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}'
+    # caBundle:
   group: admission.anchore.io
   version: v1beta1
+  namespaceSelector:
+    matchExpressions:
+      - key: exclude.admission.anchore.io
+        operator: NotIn
+        values: ["true"]
 
 anchoreEndpoint: ""
 policySelectors:
