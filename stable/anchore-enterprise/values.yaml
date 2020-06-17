@@ -476,10 +476,344 @@ anchoreSimpleQueue:
   tolerations: []
   affinity: {}
 
-# removing anchoreEnterpriseGlobal: and enabled: false for some reason causes the following error:
-#     Error: unable to build kubernetes objects from release manifest: error validating "": error validating data: unknown object type "nil" in PersistentVolumeClaim.metadata.annotations.helm.sh/resource-policy
-#     helm.go:84: [debug] error validating "": error validating data: unknown object type "nil" in PersistentVolumeClaim.metadata.annotations.helm.sh/resource-policy
-
+# This section is used for configuring anchore enterprise.
 anchoreEnterpriseGlobal:
   enabled: false
+  # Name of kubernetes secret containing your license.yaml file.
+  # Create this secret with the following command - kubectl create secret generic anchore-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
+  licenseSecretName: anchore-enterprise-license
 
+  image: docker.io/anchore/enterprise:v2.3.1
+  imagePullPolicy: IfNotPresent
+  # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
+  # Create this secret with the following command - kubectl create secret docker-registry anchore-dockerhub-creds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
+  imagePullSecretName: anchore-enterprise-pullcreds
+
+# Configure the second postgres database instance for the enterprise feeds service.
+# Only utilized if anchoreEnterpriseGlobal.enabled: true
+anchore-feeds-db:
+  # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # enabled: false
+  postgresUser: anchoreengine
+  postgresPassword: anchore-postgres,123
+  postgresDatabase: anchore-feeds
+
+  # Specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
+
+  # Configure size of the persitant volume used with helm managed chart.
+  # This should be commented out if using an external endpoint.
+  persistence:
+    resourcePolicy: nil
+    size: 20Gi
+
+  # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
+  # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+  # imageTag: latest
+  # extraEnv:
+  # - name: POSTGRESQL_USER
+  #   value: anchoreengine
+  # - name: POSTGRESQL_PASSWORD
+  #   value: anchore-postgres,123
+  # - name: POSTGRESQL_DATABASE
+  #   value: anchore
+  # - name: PGUSER
+  #   value: postgres
+  # - name: LD_LIBRARY_PATH
+  #   value: /opt/rh/rh-postgresql96/root/usr/lib64
+  # - name: PATH
+  #   value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Configure & enable the Anchore Enterprise on-prem feeds service.
+anchoreEnterpriseFeeds:
+  # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
+  enabled: true
+
+  # Enable github advisory feeds
+  githubDriverEnabled: false
+  # GitHub advisory feeds require a github developer personal access token with no permission scopes selected.
+  githubDriverToken: null
+
+  # Enable microsoft feeds
+  msrcDriverEnabled: false
+  msrcApiKey: null
+  # Uncomment to add MSRC product IDs for generating their feed data, this extends the pre-defined list of product IDs
+  # msrcWhitelist:
+  # - 12345
+
+  # Set extra environment variables. These will be set on all feeds containers.
+  extraEnv: []
+    # - name: foo
+    #   value: bar
+
+  # Time delay in seconds between consecutive driver runs for processing data
+  cycleTimers:
+    driver_sync: 7200
+
+  # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
+  dbConfig:
+    timeout: 120
+    # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs
+    ssl: false
+    sslMode: verify-full
+    # Specify path to an additional root CA certificate - this is only utilized if 'ssl: true' is configured.
+    sslRootCertName: Null
+    connectionPoolSize: 30
+    connectionPoolMaxOverflow: 100
+
+  # kubernetes service configuration for anchore feeds service api
+  service:
+    type: ClusterIP
+    port: 8448
+    annotations: {}
+    labels: {}
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 4G
+  #  requests:
+  #    cpu: 1
+  #    memory: 2G
+
+  labels: {}
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Configure the Anchore Enterprise role based access control component.
+# This component consists of 2 containers that run as side-cars in the anchore engine api pod.
+anchoreEnterpriseRbac:
+  enabled: true
+
+  # Set extra environment variables. These will be set on all rbac containers.
+  extraEnv: []
+    # - name: foo
+    #   value: bar
+
+  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
+  # Due to RBAC sharing a service with the general API.
+  service:
+    apiPort: 8229
+    authPort: 8089
+
+  # authResources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
+  # managerResources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
+# Configure the Anchore Enterprise reporting component.
+anchoreEnterpriseReports:
+  enabled: true
+
+  # Set extra environment variables. These will be set on all rbac containers.
+  extraEnv: []
+    # - name: foo
+    #   value: bar
+
+  # GraphiQL is a GUI for editing and testing GraphQL queries and mutations.
+  # Set enable_graphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
+  enableGraphql: true
+  # Set enable_data_ingress to true for periodically syncing data from anchore engine into the reports service
+  enableDataIngress: true
+
+  cycleTimers:
+    # images and tags synced every 10 minutes
+    reports_data_load: 600
+    # policy evaluations and vulnerabilities refreshed every 2 hours
+    reports_data_refresh: 7200
+    # metrics generated every hour
+    reports_metrics: 3600
+
+  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
+  # Due to Reports sharing a service with the general API.
+  service:
+    port: 8558
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
+  labels: {}
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Configure the Anchore Enterprise notifications component.
+anchoreEnterpriseNotifications:
+  enabled: true
+
+  # Set extra environment variables. These will be set on all rbac containers.
+  extraEnv: []
+    # - name: foo
+    #   value: bar
+
+  cycleTimers:
+    notifications: 30
+
+  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
+  # Due to Reports sharing a service with the general API.
+  service:
+    port: 8668
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
+  labels: {}
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Configure the Anchore Enterprise UI.
+anchoreEnterpriseUi:
+  # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
+  enabled: true
+  image: docker.io/anchore/enterprise-ui:v2.3.1
+  imagePullPolicy: IfNotPresent
+
+  # Set extra environment variables. These will be set on all UI containers.
+  extraEnv: []
+    # - name: foo
+    #   value: bar
+
+  # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
+  ldapsRootCaCertName: Null
+
+  # Specifies whether to trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header).
+  enableProxy: false
+
+  # Specifies if SSL is enabled in the web app container.
+  enableSsl: false
+
+  # Specifies if a single set of user credentials can be used to start multiple Anchore Enterprise UI sessions; for
+  # example, by multiple users across different systems, or by a single user on a single system across multiple browsers.
+  #
+  # When set to `false`, only one session per credential is permitted at a time, and logging in will invalidate any other
+  # sessions that are using the same set of credentials. Note that setting this property to `false` does not prevent a
+  # single session from being viewed within multiple *tabs* inside the same browser.
+  enableSharedLogin: true
+
+  # The redisFlushdb` key specifies if the Redis datastore containing
+  # user session keys and data is emptied on application startup. If the datastore
+  # is flushed, any users with active sessions will be required to re-authenticate.
+  redisFlushdb: true
+
+  # The (optional) `policy_hub_uri` key specifies the address of a Policy Hub
+  # service. The value must be a string containing a properly-formed 'http' or
+  # 'https' URI, and can be overridden by using the `ANCHORE_POLICY_HUB_URI`
+  # environment variable.
+  #
+  # When this value is set, the Policy Hub component is enabled within the
+  # Policy Manager view (`/policy`). Note that the availability and integrity of
+  # Policy Hub data is determined by this component at run-time when this
+  # component is accessed.
+  policyHubUri: 'http://hub.anchore.io'
+
+  # The (optional) `custom_links` key allows a list of up to 10 external links to
+  # be provided (additional items will be excluded). The top-level `title` key
+  # provided the label for the menu (if present, otherwise the string "Custom
+  # External Links" will be used instead).
+  #
+  #  Each link entry must have a title of greater than 0-length and a valid URI.
+  #  If either item is invalid, the entry will be excluded.
+  #
+  # Uncomment customLinks and specify your custom config as per the example below
+  # customLinks:
+  #   title: Custom External Links
+  #   links:
+  #   - title: Example Link 1
+  #     uri: https://example.com
+  #   - title: Example Link 2
+  #     uri: https://example.com
+  #   - title: Example Link 3
+  #     uri: https://example.com
+  #   - title: Example Link 4
+  #     uri: https://example.com
+  #   - title: Example Link 5
+  #     uri: https://example.com
+  #   - title: Example Link 6
+  #     uri: https://example.com
+  #   - title: Example Link 7
+  #     uri: https://example.com
+  #   - title: Example Link 8
+  #     uri: https://example.com
+  #   - title: Example Link 9
+  #     uri: https://example.com
+  #   - title: Example Link 10
+  #     uri: https://example.com
+
+  # The (optional) `enable_add_repositories` key specifies if repositories can be
+  # added via the application interface by either administrative users or standard
+  # users. In the absence of this key, the default is `True`.
+  #
+  # In the absence of one or all of the properties, the default is also `True`.
+  # Thus, this key and a child key corresponding to an account type must be
+  # explicitly set to `False` for the feature to be disabled for that account.
+  #
+  # Uncomment enableAddRepositories and set the config as per the example below
+  # enableAddRepositories:
+  #   admin: True
+  #   standard: True
+
+  # kubernetes service configuration for anchore UI
+  service:
+    type: ClusterIP
+    port: 80
+    annotations: {}
+    labels: {}
+    sessionAffinity: ClientIP
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
+
+  labels: {}
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Anchore Engine Enterprise UI is dependent on redis for storing sessions
+# Only utilized if 'anchoreEnterpriseUi.enabled: true'
+anchore-ui-redis:
+  password: anchore-redis,123
+  cluster:
+    enabled: false
+  persistence:
+    enabled: false
+
+  # To use an external redis endpoint, uncomment to set 'enabled: false'
+  # enabled: false
+
+  # If 'enabled: false', specify an external redis endpoint -
+  # eg redis://:<password>@hostname:6379
+  externalEndpoint: Null

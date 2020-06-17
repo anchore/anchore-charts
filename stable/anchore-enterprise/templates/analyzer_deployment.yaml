@@ -1,15 +1,15 @@
-{{- $component := "catalog" -}}
+{{- $component := "analyzer" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
+  name: {{ template "anchore-engine.analyzer.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: {{ $component }}
-    {{- with .Values.anchoreCatalog.labels }}
+    {{- with .Values.anchoreAnalyzer.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.anchoreGlobal.labels }}
@@ -20,7 +20,7 @@ spec:
     matchLabels:
       app: {{ template "anchore-engine.fullname" . }}
       component: {{ $component }}
-  replicas: {{ .Values.anchoreCatalog.replicaCount }}
+  replicas: {{ .Values.anchoreAnalyzer.replicaCount }}
   strategy:
     type: Recreate
     rollingUpdate: null
@@ -29,13 +29,13 @@ spec:
       labels:
         app: {{ template "anchore-engine.fullname" . }}
         component: {{ $component }}
-        {{- with .Values.anchoreCatalog.labels }}
+        {{- with .Values.anchoreAnalyzer.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
         {{- with .Values.anchoreGlobal.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.anchoreCatalog.annotations }}
+      {{- with .Values.anchoreAnalyzer.annotations }}
       annotations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -66,7 +66,7 @@ spec:
       - name: {{ .Chart.Name }}-{{ $component }}
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
-        args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "catalog"]
+        args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "analyzer"]
         envFrom:
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
@@ -76,7 +76,7 @@ spec:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.anchoreCatalog.extraEnv }}
+        {{- with .Values.anchoreAnalyzer.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         - name: ANCHORE_POD_NAME
@@ -84,12 +84,22 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         ports:
-        - name: catalog
-          containerPort: {{ .Values.anchoreCatalog.service.port }}
+        - name: analyzer-api
+          containerPort: {{ .Values.anchoreAnalyzer.containerPort }}
         volumeMounts:
+        - name: analyzer-config-volume
+          mountPath: /anchore_service/analyzer_config.yaml
+          subPath: analyzer_config.yaml
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
+        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
+        - name: certs
+          mountPath: /home/anchore/certs/
+          readOnly: true
+        {{- end }}
+        - name: {{ $component }}-scratch
+          mountPath: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           mountPath: /anchore_service_config
@@ -98,15 +108,10 @@ spec:
         - name: run
           mountPath: /var/run/anchore
         {{- end }}
-        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
-        - name: certs
-          mountPath: /home/anchore/certs/
-          readOnly: true
-        {{- end }}
         livenessProbe:
           httpGet:
             path: /health
-            port: catalog
+            port: analyzer-api
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
@@ -118,7 +123,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: catalog
+            port: analyzer-api
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
@@ -127,11 +132,13 @@ spec:
           failureThreshold: 3
           successThreshold: 1
         resources:
-          {{ toYaml .Values.anchoreCatalog.resources | nindent 10 }}
+          {{ toYaml .Values.anchoreAnalyzer.resources | nindent 10 }}
       volumes:
         - name: config-volume
           configMap:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ template "anchore-engine.fullname" .}}
+        - name: {{ $component }}-scratch
+          {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -140,6 +147,9 @@ spec:
         - name: run
           emptyDir: {}
         {{- end }}
+        - name: analyzer-config-volume
+          configMap:
+            name: {{ template "anchore-engine.analyzer.fullname" . }}
         {{- with .Values.anchoreGlobal.certStoreSecretName }}
         - name: certs
           secret:
@@ -150,98 +160,61 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
         {{- end }}
-      {{- with .Values.anchoreCatalog.nodeSelector }}
+      {{- with .Values.anchoreAnalyzer.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreCatalog.affinity }}
+      {{- with .Values.anchoreAnalyzer.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreCatalog.tolerations }}
+      {{- with .Values.anchoreAnalyzer.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
-  labels:
-    app: {{ template "anchore-engine.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: {{ $component }}
-    {{- with .Values.anchoreCatalog.service.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
-    {{- with .Values.anchoreGlobal.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
-  {{- with .Values.anchoreCatalog.service.annotations }}
-  annotations:
-    {{ toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-  type: {{ .Values.anchoreCatalog.service.type }}
-  ports:
-    - name: anchore-catalog-api
-      port: {{ .Values.anchoreCatalog.service.port }}
-      targetPort: {{ .Values.anchoreCatalog.service.port }}
-      protocol: TCP
-  selector:
-    app: {{ template "anchore-engine.fullname" . }}
-    component: {{ $component }}
-
----
+{{- $component := "analyzer" -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: "catalog-config"
+  name: {{ template "anchore-engine.analyzer.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    component: {{ $component }}
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 data:
-  catalog_config.yaml: |
+  analyzer_config.yaml: |
     {{ include "anchore-engine.globalConfig" . }}
-    # Anchore Catalog config
+    {{- with .Values.anchoreAnalyzer.configFile }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     services:
-      catalog:
+      analyzer:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.catalog.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.analyzer.fullname" . }}
         listen: 0.0.0.0
-        port: {{ .Values.anchoreCatalog.service.port }}
+        port: {{ .Values.anchoreAnalyzer.containerPort }}
         cycle_timer_seconds: 1
         cycle_timers:
-          # Interval to check for an update to a tag
-          image_watcher: {{ .Values.anchoreCatalog.cycleTimers.image_watcher }}
-          # Interval to run a policy evaluation on images with the policy_eval subscription activated.
-          policy_eval: {{ .Values.anchoreCatalog.cycleTimers.policy_eval }}
-          # Interval to run a vulnerability scan on images with the vuln_update subscription activated.
-          vulnerability_scan: {{ .Values.anchoreCatalog.cycleTimers.vulnerability_scan }}
-          # Interval at which the catalog looks for new work to put on the image analysis queue.
-          analyzer_queue: {{ .Values.anchoreCatalog.cycleTimers.analyzer_queue }}
-          # Interval notifications will be processed for state changes
-          notifications: {{ .Values.anchoreCatalog.cycleTimers.notifications }}
-          # Intervals service state updates are polled for the system status
-          service_watcher: {{ .Values.anchoreCatalog.cycleTimers.service_watcher }}
-          # Interval between checks to repo for new tags
-          repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
-        event_log:
-          {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
-        archive:
-          {{- toYaml .Values.anchoreCatalog.archive | nindent 10 }}
+          {{- toYaml .Values.anchoreAnalyzer.cycleTimers | nindent 10 }}
+        max_threads: {{ .Values.anchoreAnalyzer.concurrentTasksPerWorker }}
+        analyzer_driver: 'nodocker'
+        {{- if gt .Values.anchoreAnalyzer.layerCacheMaxGigabytes 0.0 }}
+        layer_cache_enable: true
+        {{- else }}
+        layer_cache_enable: false
+        {{- end }}
+        layer_cache_max_gigabytes: {{ .Values.anchoreAnalyzer.layerCacheMaxGigabytes }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
-    # End Anchore Catalog config
+

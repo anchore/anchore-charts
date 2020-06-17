@@ -43,15 +43,10 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
-    {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-      imagePullSecrets:
-      - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
-    {{- else }}
       {{- with .Values.anchoreGlobal.imagePullSecretName }}
       imagePullSecrets:
       - name: {{ . }}
       {{- end }}
-    {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -69,18 +64,9 @@ spec:
         {{- end }}
       {{- end }}
       - name: "{{ .Chart.Name }}-{{ $component }}"
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        {{- else }}
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
-        {{- end }}
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "simplequeue"]
-        {{- else }}
         args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "simplequeue"]
-        {{- end }}
         envFrom:
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
@@ -101,11 +87,6 @@ spec:
         - name: simplequeue
           containerPort: {{ .Values.anchoreSimpleQueue.service.port }}
         volumeMounts:
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        - name: anchore-license
-          mountPath: /home/anchore/license.yaml
-          subPath: license.yaml
-        {{- end }}
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
@@ -148,11 +129,6 @@ spec:
         resources:
           {{ toYaml .Values.anchoreSimpleQueue.resources | nindent 10 }}
       volumes:
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        - name: anchore-license
-          secret:
-            secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
-        {{- end }}
         - name: config-volume
           configMap:
             name: {{ template "anchore-engine.fullname" .}}
@@ -218,3 +194,34 @@ spec:
   selector:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: "simplequeue-config"
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  simplequeue_config.yaml: |
+    {{ include "anchore-engine.globalConfig" . }}
+    # Anchore SimpleQueue config
+    services:
+      simplequeue:
+        enabled: true
+        require_auth: true
+        endpoint_hostname: {{ template "anchore-engine.simplequeue.fullname" . }}
+        listen: 0.0.0.0
+        port: {{ .Values.anchoreSimpleQueue.service.port }}
+        {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
+        ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
+        ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
+        ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
+        {{- end }}
+    # End Anchore SimpleQueue config

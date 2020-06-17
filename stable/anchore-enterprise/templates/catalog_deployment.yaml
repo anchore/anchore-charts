@@ -211,7 +211,6 @@ metadata:
 data:
   catalog_config.yaml: |
     {{ include "anchore-engine.globalConfig" . }}
-    # Anchore Catalog config
     services:
       catalog:
         enabled: true
@@ -244,4 +243,3 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
-    # End Anchore Catalog config
