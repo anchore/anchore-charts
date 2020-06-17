@@ -56,7 +56,7 @@ cloudsql:
 # By default this chart is setup to use the NGINX ingress controller which needs to be installed & configured on your cluster.
 # To utilize a GCE/ALB ingress controller comment out the nginx annotations below, change ingress.class, edit path configurations as per the comments, & set API/UI services to use NodePort.
 ingress:
-  enabled: false
+  enabled: true
   labels: {}
   # Use the following paths for GCE/ALB ingress controller
   # feedsPath: /v1/feeds/*
