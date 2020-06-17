@@ -1,0 +1,245 @@
+{{- $component := "catalog" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "anchore-engine.catalog.fullname" . }}
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: {{ $component }}
+    {{- with .Values.anchoreCatalog.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "anchore-engine.fullname" . }}
+      component: {{ $component }}
+  replicas: {{ .Values.anchoreCatalog.replicaCount }}
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  template:
+    metadata:
+      labels:
+        app: {{ template "anchore-engine.fullname" . }}
+        component: {{ $component }}
+        {{- with .Values.anchoreCatalog.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.anchoreCatalog.annotations }}
+      annotations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      {{- with .Values.anchoreGlobal.imagePullSecretName }}
+      imagePullSecrets:
+      - name: {{ . }}
+      {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
+        {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
+        volumeMounts:
+        - mountPath: /var/{{ .Values.cloudsql.serviceAccSecretName }}
+          name: {{ .Values.cloudsql.serviceAccSecretName }}
+          readOnly: true
+        {{- end }}
+      {{- end }}
+      - name: {{ .Chart.Name }}-{{ $component }}
+        image: {{ .Values.anchoreGlobal.image }}
+        imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
+        args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "catalog"]
+        envFrom:
+        - secretRef:
+            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        - configMapRef:
+            name: {{ template "anchore-engine.fullname" . }}-env
+        env:
+        {{- with .Values.anchoreGlobal.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.anchoreCatalog.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: ANCHORE_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+        - name: catalog
+          containerPort: {{ .Values.anchoreCatalog.service.port }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config/config.yaml
+          subPath: config.yaml
+        {{- if .Values.anchoreGlobal.openShiftDeployment }}
+        - name: service-config-volume
+          mountPath: /anchore_service_config
+        - name: logs
+          mountPath: /var/log/anchore
+        - name: run
+          mountPath: /var/run/anchore
+        {{- end }}
+        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
+        - name: certs
+          mountPath: /home/anchore/certs/
+          readOnly: true
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: catalog
+            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
+            scheme: HTTPS
+            {{- end }}
+          initialDelaySeconds: 120
+          timeoutSeconds: 10
+          periodSeconds: 10
+          failureThreshold: 6
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: catalog
+            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
+            scheme: HTTPS
+            {{- end }}
+          timeoutSeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        resources:
+          {{ toYaml .Values.anchoreCatalog.resources | nindent 10 }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "anchore-engine.fullname" . }}
+        {{- if .Values.anchoreGlobal.openShiftDeployment }}
+        - name: service-config-volume
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+        {{- end }}
+        {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - name: {{ .Values.cloudsql.serviceAccSecretName }}
+          secret:
+            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+        {{- end }}
+      {{- with .Values.anchoreCatalog.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreCatalog.affinity }}
+      affinity:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreCatalog.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "anchore-engine.catalog.fullname" . }}
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: {{ $component }}
+    {{- with .Values.anchoreCatalog.service.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.anchoreCatalog.service.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.anchoreCatalog.service.type }}
+  ports:
+    - name: anchore-catalog-api
+      port: {{ .Values.anchoreCatalog.service.port }}
+      targetPort: {{ .Values.anchoreCatalog.service.port }}
+      protocol: TCP
+  selector:
+    app: {{ template "anchore-engine.fullname" . }}
+    component: {{ $component }}
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: "catalog-config"
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  catalog_config.yaml: |
+    {{ include "anchore-engine.globalConfig" . }}
+    services:
+      catalog:
+        enabled: true
+        require_auth: true
+        endpoint_hostname: {{ template "anchore-engine.catalog.fullname" . }}
+        listen: 0.0.0.0
+        port: {{ .Values.anchoreCatalog.service.port }}
+        cycle_timer_seconds: 1
+        cycle_timers:
+          # Interval to check for an update to a tag
+          image_watcher: {{ .Values.anchoreCatalog.cycleTimers.image_watcher }}
+          # Interval to run a policy evaluation on images with the policy_eval subscription activated.
+          policy_eval: {{ .Values.anchoreCatalog.cycleTimers.policy_eval }}
+          # Interval to run a vulnerability scan on images with the vuln_update subscription activated.
+          vulnerability_scan: {{ .Values.anchoreCatalog.cycleTimers.vulnerability_scan }}
+          # Interval at which the catalog looks for new work to put on the image analysis queue.
+          analyzer_queue: {{ .Values.anchoreCatalog.cycleTimers.analyzer_queue }}
+          # Interval notifications will be processed for state changes
+          notifications: {{ .Values.anchoreCatalog.cycleTimers.notifications }}
+          # Intervals service state updates are polled for the system status
+          service_watcher: {{ .Values.anchoreCatalog.cycleTimers.service_watcher }}
+          # Interval between checks to repo for new tags
+          repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
+        event_log:
+          {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
+        archive:
+          {{- toYaml .Values.anchoreCatalog.archive | nindent 10 }}
+        {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
+        ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
+        ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
+        ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
+        {{- end }}
