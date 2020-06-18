@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euvo pipefail
+
+. anchore-ci/utils
+
