@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   lint-charts:
     docker:
-      - gcr.io/kubernetes-charts-ci/test-image:v3.4.1
+      - image: gcr.io/kubernetes-charts-ci/test-image:v3.4.1
     steps:
       - checkout
       - run:
