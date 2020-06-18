@@ -8,12 +8,12 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Lint Charts
-        command: |
-          helm version --client
-          git remote add charts https://github.com/robertp/anchore-charts
-          git fetch charts factor-charts
-          ct lint --config ci/ct.yaml
+          name: Lint Charts
+          command: |
+            helm version --client
+            git remote add charts https://github.com/robertp/anchore-charts
+            git fetch charts factor-charts
+            ct lint --config ci/ct.yaml
 
 workflows:
   version: 2.1
