@@ -1,0 +1,22 @@
+version: 2.1
+
+jobs:
+
+  lint-charts:
+    docker:
+      - gcr.io/kubernetes-charts-ci/test-image:v3.4.1
+    steps:
+      - checkout
+      - run:
+        name: Lint Charts
+        command: |
+          helm version --client
+          git remote add charts https://github.com/robertp/anchore-charts
+          git fetch charts factor-charts
+          ct lint --config ci/ct.yaml
+
+workflows:
+  version: 2.1
+  lint:
+    jobs:
+      - lint-charts

@@ -1,0 +1,4 @@
+remote: charts
+target-branch: factor-charts
+chart-dirs:
+  - stable/anchore-engine
