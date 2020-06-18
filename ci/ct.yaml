@@ -1,4 +1,7 @@
 remote: charts
-target-branch: factor-charts
+target-branch: master
 chart-dirs:
-  - stable/anchore-engine
+  - stable
+excluded-charts:
+    - anchore-enterprise
+    - anchore-admission-controller

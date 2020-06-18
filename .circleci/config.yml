@@ -11,7 +11,6 @@ jobs:
           command: |
             helm version --client
             git remote add charts https://github.com/robertp/anchore-charts
-            git fetch charts factor-charts
             ct lint --config ci/ct.yaml
 
 workflows:
