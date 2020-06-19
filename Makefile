@@ -44,7 +44,9 @@ VENV := venv
 ACTIVATE_VENV := . $(VENV)/bin/activate
 PYTHON := $(VENV)/bin/python3
 .DEFAULT_GOAL := help # Running make without args will run the help target
-CLUSTER_CONFIG := scripts/ci/kind-config.yaml
+CONFIG_CI := scripts/ci/kind-config.yaml
+CONFIG_LOCAL := scripts/ci/kind-config-local.yaml
+CLUSTER_CONFIG := $(CONFIG_CI)
 K8S_VERSION := 1.15.7
 ENGINE_CHART_DIR := stable/anchore-engine
 
@@ -75,6 +77,11 @@ $(VENV)/bin/activate:
 
 install-cluster-deps: anchore-ci venv ## Install kind, helm, and kubectl (unless installed)
 	$(CI_CMD) install-cluster-deps "$(VENV)"
+
+# If running CI locally, don't clog up the port mapping in control plane node definition
+ifeq ($(CI),false)
+CLUSTER_CONFIG := $(CONFIG_LOCAL)
+endif
 
 cluster-up: anchore-ci venv ## Set up and run kind cluster
 	@$(MAKE) install-cluster-deps

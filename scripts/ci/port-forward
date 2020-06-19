@@ -6,13 +6,18 @@ set -euo pipefail
 
 if [[ "${CI:-false}" == false ]]; then
 
-  print_colorized INFO "Port forwarding to API."
+  print_colorized INFO "Port forwarding to API."; echo
 
   HELM_INSTALL="${1:?'Missing required parameter: HELM_INSTALL'}"
 
-  print_colorized INFO "Waiting for API to come up."
+  print_colorized INFO "Waiting for API to come up."; echo
 
-  sleep 45
+  podname=$(kubectl get pods | grep -v Name | grep api | cut -d' ' -f1)
+
+  while [[ $(kubectl get pods "${podname}" -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]
+    do echo "Waiting for pod ${podname} to be in Ready state." && sleep 3
+  done
+  echo "${podname} is ready."; echo
 
   kubectl port-forward svc/${HELM_INSTALL}-anchore-engine-api 8228:8228 &
 
