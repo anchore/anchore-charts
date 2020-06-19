@@ -9,7 +9,6 @@ jobs:
       - run:
           name: Lint Charts
           command: |
-            helm repo add stable https://kubernetes-charts.storage.googleapis.com
             make lint-chart-engine
 
   install-charts:
@@ -20,7 +19,6 @@ jobs:
       - checkout
       - run:
           command: |
-            helm repo add stable https://kubernetes-charts.storage.googleapis.com
             make install-chart-engine
             make smoke-tests
             make cluster-down

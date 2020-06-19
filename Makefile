@@ -85,10 +85,12 @@ cluster-down: anchore-ci venv ## Tear down/stop kind cluster
 	$(ACTIVATE_VENV) && $(CI_CMD) cluster-down "$(CLUSTER_NAME)"
 
 lint-chart-engine: venv anchore-ci ## Lint charts using ct (see https://github.com/helm/chart-testing)
+	@$(ACTIVATE_VENV) && helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	@$(MAKE) install-cluster-deps
 	@$(ACTIVATE_VENV) && $(CI_CMD) lint-chart "$(ENGINE_CHART_DIR)"
 
 install-chart-engine: anchore-ci venv ## Install Anchore Engine with Helm chart
+	@$(ACTIVATE_VENV) && helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	@$(MAKE) cluster-up
 	@$(ACTIVATE_VENV) && $(CI_CMD) install-chart "$(ENGINE_CHART_DIR)" "$(HELM_INSTALL_NAME)"
 
