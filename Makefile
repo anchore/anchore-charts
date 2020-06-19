@@ -35,7 +35,7 @@ COMMIT_SHA := $(shell echo $${CIRCLE_SHA:=$$(git rev-parse HEAD)})
 GIT_TAG ?= $(shell echo $${CIRCLE_TAG:=null})
 
 CLUSTER_NAME := chart-install
-HELM_INSTALL_NAME := anchore
+HELM_INSTALL_NAME := chart-test
 
 
 # Make environment configuration
@@ -84,7 +84,7 @@ cluster-down: anchore-ci venv ## Tear down/stop kind cluster
 	@$(MAKE) install-cluster-deps
 	$(ACTIVATE_VENV) && $(CI_CMD) cluster-down "$(CLUSTER_NAME)"
 
-lint-chart-engine: venv anchore-ci ## Lint charts using ct (see https://github.com/helm/chart-testing)
+lint-chart-engine: venv anchore-ci ## Lint charts using 'helm lint'
 	@$(MAKE) install-cluster-deps
 	@$(ACTIVATE_VENV) && helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	@$(ACTIVATE_VENV) && $(CI_CMD) lint-chart "$(ENGINE_CHART_DIR)"
@@ -94,23 +94,23 @@ install-chart-engine: anchore-ci venv ## Install Anchore Engine with Helm chart
 	@$(ACTIVATE_VENV) && helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	@$(MAKE) cluster-up
 	@$(ACTIVATE_VENV) && $(CI_CMD) install-chart "$(ENGINE_CHART_DIR)" "$(HELM_INSTALL_NAME)"
+	@$(ACTIVATE_VENV) && $(CI_CMD) port-forward "$(HELM_INSTALL_NAME)"
 
 smoke-tests: anchore-ci venv ## Run Anchore Engine smoke tests
 	@$(ACTIVATE_VENV) && $(CI_CMD) smoke-tests
 
-clean: ## Clean virtual env, CI scripts, and py cache
-	@$(CI_CMD) clean "$(VENV)" "$(TEST_IMAGE_NAME)"
+clean-engine: ## Clean virtual env, CI scripts, and py cache for Anchore Engine charts
 	@$(MAKE) clean-venv
 	@$(MAKE) clean-ci-scripts
 	@$(MAKE) clean-py-cache
 
-clean-venv: ## Delete virtual environment
+clean-venv: anchore-ci ## Delete virtual environment
 	@$(CI_CMD) clean-venv "$(VENV)" "$(TEST_IMAGE_NAME)"
 
-clean-ci: ## Delete CI scripts
-	@$(CI_CMD) clean-ci-scripts "$(VENV)" "$(TEST_IMAGE_NAME)"
+clean-ci: anchore-ci ## Delete CI scripts
+	@$(CI_CMD) clean-ci-scripts
 
-clean-py-cache: ## Delete local python cache files
+clean-py-cache: anchore-ci ## Delete local python cache files
 	@$(CI_CMD) clean-py-cache
 
 printvars: ## Print make variables

@@ -6,6 +6,6 @@ set -euvo pipefail
 
 print_colorized INFO "Removing CI scripts."; echo
 
-rm -rf ./anchore-ci
+rm -rf anchore-ci
 
 print_colorized INFO "Removed CI scripts."; echo

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+. anchore-ci/utils
+
+print_colorized INFO "Port forwarding to API."
+
+HELM_INSTALL="${1:?'Missing required parameter: HELM_INSTALL'}"
+
+print_colorized INFO "Waiting for API to come up."
+
+sleep 45
+
+kubectl port-forward svc/${HELM_INSTALL}-anchore-engine-api 8228:8228 &
+
+print_colorized INFO "Port forwarded to API."
