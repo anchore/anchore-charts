@@ -1,3 +1,4 @@
 remote: origin
 chart-dirs:
 - stable
+- legacy
