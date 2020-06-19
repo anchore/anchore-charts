@@ -16,6 +16,7 @@ jobs:
       - image: circleci/python:3.6
     resource_class: large
     steps:
+      - setup_remote_docker
       - checkout
       - run:
           command: |
