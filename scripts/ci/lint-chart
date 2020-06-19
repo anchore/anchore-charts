@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+. anchore-ci/utils
+
+print_colorized INFO "Linting Helm chart."
+
+CHART_DIR="${1:?'Missing required parameter: CHART_DIR'}"
+
+helm dependency update "${CHART_DIR}"
+
+helm lint "${CHART_DIR}"
+
+print_colorized INFO "Linted Helm chart."

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euvo pipefail
+
+. anchore-ci/utils
+
+print_colorized INFO "Installing Anchore Helm chart."
+
+CHART_DIR="${1:?'Missing required parameter: CHART_DIR'}"
+HELM_INSTALL_NAME="${2:?'Missing required parameter: HELM_INSTALL_NAME'}"
+
+helm dependency update "${CHART_DIR}"
+
+helm install "${HELM_INSTALL_NAME}" "${CHART_DIR}"
+
+print_colorized INFO "Installed Anchore Helm chart."

@@ -199,7 +199,7 @@ spec:
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: "catalog-config"
+  name: {{ template "anchore-engine.catalog.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}

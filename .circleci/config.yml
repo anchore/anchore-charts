@@ -3,18 +3,30 @@ version: 2.1
 jobs:
   lint-charts:
     docker:
-      - image: gcr.io/kubernetes-charts-ci/test-image:v3.4.1
+      - image: circleci/python:3.6
     steps:
       - checkout
       - run:
           name: Lint Charts
           command: |
-            helm version --client
-            git remote add charts https://github.com/robertp/anchore-charts
-            ct lint --config ci/ct.yaml
+            make lint-chart-engine
+
+  install-charts:
+    docker:
+      - image: circleci/python:3.6
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          command: |
+            make install-chart-engine
+            make smoke-tests
+            make cluster-down
 
 workflows:
   version: 2.1
-  lint:
-    jobs:
-      - lint-charts
+  jobs:
+    - lint-charts
+    - install-charts:
+        requires:
+          - lint-charts
