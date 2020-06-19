@@ -66,8 +66,8 @@ CI_CMD := anchore-ci/ci_harness
 ci: lint-chart-engine install-chart-engine smoke-tests cluster-down ## Run full CI pipeline, locally
 
 anchore-ci: ## Fetch test artifacts for local CI
-	rm -rf /tmp/test-infra; git clone $(TEST_HARNESS_REPO) /tmp/test-infra
-	mv ./anchore-ci ./anchore-ci-`date +%F-%H-%M-%S`; mv /tmp/test-infra/anchore-ci .
+	rm -rf /tmp/test-infra 2>/dev/null; git clone $(TEST_HARNESS_REPO) /tmp/test-infra
+	mv ./anchore-ci ./anchore-ci-`date +%F-%H-%M-%S` 2>/dev/null; mv /tmp/test-infra/anchore-ci .
 
 venv: $(VENV)/bin/activate ## Set up a virtual environment
 $(VENV)/bin/activate:
@@ -85,11 +85,12 @@ cluster-down: anchore-ci venv ## Tear down/stop kind cluster
 	$(ACTIVATE_VENV) && $(CI_CMD) cluster-down "$(CLUSTER_NAME)"
 
 lint-chart-engine: venv anchore-ci ## Lint charts using ct (see https://github.com/helm/chart-testing)
-	@$(ACTIVATE_VENV) && helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	@$(MAKE) install-cluster-deps
+	@$(ACTIVATE_VENV) && helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	@$(ACTIVATE_VENV) && $(CI_CMD) lint-chart "$(ENGINE_CHART_DIR)"
 
 install-chart-engine: anchore-ci venv ## Install Anchore Engine with Helm chart
+	@$(MAKE) install-cluster-deps
 	@$(ACTIVATE_VENV) && helm repo add stable https://kubernetes-charts.storage.googleapis.com
 	@$(MAKE) cluster-up
 	@$(ACTIVATE_VENV) && $(CI_CMD) install-chart "$(ENGINE_CHART_DIR)" "$(HELM_INSTALL_NAME)"
