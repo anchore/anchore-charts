@@ -4,14 +4,19 @@ set -euo pipefail
 
 . anchore-ci/utils
 
-print_colorized INFO "Port forwarding to API."
+if [[ "${CI:-false}" == false ]]; then
 
-HELM_INSTALL="${1:?'Missing required parameter: HELM_INSTALL'}"
+  print_colorized INFO "Port forwarding to API."
 
-print_colorized INFO "Waiting for API to come up."
+  HELM_INSTALL="${1:?'Missing required parameter: HELM_INSTALL'}"
 
-sleep 45
+  print_colorized INFO "Waiting for API to come up."
 
-kubectl port-forward svc/${HELM_INSTALL}-anchore-engine-api 8228:8228 &
+  sleep 45
 
-print_colorized INFO "Port forwarded to API."
+  kubectl port-forward svc/${HELM_INSTALL}-anchore-engine-api 8228:8228 &
+
+  print_colorized INFO "Port forwarded to API."
+else
+  print_colorized INFO "No need to port forward."
+fi

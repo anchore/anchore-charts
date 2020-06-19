@@ -1,5 +1,21 @@
 version: 2.1
 
+# Note that these ports must match what's actually exposed in
+# the k8s cluster; that's done in the config used in creating
+# the cluster, e.g.:
+# nodes:
+#  - role: control-plane
+#    extraPortMappings:
+#      - containerPort: 30028
+#        hostPort: 8228
+#
+.ssh_forward_port: &ssh_forward_port
+  run:
+    name: Forward remote-docker ports for testing
+    command: |
+      ssh -MS anchore-api -fN4 -L 8228:localhost:8228 remote-docker
+      ssh -MS k8s-api -fN4 -L 32768:localhost:32768 remote-docker
+
 jobs:
   lint-charts:
     docker:
@@ -18,6 +34,7 @@ jobs:
     steps:
       - setup_remote_docker
       - checkout
+      - <<: *ssh_forward_port
       - run:
           command: |
             make install-chart-engine
