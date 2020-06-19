@@ -1,0 +1,14 @@
+dependencies:
+  - name: postgresql
+    version: "1.0.0"
+    condition: postgresql.enabled
+
+  - name: postgresql
+    version: "1.0.0"
+    condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
+    alias: anchore-feeds-db
+
+  - name: redis
+    version: "6.4.5"
+    condition: anchore-ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+    alias: anchore-ui-redis
