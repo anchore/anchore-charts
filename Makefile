@@ -106,6 +106,10 @@ install-chart-engine: anchore-ci venv ## Install Anchore Engine with Helm chart
 smoke-tests: anchore-ci venv ## Run Anchore Engine smoke tests
 	@$(ACTIVATE_VENV) && $(CI_CMD) smoke-tests
 
+run-smoke-tests: anchore-ci venv ## Set up and run Anchore Engine smoke tests
+	@$(MAKE) install-chart-engine
+	@$(MAKE) smoke-tests
+
 clean-engine: ## Clean virtual env, CI scripts, and py cache for Anchore Engine charts
 	@$(MAKE) clean-venv
 	@$(MAKE) clean-ci-scripts

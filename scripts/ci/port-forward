@@ -15,9 +15,9 @@ if [[ "${CI:-false}" == false ]]; then
   podname=$(kubectl get pods | grep -v Name | grep api | cut -d' ' -f1)
 
   while [[ $(kubectl get pods "${podname}" -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]
-    do echo "Waiting for pod ${podname} to be in Ready state." && sleep 3
+    do echo "Waiting for API pod ${podname} to be in Ready state." && sleep 5
   done
-  echo "${podname} is ready."; echo
+  echo "API ${podname} is ready."; echo
 
   kubectl port-forward svc/${HELM_INSTALL}-anchore-engine-api 8228:8228 &
 
