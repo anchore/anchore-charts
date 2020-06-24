@@ -1,0 +1,12 @@
+dependencies:
+- name: postgresql
+  repository: ""
+  version: 1.0.0
+- name: postgresql
+  repository: ""
+  version: 1.0.0
+- name: redis
+  repository: ""
+  version: 6.4.5
+digest: sha256:9a9c812e7f082129a732ccbbdcab9b92f5a80f280b2fd258fd4dfbf56d1e6d05
+generated: "2020-06-24T06:42:34.897760867Z"
