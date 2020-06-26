@@ -49,6 +49,7 @@ CONFIG_LOCAL := scripts/ci/kind-config-local.yaml
 CLUSTER_CONFIG := $(CONFIG_CI)
 K8S_VERSION := 1.15.7
 ENGINE_CHART_DIR := stable/anchore-engine
+ENTERPRISE_CHART_DIR := stable/anchore-enterprise
 
 # Run make serially. Note that recursively invoked make will still
 # run recipes in parallel (unless they also contain .NOTPARALLEL)
