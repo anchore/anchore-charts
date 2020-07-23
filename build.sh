@@ -15,18 +15,13 @@ do_push=$3
 
 
 echo "Building charts in $dest_dir and merging with data from $s3_bucket_path"
-pushd $dest_dir
+pushd "${dest_dir}"
 
 echo "Syncing s3 data down"
 aws s3 sync s3://"${s3_bucket_path}" .
 
 echo Generating packages
-for chart_dir in $(find -maxdepth 1 -not -name '.*' -type d)
-do
-	echo "Packaging ${chart_dir}"
-	helm package "${chart_dir}"
-done
-
+find . -maxdepth 1 -not -name '.*' -type d -exec echo Packaging {} \; -exec helm package {} \;
 helm repo index --merge index.yaml .
 
 
