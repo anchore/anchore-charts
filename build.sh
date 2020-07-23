@@ -14,7 +14,7 @@ s3_bucket_path=$2
 do_push=$3
 
 
-echo "Building charts in $dest_dir and merging with data from $s3_bucket_path"
+echo "Building charts in ${dest_dir} and merging with data from ${s3_bucket_path}"
 pushd "${dest_dir}"
 
 echo "Syncing s3 data down"
