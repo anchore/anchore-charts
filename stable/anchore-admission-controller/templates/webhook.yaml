@@ -3,7 +3,7 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
-labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
 webhooks:
 - name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
   clientConfig:
