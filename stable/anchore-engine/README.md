@@ -213,6 +213,223 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 ## Upgrading from previous chart versions
 A Helm post-upgrade hook job has been added starting with Chart version 1.6.0 - this job will shut down all previously running Anchore services and perform the Anchore DB upgrade process using a kubernetes job. The upgrade will only be considered successful when this job completes successfully. Performing an update after v1.6.0 will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful helm upgrade.
 
+## Chart version 1.7.0
+
+
+### Migrating The Anchore Engine Chart To The New Anchore Charts Repository
+
+**FIXME write a nice overview paragraph here.**
+
+For these examples, we assume that your namespace is called `my-namespace` and your Anchore installation is called `my-anchore`.
+
+These examples use Helm version 3 and kubectl client version 1.18 and server version 1.14.
+
+#### Scan An Image For A Quick Validation Upon Reinstallation
+
+Scan an image to use as a quick validation of your data once you reinstall Anchore Engine (the command used to run an anchore-cli pod in your cluster may differ based on your namespace and installation names). You may wish to use a different image; we're using `alpine:latest`:
+
+      $ kubectl run -i --tty anchore-cli --restart=Always --image anchore/engine-cli  --env ANCHORE_CLI_USER=admin --env ANCHORE_CLI_PASS=${ANCHORE_CLI_PASS} --env ANCHORE_CLI_URL=http://my-anchore-anchore-engine-legacy-api.my-namespace.svc.cluster.local:8228/v1/
+      [anchore@anchore-cli anchore-cli]$ anchore-cli image add alpine:latest
+      Image Digest: sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
+      Parent Digest: sha256:185518070891758909c9f839cf4ca393ee977ac378609f700f60a771a2dfe321
+      Analysis Status: not_analyzed
+      Image Type: docker
+      Analyzed At: None
+      Image ID: a24bb4013296f61e89ba57005a7b3e52274d8edd3ae2077d04395f806b63d83e
+      Dockerfile Mode: None
+      Distro: None
+      Distro Version: None
+      Size: None
+      Architecture: None
+      Layer Count: None
+
+      Full Tag: docker.io/alpine:latest
+      Tag Detected At: 2020-06-25T23:28:49Z
+
+Wait a short while, then:
+
+      [anchore@anchore-cli anchore-cli]$ anchore-cli evaluate check alpine:latest
+      Image Digest: sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
+      Full Tag: docker.io/alpine:latest
+      Status: pass
+      Last Eval: 2020-06-25T23:29:47Z
+      Policy ID: 2c53a13c-1765-11e8-82ef-23527761d060
+
+Note the results to refer to later.
+
+#### Determine Your Database PersistentVolumeClaim
+
+Find the name of the database PersistentVolumeClaim using `kubectl`:
+
+      $ kubectl get persistentvolumeclaim --namespace my-namespace
+      NAME                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+      my-anchore-postgresql   Bound   pvc-739f6f21-b73b-11ea-a2b9-42010a800176    20Gi       RWO            standard       2d
+
+The name of your PersistentVolumeClaim in the example shown is `my-anchore-postgresql`. Note that, as you will need it later.
+
+#### Uninstall Your Anchore Installation With Helm
+
+      $ helm uninstall --namespace=my-namespace my-anchore
+      release "my-anchore" uninstalled
+
+Your PersistentVolumeClaim will still be resident in your cluster:
+
+      $ kubectl get persistentvolumeclaim --namespace my-namespace
+      NAME                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+      my-anchore-postgresql   Bound    pvc-739f6f21-b73b-11ea-a2b9-42010a800176   20Gi       RWO            standard       2d
+
+#### Add The New Anchore Helm Chart Repository And Install The Anchore Helm Chart
+
+      $ helm repo add anchore-charts https://charts.anchore.io
+      "anchore-charts" has been added to your repositories
+
+      $ helm repo update
+      Hang tight while we grab the latest from your chart repositories...
+      ...Successfully got an update from the "anchore-charts" chart repository
+
+This is where you'll need the name of the PersistentVolumeClaim from above, to override the value `postgresql.persistence.existingclaim`:
+
+      $ helm install --set postgresql.persistence.existingclaim=my-anchore-postgresql --namespace=my-namespace my-anchore anchore-charts/anchore-engine
+      NAME: my-anchore
+      LAST DEPLOYED: Thu Jun 25 12:25:33 2020
+      NAMESPACE: my-namespace
+      STATUS: deployed
+      REVISION: 1
+      TEST SUITE: None
+      NOTES:
+      To use Anchore Engine you need the URL, username, and password to access the API.
+      ...more instructions...
+
+Verify that your PersistentVolumeClaim is in place:
+
+      $ kubectl get persistentvolumeclaim --namespace my-namespace
+      NAME                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+      my-anchore-postgresql   Bound    pvc-739f6f21-b73b-11ea-a2b9-42010a800176   20Gi       RWO            standard       2d
+
+Reconnect to the anchore-cli pod, or create another.  Then validate that you still have the results from scanning `alpine:latest` (the "Last Eval" time will differ, as it's the time the evaluate command is run):
+
+      [anchore@anchore-cli anchore-cli]$ anchore-cli evaluate check alpine:latest
+      Image Digest: sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
+      Full Tag: docker.io/alpine:latest
+      Status: pass
+      Last Eval: 2020-06-25T23:34:05Z
+      Policy ID: 2c53a13c-1765-11e8-82ef-23527761d060
+
+You are now running Anchore Engine from the new chart repository, with your data in place.
+
+
+### Migrating The Anchore Enterprise Chart To The New Anchore Charts Repository
+
+**FIXME write a nice overview paragraph here.**
+
+For these examples, we assume that your namespace is called `my-namespace` and your Anchore installation is called `my-anchore`.
+
+These examples use Helm version 3 and kubectl client version 1.18 and server version 1.14.
+
+#### Scan An Image For A Quick Validation Upon Reinstallation
+
+Scan an image to use as a quick validation of your data once you reinstall Anchore Engine (the command used to run an anchore-cli pod in your cluster may differ based on your namespace and installation names). You may wish to use a different image; we're using `alpine:latest`:
+
+      $ kubectl run -i --tty anchore-cli --restart=Always --image anchore/engine-cli  --env ANCHORE_CLI_USER=admin --env ANCHORE_CLI_PASS=${ANCHORE_CLI_PASS} --env ANCHORE_CLI_URL=http://my-anchore-anchore-engine-legacy-api.my-namespace.svc.cluster.local:8228/v1/
+      [anchore@anchore-cli anchore-cli]$ anchore-cli image add alpine:latest
+      Image Digest: sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
+      Parent Digest: sha256:185518070891758909c9f839cf4ca393ee977ac378609f700f60a771a2dfe321
+      Analysis Status: not_analyzed
+      Image Type: docker
+      Analyzed At: None
+      Image ID: a24bb4013296f61e89ba57005a7b3e52274d8edd3ae2077d04395f806b63d83e
+      Dockerfile Mode: None
+      Distro: None
+      Distro Version: None
+      Size: None
+      Architecture: None
+      Layer Count: None
+
+      Full Tag: docker.io/alpine:latest
+      Tag Detected At: 2020-06-25T23:28:49Z
+
+Wait a short while, then:
+
+      [anchore@anchore-cli anchore-cli]$ anchore-cli evaluate check alpine:latest
+      Image Digest: sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
+      Full Tag: docker.io/alpine:latest
+      Status: pass
+      Last Eval: 2020-06-25T23:29:47Z
+      Policy ID: 2c53a13c-1765-11e8-82ef-23527761d060
+
+Note the results to refer to later.
+
+#### Determine Your Database PersistentVolumeClaim
+
+Find the names of the database PersistentVolumeClaims using `kubectl`:
+
+      $ kubectl get persistentvolumeclaim --namespace my-namespace
+      NAME                                           STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+      my-anchore-anchore-feeds-db                    Bound    pvc-cd7ebb6f-bbe0-11ea-b9bf-42010a800020   20Gi       RWO            standard       3d
+      my-anchore-postgresql                          Bound    pvc-cd7dc7d2-bbe0-11ea-b9bf-42010a800020   20Gi       RWO            standard       3d
+
+The names of the PersistentVolumeClaims in the example shown are `my-anchore-anchore-feeds-db` and `my-anchore-postgresql`, You may have other persistent volume clains, but only `my-anchore-anchore-feeds-db` and `my-anchore-postgresql` are relevant for this migration; note the names, as you will need them later.
+
+#### Uninstall Your Anchore Installation With Helm
+
+      $ helm uninstall --namespace=my-namespace my-anchore
+      release "my-anchore" uninstalled
+
+Remove the Redis DB PersistentVolumeClaim, as another will be created when reinstalling:
+
+    $ kubectl delete pvc redis-data-my-anchore-anchore-ui-redis-master-0
+
+Your other PersistentVolumeClaims will still be resident in your cluster:
+
+      $ kubectl get persistentvolumeclaim --namespace my-namespace
+      NAME                          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+      my-anchore-anchore-feeds-db   Bound    pvc-a22abf70-bbb9-11ea-840b-42010a8001d8   20Gi       RWO            standard       3d
+      my-anchore-postgresql         Bound    pvc-e6daf90a-bbb8-11ea-840b-42010a8001d8   20Gi       RWO            standard       3d
+
+#### Add The New Anchore Helm Chart Repository And Install The Anchore Helm Chart
+
+      $ helm repo add anchore-charts https://charts.anchore.io
+      "anchore-charts" has been added to your repositories
+
+      $ helm repo update
+      Hang tight while we grab the latest from your chart repositories...
+      ...Successfully got an update from the "anchore-charts" chart repository
+
+This is where you'll need the name of the PersistentVolumeClaims from above, to set the values `postgresql.persistence.existingclaim` and `anchore-feeds-db.persistence.existingclaim`.  Note that in the helm command, we're including a simple values file to enable Anchore Enterprise:
+
+      $ cat enterprise_values.yaml
+      anchoreEnterpriseGlobal:
+        enabled: true
+
+      $ helm install --set postgresql.persistence.existingclaim=my-anchore-postgresql,anchore-feeds-db.persistence.existingclaim=my-anchore-anchore-feeds-db --namespace=my-namespace my-anchore -f enterprise_values.yaml new-repo-name/anchore-engine
+      NAME: my-anchore
+      LAST DEPLOYED: Thu Jun 25 12:25:33 2020
+      NAMESPACE: my-namespace
+      STATUS: deployed
+      REVISION: 1
+      TEST SUITE: None
+      NOTES:
+      To use Anchore Engine you need the URL, username, and password to access the API.
+      ...more instructions...
+
+Your PersistentVolumeClaims are in place:
+
+      $ kubectl get persistentvolumeclaim --namespace my-namespace
+      NAME                          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+      my-anchore-anchore-feeds-db   Bound    pvc-a22abf70-bbb9-11ea-840b-42010a8001d8   20Gi       RWO            standard       3d
+      my-anchore-postgresql         Bound    pvc-e6daf90a-bbb8-11ea-840b-42010a8001d8   20Gi       RWO            standard       3d
+
+Reconnect to the anchore-cli pod, or create another.  Then validate that you still have the results from scanning `alpine:latest` (the "Last Eval" time will differ, as it's the time the evaluate command is run):
+
+      [anchore@anchore-cli anchore-cli]$ anchore-cli evaluate check alpine:latest
+      Image Digest: sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
+      Full Tag: docker.io/alpine:latest
+      Status: pass
+      Last Eval: 2020-06-25T23:34:05Z
+      Policy ID: 2c53a13c-1765-11e8-82ef-23527761d060
+
+You are now running Anchore Enterprise from the new chart repository, with your data in place.
+
 ## Chart version 1.6.0
 Changes with this version include:
   * Anchore database upgrades will now be handled using a helm post-upgrade hook job
