@@ -280,7 +280,7 @@ The names of the PersistentVolumeClaims in the example shown are `my-anchore-anc
       $ helm uninstall --namespace=my-namespace my-anchore
       release "my-anchore" uninstalled
 
-Remove the Redis DB PersistentVolumeClaim, as another will be created when reinstalling:
+Anchore Enterprise users will want to remove the Redis DB PersistentVolumeClaim, as another will be created when reinstalling:
 
     $ kubectl delete pvc redis-data-my-anchore-anchore-ui-redis-master-0
 
