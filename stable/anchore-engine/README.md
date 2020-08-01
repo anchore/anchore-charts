@@ -228,11 +228,11 @@ These examples use Helm version 3 and kubectl client version 1.18, server versio
 
 #### ENSURE MIGRATION IS PERFORMED SEPARATELY FROM ANCHORE ENGINE UPGRADES
 
-All helm installation steps will include a flag to override the Anchore Engine/Enterprise images with your current running version. Record the version of your Anchore deployment and use it anytime the instructions refer to the Engine Code Version.
+All helm installation steps will include a flag to override the Anchore Engine/Enterprise images with your current running version. Upgrading your version of Anchore can be performed after moving to the new chart from charts.anchore.io. Record the version of your Anchore deployment and use it anytime the instructions refer to the Engine Code Version.
 
 ### Determine Currently Running Anchore Version
 
-Connect to the anchore-api pod and issue the following command and record the Engine Code Version:
+Connect to the anchore-api pod, issue the following command and record the Engine Code Version:
 
 ```
 [anchore@anchore-api anchore-engine]$ anchore-cli system status
@@ -357,7 +357,7 @@ To use Anchore Engine you need the URL, username, and password to access the API
 ...more instructions...
 ```
 
-Verify that your PersistentVolumeClaims are in place (output may vary):
+Verify that your PersistentVolumeClaims are bound (output may vary):
 
 ```
 $ kubectl get persistentvolumeclaim --namespace my-namespace
@@ -378,8 +378,8 @@ docker.io/ubuntu:latest                    sha256:60f560e52264ed1cb7829a0d59b1ee
 
 You are now running Anchore from the new chart repository, with your data in place. 
 
-#### Upgrade To Latest Version of Anchore
-Now you can upgrade Anchore to the latest version if desired.
+## Upgrade To Latest Version of Anchore
+Now that you're migrated to charts.anchore.io you can upgrade Anchore Engine to the latest version if desired.
 
 ```
 $ helm upgrade --namespace my-namespace -f anchore_values.yaml my-anchore anchore/anchore-engine
