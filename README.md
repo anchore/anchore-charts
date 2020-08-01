@@ -1,12 +1,16 @@
 # Anchore Charts
 
-A collection of anchore charts for tooling and integrations.
-
-The charts in this repository are available from the Anchore Charts Repository at:
+A collection of anchore charts for tooling and integrations. The charts in this repository are available from the Anchore Charts Repository at:
 
 http://charts.anchore.io
 
-http://charts.anchore.io/test
+## Installing Charts
+```
+$ helm repo add anchore https://charts.anchore.io
+$ helm search repo anchore
+$ helm install my-release anchore/<chart>
+```
+
 
 ## Contributing
 
