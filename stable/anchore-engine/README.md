@@ -19,7 +19,11 @@ The chart is split into global and service specific configurations for the OSS A
 For a description of each component, view the official documentation at: [Anchore Enterprise Service Overview](https://docs.anchore.com/current/docs/overview/architecture/)
 
 ## Installing the Anchore Engine Helm Chart
-TL;DR - `helm repo add anchore https://charts.anchore.io && helm install anchore/anchore-engine`
+### TL;DR
+```
+helm repo add anchore https://charts.anchore.io
+helm install my-release anchore/anchore-engine
+```
 
 Anchore Engine will take approximately 3 minutes to bootstrap. After the initial bootstrap period, Anchore Engine will begin a vulnerability feed sync. During this time, image analysis will show zero vulnerabilities until the sync is completed. This sync can take multiple hours depending on which feeds are enabled. The following anchore-cli command is available to poll the system and report back when the engine is bootstrapped and the vulnerability feeds are all synced up. `anchore-cli system wait`
 
