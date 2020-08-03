@@ -289,7 +289,7 @@ $ helm uninstall --namespace=my-namespace my-anchore
 release "my-anchore" uninstalled
 ```
 
-Anchore Enterprise users will want to remove the Redis DB PersistentVolumeClaim, this will delete all current session data but will not effect stability of the deployment:
+Anchore Enterprise users will want to remove the Redis DB PersistentVolumeClaim; this will delete all current session data but will not affect stability of the deployment:
 
 ```
 $ kubectl delete pvc redis-data-my-anchore-anchore-ui-redis-master-0
@@ -317,7 +317,7 @@ Hang tight while we grab the latest from your chart repositories...
 
 #### Install The Anchore Helm Chart
 
-This is where you'll need the name of the PersistentVolumeClaim from above, to override the value `postgresql.persistence.existingclaim`. Update your anchore_values.yaml file as shown below:
+Update your anchore_values.yaml file as shown, using the PersistentVolumeClaim values from above:
 
 Engine only deployment values file example:
 ```
