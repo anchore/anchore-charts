@@ -256,7 +256,7 @@ $ helm uninstall --namespace=my-namespace my-anchore
 $ helm repo add anchore https://charts.anchore.io
 $ helm repo update
 $ export ANCHORE_VERSION=0.7.2 # USE YOUR ENGINE CODE VERSION HERE
-$ helm install --namespace=my-namespace --set anchoreGlobal.image:docker.io/anchore/anchore-engine:v${ANCHORE_VERSION} --set anchoreEnterpriseGlobal.image:docker.io/anchore/enterprise:v${ANCHORE_VERSION} -f anchore_values.yaml my-anchore anchore/anchore-engine
+$ helm install --namespace=my-namespace --set anchoreGlobal.image=docker.io/anchore/anchore-engine:v${ANCHORE_VERSION} --set anchoreEnterpriseGlobal.image=docker.io/anchore/enterprise:v${ANCHORE_VERSION} -f anchore_values.yaml my-anchore anchore/anchore-engine
 ```
 
 ## If Using The Included Postgresql Chart
@@ -348,7 +348,7 @@ anchore-feeds-db:
 Install a new Anchore Engine deployment using the chart from charts.anchore.io
 ```
 $ export ANCHORE_VERSION=0.7.2 # USE YOUR ENGINE CODE VERSION HERE
-$ helm install --namespace=my-namespace --set anchoreGlobal.image:docker.io/anchore/anchore-engine:v${ANCHORE_VERSION} --set anchoreEnterpriseGlobal.image:docker.io/anchore/enterprise:v${ANCHORE_VERSION} -f anchore_values.yaml my-anchore anchore/anchore-engine
+$ helm install --namespace=my-namespace --set anchoreGlobal.image=docker.io/anchore/anchore-engine:v${ANCHORE_VERSION} --set anchoreEnterpriseGlobal.image=docker.io/anchore/enterprise:v${ANCHORE_VERSION} -f anchore_values.yaml my-anchore anchore/anchore-engine
 
 NAME: my-anchore
 LAST DEPLOYED: Thu Jun 25 12:25:33 2020
