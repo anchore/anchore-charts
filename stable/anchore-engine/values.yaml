@@ -261,9 +261,9 @@ anchoreAnalyzer:
     #   regexp_match:
     #     - "EXAMPLE_MATCH="
 
-    # Uncomment the 'malware' section to enable use of the open-source ClamAV malware scanner to detect malicious code embedded in container images. 
-    # This scan occurs only at analysis time when the image content itself is available, and the scan results are available via the Engine API as well as 
-    # for consumption in new policy gates to allow gating of image with malware findings. 
+    # Uncomment the 'malware' section to enable use of the open-source ClamAV malware scanner to detect malicious code embedded in container images.
+    # This scan occurs only at analysis time when the image content itself is available, and the scan results are available via the Engine API as well as
+    # for consumption in new policy gates to allow gating of image with malware findings.
     # For more detailed configuration info see - https://docs.anchore.com/current/docs/engine/general/concepts/images/analysis/malware_scanning
     #
     # malware:
