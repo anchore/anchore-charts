@@ -20,8 +20,8 @@ entries:
     version: 0.2.9
   anchore-engine:
   - apiVersion: v1
-    appVersion: 0.7.3
-    created: "2020-08-06T06:28:46.473042292Z"
+    appVersion: 0.8.0
+    created: "2020-08-10T17:24:51.928958194Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -38,7 +38,7 @@ entries:
       repository: https://charts.bitnami.com/bitnami
       version: "10"
     description: Anchore container analysis and policy evaluation engine service
-    digest: 8c25487c2be7ec2505c4904e855854c2fa26deea720d5295af58b4085c5f99e5
+    digest: 407f5ac1128562801cb130fbbdbf3e839b39866b31779c430b6bbf91e09ed72f
     home: https://anchore.com
     icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
     keywords:
@@ -59,6 +59,6 @@ entries:
     sources:
     - https://github.com/anchore/anchore-engine
     urls:
-    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.7.0/anchore-engine-1.7.0.tgz
-    version: 1.7.0
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.8.0/anchore-engine-1.8.0.tgz
+    version: 1.8.0
 generated: "2020-07-23T09:06:09.893357241Z"
