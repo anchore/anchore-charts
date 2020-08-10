@@ -90,7 +90,7 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.7.3
+  image: docker.io/anchore/anchore-engine:v0.8.0
   imagePullPolicy: IfNotPresent
   # Set image pull secret name if using an anchore-engine image from a private registry
   imagePullSecretName:
@@ -223,6 +223,12 @@ anchoreAnalyzer:
   # For more info see - https://docs.anchore.com/current/docs/engine/engine_installation/storage/layer_caching/
   # Enable image layer caching by setting a cache size > 0GB.
   layerCacheMaxGigabytes: 0
+
+  # Enable the ability to read a user-supplied 'hints' file to allow users to override and/or augment the software artifacts that are discovered by anchore during its image analysis process.
+  # Once enabled, the analyzer services will look for a file with a specific name, location and format located within the container image - /anchore_hints.json
+  # For more info see - https://docs.anchore.com/current/docs/engine/engine_installation/configuration/content_hints
+  enableHints: false
+
   configFile:
     # Anchore analyzer config file
     #
@@ -254,6 +260,17 @@ anchoreAnalyzer:
     #     - MAXFILESIZE=10000
     #   regexp_match:
     #     - "EXAMPLE_MATCH="
+
+    # Uncomment the 'malware' section to enable use of the open-source ClamAV malware scanner to detect malicious code embedded in container images.
+    # This scan occurs only at analysis time when the image content itself is available, and the scan results are available via the Engine API as well as
+    # for consumption in new policy gates to allow gating of image with malware findings.
+    # For more detailed configuration info see - https://docs.anchore.com/current/docs/engine/general/concepts/images/analysis/malware_scanning
+    #
+    # malware:
+    #   clamav:
+    #     enabled: true
+    #     db_update_enabled: true
+
 
   # resources:
   #  limits:

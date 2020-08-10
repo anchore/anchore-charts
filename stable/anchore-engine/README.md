@@ -1,5 +1,7 @@
 # Anchore Engine Helm Chart
 
+[Instructions for migrating deployments from helm/stable to charts.anchore.io](#migrating-to-the-new-anchore-charts-repository)
+
 This chart deploys the Anchore Engine docker container image analysis system. Anchore Engine requires a PostgreSQL database (>=9.6) which may be handled by the chart or supplied externally, and executes in a service based architecture utilizing the following Anchore Engine services: External API, SimpleQueue, Catalog, Policy Engine, and Analyzer.
 
 This chart can also be used to install the following Anchore Enterprise services: GUI, RBAC, Reporting, Notifications & On-premises Feeds. Enterprise services require a valid Anchore Enterprise License as well as credentials with access to the private DockerHub repository hosting the images. These are not enabled by default.
@@ -218,6 +220,16 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 ## Upgrading from previous chart versions
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore DB upgrade process using a kubernetes job. The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful helm upgrade.
 
+# Chart version 1.8.0
+
+The following Anchore-Engine features were added with this version:
+  * Malware scanning - see .Values.anchoreAnalyzer.configFile.malware
+  * Binary content scanning
+  * Content hints file analysis - see .Values.anchoreAnalyzer.enableHints
+  * Updated image deletion behavior
+
+For more details see - https://docs.anchore.com/current/docs/engine/releasenotes/080
+
 # Chart version 1.7.0
 
 Starting with version 1.7.0 the anchore-engine chart will be hosted on charts.anchore.io - if you're upgrading from a previous version of the chart, you will need to delete your previous deployment and redeploy Anchore Engine using the chart from the Anchore Charts repository. 
@@ -228,7 +240,7 @@ This version of the chart includes the dependent Postgresql chart in the charts/
 
 For these examples, we assume that your namespace is called `my-namespace` and your Anchore installation is called `my-anchore`.
 
-These examples use Helm version 3 and kubectl client version 1.18, server version 1.14.
+These examples use Helm version 3 and kubectl client version 1.18, server version 1.18.
 
 #### ENSURE MIGRATION IS PERFORMED SEPARATELY FROM ANCHORE ENGINE UPGRADES
 
