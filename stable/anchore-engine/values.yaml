@@ -123,6 +123,12 @@ anchoreGlobal:
   # Certs and keys should be added using the file name the certificate is stored at. This secret will be mounted to /home/anchore/certs.
   certStoreSecretName: Null
 
+  # Specify your pod securityContext here, by default the anchore images utilize the user/group 'anchore' using uid/gid 1000
+  # To disable this securityContext comment out `runAsUser` & `runAsGroup`
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+
   ###
   # Start of General Anchore Engine Configurations (populates /config/config.yaml)
   ###
