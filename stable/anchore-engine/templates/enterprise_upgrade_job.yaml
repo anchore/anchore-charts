@@ -20,9 +20,10 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     spec:
+      {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
       restartPolicy: Never

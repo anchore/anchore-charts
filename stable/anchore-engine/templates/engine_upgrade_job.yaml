@@ -19,9 +19,10 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     spec:
+      {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
      {{- if .Values.anchoreEnterpriseGlobal.enabled }}
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
