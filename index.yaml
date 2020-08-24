@@ -16,7 +16,7 @@ entries:
       name: btodhunter
     name: anchore-admission-controller
     urls:
-    - https://github.com/Btodhunter/anchore-charts/releases/download/anchore-admission-controller-0.2.9/anchore-admission-controller-0.2.9.tgz
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-admission-controller-0.2.9/anchore-admission-controller-0.2.9.tgz
     version: 0.2.9
   anchore-engine:
   - apiVersion: v1
