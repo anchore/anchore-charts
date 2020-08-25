@@ -24,6 +24,6 @@ jobs:
         uses: helm/chart-releaser-action@v1.0.0-rc.1
         with:
           charts_dir: stable
-          charts_repo_url: https://btodhunter.github.io/anchore-charts
+          charts_repo_url: https://charts.anchore.io
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
