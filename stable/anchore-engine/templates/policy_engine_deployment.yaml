@@ -35,8 +35,11 @@ spec:
         {{- with .Values.anchoreGlobal.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.anchorePolicyEngine.annotations }}
       annotations:
+      {{- with .Values.anchoreGlobal.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchorePolicyEngine.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
@@ -83,8 +86,10 @@ spec:
         args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "policy_engine"]
         {{- end }}
         envFrom:
+        {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
         env:
