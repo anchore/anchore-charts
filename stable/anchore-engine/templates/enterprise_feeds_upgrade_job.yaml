@@ -37,6 +37,8 @@ spec:
         args: ["/bin/bash", "-c", "anchore-enterprise-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask"]
         {{- end }}
         envFrom:
+        - secretRef:
+            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
         - configMapRef:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
         env:
