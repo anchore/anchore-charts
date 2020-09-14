@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ .Release.Name }}-enterprise-upgrade"
+  name: "{{ .Release.Name }}-enterprise-feeds-upgrade"
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -14,7 +14,7 @@ metadata:
 spec:
   template:
     metadata:
-      name: "{{ .Release.Name }}-enterprise-upgrade"
+      name: "{{ .Release.Name }}-enterprise-feeds-upgrade"
       labels:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
@@ -28,7 +28,7 @@ spec:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
       restartPolicy: Never
       containers:
-      - name: "{{ .Release.Name }}-enterprise-upgrade"
+      - name: "{{ .Release.Name }}-enterprise-feeds-upgrade"
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         {{- if .Values.anchoreGlobal.dbConfig.ssl }}
@@ -40,11 +40,19 @@ spec:
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
         - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
+            name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- with .Values.anchoreEnterpriseFeeds.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: ANCHORE_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "anchore-engine.fullname" . }}
+              key: .feedsDbPassword
         {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         volumeMounts:
         - name: certs

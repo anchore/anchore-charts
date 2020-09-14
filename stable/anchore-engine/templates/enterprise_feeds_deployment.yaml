@@ -41,9 +41,10 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
       containers:
