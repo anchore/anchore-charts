@@ -519,6 +519,12 @@ anchoreSimpleQueue:
   tolerations: []
   affinity: {}
 
+# Pod configuration for the helm post-install-hook engine upgrade Job
+anchoreEngineUpgradeJob:
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
 # This section is used for configuring anchore enterprise.
 anchoreEnterpriseGlobal:
   enabled: false
@@ -624,6 +630,12 @@ anchoreEnterpriseFeeds:
 
   labels: {}
   annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Pod configuration for the helm post-install-hook feeds upgrade Job
+anchoreEnterpriseFeedsUpgradeJob:
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -861,6 +873,12 @@ anchore-ui-redis:
   # If 'enabled: false', specify an external redis endpoint -
   # eg redis://:<password>@hostname:6379
   externalEndpoint: Null
+
+# Pod configuration for the helm post-install-hook enterprise engine upgrade Job
+anchoreEnterpriseEngineUpgradeJob:
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
 
 # To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
 # This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault

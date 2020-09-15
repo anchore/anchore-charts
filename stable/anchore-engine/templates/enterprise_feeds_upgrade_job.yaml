@@ -71,4 +71,16 @@ spec:
         secret:
           secretName: {{ . }}
       {{- end }}
+      {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.affinity }}
+      affinity:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }}
