@@ -104,17 +104,19 @@ spec:
         livenessProbe:
           tcpSocket:
             port: enterprise-ui
-          initialDelaySeconds: 120
-          periodSeconds: 10
-          failureThreshold: 6
-          successThreshold: 1
+          initialDelaySeconds: {{ .Values.anchoreGlobal.probes.liveness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.anchoreGlobal.probes.liveness.timeoutSeconds }}
+          periodSeconds: {{ .Values.anchoreGlobal.probes.liveness.periodSeconds }}
+          failureThreshold: {{ .Values.anchoreGlobal.probes.liveness.failureThreshold }}
+          successThreshold: {{ .Values.anchoreGlobal.probes.liveness.successThreshold }}
         readinessProbe:
           httpGet:
             path: /service/health
             port: enterprise-ui
-          periodSeconds: 10
-          failureThreshold: 3
-          successThreshold: 1
+          timeoutSeconds: {{ .Values.anchoreGlobal.probes.readiness.timeoutSeconds }}
+          periodSeconds: {{ .Values.anchoreGlobal.probes.readiness.periodSeconds }}
+          failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
+          successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
         resources:
           {{ toYaml .Values.anchoreEnterpriseUi.resources | nindent 10 }}
       volumes:

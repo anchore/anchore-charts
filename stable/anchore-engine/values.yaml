@@ -203,6 +203,20 @@ anchoreGlobal:
     general: {}
       # url: "http://somehost:9090/<notification_type>/<userId>"
 
+  # Allow configuration of Kubernetes probes
+  probes:
+    liveness:
+      initialDelaySeconds: 120
+      timeoutSeconds: 10
+      periodSeconds: 10
+      failureThreshold: 6
+      successThreshold: 1
+    readiness:
+      timeoutSeconds: 10
+      periodSeconds: 10
+      failureThreshold: 3
+      successThreshold: 1
+
 # Configuration for the analyzer pods that perform image analysis
 # There may be many of these analyzers but best practice is to not have more than one per node since analysis
 # is very IO intensive. Use of affinity/anti-affinity rules for scheduling the analyzers is future work.
