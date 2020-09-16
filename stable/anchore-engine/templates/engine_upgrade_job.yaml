@@ -18,6 +18,10 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+      annotations:
+      {{- with .Values.anchoreGlobal.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
@@ -48,8 +52,10 @@ spec:
         args: ["/bin/bash", "-c", "anchore-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask"]
         {{- end }}
         envFrom:
+        {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
         env:

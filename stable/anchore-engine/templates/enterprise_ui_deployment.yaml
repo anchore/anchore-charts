@@ -40,8 +40,11 @@ spec:
         {{- with .Values.anchoreGlobal.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.anchoreEnterpriseUi.annotations }}
       annotations:
+      {{- with .Values.anchoreGlobal.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreEnterpriseUi.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:

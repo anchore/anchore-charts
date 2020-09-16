@@ -103,6 +103,12 @@ anchoreGlobal:
     # app.kubernetes.io/managed-by: Helm
     # foo: bar
 
+  # Add common annotations to set on all pods. Useful expecially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
+  # Ref: https://banzaicloud.com/docs/bank-vaults/mutating-webhook/
+  annotations: {}
+    # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
+    # vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
+
   # Set extra environment variables. These will be set on all containers.
   extraEnv: []
     # - name: foo
@@ -855,3 +861,7 @@ anchore-ui-redis:
   # If 'enabled: false', specify an external redis endpoint -
   # eg redis://:<password>@hostname:6379
   externalEndpoint: Null
+
+# To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
+# This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault
+# inject_secrets_via_env: false
