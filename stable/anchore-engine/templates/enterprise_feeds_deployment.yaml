@@ -36,8 +36,11 @@ spec:
         {{- with .Values.anchoreGlobal.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.anchoreEnterpriseFeeds.annotations }}
       annotations:
+      {{- with .Values.anchoreGlobal.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.anchoreEnterpriseFeeds.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
@@ -71,8 +74,10 @@ spec:
         - containerPort: {{ .Values.anchoreEnterpriseFeeds.service.port }}
           name: feeds-api
         envFrom:
+        {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
         env:
@@ -82,11 +87,13 @@ spec:
         {{- with .Values.anchoreEnterpriseFeeds.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if not .Values.inject_secrets_via_env }}
         - name: ANCHORE_DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ template "anchore-engine.fullname" . }}
               key: .feedsDbPassword
+        {{- end }}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:
@@ -120,11 +127,11 @@ spec:
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
-          initialDelaySeconds: 120
-          timeoutSeconds: 10
-          periodSeconds: 10
-          failureThreshold: 6
-          successThreshold: 1
+          initialDelaySeconds: {{ .Values.anchoreGlobal.probes.liveness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.anchoreGlobal.probes.liveness.timeoutSeconds }}
+          periodSeconds: {{ .Values.anchoreGlobal.probes.liveness.periodSeconds }}
+          failureThreshold: {{ .Values.anchoreGlobal.probes.liveness.failureThreshold }}
+          successThreshold: {{ .Values.anchoreGlobal.probes.liveness.successThreshold }}
         readinessProbe:
           httpGet:
             path: /health
@@ -132,10 +139,10 @@ spec:
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
-          timeoutSeconds: 10
-          periodSeconds: 10
-          failureThreshold: 3
-          successThreshold: 1
+          timeoutSeconds: {{ .Values.anchoreGlobal.probes.readiness.timeoutSeconds }}
+          periodSeconds: {{ .Values.anchoreGlobal.probes.readiness.periodSeconds }}
+          failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
+          successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
         resources:
           {{ toYaml .Values.anchoreEnterpriseFeeds.resources | nindent 10 }}
       volumes:
