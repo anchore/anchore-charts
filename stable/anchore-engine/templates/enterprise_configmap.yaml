@@ -131,6 +131,10 @@ data:
           endpoint: "http://localhost:{{- .Values.anchoreEnterpriseRbac.service.authPort }}"
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseNotifications.cycleTimers | nindent 10 }}
+        {{- if .Values.anchoreEnterpriseNotifications.uiUrl }}
+        ui_url: "{{ .Values.anchoreEnterpriseNotifications.uiUrl }}"
+        {{- else }}
         ui_url: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+        {{- end }}
       {{- end }}
 {{- end -}}

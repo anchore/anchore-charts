@@ -726,6 +726,9 @@ anchoreEnterpriseNotifications:
   cycleTimers:
     notifications: 30
 
+  # Set the UI URL that is included in the notification
+  # uiUrl: "http://<ui_url>"
+
   # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
   # Due to Reports sharing a service with the general API.
   service:
