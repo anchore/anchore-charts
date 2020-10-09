@@ -80,6 +80,9 @@ spec:
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
         {{- end }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
+        terminationMessagePath: /var/log/anchore/anchore-api.log
+        {{- end }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "apiext"]
         {{- else }}
@@ -164,6 +167,9 @@ spec:
       - name: {{ .Chart.Name }}-rbac-manager
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
+        terminationMessagePath: /var/log/anchore/anchore-enterprise-rbac-manager.log
+        {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -234,6 +240,9 @@ spec:
       - name: {{ .Chart.Name }}-rbac-authorizer
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
+        terminationMessagePath: /var/log/anchore/anchore-enterprise-rbac-authorizer.log
+        {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_authorizer"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -304,6 +313,9 @@ spec:
       - name: "{{ .Chart.Name }}-reports"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
+        terminationMessagePath: /var/log/anchore/anchore-enterprise-reports.log
+        {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports"]
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseReports.service.port }}
@@ -376,6 +388,9 @@ spec:
       - name: "{{ .Chart.Name }}-notifications"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
+        terminationMessagePath: /var/log/anchore/anchore-enterprise-notifications.log
+        {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "notifications"]
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseNotifications.service.port }}

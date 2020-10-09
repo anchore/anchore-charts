@@ -69,6 +69,9 @@ spec:
       - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
+        terminationMessagePath: /var/log/anchore/anchore-enterprise-feeds.log
+        {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "feeds"]
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseFeeds.service.port }}

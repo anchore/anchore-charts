@@ -80,6 +80,9 @@ spec:
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
         {{- end }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
+        terminationMessagePath: /var/log/anchore/anchore-simplequeue.log
+        {{- end }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "simplequeue"]
         {{- else }}

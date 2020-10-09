@@ -103,6 +103,9 @@ anchoreGlobal:
   # Set this value to True to setup the chart for OpenShift deployment compatibility.
   openShiftDeployment: False
 
+  # Enable anchore log output to kubernetes pod termination message
+  enableLogTerminationMessage: false
+
   # Add additionnal labels to all kubernetes resources
   labels: {}
     # app.kubernetes.io/managed-by: Helm
