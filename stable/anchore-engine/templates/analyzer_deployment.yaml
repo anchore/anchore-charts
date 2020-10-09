@@ -80,8 +80,9 @@ spec:
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
         {{- end }}
-        {{- ifs .Values.anchoreGlobal.enableLogTerminationMessage }}
+        {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-worker.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "analyzer"]

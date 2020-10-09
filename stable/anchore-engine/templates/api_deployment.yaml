@@ -82,6 +82,7 @@ spec:
         {{- end }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-api.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "apiext"]
@@ -169,6 +170,7 @@ spec:
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-enterprise-rbac-manager.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
         envFrom:
@@ -242,6 +244,7 @@ spec:
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-enterprise-rbac-authorizer.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_authorizer"]
         envFrom:
@@ -315,6 +318,7 @@ spec:
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-enterprise-reports.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports"]
         ports:
@@ -390,6 +394,7 @@ spec:
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-enterprise-notifications.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "notifications"]
         ports:

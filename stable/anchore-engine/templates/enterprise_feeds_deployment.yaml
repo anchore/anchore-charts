@@ -71,6 +71,7 @@ spec:
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-enterprise-feeds.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "feeds"]
         ports:

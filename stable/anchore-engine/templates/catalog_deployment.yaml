@@ -82,6 +82,7 @@ spec:
         {{- end }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-catalog.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "catalog"]

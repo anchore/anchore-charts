@@ -82,6 +82,7 @@ spec:
         {{- end }}
         {{- if .Values.anchoreGlobal.enableLogTerminationMessage }}
         terminationMessagePath: /var/log/anchore/anchore-policy-engine.log
+        terminationMessagePolicy: FallbackToLogsOnError
         {{- end }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "policy_engine"]
