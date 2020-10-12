@@ -190,6 +190,9 @@ anchoreGlobal:
     sslRootCertName: Null
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100
+    # Allows you to set custom db connection pool settings
+    engineArgs: {}
+      # pool_recycle: 600
 
   internalServicesSsl:
     # Enable to force all anchore-engine services to communicate internally using SSL
@@ -617,6 +620,9 @@ anchoreEnterpriseFeeds:
     sslRootCertName: Null
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100
+    # Allows you to set custom db connection pool settings
+    engineArgs: {}
+      # pool_recycle: 600
 
   # kubernetes service configuration for anchore feeds service api
   service:
