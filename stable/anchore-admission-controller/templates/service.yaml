@@ -11,5 +11,5 @@ spec:
     protocol: TCP
     name: {{ .Values.service.name }}
   selector:
-    app: {{ template "anchore-admission-controller.name" . }}
-    release: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ template "anchore-admission-controller.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
