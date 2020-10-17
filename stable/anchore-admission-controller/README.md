@@ -99,6 +99,8 @@ It will remove kubernetes objects which are not removed by a helm delete. Pass t
 |---|---|---|---|
 |requestAnalysis | boolean | true | Ask anchore to analyze an image that isn't already analyzed
 |---|---|---|---|
+|extraEnv | array | [] | Define custom environment variables to pass to init-ca pod |
+|---|---|---|---|
 
 ## Updating configuration
 
