@@ -81,7 +81,7 @@ credentials: {}
   #   password: password2
 
 # Settings related to init-ca pod
-initCA:
+initCa:
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
     # - name: FOO
