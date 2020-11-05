@@ -1,5 +1,7 @@
 name: "Test using kind and chart-testing tool"
-on: [pull_request, push]
+
+on:
+  - pull_request
 
 jobs:
   test:
@@ -17,17 +19,17 @@ jobs:
       run: git fetch --prune --unshallow
 
     - name: Shellcheck
-      uses: ludeeus/action-shellcheck@0.2.1
+      uses: ludeeus/action-shellcheck@1.0.0
 
     - name: Run chart-testing (lint)
       id: lint
-      uses: helm/chart-testing-action@v1.0.0-rc.2
+      uses: helm/chart-testing-action@v1.1.0
       with:
         command: lint
         config: ct-config.yaml
 
     - name: Install kind
-      uses: helm/kind-action@v1.0.0-rc.1
+      uses: helm/kind-action@v1.0.0
       with:
         node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
         config: kind-config.yaml
@@ -35,7 +37,7 @@ jobs:
       if: steps.lint.outputs.changed == 'true'
 
     - name: Run chart-testing (install)
-      uses: helm/chart-testing-action@v1.0.0-rc.2
+      uses: helm/chart-testing-action@v1.1.0
       with:
         command: install
         config: ct-config.yaml
