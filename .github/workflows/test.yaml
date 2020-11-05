@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetesVersion: ["v1.13.12", "v1.17.0"]
+        kubernetesVersion: ["v1.13.12", "v1.18.0"]
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/master'
     steps:
@@ -29,7 +29,7 @@ jobs:
         config: ct-config.yaml
 
     - name: Install kind
-      uses: helm/kind-action@v1.0.0
+      uses: helm/kind-action@v1.0.0-alpha.3
       with:
         node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
         config: kind-config.yaml
