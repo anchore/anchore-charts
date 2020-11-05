@@ -220,6 +220,9 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 ## Upgrading from previous chart versions
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore DB upgrade process using a kubernetes job. The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful helm upgrade.
 
+# Chart version 1.10.0
+Chart dependency declarations have been updated to be compatible with Helm v3.4.0
+
 # Chart version 1.8.0
 
 The following Anchore-Engine features were added with this version:
