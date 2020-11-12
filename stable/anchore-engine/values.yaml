@@ -533,6 +533,7 @@ anchoreSimpleQueue:
 
 # Pod configuration for the helm post-install-hook engine upgrade Job
 anchoreEngineUpgradeJob:
+  enabled: true
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -651,6 +652,7 @@ anchoreEnterpriseFeeds:
 
 # Pod configuration for the helm post-install-hook feeds upgrade Job
 anchoreEnterpriseFeedsUpgradeJob:
+  enabled: true
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -894,6 +896,7 @@ anchore-ui-redis:
 
 # Pod configuration for the helm post-install-hook enterprise engine upgrade Job
 anchoreEnterpriseEngineUpgradeJob:
+  enabled: true
   nodeSelector: {}
   tolerations: []
   affinity: {}
