@@ -75,6 +75,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseFeeds.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreEnterpriseFeeds.maxRequestThreads }}
         # Time delay in seconds between consecutive driver runs for processing data
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseFeeds.cycleTimers | nindent 10 }}

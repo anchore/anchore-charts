@@ -82,12 +82,14 @@ data:
         endpoint_hostname: localhost
         listen: 127.0.0.1
         port: {{ .Values.anchoreEnterpriseRbac.service.authPort }}
+        max_request_threads: {{ default 50 .Values.anchoreEnterpriseRbac.maxRequestThreads }}
       rbac_manager:
         enabled: true
         require_auth: true
         endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseRbac.service.apiPort }}
+        max_request_threads: {{ default 50 .Values.anchoreEnterpriseRbac.maxRequestThreads }}
         authorization_handler: external
         authorization_handler_config:
           endpoint: "http://localhost:{{- .Values.anchoreEnterpriseRbac.service.authPort }}"
@@ -104,6 +106,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.enterprise-reports.fullname" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreEnterpriseReports.maxRequestThreads }}
         enable_graphiql: "{{ .Values.anchoreEnterpriseReports.enableGraphql }}"
         enable_data_ingress: "{{ .Values.anchoreEnterpriseReports.enableDataIngress }}"
         cycle_timers:
@@ -126,6 +129,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.enterprise-notifications.fullname" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseNotifications.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreEnterpriseNotifications.maxRequestThreads }}
         authorization_handler: external
         authorization_handler_config:
           endpoint: "http://localhost:{{- .Values.anchoreEnterpriseRbac.service.authPort }}"
