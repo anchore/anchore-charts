@@ -141,7 +141,7 @@ spec:
       {{- end }}
       {{- with .Values.anchoreEnterpriseUi.nodeSelector }}
       nodeSelector:
-        {{ toYaml .Values.anchoreEnterpriseUi.nodeSelector | nindent 8 }}
+        {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.anchoreEnterpriseUi.affinity }}
       affinity:
