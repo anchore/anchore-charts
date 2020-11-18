@@ -72,6 +72,10 @@ data:
           ssl: false
         db_pool_size: {{ .Values.anchoreGlobal.dbConfig.connectionPoolSize }}
         db_pool_max_overflow: {{ .Values.anchoreGlobal.dbConfig.connectionPoolMaxOverflow }}
+        {{- with .Values.anchoreGlobal.dbConfig.engineArgs }}
+        db_engine_args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
 
     services:
       {{- if .Values.anchoreEnterpriseRbac.enabled }}
