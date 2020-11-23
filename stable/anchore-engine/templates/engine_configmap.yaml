@@ -135,6 +135,7 @@ data:
         enabled: true
         require_auth: true
         endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreApi.service.port }}
         {{- if .Values.anchoreApi.external }}
@@ -162,6 +163,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.analyzer.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreAnalyzer.containerPort }}
+        max_request_threads: {{ default 50 .Values.anchoreAnalyzer.maxRequestThreads }}
         cycle_timer_seconds: 1
         cycle_timers:
           {{- toYaml .Values.anchoreAnalyzer.cycleTimers | nindent 10 }}
@@ -185,6 +187,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.catalog.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreCatalog.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreCatalog.maxRequestThreads }}
         cycle_timer_seconds: 1
         cycle_timers:
           # Interval to check for an update to a tag
@@ -220,6 +223,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.simplequeue.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreSimpleQueue.service.port }}
+        max_request_threads: {{ default 50 .Values.anchoreSimpleQueue.maxRequestThreads }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
@@ -228,6 +232,7 @@ data:
       policy_engine:
         enabled: true
         require_auth: true
+        max_request_threads: {{ default 50 .Values.anchorePolicyEngine.maxRequestThreads }}
         endpoint_hostname: {{ template "anchore-engine.policy-engine.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchorePolicyEngine.service.port }}
