@@ -380,7 +380,7 @@ anchoreCatalog:
     # Interval at which the catalog looks for new work to put on the image analysis queue.
     analyzer_queue: 1
     # Interval at which the catalog archival tasks are triggered.
-    archive_tasks: 43200 # 12 hours between archive task run
+    archive_tasks: 43200 
     # Interval notifications will be processed for state changes
     notifications: 30
     # Intervals service state updates are polled for the system status
@@ -452,7 +452,7 @@ anchoreCatalog:
     storage_driver:
       # Valid storage driver names: 'db', 's3', 'swift'
       name: db
-      config: {}    
+      config: {}
 
       # Example S3 Configuration:
       # name: s3
