@@ -380,7 +380,7 @@ anchoreCatalog:
     # Interval at which the catalog looks for new work to put on the image analysis queue.
     analyzer_queue: 1
     # Interval at which the catalog archival tasks are triggered.
-    archive_tasks: 43200 
+    archive_tasks: 43200
     # Interval notifications will be processed for state changes
     notifications: 30
     # Intervals service state updates are polled for the system status
