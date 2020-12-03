@@ -44,7 +44,7 @@ kubectl create secret generic anchore-credentials --from-file=credentials.json
 
 Next, create a _values.yaml_ for the chart with a minimum set of keys:
 ```
-credentialsSecret: anchore-credentials
+existingCredentialsSecret: anchore-credentials
 anchoreEndpoint: <anchore service endpoint for external api>
 policySelectors:
   - Selector:

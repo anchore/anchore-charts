@@ -1,3 +1,4 @@
+{{- if .Values.anchoreEngineUpgradeJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -89,3 +90,4 @@ spec:
       {{- with .Values.anchoreGlobal.serviceAccountName }}
       serviceAccountName: {{ . }}
       {{- end }}
+{{- end }}
