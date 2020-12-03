@@ -379,6 +379,8 @@ anchoreCatalog:
     vulnerability_scan: 14400
     # Interval at which the catalog looks for new work to put on the image analysis queue.
     analyzer_queue: 1
+    # Interval at which the catalog archival tasks are triggered.
+    archive_tasks: 43200
     # Interval notifications will be processed for state changes
     notifications: 30
     # Intervals service state updates are polled for the system status
@@ -395,7 +397,55 @@ anchoreCatalog:
         - error
         # - info
 
-  archive:
+  analysis_archive:
+    compression:
+      enabled: true
+      min_size_kbytes: 100
+    storage_driver:
+      # Valid storage driver names: 'db', 's3', 'swift'
+      name: db
+      config: {}
+
+      # Example S3 Configuration:
+      # name: s3
+      # config:
+      #   # All objects are stored in a single bucket, defined here
+      #   bucket: "anchore-engine-testing"
+      #   # A prefix for keys in the bucket if desired (optional)
+      #   prefix: "internaltest"
+      #   # Create the bucket if it doesn't already exist
+      #   create_bucket: false
+          # Url only needed for non-AWS S3 implementations (e.g. minio). Otherwise, configure the region instead
+      #   #url: "https://s3.amazonaws.com"
+      #   # AWS region to connect to if 'url' not specified, if both are set, then 'url' has precedent
+      #   region: us-west-2
+      #   # For Auth can provide access/secret keys or use 'iamauto' which will use an instance profile or any credentials found in normal aws search paths/metadata service
+      #   access_key: XXXX
+      #   secret_key: YYYY
+      #   iamauto: false
+
+      # Example Minio configuration (basically same as s3 example):
+      # name: s3
+      # config:
+      #   url: http://<minio url>:9000
+      #   bucket: mybucket
+      #   access_key: xxxxxx
+      #   secret_key: yyyyyy
+      #   create_bucket: true
+
+      # Example Swift Configuration:
+      # name: swift
+      # config:
+      #     # Config for swift has a few options, just add the keys and names as used to configure a swiftclient here. All are passed directly to the client impl.
+      #     user: "test:tester"
+      #     key: "testing"
+      #     auth: "http://swift_ephemeral:8080/auth/v1.0"
+      #     # The swift container where data will be stored
+      #     container: "local_test_anchore"
+      #     # Create the container if it is not already present
+      #     create_container: false
+
+  object_store:
     compression:
       enabled: true
       min_size_kbytes: 100

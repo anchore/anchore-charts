@@ -198,6 +198,8 @@ data:
           vulnerability_scan: {{ .Values.anchoreCatalog.cycleTimers.vulnerability_scan }}
           # Interval at which the catalog looks for new work to put on the image analysis queue.
           analyzer_queue: {{ .Values.anchoreCatalog.cycleTimers.analyzer_queue }}
+          # Interval at which the catalog archival tasks are triggered.
+          archive_tasks: {{ .Values.anchoreCatalog.cycleTimers.archive_tasks }}
           # Interval notifications will be processed for state changes
           {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
           notifications: 0
@@ -210,8 +212,10 @@ data:
           repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
         event_log:
           {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
-        archive:
-          {{- toYaml .Values.anchoreCatalog.archive | nindent 10 }}
+        analysis_archive:
+          {{- toYaml .Values.anchoreCatalog.analysis_archive | nindent 10 }}
+        object_store:
+          {{- toYaml .Values.anchoreCatalog.object_store | nindent 10 }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
