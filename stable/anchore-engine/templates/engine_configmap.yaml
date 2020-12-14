@@ -72,7 +72,12 @@ data:
           {{- end }}
           # Sync github data if available for GHSA matches
           github: {{ default "true" .Values.anchoreGlobal.syncGithub }}
-      {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
+    {{- if .Values.anchoreEnterpriseFeeds.url }}
+      url: "{{- .Values.anchoreEnterpriseFeeds.url }}"
+      ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
+      client_url:
+      token_url:
+    {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
       {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
       url: "https://{{- template "anchore-engine.enterprise-feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
       {{- else }}
@@ -81,12 +86,12 @@ data:
       ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
       client_url:
       token_url:
-      {{- else }}
+    {{- else }}
       client_url: "https://ancho.re/v1/account/users"
       token_url: "https://ancho.re/oauth/token"
       anonymous_user_username: anon@ancho.re
       anonymous_user_password: pbiU2RYZ2XrmYQ
-      {{- end }}
+    {{- end }}
       connection_timeout_seconds: {{ default 3 .Values.anchoreGlobal.feedsConnectionTimeout }}
       read_timeout_seconds: {{ default 180 .Values.anchoreGlobal.feedsReadTimeout }}
     default_admin_password: ${ANCHORE_ADMIN_PASSWORD}
