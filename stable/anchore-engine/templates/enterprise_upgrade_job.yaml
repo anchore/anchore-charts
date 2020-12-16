@@ -23,6 +23,9 @@ spec:
       {{- with .Values.anchoreGlobal.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.anchoreEnterpriseEngineUpgradeJob.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
