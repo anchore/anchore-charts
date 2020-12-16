@@ -95,7 +95,7 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.8.2
+  image: docker.io/anchore/anchore-engine:v0.9.0
   imagePullPolicy: IfNotPresent
 
   # Set image pull secret name if using an anchore-engine image from a private registry
@@ -155,7 +155,6 @@ anchoreGlobal:
   # Set where default configs are placed at startup. This must be a writable location for the pod.
   serviceDir: /anchore_service
   logLevel: INFO
-  cleanupImages: true
 
   # Define timeout, in seconds, for image analysis
   imageAnalyzeTimeoutSeconds: 36000
@@ -392,6 +391,8 @@ anchoreCatalog:
     service_watcher: 15
     # Interval between checks to repo for new tags
     repo_watcher: 60
+    # Interval for when the catalog garbage collects images marked for deletion
+    image_gc: 60
 
   # Event log configuration for webhooks
   events:
