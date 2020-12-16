@@ -219,6 +219,48 @@ entries:
   anchore-engine:
   - apiVersion: v2
     appVersion: 0.8.2
+    created: "2020-12-16T22:53:18.005580778Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-db
+      condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-ui-redis
+      condition: anchore-ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: "10"
+    description: Anchore container analysis and policy evaluation engine service
+    digest: 67bc78e8a766352928f646cacaaa5fc581dfaafe85e4a74d640fc7e01d98b1c2
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - security
+    - vulnerability
+    - scanner
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-engine
+    sources:
+    - https://github.com/anchore/anchore-engine
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.10.7/anchore-engine-1.10.7.tgz
+    version: 1.10.7
+  - apiVersion: v2
+    appVersion: 0.8.2
     created: "2020-12-14T23:46:33.022186081Z"
     dependencies:
     - condition: postgresql.enabled
