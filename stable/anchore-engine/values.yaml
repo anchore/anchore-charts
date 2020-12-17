@@ -225,6 +225,23 @@ anchoreGlobal:
     general: {}
       # url: "http://somehost:9090/<notification_type>/<userId>"
 
+  # Custom policy bundles can be specified here. This values section represents a kubernetes configmap that is volume mounted
+  # to <anchore_service_dir>/bundles and made available to all anchore services. See the docs for details on how to create policy bundles
+  # https://docs.anchore.com/current/docs/engine/general/concepts/policy/bundles/
+  policyBundles:
+    empty_policy_bundle.json: |
+      {
+        "id": "custom0",
+        "version": "1_0",
+        "name": "My custom bundle",
+        "comment": "My system's custom bundle",
+        "whitelisted_images": [],
+        "blacklisted_images": [],
+        "mappings": [],
+        "whitelists": [],
+        "policies": []
+      }
+
   # Allow configuration of Kubernetes probes
   probes:
     liveness:
