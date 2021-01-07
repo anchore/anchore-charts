@@ -127,11 +127,13 @@ spec:
           subPath: license.yaml
         {{- end }}
         - name: analyzer-config-volume
-          mountPath: /anchore_service/analyzer_config.yaml
+          mountPath: {{ .Values.anchoreGlobal.serviceDir }}/analyzer_config.yaml
           subPath: analyzer_config.yaml
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
+        - name: policy-bundle-volume
+          mountPath: {{ .Values.anchoreGlobal.serviceDir }}/bundles
         {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
@@ -183,6 +185,12 @@ spec:
             name: {{ template "anchore-engine.fullname" .}}
         - name: {{ $component }}-scratch
           {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        - name: analyzer-config-volume
+          configMap:
+            name: {{ template "anchore-engine.analyzer.fullname" . }}
+        - name: policy-bundle-volume
+          configMap:
+            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -191,9 +199,6 @@ spec:
         - name: run
           emptyDir: {}
         {{- end }}
-        - name: analyzer-config-volume
-          configMap:
-            name: {{ template "anchore-engine.analyzer.fullname" . }}
         {{- with .Values.anchoreGlobal.certStoreSecretName }}
         - name: certs
           secret:

@@ -129,6 +129,8 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
+        - name: policy-bundle-volume
+          mountPath: {{ .Values.anchoreGlobal.serviceDir }}/bundles
         - name: {{ $component }}-scratch
           mountPath: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
@@ -178,6 +180,9 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "anchore-engine.fullname" . }}
+        - name: policy-bundle-volume
+          configMap:
+            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
         - name: {{ $component }}-scratch
           {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}

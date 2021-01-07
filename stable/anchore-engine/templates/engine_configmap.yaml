@@ -17,7 +17,6 @@ data:
     tmp_dir: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
     log_level: {{ .Values.anchoreGlobal.logLevel }}
     image_analyze_timeout_seconds: {{ .Values.anchoreGlobal.imageAnalyzeTimeoutSeconds }}
-    cleanup_images: {{ .Values.anchoreGlobal.cleanupImages }}
     allow_awsecr_iam_auto: {{ .Values.anchoreGlobal.allowECRUseIAMRole }}
     host_id: "${ANCHORE_POD_NAME}"
     internal_ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
@@ -205,6 +204,7 @@ data:
           analyzer_queue: {{ .Values.anchoreCatalog.cycleTimers.analyzer_queue }}
           # Interval at which the catalog archival tasks are triggered.
           archive_tasks: {{ .Values.anchoreCatalog.cycleTimers.archive_tasks }}
+          image_gc: {{ .Values.anchoreCatalog.cycleTimers.image_gc }}
           # Interval notifications will be processed for state changes
           {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
           notifications: 0
