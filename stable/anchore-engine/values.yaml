@@ -129,6 +129,10 @@ anchoreGlobal:
   # The scratchVolume controls the mounting of an external volume for scratch space for image analysis. Generally speaking
   # you need to provision 3x the size of the largest image (uncompressed) that you want to analyze for this space.
   scratchVolume:
+    # Some k8s Volumes do not properly respect the fsGroup permissions. These volumes will get mounted as root:root
+    # regardless of the security permissions requested. The fixGroupPermissions will create an initContainer that will
+    # fixup the permissions.
+    fixGroupPermissions: false
     mountPath: /analysis_scratch
     details:
       # Specify volume configuration here
@@ -143,6 +147,7 @@ anchoreGlobal:
   securityContext:
     runAsUser: 1000
     runAsGroup: 1000
+    fsGroup: 1000
 
   ###
   # Start of General Anchore Engine Configurations (populates /config/config.yaml)
