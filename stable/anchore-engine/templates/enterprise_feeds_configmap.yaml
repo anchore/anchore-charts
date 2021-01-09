@@ -55,9 +55,9 @@ data:
     credentials:
       database:
         {{- if .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
         {{- else }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
         {{- end }}
         db_connect_args:
           timeout: {{ .Values.anchoreEnterpriseFeeds.dbConfig.timeout }}
@@ -101,7 +101,7 @@ data:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
             enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
-            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
+            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
           amzn:
             enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.amazonDriverEnabled }}
           centos:

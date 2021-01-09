@@ -101,13 +101,6 @@ spec:
         {{- with .Values.anchoreEnterpriseFeeds.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- if not .Values.inject_secrets_via_env }}
-        - name: ANCHORE_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "anchore-engine.fullname" . }}
-              key: .feedsDbPassword
-        {{- end }}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:
