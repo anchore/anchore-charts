@@ -54,6 +54,28 @@ spec:
       {{- end }}
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+      initContainers:
+        - name: config-generator
+          image: alpine:latest
+          envFrom:
+          {{- if not .Values.inject_secrets_via_env }}
+          - secretRef:
+              name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+          {{- end }}
+          - configMapRef:
+              name: {{ template "anchore-engine.fullname" . }}-env
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: anchore-ui-config
+              mountPath: /config/config-ui-vars.yaml
+              subPath: config-ui.yaml
+          command:
+            - sh
+            - -c
+            - (apk add gettext && cat /config/config-ui-vars.yaml | envsubst > /config/config-ui.yaml && chgrp {{ .Values.anchoreGlobal.securityContext.fsGroup }} /config/config-ui.yaml)
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -96,9 +118,8 @@ spec:
         - name: anchore-license
           mountPath: /home/anchore/license.yaml
           subPath: license.yaml
-        - name: anchore-ui-config
-          mountPath: /config/config-ui.yaml
-          subPath: config-ui.yaml
+        - name: config-volume
+          mountPath: /config
         {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
@@ -127,8 +148,10 @@ spec:
         secret:
           secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
       - name: anchore-ui-config
-        secret:
-          secretName: {{ template "anchore-engine.enterprise-ui.fullname" . }}
+        configMap:
+          name: {{ template "anchore-engine.enterprise-ui.fullname" . }}
+      - name: config-volume
+        emptyDir: {}
       {{- with .Values.anchoreGlobal.certStoreSecretName }}
       - name: certs
         secret:
