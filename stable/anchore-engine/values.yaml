@@ -883,17 +883,6 @@ anchoreEnterpriseUi:
   # is flushed, any users with active sessions will be required to re-authenticate.
   redisFlushdb: true
 
-  # The (optional) `policy_hub_uri` key specifies the address of a Policy Hub
-  # service. The value must be a string containing a properly-formed 'http' or
-  # 'https' URI, and can be overridden by using the `ANCHORE_POLICY_HUB_URI`
-  # environment variable.
-  #
-  # When this value is set, the Policy Hub component is enabled within the
-  # Policy Manager view (`/policy`). Note that the availability and integrity of
-  # Policy Hub data is determined by this component at run-time when this
-  # component is accessed.
-  policyHubUri: 'http://hub.anchore.io'
-
   # The (optional) `custom_links` key allows a list of up to 10 external links to
   # be provided (additional items will be excluded). The top-level `title` key
   # provided the label for the menu (if present, otherwise the string "Custom
