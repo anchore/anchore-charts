@@ -33,8 +33,10 @@ data:
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
     keys:
-      {{- if .Values.anchoreGlobal.saml.secret }}
+      {{- if .Values.anchoreGlobal.saml.useExistingSecret }}
       secret: ${ANCHORE_SAML_SECRET}
+      {{- else }}
+      secret: {{ .Values.anchoreGlobal.saml.secret }}
       {{- end }}
       {{- with .Values.anchoreGlobal.saml.publicKeyName }}
       public_key_path: /home/anchore/certs/{{- . }}
