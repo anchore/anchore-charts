@@ -104,8 +104,8 @@ anchoreGlobal:
   # Specify a service account name utilized to run all Anchore pods
   serviceAccountName:
 
-  # Set this value to True to setup the chart for OpenShift deployment compatibility.
-  openShiftDeployment: False
+  # Set this value to true to setup the chart for OpenShift deployment compatibility.
+  openShiftDeployment: false
 
   # Add additionnal labels to all kubernetes resources
   labels: {}
@@ -874,7 +874,7 @@ anchoreEnterpriseUi:
     #   value: bar
 
   # Specifies an existing secret to be used for db and redis endpoints
-  # This secret should define the following ENV vars 
+  # This secret should define the following ENV vars
   # ANCHORE_APPDB_URI
   # ANCHORE_REDIS_URI
   existingSecret: Null
