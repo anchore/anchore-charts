@@ -21,11 +21,8 @@ data:
     {{- else }}
     engine_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreApi.service.port }}/v1'
     {{- end }}
-    {{- if and (index .Values "anchore-ui-redis" "externalEndpoint") (not (index .Values "anchore-ui-redis" "enabled")) }}
-    redis_uri: '{{ index .Values "anchore-ui-redis" "externalEndpoint" }}'
-    {{- else }}
-    redis_uri: 'redis://:${ANCHORE_REDIS_PASSWORD}@{{ template "redis.fullname" . }}-master:6379'
-    {{- end }}
+    # This value is overridden by using the `ANCHORE_REDIS_URI` environment variable.
+    # redis_ui: $ANCHORE_REDIS_URI
   {{- if .Values.anchoreEnterpriseRbac.enabled }}
     {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
     rbac_uri: 'https://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseRbac.service.apiPort }}/v1'
@@ -47,11 +44,8 @@ data:
     notifications_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseNotifications.service.port}}/v1'
     {{- end }}
   {{- end }}
-    {{- if .Values.anchoreGlobal.dbConfig.ssl }}
-    appdb_uri: 'postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?ssl=verify-full'
-    {{- else }}
-    appdb_uri: 'postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}'
-    {{- end }}
+    # This value is overridden by using the `ANCHORE_APPDB_URI` environment variable.
+    # appdb_uri: $ANCHORE_APPDB_URI
     license_path: '/home/anchore/'
     enable_ssl: {{ .Values.anchoreEnterpriseUi.enableSsl }}
     enable_proxy: {{ .Values.anchoreEnterpriseUi.enableProxy }}
