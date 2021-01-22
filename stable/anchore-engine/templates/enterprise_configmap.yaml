@@ -109,7 +109,7 @@ data:
       reports:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-reports.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseReports.maxRequestThreads }}
