@@ -74,6 +74,10 @@ spec:
         image: {{ .Values.anchoreEnterpriseUi.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseUi.imagePullPolicy }}
         env:
+        {{- if and (index .Values "anchoreEnterpriseUi" "existingSecret") (not (index .Values "anchore-ui-redis" "externalEndpoint")) }}
+        - name: ANCHORE_REDIS_URI
+          value: redis://:{{ index .Values "anchore-ui-redis" "password" }}@{{ template "redis.fullname" . }}-master:6379
+        {{- end }}
         {{ if .Values.anchoreGlobal.dbConfig.ssl }}
         - name: PGSSLROOTCERT
           value: /home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }}
