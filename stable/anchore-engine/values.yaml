@@ -173,7 +173,7 @@ anchoreGlobal:
   metricsAuthDisabled: false
 
   # Sets the password & email address for the default anchore-engine admin user.
-  defaultAdminPassword: foobar
+  defaultAdminPassword:
   defaultAdminEmail: example@email.com
 
   saml:
