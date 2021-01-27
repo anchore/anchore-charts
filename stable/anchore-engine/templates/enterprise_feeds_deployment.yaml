@@ -90,7 +90,7 @@ spec:
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ default (include "anchore-engine.enterprise-feeds.fullname" .) .Values.anchoreEnterpriseFeeds.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env

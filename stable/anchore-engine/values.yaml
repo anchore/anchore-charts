@@ -104,8 +104,8 @@ anchoreGlobal:
   # Specify a service account name utilized to run all Anchore pods
   serviceAccountName:
 
-  # Set this value to True to setup the chart for OpenShift deployment compatibility.
-  openShiftDeployment: False
+  # Set this value to true to setup the chart for OpenShift deployment compatibility.
+  openShiftDeployment: false
 
   # Add additionnal labels to all kubernetes resources
   labels: {}
@@ -124,6 +124,10 @@ anchoreGlobal:
     #   value: bar
 
   # Specifies an existing secret to be used for admin and db passwords
+  # The secret should define the following environment vars:
+  # ANCHORE_ADMIN_PASSWORD
+  # ANCHORE_DB_PASSWORD
+  # ANCHORE_SAML_SECRET (if applicable)
   existingSecret: Null
 
   # The scratchVolume controls the mounting of an external volume for scratch space for image analysis. Generally speaking
@@ -698,6 +702,14 @@ anchoreEnterpriseFeeds:
   cycleTimers:
     driver_sync: 7200
 
+  # Specifies an existing secret to be used for anchore admin and db passwords
+  # The secret should define the following environment vars:
+  # ANCHORE_ADMIN_PASSWORD
+  # ANCHORE_FEEDS_DB_PASSWORD
+  # ANCHORE_SAML_SECRET (if applicable)
+
+  existingSecret: Null
+
   # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
@@ -860,6 +872,12 @@ anchoreEnterpriseUi:
   extraEnv: []
     # - name: foo
     #   value: bar
+
+  # Specifies an existing secret to be used for db and redis endpoints
+  # This secret should define the following ENV vars
+  # ANCHORE_APPDB_URI
+  # ANCHORE_REDIS_URI
+  existingSecret: Null
 
   # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
   ldapsRootCaCertName: Null
