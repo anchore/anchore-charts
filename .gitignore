@@ -1,3 +1,4 @@
 examples/
 *.tgz
 charts/
+.idea/
