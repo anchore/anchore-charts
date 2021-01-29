@@ -1381,6 +1381,6 @@ data:
         ]
     }
 
-  {{- with .Values.anchoreGlobal.policyBundles }}
+{{- with .Values.anchoreGlobal.policyBundles }}
 {{- toYaml . | nindent 2 }}
 {{- end }} 
