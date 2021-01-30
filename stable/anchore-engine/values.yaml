@@ -235,22 +235,22 @@ anchoreGlobal:
   # to <anchore_service_dir>/bundles and made available to all anchore services. See the docs for details on how to create policy bundles
   # https://docs.anchore.com/current/docs/engine/general/concepts/policy/bundles/
   policyBundles:
-    # custom_policy_bundle1.json: |
-    #   {
-    #     "id": "custom1",
-    #     "version": "1_0",
-    #     "name": "My custom bundle",
-    #     "comment": "My system's custom bundle",
-    #     "whitelisted_images": [],
-    #     "blacklisted_images": [],
-    #     "mappings": [],
-    #     "whitelists": [],
-    #     "policies": []
-    #   }
-    # custom_policy_bundle2.json: |
-    #   {
-    #     ....
-    #   }
+#     custom_policy_bundle1.json: |
+#       {
+#         "id": "custom1",
+#         "version": "1_0",
+#         "name": "My custom bundle",
+#         "comment": "My system's custom bundle",
+#         "whitelisted_images": [],
+#         "blacklisted_images": [],
+#         "mappings": [],
+#         "whitelists": [],
+#         "policies": []
+#       }
+#     custom_policy_bundle2.json: |
+#       {
+#         ....
+#       }
 
   # Allow configuration of Kubernetes probes
   probes:
