@@ -145,7 +145,7 @@ Create database hostname string from supplied values file. Used for the enterpri
 */}}
 {{- define "db-hostname" }}
   {{- if and (index .Values "postgresql" "externalEndpoint") (not (index .Values "postgresql" "enabled")) }}
-    {{- print ( index .Values "postgresql" "externalEndpoint" | quote ) }}
+    {{- print ( index .Values "postgresql" "externalEndpoint" ) }}
   {{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "postgresql" "enabled")) }}
     {{- print "localhost:5432" }}
   {{- else }}
