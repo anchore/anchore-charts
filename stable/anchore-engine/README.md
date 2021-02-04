@@ -242,16 +242,22 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore DB upgrade process using a kubernetes job. The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful helm upgrade.
 
+## Chart version 1.12.0
+
+---
+* Anchore Engine image updated to v0.9.1
+* Anchore Enterprise images updated to v3.0.0
+* Existing secrets now work for Enterprise Feeds and Enterprise UI - see [existing secrets configuration](#-Utilize-an-Existing-Secret)
+* Anchore admin default password no longer defaults to `foobar`, if no password is specified a random string will be generated.
+
 ## Chart version 1.10.0
 
 ---
-
 Chart dependency declarations have been updated to be compatible with Helm v3.4.0
 
 ## Chart version 1.8.0
 
 ---
-
 The following Anchore-Engine features were added with this version:
 
 * Malware scanning - see .Values.anchoreAnalyzer.configFile.malware
@@ -264,7 +270,6 @@ For more details see - https://docs.anchore.com/current/docs/engine/releasenotes
 ## Chart version 1.7.0
 
 ---
-
 Starting with version 1.7.0 the anchore-engine chart will be hosted on charts.anchore.io - if you're upgrading from a previous version of the chart, you will need to delete your previous deployment and redeploy Anchore Engine using the chart from the Anchore Charts repository. 
 
 This version of the chart includes the dependent Postgresql chart in the charts/ directory rather then pulling it from upstream. All apiVersions were updated for compatibility with kubernetes v1.16+ and the postgresql image has been updated to version 9.6.18. The chart version also updates to the latest version of the Redis chart from Bitnami. These dependency updates require deleting and re-installing your chart. If the following process is performed, no data should be lost.
@@ -511,11 +516,29 @@ anchoreApi:
 
 ## Utilize an Existing Secret
 
-Can be used to override the default secrets.yaml
+Secrets should be created prior to running `helm install`. These can be used to override the secret provisioned by the helm chart, preventing plaintext passwords in your values.yaml file.
 
 ```yaml
 anchoreGlobal:
-  existingSecret: "foo-bar"
+  # The secret should define the following environment vars:
+  # ANCHORE_ADMIN_PASSWORD
+  # ANCHORE_DB_PASSWORD
+  # ANCHORE_SAML_SECRET (if applicable)
+  existingSecret: "anchore-engine-secrets"
+
+
+anchoreEnterpriseFeeds:
+  # The secret should define the following environment vars:
+  # ANCHORE_ADMIN_PASSWORD
+  # ANCHORE_FEEDS_DB_PASSWORD
+  # ANCHORE_SAML_SECRET (if applicable)
+  existingSecret: "anchore-feeds-secrets"
+
+anchoreEnterpriseUI:
+  # This secret should define the following ENV vars
+  # ANCHORE_APPDB_URI
+  # ANCHORE_REDIS_URI
+  existingSeccret: "anchore-ui-secrets"
 ```
 
 ## Install using an existing/external PostgreSQL instance
