@@ -245,6 +245,7 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 ## Chart version 1.12.0
 
 ---
+
 * Anchore Engine image updated to v0.9.1
 * Anchore Enterprise images updated to v3.0.0
 * Existing secrets now work for Enterprise Feeds and Enterprise UI - see [existing secrets configuration](#-Utilize-an-Existing-Secret)
