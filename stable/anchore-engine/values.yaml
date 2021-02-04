@@ -420,6 +420,8 @@ anchoreCatalog:
     repo_watcher: 60
     # Interval for when the catalog garbage collects images marked for deletion
     image_gc: 60
+    # Interval for the runtime inventory image execution poll
+    k8s_watcher: 300
 
   # Event log configuration for webhooks
   events:
@@ -546,6 +548,13 @@ anchoreCatalog:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+  runtime_inventory:
+    # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
+    # The working set. Note: The image will still have a historical record in the reports service, subject to data history
+    # constraints as part of that service.
+    # Note: if a runtime inventory image's digest is also in anchore for regular image analysis, it won't be removed.
+    image_ttl_days: 1
 
 # Pod configuration for the anchore engine policy service.
 anchorePolicyEngine:
