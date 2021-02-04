@@ -132,8 +132,6 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
-        - name: policy-bundle-volume
-          mountPath: {{ .Values.anchoreGlobal.serviceDir }}/bundles
         {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
@@ -188,9 +186,6 @@ spec:
         - name: analyzer-config-volume
           configMap:
             name: {{ template "anchore-engine.analyzer.fullname" . }}
-        - name: policy-bundle-volume
-          configMap:
-            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
