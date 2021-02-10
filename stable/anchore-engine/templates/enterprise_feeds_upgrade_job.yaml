@@ -1,4 +1,4 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeedsUpgradeJob.enabled }}
+{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled .Values.anchoreEnterpriseFeedsUpgradeJob.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
