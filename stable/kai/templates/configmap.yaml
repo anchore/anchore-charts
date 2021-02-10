@@ -26,6 +26,7 @@ data:
       url: {{ .Values.kai.anchore.url }}
       user: {{ .Values.kai.anchore.user }}
       password: $KAI_ANCHORE_PASSWORD
+      account: {{ .Values.kai.anchore.account }}
       http:
         insecure: {{ .Values.kai.anchore.http.insecure }}
         timeoutSeconds: {{ .Values.kai.anchore.http.timeoutSeconds }}
