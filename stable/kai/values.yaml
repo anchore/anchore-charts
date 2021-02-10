@@ -8,7 +8,7 @@ image:
   repository: anchore/kai
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.1.0"
+  tag: "v0.2.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -76,7 +76,7 @@ probes:
     successThreshold: 1
 
 kai:
-  existing_secret: Null
+  existingSecret: Null
 
   # same as -o ; the output format (options: table, json)
   output: "json"
@@ -111,8 +111,10 @@ kai:
 
   anchore:
     url:
+    # Note: the user specified must be an admin user or have full-control, or read-write RBAC permissions
     user: admin
     password: foobar
+    # account: admin # defaults to 'admin' when not specified
     http:
       insecure: true
       timeoutSeconds: 10
