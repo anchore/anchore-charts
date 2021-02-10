@@ -111,10 +111,13 @@ kai:
 
   anchore:
     url:
+
     # Note: the user specified must be an admin user or have full-control, or read-write RBAC permissions
     user: admin
     password: foobar
-    # account: admin # defaults to 'admin' when not specified
+
+    # defaults to 'admin' when not specified
+    account: admin
     http:
       insecure: true
       timeoutSeconds: 10
