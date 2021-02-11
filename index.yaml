@@ -1521,6 +1521,30 @@ entries:
     version: 1.7.0
   kai:
   - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2021-02-11T16:59:26.520523447Z"
+    description: A Helm chart for Kubernetes Automated Inventory, which describes
+      which images are in use in a given Kubernetes Cluster
+    digest: 9a99e1e7089fa43f3b0fb3e19c64132262ccffb0ebb460bedfb784113beae5ec
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: sam.dacanay@anchore.com
+      name: dakaneye
+    name: kai
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/kai-0.2.0/kai-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     appVersion: 0.1.0
     created: "2021-01-27T05:38:28.570421895Z"
     description: A Helm chart for Kubernetes Automated Inventory, which describes
