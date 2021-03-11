@@ -95,7 +95,7 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.9.1
+  image: docker.io/anchore/anchore-engine:v0.9.2
   imagePullPolicy: IfNotPresent
 
   # Set image pull secret name if using an anchore-engine image from a private registry
@@ -420,6 +420,8 @@ anchoreCatalog:
     repo_watcher: 60
     # Interval for when the catalog garbage collects images marked for deletion
     image_gc: 60
+    # Interval for the runtime inventory image execution poll
+    k8s_watcher: 300
 
   # Event log configuration for webhooks
   events:
@@ -547,6 +549,13 @@ anchoreCatalog:
   tolerations: []
   affinity: {}
 
+  runtime_inventory:
+    # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
+    # The working set. Note: The image will still have a historical record in the reports service, subject to data history
+    # constraints as part of that service.
+    # Note: if a runtime inventory image's digest is also in anchore for regular image analysis, it won't be removed.
+    image_ttl_days: 1
+
 # Pod configuration for the anchore engine policy service.
 anchorePolicyEngine:
   replicaCount: 1
@@ -629,7 +638,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v3.0.0
+  image: docker.io/anchore/enterprise:v3.0.1
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -865,7 +874,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v3.0.0
+  image: docker.io/anchore/enterprise-ui:v3.0.1
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.

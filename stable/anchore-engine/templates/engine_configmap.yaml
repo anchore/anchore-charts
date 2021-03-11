@@ -218,6 +218,7 @@ data:
           service_watcher: {{ .Values.anchoreCatalog.cycleTimers.service_watcher }}
           # Interval between checks to repo for new tags
           repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
+          k8s_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_watcher }}
         event_log:
           {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
         analysis_archive:
@@ -229,6 +230,8 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
+        runtime_inventory:
+          image_ttl_days: {{ .Values.anchoreCatalog.runtime_inventory.image_ttl_days }}
       simplequeue:
         enabled: true
         require_auth: true
@@ -256,4 +259,3 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
-
