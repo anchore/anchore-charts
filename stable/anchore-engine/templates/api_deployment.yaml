@@ -97,6 +97,8 @@ spec:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        - secretRef:
+            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -115,7 +117,7 @@ spec:
         - name: ANCHORE_CLI_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+              name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
               key: ANCHORE_ADMIN_PASSWORD
         {{- end }}
         ports:
@@ -184,6 +186,8 @@ spec:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        - secretRef:
+            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -254,6 +258,8 @@ spec:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        - secretRef:
+            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -327,6 +333,8 @@ spec:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        - secretRef:
+            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -399,6 +407,8 @@ spec:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+        - secretRef:
+            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
