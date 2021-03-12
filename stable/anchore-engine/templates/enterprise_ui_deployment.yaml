@@ -47,6 +47,10 @@ spec:
       {{- with .Values.anchoreEnterpriseUi.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if not .Values.inject_secrets_via_env }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_ui_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/ui-config: {{ include (print $.Template.BasePath "/enterprise_ui_configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:

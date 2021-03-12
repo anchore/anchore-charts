@@ -42,6 +42,12 @@ spec:
       {{- with .Values.anchoreAnalyzer.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      {{- if not .Values.inject_secrets_via_env }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
+        checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
+        checksum/analyzer-config: {{ include (print $.Template.BasePath "/analyzer_configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
