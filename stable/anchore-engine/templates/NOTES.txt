@@ -8,7 +8,7 @@ Here are the steps to configure the anchore-cli (`pip install anchorecli`). Use 
 To configure your anchore-cli run:
 
     ANCHORE_CLI_USER=admin
-    ANCHORE_CLI_PASS=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "anchore-engine.fullname" . }} -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 --decode; echo)
+    ANCHORE_CLI_PASS=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "anchore-engine.fullname" . }}-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 --decode; echo)
 {{ if .Values.ingress.enabled }}
    ANCHORE_CLI_URL={{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}https{{- else }}http{{- end -}}://$(kubectl get ingress --namespace {{ .Release.Namespace }} {{ template "anchore-engine.fullname" . }} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")/v1/
 {{ else }}

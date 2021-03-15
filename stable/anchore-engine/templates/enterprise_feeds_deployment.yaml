@@ -96,6 +96,8 @@ spec:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.enterprise-feeds.fullname" .) .Values.anchoreEnterpriseFeeds.existingSecret }}
+        - secretRef:
+            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env

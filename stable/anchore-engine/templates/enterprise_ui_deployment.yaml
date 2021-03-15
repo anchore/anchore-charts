@@ -100,6 +100,8 @@ spec:
         {{- if not .Values.inject_secrets_via_env }}
         - secretRef:
             name: {{ default (include "anchore-engine.enterprise-ui.fullname" .) .Values.anchoreEnterpriseUi.existingSecret }}
+        - secretRef:
+            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
         {{- end }}
         ports:
         - containerPort: 3000
