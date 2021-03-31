@@ -1,0 +1,33 @@
+{{- if and (not .Values.postgresql.enabled) .Values.anchoreEnterpriseGlobal.enabled }}
+# Job to sync db and db user with external postgres for Anchore's primary data store
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ensure-anchore-db
+  annotations:
+    "helm.sh/hook-weight": "-4"
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: ensure-anchore-db
+      annotations:
+        sidecar.istio.io/inject: 'false'
+    spec:
+      containers:
+        - name: psql
+          image: "registry1.dso.mil/ironbank/opensource/postgres/postgresql12:12.5"
+          command:
+            - /bin/bash
+            - -exc
+            - |   
+              echo "Ensure Anchore DB..."
+              
+              psql -tc "SELECT 1 FROM pg_database WHERE datname = '$ANCHORE_DB'" | grep -q 1 || psql -c "CREATE DATABASE $ANCHORE_DB"
+              psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$PGUSER'" | grep -q 1 && psql -c "ALTER USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $ANCHORE_DB TO $PGUSER;" | grep -q GRANT || psql -c "CREATE USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $ANCHORE_DB TO $PGUSER;"
+          envFrom:
+            - secretRef:
+                name: anchore-db-credentials
+      restartPolicy: OnFailure
+{{- end }}

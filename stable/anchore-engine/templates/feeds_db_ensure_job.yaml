@@ -1,0 +1,33 @@
+{{- if and (not (index .Values "anchore-feeds-db" "enabled")) .Values.anchoreEnterpriseGlobal.enabled }}
+# Job to sync db and db user with external postgres for Anchore's feeds db
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ensure-feeds-db
+  annotations:
+    "helm.sh/hook-weight": "-4"
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: ensure-feeds-db
+      annotations:
+        sidecar.istio.io/inject: 'false'
+    spec:
+      containers:
+        - name: psql
+          image: "registry1.dso.mil/ironbank/opensource/postgres/postgresql12:12.5"
+          command:
+            - /bin/bash
+            - -exc
+            - |   
+              echo "Ensure Anchore Feeds DB..."
+              
+              psql -tc "SELECT 1 FROM pg_database WHERE datname = '$FEEDS_DB'" | grep -q 1 || psql -c "CREATE DATABASE $FEEDS_DB"
+              psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$PGUSER'" | grep -q 1 && psql -c "ALTER USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $FEEDS_DB TO $PGUSER;" | grep -q GRANT || psql -c "CREATE USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $FEEDS_DB TO $PGUSER;"
+          envFrom:
+            - secretRef:
+                name: feeds-db-credentials
+      restartPolicy: OnFailure
+{{- end }}
