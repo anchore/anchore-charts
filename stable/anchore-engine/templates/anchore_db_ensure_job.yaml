@@ -1,4 +1,5 @@
-{{- if and (not .Values.postgresql.enabled) .Values.anchoreEnterpriseGlobal.enabled }}
+{{- if hasKey .Values.postgresql "enabled" }}
+{{- if (not .Values.postgresql.enabled) }}
 # Job to sync db and db user with external postgres for Anchore's primary data store
 apiVersion: batch/v1
 kind: Job
@@ -15,9 +16,11 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
     spec:
+      imagePullSecrets:
+        - name: {{ .Values.postgresql.imagePullSecrets }}
       containers:
         - name: psql
-          image: "registry1.dso.mil/ironbank/opensource/postgres/postgresql12:12.5"
+          image: {{ .Values.postgresql.image }}
           command:
             - /bin/bash
             - -exc
@@ -30,4 +33,5 @@ spec:
             - secretRef:
                 name: anchore-db-credentials
       restartPolicy: OnFailure
+{{- end }}
 {{- end }}

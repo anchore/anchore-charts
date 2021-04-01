@@ -2,9 +2,9 @@
 
 # Anchore engine has a dependency on Postgresql, configure here
 postgresql:
-  # To use an external DB or Google CloudSQL in GKE, set 'enabled: false'
+  # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
-  enabled: true
+  # enabled: false
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore
@@ -647,9 +647,9 @@ anchoreEnterpriseGlobal:
 # Configure the second postgres database instance for the enterprise feeds service.
 # Only utilized if anchoreEnterpriseGlobal.enabled: true
 anchore-feeds-db:
-  # To use an external DB or Google CloudSQL, set 'enabled: false'
+  # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
-  enabled: true
+  # enabled: false
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore-feeds
