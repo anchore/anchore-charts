@@ -2,6 +2,13 @@
 
 # Anchore engine has a dependency on Postgresql, configure here
 postgresql:
+  # Image used for all postgres jobs
+  image: docker.io/postgres:9.6.18
+  imagePullPolicy: IfNotPresent
+
+  # Set image pull secret name if using a postgres image from a private registry
+  imagePullSecretName: ""
+
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
@@ -12,6 +19,12 @@ postgresql:
   # Specify an external (already existing) postgres deployment for use.
   # Set to the host and port. eg. mypostgres.myserver.io:5432
   externalEndpoint: Null
+
+  # To automatically create external DB and application user, set 'createExternalDbAssets: true'
+  # applicationUser and applicationPassword are required values for creating external DB assets (can be the same as postgresUser/postgresPassword but not recommended)
+  createExternalDbAssets: false
+  applicationUser: anchoreengine-user
+  applicationPassword: anchore-postgres-user,123
 
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
@@ -647,6 +660,13 @@ anchoreEnterpriseGlobal:
 # Configure the second postgres database instance for the enterprise feeds service.
 # Only utilized if anchoreEnterpriseGlobal.enabled: true
 anchore-feeds-db:
+  # Image used for all postgres jobs
+  image: docker.io/postgres:9.6.18
+  imagePullPolicy: IfNotPresent
+
+  # Set image pull secret name if using a postgres image from a private registry
+  imagePullSecretName: ""
+
   # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
@@ -658,6 +678,12 @@ anchore-feeds-db:
   # Set to the host and port. eg. mypostgres.myserver.io:5432
   externalEndpoint: Null
 
+  # To automatically create external DB and application user, set 'createExternalDbAssets: true'
+  # applicationUser and applicationPassword are required values for creating external DB assets (can be the same as postgresUser/postgresPassword but not recommended)
+  createExternalDbAssets: false
+  applicationUser: anchoreengine-user
+  applicationPassword: anchore-postgres-user,123
+  
   # Configure size of the persitant volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:

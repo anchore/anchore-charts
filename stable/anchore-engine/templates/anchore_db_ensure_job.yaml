@@ -1,3 +1,4 @@
+{{- if .Values.postgresql.createExternalDbAssets }}
 {{- if hasKey .Values.postgresql "enabled" }}
 {{- if (not .Values.postgresql.enabled) }}
 # Job to sync db and db user with external postgres for Anchore's primary data store
@@ -16,8 +17,10 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
     spec:
+      {{- if .Values.postgresql.imagePullSecrets }}
       imagePullSecrets:
         - name: {{ .Values.postgresql.imagePullSecrets }}
+      {{- end }}
       containers:
         - name: psql
           image: {{ .Values.postgresql.image }}
@@ -28,10 +31,11 @@ spec:
               echo "Ensure Anchore DB..."
               
               psql -tc "SELECT 1 FROM pg_database WHERE datname = '$ANCHORE_DB'" | grep -q 1 || psql -c "CREATE DATABASE $ANCHORE_DB"
-              psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$PGUSER'" | grep -q 1 && psql -c "ALTER USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $ANCHORE_DB TO $PGUSER;" | grep -q GRANT || psql -c "CREATE USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $ANCHORE_DB TO $PGUSER;"
+              psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$APPLICATION_USER'" | grep -q 1 && psql -c "ALTER USER $APPLICATION_USER WITH PASSWORD '$APPLICATION_PASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $ANCHORE_DB TO $APPLICATION_USER;" | grep -q GRANT || psql -c "CREATE USER $APPLICATION_USER WITH PASSWORD '$APPLICATION_PASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $ANCHORE_DB TO $APPLICATION_USER;"
           envFrom:
             - secretRef:
                 name: anchore-db-credentials
       restartPolicy: OnFailure
+{{- end }}
 {{- end }}
 {{- end }}

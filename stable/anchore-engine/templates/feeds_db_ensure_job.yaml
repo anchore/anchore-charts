@@ -1,3 +1,4 @@
+{{- if (index .Values "anchore-feeds-db" "createExternalDbAssets") }}
 {{- if and (hasKey (index .Values "anchore-feeds-db") "enabled")  }}
 {{- if and (not (index .Values "anchore-feeds-db" "enabled")) .Values.anchoreEnterpriseGlobal.enabled }}
 # Job to sync db and db user with external postgres for Anchore's feeds db
@@ -16,8 +17,10 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
     spec:
+      {{- if (index .Values "anchore-feeds-db" "imagePullSecrets") }}
       imagePullSecrets:
         - name: {{ (index .Values "anchore-feeds-db" "imagePullSecrets") }}
+      {{- end }}
       containers:
         - name: psql
           image: {{ (index .Values "anchore-feeds-db" "image") }}
@@ -28,10 +31,11 @@ spec:
               echo "Ensure Anchore Feeds DB..."
               
               psql -tc "SELECT 1 FROM pg_database WHERE datname = '$FEEDS_DB'" | grep -q 1 || psql -c "CREATE DATABASE $FEEDS_DB"
-              psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$PGUSER'" | grep -q 1 && psql -c "ALTER USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $FEEDS_DB TO $PGUSER;" | grep -q GRANT || psql -c "CREATE USER $PGUSER WITH PASSWORD '$PGPASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $FEEDS_DB TO $PGUSER;"
+              psql -tc "SELECT 1 FROM pg_roles WHERE rolname = '$APPLICATION_USER'" | grep -q 1 && psql -c "ALTER USER $APPLICATION_USER WITH PASSWORD '$APPLICATION_PASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $FEEDS_DB TO $APPLICATION_USER;" | grep -q GRANT || psql -c "CREATE USER $APPLICATION_USER WITH PASSWORD '$APPLICATION_PASSWORD'; GRANT ALL PRIVILEGES ON DATABASE $FEEDS_DB TO $APPLICATION_USER;"
           envFrom:
             - secretRef:
                 name: feeds-db-credentials
       restartPolicy: OnFailure
+{{- end }}
 {{- end }}
 {{- end }}
