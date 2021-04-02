@@ -17,9 +17,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
     spec:
-      {{- if .Values.postgresql.imagePullSecrets }}
+      {{- if .Values.postgresql.imagePullSecretName }}
       imagePullSecrets:
-        - name: {{ .Values.postgresql.imagePullSecrets }}
+        - name: {{ .Values.postgresql.imagePullSecretName }}
       {{- end }}
       containers:
         - name: psql

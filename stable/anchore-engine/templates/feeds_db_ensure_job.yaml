@@ -17,9 +17,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: 'false'
     spec:
-      {{- if (index .Values "anchore-feeds-db" "imagePullSecrets") }}
+      {{- if (index .Values "anchore-feeds-db" "imagePullSecretName") }}
       imagePullSecrets:
-        - name: {{ (index .Values "anchore-feeds-db" "imagePullSecrets") }}
+        - name: {{ (index .Values "anchore-feeds-db" "imagePullSecretName") }}
       {{- end }}
       containers:
         - name: psql
