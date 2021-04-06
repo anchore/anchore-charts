@@ -95,10 +95,15 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
         - secretRef:
-            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -184,10 +189,15 @@ spec:
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
         - secretRef:
-            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -256,10 +266,15 @@ spec:
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_authorizer"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
         - secretRef:
-            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -331,10 +346,15 @@ spec:
           name: reports-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
         - secretRef:
-            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
@@ -405,10 +425,15 @@ spec:
           name: notifi-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreGlobal.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.fullname" .) .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecret }}
+        {{- else }}
         - secretRef:
-            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
+            name: {{ include "anchore-engine.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         - configMapRef:
             name: {{ template "anchore-engine.fullname" . }}-env
