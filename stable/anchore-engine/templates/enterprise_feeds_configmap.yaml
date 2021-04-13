@@ -128,14 +128,14 @@ data:
             enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.vulndbDriverEnabled }}
           msrc:
             enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
-            api_key: {{ .Values.anchoreEnterpriseFeeds.msrcApiKey }}
+            api_key: ${ANCHORE_MSRC_KEY}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
             whitelist:
               - {{ . }}
             {{- end }}
           github:
             enabled: {{ .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
-            token: {{ .Values.anchoreEnterpriseFeeds.githubDriverToken }}
+            token: ${ANCHORE_GITHUB_TOKEN}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
