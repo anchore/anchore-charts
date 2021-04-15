@@ -35,6 +35,21 @@ spec:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
       restartPolicy: Never
       containers:
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
+        {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
+        volumeMounts:
+        - mountPath: /var/{{ .Values.cloudsql.serviceAccSecretName }}
+          name: {{ .Values.cloudsql.serviceAccSecretName }}
+          readOnly: true
+        {{- end }}
+      {{- end }}
       - name: "{{ .Release.Name }}-enterprise-feeds-upgrade"
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
@@ -70,12 +85,19 @@ spec:
           mountPath: /home/anchore/certs/
           readOnly: true
         {{- end }}
-    {{- with .Values.anchoreGlobal.certStoreSecretName }}
+    {{- if or .Values.anchoreGlobal.certStoreSecretName .Values.cloudsql.useExistingServiceAcc }}
       volumes:
+      {{- with .Values.anchoreGlobal.certStoreSecretName }}
       - name: certs
         secret:
           secretName: {{ . }}
       {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+      - name: {{ .Values.cloudsql.serviceAccSecretName }}
+        secret:
+          secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+    {{- end }}
       {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
