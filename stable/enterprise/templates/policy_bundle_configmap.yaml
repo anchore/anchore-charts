@@ -1,0 +1,18 @@
+{{- if .Values.anchoreGlobal.policyBundles }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "anchore-engine.fullname" . }}-policy-bundles
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+data:
+{{- with .Values.anchoreGlobal.policyBundles }}
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}

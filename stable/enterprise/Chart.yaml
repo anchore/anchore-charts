@@ -1,0 +1,42 @@
+apiVersion: v2
+name: enterprise
+version: 0.0.1
+appVersion: 3.0.2
+description: |
+  Anchore Enterprise is a complete container security workflow solution for professional teams. Easily integrating with CI/CD systems,
+  it allows developers to bolster security without compromising velocity and enables security teams to audit and verify compliance in real-time.
+  It is based on Anchore Engine, an open-source image inspection and scanning tool.
+keywords:
+ - analysis
+ - docker
+ - anchore
+ - "anchore-engine"
+ - image
+ - security
+ - vulnerability
+ - scanner
+home: https://anchore.com
+sources:
+ - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+maintainers:
+ - name: zhill
+   email: zach@anchore.com
+ - name: btodhunter
+   email: bradyt@anchore.com
+engine: gotpl
+icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+dependencies:
+ - name: postgresql
+   version: "10.3.17"
+   repository: "https://charts.bitnami.com/bitnami"
+   condition: postgresql.enabled
+ - name: postgresql
+   version: "10.3.17"
+   repository: "https://charts.bitnami.com/bitnami"
+   condition: anchore-feeds-db.enabled
+   alias: anchore-feeds-db
+ - name: redis
+   version: "13.0.1"
+   repository: "https://charts.bitnami.com/bitnami"
+   condition: anchore-ui-redis.enabled
+   alias: anchore-ui-redis
