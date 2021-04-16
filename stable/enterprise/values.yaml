@@ -2,12 +2,13 @@
 
 # Anchore engine has a dependency on Postgresql, configure here
 postgresql:
+  image:
+    tag: 9.6.21-debian-10-r66
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
-  postgresUser: anchoreengine
-  postgresPassword: anchore-postgres,123
-  postgresDatabase: anchore
+  postgresqlPassword: anchore-postgres,123
+  postgresqlDatabase: anchore
 
   # Specify an external (already existing) postgres deployment for use.
   # Set to the host and port. eg. mypostgres.myserver.io:5432
@@ -16,7 +17,6 @@ postgresql:
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
-    resourcePolicy: nil
     size: 20Gi
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
@@ -49,7 +49,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.12
+    tag: 1.21
     pullPolicy: IfNotPresent
 
 # Create an ingress resource for all external anchore engine services (API & Enterprise UI).
