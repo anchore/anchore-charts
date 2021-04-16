@@ -1,4 +1,4 @@
-{{- if .Values.anchoreGlobal.policyBundles }}
+{{- if .Values.policyBundles }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -8,11 +8,11 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- with .Values.anchoreGlobal.labels }}
+    {{- with .Values.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 data:
-{{- with .Values.anchoreGlobal.policyBundles }}
+{{- with .Values.policyBundles }}
 {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- end }}

@@ -92,149 +92,149 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# Global configuration shared by all anchore-engine services.
-anchoreGlobal:
-  # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.9.3
-  imagePullPolicy: IfNotPresent
+## Global configuration shared by all anchore-engine services.
 
-  # Set image pull secret name if using an anchore-engine image from a private registry
-  imagePullSecretName:
+# Image used for all anchore engine deployments (excluding enterprise components).
+image: docker.io/anchore/anchore-engine:v0.9.3
+imagePullPolicy: IfNotPresent
 
-  # Specify a service account name utilized to run all Anchore pods
-  serviceAccountName:
+# Set image pull secret name if using an anchore-engine image from a private registry
+imagePullSecretName:
 
-  # Set this value to true to setup the chart for OpenShift deployment compatibility.
-  openShiftDeployment: false
+# Specify a service account name utilized to run all Anchore pods
+serviceAccountName:
 
-  # Add additionnal labels to all kubernetes resources
-  labels: {}
-    # app.kubernetes.io/managed-by: Helm
-    # foo: bar
+# Set this value to true to setup the chart for OpenShift deployment compatibility.
+openShiftDeployment: false
 
-  # Add common annotations to set on all pods. Useful expecially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
-  # Ref: https://banzaicloud.com/docs/bank-vaults/mutating-webhook/
-  annotations: {}
-    # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
-    # vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
+# Add additionnal labels to all kubernetes resources
+labels: {}
+  # app.kubernetes.io/managed-by: Helm
+  # foo: bar
 
-  # Set extra environment variables. These will be set on all containers.
-  extraEnv: []
-    # - name: foo
-    #   value: bar
+# Add common annotations to set on all pods. Useful expecially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
+# Ref: https://banzaicloud.com/docs/bank-vaults/mutating-webhook/
+annotations: {}
+  # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
+  # vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
 
-  # Specifies an existing secret to be used for admin and db passwords
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  existingSecret: Null
+# Set extra environment variables. These will be set on all containers.
+extraEnv: []
+  # - name: foo
+  #   value: bar
 
-  # The scratchVolume controls the mounting of an external volume for scratch space for image analysis. Generally speaking
-  # you need to provision 3x the size of the largest image (uncompressed) that you want to analyze for this space.
-  scratchVolume:
-    # Some k8s Volumes do not properly respect the fsGroup permissions. These volumes will get mounted as root:root
-    # regardless of the security permissions requested. The fixGroupPermissions will create an initContainer that will
-    # fixup the permissions.
-    fixGroupPermissions: false
-    mountPath: /analysis_scratch
-    details:
-      # Specify volume configuration here
-      emptyDir: {}
+# Specifies an existing secret to be used for admin and db passwords
+# The secret should define the following environment vars:
+# ANCHORE_ADMIN_PASSWORD
+# ANCHORE_DB_PASSWORD
+# ANCHORE_SAML_SECRET (if applicable)
+existingSecret: Null
 
-  # A secret must be created in the same namespace as anchore-engine is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
-  # Certs and keys should be added using the file name the certificate is stored at. This secret will be mounted to /home/anchore/certs.
-  certStoreSecretName: Null
+# The scratchVolume controls the mounting of an external volume for scratch space for image analysis. Generally speaking
+# you need to provision 3x the size of the largest image (uncompressed) that you want to analyze for this space.
+scratchVolume:
+  # Some k8s Volumes do not properly respect the fsGroup permissions. These volumes will get mounted as root:root
+  # regardless of the security permissions requested. The fixGroupPermissions will create an initContainer that will
+  # fixup the permissions.
+  fixGroupPermissions: false
+  mountPath: /analysis_scratch
+  details:
+    # Specify volume configuration here
+    emptyDir: {}
 
-  # Specify your pod securityContext here, by default the anchore images utilize the user/group 'anchore' using uid/gid 1000
-  # To disable this securityContext comment out `runAsUser` & `runAsGroup`
-  securityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 1000
+# A secret must be created in the same namespace as anchore-engine is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
+# Certs and keys should be added using the file name the certificate is stored at. This secret will be mounted to /home/anchore/certs.
+certStoreSecretName: Null
 
-  ###
-  # Start of General Anchore Engine Configurations (populates /config/config.yaml)
-  ###
-  # Set where default configs are placed at startup. This must be a writable location for the pod.
-  serviceDir: /anchore_service
-  logLevel: INFO
+# Specify your pod securityContext here, by default the anchore images utilize the user/group 'anchore' using uid/gid 1000
+# To disable this securityContext comment out `runAsUser` & `runAsGroup`
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
 
-  # Define timeout, in seconds, for image analysis
-  imageAnalyzeTimeoutSeconds: 36000
+###
+# Start of General Anchore Engine Configurations (populates /config/config.yaml)
+###
+# Set where default configs are placed at startup. This must be a writable location for the pod.
+serviceDir: /anchore_service
+logLevel: INFO
 
-  # If true, when a user adds an ECR registry with username = awsauto then the system will look for an instance profile to use for auth against the registry
-  allowECRUseIAMRole: false
+# Define timeout, in seconds, for image analysis
+imageAnalyzeTimeoutSeconds: 36000
 
-  # Enable prometheus metrics
-  enableMetrics: false
+# If true, when a user adds an ECR registry with username = awsauto then the system will look for an instance profile to use for auth against the registry
+allowECRUseIAMRole: false
 
-  # Disable auth on prometheus metrics
-  metricsAuthDisabled: false
+# Enable prometheus metrics
+enableMetrics: false
 
-  # Sets the password & email address for the default anchore-engine admin user.
-  defaultAdminPassword:
-  defaultAdminEmail: example@email.com
+# Disable auth on prometheus metrics
+metricsAuthDisabled: false
 
-  saml:
-    # Locations for keys used for signing and encryption. Only one of 'secret' or 'privateKeyName'/'publicKeyName' needs to be set. If all are set then the keys take precedence over the secret value
-    # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
-    secret: Null
-    # If set to true, use the secret specified in anchoreGlobal.existingSecret to set the ANCHORE_SAML_SECRET env variable
-    useExistingSecret: false
-    privateKeyName: Null
-    publicKeyName: Null
+# Sets the password & email address for the default anchore-engine admin user.
+defaultAdminPassword:
+defaultAdminEmail: example@email.com
 
-  oauthEnabled: false
-  oauthTokenExpirationSeconds: 3600
+saml:
+  # Locations for keys used for signing and encryption. Only one of 'secret' or 'privateKeyName'/'publicKeyName' needs to be set. If all are set then the keys take precedence over the secret value
+  # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
+  secret: Null
+  # If set to true, use the secret specified in existingSecret to set the ANCHORE_SAML_SECRET env variable
+  useExistingSecret: false
+  privateKeyName: Null
+  publicKeyName: Null
 
-  # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
-  # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
-  # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
-  hashedPasswords: false
+oauthEnabled: false
+oauthTokenExpirationSeconds: 3600
 
-  # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
-  dbConfig:
-    timeout: 120
-    # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs only.
-    # All ssl dbConfig values are only utilized when ssl=true
-    ssl: false
-    sslMode: verify-full
-    # sslRootCertName is the name of the postgres root CA certificate stored in anchoreGlobal.certStoreSecretName
-    sslRootCertName: Null
-    connectionPoolSize: 30
-    connectionPoolMaxOverflow: 100
-    # Allows you to set custom db connection pool settings
-    engineArgs: {}
-      # pool_recycle: 600
+# Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
+# don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
+# WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
+hashedPasswords: false
 
-  internalServicesSsl:
-    # Enable to force all anchore-engine services to communicate internally using SSL
-    enabled: false
-    # specify whether cert is verfied against the local certifacte bundle (allow self-signed certs if set to false)
-    verifyCerts: false
-    certSecretKeyName: Null
-    certSecretCertName: Null
+# Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
+dbConfig:
+  timeout: 120
+  # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs only.
+  # All ssl dbConfig values are only utilized when ssl=true
+  ssl: false
+  sslMode: verify-full
+  # sslRootCertName is the name of the postgres root CA certificate stored in certStoreSecretName
+  sslRootCertName: Null
+  connectionPoolSize: 30
+  connectionPoolMaxOverflow: 100
+  # Allows you to set custom db connection pool settings
+  engineArgs: {}
+    # pool_recycle: 600
 
-  # To enable webhooks, set webhooksEnabled: true
-  webhooksEnabled: false
-  # Configure webhook outputs here. The service provides these webhooks for notifying external systems of updates
-  webhooks:
-    # User and password to be set (using HTTP basic auth) on all webhook calls if necessary
-    webhook_user: Null
-    webhook_pass: Null
-    ssl_verify: true
+internalServicesSsl:
+  # Enable to force all anchore-engine services to communicate internally using SSL
+  enabled: false
+  # specify whether cert is verfied against the local certifacte bundle (allow self-signed certs if set to false)
+  verifyCerts: false
+  certSecretKeyName: Null
+  certSecretCertName: Null
 
-    # Endpoint for general notification delivery. These events are image/tag updates etc. This is globally configured
-    # and updates for all users are sent to the same host but with a different path for each user.
-    # <notification_type>/<userId> are required as documented at end of URI - only hostname:port should be configured.
-    general: {}
-      # url: "http://somehost:9090/<notification_type>/<userId>"
+# To enable webhooks, set webhooksEnabled: true
+webhooksEnabled: false
+# Configure webhook outputs here. The service provides these webhooks for notifying external systems of updates
+webhooks:
+  # User and password to be set (using HTTP basic auth) on all webhook calls if necessary
+  webhook_user: Null
+  webhook_pass: Null
+  ssl_verify: true
 
-  # Custom policy bundles can be specified here. This values section represents a kubernetes configmap that is volume mounted
-  # to <anchore_service_dir>/bundles and made available to all anchore services. See the docs for details on how to create policy bundles
-  # https://docs.anchore.com/current/docs/engine/general/concepts/policy/bundles/
-  policyBundles:
+  # Endpoint for general notification delivery. These events are image/tag updates etc. This is globally configured
+  # and updates for all users are sent to the same host but with a different path for each user.
+  # <notification_type>/<userId> are required as documented at end of URI - only hostname:port should be configured.
+  general: {}
+    # url: "http://somehost:9090/<notification_type>/<userId>"
+
+# Custom policy bundles can be specified here. This values section represents a kubernetes configmap that is volume mounted
+# to <anchore_service_dir>/bundles and made available to all anchore services. See the docs for details on how to create policy bundles
+# https://docs.anchore.com/current/docs/engine/general/concepts/policy/bundles/
+policyBundles:
 #     custom_policy_bundle1.json: |
 #       {
 #         "id": "custom1",
@@ -252,19 +252,19 @@ anchoreGlobal:
 #         ....
 #       }
 
-  # Allow configuration of Kubernetes probes
-  probes:
-    liveness:
-      initialDelaySeconds: 120
-      timeoutSeconds: 10
-      periodSeconds: 10
-      failureThreshold: 6
-      successThreshold: 1
-    readiness:
-      timeoutSeconds: 10
-      periodSeconds: 10
-      failureThreshold: 3
-      successThreshold: 1
+# Allow configuration of Kubernetes probes
+probes:
+  liveness:
+    initialDelaySeconds: 120
+    timeoutSeconds: 10
+    periodSeconds: 10
+    failureThreshold: 6
+    successThreshold: 1
+  readiness:
+    timeoutSeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
 
 # Configuration for the analyzer pods that perform image analysis
 # There may be many of these analyzers but best practice is to not have more than one per node since analysis
@@ -287,7 +287,7 @@ anchoreAnalyzer:
   concurrentTasksPerWorker: 1
 
   # Image layer caching can be enabled to speed up image downloads before analysis.
-  # This chart sets up a scratch directory for all analyzer pods using the values found at anchoreGlobal.scratchVolume.
+  # This chart sets up a scratch directory for all analyzer pods using the values found at scratchVolume.
   # When setting anchoreAnalyzer.layerCacheMaxGigabytes, ensure the scratch volume has suffient storage space.
   # For more info see - https://docs.anchore.com/current/docs/engine/engine_installation/storage/layer_caching/
   # Enable image layer caching by setting a cache size > 0GB.
@@ -888,7 +888,7 @@ anchoreEnterpriseUi:
   # ANCHORE_REDIS_URI
   existingSecret: Null
 
-  # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
+  # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at certStoreSecretName and specify the name of the cert here
   ldapsRootCaCertName: Null
 
   # Specifies whether to trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header).

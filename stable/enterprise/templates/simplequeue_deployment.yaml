@@ -12,7 +12,7 @@ metadata:
     {{- with .Values.anchoreSimpleQueue.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-    {{- with .Values.anchoreGlobal.labels }}
+    {{- with .Values.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
@@ -32,11 +32,11 @@ spec:
         {{- with .Values.anchoreSimpleQueue.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.anchoreGlobal.labels }}
+        {{- with .Values.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
       annotations:
-      {{- with .Values.anchoreGlobal.annotations }}
+      {{- with .Values.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.anchoreSimpleQueue.annotations }}
@@ -48,7 +48,7 @@ spec:
         checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
         checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
     spec:
-      {{- with .Values.anchoreGlobal.securityContext }}
+      {{- with .Values.securityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -56,7 +56,7 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
     {{- else }}
-      {{- with .Values.anchoreGlobal.imagePullSecretName }}
+      {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
       - name: {{ . }}
       {{- end }}
@@ -82,8 +82,8 @@ spec:
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         {{- else }}
-        image: {{ .Values.anchoreGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- end }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "simplequeue"]
@@ -92,9 +92,9 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.existingSecret }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.existingSecret }}
         {{- else }}
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
@@ -105,7 +105,7 @@ spec:
         - configMapRef:
             name: {{ template "enterprise.fullname" . }}-env
         env:
-        {{- with .Values.anchoreGlobal.extraEnv }}
+        {{- with .Values.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- with .Values.anchoreSimpleQueue.extraEnv }}
@@ -127,7 +127,7 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
-        {{- if .Values.anchoreGlobal.openShiftDeployment }}
+        {{- if .Values.openShiftDeployment }}
         - name: service-config-volume
           mountPath: /anchore_service_config
         - name: logs
@@ -135,7 +135,7 @@ spec:
         - name: run
           mountPath: /var/run/anchore
         {{- end }}
-        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
+        {{- if (.Values.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
@@ -144,25 +144,25 @@ spec:
           httpGet:
             path: /health
             port: simplequeue
-            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
+            {{- if .Values.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
-          initialDelaySeconds: {{ .Values.anchoreGlobal.probes.liveness.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.anchoreGlobal.probes.liveness.timeoutSeconds }}
-          periodSeconds: {{ .Values.anchoreGlobal.probes.liveness.periodSeconds }}
-          failureThreshold: {{ .Values.anchoreGlobal.probes.liveness.failureThreshold }}
-          successThreshold: {{ .Values.anchoreGlobal.probes.liveness.successThreshold }}
+          initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+          failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          successThreshold: {{ .Values.probes.liveness.successThreshold }}
         readinessProbe:
           httpGet:
             path: /health
             port: simplequeue
-            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
+            {{- if .Values.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
-          timeoutSeconds: {{ .Values.anchoreGlobal.probes.readiness.timeoutSeconds }}
-          periodSeconds: {{ .Values.anchoreGlobal.probes.readiness.periodSeconds }}
-          failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
-          successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
+          timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
           {{ toYaml .Values.anchoreSimpleQueue.resources | nindent 10 }}
       volumes:
@@ -174,7 +174,7 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "enterprise.fullname" .}}
-        {{- if .Values.anchoreGlobal.openShiftDeployment }}
+        {{- if .Values.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
         - name: logs
@@ -182,7 +182,7 @@ spec:
         - name: run
           emptyDir: {}
         {{- end }}
-        {{- with .Values.anchoreGlobal.certStoreSecretName }}
+        {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
             secretName: {{ . }}
@@ -204,7 +204,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
       {{- end }}
 
@@ -222,7 +222,7 @@ metadata:
     {{- with .Values.anchoreSimpleQueue.service.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-    {{- with .Values.anchoreGlobal.labels }}
+    {{- with .Values.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
   {{- with .Values.anchoreSimpleQueue.service.annotations }}

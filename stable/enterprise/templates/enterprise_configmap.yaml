@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: {{ $component }}
-    {{- with .Values.anchoreGlobal.labels }}
+    {{- with .Values.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
 data:
@@ -20,61 +20,61 @@ data:
     # General system-wide configuration options, these should not need to
     # be altered for basic operation
     #
-    service_dir: {{ .Values.anchoreGlobal.serviceDir }}
-    tmp_dir: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
-    log_level: {{ .Values.anchoreGlobal.logLevel }}
-    cleanup_images: {{ .Values.anchoreGlobal.cleanupImages }}
+    service_dir: {{ .Values.serviceDir }}
+    tmp_dir: {{ .Values.scratchVolume.mountPath }}
+    log_level: {{ .Values.logLevel }}
+    cleanup_images: {{ .Values.cleanupImages }}
 
-    allow_awsecr_iam_auto: {{ .Values.anchoreGlobal.allowECRUseIAMRole }}
+    allow_awsecr_iam_auto: {{ .Values.allowECRUseIAMRole }}
     host_id: "${ANCHORE_POD_NAME}"
-    internal_ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
+    internal_ssl_verify: {{ .Values.internalServicesSsl.verifyCerts }}
     auto_restart_services: false
     license_file: /home/anchore/license.yaml
 
-    global_client_connect_timeout: {{ default 0 .Values.anchoreGlobal.clientConnectTimeout }}
-    global_client_read_timeout: {{ default 0 .Values.anchoreGlobal.clientReadTimeout }}
+    global_client_connect_timeout: {{ default 0 .Values.clientConnectTimeout }}
+    global_client_read_timeout: {{ default 0 .Values.clientReadTimeout }}
 
     metrics:
-      enabled: {{ .Values.anchoreGlobal.enableMetrics }}
-      auth_disabled: {{ .Values.anchoreGlobal.metricsAuthDisabled }}
+      enabled: {{ .Values.enableMetrics }}
+      auth_disabled: {{ .Values.metricsAuthDisabled }}
 
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
     keys:
-      {{- if or .Values.anchoreGlobal.saml.secret .Values.anchoreGlobal.saml.useExistingSecret }}
+      {{- if or .Values.saml.secret .Values.saml.useExistingSecret }}
       secret: ${ANCHORE_SAML_SECRET}
       {{- end }}
-      {{- with .Values.anchoreGlobal.saml.publicKeyName }}
+      {{- with .Values.saml.publicKeyName }}
       public_key_path: /home/anchore/certs/{{- . }}
       {{- end }}
-      {{- with .Values.anchoreGlobal.saml.privateKeyName }}
+      {{- with .Values.saml.privateKeyName }}
       private_key_path: /home/anchore/certs/{{- . }}
       {{- end }}
 
     # Configuring supported user authentication and credential management
     user_authentication:
       oauth:
-        enabled: {{ .Values.anchoreGlobal.oauthEnabled }}
-        default_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthTokenExpirationSeconds }}
+        enabled: {{ .Values.oauthEnabled }}
+        default_token_expiration_seconds: {{ .Values.oauthTokenExpirationSeconds }}
 
       # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
       # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
       # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
-      hashed_passwords: {{ .Values.anchoreGlobal.hashedPasswords }}
+      hashed_passwords: {{ .Values.hashedPasswords }}
 
     credentials:
       database:
-        {{- if .Values.anchoreGlobal.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }}"
+        {{- if .Values.dbConfig.ssl }}
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.dbConfig.sslRootCertName }}"
         {{- else }}
         db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
         {{- end }}
         db_connect_args:
-          timeout: {{ .Values.anchoreGlobal.dbConfig.timeout }}
+          timeout: {{ .Values.dbConfig.timeout }}
           ssl: false
-        db_pool_size: {{ .Values.anchoreGlobal.dbConfig.connectionPoolSize }}
-        db_pool_max_overflow: {{ .Values.anchoreGlobal.dbConfig.connectionPoolMaxOverflow }}
-        {{- with .Values.anchoreGlobal.dbConfig.engineArgs }}
+        db_pool_size: {{ .Values.dbConfig.connectionPoolSize }}
+        db_pool_max_overflow: {{ .Values.dbConfig.connectionPoolMaxOverflow }}
+        {{- with .Values.dbConfig.engineArgs }}
         db_engine_args:
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -99,10 +99,10 @@ data:
         authorization_handler: external
         authorization_handler_config:
           endpoint: "http://localhost:{{- .Values.anchoreEnterpriseRbac.service.authPort }}"
-        {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-        ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
-        ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
-        ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
+        {{- if .Values.internalServicesSsl.enabled }}
+        ssl_enable: {{ .Values.internalServicesSsl.enabled }}
+        ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
+        ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
       {{- end }}
       {{- if .Values.anchoreEnterpriseReports.enabled }}
@@ -122,10 +122,10 @@ data:
         authorization_handler_config:
           endpoint: "http://localhost:{{- .Values.anchoreEnterpriseRbac.service.authPort }}"
         {{- end }}
-        {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-        ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
-        ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
-        ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
+        {{- if .Values.internalServicesSsl.enabled }}
+        ssl_enable: {{ .Values.internalServicesSsl.enabled }}
+        ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
+        ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
       {{- end }}
       {{- if .Values.anchoreEnterpriseNotifications.enabled }}

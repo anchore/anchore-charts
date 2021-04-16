@@ -20,14 +20,14 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
       annotations:
-      {{- with .Values.anchoreGlobal.annotations }}
+      {{- with .Values.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- with .Values.anchoreEngineUpgradeJob.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      {{- with .Values.anchoreGlobal.securityContext }}
+      {{- with .Values.securityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -35,7 +35,7 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
     {{- else }}
-      {{- with .Values.anchoreGlobal.imagePullSecretName }}
+      {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
       - name: {{ . }}
       {{- end }}
@@ -47,19 +47,19 @@ spec:
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         {{- else }}
-        image: {{ .Values.anchoreGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- end }}
-        {{- if .Values.anchoreGlobal.dbConfig.ssl }}
-        args: ["/bin/bash", "-c", "anchore-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.anchoreGlobal.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask"]
+        {{- if .Values.dbConfig.ssl }}
+        args: ["/bin/bash", "-c", "anchore-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.dbConfig.sslRootCertName }} upgrade --dontask"]
         {{- else }}
         args: ["/bin/bash", "-c", "anchore-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask"]
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.existingSecret }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.existingSecret }}
         {{- else }}
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
@@ -70,16 +70,16 @@ spec:
         - configMapRef:
             name: {{ template "enterprise.fullname" . }}-env
         env:
-        {{- with .Values.anchoreGlobal.extraEnv }}
+        {{- with .Values.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
+        {{- if (.Values.certStoreSecretName) }}
         volumeMounts:
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
         {{- end }}
-      {{- with .Values.anchoreGlobal.certStoreSecretName }}
+      {{- with .Values.certStoreSecretName }}
       volumes:
       - name: certs
         secret:
@@ -97,7 +97,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
       {{- end }}
 {{- end }}
