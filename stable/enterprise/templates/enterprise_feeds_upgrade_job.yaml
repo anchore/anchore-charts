@@ -32,12 +32,12 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       imagePullSecrets:
-      - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+      - name: {{ .Values.imagePullSecretName }}
       restartPolicy: Never
       containers:
       - name: "{{ .Release.Name }}-enterprise-feeds-upgrade"
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        image: {{ .Values.image }}
         {{- if .Values.dbConfig.ssl }}
         args: ["/bin/bash", "-c", "anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.dbConfig.sslRootCertName }} upgrade --dontask"]
         {{- else }}

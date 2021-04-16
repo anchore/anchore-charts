@@ -54,7 +54,7 @@ spec:
       {{- end }}
     {{- if .Values.anchoreEnterpriseGlobal.enabled }}
       imagePullSecrets:
-      - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+      - name: {{ .Values.imagePullSecretName }}
     {{- else }}
       {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
@@ -79,8 +79,8 @@ spec:
       {{- end }}
       - name: "{{ .Chart.Name }}-{{ $component }}"
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- else }}
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -169,7 +169,7 @@ spec:
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         - name: anchore-license
           secret:
-            secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
+            secretName: {{ .Values.licenseSecretName }}
         {{- end }}
         - name: config-volume
           configMap:

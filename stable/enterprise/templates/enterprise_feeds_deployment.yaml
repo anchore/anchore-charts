@@ -54,7 +54,7 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       imagePullSecrets:
-      - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+      - name: {{ .Values.imagePullSecretName }}
     {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
       initContainers:
         - name: mode-fixer
@@ -86,8 +86,8 @@ spec:
         {{- end }}
       {{- end }}
       - name: "{{ .Chart.Name }}-{{ $component }}"
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "feeds"]
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseFeeds.service.port }}
@@ -180,7 +180,7 @@ spec:
         {{- end }}
         - name: anchore-license
           secret:
-            secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
+            secretName: {{ .Values.licenseSecretName }}
         {{- if .Values.cloudsql.useExistingServiceAcc }}
         - name: {{ .Values.cloudsql.serviceAccSecretName }}
           secret:

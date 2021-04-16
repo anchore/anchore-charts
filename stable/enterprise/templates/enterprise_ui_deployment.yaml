@@ -57,7 +57,7 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
       imagePullSecrets:
-      - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+      - name: {{ .Values.imagePullSecretName }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -145,7 +145,7 @@ spec:
       volumes:
       - name: anchore-license
         secret:
-          secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
+          secretName: {{ .Values.licenseSecretName }}
       - name: anchore-ui-config
         configMap:
           name: {{ template "enterprise.ui.fullname" . }}

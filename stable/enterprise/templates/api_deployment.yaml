@@ -57,7 +57,7 @@ spec:
       {{- end }}
     {{- if .Values.anchoreEnterpriseGlobal.enabled }}
       imagePullSecrets:
-      - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+      - name: {{ .Values.imagePullSecretName }}
     {{- else }}
       {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
@@ -82,8 +82,8 @@ spec:
       {{- end }}
       - name: "{{ .Chart.Name }}-{{ $component }}"
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- else }}
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -184,8 +184,8 @@ spec:
           {{ toYaml .Values.anchoreApi.resources | nindent 10 }}
       {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseRbac.enabled }}
       - name: {{ .Chart.Name }}-rbac-manager
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -261,8 +261,8 @@ spec:
         resources:
           {{ toYaml .Values.anchoreEnterpriseRbac.managerResources | nindent 10 }}
       - name: {{ .Chart.Name }}-rbac-authorizer
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_authorizer"]
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -338,8 +338,8 @@ spec:
       {{- end }}
       {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled }}
       - name: "{{ .Chart.Name }}-reports"
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports"]
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseReports.service.port }}
@@ -417,8 +417,8 @@ spec:
       {{- end }}
       {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
       - name: "{{ .Chart.Name }}-notifications"
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "notifications"]
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseNotifications.service.port }}
@@ -514,7 +514,7 @@ spec:
         {{ if and .Values.anchoreEnterpriseGlobal.enabled (or .Values.anchoreEnterpriseRbac.enabled .Values.anchoreEnterpriseReports.enabled) }}
         - name: anchore-license
           secret:
-            secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
+            secretName: {{ .Values.licenseSecretName }}
         - name: enterprise-config-volume
           configMap:
             name: {{ template "enterprise.fullname" . }}

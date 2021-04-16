@@ -33,7 +33,7 @@ spec:
       {{- end }}
      {{- if .Values.anchoreEnterpriseGlobal.enabled }}
       imagePullSecrets:
-      - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
+      - name: {{ .Values.imagePullSecretName }}
     {{- else }}
       {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
@@ -44,8 +44,8 @@ spec:
       containers:
       - name: "{{ .Release.Name }}-enterprise-upgrade"
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- else }}
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
