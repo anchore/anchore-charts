@@ -50,13 +50,13 @@ spec:
             name: {{ .Values.anchoreEnterpriseFeeds.existingSecret }}
         {{- else }}
         - secretRef:
-            name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
+            name: {{ include "enterprise.feeds.fullname" . }}
         - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
         - configMapRef:
-            name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
+            name: {{ template "enterprise.feeds.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}

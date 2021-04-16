@@ -4,9 +4,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "anchore-engine.enterprise-ui.fullname" . }}
+  name: {{ include "enterprise.ui.fullname" . }}
   labels:
-    app: {{ include "anchore-engine.fullname" . }}
+    app: {{ include "enterprise.fullname" . }}
     component: {{ $component }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
@@ -20,7 +20,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ template "anchore-engine.fullname" . }}
+      app: {{ template "enterprise.fullname" . }}
       component: {{ $component }}
   replicas: 1
   strategy:
@@ -29,7 +29,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "anchore-engine.fullname" . }}
+        app: {{ template "enterprise.fullname" . }}
         component: {{ $component }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: {{ .Release.Name }}
@@ -103,9 +103,9 @@ spec:
             name: {{ .Values.anchoreEnterpriseUi.existingSecret }}
         {{- else }}
         - secretRef:
-            name: {{ include "anchore-engine.enterprise-ui.fullname" . }}
+            name: {{ include "enterprise.ui.fullname" . }}
         - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
         ports:
@@ -148,7 +148,7 @@ spec:
           secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
       - name: anchore-ui-config
         configMap:
-          name: {{ template "anchore-engine.enterprise-ui.fullname" . }}
+          name: {{ template "enterprise.ui.fullname" . }}
       {{- with .Values.anchoreGlobal.certStoreSecretName }}
       - name: certs
         secret:
@@ -179,9 +179,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+  name: {{ include "enterprise.ui.fullname" . | quote }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     component: {{ $component }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
@@ -205,7 +205,7 @@ spec:
       protocol: TCP
       targetPort: 3000
   selector:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     component: {{ $component }}
 
 {{- end -}}

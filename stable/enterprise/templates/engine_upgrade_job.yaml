@@ -62,13 +62,13 @@ spec:
             name: {{ .Values.anchoreGlobal.existingSecret }}
         {{- else }}
         - secretRef:
-            name: {{ include "anchore-engine.fullname" . }}
+            name: {{ include "enterprise.fullname" . }}
         - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
         - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
+            name: {{ template "enterprise.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}

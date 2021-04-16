@@ -1,9 +1,9 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ template "anchore-engine.fullname" . }}-env
+  name: {{ template "enterprise.fullname" . }}-env
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}

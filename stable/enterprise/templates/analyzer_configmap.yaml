@@ -2,9 +2,9 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ template "anchore-engine.analyzer.fullname" . }}
+  name: {{ template "enterprise.analyzer.fullname" . }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}

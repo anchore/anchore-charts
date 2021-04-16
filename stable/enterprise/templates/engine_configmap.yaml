@@ -1,9 +1,9 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ template "anchore-engine.fullname" . }}
+  name: {{ template "enterprise.fullname" . }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -79,9 +79,9 @@ data:
       token_url:
     {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
       {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-      url: "https://{{- template "anchore-engine.enterprise-feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
+      url: "https://{{- template "enterprise.feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
       {{- else }}
-      url: "http://{{- template "anchore-engine.enterprise-feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
+      url: "http://{{- template "enterprise.feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
       {{- end }}
       ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
       client_url:
@@ -141,7 +141,7 @@ data:
       apiext:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.api.fullname" . }}
         max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreApi.service.port }}
@@ -167,7 +167,7 @@ data:
       analyzer:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.analyzer.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.analyzer.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreAnalyzer.containerPort }}
         max_request_threads: {{ default 50 .Values.anchoreAnalyzer.maxRequestThreads }}
@@ -191,7 +191,7 @@ data:
       catalog:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.catalog.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.catalog.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreCatalog.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreCatalog.maxRequestThreads }}
@@ -235,7 +235,7 @@ data:
       simplequeue:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.simplequeue.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.simplequeue.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreSimpleQueue.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreSimpleQueue.maxRequestThreads }}
@@ -248,7 +248,7 @@ data:
         enabled: true
         require_auth: true
         max_request_threads: {{ default 50 .Values.anchorePolicyEngine.maxRequestThreads }}
-        endpoint_hostname: {{ template "anchore-engine.policy-engine.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.policy-engine.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchorePolicyEngine.service.port }}
         cycle_timer_seconds: 1

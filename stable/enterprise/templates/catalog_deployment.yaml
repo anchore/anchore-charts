@@ -2,9 +2,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
+  name: {{ template "enterprise.catalog.fullname" . }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -18,7 +18,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ template "anchore-engine.fullname" . }}
+      app: {{ template "enterprise.fullname" . }}
       component: {{ $component }}
   replicas: {{ .Values.anchoreCatalog.replicaCount }}
   strategy:
@@ -27,7 +27,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "anchore-engine.fullname" . }}
+        app: {{ template "enterprise.fullname" . }}
         component: {{ $component }}
         {{- with .Values.anchoreCatalog.labels }}
         {{ toYaml . | nindent 8 }}
@@ -100,13 +100,13 @@ spec:
             name: {{ .Values.anchoreGlobal.existingSecret }}
         {{- else }}
         - secretRef:
-            name: {{ include "anchore-engine.fullname" . }}
+            name: {{ include "enterprise.fullname" . }}
         - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
         - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
+            name: {{ template "enterprise.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
@@ -183,11 +183,11 @@ spec:
         {{- end }}
         - name: config-volume
           configMap:
-            name: {{ template "anchore-engine.fullname" . }}
+            name: {{ template "enterprise.fullname" . }}
         {{- if .Values.anchoreGlobal.policyBundles }}
         - name: policy-bundle-volume
           configMap:
-            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
+            name: {{ template "enterprise.fullname" . }}-policy-bundles
         {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
@@ -227,9 +227,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
+  name: {{ template "enterprise.catalog.fullname" . }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -252,5 +252,5 @@ spec:
       targetPort: {{ .Values.anchoreCatalog.service.port }}
       protocol: TCP
   selector:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     component: {{ $component }}

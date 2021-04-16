@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "anchore-engine.enterprise.fullname" . }}
+  name: {{ template "enterprise.fullname" . }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -92,7 +92,7 @@ data:
       rbac_manager:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.api.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseRbac.service.apiPort }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseRbac.maxRequestThreads }}
@@ -109,7 +109,7 @@ data:
       reports:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.api.fullname" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseReports.maxRequestThreads }}
@@ -132,7 +132,7 @@ data:
       notifications:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "enterprise.api.fullname" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseNotifications.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseNotifications.maxRequestThreads }}
@@ -144,7 +144,7 @@ data:
         {{- if .Values.anchoreEnterpriseNotifications.uiUrl }}
         ui_url: "{{ .Values.anchoreEnterpriseNotifications.uiUrl }}"
         {{- else }}
-        ui_url: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+        ui_url: {{ include "enterprise.ui.fullname" . | quote }}
         {{- end }}
       {{- end }}
 {{- end -}}

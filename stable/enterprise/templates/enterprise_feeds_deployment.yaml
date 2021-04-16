@@ -3,9 +3,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+  name: {{ template "enterprise.feeds.fullname" . }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     component: {{ $component }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
@@ -19,7 +19,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ template "anchore-engine.fullname" . }}
+      app: {{ template "enterprise.fullname" . }}
       component: {{ $component }}
   replicas: 1
   strategy:
@@ -28,7 +28,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "anchore-engine.fullname" . }}
+        app: {{ template "enterprise.fullname" . }}
         component: {{ $component }}
         {{- with .Values.anchoreEnterpriseFeeds.labels }}
         {{ toYaml . | nindent 8 }}
@@ -99,13 +99,13 @@ spec:
             name: {{ .Values.anchoreEnterpriseFeeds.existingSecret }}
         {{- else }}
         - secretRef:
-            name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
+            name: {{ include "enterprise.feeds.fullname" . }}
         - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
         - configMapRef:
-            name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
+            name: {{ template "enterprise.feeds.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
@@ -167,7 +167,7 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+            name: {{ template "enterprise.feeds.fullname" . }}
         - name: {{ $component}}-scratch
           {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
@@ -211,9 +211,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+  name: {{ template "enterprise.feeds.fullname" . }}
   labels:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -236,7 +236,7 @@ spec:
       targetPort: {{ .Values.anchoreEnterpriseFeeds.service.port }}
       protocol: TCP
   selector:
-    app: {{ template "anchore-engine.fullname" . }}
+    app: {{ template "enterprise.fullname" . }}
     component: {{ $component }}
 
 {{- end -}}
