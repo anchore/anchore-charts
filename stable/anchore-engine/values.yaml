@@ -271,7 +271,6 @@ anchoreGlobal:
 # is very IO intensive. Use of affinity/anti-affinity rules for scheduling the analyzers is future work.
 anchoreAnalyzer:
   replicaCount: 1
-  containerPort: 8084
 
   # Set extra environment variables. These will be set only on analyzer containers.
   extraEnv: []
@@ -340,6 +339,11 @@ anchoreAnalyzer:
     #     enabled: true
     #     db_update_enabled: true
 
+  service:
+    type: ClusterIP
+    port: 8084
+    annotations: {}
+    label: {}
 
   # resources:
   #  limits:
