@@ -98,12 +98,12 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.anchoreEnterpriseUi.existingSecret }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseUi.existingSecret }}
         {{- else }}
         - secretRef:
-            name: {{ include "anchore-engine.fullname" . }}
+            name: {{ include "anchore-engine.enterprise-ui.fullname" . }}
         - secretRef:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}

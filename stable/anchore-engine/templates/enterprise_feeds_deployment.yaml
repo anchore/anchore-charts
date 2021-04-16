@@ -94,12 +94,12 @@ spec:
           name: feeds-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.anchoreEnterpriseFeeds.existingSecret }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseFeeds.existingSecret }}
         {{- else }}
         - secretRef:
-            name: {{ include "anchore-engine.fullname" . }}
+            name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
         - secretRef:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
