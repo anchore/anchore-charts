@@ -98,10 +98,15 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
+        {{- if .Values.anchoreEnterpriseUi.existingSecret }}
         - secretRef:
-            name: {{ default (include "anchore-engine.enterprise-ui.fullname" .) .Values.anchoreEnterpriseUi.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseUi.existingSecret }}
+        {{- else }}
         - secretRef:
-            name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
+            name: {{ include "anchore-engine.enterprise-ui.fullname" . }}
+        - secretRef:
+            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+        {{- end }}
         {{- end }}
         ports:
         - containerPort: 3000
