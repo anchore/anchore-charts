@@ -13,7 +13,7 @@ This chart is a simple wrapper to wire up credentials, configuration, and setup 
 to deploy one with:
 
 ```
-helm install --name anchore stable/anchore-engine
+helm install --name anchore anchore/anchore-engine
 ```
 
 Setup of policies and users is covered in the anchore documentation, for this readme we'll use admin user credentials, but it 
