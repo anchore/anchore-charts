@@ -41,6 +41,9 @@ spec:
       {{- end }}
     {{- end }}
       restartPolicy: Never
+      {{- if .Values.cloudsql.enabled }}
+      shareProcessNamespace: true
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -57,7 +60,7 @@ spec:
           readOnly: true
         {{- end }}
       {{- end }}
-      - name: "{{ .Release.Name }}-enterprise-upgrade"
+      - name: "{{ .Release.Name }}-engine-upgrade"
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
@@ -65,10 +68,21 @@ spec:
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
         {{- end }}
+        command: ["/bin/bash", "-c"]
+        args:
         {{- if .Values.anchoreGlobal.dbConfig.ssl }}
-        args: ["/bin/bash", "-c", "anchore-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.anchoreGlobal.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask"]
+          - |
+            anchore-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.anchoreGlobal.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask;
         {{- else }}
-        args: ["/bin/bash", "-c", "anchore-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask"]
+          - |
+            anchore-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask;
+        {{- end }}
+        {{- if .Values.cloudsql.enabled }}
+            sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+        securityContext:
+          capabilities:
+            add:
+              - SYS_PTRACE
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
