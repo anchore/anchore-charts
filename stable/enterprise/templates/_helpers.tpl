@@ -80,6 +80,59 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "enterprise.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+When calling this template, .component must be included in the context
+*/}}
+{{- define "enterprise.labels" -}}
+app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+app.kubernetes.io/component: {{ .component }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/part-of: "Anchore Enterprise"
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+helm.sh/chart: {{ template "enterprise.chart" . }}
+{{- with .Values.labels }}
+{{ toYaml . }}
+{{- end }}
+{{- with (printf ".Values.%s.labels" .component) }}
+{{ toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common annotations
+When calling this template, .component must be included in the context
+*/}}
+{{- define "enterprise.annotations" -}}
+{{- with .Values.annotations }}
+{{ toYaml . }}
+{{- end }}
+{{- with (printf ".Values.%s.annotations" .component) }}
+{{ toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common environment variables
+When calling this template, .component must be included in the context
+*/}}
+{{- define "enterprise.environment" -}}
+{{- with .Values.extraEnv }}
+{{- toYaml . }}
+{{- end }}
+{{- with (printf ".Values.%s.extraEnv" .component) }}
+{{- toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
 Return Anchore default admin password
 */}}
 {{- define "enterprise.defaultAdminPassword" -}}
