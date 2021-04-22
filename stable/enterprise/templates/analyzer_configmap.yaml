@@ -4,16 +4,11 @@ apiVersion: v1
 metadata:
   name: {{ template "enterprise.analyzer.fullname" . }}
   labels:
-    app: {{ template "enterprise.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: {{ $component }}
-    {{- with .Values.anchoreGlobal.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
+  annotations:
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 data:
   analyzer_config.yaml: |
-{{- with .Values.anchoreAnalyzer.configFile }}
-{{- toYaml . | nindent 4 }}
+{{- with .Values.analyzer.configFile }}
+    {{- toYaml . | nindent 4 }}
 {{- end }}

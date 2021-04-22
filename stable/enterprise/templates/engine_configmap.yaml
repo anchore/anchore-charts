@@ -169,20 +169,20 @@ data:
         require_auth: true
         endpoint_hostname: {{ template "enterprise.analyzer.fullname" . }}
         listen: 0.0.0.0
-        port: {{ .Values.anchoreAnalyzer.containerPort }}
-        max_request_threads: {{ default 50 .Values.anchoreAnalyzer.maxRequestThreads }}
+        port: {{ .Values.analyzer.containerPort }}
+        max_request_threads: {{ default 50 .Values.analyzer.maxRequestThreads }}
         cycle_timer_seconds: 1
         cycle_timers:
-          {{- toYaml .Values.anchoreAnalyzer.cycleTimers | nindent 10 }}
-        max_threads: {{ .Values.anchoreAnalyzer.concurrentTasksPerWorker }}
+          {{- toYaml .Values.analyzer.cycleTimers | nindent 10 }}
+        max_threads: {{ .Values.analyzer.concurrentTasksPerWorker }}
         analyzer_driver: 'nodocker'
-        {{- if gt .Values.anchoreAnalyzer.layerCacheMaxGigabytes 0.0 }}
+        {{- if gt .Values.analyzer.layerCacheMaxGigabytes 0.0 }}
         layer_cache_enable: true
         {{- else }}
         layer_cache_enable: false
         {{- end }}
-        layer_cache_max_gigabytes: {{ .Values.anchoreAnalyzer.layerCacheMaxGigabytes }}
-        enable_hints: {{ .Values.anchoreAnalyzer.enableHints }}
+        layer_cache_max_gigabytes: {{ .Values.analyzer.layerCacheMaxGigabytes }}
+        enable_hints: {{ .Values.analyzer.enableHints }}
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"

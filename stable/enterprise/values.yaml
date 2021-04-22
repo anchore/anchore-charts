@@ -273,7 +273,7 @@ probes:
 # Configuration for the analyzer pods that perform image analysis
 # There may be many of these analyzers but best practice is to not have more than one per node since analysis
 # is very IO intensive. Use of affinity/anti-affinity rules for scheduling the analyzers is future work.
-anchoreAnalyzer:
+analyzer:
   replicaCount: 1
   containerPort: 8084
 
@@ -307,16 +307,11 @@ anchoreAnalyzer:
     #
     # WARNING - malforming this file can cause the analyzer to fail on all image analysis
     #
-    # Options for any analyzer module(s) that takes customizable input
-    #
-    # example configuration for the 'retrieve_files' analyzer, if installed
     retrieve_files:
       file_list:
         - '/etc/passwd'
         # - '/etc/services'
         # - '/etc/sudoers'
-
-    # example configuration for the 'content_search' analyze, if installed
     secret_search:
       match_params:
         - MAXFILESIZE=10000
@@ -345,7 +340,7 @@ anchoreAnalyzer:
     #     db_update_enabled: true
 
 
-  # resources:
+  resources: {}
   #  limits:
   #    cpu: 1
   #    memory: 4G
