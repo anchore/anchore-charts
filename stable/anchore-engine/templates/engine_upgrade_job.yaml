@@ -41,8 +41,26 @@ spec:
       {{- end }}
     {{- end }}
       restartPolicy: Never
+      {{- if .Values.cloudsql.enabled }}
+      shareProcessNamespace: true
+      {{- end }}
       containers:
-      - name: "{{ .Release.Name }}-enterprise-upgrade"
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
+        {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
+        volumeMounts:
+        - mountPath: /var/{{ .Values.cloudsql.serviceAccSecretName }}
+          name: {{ .Values.cloudsql.serviceAccSecretName }}
+          readOnly: true
+        {{- end }}
+      {{- end }}
+      - name: "{{ .Release.Name }}-engine-upgrade"
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
@@ -50,10 +68,21 @@ spec:
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
         {{- end }}
+        command: ["/bin/bash", "-c"]
+        args:
         {{- if .Values.anchoreGlobal.dbConfig.ssl }}
-        args: ["/bin/bash", "-c", "anchore-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.anchoreGlobal.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask"]
+          - |
+            anchore-manager db --db-use-ssl --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{ .Values.anchoreGlobal.dbConfig.sslMode }}\\&sslrootcert=/home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask;
         {{- else }}
-        args: ["/bin/bash", "-c", "anchore-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask"]
+          - |
+            anchore-manager db --db-connect postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME} upgrade --dontask;
+        {{- end }}
+        {{- if .Values.cloudsql.enabled }}
+            sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+        securityContext:
+          capabilities:
+            add:
+              - SYS_PTRACE
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -79,12 +108,19 @@ spec:
           mountPath: /home/anchore/certs/
           readOnly: true
         {{- end }}
-      {{- with .Values.anchoreGlobal.certStoreSecretName }}
+    {{- if or .Values.anchoreGlobal.certStoreSecretName .Values.cloudsql.useExistingServiceAcc }}
       volumes:
+      {{- with .Values.anchoreGlobal.certStoreSecretName }}
       - name: certs
         secret:
           secretName: {{ . }}
       {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+      - name: {{ .Values.cloudsql.serviceAccSecretName }}
+        secret:
+          secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+    {{- end }}
       {{- with .Values.anchoreEngineUpgradeJob.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
