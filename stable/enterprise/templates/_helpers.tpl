@@ -88,7 +88,7 @@ Create chart name and version as used by the chart label.
 
 {{/*
 Common labels
-When calling this template, .component must be included in the context
+When calling this template, .component can be included in the context for component specific labels
 {{- include "enterprise.labels" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.labels" -}}
@@ -102,36 +102,42 @@ helm.sh/chart: {{ template "enterprise.chart" . }}
 {{- with .Values.labels }}
 {{ toYaml . }}
 {{- end }}
+{{- if .component }}
 {{- with (printf ".Values.%s.labels" .component) }}
 {{ toYaml . }}
+{{- end }}
 {{- end }}
 {{- end }}
 
 {{/*
 Common annotations
-When calling this template, .component must be included in the context
+When calling this template, .component can be included in the context for component specific annotations
 {{- include "enterprise.annotations" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.annotations" -}}
 {{- with .Values.annotations }}
 {{ toYaml . }}
 {{- end }}
+{{- if .component }}
 {{- with (printf ".Values.%s.annotations" .component) }}
 {{ toYaml . }}
+{{- end }}
 {{- end }}
 {{- end }}
 
 {{/*
 Common environment variables
-When calling this template, .component must be included in the context.
+When calling this template, .component can be included in the context for component specific env vars
 {{- include "enterprise.environment" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.environment" -}}
 {{- with .Values.extraEnv }}
 {{- toYaml . }}
 {{- end }}
+{{- if .component }}
 {{- with (printf ".Values.%s.extraEnv" .component) }}
 {{- toYaml . }}
+{{- end }}
 {{- end }}
 {{- end }}
 
