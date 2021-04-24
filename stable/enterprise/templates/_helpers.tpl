@@ -89,6 +89,7 @@ Create chart name and version as used by the chart label.
 {{/*
 Common labels
 When calling this template, .component must be included in the context
+{{- include "enterprise.labels" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.labels" -}}
 app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
@@ -109,6 +110,7 @@ helm.sh/chart: {{ template "enterprise.chart" . }}
 {{/*
 Common annotations
 When calling this template, .component must be included in the context
+{{- include "enterprise.annotations" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.annotations" -}}
 {{- with .Values.annotations }}
@@ -121,7 +123,8 @@ When calling this template, .component must be included in the context
 
 {{/*
 Common environment variables
-When calling this template, .component must be included in the context
+When calling this template, .component must be included in the context.
+{{- include "enterprise.environment" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.environment" -}}
 {{- with .Values.extraEnv }}
