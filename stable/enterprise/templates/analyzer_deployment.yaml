@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "enterprise.analyzer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
   annotations:
@@ -46,7 +47,7 @@ spec:
           securityContext:
             runAsUser: 0
           volumeMounts:
-            - name: {{ $component }}-scratch
+            - name: "{{ $component }}-scratch"
               mountPath: {{ .Values.scratchVolume.mountPath }}
           command:
             - sh
@@ -54,22 +55,22 @@ spec:
             - (chmod 0775 {{ .Values.scratchVolume.mountPath }}; chgrp {{ .Values.securityContext.fsGroup }} {{ .Values.scratchVolume.mountPath }} )
     {{- end }}
       containers:
-      - name: {{ .Chart.Name }}-{{ $component }}
+      - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "analyzer"]
         envFrom:
         - configMapRef:
-            name: {{ template "enterprise.fullname" . }}-env
+            name: "{{ template "enterprise.fullname" . }}-env"
     {{- if not .Values.inject_secrets_via_env }}
       {{- if .Values.existingSecret }}
         - secretRef:
             name: {{ .Values.existingSecret }}
       {{- else }}
         - secretRef:
-            name: {{ include "enterprise.fullname" . }}
+            name: {{ template "enterprise.fullname" . }}
         - secretRef:
-            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+            name: "{{ template "enterprise.fullname" . }}-admin-pass"
       {{- end }}
     {{- end }}
         env:
@@ -86,12 +87,12 @@ spec:
           mountPath: /home/anchore/license.yaml
           subPath: license.yaml
         - name: analyzer-config-volume
-          mountPath: {{ .Values.serviceDir }}/analyzer_config.yaml
+          mountPath: "{{ .Values.serviceDir }}/analyzer_config.yaml"
           subPath: analyzer_config.yaml
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
-        - name: {{ $component }}-scratch
+        - name: "{{ $component }}-scratch"
           mountPath: {{ .Values.scratchVolume.mountPath }}
       {{- if (.Values.certStoreSecretName) }}
         - name: certs
@@ -127,7 +128,7 @@ spec:
       {{- end }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
-        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        image: "{{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}"
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
         command: ["/cloud_sql_proxy"]
         args:
@@ -135,7 +136,7 @@ spec:
       {{- if .Values.cloudsql.useExistingServiceAcc }}
         - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
         volumeMounts:
-        - mountPath: /var/{{ .Values.cloudsql.serviceAccSecretName }}
+        - mountPath: "/var/{{ .Values.cloudsql.serviceAccSecretName }}"
           name: {{ .Values.cloudsql.serviceAccSecretName }}
           readOnly: true
       {{- end }}
@@ -147,7 +148,7 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "enterprise.fullname" . }}
-        - name: {{ $component }}-scratch
+        - name: "{{ $component }}-scratch"
           {{ toYaml .Values.scratchVolume.details | indent 10 }}
         - name: analyzer-config-volume
           configMap:
