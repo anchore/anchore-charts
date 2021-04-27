@@ -1,101 +1,9 @@
 # Default values for anchore_engine chart.
 
-# Anchore engine has a dependency on Postgresql, configure here
-postgresql:
-  image:
-    tag: 9.6.21-debian-10-r66
-  # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
-  # enabled: false
-  postgresqlPassword: anchore-postgres,123
-  postgresqlDatabase: anchore
-
-  # Specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
-  externalEndpoint: Null
-
-  # Configure size of the persistent volume used with helm managed chart.
-  # This should be commented out if using an external endpoint.
-  persistence:
-    size: 20Gi
-
-  # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
-  # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
-  # imageTag: latest
-  # extraEnv:
-  # - name: POSTGRESQL_USER
-  #   value: anchoreengine
-  # - name: POSTGRESQL_PASSWORD
-  #   value: anchore-postgres,123
-  # - name: POSTGRESQL_DATABASE
-  #   value: anchore
-  # - name: PGUSER
-  #   value: postgres
-  # - name: LD_LIBRARY_PATH
-  #   value: /opt/rh/rh-postgresql96/root/usr/lib64
-  # - name: PATH
-  #   value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-# Google CloudSQL support in GKE via gce-proxy
-cloudsql:
-  # To use CloudSQL in GKE set 'enable: true'
-  enabled: false
-  # set CloudSQL instance: 'project:zone:instancname'
-  instance: ""
-  # Optional existing service account secret to use.
-  # useExistingServiceAcc: false
-  # serviceAccSecretName: service_acc
-  # serviceAccJsonName: for_cloudsql.json
-  image:
-    # set repo and image tag of gce-proxy
-    repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.21
-    pullPolicy: IfNotPresent
-
-# Create an ingress resource for all external anchore engine services (API & Enterprise UI).
-# By default this chart is setup to use the NGINX ingress controller which needs to be installed & configured on your cluster.
-# To utilize a GCE/ALB ingress controller comment out the nginx annotations below, change ingress.class, edit path configurations as per the comments, & set API/UI services to use NodePort.
-ingress:
-  enabled: false
-  labels: {}
-  # Use the following paths for GCE/ALB ingress controller
-  # feedsPath: /v1/feeds/*
-  # apiPath: /v1/*
-  # uiPath: /*
-  # Exposing the feeds API w/ ingress is for special cases only, uncomment feedsPath if external access to the feeds API is needed
-  # feedsPath: /v1/feeds/
-  # Exposing the report API w/ ingress enables the GraphQL interface at <anchore.url>/v1/reports/graphql
-  # reportsPath: /v1/reports/
-  apiPath: /v1/
-  uiPath: /
-  # uncomment `feedsPath` to add an ingress endpoint for the feeds api
-  # uncomment 'reportsPath' to add an ingress endpoint for the reports api
-
-  # Uncomment the following lines to bind on specific hostnames
-  # apiHosts:
-  #   - anchore-api.example.com
-  # uiHosts:
-  #   - anchore-ui.example.com
-  # feedsHosts:
-  #   - anchore-feeds.example.com
-  # reportsHosts:
-  #   - anchore-api.example.com
-  annotations:
-    # kubernetes.io/ingress.class: gce
-    kubernetes.io/ingress.class: nginx
-    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    # kubernetes.io/ingress.allow-http: false
-    # kubernetes.io/tls-acme: true
-  tls: []
-  # Secrets must be manually created in the namespace.
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
 ## Global configuration shared by all anchore-engine services.
 
 # Image used for all anchore engine deployments (excluding enterprise components).
-image: docker.io/anchore/anchore-engine:v0.9.3
+image: docker.io/anchore/enterprise:v3.0.2
 imagePullPolicy: IfNotPresent
 
 # Set image pull secret name if using an anchore-engine image from a private registry
@@ -104,12 +12,13 @@ imagePullSecretName:
 # Specify a service account name utilized to run all Anchore pods
 serviceAccountName:
 
+# To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
+# This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault
+inject_secrets_via_env: false
+
 # Name of kubernetes secret containing your license.yaml file.
 # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
 licenseSecretName: anchore-enterprise-license
-
-# Set this value to true to setup the chart for OpenShift deployment compatibility.
-openShiftDeployment: false
 
 # Add additionnal labels to all kubernetes resources
 labels: {}
@@ -270,6 +179,46 @@ probes:
     failureThreshold: 3
     successThreshold: 1
 
+# Create an ingress resource for all external anchore engine services (API & Enterprise UI).
+# By default this chart is setup to use the NGINX ingress controller which needs to be installed & configured on your cluster.
+# To utilize a GCE/ALB ingress controller comment out the nginx annotations below, change ingress.class, edit path configurations as per the comments, & set API/UI services to use NodePort.
+ingress:
+  enabled: false
+  labels: {}
+  # Use the following paths for GCE/ALB ingress controller
+  # feedsPath: /v1/feeds/*
+  # apiPath: /v1/*
+  # uiPath: /*
+  # Exposing the feeds API w/ ingress is for special cases only, uncomment feedsPath if external access to the feeds API is needed
+  # feedsPath: /v1/feeds/
+  # Exposing the report API w/ ingress enables the GraphQL interface at <anchore.url>/v1/reports/graphql
+  # reportsPath: /v1/reports/
+  apiPath: /v1/
+  uiPath: /
+  # uncomment `feedsPath` to add an ingress endpoint for the feeds api
+  # uncomment 'reportsPath' to add an ingress endpoint for the reports api
+
+  # Uncomment the following lines to bind on specific hostnames
+  # apiHosts:
+  #   - anchore-api.example.com
+  # uiHosts:
+  #   - anchore-ui.example.com
+  # feedsHosts:
+  #   - anchore-feeds.example.com
+  # reportsHosts:
+  #   - anchore-api.example.com
+  annotations:
+    # kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # kubernetes.io/ingress.allow-http: false
+    # kubernetes.io/tls-acme: true
+  tls: []
+  # Secrets must be manually created in the namespace.
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
 # Configuration for the analyzer pods that perform image analysis
 # There may be many of these analyzers but best practice is to not have more than one per node since analysis
 # is very IO intensive. Use of affinity/anti-affinity rules for scheduling the analyzers is future work.
@@ -391,7 +340,7 @@ anchoreApi:
   tolerations: []
   affinity: {}
 
-anchoreCatalog:
+catalog:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all catalog containers.
@@ -622,51 +571,6 @@ simpleQueue:
   tolerations: []
   affinity: {}
 
-# Pod configuration for the helm post-install-hook engine upgrade Job
-anchoreEngineUpgradeJob:
-  enabled: true
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  annotations: {}
-
-# Configure the second postgres database instance for the enterprise feeds service.
-# Only utilized if anchoreEnterpriseGlobal.enabled: true
-anchore-feeds-db:
-  # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
-  # enabled: false
-  postgresUser: anchoreengine
-  postgresPassword: anchore-postgres,123
-  postgresDatabase: anchore-feeds
-
-  # Specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
-  externalEndpoint: Null
-
-  # Configure size of the persitant volume used with helm managed chart.
-  # This should be commented out if using an external endpoint.
-  persistence:
-    resourcePolicy: nil
-    size: 20Gi
-
-  # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
-  # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
-  # imageTag: latest
-  # extraEnv:
-  # - name: POSTGRESQL_USER
-  #   value: anchoreengine
-  # - name: POSTGRESQL_PASSWORD
-  #   value: anchore-postgres,123
-  # - name: POSTGRESQL_DATABASE
-  #   value: anchore
-  # - name: PGUSER
-  #   value: postgres
-  # - name: LD_LIBRARY_PATH
-  #   value: /opt/rh/rh-postgresql96/root/usr/lib64
-  # - name: PATH
-  #   value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
 # Configure & enable the Anchore Enterprise on-prem feeds service.
 feeds:
   # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
@@ -739,14 +643,6 @@ feeds:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
-# Pod configuration for the helm post-install-hook feeds upgrade Job
-feedsUpgradeJob:
-  enabled: true
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  annotations: {}
 
 # Configure the Anchore Enterprise role based access control component.
 # This component consists of 2 containers that run as side-cars in the anchore engine api pod.
@@ -860,7 +756,7 @@ anchoreEnterpriseNotifications:
 ui:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v3.0.1
+  image: docker.io/anchore/enterprise-ui:v3.0.2
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
@@ -964,6 +860,77 @@ ui:
   tolerations: []
   affinity: {}
 
+# Pod configuration for the helm post-install-hook enterprise upgrade Job
+upgradeJob:
+  enabled: true
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  annotations: {}
+
+# Pod configuration for the helm post-install-hook feeds upgrade Job
+feedsUpgradeJob:
+  enabled: true
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  annotations: {}
+
+# Anchore engine has a dependency on Postgresql, configure here
+postgresql:
+  image:
+    tag: 9.6.21-debian-10-r66
+  # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # enabled: false
+  postgresqlPassword: anchore-postgres,123
+  postgresqlDatabase: anchore
+
+  # Specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
+
+  # Configure size of the persistent volume used with helm managed chart.
+  # This should be commented out if using an external endpoint.
+  persistence:
+    size: 20Gi
+
+# Configure the second postgres database instance for the enterprise feeds service.
+# Only utilized if anchoreEnterpriseGlobal.enabled: true
+anchore-feeds-db:
+  # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # enabled: false
+  postgresUser: anchoreengine
+  postgresPassword: anchore-postgres,123
+  postgresDatabase: anchore-feeds
+
+  # Specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
+
+  # Configure size of the persitant volume used with helm managed chart.
+  # This should be commented out if using an external endpoint.
+  persistence:
+    resourcePolicy: nil
+    size: 20Gi
+
+# Google CloudSQL support in GKE via gce-proxy
+cloudsql:
+  # To use CloudSQL in GKE set 'enable: true'
+  enabled: false
+  # set CloudSQL instance: 'project:zone:instancname'
+  instance: ""
+  # Optional existing service account secret to use.
+  # useExistingServiceAcc: false
+  # serviceAccSecretName: service_acc
+  # serviceAccJsonName: for_cloudsql.json
+  image:
+    # set repo and image tag of gce-proxy
+    repository: gcr.io/cloudsql-docker/gce-proxy
+    tag: 1.21
+    pullPolicy: IfNotPresent
+
 # Anchore Engine Enterprise UI is dependent on redis for storing sessions
 # Only utilized if 'anchoreEnterpriseUi.enabled: true'
 anchore-ui-redis:
@@ -979,15 +946,3 @@ anchore-ui-redis:
   # If 'enabled: false', specify an external redis endpoint -
   # eg redis://:<password>@hostname:6379
   externalEndpoint: Null
-
-# Pod configuration for the helm post-install-hook enterprise engine upgrade Job
-anchoreEnterpriseEngineUpgradeJob:
-  enabled: true
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  annotations: {}
-
-# To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
-# This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault
-# inject_secrets_via_env: false
