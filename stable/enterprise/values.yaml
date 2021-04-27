@@ -593,7 +593,7 @@ anchorePolicyEngine:
   affinity: {}
 
 # Pod configuration for the anchore engine simplequeue service.
-anchoreSimpleQueue:
+simpleQueue:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all simplequeue containers.
@@ -741,7 +741,7 @@ anchoreEnterpriseFeeds:
   affinity: {}
 
 # Pod configuration for the helm post-install-hook feeds upgrade Job
-anchoreEnterpriseFeedsUpgradeJob:
+feedsUpgradeJob:
   enabled: true
   nodeSelector: {}
   tolerations: []

@@ -1,152 +1,92 @@
 {{- $component := "simplequeue" -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "enterprise.simplequeue.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "enterprise.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: {{ $component }}
-    {{- with .Values.anchoreSimpleQueue.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
-    {{- with .Values.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
+  annotations:
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "enterprise.fullname" . }}
-      component: {{ $component }}
-  replicas: {{ .Values.anchoreSimpleQueue.replicaCount }}
+      app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+      app.kubernetes.io/component: {{ $component }}
+  replicas: {{ .Values.simpleQueue.replicaCount }}
   strategy:
     type: Recreate
-    rollingUpdate: null
   template:
     metadata:
       labels:
-        app: {{ template "enterprise.fullname" . }}
-        component: {{ $component }}
-        {{- with .Values.anchoreSimpleQueue.labels }}
-        {{ toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.labels }}
-        {{ toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 8 }}
       annotations:
-      {{- with .Values.annotations }}
-        {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.anchoreSimpleQueue.annotations }}
-        {{ toYaml . | nindent 8 }}
-      {{- end }}
+        {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 8 }}
       {{- if not .Values.inject_secrets_via_env }}
         checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
         checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
     spec:
-      {{- with .Values.securityContext }}
+    {{- with .Values.securityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}
-    {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-      imagePullSecrets:
-      - name: {{ .Values.imagePullSecretName }}
-    {{- else }}
-      {{- with .Values.imagePullSecretName }}
+    {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
       - name: {{ . }}
-      {{- end }}
     {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
-      - name: cloudsql-proxy
-        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
-        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
-        command: ["/cloud_sql_proxy"]
-        args:
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
-        {{- if .Values.cloudsql.useExistingServiceAcc }}
-        - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
-        volumeMounts:
-        - mountPath: /var/{{ .Values.cloudsql.serviceAccSecretName }}
-          name: {{ .Values.cloudsql.serviceAccSecretName }}
-          readOnly: true
-        {{- end }}
-      {{- end }}
       - name: "{{ .Chart.Name }}-{{ $component }}"
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- else }}
-        image: {{ .Values.image }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- end }}
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "simplequeue"]
-        {{- else }}
-        args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "simplequeue"]
-        {{- end }}
         envFrom:
-        {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.existingSecret }}
+    {{- if not .Values.inject_secrets_via_env }}
+      {{- if .Values.existingSecret }}
         - secretRef:
             name: {{ .Values.existingSecret }}
-        {{- else }}
+      {{- else }}
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
         - secretRef:
             name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
-        {{- end }}
-        {{- end }}
+      {{- end }}
+    {{- end }}
         - configMapRef:
             name: {{ template "enterprise.fullname" . }}-env
         env:
-        {{- with .Values.extraEnv }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.anchoreSimpleQueue.extraEnv }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         ports:
         - name: simplequeue
-          containerPort: {{ .Values.anchoreSimpleQueue.service.port }}
+          containerPort: {{ .Values.simpleQueue.service.port }}
         volumeMounts:
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         - name: anchore-license
           mountPath: /home/anchore/license.yaml
           subPath: license.yaml
-        {{- end }}
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
-        {{- if .Values.openShiftDeployment }}
-        - name: service-config-volume
-          mountPath: /anchore_service_config
-        - name: logs
-          mountPath: /var/log/anchore
-        - name: run
-          mountPath: /var/run/anchore
-        {{- end }}
-        {{- if (.Values.certStoreSecretName) }}
+      {{- if (.Values.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
-        {{- end }}
+      {{- end }}
         livenessProbe:
           httpGet:
             path: /health
             port: simplequeue
-            {{- if .Values.internalServicesSsl.enabled }}
+          {{- if .Values.internalServicesSsl.enabled }}
             scheme: HTTPS
-            {{- end }}
+          {{- end }}
           initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
           periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
@@ -156,86 +96,77 @@ spec:
           httpGet:
             path: /health
             port: simplequeue
-            {{- if .Values.internalServicesSsl.enabled }}
+          {{- if .Values.internalServicesSsl.enabled }}
             scheme: HTTPS
-            {{- end }}
+          {{- end }}
           timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
           periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
           failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.anchoreSimpleQueue.resources | nindent 10 }}
+          {{ toYaml .Values.simpleQueue.resources | nindent 10 }}
+    {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
+        volumeMounts:
+        - mountPath: /var/{{ .Values.cloudsql.serviceAccSecretName }}
+          name: {{ .Values.cloudsql.serviceAccSecretName }}
+          readOnly: true
+      {{- end }}
+    {{- end }}
       volumes:
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         - name: anchore-license
           secret:
             secretName: {{ .Values.licenseSecretName }}
-        {{- end }}
         - name: config-volume
           configMap:
             name: {{ template "enterprise.fullname" .}}
-        {{- if .Values.openShiftDeployment }}
-        - name: service-config-volume
-          emptyDir: {}
-        - name: logs
-          emptyDir: {}
-        - name: run
-          emptyDir: {}
-        {{- end }}
-        {{- with .Values.certStoreSecretName }}
+      {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
             secretName: {{ . }}
-        {{- end }}
-        {{- if .Values.cloudsql.useExistingServiceAcc }}
+      {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
         - name: {{ .Values.cloudsql.serviceAccSecretName }}
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
-        {{- end }}
-      {{- with .Values.anchoreSimpleQueue.nodeSelector }}
+      {{- end }}
+    {{- with .Values.simpleQueue.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.anchoreSimpleQueue.affinity }}
+    {{- end }}
+    {{- with .Values.simpleQueue.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.anchoreSimpleQueue.tolerations }}
+    {{- end }}
+    {{- with .Values.simpleQueue.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.serviceAccountName }}
-      serviceAccountName: {{ . }}
-      {{- end }}
+    {{- end }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ template "enterprise.simplequeue.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "enterprise.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: {{ $component }}
-    {{- with .Values.anchoreSimpleQueue.service.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
-    {{- with .Values.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
-  {{- with .Values.anchoreSimpleQueue.service.annotations }}
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
   annotations:
-    {{ toYaml . | nindent 4 }}
-  {{- end }}
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 spec:
-  type: {{ .Values.anchoreSimpleQueue.service.type }}
+  type: {{ .Values.simpleQueue.service.type }}
   ports:
     - name: anchore-simplequeue-api
-      port: {{ .Values.anchoreSimpleQueue.service.port }}
-      targetPort: {{ .Values.anchoreSimpleQueue.service.port }}
+      port: {{ .Values.simpleQueue.service.port }}
+      targetPort: {{ .Values.simpleQueue.service.port }}
       protocol: TCP
   selector:
-    app: {{ template "enterprise.fullname" . }}
-    component: {{ $component }}
+    app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+    app.kubernetes.io/component: {{ $component }}
