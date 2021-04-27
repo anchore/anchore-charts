@@ -556,7 +556,7 @@ anchoreCatalog:
     image_ttl_days: 1
 
 # Pod configuration for the anchore engine policy service.
-anchorePolicyEngine:
+policyEngine:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all policy engine containers.
