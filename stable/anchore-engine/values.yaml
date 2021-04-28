@@ -991,7 +991,7 @@ anchore-ui-redis:
   # enabled: false
 
   # If 'enabled: false', specify an external redis endpoint -
-  # eg redis://:<password>@hostname:6379
+  # eg redis://nouser:<password>@hostname:6379
   externalEndpoint: Null
 
 # Pod configuration for the helm post-install-hook enterprise engine upgrade Job
