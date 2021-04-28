@@ -28,6 +28,7 @@ data:
 
     global_client_connect_timeout: {{ default 0 .Values.anchoreGlobal.clientConnectTimeout }}
     global_client_read_timeout: {{ default 0 .Values.anchoreGlobal.clientReadTimeout }}
+    server_request_timeout_seconds: {{ .Values.anchoreGlobal.serverRequestTimeoutSeconds }}
     max_compressed_image_size_mb: {{ default -1 .Values.anchoreGlobal.maxCompressedImageSizeMB }}
 
     metrics:
