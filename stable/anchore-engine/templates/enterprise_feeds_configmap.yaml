@@ -126,16 +126,20 @@ data:
             enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled }}
           vulndb:
             enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.vulndbDriverEnabled }}
+        {{- if .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
           msrc:
-            enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
+            enabled: true
             api_key: ${ANCHORE_MSRC_KEY}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
             whitelist:
               - {{ . }}
             {{- end }}
+        {{- end }}
+        {{- if .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
           github:
-            enabled: {{ .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
+            enabled: true
             token: ${ANCHORE_GITHUB_TOKEN}
+        {{- end }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
