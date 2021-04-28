@@ -45,7 +45,9 @@ data:
         # If enabled only sync specific feeds instead of all that are found.
         enabled: true
         feeds:
-          {{- if not .Values.anchoreEnterpriseGlobal.enabled }}
+          {{- if .Values.anchoreEnterpriseGlobal.enabled }}
+          github: {{ .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
+          {{- else }}
           github: {{ default "true" .Values.anchoreGlobal.syncGithub }}
           {{- end }}
           # Vulnerabilities feed is the feed for distro cve sources (redhat, debian, ubuntu, oracle, alpine....)
