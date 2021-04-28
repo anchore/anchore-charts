@@ -70,8 +70,6 @@ data:
           vulndb: false
           microsoft: false
           {{- end }}
-          # Sync github data if available for GHSA matches
-          github: {{ default "true" .Values.anchoreGlobal.syncGithub }}
     {{- if .Values.anchoreEnterpriseFeeds.url }}
       url: "{{- .Values.anchoreEnterpriseFeeds.url }}"
       ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
