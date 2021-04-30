@@ -1,0 +1,176 @@
+{{- if .Values.enableAnchoreRbac -}}
+{{- $component := "rbacManager" -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "enterprise.api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
+  annotations:
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+      app.kubernetes.io/component: {{ $component }}
+  replicas: {{ .Values.rbacManager.replicaCount }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 8 }}
+      annotations:
+        {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 8 }}
+      {{- if not .Values.inject_secrets_via_env }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
+        checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
+    spec:
+    {{- with .Values.securityContext }}
+      securityContext:
+        {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.serviceAccountName }}
+      serviceAccountName: {{ . }}
+    {{- end }}
+    {{- with .Values.imagePullSecretName }}
+      imagePullSecrets:
+      - name: {{ . }}
+    {{- end }}
+      containers:
+      - name: "{{ .Chart.Name }}-{{ $component }}"
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
+        envFrom:
+    {{- if not .Values.inject_secrets_via_env }}
+      {{- if .Values.existingSecret }}
+        - secretRef:
+            name: {{ .Values.existingSecret }}
+      {{- else }}
+        - secretRef:
+            name: {{ include "enterprise.fullname" . }}
+        - secretRef:
+            name: {{ template "enterprise.fullname" .}}-admin-pass
+      {{- end }}
+    {{- end }}
+        - configMapRef:
+            name: {{ template "enterprise.fullname" . }}-env
+        env:
+        {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
+        - name: ANCHORE_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+        - containerPort: {{ .Values.rbacManager.service.port }}
+          name: rbac-manager
+        volumeMounts:
+        - name: anchore-license
+          mountPath: /home/anchore/license.yaml
+          subPath: license.yaml
+        - name: enterprise-config-volume
+          mountPath: /config/config.yaml
+          subPath: config.yaml
+      {{- if (.Values.certStoreSecretName) }}
+        - name: certs
+          mountPath: /home/anchore/certs/
+          readOnly: true
+      {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: rbac-manager
+          {{- if .Values.internalServicesSsl.enabled }}
+            scheme: HTTPS
+          {{- end }}
+          initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+          failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          successThreshold: {{ .Values.probes.liveness.successThreshold }}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: rbac-manager
+          {{- if .Values.internalServicesSsl.enabled }}
+            scheme: HTTPS
+          {{- end }}
+          timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          successThreshold: {{ .Values.probes.readiness.successThreshold }}
+        resources:
+          {{ toYaml .Values.rbacManager.resources | nindent 10 }}
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: "{{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}"
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
+        volumeMounts:
+        - mountPath: "/var/{{ .Values.cloudsql.serviceAccSecretName }}"
+          name: {{ .Values.cloudsql.serviceAccSecretName }}
+          readOnly: true
+      {{- end }}
+    {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "enterprise.fullname" . }}
+        - name: anchore-license
+          secret:
+            secretName: {{ .Values.licenseSecretName }}
+        - name: enterprise-config-volume
+          configMap:
+            name: {{ template "enterprise.fullname" . }}
+      {{- with .Values.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+      {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - name: {{ .Values.cloudsql.serviceAccSecretName }}
+          secret:
+            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+    {{- with .Values.rbacManager.nodeSelector }}
+      nodeSelector:
+        {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.rbacManager.affinity }}
+      affinity:
+        {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.rbacManager.tolerations }}
+      tolerations:
+        {{ toYaml . | nindent 8 }}
+    {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "enterprise.api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
+  annotations:
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
+spec:
+  type: {{ .Values.rbacManager.service.type }}
+  ports:
+    - name: anchore-rbac-manager
+      port: {{ .Values.rbacManager.service.port }}
+      targetPort: {{ .Values.rbacManager.service.port }}
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+    app.kubernetes.io/component: {{ $component }}
