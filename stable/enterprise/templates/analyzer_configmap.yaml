@@ -11,4 +11,4 @@ data:
   analyzer_config.yaml: |
 {{- with .Values.analyzer.configFile }}
     {{- toYaml . | nindent 4 }}
-{{- end }}
+{{- end -}}
