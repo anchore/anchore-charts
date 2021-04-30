@@ -174,3 +174,5 @@ spec:
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
     app.kubernetes.io/component: {{ $component }}
+
+{{- end -}}

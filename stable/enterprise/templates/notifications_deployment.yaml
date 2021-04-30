@@ -106,7 +106,6 @@ spec:
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
           {{ toYaml .Values.notifications.resources | nindent 10 }}
-      {{- end }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}

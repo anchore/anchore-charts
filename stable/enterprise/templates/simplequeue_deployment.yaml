@@ -35,7 +35,7 @@ spec:
     {{- end }}
     {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
-      {{- end }}
+    {{- end }}
     {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
       - name: {{ . }}
