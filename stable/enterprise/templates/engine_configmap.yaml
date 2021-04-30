@@ -2,17 +2,18 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: {{ template "enterprise.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "enterprise.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    {{- with .Values.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "enterprise.labels" . | indent 4 }}
+  annotations:
+    {{- include "enterprise.annotations" . | indent 4 }}
 data:
   config.yaml: |
     # Anchore Service Configuration File from ConfigMap
+    
+    # General system-wide configuration options, these should not need to
+    # be altered for basic operation
+    #
     service_dir: {{ .Values.serviceDir }}
     tmp_dir: {{ .Values.scratchVolume.mountPath }}
     log_level: {{ .Values.logLevel }}
@@ -21,10 +22,7 @@ data:
     host_id: "${ANCHORE_POD_NAME}"
     internal_ssl_verify: {{ .Values.internalServicesSsl.verifyCerts }}
     auto_restart_services: false
-
-    {{- if .Values.anchoreEnterpriseGlobal.enabled }}
     license_file: /home/anchore/license.yaml
-    {{- end }}
 
     global_client_connect_timeout: {{ default 0 .Values.clientConnectTimeout }}
     global_client_read_timeout: {{ default 0 .Values.clientReadTimeout }}
@@ -33,10 +31,12 @@ data:
     metrics:
       enabled: {{ .Values.enableMetrics }}
       auth_disabled: {{ .Values.metricsAuthDisabled }}
+
     {{ if .Values.webhooksEnabled }}
     webhooks:
-      {{- toYaml .Values.webhooks | nindent 6 }}
+      {{- toYaml .Values.webhooks | indent 6 }}
     {{ end }}
+
     # Configure what feeds to sync.
     # The sync will hit http://ancho.re/feeds, if any outbound firewall config needs to be set in your environment.
     feeds:
@@ -45,43 +45,41 @@ data:
         # If enabled only sync specific feeds instead of all that are found.
         enabled: true
         feeds:
-          {{- if not .Values.anchoreEnterpriseGlobal.enabled }}
           github: {{ default "true" .Values.syncGithub }}
-          {{- end }}
           # Vulnerabilities feed is the feed for distro cve sources (redhat, debian, ubuntu, oracle, alpine....)
           vulnerabilities: {{ default "true" .Values.syncVulnerabilites }}
           # NVD Data is used for non-distro CVEs (jars, npm, etc) that are not packaged and released by distros as rpms, debs, etc
           nvdv2: {{ default "true" .Values.syncNvd }}
           # Warning: enabling the package sync causes the service to require much
           #   more memory to do process the significant data volume. We recommend at least 4GB available for the container
-          {{- if and (and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled) (or .Values.anchoreEnterpriseFeeds.gemDriverEnabled .Values.anchoreEnterpriseFeeds.npmDriverEnabled) }}
+          {{- if and .Values.feeds.enabled (or .Values.feeds.gemDriverEnabled .Values.feeds.npmDriverEnabled) }}
           packages: true
           {{- else }}
           packages: {{ default "false" .Values.syncPackages }}
           {{- end }}
           # Enabling vulndb syncs vulndb vulnerability data from an on-premise anchore enterprise feeds service. Please contact
           # anchore support for finding out more about this service
-          {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
-          vulndb: {{ default "true" .Values.anchoreEnterpriseFeeds.vulndbDriverEnabled }}
+          {{- if .Values.feeds.enabled }}
+          vulndb: {{ default "true" .Values.feeds.vulndbDriverEnabled }}
           # Enabling microsoft syncs MSRC data from an on-premise anchore enterprise feeds service. Please contact
           # anchore support for finding out more about this service
-          microsoft: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
+          microsoft: {{ .Values.feeds.msrcDriverEnabled }}
           {{- else }}
           vulndb: false
           microsoft: false
           {{- end }}
           # Sync github data if available for GHSA matches
           github: {{ default "true" .Values.syncGithub }}
-    {{- if .Values.anchoreEnterpriseFeeds.url }}
-      url: "{{- .Values.anchoreEnterpriseFeeds.url }}"
+    {{- if .Values.feeds.url }}
+      url: "{{- .Values.feeds.url }}"
       ssl_verify: {{ .Values.internalServicesSsl.verifyCerts }}
       client_url:
       token_url:
-    {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
+    {{- else if .Values.feeds.enabled }}
       {{- if .Values.internalServicesSsl.enabled }}
-      url: "https://{{- template "enterprise.feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
+      url: "https://{{- template "enterprise.feeds.fullname" . }}:{{- .Values.feeds.service.port }}/v1/feeds"
       {{- else }}
-      url: "http://{{- template "enterprise.feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds"
+      url: "http://{{- template "enterprise.feeds.fullname" . }}:{{- .Values.feeds.service.port }}/v1/feeds"
       {{- end }}
       ssl_verify: {{ .Values.internalServicesSsl.verifyCerts }}
       client_url:
@@ -137,27 +135,28 @@ data:
         db_engine_args:
           {{- toYaml . | nindent 10 }}
         {{- end }}
+
     services:
       apiext:
         enabled: true
         require_auth: true
         endpoint_hostname: {{ template "enterprise.api.fullname" . }}
-        max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
+        max_request_threads: {{ default 50 .Values.api.maxRequestThreads }}
         listen: 0.0.0.0
-        port: {{ .Values.anchoreApi.service.port }}
-        {{- if .Values.anchoreApi.external }}
-        {{- if .Values.anchoreApi.external.use_tls }}
-        external_tls: {{ .Values.anchoreApi.external.use_tls }}
+        port: {{ .Values.api.service.port }}
+        {{- if .Values.api.external }}
+        {{- if .Values.api.external.use_tls }}
+        external_tls: {{ .Values.api.external.use_tls }}
         {{- end }}
-        {{- if .Values.anchoreApi.external.hostname }}
-        external_hostname: {{ .Values.anchoreApi.external.hostname }}
+        {{- if .Values.api.external.hostname }}
+        external_hostname: {{ .Values.api.external.hostname }}
         {{- end }}
-        external_port: {{ .Values.anchoreApi.external.port | default "null" }}
+        external_port: {{ .Values.api.external.port | default "null" }}
         {{- end }}
-        {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseRbac.enabled }}
+        {{- if .Values.anchoreRbacEnabled }}
         authorization_handler: external
         authorization_handler_config:
-          endpoint: "http://localhost:{{- .Values.anchoreEnterpriseRbac.service.authPort }}"
+          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
         {{- end }}
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
@@ -209,7 +208,7 @@ data:
           archive_tasks: {{ .Values.catalog.cycleTimers.archive_tasks }}
           image_gc: {{ .Values.catalog.cycleTimers.image_gc }}
           # Interval notifications will be processed for state changes
-          {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
+          {{- if .Values.notifications.enabled }}
           notifications: 0
           {{- else }}
           notifications: {{ .Values.catalog.cycleTimers.notifications }}
@@ -237,8 +236,8 @@ data:
         require_auth: true
         endpoint_hostname: {{ template "enterprise.simplequeue.fullname" . }}
         listen: 0.0.0.0
-        port: {{ .Values.anchoreSimpleQueue.service.port }}
-        max_request_threads: {{ default 50 .Values.anchoreSimpleQueue.maxRequestThreads }}
+        port: {{ .Values.simpleQueue.service.port }}
+        max_request_threads: {{ default 50 .Values.simpleQueue.maxRequestThreads }}
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
@@ -247,15 +246,82 @@ data:
       policy_engine:
         enabled: true
         require_auth: true
-        max_request_threads: {{ default 50 .Values.anchorePolicyEngine.maxRequestThreads }}
+        max_request_threads: {{ default 50 .Values.policyEngine.maxRequestThreads }}
         endpoint_hostname: {{ template "enterprise.policy-engine.fullname" . }}
         listen: 0.0.0.0
-        port: {{ .Values.anchorePolicyEngine.service.port }}
+        port: {{ .Values.policyEngine.service.port }}
         cycle_timer_seconds: 1
         cycle_timers:
-          {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
+          {{- toYaml .Values.policyEngine.cycleTimers | nindent 10 }}
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
+      {{- if .Values.anchoreRbacEnabled }}
+      # This should never be exposed outside of linked containers/localhost. It is used only for internal service access
+      rbac_authorizer:
+        enabled: true
+        require_auth: true
+        endpoint_hostname: localhost
+        listen: 127.0.0.1
+        port: {{ .Values.api.service.authPort }}
+        max_request_threads: {{ default 50 .Values.api.maxRequestThreads }}
+      rbac_manager:
+        enabled: true
+        require_auth: true
+        endpoint_hostname: {{ template "enterprise.api.fullname" . }}
+        listen: 0.0.0.0
+        port: {{ .Values.rbacManager.service.port }}
+        max_request_threads: {{ default 50 .Values.rbacManager.maxRequestThreads }}
+        authorization_handler: external
+        authorization_handler_config:
+          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
+        {{- if .Values.internalServicesSsl.enabled }}
+        ssl_enable: {{ .Values.internalServicesSsl.enabled }}
+        ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
+        ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
+        {{- end }}
+      {{- end }}
+      {{- if .Values.reports.enabled }}
+      reports:
+        enabled: true
+        require_auth: true
+        endpoint_hostname: {{ template "enterprise.api.fullname" . }}
+        listen: '0.0.0.0'
+        port: {{ .Values.reports.service.port }}
+        max_request_threads: {{ default 50 .Values.reports.maxRequestThreads }}
+        enable_graphiql: "{{ .Values.reports.enableGraphql }}"
+        enable_data_ingress: "{{ .Values.reports.enableDataIngress }}"
+        cycle_timers:
+          {{- toYaml .Values.reports.cycleTimers | nindent 10 }}
+        {{- if .Values.anchoreRbacEnabled }}
+        authorization_handler: external
+        authorization_handler_config:
+          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
+        {{- end }}
+        {{- if .Values.internalServicesSsl.enabled }}
+        ssl_enable: {{ .Values.internalServicesSsl.enabled }}
+        ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
+        ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
+        {{- end }}
+      {{- end }}
+      {{- if .Values.notifications.enabled }}
+      notifications:
+        enabled: true
+        require_auth: true
+        endpoint_hostname: {{ template "enterprise.api.fullname" . }}
+        listen: '0.0.0.0'
+        port: {{ .Values.notifications.service.port }}
+        max_request_threads: {{ default 50 .Values.notifications.maxRequestThreads }}
+        authorization_handler: external
+        authorization_handler_config:
+          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
+        cycle_timers:
+          {{- toYaml .Values.notifications.cycleTimers | nindent 10 }}
+        {{- if .Values.notifications.uiUrl }}
+        ui_url: "{{ .Values.notifications.uiUrl }}"
+        {{- else }}
+        ui_url: {{ include "enterprise.ui.fullname" . | quote }}
+        {{- end }}
+      {{- end }}
