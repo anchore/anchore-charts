@@ -1,23 +1,15 @@
 {{- if .Values.ingress.enabled -}}
+{{- $component := "ingress" -}}
+
 apiVersion: {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" }} networking.k8s.io/v1beta1 {{- else }} extensions/v1beta1 {{- end }}
 kind: Ingress
 metadata:
   name: {{ template "enterprise.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "enterprise.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    {{- with .Values.ingress.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
-    {{- with .Values.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
-  {{- with .Values.ingress.annotations }}
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
   annotations:
-    {{ toYaml . | nindent 4 }}
-  {{- end }}
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 spec:
   {{- if .Values.ingress.tls }}
   tls:
@@ -38,7 +30,7 @@ spec:
         - path: {{ $.Values.ingress.apiPath }}
           backend:
             serviceName: {{ template "enterprise.api.fullname" $ }}
-            servicePort: {{ $.Values.anchoreApi.service.port }}
+            servicePort: {{ $.Values.api.service.port }}
     {{- end }}
     {{- range .Values.ingress.uiHosts }}
     - host: {{ . | quote }}
@@ -47,7 +39,7 @@ spec:
         - path: {{ $.Values.ingress.uiPath }}
           backend:
             serviceName: {{ template "enterprise.ui.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
+            servicePort: {{ $.Values.ui.service.port }}
     {{- end }}
     {{- range .Values.ingress.feedsHosts }}
     - host: {{ . | quote }}
@@ -56,7 +48,7 @@ spec:
         - path: {{ $.Values.ingress.feedsPath }}
           backend:
             serviceName: {{ template "enterprise.feeds.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
+            servicePort: {{ $.Values.feeds.service.port }}
     {{- end }}
     {{- range .Values.ingress.reportsHosts }}
     - host: {{ . | quote }}
@@ -65,7 +57,7 @@ spec:
         - path: {{ $.Values.ingress.reportsPath }}
           backend:
             serviceName: {{ template "enterprise.api.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseReports.service.port }}
+            servicePort: {{ $.Values.reports.service.port }}
     {{- end }}
   {{- else }}
     - http:
@@ -74,25 +66,26 @@ spec:
         - path: {{ . }}
           backend:
             serviceName: {{ template "enterprise.api.fullname" $ }}
-            servicePort: {{ $.Values.anchoreApi.service.port }}
+            servicePort: {{ $.Values.api.service.port }}
         {{- end }}
         {{- with .Values.ingress.uiPath }}
         - path: {{ . }}
           backend:
             serviceName: {{ template "enterprise.ui.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
+            servicePort: {{ $.Values.ui.service.port }}
         {{- end }}
         {{- with .Values.ingress.feedsPath }}
         - path: {{ . }}
           backend:
             serviceName: {{ template "enterprise.feeds.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
+            servicePort: {{ $.Values.feeds.service.port }}
         {{- end }}
         {{- with .Values.ingress.reportsPath }}
         - path: {{ . }}
           backend:
             serviceName: {{ template "enterprise.api.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseReports.service.port }}
+            servicePort: {{ $.Values.reports.service.port }}
         {{- end }}
   {{- end }}
+
 {{- end -}}
