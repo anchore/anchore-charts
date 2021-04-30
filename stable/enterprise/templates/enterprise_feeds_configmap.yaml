@@ -1,18 +1,15 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
-{{- $component := "enterprise-feeds" -}}
+{{- if .Values.feeds.enabled -}}
+{{- $component := "feeds" -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "enterprise.feeds.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "enterprise.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: {{ $component }}
-    {{- with .Values.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
+  annotations:
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 data:
   config.yaml: |
     # Anchore Enterprise Service Configuration File
@@ -56,17 +53,17 @@ data:
 
     credentials:
       database:
-        {{- if .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
+        {{- if .Values.feeds.dbConfig.ssl }}
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.feeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.feeds.dbConfig.sslRootCertName }}"
         {{- else }}
         db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
         {{- end }}
         db_connect_args:
-          timeout: {{ .Values.anchoreEnterpriseFeeds.dbConfig.timeout }}
+          timeout: {{ .Values.feeds.dbConfig.timeout }}
           ssl: false
-        db_pool_size: {{ .Values.anchoreEnterpriseFeeds.dbConfig.connectionPoolSize }}
-        db_pool_max_overflow: {{ .Values.anchoreEnterpriseFeeds.dbConfig.connectionPoolMaxOverflow }}
-        {{- with .Values.anchoreEnterpriseFeeds.dbConfig.engineArgs }}
+        db_pool_size: {{ .Values.feeds.dbConfig.connectionPoolSize }}
+        db_pool_max_overflow: {{ .Values.feeds.dbConfig.connectionPoolMaxOverflow }}
+        {{- with .Values.feeds.dbConfig.engineArgs }}
         db_engine_args:
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -76,11 +73,11 @@ data:
         require_auth: true
         endpoint_hostname: {{ template "enterprise.feeds.fullname" . }}
         listen: 0.0.0.0
-        port: {{ .Values.anchoreEnterpriseFeeds.service.port }}
-        max_request_threads: {{ default 50 .Values.anchoreEnterpriseFeeds.maxRequestThreads }}
+        port: {{ .Values.feeds.service.port }}
+        max_request_threads: {{ default 50 .Values.feeds.maxRequestThreads }}
         # Time delay in seconds between consecutive driver runs for processing data
         cycle_timers:
-          {{- toYaml .Values.anchoreEnterpriseFeeds.cycleTimers | nindent 10 }}
+          {{- toYaml .Values.feeds.cycleTimers | nindent 10 }}
         # Staging space for holding normalized output from drivers.
         local_workspace: {{ .Values.scratchVolume.mountPath }}
         # Drivers process data from external sources and store normalized data in local_workspace. Processing large data sets
@@ -93,52 +90,53 @@ data:
           workspace_preload_file: "/workspace_preload/data.tar.gz"
         # If api_only is set to true, the service will not update feed data in the system.
         # API end points will be functional and serve feed data if any is available.
-        api_only: {{ default "false" .Values.anchoreEnterpriseFeeds.apiOnly }}
+        api_only: {{ default "false" .Values.feeds.apiOnly }}
         drivers:
           # Configuration section for drivers collecting and processing feed data.
           # All drivers are enabled by default unless explicitly disabled. npm and gem drivers are explicitly disabled out of the box
           npm:
-            enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.npmDriverEnabled }}
+            enabled: {{ default "false" .Values.feeds.npmDriverEnabled }}
           gem:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
-            enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
-            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
+            enabled: {{ default "false" .Values.feeds.gemDriverEnabled }}
+            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.feeds.gemDbEndpoint }}
           amzn:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.amazonDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.amazonDriverEnabled }}
           centos:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.centosDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.centosDriverEnabled }}
           debian:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.debianDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.debianDriverEnabled }}
           ubuntu:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.ubuntuDriverEnabled }}
           rhel:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.rhelDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.rhelDriverEnabled }}
           ol:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.olDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.olDriverEnabled }}
           alpine:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.alpineDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.alpineDriverEnabled }}
           snyk:
-            enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.snykDriverEnabled }}
+            enabled: {{ default "false" .Values.feeds.snykDriverEnabled }}
           nvddb:
-            enabled: {{ default "false" .Values.anchoreEnterpriseFeeds.nvdDriverEnabled }}
+            enabled: {{ default "false" .Values.feeds.nvdDriverEnabled }}
           nvdv2:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.nvdv2DriverEnabled }}
           vulndb:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.vulndbDriverEnabled }}
+            enabled: {{ default "true" .Values.feeds.vulndbDriverEnabled }}
           msrc:
-            enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
-            api_key: {{ .Values.anchoreEnterpriseFeeds.msrcApiKey }}
-            {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
+            enabled: {{ .Values.feeds.msrcDriverEnabled }}
+            api_key: {{ .Values.feeds.msrcApiKey }}
+            {{- with .Values.feeds.msrcWhitelist }}
             whitelist:
               - {{ . }}
             {{- end }}
           github:
-            enabled: {{ .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
-            token: {{ .Values.anchoreEnterpriseFeeds.githubDriverToken }}
+            enabled: {{ .Values.feeds.githubDriverEnabled }}
+            token: {{ .Values.feeds.githubDriverToken }}
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
+
 {{- end -}}
