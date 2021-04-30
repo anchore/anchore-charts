@@ -69,6 +69,7 @@ securityContext:
 ###
 # Start of General Anchore Engine Configurations (populates /config/config.yaml)
 ###
+
 # Set where default configs are placed at startup. This must be a writable location for the pod.
 serviceDir: /anchore_service
 logLevel: INFO
@@ -81,6 +82,9 @@ allowECRUseIAMRole: false
 
 # Enable prometheus metrics
 enableMetrics: false
+
+# Enable anchore RBAC
+enableAnchoreRbac: true
 
 # Disable auth on prometheus metrics
 metricsAuthDisabled: false
@@ -305,7 +309,7 @@ analyzer:
 
 
 # Pod configuration for the anchore engine api service.
-anchoreApi:
+api:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all api containers.
@@ -317,6 +321,7 @@ anchoreApi:
   service:
     type: ClusterIP
     port: 8228
+    rbacAuthPort: 8089
     annotations: {}
     label: {}
 
@@ -333,6 +338,14 @@ anchoreApi:
   #  requests:
   #    cpu: 100m
   #    memory: 1G
+
+  # rbacAuthResources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
 
   labels: {}
   annotations: {}
@@ -645,7 +658,6 @@ feeds:
   affinity: {}
 
 rbacManager:
-  enabled: true
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all rbac containers.
@@ -670,38 +682,6 @@ rbacManager:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
-# Configure the Anchore Enterprise role based access control component.
-# This component consists of 2 containers that run as side-cars in the anchore engine api pod.
-anchoreEnterpriseRbac:
-  enabled: true
-
-  # Set extra environment variables. These will be set on all rbac containers.
-  extraEnv: []
-    # - name: foo
-    #   value: bar
-
-  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
-  # Due to RBAC sharing a service with the general API.
-  service:
-    apiPort: 8229
-    authPort: 8089
-
-  # authResources:
-  #  limits:
-  #    cpu: 1
-  #    memory: 1G
-  #  requests:
-  #    cpu: 100m
-  #    memory: 256M
-
-  # managerResources:
-  #  limits:
-  #    cpu: 1
-  #    memory: 1G
-  #  requests:
-  #    cpu: 100m
-  #    memory: 256M
 
 # Configure the Anchore Enterprise reporting component.
 reports:
