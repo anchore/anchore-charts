@@ -1,26 +1,24 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
+{{- if .Values.feeds.enabled -}}
 {{- $component := "enterprise-feeds" -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "enterprise.feeds.fullname" . }}-env
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "enterprise.fullname" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-    component: {{ $component }}
-    {{- with .Values.labels }}
-    {{ toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
+  annotations:
+    {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 data:
-  ANCHORE_DB_NAME: {{ index .Values "anchore-feeds-db" "postgresDatabase" | quote }}
-  ANCHORE_DB_USER: {{ index .Values "anchore-feeds-db" "postgresUser"  | quote }}
-  {{- if and (index .Values "anchore-feeds-db" "externalEndpoint") (not (index .Values "anchore-feeds-db" "enabled")) }}
+  ANCHORE_DB_NAME: {{ index .Values "anchore-feeds-db" "postgresqlDatabase" | quote }}
+  ANCHORE_DB_USER: {{ index .Values "anchore-feeds-db" "postgreslqUser"  | quote }}
+{{- if and (index .Values "anchore-feeds-db" "externalEndpoint") (not (index .Values "anchore-feeds-db" "enabled")) }}
   ANCHORE_DB_HOST: {{ index .Values "anchore-feeds-db" "externalEndpoint" | quote }}
-  {{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "anchore-feeds-db" "enabled")) }}
+{{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "anchore-feeds-db" "enabled")) }}
   ANCHORE_DB_HOST: "localhost:5432"
-  {{- else }}
+{{- else }}
   ANCHORE_DB_HOST: "{{ template "postgres.enterprise-feeds-db.fullname" . }}:5432"
-  {{- end }}
+{{- end }}
+
 {{- end }}
