@@ -9,6 +9,7 @@ metadata:
     {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 data:
   analyzer_config.yaml: |
+    # Anchore analyzer configuration
 {{- with .Values.analyzer.configFile }}
     {{- toYaml . | nindent 4 }}
 {{- end -}}

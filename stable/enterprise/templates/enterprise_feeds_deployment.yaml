@@ -1,4 +1,4 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.feeds.enabled -}}
+{{- if .Values.feeds.enabled -}}
 {{- $component := "enterprise-feeds" -}}
 
 apiVersion: apps/v1

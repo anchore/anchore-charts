@@ -1,4 +1,4 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.ui.enabled -}}
+{{- if .Values.ui.enabled -}}
 {{- $component := "enterprise-ui" -}}
 
 apiVersion: apps/v1
@@ -46,7 +46,7 @@ spec:
         imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
         env:
         {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
-      {{- if and (index .Values "anchoreEnterpriseUi" "existingSecret") (not (index .Values "anchore-ui-redis" "externalEndpoint")) }}
+      {{- if and (index .Values "ui" "existingSecret") (not (index .Values "anchore-ui-redis" "externalEndpoint")) }}
         - name: ANCHORE_REDIS_URI
           value: redis://:{{ index .Values "anchore-ui-redis" "password" }}@{{ template "redis.fullname" . }}-master:6379
       {{- end }}

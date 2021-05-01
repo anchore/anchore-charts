@@ -1,4 +1,4 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.feeds.enabled .Values.feedsUpgradeJob.enabled }}
+{{- if and .Values.feeds.enabled .Values.feedsUpgradeJob.enabled }}
 {{- $component := "feedsUpgradeJob" -}}
 
 apiVersion: batch/v1

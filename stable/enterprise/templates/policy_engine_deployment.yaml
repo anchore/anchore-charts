@@ -137,11 +137,9 @@ spec:
       {{- end }}
     {{- end }}
       volumes:
-      {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         - name: anchore-license
           secret:
             secretName: {{ .Values.licenseSecretName }}
-      {{- end }}
         - name: config-volume
           configMap:
             name: {{ template "enterprise.fullname" . }}
