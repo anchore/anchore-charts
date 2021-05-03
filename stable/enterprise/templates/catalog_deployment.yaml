@@ -33,7 +33,7 @@ spec:
     spec:
     {{- with .Values.securityContext }}
       securityContext:
-        {{ toYaml . | indent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
@@ -113,7 +113,7 @@ spec:
           failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.catalog.resources | indent 10 }}
+          {{- toYaml .Values.catalog.resources | nindent 10 }}
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: "{{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}"
@@ -153,15 +153,15 @@ spec:
       {{- end }}
     {{- with .Values.catalog.nodeSelector }}
       nodeSelector:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.catalog.affinity }}
       affinity:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.catalog.tolerations }}
       tolerations:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
 
 ---

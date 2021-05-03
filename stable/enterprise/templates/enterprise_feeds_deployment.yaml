@@ -32,7 +32,7 @@ spec:
     spec:
     {{- with .Values.securityContext }}
       securityContext:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
@@ -121,7 +121,7 @@ spec:
           failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.feeds.resources | nindent 10 }}
+          {{- toYaml .Values.feeds.resources | nindent 10 }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
@@ -142,7 +142,7 @@ spec:
           configMap:
             name: {{ template "enterprise.feeds.fullname" . }}
         - name: "{{ $component}}-scratch"
-          {{ toYaml .Values.scratchVolume.details | nindent 10 }}
+          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
         - name: anchore-license
           secret:
             secretName: {{ .Values.licenseSecretName }}
@@ -158,15 +158,15 @@ spec:
       {{- end }}
     {{- with .Values.feeds.nodeSelector }}
       nodeSelector:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.feeds.affinity }}
       affinity:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.feeds.tolerations }}
       tolerations:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
 
 ---

@@ -31,7 +31,7 @@ spec:
     spec:
     {{- with .Values.securityContext }}
       securityContext:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
@@ -120,7 +120,7 @@ spec:
           failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.policyEngine.resources | nindent 10 }}
+          {{- toYaml .Values.policyEngine.resources | nindent 10 }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: "{{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}"
@@ -144,7 +144,7 @@ spec:
           configMap:
             name: {{ template "enterprise.fullname" . }}
         - name: {{ $component }}-scratch
-          {{ toYaml .Values.scratchVolume.details | nindent 10 }}
+          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
       {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
@@ -157,15 +157,15 @@ spec:
       {{- end }}
     {{- with .Values.policyEngine.nodeSelector }}
       nodeSelector:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.policyEngine.affinity }}
       affinity:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.policyEngine.tolerations }}
       tolerations:
-        {{ toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
 
 ---

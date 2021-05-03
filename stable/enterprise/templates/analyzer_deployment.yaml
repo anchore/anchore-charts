@@ -31,7 +31,7 @@ spec:
     spec:
     {{- with .Values.securityContext }}
       securityContext:
-        {{ toYaml . | indent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
@@ -124,7 +124,7 @@ spec:
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
       {{- with .Values.analyzer.resources }}
         resources:
-          {{ toYaml . | indent 10 }}
+          {{- toYaml . | nindent 10 }}
       {{- end }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -149,7 +149,7 @@ spec:
           configMap:
             name: {{ template "enterprise.fullname" . }}
         - name: "{{ $component }}-scratch"
-          {{ toYaml .Values.scratchVolume.details | indent 10 }}
+          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
         - name: analyzer-config-volume
           configMap:
             name: {{ template "enterprise.analyzer.fullname" . }}
@@ -165,13 +165,13 @@ spec:
       {{- end }}
     {{- with .Values.analyzer.nodeSelector }}
       nodeSelector:
-        {{ toYaml . | indent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.analyzer.affinity }}
       affinity:
-        {{ toYaml . | indent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- with .Values.analyzer.tolerations }}
       tolerations:
-        {{ toYaml . | indent 8 }}
+        {{- toYaml . | nindent 8 }}
     {{- end }}

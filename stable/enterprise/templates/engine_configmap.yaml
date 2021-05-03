@@ -34,7 +34,7 @@ data:
 
     {{ if .Values.webhooksEnabled }}
     webhooks:
-      {{- toYaml .Values.webhooks | indent 6 }}
+      {{- toYaml .Values.webhooks | nindent 6 }}
     {{ end }}
 
     # Configure what feeds to sync.
