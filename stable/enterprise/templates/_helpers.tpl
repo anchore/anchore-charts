@@ -92,8 +92,9 @@ When calling this template, .component can be included in the context for compon
 {{- include "enterprise.labels" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.labels" -}}
+{{- $component := .component }}
 app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-app.kubernetes.io/component: {{ .component }}
+app.kubernetes.io/component: {{ $component }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/part-of: "Anchore Enterprise"
@@ -102,10 +103,8 @@ helm.sh/chart: {{ template "enterprise.chart" . }}
 {{- with .Values.labels }}
 {{ toYaml . }}
 {{- end }}
-{{- if .component }}
-{{- with (printf ".Values.%s.labels" .component) }}
+{{- with (index .Values (print $component)).labels }}
 {{ toYaml . }}
-{{- end }}
 {{- end }}
 {{- end }}
 
@@ -115,11 +114,12 @@ When calling this template, .component can be included in the context for compon
 {{- include "enterprise.annotations" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.annotations" -}}
+{{- $component := .component -}}
 {{- with .Values.annotations }}
 {{ toYaml . }}
 {{- end }}
 {{- if .component }}
-{{- with (printf ".Values.%s.annotations" .component) }}
+{{- with (index .Values (print $component)).annotations }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
@@ -131,12 +131,13 @@ When calling this template, .component can be included in the context for compon
 {{- include "enterprise.environment" (merge (dict "component" $component) .) }}
 */}}
 {{- define "enterprise.environment" -}}
+{{- $component := .component -}}
 {{- with .Values.extraEnv }}
-{{- toYaml . }}
+{{ toYaml . }}
 {{- end }}
 {{- if .component }}
-{{- with (printf ".Values.%s.extraEnv" .component) }}
-{{- toYaml . }}
+{{- with (index .Values (print $component)).extraEnv }}
+{{ toYaml . }}
 {{- end }}
 {{- end }}
 {{- end }}
