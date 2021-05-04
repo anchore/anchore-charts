@@ -54,10 +54,9 @@ spec:
             name: "{{ template "enterprise.fullname" .}}-admin-pass"
       {{- end }}
     {{- end }}
-        - configMapRef:
-            name: "{{ template "enterprise.fullname" . }}-env"
         env:
         {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
+        {{- include "enterprise.engineDbConfigEnv" . | nindent 8 }}
       {{- if (.Values.certStoreSecretName) }}
         volumeMounts:
         - name: certs

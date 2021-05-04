@@ -25,7 +25,6 @@ spec:
       {{- if not .Values.inject_secrets_via_env }}
         checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
         checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
       {{- if .Values.policyBundles }}
         checksum/policy-config: {{ include (print $.Template.BasePath "/policy_bundle_configmap.yaml") . | sha256sum }}
@@ -59,10 +58,9 @@ spec:
             name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
       {{- end }}
     {{- end }}
-        - configMapRef:
-            name: {{ template "enterprise.fullname" . }}-env
         env:
         {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
+        {{- include "enterprise.engineDbConfigEnv" . | nindent 8}}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:
@@ -87,7 +85,7 @@ spec:
     {{- if .Values.policyBundles }}
       {{- range $key, $value := .Values.policyBundles }}
         - name: policy-bundle-volume
-          mountPath: {{ $.Values.serviceDir  }}/bundles/{{ $key }}
+          mountPath: "{{ $.Values.serviceDir  }}/bundles/{{ $key }}"
           subPath: {{ $key }}
       {{- end }}
     {{- end }}
@@ -138,10 +136,9 @@ spec:
             name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
       {{- end }}
     {{- end }}
-        - configMapRef:
-            name: {{ template "enterprise.fullname" . }}-env
         env:
         {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
+        {{- include "enterprise.engineDbConfigEnv" . | nindent 8}}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:

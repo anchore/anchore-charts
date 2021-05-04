@@ -12,6 +12,6 @@ metadata:
     {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 data:
 {{- with .Values.policyBundles }}
-{{- toYaml . | nindent 2 }}
+  {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- end }}
+{{- end -}}

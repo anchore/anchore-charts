@@ -27,7 +27,6 @@ spec:
       {{- if not .Values.inject_secrets_via_env }}
         checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
         checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
     spec:
     {{- with .Values.securityContext }}
@@ -50,8 +49,6 @@ spec:
         - containerPort: {{ .Values.reports.service.port }}
           name: reports-api
         envFrom:
-        - configMapRef:
-            name: "{{ template "enterprise.fullname" . }}-env"
     {{- if not .Values.inject_secrets_via_env }}
       {{- if .Values.existingSecret }}
         - secretRef:
@@ -65,6 +62,7 @@ spec:
     {{- end }}
         env:
         {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
+        {{- include "enterprise.engineDbConfigEnv" . | nindent 8 }}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:

@@ -147,6 +147,46 @@ When calling this template, .component can be included in the context for compon
 {{- end -}}
 
 {{/*
+Return Anchore database config environment variables
+*/}}
+{{- define "enterprise.engineDbConfigEnv" -}}
+- name: ANCHORE_DB_NAME
+  value: "{{ .Values.postgresql.postgresqlDatabase }}"
+- name: ANCHORE_DB_USER
+  value: "{{ .Values.postgresql.postgresqlUser }}"
+{{- if and .Values.postgresql.externalEndpoint (not .Values.postgresql.enabled) }}
+- name: ANCHORE_DB_HOST
+  value: "{{ .Values.postgresql.externalEndpoint }}"
+{{- else if and .Values.cloudsql.enabled (not .Values.postgresql.enabled) }}
+- name: ANCHORE_DB_HOST
+  value: "localhost:5432"
+{{- else }}
+- name: ANCHORE_DB_HOST
+  value: "{{ template "postgres.fullname" . }}:5432"
+{{- end }}
+{{- end -}}
+
+{{/*
+Return Anchore feeds database config environment variables
+*/}}
+{{- define "enterprise.feedsDbConfigEnv" -}}
+- name: ANCHORE_DB_NAME
+  value: {{ index .Values "anchore-feeds-db" "postgresqlDatabase" | quote }}
+- name: ANCHORE_DB_USER
+  value: {{ index .Values "anchore-feeds-db" "postgresqlUser"  | quote }}
+{{- if and (index .Values "anchore-feeds-db" "externalEndpoint") (not (index .Values "anchore-feeds-db" "enabled")) }}
+- name: ANCHORE_DB_HOST
+  value: {{ index .Values "anchore-feeds-db" "externalEndpoint" | quote }}
+{{- else if and .Values.cloudsql.enabled (not (index .Values "anchore-feeds-db" "enabled")) }}
+- name: ANCHORE_DB_HOST
+  value: "localhost:5432"
+{{- else }}
+- name: ANCHORE_DB_HOST
+  value: "{{ template "postgres.enterprise-feeds-db.fullname" . }}:5432"
+{{- end }}
+{{- end -}}
+
+{{/*
 Return Anchore default admin password
 */}}
 {{- define "enterprise.defaultAdminPassword" -}}
