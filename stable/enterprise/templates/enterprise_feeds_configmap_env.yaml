@@ -12,7 +12,7 @@ metadata:
     {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 data:
   ANCHORE_DB_NAME: {{ index .Values "anchore-feeds-db" "postgresqlDatabase" | quote }}
-  ANCHORE_DB_USER: {{ index .Values "anchore-feeds-db" "postgreslqUser"  | quote }}
+  ANCHORE_DB_USER: {{ index .Values "anchore-feeds-db" "postgresqlUser"  | quote }}
 {{- if and (index .Values "anchore-feeds-db" "externalEndpoint") (not (index .Values "anchore-feeds-db" "enabled")) }}
   ANCHORE_DB_HOST: {{ index .Values "anchore-feeds-db" "externalEndpoint" | quote }}
 {{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "anchore-feeds-db" "enabled")) }}

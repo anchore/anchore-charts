@@ -894,6 +894,7 @@ postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
+  postgresqlUser: anchoreengine
   postgresqlPassword: anchore-postgres,123
   postgresqlDatabase: anchore
 
@@ -912,9 +913,9 @@ anchore-feeds-db:
   # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
-  postgresUser: anchoreengine
-  postgresPassword: anchore-postgres,123
-  postgresDatabase: anchore-feeds
+  postgresqlUser: anchoreengine
+  postgresqlPassword: anchore-postgres,123
+  postgresqlDatabase: anchore-feeds
 
   # Specify an external (already existing) postgres deployment for use.
   # Set to the host and port. eg. mypostgres.myserver.io:5432

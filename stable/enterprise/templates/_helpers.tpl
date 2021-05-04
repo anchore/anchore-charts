@@ -20,7 +20,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
-{{- end }}
+{{- end -}}
 
 {{- define "enterprise.analyzer.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
@@ -84,7 +84,7 @@ Create chart name and version as used by the chart label.
 */}}
 {{- define "enterprise.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Common labels
@@ -94,7 +94,9 @@ When calling this template, .component can be included in the context for compon
 {{- define "enterprise.labels" -}}
 {{- $component := .component }}
 app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+{{- if $component }}
 app.kubernetes.io/component: {{ $component }}
+{{- end }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/part-of: "Anchore Enterprise"
@@ -103,10 +105,12 @@ helm.sh/chart: {{ template "enterprise.chart" . }}
 {{- with .Values.labels }}
 {{ toYaml . }}
 {{- end }}
+{{- if $component }}
 {{- with (index .Values (print $component)).labels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
+{{- end -}}
 
 {{/*
 Common annotations
@@ -118,12 +122,12 @@ When calling this template, .component can be included in the context for compon
 {{- with .Values.annotations }}
 {{ toYaml . }}
 {{- end }}
-{{- if .component }}
+{{- if $component }}
 {{- with (index .Values (print $component)).annotations }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Common environment variables
@@ -135,12 +139,12 @@ When calling this template, .component can be included in the context for compon
 {{- with .Values.extraEnv }}
 {{ toYaml . }}
 {{- end }}
-{{- if .component }}
+{{- if $component }}
 {{- with (index .Values (print $component)).extraEnv }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Return Anchore default admin password
@@ -165,4 +169,4 @@ Create database hostname string from supplied values file. Used for the ui ANCHO
     {{- $db_host := include "postgres.fullname" . }}
     {{- printf "%s:5432" $db_host -}}
   {{- end }}
-{{- end }}
+{{- end -}}
