@@ -147,6 +147,17 @@ When calling this template, .component can be included in the context for compon
 {{- end -}}
 
 {{/*
+Return anchore default selectors
+When calling this template, .component can be included in the context for component specific env vars
+{{- include "enterprise.selectors" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.selectors" -}}
+{{- $component := .component -}}
+app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+app.kubernetes.io/component: {{ $component }}
+{{- end -}}
+
+{{/*
 Return Anchore database config environment variables
 */}}
 {{- define "enterprise.engineDbConfigEnv" -}}

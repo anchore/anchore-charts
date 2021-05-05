@@ -137,14 +137,14 @@ spec:
       {{- end }}
     {{- end }}
         env:
-        {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
+        {{- include "enterprise.environment" (merge (dict "component" "rbacAuth") .) | indent 8 }}
         {{- include "enterprise.engineDbConfigEnv" . | nindent 8}}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
         ports:
-        - containerPort: {{ .Values.api.service.rbacAuthPort }}
+        - containerPort: {{ .Values.rbacAuth.port }}
           name: rbac-auth
         volumeMounts:
         - name: anchore-license
@@ -163,7 +163,7 @@ spec:
             command:
               - curl
               - -f
-              - 'localhost:{{ .Values.api.service.rbacAuthPort }}/health'
+              - 'localhost:{{ .Values.rbacAuth.port }}/health'
           initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
           periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
@@ -174,13 +174,13 @@ spec:
             command:
               - curl
               - -f
-              - 'localhost:{{ .Values.api.service.rbacAuthPort }}/health'
+              - 'localhost:{{ .Values.rbacAuth.port }}/health'
           timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
           periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
           failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
-          {{- toYaml .Values.api.rbacAuthResources | nindent 10 }}
+          {{- toYaml .Values.rbacAuth.resources | nindent 10 }}
     {{- end }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy

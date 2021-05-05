@@ -156,7 +156,7 @@ data:
         {{- if .Values.anchoreRbacEnabled }}
         authorization_handler: external
         authorization_handler_config:
-          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
+          endpoint: "http://localhost:{{- .Values.rbacAuth.port }}"
         {{- end }}
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
@@ -265,8 +265,8 @@ data:
         require_auth: true
         endpoint_hostname: localhost
         listen: 127.0.0.1
-        port: {{ .Values.api.service.authPort }}
-        max_request_threads: {{ default 50 .Values.api.maxRequestThreads }}
+        port: {{ .Values.rbacAuth.port }}
+        max_request_threads: {{ default 50 .Values.rbacAuth.maxRequestThreads }}
       rbac_manager:
         enabled: true
         require_auth: true
@@ -276,7 +276,7 @@ data:
         max_request_threads: {{ default 50 .Values.rbacManager.maxRequestThreads }}
         authorization_handler: external
         authorization_handler_config:
-          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
+          endpoint: "http://localhost:{{- .Values.rbacAuth.port }}"
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
@@ -298,7 +298,7 @@ data:
         {{- if .Values.anchoreRbacEnabled }}
         authorization_handler: external
         authorization_handler_config:
-          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
+          endpoint: "http://localhost:{{- .Values.rbacAuth.port }}"
         {{- end }}
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
@@ -316,7 +316,7 @@ data:
         max_request_threads: {{ default 50 .Values.notifications.maxRequestThreads }}
         authorization_handler: external
         authorization_handler_config:
-          endpoint: "http://localhost:{{- .Values.api.service.authPort }}"
+          endpoint: "http://localhost:{{- .Values.rbacAuth.port }}"
         cycle_timers:
           {{- toYaml .Values.notifications.cycleTimers | nindent 10 }}
         {{- if .Values.notifications.uiUrl }}

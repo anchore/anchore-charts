@@ -321,7 +321,6 @@ api:
   service:
     type: ClusterIP
     port: 8228
-    rbacAuthPort: 8089
     annotations: {}
     label: {}
 
@@ -338,14 +337,6 @@ api:
   #  requests:
   #    cpu: 100m
   #    memory: 1G
-
-  # rbacAuthResources:
-  #  limits:
-  #    cpu: 1
-  #    memory: 1G
-  #  requests:
-  #    cpu: 100m
-  #    memory: 256M
 
   labels: {}
   annotations: {}
@@ -656,6 +647,22 @@ feeds:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+rbacAuth:
+  # Set extra environment variables. These will be set on all rbac containers.
+  extraEnv: []
+    # - name: foo
+    #   value: bar
+
+  port: 8089
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 1G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 256M
 
 rbacManager:
   replicaCount: 1

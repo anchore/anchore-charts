@@ -104,6 +104,69 @@ spec:
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
           {{- toYaml .Values.reports.resources | nindent 10 }}
+    {{- if .Values.enableAnchoreRbac -}}
+      - name: "{{ .Chart.Name }}-rbac-authorizer"
+        image: {{ .Values.image }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_authorizer"]
+        envFrom:
+    {{- if not .Values.inject_secrets_via_env }}
+      {{- if .Values.existingSecret }}
+        - secretRef:
+            name: {{ .Values.existingSecret }}
+      {{- else }}
+        - secretRef:
+            name: {{ include "enterprise.fullname" . }}
+        - secretRef:
+            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+      {{- end }}
+    {{- end }}
+        env:
+        {{- include "enterprise.environment" (merge (dict "component" "rbacAuth") .) | indent 8 }}
+        {{- include "enterprise.engineDbConfigEnv" . | nindent 8}}
+        - name: ANCHORE_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+        - containerPort: {{ .Values.rbacAuth.port }}
+          name: rbac-auth
+        volumeMounts:
+        - name: anchore-license
+          mountPath: /home/anchore/license.yaml
+          subPath: license.yaml
+        - name: enterprise-config-volume
+          mountPath: /config/config.yaml
+          subPath: config.yaml
+      {{- if (.Values.certStoreSecretName) }}
+        - name: certs
+          mountPath: /home/anchore/certs/
+          readOnly: true
+      {{- end }}
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - -f
+              - 'localhost:{{ .Values.rbacAuth.port }}/health'
+          initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+          failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          successThreshold: {{ .Values.probes.liveness.successThreshold }}
+        readinessProbe:
+          exec:
+            command:
+              - curl
+              - -f
+              - 'localhost:{{ .Values.rbacAuth.port }}/health'
+          timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          successThreshold: {{ .Values.probes.readiness.successThreshold }}
+        resources:
+          {{- toYaml .Values.rbacAuth.resources | nindent 10 }}
+    {{- end }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
