@@ -56,7 +56,7 @@ spec:
         paths:
         - path: {{ $.Values.ingress.reportsPath }}
           backend:
-            serviceName: {{ template "enterprise.api.fullname" $ }}
+            serviceName: {{ template "enterprise.reports.fullname" $ }}
             servicePort: {{ $.Values.reports.service.port }}
     {{- end }}
   {{- else }}
@@ -83,7 +83,7 @@ spec:
         {{- with .Values.ingress.reportsPath }}
         - path: {{ . }}
           backend:
-            serviceName: {{ template "enterprise.api.fullname" $ }}
+            serviceName: {{ template "enterprise.reports.fullname" $ }}
             servicePort: {{ $.Values.reports.service.port }}
         {{- end }}
   {{- end }}
