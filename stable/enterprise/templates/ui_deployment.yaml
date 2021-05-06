@@ -1,10 +1,10 @@
-{{- if .Values.feeds.enabled -}}
-{{- $component := "enterprise-feeds" -}}
+{{- if .Values.ui.enabled -}}
+{{- $component := "enterprise-ui" -}}
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "enterprise.feeds.fullname" . }}
+  name: {{ include "enterprise.ui.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
@@ -25,9 +25,9 @@ spec:
       annotations:
         {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 8 }}
       {{- if not .Values.inject_secrets_via_env }}
-        checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_feeds_secret.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/ui_secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/feeds-config: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap.yaml") . | sha256sum }}
+        checksum/ui-config: {{ include (print $.Template.BasePath "/ui_configmap.yaml") . | sha256sum }}
     spec:
     {{- with .Values.securityContext }}
       securityContext:
@@ -35,73 +35,60 @@ spec:
     {{- end }}
     {{- with .Values.serviceAccountName }}
       serviceAccountName: {{ . }}
-      {{- end }}
+    {{- end }}
     {{- with .Values.imagePullSecretName }}
       imagePullSecrets:
       - name: {{ . }}
     {{- end }}
-    {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
-      initContainers:
-        - name: mode-fixer
-          image: alpine
-          securityContext:
-            runAsUser: 0
-          volumeMounts:
-            - name: "{{ $component | lower }}-scratch"
-              mountPath: {{ .Values.scratchVolume.mountPath }}
-          command:
-            - sh
-            - -c
-            - (chmod 0775 {{ .Values.scratchVolume.mountPath }}; chgrp {{ .Values.securityContext.fsGroup }} {{ .Values.scratchVolume.mountPath }} )
-    {{- end }}
       containers:
       - name: "{{ .Chart.Name }}-{{ $component | lower }}"
-        image: {{ .Values.image }}
-        imagePullPolicy: {{ .Values.imagePullPolicy }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "feeds"]
-        ports:
-        - containerPort: {{ .Values.feeds.service.port }}
-          name: feeds-api
+        image: {{ .Values.ui.image }}
+        imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
+        env:
+        {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
+      {{- if and (index .Values "ui" "existingSecret") (not (index .Values "anchore-ui-redis" "externalEndpoint")) }}
+        - name: ANCHORE_REDIS_URI
+          value: redis://:{{ index .Values "anchore-ui-redis" "password" }}@{{ template "redis.fullname" . }}-master:6379
+      {{- end }}
+      {{ if .Values.dbConfig.ssl }}
+        - name: PGSSLROOTCERT
+          value: /home/anchore/certs/{{ .Values.dbConfig.sslRootCertName }}
+      {{- end }}
+      {{ with .Values.ui.ldapsRootCaCertName }}
+        - name: NODE_EXTRA_CA_CERTS
+          value: /home/anchore/certs/{{- . }}
+      {{- end }}
         envFrom:
     {{- if not .Values.inject_secrets_via_env }}
-      {{- if .Values.feeds.existingSecret }}
+      {{- if .Values.ui.existingSecret }}
         - secretRef:
-            name: {{ .Values.feeds.existingSecret }}
+            name: {{ .Values.ui.existingSecret }}
       {{- else }}
         - secretRef:
-            name: {{ include "enterprise.feeds.fullname" . }}
+            name: {{ include "enterprise.ui.fullname" . }}
         - secretRef:
             name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
-        env:
-        {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
-        {{- include "enterprise.feedsDbConfigEnv" . | nindent 8 }}
-        - name: ANCHORE_POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+          name: enterprise-ui
         volumeMounts:
-        - name: config-volume
-          mountPath: /config/config.yaml
-          subPath: config.yaml
-        - name: "{{ $component | lower }}-scratch"
-          mountPath: {{ .Values.scratchVolume.mountPath }}
         - name: anchore-license
           mountPath: /home/anchore/license.yaml
           subPath: license.yaml
+        - name: anchore-ui-config
+          mountPath: /config/config-ui.yaml
+          subPath: config-ui.yaml
       {{- if (.Values.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
       {{- end }}
         livenessProbe:
-          httpGet:
-            path: /health
-            port: feeds-api
-          {{- if .Values.internalServicesSsl.enabled }}
-            scheme: HTTPS
-          {{- end }}
+          tcpSocket:
+            port: enterprise-ui
           initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
           periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
@@ -109,20 +96,17 @@ spec:
           successThreshold: {{ .Values.probes.liveness.successThreshold }}
         readinessProbe:
           httpGet:
-            path: /health
-            port: feeds-api
-          {{- if .Values.internalServicesSsl.enabled }}
-            scheme: HTTPS
-          {{- end }}
+            path: /service/health
+            port: enterprise-ui
           timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
           periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
           failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
-          {{- toYaml .Values.feeds.resources | nindent 10 }}
+          {{- toYaml .Values.ui.resources | nindent 10 }}
     {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
-        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        image: "{{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}"
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
         command: ["/cloud_sql_proxy"]
         args:
@@ -130,39 +114,37 @@ spec:
       {{- if .Values.cloudsql.useExistingServiceAcc }}
         - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
         volumeMounts:
-        - mountPath: /var/{{ .Values.cloudsql.serviceAccSecretName }}
+        - mountPath: "/var/{{ .Values.cloudsql.serviceAccSecretName }}"
           name: {{ .Values.cloudsql.serviceAccSecretName }}
           readOnly: true
       {{- end }}
     {{- end }}
       volumes:
-        - name: config-volume
-          configMap:
-            name: {{ template "enterprise.feeds.fullname" . }}
-        - name: "{{ $component | lower }}-scratch"
-          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
-        - name: anchore-license
-          secret:
-            secretName: {{ .Values.licenseSecretName }}
-      {{- if .Values.cloudsql.useExistingServiceAcc }}
-        - name: {{ .Values.cloudsql.serviceAccSecretName }}
-          secret:
-            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
-      {{- end }}
-      {{- with .Values.certStoreSecretName }}
-        - name: certs
-          secret:
-            secretName: {{ . }}
-      {{- end }}
-    {{- with .Values.feeds.nodeSelector }}
+      - name: anchore-license
+        secret:
+          secretName: {{ .Values.licenseSecretName }}
+      - name: anchore-ui-config
+        configMap:
+          name: {{ template "enterprise.ui.fullname" . }}
+    {{- with .Values.certStoreSecretName }}
+      - name: certs
+        secret:
+          secretName: {{ . }}
+    {{- end }}
+    {{- if .Values.cloudsql.useExistingServiceAcc }}
+      - name: {{ .Values.cloudsql.serviceAccSecretName }}
+        secret:
+          secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+    {{- end }}
+    {{- with .Values.ui.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.feeds.affinity }}
+    {{- with .Values.ui.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.feeds.tolerations }}
+    {{- with .Values.ui.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
@@ -171,21 +153,21 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "enterprise.feeds.fullname" . }}
+  name: {{ include "enterprise.ui.fullname" . | quote }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
   annotations:
     {{- include "enterprise.annotations" (merge (dict "component" $component) .) | indent 4 }}
 spec:
-  type: {{ .Values.feeds.service.type }}
+  sessionAffinity: {{ .Values.ui.service.sessionAffinity }}
+  type: {{ .Values.ui.service.type }}
   ports:
-    - name: feeds-api
-      port: {{ .Values.feeds.service.port }}
-      targetPort: {{ .Values.feeds.service.port }}
+    - name: enterprise-ui
+      port: {{ .Values.ui.service.port }}
       protocol: TCP
+      targetPort: 3000
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
     app.kubernetes.io/component: {{ $component | lower }}
-
 {{- end -}}
