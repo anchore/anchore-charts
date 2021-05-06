@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-      app.kubernetes.io/component: {{ $component }}
+      app.kubernetes.io/component: {{ $component | lower }}
   replicas: {{ .Values.catalog.replicaCount }}
   strategy:
     type: Recreate
@@ -42,7 +42,7 @@ spec:
       - name: {{ . }}
     {{- end }}
       containers:
-      - name: "{{ .Chart.Name }}-{{ $component }}"
+      - name: "{{ .Chart.Name }}-{{ $component | lower }}"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "catalog"]
@@ -55,7 +55,7 @@ spec:
         - secretRef:
             name: {{ template "enterprise.fullname" . }}
         - secretRef:
-            name: {{ template "enterprise.fullname" . }}-admin-pass"
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:
@@ -137,7 +137,7 @@ spec:
       {{- if .Values.policyBundles }}
         - name: policy-bundle-volume
           configMap:
-            name: "{{ template "enterprise.fullname" . }}-policy-bundles"
+            name: {{ template "enterprise.fullname" . }}-policy-bundles
       {{- end }}
       {{- with .Values.certStoreSecretName }}
         - name: certs
@@ -181,4 +181,4 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-    app.kubernetes.io/component: {{ $component }}
+    app.kubernetes.io/component: {{ $component | lower }}

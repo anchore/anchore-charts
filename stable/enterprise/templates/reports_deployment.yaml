@@ -14,7 +14,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-      app.kubernetes.io/component: {{ $component }}
+      app.kubernetes.io/component: {{ $component | lower }}
   replicas: {{ .Values.reports.replicaCount }}
   strategy:
     type: Recreate
@@ -41,7 +41,7 @@ spec:
       serviceAccountName: {{ . }}
     {{- end }}
       containers:
-      - name: "{{ .Chart.Name }}-{{ $component }}"
+      - name: "{{ .Chart.Name }}-{{ $component | lower }}"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports"]
@@ -57,7 +57,7 @@ spec:
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
         - secretRef:
-            name: "{{ template "enterprise.fullname" . }}-admin-pass"
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:
@@ -104,7 +104,7 @@ spec:
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
           {{- toYaml .Values.reports.resources | nindent 10 }}
-    {{- if .Values.enableAnchoreRbac -}}
+    {{- if .Values.enableAnchoreRbac }}
       - name: "{{ .Chart.Name }}-rbac-authorizer"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -118,7 +118,7 @@ spec:
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
         - secretRef:
-            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:
@@ -219,7 +219,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "enterprise.api.fullname" . }}
+  name: {{ template "enterprise.reports.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "enterprise.labels" (merge (dict "component" $component) .) | indent 4 }}
@@ -234,6 +234,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-    app.kubernetes.io/component: {{ $component }}
+    app.kubernetes.io/component: {{ $component | lower }}
 
 {{- end -}}

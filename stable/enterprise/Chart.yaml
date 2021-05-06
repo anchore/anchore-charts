@@ -34,8 +34,8 @@ dependencies:
  - name: postgresql
    version: "10.3.17"
    repository: "https://charts.bitnami.com/bitnami"
-   condition: anchore-feeds-db.enabled
-   alias: anchore-feeds-db
+   condition: feeds-db.enabled
+   alias: feeds-db
  - name: redis
    version: "13.0.1"
    repository: "https://charts.bitnami.com/bitnami"

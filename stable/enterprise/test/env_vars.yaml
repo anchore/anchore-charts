@@ -1,0 +1,20 @@
+labels:
+  foo: bar
+
+annotations:
+  foo: bar
+
+extraEnv:
+- name: foo
+  value: bar
+
+analyzer:
+  labels:
+    test: analyzer
+
+  annotations:
+    test: analyzer
+
+  extraEnv:
+  - name: test
+    value: analyzer

@@ -14,7 +14,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-      app.kubernetes.io/component: {{ $component }}
+      app.kubernetes.io/component: {{ $component | lower }}
   replicas: 1
   strategy:
     type: Recreate
@@ -41,7 +41,7 @@ spec:
       - name: {{ . }}
     {{- end }}
       containers:
-      - name: "{{ .Chart.Name }}-{{ $component }}"
+      - name: "{{ .Chart.Name }}-{{ $component | lower }}"
         image: {{ .Values.ui.image }}
         imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
         env:
@@ -67,7 +67,7 @@ spec:
         - secretRef:
             name: {{ include "enterprise.ui.fullname" . }}
         - secretRef:
-            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         ports:
@@ -169,5 +169,5 @@ spec:
       targetPort: 3000
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-    app.kubernetes.io/component: {{ $component }}
+    app.kubernetes.io/component: {{ $component | lower }}
 {{- end -}}

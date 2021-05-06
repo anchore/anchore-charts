@@ -153,7 +153,7 @@ data:
         {{- end }}
         external_port: {{ .Values.api.external.port | default "null" }}
         {{- end }}
-        {{- if .Values.anchoreRbacEnabled }}
+        {{- if .Values.enableAnchoreRbac }}
         authorization_handler: external
         authorization_handler_config:
           endpoint: "http://localhost:{{- .Values.rbacAuth.port }}"
@@ -258,7 +258,7 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
-      {{- if .Values.anchoreRbacEnabled }}
+      {{- if .Values.enableAnchoreRbac }}
       # This should never be exposed outside of linked containers/localhost. It is used only for internal service access
       rbac_authorizer:
         enabled: true
@@ -295,7 +295,7 @@ data:
         enable_data_ingress: "{{ .Values.reports.enableDataIngress }}"
         cycle_timers:
           {{- toYaml .Values.reports.cycleTimers | nindent 10 }}
-        {{- if .Values.anchoreRbacEnabled }}
+        {{- if .Values.enableAnchoreRbac }}
         authorization_handler: external
         authorization_handler_config:
           endpoint: "http://localhost:{{- .Values.rbacAuth.port }}"

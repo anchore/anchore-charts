@@ -1,4 +1,4 @@
-{{- if and .Values.feeds.enabled .Values.feedsUpgradeJob.enabled }}
+{{- if and .Values.feeds.enabled .Values.feedsUpgradeJob.enabled -}}
 {{- $component := "feedsUpgradeJob" -}}
 
 apiVersion: batch/v1
@@ -51,7 +51,7 @@ spec:
         - secretRef:
             name: {{ template "enterprise.feeds.fullname" . }}
         - secretRef:
-            name: "{{ template "enterprise.fullname" . }}-admin-pass"
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:

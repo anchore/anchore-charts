@@ -14,7 +14,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-      app.kubernetes.io/component: {{ $component }}
+      app.kubernetes.io/component: {{ $component | lower }}
   replicas: 1
   strategy:
     type: Recreate
@@ -47,7 +47,7 @@ spec:
           securityContext:
             runAsUser: 0
           volumeMounts:
-            - name: "{{ $component }}-scratch"
+            - name: "{{ $component | lower }}-scratch"
               mountPath: {{ .Values.scratchVolume.mountPath }}
           command:
             - sh
@@ -55,7 +55,7 @@ spec:
             - (chmod 0775 {{ .Values.scratchVolume.mountPath }}; chgrp {{ .Values.securityContext.fsGroup }} {{ .Values.scratchVolume.mountPath }} )
     {{- end }}
       containers:
-      - name: "{{ .Chart.Name }}-{{ $component }}"
+      - name: "{{ .Chart.Name }}-{{ $component | lower }}"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "feeds"]
@@ -71,11 +71,9 @@ spec:
         - secretRef:
             name: {{ include "enterprise.feeds.fullname" . }}
         - secretRef:
-            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
-        - configMapRef:
-            name: {{ template "enterprise.feeds.fullname" . }}-env
         env:
         {{- include "enterprise.environment" (merge (dict "component" $component) .) | indent 8 }}
         {{- include "enterprise.feedsDbConfigEnv" . | nindent 8 }}
@@ -87,7 +85,7 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
-        - name: "{{ $component }}-scratch"
+        - name: "{{ $component | lower }}-scratch"
           mountPath: {{ .Values.scratchVolume.mountPath }}
         - name: anchore-license
           mountPath: /home/anchore/license.yaml
@@ -141,7 +139,7 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "enterprise.feeds.fullname" . }}
-        - name: "{{ $component}}-scratch"
+        - name: "{{ $component | lower }}-scratch"
           {{- toYaml .Values.scratchVolume.details | nindent 10 }}
         - name: anchore-license
           secret:
@@ -188,6 +186,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-    app.kubernetes.io/component: {{ $component }}
+    app.kubernetes.io/component: {{ $component | lower }}
 
 {{- end -}}

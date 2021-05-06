@@ -1,4 +1,4 @@
-{{- if .Values.policyBundles }}
+{{- if .Values.policyBundles -}}
 {{- $component := "policyEngine" -}}
 
 kind: ConfigMap

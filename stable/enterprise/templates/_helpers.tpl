@@ -67,11 +67,16 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s-%s" .Release.Name $name "notifications"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "enterprise.rbac.fullname" -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- printf "%s-%s-%s" .Release.Name $name "rbac"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "postgres.fullname" -}}
 {{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "postgres.enterprise-feeds-db.fullname" -}}
+{{- define "postgres.feeds-db.fullname" -}}
 {{- printf "%s-%s" .Release.Name "feeds-db" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -95,11 +100,11 @@ When calling this template, .component can be included in the context for compon
 {{- $component := .component }}
 app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
 {{- if $component }}
-app.kubernetes.io/component: {{ $component }}
+app.kubernetes.io/component: {{ $component | lower }}
 {{- end }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-app.kubernetes.io/part-of: "Anchore Enterprise"
+app.kubernetes.io/part-of: "Anchore"
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ template "enterprise.chart" . }}
 {{- with .Values.labels }}
@@ -154,7 +159,7 @@ When calling this template, .component can be included in the context for compon
 {{- define "enterprise.selectors" -}}
 {{- $component := .component -}}
 app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-app.kubernetes.io/component: {{ $component }}
+app.kubernetes.io/component: {{ $component | lower }}
 {{- end -}}
 
 {{/*
@@ -164,7 +169,7 @@ Return Anchore database config environment variables
 - name: ANCHORE_DB_NAME
   value: "{{ .Values.postgresql.postgresqlDatabase }}"
 - name: ANCHORE_DB_USER
-  value: "{{ .Values.postgresql.postgresqlUser }}"
+  value: "{{ .Values.postgresql.postgresqlUsername }}"
 {{- if and .Values.postgresql.externalEndpoint (not .Values.postgresql.enabled) }}
 - name: ANCHORE_DB_HOST
   value: "{{ .Values.postgresql.externalEndpoint }}"
@@ -182,18 +187,18 @@ Return Anchore feeds database config environment variables
 */}}
 {{- define "enterprise.feedsDbConfigEnv" -}}
 - name: ANCHORE_DB_NAME
-  value: {{ index .Values "anchore-feeds-db" "postgresqlDatabase" | quote }}
+  value: {{ index .Values "feeds-db" "postgresqlDatabase" | quote }}
 - name: ANCHORE_DB_USER
-  value: {{ index .Values "anchore-feeds-db" "postgresqlUser"  | quote }}
-{{- if and (index .Values "anchore-feeds-db" "externalEndpoint") (not (index .Values "anchore-feeds-db" "enabled")) }}
+  value: {{ index .Values "feeds-db" "postgresqlUsername"  | quote }}
+{{- if and (index .Values "feeds-db" "externalEndpoint") (not (index .Values "feeds-db" "enabled")) }}
 - name: ANCHORE_DB_HOST
-  value: {{ index .Values "anchore-feeds-db" "externalEndpoint" | quote }}
-{{- else if and .Values.cloudsql.enabled (not (index .Values "anchore-feeds-db" "enabled")) }}
+  value: {{ index .Values "feeds-db" "externalEndpoint" | quote }}
+{{- else if and .Values.cloudsql.enabled (not (index .Values "feeds-db" "enabled")) }}
 - name: ANCHORE_DB_HOST
   value: "localhost:5432"
 {{- else }}
 - name: ANCHORE_DB_HOST
-  value: "{{ template "postgres.enterprise-feeds-db.fullname" . }}:5432"
+  value: "{{ template "postgres.feeds-db.fullname" . }}:5432"
 {{- end }}
 {{- end -}}
 

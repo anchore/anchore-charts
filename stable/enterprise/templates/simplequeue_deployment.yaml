@@ -13,7 +13,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-      app.kubernetes.io/component: {{ $component }}
+      app.kubernetes.io/component: {{ $component | lower }}
   replicas: {{ .Values.simpleQueue.replicaCount }}
   strategy:
     type: Recreate
@@ -40,7 +40,7 @@ spec:
       - name: {{ . }}
     {{- end }}
       containers:
-      - name: "{{ .Chart.Name }}-{{ $component }}"
+      - name: "{{ .Chart.Name }}-{{ $component | lower }}"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "simplequeue"]
@@ -53,7 +53,7 @@ spec:
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
         - secretRef:
-            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:
@@ -167,4 +167,4 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-    app.kubernetes.io/component: {{ $component }}
+    app.kubernetes.io/component: {{ $component | lower }}

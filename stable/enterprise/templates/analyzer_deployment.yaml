@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-      app.kubernetes.io/component: {{ $component }}
+      app.kubernetes.io/component: {{ $component | lower }}
   replicas: {{ .Values.analyzer.replicaCount }}
   strategy:
     type: Recreate
@@ -46,7 +46,7 @@ spec:
           securityContext:
             runAsUser: 0
           volumeMounts:
-            - name: "{{ $component }}-scratch"
+            - name: "{{ $component | lower }}-scratch"
               mountPath: {{ .Values.scratchVolume.mountPath }}
           command:
             - sh
@@ -54,7 +54,7 @@ spec:
             - (chmod 0775 {{ .Values.scratchVolume.mountPath }}; chgrp {{ .Values.securityContext.fsGroup }} {{ .Values.scratchVolume.mountPath }} )
     {{- end }}
       containers:
-      - name: "{{ .Chart.Name }}-{{ $component }}"
+      - name: "{{ .Chart.Name }}-{{ $component | lower }}"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "analyzer"]
@@ -67,7 +67,7 @@ spec:
         - secretRef:
             name: {{ template "enterprise.fullname" . }}
         - secretRef:
-            name: "{{ template "enterprise.fullname" . }}-admin-pass"
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:
@@ -90,7 +90,7 @@ spec:
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
-        - name: "{{ $component }}-scratch"
+        - name: "{{ $component | lower }}-scratch"
           mountPath: {{ .Values.scratchVolume.mountPath }}
       {{- if (.Values.certStoreSecretName) }}
         - name: certs
@@ -146,7 +146,7 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "enterprise.fullname" . }}
-        - name: "{{ $component }}-scratch"
+        - name: "{{ $component | lower }}-scratch"
           {{- toYaml .Values.scratchVolume.details | nindent 10 }}
         - name: analyzer-config-volume
           configMap:

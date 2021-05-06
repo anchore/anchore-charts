@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-      app.kubernetes.io/component: {{ $component }}
+      app.kubernetes.io/component: {{ $component | lower }}
   replicas: {{ .Values.api.replicaCount }}
   strategy:
     type: Recreate
@@ -42,7 +42,7 @@ spec:
       - name: {{ . }}
     {{- end }}
       containers:
-      - name: "{{ .Chart.Name }}-{{ $component }}"
+      - name: "{{ .Chart.Name }}-{{ $component | lower }}"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "apiext"]
@@ -55,7 +55,7 @@ spec:
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
         - secretRef:
-            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:
@@ -119,7 +119,7 @@ spec:
           successThreshold: {{ .Values.probes.readiness.successThreshold }}
         resources:
           {{- toYaml .Values.api.resources | nindent 10 }}
-    {{- if .Values.enableAnchoreRbac -}}
+    {{- if .Values.enableAnchoreRbac }}
       - name: "{{ .Chart.Name }}-rbac-authorizer"
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -133,7 +133,7 @@ spec:
         - secretRef:
             name: {{ include "enterprise.fullname" . }}
         - secretRef:
-            name: {{ print (include "enterprise.fullname" .) "-admin-pass" }}
+            name: {{ template "enterprise.fullname" . }}-admin-pass
       {{- end }}
     {{- end }}
         env:
@@ -254,4 +254,4 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
-    app.kubernetes.io/component: {{ $component }}
+    app.kubernetes.io/component: {{ $component | lower }}
