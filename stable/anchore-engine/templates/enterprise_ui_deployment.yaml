@@ -80,7 +80,7 @@ spec:
         env:
         {{- if and (index .Values "anchoreEnterpriseUi" "existingSecret") (not (index .Values "anchore-ui-redis" "externalEndpoint")) }}
         - name: ANCHORE_REDIS_URI
-          value: redis://:{{ index .Values "anchore-ui-redis" "password" }}@{{ template "redis.fullname" . }}-master:6379
+          value: redis://nouser:{{ index .Values "anchore-ui-redis" "password" }}@{{ template "redis.fullname" . }}-master:6379
         {{- end }}
         {{ if .Values.anchoreGlobal.dbConfig.ssl }}
         - name: PGSSLROOTCERT
