@@ -231,7 +231,13 @@ data:
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
         runtime_inventory:
-          image_ttl_days: {{ .Values.anchoreCatalog.runtime_inventory.image_ttl_days }}
+          image_ttl_days: {{ .Values.anchoreCatalog.runtimeInventory.imageTTLDays }}
+          kubernetes:
+            report_anchore_cluster:
+              enabled: {{ .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
+              anchore_cluster_name: {{ .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.clusterName }}
+              namespaces:
+                {{- toYaml .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.namespaces | nindent 16 }}
       simplequeue:
         enabled: true
         require_auth: true
