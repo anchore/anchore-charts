@@ -535,6 +535,13 @@ anchoreCatalog:
     annotations: {}
     labels: {}
 
+  # These are the service account parameters for the catalog deployment
+  serviceAccount:
+    enabled: true
+    name: anchore-catalog-service-account
+    labels: {}
+    annotations: {}
+
   # resources:
   #  limits:
   #    cpu: 1
