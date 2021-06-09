@@ -43,7 +43,7 @@ apiService:
     matchExpressions:
       - key: exclude.admission.anchore.io
         operator: NotIn
-        values: [ "true" ]
+        values: ["true"]
 
 anchoreEndpoint: ""
 policySelectors:
@@ -62,7 +62,7 @@ policySelectors:
 # strict gating or analysis gating are true
 requestAnalysis: true
 
-resources: { }
+resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -76,21 +76,21 @@ resources: { }
 
 ## Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-nodeSelector: { }
+nodeSelector: {}
 
 ## Tolerations for pod assignment to nodes with taints
 ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-tolerations: [ ]
+tolerations: []
 
 ## Constrain which nodes your pod is eligible to be scheduled on, based on labels on the node
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-affinity: { }
+affinity: {}
 
 # define name of existing secret containing anchore credentials
 existingCredentialsSecret: null
 
 # or define credentials here to create secrets
-credentials: { }
+credentials: {}
   # users:
   # - username: user1
   #   password: password1
@@ -100,6 +100,6 @@ credentials: { }
 # Settings related to init-ca pod
 initCa:
   # Define custom environment variables to pass to init-ca pod
-  extraEnv: [ ]
+  extraEnv: []
     # - name: FOO
   # value: "bar"
