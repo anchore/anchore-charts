@@ -15,14 +15,7 @@ webhooks:
     caBundle: {{ . | b64enc }}
     {{- end }}
   rules:
-  - operations:
-    - CREATE
-    apiGroups:
-    - ""
-    apiVersions:
-    - "*"
-    resources:
-    - pods
+    {{- toYaml .Values.apiService.webhook.rules | nindent 4}}
   failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
   namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
 {{- end }}
