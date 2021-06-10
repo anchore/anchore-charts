@@ -540,6 +540,15 @@ anchoreCatalog:
     annotations: {}
     labels: {}
 
+  # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
+  # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
+  # detailed information on the Service Account, Cluster Role & Binding
+  serviceAccount:
+    enabled: false
+    name: anchore-catalog-service-account
+    labels: {}
+    annotations: {}
+
   # resources:
   #  limits:
   #    cpu: 1
@@ -563,8 +572,12 @@ anchoreCatalog:
 
     # Since Anchore is running in Kubernetes, we can collect runtime inventory data out of the box
     reportAnchoreCluster:
-      # If set to true, Anchore will use its own service-account to try and collect runtime inventory data for all namespaces
+      # If set to true, Anchore will use its own chart permissions (see anchoreCatalog.serviceAccount.enabled) to try and
+      # collect runtime inventory data for all namespaces.
       # Note: requires a value for clusterName to populate inventory image context
+      # Note: If anchoreCatalog.serviceAccount.enabled is set to false, you will need to give the Anchore Catalog service
+      # enough permission to be able to read cluster information (pods & namespaces) for the embedded runtime inventory
+      # feature to work.
       enabled: true
       clusterName: anchore-k8s
       namespaces:

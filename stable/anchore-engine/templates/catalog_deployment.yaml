@@ -254,3 +254,48 @@ spec:
   selector:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}
+
+{{- if .Values.anchoreCatalog.serviceAccount.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{{ .Release.Name }}-{{ .Values.anchoreCatalog.serviceAccount.name }}"
+  labels:
+    {{- with .Values.anchoreCatalog.serviceAccount.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.anchoreCatalog.serviceAccount.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{- if .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: "{{ .Release.Name }}-catalog-cluster-read-only"
+rules:
+- apiGroups: [""]
+  resources: ["pods","namespaces"]
+  verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "{{ .Release.Name }}-catalog-cluster-read-only-binding"
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "anchore-engine.catalog.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: catalog-cluster-read-only
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
