@@ -260,7 +260,7 @@ data:
                 {{- else }}
                 enabled: {{ default "false" .Values.anchoreGlobal.syncPackages }}
                 {{- end }}
-               url: {{ $anchoreFeedsURL }}
+                url: {{ $anchoreFeedsURL }}
               {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
               vulndb:
                enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.vulndbDriverEnabled }}
