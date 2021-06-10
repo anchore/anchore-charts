@@ -1,14 +1,13 @@
+{{ $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" }}
 {{- if .Values.anchoreEnterpriseFeeds.url }}
-{{- $anchoreFeedsURL := .Values.anchoreEnterpriseFeeds.url }}
+{{- $anchoreFeedsURL = .Values.anchoreEnterpriseFeeds.url }}
 {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
 {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-{{- $anchoreFeedsURL := "https://{{- template "anchore-engine.enterprise-feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds" }}
+{{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) }}
 {{- else }}
-{{- $anchoreFeedsURL := "http://{{- template "anchore-engine.enterprise-feeds.fullname" . }}:{{- .Values.anchoreEnterpriseFeeds.service.port }}/v1/feeds" }}
+{{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) }}
 {{- end }}
-{{- else }}
-{{- $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" }}
-{{- end -}}
+{{- end }}
 
 kind: ConfigMap
 apiVersion: v1
@@ -191,7 +190,7 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
-        {{- if anchoreEnterpriseGlobal.enabled }}
+        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         runtime_compliance:
           object_store_bucket: "runtime_compliance_check"
         {{- end }}
