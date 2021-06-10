@@ -166,6 +166,10 @@ anchoreGlobal:
   # If true, when a user adds an ECR registry with username = awsauto then the system will look for an instance profile to use for auth against the registry
   allowECRUseIAMRole: false
 
+  # Twisted has a global server side timeout on all established connections which defaults to 60, anything lasting longer
+  # than this (+ a 15 min abort final timeout) will have the connection killed by twisted
+  serverRequestTimeout: 60
+
   # Enable prometheus metrics
   enableMetrics: false
 
@@ -422,6 +426,7 @@ anchoreCatalog:
     image_gc: 60
     # Interval for the runtime inventory image execution poll
     k8s_watcher: 300
+    k8s_image_watcher: 150
 
   # Event log configuration for webhooks
   events:
@@ -587,6 +592,14 @@ anchorePolicyEngine:
     feed_sync: 14400
     # Interval between checks to see if there needs to be a task queued
     feed_sync_checker: 3600
+    # 1 minute between checks to verify local grype-db is up to date
+    grypedb_sync: 60
+
+  # Available providers are legacy and grype. Legacy provider offers the same matching logic as previous versions of anchore-engine (<= 0.9.4)
+  # grype is a new provider that was introduced in 1.0.0, it uses the grype tool for all things vulnerabilities
+  vulnerabilityProvider: legacy
+
+  grypeDBUrl: "https://toolbox-data.anchore.io/grype/databases/listing.json"
 
   # kubernetes service configuration for anchore policy engine api
   service:
