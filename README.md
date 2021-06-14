@@ -18,3 +18,9 @@ All commits must be signed with the DCO as defined in [CONTRIBUTING](CONTRIBUTIN
 
 In git this can be done using the '-s' flag on commit.
 
+To test changes made to this chart, you must also synchronize the dependencies of the chart itself.
+For example, for anchore-engine:
+```
+helm dep up
+```
+is needed.

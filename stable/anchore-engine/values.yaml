@@ -102,7 +102,7 @@ anchoreGlobal:
   imagePullSecretName:
 
   # Specify a service account name utilized to run all Anchore pods
-  serviceAccountName:
+  serviceAccountName: Null
 
   # Set this value to true to setup the chart for OpenShift deployment compatibility.
   openShiftDeployment: false
@@ -554,6 +554,13 @@ anchoreCatalog:
   tolerations: []
   affinity: {}
 
+  # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
+  # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
+  # detailed information on the Service Account, Cluster Role & Binding.
+  # If using an existing service account, leave this value set to `false` & use anchoreGlobal.serviceAccountName to specify
+  # what service account to use. Existing service account must have adequate permissions to use this feature.
+  createServiceAccount: false
+
   runtimeInventory:
     # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
     # The working set. Note: The image will still have a historical record in the reports service, subject to data history
@@ -563,8 +570,14 @@ anchoreCatalog:
 
     # Since Anchore is running in Kubernetes, we can collect runtime inventory data out of the box
     reportAnchoreCluster:
-      # If set to true, Anchore will use its own service-account to try and collect runtime inventory data for all namespaces
-      # Note: requires a value for clusterName to populate inventory image context
+      # If set to true, Anchore will use its own service account's permissions
+      # (if anchoreCatalog.createServiceAccount is true, see `catalog_deployment.yaml`) to try and collect runtime
+      # inventory data for all namespaces.
+      #
+      # Note: this feature requires a value for clusterName to populate inventory image context
+      # Note: If anchoreCatalog.createServiceAccount is set to false, and anchoreGlobal.serviceAccountName is unspecified,
+      # then the Anchore Catalog service won't have enough permission to be able to read cluster information
+      # (pods & namespaces) for the embedded runtime inventory.
       enabled: true
       clusterName: anchore-k8s
       namespaces:
