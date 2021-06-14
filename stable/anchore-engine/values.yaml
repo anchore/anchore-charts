@@ -570,12 +570,14 @@ anchoreCatalog:
 
     # Since Anchore is running in Kubernetes, we can collect runtime inventory data out of the box
     reportAnchoreCluster:
-      # If set to true, Anchore will use its own chart permissions (see anchoreCatalog.serviceAccount.enabled) to try and
-      # collect runtime inventory data for all namespaces.
-      # Note: requires a value for clusterName to populate inventory image context
-      # Note: If anchoreCatalog.serviceAccount.enabled is set to false, you will need to give the Anchore Catalog service
-      # enough permission to be able to read cluster information (pods & namespaces) for the embedded runtime inventory
-      # feature to work.
+      # If set to true, Anchore will use its own service account's permissions
+      # (if anchoreCatalog.createServiceAccount is true, see `catalog_deployment.yaml`) to try and collect runtime
+      # inventory data for all namespaces.
+      #
+      # Note: this feature requires a value for clusterName to populate inventory image context
+      # Note: If anchoreCatalog.createServiceAccount is set to false, and anchoreGlobal.serviceAccountName is unspecified,
+      # then the Anchore Catalog service won't have enough permission to be able to read cluster information
+      # (pods & namespaces) for the embedded runtime inventory.
       enabled: true
       clusterName: anchore-k8s
       namespaces:

@@ -219,10 +219,10 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.anchoreCatalog.createServiceAccount }}
-      serviceAccountName: {{ template "anchore-engine.catalog.fullname" . }}
-      {{- else if .Values.anchoreGlobal.serviceAccountName }}
+      {{- if .Values.anchoreGlobal.serviceAccountName }}
       serviceAccountName: {{ .Values.anchoreGlobal.serviceAccountName }}
+      {{- else if .Values.anchoreCatalog.createServiceAccount }}
+      serviceAccountName: {{ template "anchore-engine.catalog.fullname" . }}
       {{- end }}
 
 ---
