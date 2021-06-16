@@ -112,7 +112,7 @@ kai:
   anchore:
     url:
 
-    # Note: the user specified must be an admin user or have full-control, or read-write RBAC permissions
+    # Note: reccommend using the inventory-agent role
     user: admin
     password: foobar
 
