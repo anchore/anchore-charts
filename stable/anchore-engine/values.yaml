@@ -605,8 +605,6 @@ anchorePolicyEngine:
   # grype is a new provider that was introduced in 1.0.0, it uses the grype tool for all things vulnerabilities
   vulnerabilityProvider: legacy
 
-  grypeDBUrl: "https://toolbox-data.anchore.io/grype/databases/listing.json"
-
   # kubernetes service configuration for anchore policy engine api
   service:
     type: ClusterIP
