@@ -1,6 +1,6 @@
 {{ $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" }}
-{{- if .Values.anchoreEnterpriseFeeds.url }}
-{{- $anchoreFeedsURL = .Values.anchoreEnterpriseFeeds.url }}
+{{- if .Values.anchoreEnterpriseGlobal.feedsURL }}
+{{- $anchoreFeedsURL = .Values.anchoreEnterpriseGlobal.feedsURL }}
 {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
 {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
 {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) }}
@@ -265,8 +265,18 @@ data:
               vulndb:
                 enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.vulndbDriverEnabled }}
                 url: {{ $anchoreFeedsURL }}
+              {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreGlobal.syncVulnDB }}
+              vulndb:
+                enabled: true
+                url: {{ $anchoreFeedsURL }}
+              {{- end }}
+              {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
               microsoft:
                 enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
+                url: {{ $anchoreFeedsURL }}
+              {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreGlobal.syncMSRC }}
+              microsoft:
+                enabled: true
                 url: {{ $anchoreFeedsURL }}
               {{- end }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
