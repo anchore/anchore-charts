@@ -147,6 +147,7 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
+        enable_owned_package_filtering: {{ .Values.anchoreAnalyzer.enableOwnedPackageFiltering }}
       catalog:
         enabled: true
         require_auth: true

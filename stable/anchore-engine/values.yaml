@@ -302,6 +302,11 @@ anchoreAnalyzer:
   # For more info see - https://docs.anchore.com/current/docs/engine/engine_installation/configuration/content_hints
   enableHints: false
 
+  # If enabled, the Anchore Analyzer will filter packages out that are contained by others. (e.g. a python package installed by an RPM using yum or dnf).
+  # When disabled, the Anchore Analyzer will report all packages as content regardless of "containership". In the above example, this would cause the
+  # python package to be returned as it's own entry in the image's content.
+  enableOwnedPackageFiltering: true
+
   configFile:
     # Anchore analyzer config file
     #
