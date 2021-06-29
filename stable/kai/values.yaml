@@ -112,7 +112,7 @@ kai:
   anchore:
     url:
 
-    # Note: reccommend using the inventory-agent role
+    # Note: recommend using the inventory-agent role
     user: admin
     password: foobar
 
