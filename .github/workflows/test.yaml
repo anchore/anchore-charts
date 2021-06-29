@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         kubernetesVersion: ["v1.13.12", "v1.18.0"]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     if: github.ref != 'refs/heads/master'
     steps:
     - name: Checkout
@@ -35,6 +35,9 @@ jobs:
         config: kind-config.yaml
         wait: 300s
       if: steps.lint.outputs.changed == 'true'
+
+    - name: Check kind nodes
+      run: kubectl describe nodes
 
     - name: Run chart-testing (install)
       uses: helm/chart-testing-action@v1.1.0
