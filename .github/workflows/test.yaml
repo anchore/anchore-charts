@@ -36,6 +36,9 @@ jobs:
         wait: 300s
       if: steps.lint.outputs.changed == 'true'
 
+    - name: Check kind nodes
+      run: kubectl get nodes
+
     - name: Run chart-testing (install)
       uses: helm/chart-testing-action@v1.1.0
       with:
