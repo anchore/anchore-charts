@@ -37,7 +37,7 @@ jobs:
       if: steps.lint.outputs.changed == 'true'
 
     - name: Check kind nodes
-      run: kubectl get nodes
+      run: kubectl describe nodes
 
     - name: Run chart-testing (install)
       uses: helm/chart-testing-action@v1.1.0
