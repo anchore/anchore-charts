@@ -33,7 +33,7 @@ jobs:
       with:
         node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
         config: kind-config.yaml
-        install_local_path_provisioner: true
+        wait: 300s
       if: steps.lint.outputs.changed == 'true'
 
     - name: Run chart-testing (install)
