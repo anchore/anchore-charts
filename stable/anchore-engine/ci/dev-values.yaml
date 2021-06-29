@@ -1,6 +1,0 @@
-anchoreGlobal:
-  image: docker.io/anchore/anchore-engine-dev:latest
-anchoreEnterpriseGlobal:
-  image: docker.io/anchore/enterprise-dev:latest
-anchoreEnterpriseUi:
-  image: docker.io/anchore/anchore-on-prem-ui-dev:latest
