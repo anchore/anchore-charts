@@ -95,14 +95,14 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.9.4
+  image: docker.io/anchore/anchore-engine:v0.10.0
   imagePullPolicy: IfNotPresent
 
   # Set image pull secret name if using an anchore-engine image from a private registry
   imagePullSecretName:
 
   # Specify a service account name utilized to run all Anchore pods
-  serviceAccountName:
+  serviceAccountName: Null
 
   # Set this value to true to setup the chart for OpenShift deployment compatibility.
   openShiftDeployment: false
@@ -165,6 +165,10 @@ anchoreGlobal:
 
   # If true, when a user adds an ECR registry with username = awsauto then the system will look for an instance profile to use for auth against the registry
   allowECRUseIAMRole: false
+
+  # Twisted has a global server side timeout on all established connections which defaults to 60, anything lasting longer
+  # than this (+ a 15 min abort final timeout) will have the connection killed by twisted
+  serverRequestTimeout: 60
 
   # Enable prometheus metrics
   enableMetrics: false
@@ -298,6 +302,11 @@ anchoreAnalyzer:
   # For more info see - https://docs.anchore.com/current/docs/engine/engine_installation/configuration/content_hints
   enableHints: false
 
+  # If enabled, the Anchore Analyzer will filter packages out that are contained by others. (e.g. a python package installed by an RPM using yum or dnf).
+  # When disabled, the Anchore Analyzer will report all packages as content regardless of "containership". In the above example, this would cause the
+  # python package to be returned as it's own entry in the image's content.
+  enableOwnedPackageFiltering: true
+
   configFile:
     # Anchore analyzer config file
     #
@@ -422,6 +431,7 @@ anchoreCatalog:
     image_gc: 60
     # Interval for the runtime inventory image execution poll
     k8s_watcher: 300
+    k8s_image_watcher: 150
 
   # Event log configuration for webhooks
   events:
@@ -549,6 +559,13 @@ anchoreCatalog:
   tolerations: []
   affinity: {}
 
+  # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
+  # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
+  # detailed information on the Service Account, Cluster Role & Binding.
+  # If using an existing service account, leave this value set to `false` & use anchoreGlobal.serviceAccountName to specify
+  # what service account to use. Existing service account must have adequate permissions to use this feature.
+  createServiceAccount: false
+
   runtimeInventory:
     # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
     # The working set. Note: The image will still have a historical record in the reports service, subject to data history
@@ -558,8 +575,14 @@ anchoreCatalog:
 
     # Since Anchore is running in Kubernetes, we can collect runtime inventory data out of the box
     reportAnchoreCluster:
-      # If set to true, Anchore will use its own service-account to try and collect runtime inventory data for all namespaces
-      # Note: requires a value for clusterName to populate inventory image context
+      # If set to true, Anchore will use its own service account's permissions
+      # (if anchoreCatalog.createServiceAccount is true, see `catalog_deployment.yaml`) to try and collect runtime
+      # inventory data for all namespaces.
+      #
+      # Note: this feature requires a value for clusterName to populate inventory image context
+      # Note: If anchoreCatalog.createServiceAccount is set to false, and anchoreGlobal.serviceAccountName is unspecified,
+      # then the Anchore Catalog service won't have enough permission to be able to read cluster information
+      # (pods & namespaces) for the embedded runtime inventory.
       enabled: true
       clusterName: anchore-k8s
       namespaces:
@@ -580,6 +603,12 @@ anchorePolicyEngine:
     feed_sync: 14400
     # Interval between checks to see if there needs to be a task queued
     feed_sync_checker: 3600
+    # 1 minute between checks to verify local grype-db is up to date
+    grypedb_sync: 60
+
+  # Available providers are legacy and grype. Legacy provider offers the same matching logic as previous versions of anchore-engine (<= 0.9.4)
+  # grype is a new provider that was introduced in 1.0.0, it uses the grype tool for all things vulnerabilities
+  vulnerabilityProvider: legacy
 
   # kubernetes service configuration for anchore policy engine api
   service:
@@ -647,7 +676,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v3.0.3
+  image: docker.io/anchore/enterprise:v3.1.0
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -695,7 +724,7 @@ anchoreEnterpriseFeeds:
   # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
   enabled: true
 
-  # Set custom feeds URL if multiple Anchore deployments are using the same feeds service
+  # Set custom feeds URL if multiple Anchore deployments are using the same internal feeds service.
   url: ""
 
   # Enable github advisory feeds
@@ -883,7 +912,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v3.0.3
+  image: docker.io/anchore/enterprise-ui:v3.1.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.

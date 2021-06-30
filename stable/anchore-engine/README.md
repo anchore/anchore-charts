@@ -73,6 +73,7 @@ anchoreGlobal:
     * Anchore reporting API
     * Notifications - Slack, GitHub, Jira, etc
     * Microsoft image vulnerability scanning
+    * Kubernetes runtime image inventory/scanning
 ```
 
 ### Enabling Enterprise Services
@@ -241,6 +242,14 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 ## Upgrading from previous chart versions
 
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore DB upgrade process using a kubernetes job. The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful helm upgrade.
+
+## Chart version 1.13.0
+
+---
+
+* Anchore Engine image updated to v0.10.0 - [Release Notes](https://engine.anchore.io/docs/releasenotes/0100/)
+* Anchore Enterprise image updated to v3.1.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/310/)
+* If utilizing the Enterprise Runtime Inventory feature, the catalog service can now be configured to automatically setup RBAC for image discovery within the cluster. This is configured under `.Values.anchoreCatalog.runtimeInventory`
 
 ## Chart version 1.12.0
 
