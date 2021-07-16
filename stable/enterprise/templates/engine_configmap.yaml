@@ -1,3 +1,15 @@
+{{ $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" }}
+{{- if .Values.feeds.url }}
+{{- $anchoreFeedsURL = .Values.feeds.url }}
+{{- else if .Values.feeds.enabled }}
+{{- if .Values.internalServicesSsl.enabled }}
+{{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString) ) }}
+{{- else }}
+{{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString) ) }}
+{{- end }}
+{{- end }}
+
+
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -26,6 +38,10 @@ data:
 
     global_client_connect_timeout: {{ default 0 .Values.clientConnectTimeout }}
     global_client_read_timeout: {{ default 0 .Values.clientReadTimeout }}
+    server_request_timeout_seconds: {{ .Values.serverRequestTimeout }}
+
+    # Defines a maximum compressed image size (MB) to be added for analysis
+    # Value < 0 disables feature. Disabled by default
     max_compressed_image_size_mb: {{ default -1 .Values.maxCompressedImageSizeMB }}
 
     metrics:
@@ -187,6 +203,7 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
+        enable_owned_package_filtering: {{ .Values.analyzer.enableOwnedPackageFiltering }}
       catalog:
         enabled: true
         require_auth: true
@@ -218,6 +235,7 @@ data:
           # Interval between checks to repo for new tags
           repo_watcher: {{ .Values.catalog.cycleTimers.repo_watcher }}
           k8s_watcher: {{ .Values.catalog.cycleTimers.k8s_watcher }}
+          k8s_image_watcher: {{ .Values.catalog.cycleTimers.k8s_image_watcher }}
         event_log:
           {{- toYaml .Values.catalog.events | nindent 10 }}
         analysis_archive:
@@ -229,8 +247,16 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
+        runtime_compliance:
+          object_store_bucket: "runtime_compliance_check"
         runtime_inventory:
-          image_ttl_days: {{ .Values.catalog.runtime_inventory.image_ttl_days }}
+          image_ttl_days: {{ .Values.catalog.runtimeInventory.imageTTLDays }}
+          kubernetes:
+            report_anchore_cluster:
+              enabled: {{ .Values.catalog.runtimeInventory.reportAnchoreCluster.enabled }}
+              anchore_cluster_name: {{ .Values.catalog.runtimeInventory.reportAnchoreCluster.clusterName }}
+              namespaces:
+                {{- toYaml .Values.catalog.runtimeInventory.reportAnchoreCluster.namespaces | nindent 16 }}
       simplequeue:
         enabled: true
         require_auth: true
@@ -254,6 +280,57 @@ data:
         cycle_timers:
           {{- toYaml .Values.policyEngine.cycleTimers | nindent 10 }}
         {{- if .Values.internalServicesSsl.enabled }}
+        vulnerabilities:
+          provider: {{ .Values.policyEngine.vulnerabilityProvider }}
+          sync:
+            enabled: true
+            ssl_verify: {{ .Values.internalServicesSsl.verifyCerts }}
+            connection_timeout_seconds: {{ default 3 .Values.feedsConnectionTimeout }}
+            read_timeout_seconds: {{ default 180 .Values.feedsReadTimeout }}
+            data:
+              # grypedb feed is synced if the provider is set to grype. All the remaining feeds except for packages are ignored even if they are enabled
+              grypedb:
+                enabled: true
+                url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
+              # The following feeds are synced if provider is set to legacy
+              # Vulnerabilities feed is the feed for distro cve sources (redhat, debian, ubuntu, oracle, alpine....)
+              vulnerabilities:
+                enabled: {{ default "true" .Values.syncVulnerabilites }}
+                url: {{ $anchoreFeedsURL }}
+              # NVD Data is used for non-distro CVEs (jars, npm, etc) that are not packaged and released by distros as rpms, debs, etc
+              nvdv2:
+                enabled: {{ default "true" .Values.syncNvd }}
+                url: {{ $anchoreFeedsURL }}
+              github:
+                enabled: {{ default "true" .Values.syncGithub }}
+                url: {{ $anchoreFeedsURL }}
+              # Warning: enabling the packages and nvd sync causes the service to require much more memory to do process the significant data volume. We recommend at least 4GB available for the container
+              # packages feed is synced if it is enabled regardless of the provider
+              packages:
+              {{- if and .Values.feeds.enabled (or .Values.feeds.gemDriverEnabled .Values.feeds.npmDriverEnabled) }}
+                enabled: true
+              {{- else }}
+                enabled: {{ default "false" .Values.syncPackages }}
+              {{- end }}
+                url: {{ $anchoreFeedsURL }}
+              {{- if .Values.feeds.enabled }}
+              vulndb:
+                enabled: {{ default "true" .Values.feeds.vulndbDriverEnabled }}
+                url: {{ $anchoreFeedsURL }}
+              {{- else if .Values.syncVulnDB }}
+              vulndb:
+                enabled: true
+                url: {{ $anchoreFeedsURL }}
+              {{- end }}
+              {{- if .Values.feeds.enabled }}
+              microsoft:
+                enabled: {{ .Values.feeds.msrcDriverEnabled }}
+                url: {{ $anchoreFeedsURL }}
+              {{- else if .Values.syncMSRC }}
+              microsoft:
+                enabled: true
+                url: {{ $anchoreFeedsURL }}
+              {{- end }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretKeyName }}"

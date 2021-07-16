@@ -93,14 +93,7 @@ data:
         api_only: {{ default "false" .Values.feeds.apiOnly }}
         drivers:
           # Configuration section for drivers collecting and processing feed data.
-          # All drivers are enabled by default unless explicitly disabled. npm and gem drivers are explicitly disabled out of the box
-          npm:
-            enabled: {{ default "false" .Values.feeds.npmDriverEnabled }}
-          gem:
-            # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
-            # To enable gem driver comment the enabled property and uncomment the db_connect property.
-            enabled: {{ default "false" .Values.feeds.gemDriverEnabled }}
-            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.feeds.gemDbEndpoint }}
+          # All drivers are enabled by default unless explicitly disabled.
           amzn:
             enabled: {{ default "true" .Values.feeds.amazonDriverEnabled }}
           centos:
@@ -119,6 +112,14 @@ data:
             enabled: {{ default "false" .Values.feeds.snykDriverEnabled }}
           nvddb:
             enabled: {{ default "false" .Values.feeds.nvdDriverEnabled }}
+          # npm and gem drivers are explicitly disabled out of the box
+          npm:
+            enabled: {{ default "false" .Values.feeds.npmDriverEnabled }}
+          gem:
+            # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
+            # To enable gem driver comment the enabled property and uncomment the db_connect property.
+            enabled: {{ default "false" .Values.feeds.gemDriverEnabled }}
+            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.feeds.gemDbEndpoint }}
           nvdv2:
             enabled: {{ default "true" .Values.feeds.nvdv2DriverEnabled }}
           vulndb:
@@ -133,6 +134,9 @@ data:
           github:
             enabled: {{ .Values.feeds.githubDriverEnabled }}
             token: {{ .Values.feeds.githubDriverToken }}
+          grypedb:
+            enabled: {{ default "true" .Values.feeds.grypeDriverEnabled }}
+            external_feeds_url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
         {{- if .Values.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.internalServicesSsl.certSecretCertName }}"
