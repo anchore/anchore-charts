@@ -358,6 +358,12 @@ anchoreAnalyzer:
   #    cpu: 1
   #    memory: 1G
 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
   labels: {}
   annotations: {}
   nodeSelector: {}
@@ -394,6 +400,12 @@ anchoreApi:
   #  requests:
   #    cpu: 100m
   #    memory: 1G
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
 
   labels: {}
   annotations: {}
@@ -553,6 +565,12 @@ anchoreCatalog:
   #    cpu: 100m
   #    memory: 500M
 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
   labels: {}
   annotations: {}
   nodeSelector: {}
@@ -625,6 +643,12 @@ anchorePolicyEngine:
   #    cpu: 100m
   #    memory: 1G
 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
   labels: {}
   annotations: {}
   nodeSelector: {}
@@ -654,6 +678,12 @@ anchoreSimpleQueue:
   #  requests:
   #    cpu: 100m
   #    memory: 256M
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
 
   labels: {}
   annotations: {}
