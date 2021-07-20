@@ -226,6 +226,31 @@ spec:
       serviceAccountName: {{ . }}
       {{- end }}
 
+{{- if .Values.anchoreSimpleQueue.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "anchore-engine.simplequeue.fullname" . }}
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: {{ $component }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  maxReplicas: {{ .Values.anchoreSimpleQueue.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.anchoreSimpleQueue.autoscaling.minReplicas }}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "anchore-engine.simplequeue.fullname" . }}
+  targetCPUUtilizationPercentage: {{ .Values.anchoreSimpleQueue.autoscaling.targetCPUUtilizationPercentage }}
+{{- end }}
+
 ---
 apiVersion: v1
 kind: Service

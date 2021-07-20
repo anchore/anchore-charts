@@ -388,6 +388,12 @@ anchoreAnalyzer:
   #    cpu: 1
   #    memory: 1G
 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
   labels: {}
   annotations: {}
   # Add metadata annotations to analyzer deployments
@@ -431,6 +437,12 @@ anchoreApi:
   #  requests:
   #    cpu: 100m
   #    memory: 1G
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
 
   labels: {}
   annotations: {}
@@ -609,6 +621,12 @@ anchoreCatalog:
   #    cpu: 100m
   #    memory: 500M
 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
   labels: {}
   annotations: {}
   # Add metadata annotations to catalog deployments
@@ -657,6 +675,12 @@ anchorePolicyEngine:
   #    cpu: 100m
   #    memory: 1G
 
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
   labels: {}
   annotations: {}
   # Add metadata annotations to policy engine deployments
@@ -693,6 +717,12 @@ anchoreSimpleQueue:
   #  requests:
   #    cpu: 100m
   #    memory: 256M
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
 
   labels: {}
   annotations: {}
