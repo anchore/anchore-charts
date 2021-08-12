@@ -42,6 +42,8 @@ cloudsql:
   enabled: false
   # set CloudSQL instance: 'project:zone:instancname'
   instance: ""
+  # Enables the proxy to use Cloud SQL IAM authentication
+  # enableIamLogin: false
   # Optional existing service account secret to use.
   # useExistingServiceAcc: false
   # serviceAccSecretName: service_acc
