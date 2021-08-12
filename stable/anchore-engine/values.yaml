@@ -42,6 +42,8 @@ cloudsql:
   enabled: false
   # set CloudSQL instance: 'project:zone:instancname'
   instance: ""
+  # Force the proxy to connect to instance's private IP
+  # forcePrivateIp: false
   # Optional existing service account secret to use.
   # useExistingServiceAcc: false
   # serviceAccSecretName: service_acc
