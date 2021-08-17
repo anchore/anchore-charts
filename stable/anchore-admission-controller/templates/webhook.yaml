@@ -1,5 +1,5 @@
 {{- if .Values.apiService.webhook.enabled }}
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
@@ -18,4 +18,8 @@ webhooks:
     {{- toYaml .Values.apiService.webhook.rules | nindent 4}}
   failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
   namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
+  sideEffects: None
+  admissionReviewVersions: 
+    - v1
+
 {{- end }}
