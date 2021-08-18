@@ -94,51 +94,51 @@ data:
           workspace_preload_file: "/workspace_preload/data.tar.gz"
         # If api_only is set to true, the service will not update feed data in the system.
         # API end points will be functional and serve feed data if any is available.
-        api_only: {{ default "false" (.Values.anchoreEnterpriseFeeds.apiOnly | quote) }}
+        api_only: {{ default "false" (.Values.anchoreEnterpriseFeeds.apiOnly | toString) }}
         drivers:
           # Configuration section for drivers collecting and processing feed data.
           # All drivers are enabled by default unless explicitly disabled.
           amzn:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.amazonDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.amazonDriverEnabled | toString) }}
           alpine:
-            enabled: {{ default "true" .Values.anchoreEnterpriseFeeds.alpineDriverEnabled }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.alpineDriverEnabled | toString) }}
           centos:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.centosDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.centosDriverEnabled | toString) }}
           debian:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.debianDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.debianDriverEnabled | toString) }}
           ol:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.olDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.olDriverEnabled | toString) }}
           ubuntu:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled | toString) }}
           rhel:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | toString) }}
           nvddb:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.nvdDriverEnabled | quote) }}
+            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.nvdDriverEnabled | toString) }}
           # npm and gem drivers are explicitly disabled out of the box
           npm:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.npmDriverEnabled | quote) }}
+            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.npmDriverEnabled | toString) }}
           gem:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote) }}
+            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.gemDriverEnabled | toString) }}
             db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
           nvdv2:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | toString) }}
           vulndb:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | toString) }}
           msrc:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | quote) }}
+            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.msrcDriverEnabled | toString) }}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
             whitelist:
               - {{ . }}
             {{- end }}
           github:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | quote) }}
-          {{- if .Values.anchoreEnterpriseFeeds.githubDriverEnabled }}
+            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | toString) }}
+          {{- if eq (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | toString) "true" }}
             token: ${ANCHORE_GITHUB_TOKEN}
           {{- end }}
           grypedb:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | quote) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | toString) }}
             external_feeds_url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
