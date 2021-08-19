@@ -243,6 +243,14 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore DB upgrade process using a kubernetes job. The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful helm upgrade.
 
+## Chart version 1.14.0
+
+---
+
+* Anchore Engine image updated to v0.10.1 - [Release Notes](https://engine.anchore.io/docs/releasenotes/0101/)
+* Anchore Enterprise image updated to v3.1.1 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/311/)
+* Enterprise Feeds - MSRC feeds no longer require an access token. No changes are needed, however MSRC access tokens can now be removed from values and/or existing secrets.
+
 ## Chart version 1.13.0
 
 ---

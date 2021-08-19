@@ -8,9 +8,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetesVersion: ["v1.13.12", "v1.18.0"]
-    runs-on: ubuntu-18.04
-    if: github.ref != 'refs/heads/master'
+        kubernetesVersion: ["v1.14.10", "v1.22.0"]
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -29,11 +28,11 @@ jobs:
         config: ct-config.yaml
 
     - name: Install kind
-      uses: helm/kind-action@v1.0.0
+      uses: helm/kind-action@v1.2.0
       with:
         node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
         config: kind-config.yaml
-        wait: 300s
+        wait: 600s
       if: steps.lint.outputs.changed == 'true'
 
     - name: Check kind nodes
