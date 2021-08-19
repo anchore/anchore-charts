@@ -108,6 +108,8 @@ spec:
           mountPath: /home/anchore/certs/
           readOnly: true
         {{- end }}
+        resources:
+          {{ toYaml .Values.anchoreEngineUpgradeJob.resources | nindent 10 }}
     {{- if or .Values.anchoreGlobal.certStoreSecretName .Values.cloudsql.useExistingServiceAcc }}
       volumes:
       {{- with .Values.anchoreGlobal.certStoreSecretName }}
