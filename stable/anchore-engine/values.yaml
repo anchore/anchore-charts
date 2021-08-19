@@ -734,8 +734,6 @@ anchoreEnterpriseFeeds:
 
   # Enable microsoft feeds
   msrcDriverEnabled: false
-  # For instructions on getting API key, see the msrc section of the Feeds docs - https://docs.anchore.com/current/docs/installation/feeds/
-  msrcApiKey: null
   # Uncomment to add MSRC product IDs for generating their feed data, this extends the pre-defined list of product IDs
   # msrcWhitelist:
   # - 12345
