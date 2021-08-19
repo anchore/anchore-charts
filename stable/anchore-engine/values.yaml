@@ -1051,7 +1051,7 @@ anchore-ui-redis:
 # Pod configuration for the helm post-install-hook enterprise engine upgrade Job
 anchoreEnterpriseEngineUpgradeJob:
   enabled: true
-
+  
   # resources:
   #  limits:
   #    cpu: 1
