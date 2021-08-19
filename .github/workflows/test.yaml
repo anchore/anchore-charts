@@ -32,7 +32,7 @@ jobs:
       with:
         node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
         config: kind-config.yaml
-        wait: 300s
+        wait: 600s
       if: steps.lint.outputs.changed == 'true'
 
     - name: Check kind nodes
