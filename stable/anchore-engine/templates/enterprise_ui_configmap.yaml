@@ -51,6 +51,10 @@ data:
     enable_proxy: {{ .Values.anchoreEnterpriseUi.enableProxy }}
     allow_shared_login: {{ .Values.anchoreEnterpriseUi.enableSharedLogin }}
     redis_flushdb: {{ .Values.anchoreEnterpriseUi.redisFlushdb }}
+    force_websocket: {{ .Values.anchoreEnterpriseUi.forceWebsocket }}
+    authentication_lock: 
+      count: {{ .Values.anchoreEnterpriseUi.authenticationLock.count }}
+      expires: {{ .Values.anchoreEnterpriseUi.authenticationLock.expires }}
     {{- with .Values.anchoreEnterpriseUi.customLinks }}
     custom_links:
       title: {{ .title }}

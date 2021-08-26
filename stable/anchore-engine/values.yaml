@@ -108,18 +108,21 @@ anchoreGlobal:
   openShiftDeployment: false
 
   # Add additionnal labels to all kubernetes resources
-  labels: {}
+  labels:
+    {}
     # app.kubernetes.io/managed-by: Helm
     # foo: bar
 
   # Add common annotations to set on all pods. Useful expecially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
   # Ref: https://banzaicloud.com/docs/bank-vaults/mutating-webhook/
-  annotations: {}
+  annotations:
+    {}
     # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
     # vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
 
   # Set extra environment variables. These will be set on all containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -209,7 +212,8 @@ anchoreGlobal:
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100
     # Allows you to set custom db connection pool settings
-    engineArgs: {}
+    engineArgs:
+      {}
       # pool_recycle: 600
 
   internalServicesSsl:
@@ -232,29 +236,30 @@ anchoreGlobal:
     # Endpoint for general notification delivery. These events are image/tag updates etc. This is globally configured
     # and updates for all users are sent to the same host but with a different path for each user.
     # <notification_type>/<userId> are required as documented at end of URI - only hostname:port should be configured.
-    general: {}
+    general:
+      {}
       # url: "http://somehost:9090/<notification_type>/<userId>"
 
   # Custom policy bundles can be specified here. This values section represents a kubernetes configmap that is volume mounted
   # to <anchore_service_dir>/bundles and made available to all anchore services. See the docs for details on how to create policy bundles
   # https://docs.anchore.com/current/docs/engine/general/concepts/policy/bundles/
   policyBundles:
-#     custom_policy_bundle1.json: |
-#       {
-#         "id": "custom1",
-#         "version": "1_0",
-#         "name": "My custom bundle",
-#         "comment": "My system's custom bundle",
-#         "whitelisted_images": [],
-#         "blacklisted_images": [],
-#         "mappings": [],
-#         "whitelists": [],
-#         "policies": []
-#       }
-#     custom_policy_bundle2.json: |
-#       {
-#         ....
-#       }
+  #     custom_policy_bundle1.json: |
+  #       {
+  #         "id": "custom1",
+  #         "version": "1_0",
+  #         "name": "My custom bundle",
+  #         "comment": "My system's custom bundle",
+  #         "whitelisted_images": [],
+  #         "blacklisted_images": [],
+  #         "mappings": [],
+  #         "whitelists": [],
+  #         "policies": []
+  #       }
+  #     custom_policy_bundle2.json: |
+  #       {
+  #         ....
+  #       }
 
   # Allow configuration of Kubernetes probes
   probes:
@@ -278,7 +283,8 @@ anchoreAnalyzer:
   containerPort: 8084
 
   # Set extra environment variables. These will be set only on analyzer containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -317,7 +323,7 @@ anchoreAnalyzer:
     # example configuration for the 'retrieve_files' analyzer, if installed
     retrieve_files:
       file_list:
-        - '/etc/passwd'
+        - "/etc/passwd"
         # - '/etc/services'
         # - '/etc/sudoers'
 
@@ -330,7 +336,7 @@ anchoreAnalyzer:
         - "AWS_ACCESS_KEY=(?i).*aws_access_key_id( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9]).*"
         - "AWS_SECRET_KEY=(?i).*aws_secret_access_key( *=+ *).*(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=]).*"
         - "PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+"
-        - "DOCKER_AUTH=(?i).*\"auth\": *\".+\""
+        - 'DOCKER_AUTH=(?i).*"auth": *".+"'
         - "API_KEY=(?i).*api(-|_)key( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*"
         # - "ALPINE_NULL_ROOT=^root:::0:::::$"
     # content_search:
@@ -338,7 +344,6 @@ anchoreAnalyzer:
     #     - MAXFILESIZE=10000
     #   regexp_match:
     #     - "EXAMPLE_MATCH="
-
     # Uncomment the 'malware' section to enable use of the open-source ClamAV malware scanner to detect malicious code embedded in container images.
     # This scan occurs only at analysis time when the image content itself is available, and the scan results are available via the Engine API as well as
     # for consumption in new policy gates to allow gating of image with malware findings.
@@ -348,7 +353,6 @@ anchoreAnalyzer:
     #   clamav:
     #     enabled: true
     #     db_update_enabled: true
-
 
   # resources:
   #  limits:
@@ -364,13 +368,13 @@ anchoreAnalyzer:
   tolerations: []
   affinity: {}
 
-
 # Pod configuration for the anchore engine api service.
 anchoreApi:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all api containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -405,7 +409,8 @@ anchoreCatalog:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all catalog containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -460,7 +465,7 @@ anchoreCatalog:
       #   prefix: "internaltest"
       #   # Create the bucket if it doesn't already exist
       #   create_bucket: false
-          # Url only needed for non-AWS S3 implementations (e.g. minio). Otherwise, configure the region instead
+      # Url only needed for non-AWS S3 implementations (e.g. minio). Otherwise, configure the region instead
       #   #url: "https://s3.amazonaws.com"
       #   # AWS region to connect to if 'url' not specified, if both are set, then 'url' has precedent
       #   region: us-west-2
@@ -468,7 +473,6 @@ anchoreCatalog:
       #   access_key: XXXX
       #   secret_key: YYYY
       #   iamauto: false
-
       # Example Minio configuration (basically same as s3 example):
       # name: s3
       # config:
@@ -477,7 +481,6 @@ anchoreCatalog:
       #   access_key: xxxxxx
       #   secret_key: yyyyyy
       #   create_bucket: true
-
       # Example Swift Configuration:
       # name: swift
       # config:
@@ -508,7 +511,7 @@ anchoreCatalog:
       #   prefix: "internaltest"
       #   # Create the bucket if it doesn't already exist
       #   create_bucket: false
-          # Url only needed for non-AWS S3 implementations (e.g. minio). Otherwise, configure the region instead
+      # Url only needed for non-AWS S3 implementations (e.g. minio). Otherwise, configure the region instead
       #   #url: "https://s3.amazonaws.com"
       #   # AWS region to connect to if 'url' not specified, if both are set, then 'url' has precedent
       #   region: us-west-2
@@ -516,7 +519,6 @@ anchoreCatalog:
       #   access_key: XXXX
       #   secret_key: YYYY
       #   iamauto: false
-
       # Example Minio configuration (basically same as s3 example):
       # name: s3
       # config:
@@ -525,7 +527,6 @@ anchoreCatalog:
       #   access_key: xxxxxx
       #   secret_key: yyyyyy
       #   create_bucket: true
-
       # Example Swift Configuration:
       # name: swift
       # config:
@@ -593,7 +594,8 @@ anchorePolicyEngine:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all policy engine containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -636,7 +638,8 @@ anchoreSimpleQueue:
   replicaCount: 1
 
   # Set extra environment variables. These will be set on all simplequeue containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -748,7 +751,8 @@ anchoreEnterpriseFeeds:
   # - 12345
 
   # Set extra environment variables. These will be set on all feeds containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -775,7 +779,8 @@ anchoreEnterpriseFeeds:
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100
     # Allows you to set custom db connection pool settings
-    engineArgs: {}
+    engineArgs:
+      {}
       # pool_recycle: 600
 
   # kubernetes service configuration for anchore feeds service api
@@ -822,7 +827,8 @@ anchoreEnterpriseRbac:
   enabled: true
 
   # Set extra environment variables. These will be set on all rbac containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -839,7 +845,6 @@ anchoreEnterpriseRbac:
   #  requests:
   #    cpu: 100m
   #    memory: 256M
-
   # managerResources:
   #  limits:
   #    cpu: 1
@@ -853,7 +858,8 @@ anchoreEnterpriseReports:
   enabled: true
 
   # Set extra environment variables. These will be set on all rbac containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -895,7 +901,8 @@ anchoreEnterpriseNotifications:
   enabled: true
 
   # Set extra environment variables. These will be set on all rbac containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -932,7 +939,8 @@ anchoreEnterpriseUi:
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
-  extraEnv: []
+  extraEnv:
+    []
     # - name: foo
     #   value: bar
 
@@ -963,6 +971,37 @@ anchoreEnterpriseUi:
   # user session keys and data is emptied on application startup. If the datastore
   # is flushed, any users with active sessions will be required to re-authenticate.
   redisFlushdb: true
+
+  # The (optional) `force_websocket` key specifies if the WebSocket protocol must
+  # be used for socket message communications. By default, long-polling is
+  # initially used to establish the handshake between client and web service,
+  # followed by a switch to WS if the WebSocket protocol is supported.
+  #
+  # If this value is unset, or is set to anything other than a Boolean, the web
+  # service will default to `False`.
+  #
+  # This value can be overridden by using the `ANCHORE_FORCE_WEBSOCKET`
+  # environment variable.
+  #
+  forceWebsocket: false
+
+  # The (optional) `authentication_lock` keys specify if a user should be
+  # temporarily prevented from logging in to an account after one or more failed
+  # authentication attempts. For this feature to be enabled, both values must be
+  # whole numbers greater than `0`. They can be overridden by using the
+  # `ANCHORE_AUTHENTICATION_LOCK_COUNT` and `ANCHORE_AUTHENTICATION_LOCK_EXPIRES`
+  # environment variables.
+  #
+  # The `count` value represents the number of failed authentication attempts
+  # allowed to take place before a temporary lock is applied to the username. The
+  # `expires` value represents, in seconds, how long the lock will be applied for.
+  #
+  # Note that, for security reasons, when this feature is enabled it will be
+  # applied to *any* submitted username, regardless of whether the user exists.
+  #
+  authenticationLock:
+    count: 5
+    expires: 300
 
   # The (optional) `custom_links` key allows a list of up to 10 external links to
   # be provided (additional items will be excluded). The top-level `title` key
@@ -1064,7 +1103,6 @@ anchoreEnterpriseEngineUpgradeJob:
   tolerations: []
   affinity: {}
   annotations: {}
-
 # To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
 # This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault
 # inject_secrets_via_env: false
