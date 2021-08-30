@@ -613,7 +613,7 @@ anchorePolicyEngine:
 
   # Available providers are legacy and grype. Legacy provider offers the same matching logic as previous versions of anchore-engine (<= 0.9.4)
   # grype is a new provider that was introduced in 1.0.0, it uses the grype tool for all things vulnerabilities
-  vulnerabilityProvider: legacy
+  vulnerabilityProvider: grype
 
   # kubernetes service configuration for anchore policy engine api
   service:
