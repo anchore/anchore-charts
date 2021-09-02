@@ -200,11 +200,12 @@ anchoreGlobal:
   # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
-    # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs only.
-    # All ssl dbConfig values are only utilized when ssl=true
+    # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
     ssl: false
+    # set sslMode to `require` to ignore verifying the root CA - see https://www.postgresql.org/docs/9.1/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslMode: verify-full
-    # sslRootCertName is the name of the postgres root CA certificate stored in anchoreGlobal.certStoreSecretName
+    # Specify path to an additional root CA certificate - this is only utilized if 'ssl: true & sslMode: verify-full' are configured.
+    # sslRootCertName describes the filename that is mounted in `/home/anchore/certs` from the secret defined in anchoreGlobal.certStoreSecretName
     sslRootCertName: Null
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100
@@ -767,10 +768,12 @@ anchoreEnterpriseFeeds:
   # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
-    # Use ssl, but the default postgresql config in helm's stable repo does not support ssl on server side, so this should be set for external dbs
+    # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
     ssl: false
+    # set sslMode to `require` to ignore verifying the root CA - see https://www.postgresql.org/docs/9.1/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslMode: verify-full
-    # Specify path to an additional root CA certificate - this is only utilized if 'ssl: true' is configured.
+    # Specify path to an additional root CA certificate - this is only utilized if 'ssl: true & sslMode: verify-full' are configured.
+    # sslRootCertName describes the filename that is mounted in `/home/anchore/certs` from the secret defined in anchoreGlobal.certStoreSecretName
     sslRootCertName: Null
     connectionPoolSize: 30
     connectionPoolMaxOverflow: 100

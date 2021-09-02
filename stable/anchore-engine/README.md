@@ -561,7 +561,9 @@ anchoreEnterpriseUI:
 
 ## Install using an existing/external PostgreSQL instance
 
-*Note: it is recommended to use an external Postgresql instance for production installs*
+*Note: it is recommended to use an external Postgresql instance for production installs.*
+
+See comments in the values.yaml file for details on using SSL for external database connections.
 
 ```yaml
 postgresql:
@@ -574,6 +576,7 @@ postgresql:
 anchoreGlobal:
   dbConfig:
     ssl: true
+    sslMode: require
 ```
 
 ## Install using Google CloudSQL
