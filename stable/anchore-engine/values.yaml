@@ -71,6 +71,10 @@ ingress:
   # uncomment `feedsPath` to add an ingress endpoint for the feeds api
   # uncomment 'reportsPath' to add an ingress endpoint for the reports api
 
+  # Set ingressClassName if kubernetes version is >= 1.18
+  # Reference: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  # ingressClassName: nginx
+
   # Uncomment the following lines to bind on specific hostnames
   # apiHosts:
   #   - anchore-api.example.com
