@@ -388,12 +388,6 @@ anchoreAnalyzer:
   #    cpu: 1
   #    memory: 1G
 
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 3
-    targetCPUUtilizationPercentage: 80
-
   labels: {}
   annotations: {}
   # Add metadata annotations to analyzer deployments
