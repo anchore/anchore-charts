@@ -738,12 +738,9 @@ anchoreEnterpriseFeeds:
   # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
   enabled: true
 
-  # Set custom feeds URL if multiple Anchore deployments are using the same internal feeds service. i.e.: https://<feeds-hostname>:<feeds-port>/v1/feeds
+  # Set custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster.
+  # i.e. https://<feeds-hostname>:<feeds-port>
   url: ""
-
-  # ONLY USED IF RUNNING THE GRYPE PROVIDER: 
-  # The URL of the feeds service to download Grype DB with enterprise feeds, i.e.: https://<feeds-hostname>:<feeds-port>/v1/
-  grypeProviderFeedsExternalURL: ""
 
   # Enable github advisory feeds
   githubDriverEnabled: false
