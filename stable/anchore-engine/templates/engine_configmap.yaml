@@ -1,13 +1,20 @@
-{{ $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" }}
-{{- if .Values.anchoreEnterpriseFeeds.url }}
-{{- $anchoreFeedsURL = .Values.anchoreEnterpriseFeeds.url }}
-{{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
-{{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-{{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) }}
-{{- else }}
-{{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) }}
-{{- end }}
-{{- end }}
+{{- $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" -}}
+{{- $grypeProviderFeedsExternalURL := "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
+
+{{- if .Values.anchoreEnterpriseFeeds.url -}}
+  {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.anchoreEnterpriseFeeds.url)) -}}
+  {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.anchoreEnterpriseFeeds.url) -}}
+  {{- $anchoreFeedsURL = (printf "%s/v1/feeds" $anchoreFeedsHost) -}}
+  {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grype" $anchoreFeedsHost) -}}
+{{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
+  {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
+    {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grype"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+  {{- else -}}
+    {{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grype"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+  {{- end -}}
+{{- end -}}
 
 kind: ConfigMap
 apiVersion: v1
@@ -237,8 +244,8 @@ data:
             data:
               # grypedb feed is synced if the provider is set to grype. All the remaining feeds except for packages are ignored even if they are enabled
               grypedb:
-                enabled: true
-                url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
+                enabled: {{ default "true" (.Values.anchoreGlobal.syncGrypeDB | quote) }}
+                url: {{ $grypeProviderFeedsExternalURL }}
               # The following feeds are synced if provider is set to legacy
               # Vulnerabilities feed is the feed for distro cve sources (redhat, debian, ubuntu, oracle, alpine....)
               vulnerabilities:

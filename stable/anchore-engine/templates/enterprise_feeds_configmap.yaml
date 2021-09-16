@@ -1,5 +1,20 @@
 {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
 {{- $component := "enterprise-feeds" -}}
+
+{{- $grypeProviderFeedsExternalURL := "" -}}
+
+{{- if .Values.anchoreEnterpriseFeeds.url -}}
+  {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.anchoreEnterpriseFeeds.url)) }}
+  {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.anchoreEnterpriseFeeds.url) -}}
+  {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/" $anchoreFeedsHost) -}}
+{{- else -}}
+  {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+  {{- else -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+  {{- end -}}
+{{- end -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -142,7 +157,7 @@ data:
           {{- end }}
           grypedb:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | quote) }}
-            external_feeds_url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
+            external_feeds_url: {{ $grypeProviderFeedsExternalURL }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
