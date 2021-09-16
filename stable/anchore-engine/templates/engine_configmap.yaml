@@ -9,6 +9,19 @@
 {{- end }}
 {{- end }}
 
+{{ $grypeProviderFeedsExternalURL := "" }}
+{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
+{{- if .Values.anchoreEnterpriseFeeds.grypeProviderFeedsExternalURL }}
+{{- $grypeProviderFeedsExternalURL = (printf "%s/databases/grype" .Values.anchoreEnterpriseFeeds.grypeProviderFeedsExternalURL) }}
+{{- else if .Values.anchoreGlobal.internalServicesSsl.enabled }}
+{{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grype"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) }}
+{{- else }}
+{{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grype"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) }}
+{{- end }}
+{{ - else }}
+{{- $grypeProviderFeedsExternalURL = "https://toolbox-data.anchore.io/grype/databases/listing.json" }}
+{{- end}}
+
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -237,8 +250,8 @@ data:
             data:
               # grypedb feed is synced if the provider is set to grype. All the remaining feeds except for packages are ignored even if they are enabled
               grypedb:
-                enabled: true
-                url: "https://toolbox-data.anchore.io/grype/databases/listing.json"
+                enabled: {{ default "true" (.Values.anchoreGlobal.syncGrypeDB | quote) }}
+                url: {{default "https://toolbox-data.anchore.io/grype/databases/listing.json" $grypeProviderFeedsExternalURL}}
               # The following feeds are synced if provider is set to legacy
               # Vulnerabilities feed is the feed for distro cve sources (redhat, debian, ubuntu, oracle, alpine....)
               vulnerabilities:
