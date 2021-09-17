@@ -33,6 +33,6 @@ version: 0.2.3
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
-appVersion: 0.2.1
+appVersion: 0.2.2
 
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
