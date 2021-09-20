@@ -109,6 +109,9 @@ kai:
   # Only respected if mode is periodic
   pollingIntervalSeconds: 60
 
+  # Configure the request timeout for the k8s api interaction
+  kubernetesRequestTimeoutSeconds: 60
+
   anchore:
     url:
 
