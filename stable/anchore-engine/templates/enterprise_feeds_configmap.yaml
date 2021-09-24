@@ -144,6 +144,8 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
           vulndb:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | quote) }}
+          sles:
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.slesDriverEnabled | quote) }}
           msrc:
             enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.msrcDriverEnabled | quote) }}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
