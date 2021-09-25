@@ -16,6 +16,15 @@
   {{- end -}}
 {{- end -}}
 
+{{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
+{{- if not $vulnerabilityProvider -}}
+  {{- if .Release.IsUpgrade -}}
+    {{- $vulnerabilityProvider = "legacy" -}}
+  {{- else -}}
+    {{- $vulnerabilityProvider = "grype" -}}
+  {{- end -}}
+{{- end -}}
+
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -235,7 +244,7 @@ data:
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
         vulnerabilities:
-          provider: {{ .Values.anchorePolicyEngine.vulnerabilityProvider }}
+          provider: {{ $vulnerabilityProvider }}
           sync:
             enabled: true
             ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}

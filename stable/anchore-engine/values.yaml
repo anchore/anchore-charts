@@ -611,9 +611,11 @@ anchorePolicyEngine:
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
 
-  # Available providers are legacy and grype. Legacy provider offers the same matching logic as previous versions of anchore-engine (<= 0.9.4)
-  # grype is a new provider that was introduced in 1.0.0, it uses the grype tool for all things vulnerabilities
-  vulnerabilityProvider: grype
+  # Available providers are `legacy` and `grype`.
+  # legacy provider offers the same matching logic as previous versions of anchore-engine <= 0.9.4
+  # grype is a new provider that was introduced in 0.10.0, it uses the grype tool for all things vulnerabilities
+  # When vulnerabilityProvider is left unset the provider defaults to `grype` on new deployments. When upgrading from a chart version <1.15.0, vulnerabilityProvider will default to `legacy`.
+  vulnerabilityProvider: null
 
   # kubernetes service configuration for anchore policy engine api
   service:
