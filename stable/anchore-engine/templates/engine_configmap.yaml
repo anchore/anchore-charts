@@ -19,7 +19,7 @@
 {{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
 {{- if not $vulnerabilityProvider -}}
   {{- if .Release.IsUpgrade -}}
-    {{- $vulnerabilityProvider = "legacy" -}}
+    {{ required "A vulnerability provider must be explicitly set with .Values.anchorePolicyEngine.vulnerabilityProvider when upgrading to chart version v1.15.0 or higher." .Values.anchorePolicyEngine.vulnerabilityProvider }}
   {{- else -}}
     {{- $vulnerabilityProvider = "grype" -}}
   {{- end -}}
