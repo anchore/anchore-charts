@@ -139,7 +139,9 @@ data:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
             enabled: {{ .Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote }}
+          {{- if .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
             db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}/${ANCHORE_GEM_DB_NAME}"
+          {{- end }}
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
           vulndb:
