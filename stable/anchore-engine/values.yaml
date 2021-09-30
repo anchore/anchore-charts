@@ -5,18 +5,17 @@ postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
+  # If enabled=false specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore
 
-  # Specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
-  externalEndpoint: Null
-
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
-    resourcePolicy: nil
+    resourcePolicy: keep
     size: 20Gi
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
@@ -704,18 +703,17 @@ anchore-feeds-db:
   # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
+  # if enabled=false specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore-feeds
 
-  # Specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
-  externalEndpoint: Null
-
-  # Configure size of the persitant volume used with helm managed chart.
+  # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
-    resourcePolicy: nil
+    resourcePolicy: keep
     size: 20Gi
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
@@ -735,14 +733,36 @@ anchore-feeds-db:
   # - name: PATH
   #   value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+# Configure a third postgres database deployment for the enterprise feeds service Ruby Gems DB
+# This is only utilized if anchoreEnterpriseFeeds.gemDriverEnabled=true
+# Database is used for temporarily loading the Ruby gem vulnerability data.
+anchore-feeds-gem-db:
+  # To use an external DB uncomment & set 'enabled: false'
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # enabled: false
+  # If enabled=false specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
+  postgresUser: postgres
+  postgresPassword: anchore-postgres,123
+  postgresDatabase: gems
+  persistence:
+    enabled: false
+
 # Configure & enable the Anchore Enterprise on-prem feeds service.
 anchoreEnterpriseFeeds:
-  # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
+  # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unnecessary postgres instance.
   enabled: true
 
   # Set custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster.
   # i.e. https://<feeds-hostname>:<feeds-port>
   url: ""
+
+  # Enable vulnerability drivers for npm data
+  npmDriverEnabled: false
+
+  # Enable vulnerability drivers for gem data
+  gemDriverEnabled: false
 
   # Enable github advisory feeds
   githubDriverEnabled: false
@@ -791,7 +811,7 @@ anchoreEnterpriseFeeds:
   # persistence controls the mounting of an external volume for feed driver download workspace.
   persistence:
     enabled: true
-    resourcePolicy:  # set resource-policy Helm annotation on PVC. Can be nil or "keep"
+    resourcePolicy: keep # set resource-policy Helm annotation on PVC. Can be nil or "keep"
 
     ## A manually managed Persistent Volume and Claim
     ## Requires anchoreEnterpriseFeeds.persistence.enabled: true

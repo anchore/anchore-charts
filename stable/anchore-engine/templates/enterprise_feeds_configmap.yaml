@@ -134,12 +134,12 @@ data:
             enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.nvdDriverEnabled | quote) }}
           # npm and gem drivers are explicitly disabled out of the box
           npm:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.npmDriverEnabled | quote) }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.npmDriverEnabled | quote }}
           gem:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote) }}
-            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote }}
+            db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}/${ANCHORE_GEM_DB_NAME}"
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
           vulndb:
@@ -147,18 +147,18 @@ data:
           sles:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.slesDriverEnabled | quote) }}
           msrc:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.msrcDriverEnabled | quote) }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled | quote }}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
             whitelist:
               - {{ . }}
             {{- end }}
           github:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | quote) }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.githubDriverEnabled | quote }}
           {{- if eq (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | toString) "true" }}
             token: ${ANCHORE_GITHUB_TOKEN}
           {{- end }}
           grypedb:
-          {{- if eq .Values.anchorePolicyEngine.vulnerabilityProvider "legacy" }}
+          {{- if eq (.Values.anchorePolicyEngine.vulnerabilityProvider | toString ) "legacy" }}
             enabled: false
           {{- else }}
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | quote) }}

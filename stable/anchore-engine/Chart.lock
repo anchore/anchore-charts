@@ -5,8 +5,11 @@ dependencies:
 - name: postgresql
   repository: file://./deps/postgresql
   version: 1.0.1
+- name: postgresql
+  repository: file://./deps/postgresql
+  version: 1.0.1
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 10.9.0
-digest: sha256:f764fed6fb7081e73c57591d26e99b82b66e643809a2ba02c1e66bb42782f2b1
-generated: "2020-12-16T13:32:27.349956-08:00"
+digest: sha256:270d68e80fbf5b26bdd92b7a34d4c14be335d088b5f367f57a05ae22a1b8a0ab
+generated: "2021-09-29T19:05:07.656619-07:00"
