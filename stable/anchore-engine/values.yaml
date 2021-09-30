@@ -735,7 +735,7 @@ anchore-feeds-db:
 
 # Configure a third postgres database deployment for the enterprise feeds service Ruby Gems DB
 # This is only utilized if anchoreEnterpriseFeeds.gemDriverEnabled=true
-# Database is used for temporarily loading the Ruby gem vulnerability data.
+# Database is used for temporarily loading the Ruby gem vulnerability data by the Enterprise Feeds service.
 anchore-feeds-gem-db:
   # To use an external DB uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
@@ -811,7 +811,7 @@ anchoreEnterpriseFeeds:
   # persistence controls the mounting of an external volume for feed driver download workspace.
   persistence:
     enabled: true
-    resourcePolicy: keep # set resource-policy Helm annotation on PVC. Can be nil or "keep"
+    resourcePolicy: keep  # set resource-policy Helm annotation on PVC. Can be nil or "keep"
 
     ## A manually managed Persistent Volume and Claim
     ## Requires anchoreEnterpriseFeeds.persistence.enabled: true
