@@ -243,6 +243,17 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore DB upgrade process using a kubernetes job. The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful helm upgrade.
 
+## Chart version 1.15.0
+
+---
+
+Chart version v1.15.0 sets the V2 vulnerability scanner, based on [Grype](https://github.com/anchore/grype), as the default for new deployments. **Users upgrading from chart versions prior to v1.15.0 will need to explicitly set their preferred vulnerability provider using `.Values.anchorePolicyEngine.vulnerabilityProvider`.** If the vulnerabilityProvider is not explicitly set, Helm will prevent an upgrade from being initiated.
+
+* Anchore Engine image updated to v1.0.0 - [Release Notes](https://engine.anchore.io/docs/releasenotes/100/)
+* Anchore Enterprise image updated to v3.2.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/320/)
+* Enterprise Feeds - Now uses a PVC for the persistent workspace directory. This directory is used by the vulnerability drivers for downloading vulnerability data and should be persistent for optimal performance.
+* Enterprise Feeds - When enabling the Ruby Gems vulnerability driver, the helm chart will now spin up an ephemeral Postgresql deployment for the Feeds service to load Ruby vulnerability data.
+
 ## Chart version 1.14.0
 
 ---
