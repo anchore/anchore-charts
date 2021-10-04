@@ -23,4 +23,9 @@ data:
   {{- else }}
   ANCHORE_DB_HOST: "{{ template "postgres.anchore-feeds-db.fullname" . }}:5432"
   {{- end }}
+  {{- if .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
+  ANCHORE_GEM_DB_NAME: {{ index .Values "anchore-feeds-gem-db" "postgresDatabase" | quote }}
+  ANCHORE_GEM_DB_USER: {{ index .Values "anchore-feeds-gem-db" "postgresUser" | quote }}
+  ANCHORE_GEM_DB_HOST: "{{ default (include "postgres.anchore-feeds-gem-db.fullname" .) (index .Values "anchore-feeds-gem-db" "externalEndpoint") }}:5432"
+  {{- end }}
 {{- end }}

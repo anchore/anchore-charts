@@ -118,6 +118,9 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         volumeMounts:
+        - name: data
+          mountPath: {{ .Values.anchoreEnterpriseFeeds.persistence.mountPath }}
+          subPath: {{ .Values.anchoreEnterpriseFeeds.persistence.subPath }}
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
@@ -165,6 +168,13 @@ spec:
         resources:
           {{ toYaml .Values.anchoreEnterpriseFeeds.resources | nindent 10 }}
       volumes:
+        - name: data
+        {{- if .Values.anchoreEnterpriseFeeds.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.anchoreEnterpriseFeeds.persistence.existingClaim | default (include "anchore-engine.enterprise-feeds.fullname" .) }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
         - name: config-volume
           configMap:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
