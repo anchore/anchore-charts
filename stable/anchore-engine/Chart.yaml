@@ -1,6 +1,6 @@
 apiVersion: v2
 name: anchore-engine
-version: 1.15.8
+version: 1.15.0
 appVersion: 1.0.0
 description: Anchore container analysis and policy evaluation engine service
 keywords:
