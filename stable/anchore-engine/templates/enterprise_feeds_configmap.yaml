@@ -101,12 +101,12 @@ data:
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseFeeds.cycleTimers | nindent 10 }}
         # Staging space for holding normalized output from drivers.
-        local_workspace: {{ .Values.anchoreGlobal.scratchVolume.mountPath }}
+        local_workspace: {{ .Values.anchoreEnterpriseFeeds.persistence.mountPath }}
         # Drivers process data from external sources and store normalized data in local_workspace. Processing large data sets
         # is a time consuming process for some drivers. To speed it up the container is shipped with pre-loaded data which is used
         # by default if local_workspace is empty.
         workspace_preload:
-          # Do not use pre-loaded data if local_workspace is empty. Drivers will generate normalized data from scratch
+          # Do not use pre-loaded data if local_workspace is empty. Drivers will generate normalized data from local_workspace
           # disabled: true
           # To load the workspace from a different location, uncomment and configure workspace_preload_file property to point to the tar.gz file
           workspace_preload_file: "/workspace_preload/data.tar.gz"
@@ -134,29 +134,37 @@ data:
             enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.nvdDriverEnabled | quote) }}
           # npm and gem drivers are explicitly disabled out of the box
           npm:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.npmDriverEnabled | quote) }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.npmDriverEnabled | quote }}
           gem:
             # rubygem data comes packaged as a PostgreSQL dump file. gem driver loads the pg dump and normalizes the data.
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote) }}
-            db_connect: {{ default "'postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/gems'" .Values.anchoreEnterpriseFeeds.gemDbEndpoint }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote }}
+          {{- if .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
+            db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}/${ANCHORE_GEM_DB_NAME}"
+          {{- end }}
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
           vulndb:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | quote) }}
+          sles:
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.slesDriverEnabled | quote) }}
           msrc:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.msrcDriverEnabled | quote) }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled | quote }}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
             whitelist:
               - {{ . }}
             {{- end }}
           github:
-            enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | quote) }}
+            enabled: {{ .Values.anchoreEnterpriseFeeds.githubDriverEnabled | quote }}
           {{- if eq (.Values.anchoreEnterpriseFeeds.githubDriverEnabled | toString) "true" }}
             token: ${ANCHORE_GITHUB_TOKEN}
           {{- end }}
           grypedb:
+          {{- if eq (.Values.anchorePolicyEngine.vulnerabilityProvider | toString ) "legacy" }}
+            enabled: false
+          {{- else }}
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | quote) }}
+          {{- end }}
             external_feeds_url: {{ $grypeProviderFeedsExternalURL }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}

@@ -5,14 +5,23 @@
   {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.anchoreEnterpriseFeeds.url)) -}}
   {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.anchoreEnterpriseFeeds.url) -}}
   {{- $anchoreFeedsURL = (printf "%s/v1/feeds" $anchoreFeedsHost) -}}
-  {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grype" $anchoreFeedsHost) -}}
+  {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grypedb" $anchoreFeedsHost) -}}
 {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
     {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grype"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- else -}}
     {{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grype"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
+{{- if not $vulnerabilityProvider -}}
+  {{- if .Release.IsUpgrade -}}
+    {{ required "A vulnerability provider must be explicitly set with .Values.anchorePolicyEngine.vulnerabilityProvider when upgrading to chart version v1.15.0 or higher." .Values.anchorePolicyEngine.vulnerabilityProvider }}
+  {{- else -}}
+    {{- $vulnerabilityProvider = "grype" -}}
   {{- end -}}
 {{- end -}}
 
@@ -235,7 +244,7 @@ data:
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
         vulnerabilities:
-          provider: {{ .Values.anchorePolicyEngine.vulnerabilityProvider }}
+          provider: {{ $vulnerabilityProvider }}
           sync:
             enabled: true
             ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}

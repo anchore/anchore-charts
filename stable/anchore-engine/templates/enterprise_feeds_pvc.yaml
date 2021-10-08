@@ -1,0 +1,34 @@
+{{- if and (and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled) (and .Values.anchoreEnterpriseFeeds.persistence.enabled (not .Values.anchoreEnterpriseFeeds.persistence.existingClaim)) -}}
+{{- $component := "enterprise-feeds" -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: {{ $component }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/resource-policy": {{ default "" .Values.anchoreEnterpriseFeeds.persistence.resourcePolicy }}
+{{- if .Values.anchoreEnterpriseFeeds.persistence.annotations }}
+{{ toYaml .Values.anchoreEnterpriseFeeds.persistence.annotations | indent 4 }}
+{{- end }}
+spec:
+  accessModes:
+    - {{ .Values.anchoreEnterpriseFeeds.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.anchoreEnterpriseFeeds.persistence.size | quote }}
+{{- if .Values.anchoreEnterpriseFeeds.persistence.storageClass }}
+{{- if (eq "-" .Values.anchoreEnterpriseFeeds.persistence.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.anchoreEnterpriseFeeds.persistence.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end -}}
