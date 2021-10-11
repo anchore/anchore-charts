@@ -22,6 +22,7 @@ data:
       {{- toYaml .Values.kai.namespaces | nindent 6 }}
     mode: {{ .Values.kai.mode }}
     polling-interval-seconds: {{ .Values.kai.pollingIntervalSeconds }}
+    kubernetes-request-timeout-seconds: {{ .Values.kai.kubernetesRequestTimeoutSeconds }}
     anchore:
       url: {{ .Values.kai.anchore.url }}
       user: {{ .Values.kai.anchore.user }}
