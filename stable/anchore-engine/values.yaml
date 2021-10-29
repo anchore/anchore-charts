@@ -98,7 +98,7 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v1.0.0
+  image: docker.io/anchore/anchore-engine:v1.0.1
   imagePullPolicy: IfNotPresent
 
   # Set image pull secret name if using an anchore-engine image from a private registry
@@ -691,7 +691,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v3.2.0
+  image: docker.io/anchore/enterprise:v3.2.1
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -980,7 +980,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v3.2.0
+  image: docker.io/anchore/enterprise-ui:v3.2.1
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
