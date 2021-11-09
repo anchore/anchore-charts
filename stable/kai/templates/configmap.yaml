@@ -30,4 +30,4 @@ data:
       account: {{ .Values.kai.anchore.account }}
       http:
         insecure: {{ .Values.kai.anchore.http.insecure }}
-        timeoutSeconds: {{ .Values.kai.anchore.http.timeoutSeconds }}
+        timeout-seconds: {{ .Values.kai.anchore.http.timeoutSeconds }}
