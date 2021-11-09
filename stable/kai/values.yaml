@@ -99,9 +99,22 @@ kai:
     path: use-in-cluster
     cluster: docker-desktop
 
-  # Which namespaces to search (can just be a single element "all" or it can be multiple)
-  namespaces:
-    - all
+  # Which namespaces to search. Will search all namespaces if left as an empty array
+  namespaces: []
+
+  # Kubernetes API configuration parameters (should not need tuning)
+  kubernetes:
+    # Sets the request timeout for kubernetes API requests
+    requestTimeoutSeconds: 60
+
+    # Sets the number of objects to iteratively return when listing resources
+    requestBatchSize: 100
+
+    # Worker pool size for collecting pods from namespaces. Adjust this if the api-server gets overwhelmed
+    workerPoolSize: 100
+
+  # Ignore images out of pods that are not in a Running state
+  ignoreNotRunning: true
 
   # Can be one of adhoc, periodic (defaults to adhoc)
   mode: periodic
@@ -109,9 +122,7 @@ kai:
   # Only respected if mode is periodic
   pollingIntervalSeconds: 60
 
-  # Configure the request timeout for the k8s api interaction
-  kubernetesRequestTimeoutSeconds: 60
-
+  # Configure the anchore enterprise details
   anchore:
     url:
 
