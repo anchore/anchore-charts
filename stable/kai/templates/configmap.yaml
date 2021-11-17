@@ -22,7 +22,13 @@ data:
       {{- toYaml .Values.kai.namespaces | nindent 6 }}
     mode: {{ .Values.kai.mode }}
     polling-interval-seconds: {{ .Values.kai.pollingIntervalSeconds }}
-    kubernetes-request-timeout-seconds: {{ .Values.kai.kubernetesRequestTimeoutSeconds }}
+    kubernetes:
+      request-timeout-seconds: {{ .Values.kai.kubernetes.requestTimeoutSeconds }}
+      request-batch-size: {{ .Values.kai.kubernetes.requestBatchSize }}
+      worker-pool-size: {{ .Values.kai.kubernetes.workerPoolSize }}
+    ignore-not-running: {{ .Values.kai.ignoreNotRunning }}
+    missing-tag-policy:
+      {{- toYaml .Values.kai.missingTagPolicy | nindent 6 }}
     anchore:
       url: {{ .Values.kai.anchore.url }}
       user: {{ .Values.kai.anchore.user }}
