@@ -8,7 +8,7 @@ image:
   repository: anchore/kai
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.2.2"
+  tag: "v0.3.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -100,7 +100,7 @@ kai:
     cluster: docker-desktop
 
   # Which namespaces to search or exclude.
-  namespaces:
+  namespaceSelectors:
     # Namespaces to include as explicit strings, not regex
     # NOTE: Will search ALL namespaces if left as an empty array
     include: []
@@ -119,7 +119,7 @@ kai:
   mode: periodic
 
   # Only respected if mode is periodic
-  pollingIntervalSeconds: 600
+  pollingIntervalSeconds: 60
 
   # Kubernetes API configuration parameters (should not need tuning)
   kubernetes:
