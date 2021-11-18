@@ -20,8 +20,11 @@ data:
       file: {{ .Values.kai.log.file }}
     namespaces:
       {{- toYaml .Values.kai.namespaces | nindent 6 }}
+    namespace-selectors:
+      {{- toYaml .Values.kai.namespaceSelectors | nindent 6 }}
     mode: {{ .Values.kai.mode }}
     polling-interval-seconds: {{ .Values.kai.pollingIntervalSeconds }}
+    kubernetes-request-timeout-seconds: {{ .Values.kai.kubernetesRequestTimeoutSeconds }}
     kubernetes:
       request-timeout-seconds: {{ .Values.kai.kubernetes.requestTimeoutSeconds }}
       request-batch-size: {{ .Values.kai.kubernetes.requestBatchSize }}
