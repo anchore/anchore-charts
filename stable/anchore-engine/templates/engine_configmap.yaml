@@ -198,6 +198,8 @@ data:
           repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
           k8s_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_watcher }}
           k8s_image_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_image_watcher }}
+        image_gc:
+          max_worker_threads: {{ default 1 .Values.anchoreCatalog.imageGCMaxWorkerThreads }}
         event_log:
           {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
         analysis_archive:
