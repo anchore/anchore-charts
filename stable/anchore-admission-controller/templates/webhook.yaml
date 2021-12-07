@@ -16,6 +16,7 @@ webhooks:
     {{- end }}
   rules:
     {{- toYaml .Values.apiService.webhook.rules | nindent 4}}
+  sideEffects: {{ .Values.apiService.webhook.sideEffects }}
   failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
   namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
 {{- end }}
