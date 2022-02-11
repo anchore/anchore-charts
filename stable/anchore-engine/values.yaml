@@ -789,6 +789,7 @@ anchoreEnterpriseFeeds:
   # ANCHORE_ADMIN_PASSWORD
   # ANCHORE_FEEDS_DB_PASSWORD
   # ANCHORE_SAML_SECRET (if applicable)
+  # ANCHORE_GITHUB_TOKEN (if applicable)
 
   existingSecret: Null
 
