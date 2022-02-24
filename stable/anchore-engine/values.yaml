@@ -141,9 +141,8 @@ anchoreGlobal:
     # fixup the permissions.
     fixGroupPermissions: false
     mountPath: /analysis_scratch
-    details:
+    details: {}
       # Specify volume configuration here
-      emptyDir: {}
 
   # A secret must be created in the same namespace as anchore-engine is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
   # Certs and keys should be added using the file name the certificate is stored at. This secret will be mounted to /home/anchore/certs.
