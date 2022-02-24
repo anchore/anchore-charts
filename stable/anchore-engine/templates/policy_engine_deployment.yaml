@@ -191,7 +191,11 @@ spec:
           configMap:
             name: {{ template "anchore-engine.fullname" . }}
         - name: {{ $component }}-scratch
-          {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        {{- if .Values.anchoreGlobal.scratchVolume.details }}
+          {{- toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
