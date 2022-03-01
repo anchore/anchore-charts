@@ -25,9 +25,9 @@ data:
     # redis_ui: $ANCHORE_REDIS_URI
   {{- if .Values.anchoreEnterpriseRbac.enabled }}
     {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-    rbac_uri: 'https://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseRbac.service.apiPort }}/v1'
+    rbac_uri: 'https://{{ template "anchore-engine.enterprise-rbac.fullname" . }}:{{ .Values.anchoreEnterpriseRbac.service.managerPort }}/v1'
     {{- else }}
-    rbac_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseRbac.service.apiPort }}/v1'
+    rbac_uri: 'http://{{ template "anchore-engine.enterprise-rbac.fullname" . }}:{{ .Values.anchoreEnterpriseRbac.service.managerPort }}/v1'
     {{- end }}
   {{- end }}
   {{- if .Values.anchoreEnterpriseReports.enabled }}
