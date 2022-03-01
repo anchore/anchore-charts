@@ -435,6 +435,7 @@ anchoreCatalog:
     # Interval for the runtime inventory image execution poll
     k8s_watcher: 300
     k8s_image_watcher: 150
+    resource_metrics: 60
 
   # Event log configuration for webhooks
   events:
@@ -541,26 +542,7 @@ anchoreCatalog:
       #     # Create the container if it is not already present
       #     create_container: false
 
-  # kubernetes service configuration for anchore catalog api
-  service:
-    type: ClusterIP
-    port: 8082
-    annotations: {}
-    labels: {}
-
-  # resources:
-  #  limits:
-  #    cpu: 1
-  #    memory: 2G
-  #  requests:
-  #    cpu: 100m
-  #    memory: 500M
-
-  labels: {}
-  annotations: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+  imageGCMaxThreads: 4
 
   # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
   # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
@@ -590,6 +572,27 @@ anchoreCatalog:
       clusterName: anchore-k8s
       namespaces:
         - all
+
+  # kubernetes service configuration for anchore catalog api
+  service:
+    type: ClusterIP
+    port: 8082
+    annotations: {}
+    labels: {}
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 2G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 500M
+
+  labels: {}
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
 
 # Pod configuration for the anchore engine policy service.
 anchorePolicyEngine:
@@ -916,18 +919,24 @@ anchoreEnterpriseReports:
     #   value: bar
 
   # GraphiQL is a GUI for editing and testing GraphQL queries and mutations.
-  # Set enable_graphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
+  # Set enableGraphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
   enableGraphiql: true
 
-  # Set enable_data_ingress to true for periodically syncing data from anchore engine into the reports service
+  # Set enableDataIngress to true for periodically syncing data from anchore engine into the reports service
   enableDataIngress: true
 
-  # Set enable_data_egress to true to periodically remove reporting data that has been removed in other parts of system
+  # Set enableDataEgress to true to periodically remove reporting data that has been removed in other parts of system
   enableDataEgress: true
 
-  # data_egress_window defines a number of days to keep reporting data following its deletion in the rest of system.
+  # dataEgressWindow defines a number of days to keep reporting data following its deletion in the rest of system.
   # Default value of 0 will remove it on next task run
   dataEgressWindow: 0
+
+  # dataRefreshMaxWorkers is the maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service. Set non-negative values greater than 0, otherwise defaults to 10
+  dataRefreshMaxWorkers: 10
+
+  # dataLoadMaxWorkers is the maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service. Set non-negative values greater than 0, otherwise defaults to 10
+  data_load_max_workers: 10
 
   cycleTimers:
     # images and tags synced every 10 minutes
