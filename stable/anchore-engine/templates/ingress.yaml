@@ -105,11 +105,11 @@ spec:
             service:
               name: {{ template "anchore-engine.api.fullname" $ }}
               port:
-                number: {{ $.Values.anchoreEnterpriseReports.service.port }}
+                number: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- else}}
           backend:
             serviceName: {{ template "anchore-engine.api.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseReports.service.port }}
+            servicePort: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- end }}
     {{- end }}
   {{- else }}
@@ -168,11 +168,11 @@ spec:
             service:
               name: {{ template "anchore-engine.api.fullname" $ }}
               port:
-                number: {{ $.Values.anchoreEnterpriseReports.service.port }}
+                number: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- else}}
           backend:
             serviceName: {{ template "anchore-engine.api.fullname" $ }}
-            servicePort: {{ $.Values.anchoreEnterpriseReports.service.port }}
+            servicePort: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- end }}
         {{- end }}
   {{- end }}

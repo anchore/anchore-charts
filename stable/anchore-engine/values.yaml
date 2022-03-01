@@ -914,9 +914,17 @@ anchoreEnterpriseReports:
 
   # GraphiQL is a GUI for editing and testing GraphQL queries and mutations.
   # Set enable_graphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
-  enableGraphql: true
+  enableGraphiql: true
+
   # Set enable_data_ingress to true for periodically syncing data from anchore engine into the reports service
   enableDataIngress: true
+
+  # Set enable_data_egress to true to periodically remove reporting data that has been removed in other parts of system
+  enableDataEgress: true
+
+  # data_egress_window defines a number of days to keep reporting data following its deletion in the rest of system.
+  # Default value of 0 will remove it on next task run
+  dataEgressWindow: 0
 
   cycleTimers:
     # images and tags synced every 10 minutes
@@ -925,11 +933,14 @@ anchoreEnterpriseReports:
     reports_data_refresh: 7200
     # metrics generated every hour
     reports_metrics: 3600
+    reports_data_egress: 600
 
-  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
-  # Due to Reports sharing a service with the general API.
   service:
-    port: 8558
+    type: ClusterIP
+    apiPort: 8558
+    workerPort: 8778
+    annotations: {}
+    labels: {}
 
   # resources:
   #  limits:

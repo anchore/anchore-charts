@@ -32,9 +32,9 @@ data:
   {{- end }}
   {{- if .Values.anchoreEnterpriseReports.enabled }}
     {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-    reports_uri: 'https://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseReports.service.port}}/v1'
+    reports_uri: 'https://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseReports.service.apiPort}}/v1'
     {{- else}}
-    reports_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseReports.service.port}}/v1'
+    reports_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseReports.service.apiPort}}/v1'
     {{- end }}
   {{- end }}
   {{- if .Values.anchoreEnterpriseNotifications.enabled }}

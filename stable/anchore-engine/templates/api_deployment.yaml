@@ -337,12 +337,12 @@ spec:
           {{ toYaml .Values.anchoreEnterpriseRbac.authResources | nindent 10 }}
       {{- end }}
       {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled }}
-      - name: "{{ .Chart.Name }}-reports"
+      - name: "{{ .Chart.Name }}-reports-api"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports"]
         ports:
-        - containerPort: {{ .Values.anchoreEnterpriseReports.service.port }}
+        - containerPort: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
           name: reports-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -413,7 +413,7 @@ spec:
           failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.anchoreEnterpriseReports.resources | nindent 10 }}
+          {{ toYaml .Values.anchoreApi.resources | nindent 10 }}
       {{- end }}
       {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
       - name: "{{ .Chart.Name }}-notifications"
@@ -581,8 +581,8 @@ spec:
     {{- end }}
     {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled }}
     - name: reports-api
-      port: {{ .Values.anchoreEnterpriseReports.service.port }}
-      targetPort: {{ .Values.anchoreEnterpriseReports.service.port }}
+      port: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
+      targetPort: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
       protocol: TCP
     {{- end }}
     {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
