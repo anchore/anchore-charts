@@ -136,7 +136,7 @@ data:
         enable_data_ingress: "{{ .Values.anchoreEnterpriseReports.enableDataIngress }}"
         enable_data_egress: {{ .Values.anchoreEnterpriseReports.enableDataEgress }}
         data_egress_window: {{ .Values.anchoreEnterpriseReports.dataEgressWindow }}
-        data_refresh_max_workers: {{ .Values.anchoreEnterpriseReporst.dataRefreshMaxWorkers }}
+        data_refresh_max_workers: {{ .Values.anchoreEnterpriseReports.dataRefreshMaxWorkers }}
         data_load_max_workers: {{ .Values.anchoreEnterpriseReports.dataLoadMaxWorkers }}
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseReports.cycleTimers | nindent 10 }}
