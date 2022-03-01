@@ -971,10 +971,11 @@ anchoreEnterpriseNotifications:
   # Set the UI URL that is included in the notification
   # uiUrl: "http://<ui_url>"
 
-  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
-  # Due to Reports sharing a service with the general API.
   service:
+    type: ClusterIP
     port: 8668
+    annotations: {}
+    labels: {}
 
   # resources:
   #  limits:

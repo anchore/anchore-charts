@@ -153,7 +153,7 @@ data:
       notifications:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-notifications.fullname" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseNotifications.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseNotifications.maxRequestThreads }}

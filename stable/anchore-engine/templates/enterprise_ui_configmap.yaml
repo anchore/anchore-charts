@@ -39,9 +39,9 @@ data:
   {{- end }}
   {{- if .Values.anchoreEnterpriseNotifications.enabled }}
     {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-    notifications_uri: 'https://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseNotifications.service.port}}/v1'
+    notifications_uri: 'https://{{ template "anchore-engine.enterprise-notifications.fullname" . }}:{{ .Values.anchoreEnterpriseNotifications.service.port}}/v1'
     {{- else}}
-    notifications_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseNotifications.service.port}}/v1'
+    notifications_uri: 'http://{{ template "anchore-engine.enterprise-notifications.fullname" . }}:{{ .Values.anchoreEnterpriseNotifications.service.port}}/v1'
     {{- end }}
   {{- end }}
     # This value is overridden by using the `ANCHORE_APPDB_URI` environment variable.

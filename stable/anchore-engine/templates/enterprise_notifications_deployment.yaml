@@ -1,16 +1,16 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled -}}
-{{- $component := "enterprise-reports" -}}
+{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled -}}
+{{- $component := "enterprise-notifications" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "anchore-engine.enterprise-reports.fullname" . }}
+  name: {{ template "anchore-engine.enterprise-notifications.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- with .Values.anchoreEnterpriseReports.labels }}
+    {{- with .Values.anchoreEnterpriseNotifications.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.anchoreGlobal.labels }}
@@ -30,7 +30,7 @@ spec:
       labels:
         app: {{ template "anchore-engine.fullname" . }}
         component: {{ $component }}
-        {{- with .Values.anchoreEnterpriseReports.labels }}
+        {{- with .Values.anchoreEnterpriseNotifications.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
         {{- with .Values.anchoreGlobal.labels }}
@@ -40,7 +40,7 @@ spec:
       {{- with .Values.anchoreGlobal.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreEnterpriseReports.annotations }}
+      {{- with .Values.anchoreEnterpriseNotifications.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- if not .Values.inject_secrets_via_env }}
@@ -74,10 +74,10 @@ spec:
       - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports_worker"]
+        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "notifications"]
         ports:
-        - containerPort: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
-          name: reports
+        - containerPort: {{ .Values.anchoreEnterpriseNotifications.service.port }}
+          name: notify
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
         {{- if .Values.anchoreGlobal.existingSecret }}
@@ -96,7 +96,7 @@ spec:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.anchoreEnterpriseReports.extraEnv }}
+        {{- with .Values.anchoreEnterpriseNotifications.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         - name: ANCHORE_POD_NAME
@@ -126,7 +126,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: reports
+            port: notify
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
@@ -138,7 +138,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: reports
+            port: notify
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
@@ -147,7 +147,7 @@ spec:
           failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.anchoreEnterpriseReports.resources | nindent 10 }}
+          {{ toYaml .Values.anchoreEnterpriseNotifications.resources | nindent 10 }}
       {{ if .Values.anchoreEnterpriseRbac.enabled }}
       - name: {{ .Chart.Name }}-rbac-authorizer
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
@@ -250,15 +250,15 @@ spec:
           secret:
             secretName: {{ . }}
         {{- end }}
-      {{- with .Values.anchoreEnterpriseReports.nodeSelector }}
+      {{- with .Values.anchoreEnterpriseNotifications.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreEnterpriseReports.affinity }}
+      {{- with .Values.anchoreEnterpriseNotifications.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreEnterpriseReports.tolerations }}
+      {{- with .Values.anchoreEnterpriseNotifications.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
@@ -270,29 +270,29 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.enterprise-reports.fullname" . }}
+  name: {{ template "anchore-engine.enterprise-notifications.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: {{ $component }}
-    {{- with .Values.anchoreEnterpriseReports.service.labels }}
+    {{- with .Values.anchoreEnterpriseNotifications.service.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- with .Values.anchoreEnterpriseReports.service.annotations }}
+  {{- with .Values.anchoreEnterpriseNotifications.service.annotations }}
   annotations:
     {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.anchoreEnterpriseReports.service.type }}
+  type: {{ .Values.anchoreEnterpriseNotifications.service.type }}
   ports:
-    - name: reports
-      port: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
-      targetPort: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
+    - name: notify
+      port: {{ .Values.anchoreEnterpriseNotifications.service.port }}
+      targetPort: {{ .Values.anchoreEnterpriseNotifications.service.port }}
       protocol: TCP
   selector:
     app: {{ template "anchore-engine.fullname" . }}
