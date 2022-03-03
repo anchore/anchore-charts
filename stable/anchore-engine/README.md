@@ -244,6 +244,32 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore database upgrade process using a Kubernetes job. 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.17.0
+
+Chart version 1.17.0 is a tightly scoped release, specifically aimed at enabling the Grype DB Builder within the Anchore Enterprise Feeds service. This upgrade will allow users to easily switch from the legacy vulnerability provider to the next-gen Grype vulnerability provider, without any vulnerability feed downtime. The impacts of this upgrade are as follows:
+
+* For deployments currently utilizing the legacy vulnerability provider, configured with `.Values.anchorePolicyEngine.vulnerabilityProvider=legacy`, this upgrade will enable the GrypeDB Builder feeds source on the Enterprise Feeds service.
+  * Grype is the only supported vulnerability provider for Anchore Enterprise v4.0.0 and higher (coming with chart v1.18.0).
+  * The GrypeDB builder can be manually disabled for legacy deployments using `.Values.anchoreEnterpriseFeeds.grypeDriverEnabled=false`
+
+  ### WARNING
+
+  After this upgrade, the Enterprise Feeds service requires a minimum of 10GB of memory allocated. **Failure to allocate adequate resources to this pod will result in crash loops and an unavailable feeds service.** Resource allocation example:
+
+    ```yaml
+    anchoreEnterpriseFeeds:
+      resources:
+        limits:
+          cpu: 1
+          memory: 10G
+        requests:
+          cpu: 1
+          memory: 10G
+    ```
+
+* For deployments of Anchore Engine, configured with `.Values.anchoreEnterpriseGlobal=false`, this upgrade will have zero impact.
+* For Enterprise deployments currently utilizing the Grype vulnerability provider, configured with `.Values.anchorePolicyEngine.vulnerabilityProvider=grype`, this release will have zero impact.
+
 ## Chart version 1.16.0
 
 * Anchore Engine image updated to v1.1.0 - [Release Notes](https://engine.anchore.io/docs/releasenotes/110/)
