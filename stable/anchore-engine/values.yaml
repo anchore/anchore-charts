@@ -436,6 +436,7 @@ anchoreCatalog:
     k8s_watcher: 300
     k8s_image_watcher: 150
     resource_metrics: 60
+    events_gc: 43200  # 12 hours
 
   # Event log configuration for webhooks
   events:
@@ -485,7 +486,7 @@ anchoreCatalog:
       # Example Swift Configuration:
       # name: swift
       # config:
-      #     # Config for swift has a few options, just add the keys and names as used to configure a swiftclient here. All are passed directly to the client impl.
+      #     # Config for swift has a few options, just add the keys and names as used to configure a swift client here. All are passed directly to the client impl.
       #     user: "test:tester"
       #     key: "testing"
       #     auth: "http://swift_ephemeral:8080/auth/v1.0"
@@ -542,7 +543,7 @@ anchoreCatalog:
       #     # Create the container if it is not already present
       #     create_container: false
 
-  imageGCMaxThreads: 4
+  imageGCMaxMaxWorkerThreads: 4
 
   # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
   # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
@@ -612,10 +613,10 @@ anchorePolicyEngine:
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
 
-  # Available providers are `legacy` and `grype`.
-  # legacy provider offers the same matching logic as previous versions of anchore-engine <= 0.9.4
-  # grype is a new provider that was introduced in 0.10.0, it uses the grype tool for all things vulnerabilities
+  # After chart v1.18.0 the only valid vulnerabilityProvider setting is `grype`, any other settings will fail
   vulnerabilityProvider: grype
+
+  cacheTTL: 3600  # 1 hour
 
   # kubernetes service configuration for anchore policy engine api
   service:

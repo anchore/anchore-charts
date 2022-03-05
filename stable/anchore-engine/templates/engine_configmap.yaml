@@ -196,8 +196,9 @@ data:
           k8s_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_watcher }}
           k8s_image_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_image_watcher }}
           resource_metrics: {{ .Values.anchoreCatalog.cycleTimers.resource_metrics }}
+          events_gc: {{ .Values.anchoreCatalog.cycleTimers.events_gc }}
         image_gc:
-          max_worker_threads: {{ default 1 .Values.anchoreCatalog.imageGCMaxWorkerThreads }}
+          max_worker_threads: {{ .Values.anchoreCatalog.imageGCMaxWorkerThreads }}
         event_log:
           {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
         analysis_archive:
@@ -209,8 +210,6 @@ data:
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
-        image_gc:
-          max_worker_threads: {{ .Values.anchoreCatalog.imageGCMaxThreads }}
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
         runtime_compliance:
           object_store_bucket: "runtime_compliance_check"
@@ -242,6 +241,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.policy-engine.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchorePolicyEngine.service.port }}
+        policy_evaluation_cache_ttl: {{ .Values.anchorePolicyEngine.cacheTTL }}
         cycle_timer_seconds: 1
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
