@@ -440,6 +440,9 @@ anchoreCatalog:
 
   # Event log configuration for webhooks
   events:
+    # Max age of events before they get automatically deleted. 0 is disabled and events will never be deleted unless by user action.
+    # This only applies if EnterpriseGlobal=true, otherwise ignored
+    max_retention_age_days: 0
     notification:
       enabled: false
       # Send notifications for events with severity level that matches items in this list
