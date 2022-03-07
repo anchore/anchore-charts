@@ -244,6 +244,36 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore database upgrade process using a Kubernetes job. 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.17.0
+
+Chart version 1.17.0 is an Enterprise focused release. Anchore Engine users will see no change in behavior from this release.
+
+For Enterprise users, this release specifically helps reduce downtime needed during the transition from the v1 scanner to the v2 scanner. This version sets the GrypeDB driver to run in the feed service v1-scanner deployments so that the GrypeDB is ready when the update to the v2 scanner is made and thus reduces effective downtime during the maintenance window needed for that configuration change.
+
+It is recommended that users upgrade to this chart version prior to changing the scanner configuration to move from the V1 scanner to the V2 scanner.
+
+  ### WARNING
+
+  After this upgrade, the Enterprise Feeds service requires a minimum of 10GB of memory allocated. **Failure to allocate adequate resources to this pod will result in crash loops and an unavailable feeds service.** Resource allocation example:
+
+  ```yaml
+  anchoreEnterpriseFeeds:
+    resources:
+      limits:
+        cpu: 1
+        memory: 10G
+      requests:
+        cpu: 1
+        memory: 10G
+  ```
+
+The impacts of this upgrade are as follows:
+
+* For deployments currently utilizing the V1 (legacy) vulnerability provider, configured with `.Values.anchorePolicyEngine.vulnerabilityProvider=legacy`, this upgrade will enable the GrypeDB Driver on the Enterprise Feeds service.
+  * The GrypeDB driver can be manually disabled for legacy deployments using `.Values.anchoreEnterpriseFeeds.grypeDriverEnabled=false`
+* For deployments of Anchore Engine, configured with `.Values.anchoreEnterpriseGlobal=false`, this upgrade will have zero impact.
+* For Enterprise deployments currently utilizing the Grype vulnerability provider, configured with `.Values.anchorePolicyEngine.vulnerabilityProvider=grype`, this release will have zero impact.
+
 ## Chart version 1.16.0
 
 * Anchore Engine image updated to v1.1.0 - [Release Notes](https://engine.anchore.io/docs/releasenotes/110/)
