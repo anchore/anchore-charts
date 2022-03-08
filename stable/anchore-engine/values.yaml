@@ -548,12 +548,14 @@ anchoreCatalog:
 
   imageGCMaxMaxWorkerThreads: 4
 
+  # **NOTE: all runtime inventory configurations only apply to Anchore Enterprise deployments
+
   # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
   # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
   # detailed information on the Service Account, Cluster Role & Binding.
-  # If using an existing service account, leave this value set to `false` & use anchoreGlobal.serviceAccountName to specify
+  # If using an existing service account, set this value to `false` & use anchoreGlobal.serviceAccountName to specify
   # what service account to use. Existing service account must have adequate permissions to use this feature.
-  createServiceAccount: false
+  createServiceAccount: true
 
   runtimeInventory:
     # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
