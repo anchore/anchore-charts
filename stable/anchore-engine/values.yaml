@@ -1026,6 +1026,28 @@ anchoreEnterpriseUi:
   # ANCHORE_REDIS_URI
   existingSecret: Null
 
+  # The (optional) `appdbConfig` key specifies the connection options
+  # for the application SQL database.
+  #
+  # The `native` setting allows you to toggle the postgreSQL drivers used to connect
+  # to the database between the native and the NodeJS drivers.
+  # 
+  # The `pool` setting defines connection pool options:
+  #   - `max` (default 10) represents the maximum number of simultaneous
+  #     connections allowed in the connection pool.
+  #   - `min` (default 0) is the minimum number of connections. 
+  #   - `acquire` (default 30000) is the timeout in milliseconds used when acquiring 
+  #     a new connection 
+  #   - `idle` (default 10000) is the maximum time that a connection can be idle 
+  #     before being released
+  appDBConfig:
+    native: true
+    pool:
+      max: 10
+      min: 0
+      acquire: 30000
+      idle: 10000
+
   # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
   ldapsRootCaCertName: Null
 

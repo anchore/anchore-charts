@@ -46,6 +46,7 @@ data:
   {{- end }}
     # This value is overridden by using the `ANCHORE_APPDB_URI` environment variable.
     # appdb_uri: $ANCHORE_APPDB_URI
+    appdb_config: {{ toYaml .Values.anchoreEnterpriseUi.appDBConfig | nindent 6}}
     license_path: '/home/anchore/'
     enable_ssl: {{ .Values.anchoreEnterpriseUi.enableSsl }}
     enable_proxy: {{ .Values.anchoreEnterpriseUi.enableProxy }}
