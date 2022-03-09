@@ -253,7 +253,7 @@ The upgrade will only be considered successful when this job completes successfu
 ## Chart version 1.18.0
 
 * Anchore Enterprise image updated to v4.0.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/400/)
-* WARNING: For Anchore Enterprise deployments the v2 (grype) vulnerability scanner is the only valid configuration. The v1 (legacy) vulnerability scanner is no longer supported.
+* WARNING: For Anchore Enterprise 4.0 deployments the v2 (grype) vulnerability scanner is the only valid configuration. The v1 (legacy) vulnerability scanner is no longer supported.
 * The containers in the API pod have been split into 4 separate pods for better control of resource allocation & node placement. The new pods are deployed as follows:
   * External APIs (Engine API & Reports API)
   * Enterprise Notifications service
