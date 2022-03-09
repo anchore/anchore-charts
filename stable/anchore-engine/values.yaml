@@ -941,7 +941,7 @@ anchoreEnterpriseReports:
   dataRefreshMaxWorkers: 10
 
   # dataLoadMaxWorkers is the maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service. Set non-negative values greater than 0, otherwise defaults to 10
-  data_load_max_workers: 10
+  dataLoadMaxWorkers: 10
 
   cycleTimers:
     # images and tags synced every 10 minutes
@@ -1031,14 +1031,14 @@ anchoreEnterpriseUi:
   #
   # The `native` setting allows you to toggle the postgreSQL drivers used to connect
   # to the database between the native and the NodeJS drivers.
-  # 
+  #
   # The `pool` setting defines connection pool options:
   #   - `max` (default 10) represents the maximum number of simultaneous
   #     connections allowed in the connection pool.
-  #   - `min` (default 0) is the minimum number of connections. 
-  #   - `acquire` (default 30000) is the timeout in milliseconds used when acquiring 
-  #     a new connection 
-  #   - `idle` (default 10000) is the maximum time that a connection can be idle 
+  #   - `min` (default 0) is the minimum number of connections.
+  #   - `acquire` (default 30000) is the timeout in milliseconds used when acquiring
+  #     a new connection
+  #   - `idle` (default 10000) is the maximum time that a connection can be idle
   #     before being released
   appDBConfig:
     native: true
