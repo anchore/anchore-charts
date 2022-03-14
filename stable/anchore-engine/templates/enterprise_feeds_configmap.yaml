@@ -130,6 +130,7 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled | quote) }}
           rhel:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
+            concurrency: {{ .Values.anchoreEnterpriseFeeds.rhelDriverConcurrency }}
           nvddb:
             enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.nvdDriverEnabled | quote) }}
           # npm and gem drivers are explicitly disabled out of the box

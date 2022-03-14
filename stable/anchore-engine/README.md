@@ -244,6 +244,10 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore database upgrade process using a Kubernetes job. 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.17.1
+
+* The number of concurrent worker threads used for downloading RHEL feeds has been made configurable and the default value has been reduced from 20 to 5. The default number of threads has been reduced due to recent throttling on concurrent requests from RHEL that was causing feed download failures.
+
 ## Chart version 1.17.0
 
 Chart version 1.17.0 is an Enterprise focused release. Anchore Engine users will see no change in behavior from this release.
