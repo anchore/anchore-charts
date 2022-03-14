@@ -931,7 +931,7 @@ anchoreEnterpriseReports:
   enableDataIngress: true
 
   # Set enableDataEgress to true to periodically remove reporting data that has been removed in other parts of system
-  enableDataEgress: true
+  enableDataEgress: false
 
   # dataEgressWindow defines a number of days to keep reporting data following its deletion in the rest of system.
   # Default value of 0 will remove it on next task run
