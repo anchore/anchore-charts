@@ -435,9 +435,14 @@ anchoreCatalog:
     # Interval for the runtime inventory image execution poll
     k8s_watcher: 300
     k8s_image_watcher: 150
+    resource_metrics: 60
+    events_gc: 43200  # 12 hours
 
   # Event log configuration for webhooks
   events:
+    # Max age of events before they get automatically deleted. 0 is disabled and events will never be deleted unless by user action.
+    # This only applies if EnterpriseGlobal=true, otherwise ignored
+    max_retention_age_days: 0
     notification:
       enabled: false
       # Send notifications for events with severity level that matches items in this list
@@ -484,7 +489,7 @@ anchoreCatalog:
       # Example Swift Configuration:
       # name: swift
       # config:
-      #     # Config for swift has a few options, just add the keys and names as used to configure a swiftclient here. All are passed directly to the client impl.
+      #     # Config for swift has a few options, just add the keys and names as used to configure a swift client here. All are passed directly to the client impl.
       #     user: "test:tester"
       #     key: "testing"
       #     auth: "http://swift_ephemeral:8080/auth/v1.0"
@@ -541,33 +546,16 @@ anchoreCatalog:
       #     # Create the container if it is not already present
       #     create_container: false
 
-  # kubernetes service configuration for anchore catalog api
-  service:
-    type: ClusterIP
-    port: 8082
-    annotations: {}
-    labels: {}
+  imageGCMaxMaxWorkerThreads: 4
 
-  # resources:
-  #  limits:
-  #    cpu: 1
-  #    memory: 2G
-  #  requests:
-  #    cpu: 100m
-  #    memory: 500M
-
-  labels: {}
-  annotations: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+  # **NOTE: all runtime inventory configurations only apply to Anchore Enterprise deployments
 
   # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
   # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
   # detailed information on the Service Account, Cluster Role & Binding.
-  # If using an existing service account, leave this value set to `false` & use anchoreGlobal.serviceAccountName to specify
+  # If using an existing service account, set this value to `false` & use anchoreGlobal.serviceAccountName to specify
   # what service account to use. Existing service account must have adequate permissions to use this feature.
-  createServiceAccount: false
+  createServiceAccount: true
 
   runtimeInventory:
     # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
@@ -591,6 +579,27 @@ anchoreCatalog:
       namespaces:
         - all
 
+  # kubernetes service configuration for anchore catalog api
+  service:
+    type: ClusterIP
+    port: 8082
+    annotations: {}
+    labels: {}
+
+  # resources:
+  #  limits:
+  #    cpu: 1
+  #    memory: 2G
+  #  requests:
+  #    cpu: 100m
+  #    memory: 500M
+
+  labels: {}
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
 # Pod configuration for the anchore engine policy service.
 anchorePolicyEngine:
   replicaCount: 1
@@ -609,11 +618,10 @@ anchorePolicyEngine:
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
 
-  # Available providers are `legacy` and `grype`.
-  # legacy provider offers the same matching logic as previous versions of anchore-engine <= 0.9.4
-  # grype is a new provider that was introduced in 0.10.0, it uses the grype tool for all things vulnerabilities
-  # When vulnerabilityProvider is left unset the provider defaults to `grype` on new deployments. When upgrading from a chart version <1.15.0, vulnerabilityProvider will default to `legacy`.
-  vulnerabilityProvider: null
+  # After chart v1.18.0 the only valid vulnerabilityProvider setting is `grype`, any other settings will fail
+  vulnerabilityProvider: grype
+
+  cacheTTL: 3600  # 1 hour
 
   # kubernetes service configuration for anchore policy engine api
   service:
@@ -690,7 +698,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v3.3.0
+  image: docker.io/anchore/enterprise:v4.0.0
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -884,8 +892,11 @@ anchoreEnterpriseRbac:
   # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
   # Due to RBAC sharing a service with the general API.
   service:
-    apiPort: 8229
+    managerPort: 8229
     authPort: 8089
+    type: ClusterIP
+    annotations: {}
+    labels: {}
 
   # authResources:
   #  limits:
@@ -913,10 +924,24 @@ anchoreEnterpriseReports:
     #   value: bar
 
   # GraphiQL is a GUI for editing and testing GraphQL queries and mutations.
-  # Set enable_graphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
-  enableGraphql: true
-  # Set enable_data_ingress to true for periodically syncing data from anchore engine into the reports service
+  # Set enableGraphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
+  enableGraphiql: true
+
+  # Set enableDataIngress to true for periodically syncing data from anchore engine into the reports service
   enableDataIngress: true
+
+  # Set enableDataEgress to true to periodically remove reporting data that has been removed in other parts of system
+  enableDataEgress: false
+
+  # dataEgressWindow defines a number of days to keep reporting data following its deletion in the rest of system.
+  # Default value of 0 will remove it on next task run
+  dataEgressWindow: 0
+
+  # dataRefreshMaxWorkers is the maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service. Set non-negative values greater than 0, otherwise defaults to 10
+  dataRefreshMaxWorkers: 10
+
+  # dataLoadMaxWorkers is the maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service. Set non-negative values greater than 0, otherwise defaults to 10
+  dataLoadMaxWorkers: 10
 
   cycleTimers:
     # images and tags synced every 10 minutes
@@ -925,11 +950,14 @@ anchoreEnterpriseReports:
     reports_data_refresh: 7200
     # metrics generated every hour
     reports_metrics: 3600
+    reports_data_egress: 600
 
-  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
-  # Due to Reports sharing a service with the general API.
   service:
-    port: 8558
+    type: ClusterIP
+    apiPort: 8558
+    workerPort: 8778
+    annotations: {}
+    labels: {}
 
   # resources:
   #  limits:
@@ -960,10 +988,11 @@ anchoreEnterpriseNotifications:
   # Set the UI URL that is included in the notification
   # uiUrl: "http://<ui_url>"
 
-  # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
-  # Due to Reports sharing a service with the general API.
   service:
+    type: ClusterIP
     port: 8668
+    annotations: {}
+    labels: {}
 
   # resources:
   #  limits:
@@ -983,7 +1012,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v3.3.0
+  image: docker.io/anchore/enterprise-ui:v4.0.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
@@ -996,6 +1025,28 @@ anchoreEnterpriseUi:
   # ANCHORE_APPDB_URI
   # ANCHORE_REDIS_URI
   existingSecret: Null
+
+  # The (optional) `appdbConfig` key specifies the connection options
+  # for the application SQL database.
+  #
+  # The `native` setting allows you to toggle the postgreSQL drivers used to connect
+  # to the database between the native and the NodeJS drivers.
+  #
+  # The `pool` setting defines connection pool options:
+  #   - `max` (default 10) represents the maximum number of simultaneous
+  #     connections allowed in the connection pool.
+  #   - `min` (default 0) is the minimum number of connections.
+  #   - `acquire` (default 30000) is the timeout in milliseconds used when acquiring
+  #     a new connection
+  #   - `idle` (default 10000) is the maximum time that a connection can be idle
+  #     before being released
+  appDBConfig:
+    native: true
+    pool:
+      max: 10
+      min: 0
+      acquire: 30000
+      idle: 10000
 
   # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
   ldapsRootCaCertName: Null

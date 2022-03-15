@@ -1,15 +1,16 @@
-{{- $component := "catalog" -}}
+{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled -}}
+{{- $component := "enterprise-reports" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
+  name: {{ template "anchore-engine.enterprise-reports.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
+    component: {{ $component }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    component: {{ $component }}
-    {{- with .Values.anchoreCatalog.labels }}
+    {{- with .Values.anchoreEnterpriseReports.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.anchoreGlobal.labels }}
@@ -20,7 +21,7 @@ spec:
     matchLabels:
       app: {{ template "anchore-engine.fullname" . }}
       component: {{ $component }}
-  replicas: {{ .Values.anchoreCatalog.replicaCount }}
+  replicas: 1
   strategy:
     type: Recreate
     rollingUpdate: null
@@ -29,7 +30,7 @@ spec:
       labels:
         app: {{ template "anchore-engine.fullname" . }}
         component: {{ $component }}
-        {{- with .Values.anchoreCatalog.labels }}
+        {{- with .Values.anchoreEnterpriseReports.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
         {{- with .Values.anchoreGlobal.labels }}
@@ -39,31 +40,21 @@ spec:
       {{- with .Values.anchoreGlobal.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreCatalog.annotations }}
+      {{- with .Values.anchoreEnterpriseReports.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- if not .Values.inject_secrets_via_env }}
         checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
-        checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
-      {{- if .Values.anchoreGlobal.policyBundles }}
-        checksum/policy-config: {{ include (print $.Template.BasePath "/policy_bundle_configmap.yaml") . | sha256sum }}
-      {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
       securityContext:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-    {{- if .Values.anchoreEnterpriseGlobal.enabled }}
       imagePullSecrets:
       - name: {{ .Values.anchoreEnterpriseGlobal.imagePullSecretName }}
-    {{- else }}
-      {{- with .Values.anchoreGlobal.imagePullSecretName }}
-      imagePullSecrets:
-      - name: {{ . }}
-      {{- end }}
-    {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -80,19 +71,13 @@ spec:
           readOnly: true
         {{- end }}
       {{- end }}
-      - name: {{ .Chart.Name }}-{{ $component }}
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
+      - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        {{- else }}
-        image: {{ .Values.anchoreGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
-        {{- end }}
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "catalog"]
-        {{- else }}
-        args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "catalog"]
-        {{- end }}
+        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports_worker"]
+        ports:
+        - containerPort: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
+          name: reports
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
         {{- if .Values.anchoreGlobal.existingSecret }}
@@ -111,32 +96,17 @@ spec:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- with .Values.anchoreCatalog.extraEnv }}
+        {{- with .Values.anchoreEnterpriseReports.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         - name: ANCHORE_POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        ports:
-        - name: catalog
-          containerPort: {{ .Values.anchoreCatalog.service.port }}
         volumeMounts:
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        - name: anchore-license
-          mountPath: /home/anchore/license.yaml
-          subPath: license.yaml
-        {{- end }}
         - name: config-volume
           mountPath: /config/config.yaml
           subPath: config.yaml
-        {{- if .Values.anchoreGlobal.policyBundles }}
-        {{- range $key, $value := .Values.anchoreGlobal.policyBundles }}
-        - name: policy-bundle-volume
-          mountPath: {{ $.Values.anchoreGlobal.serviceDir  }}/bundles/{{ $key }}
-          subPath: {{ $key }}
-        {{- end }}
-        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           mountPath: /anchore_service_config
@@ -145,6 +115,9 @@ spec:
         - name: run
           mountPath: /var/run/anchore
         {{- end }}
+        - name: anchore-license
+          mountPath: /home/anchore/license.yaml
+          subPath: license.yaml
         {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
@@ -153,7 +126,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: catalog
+            port: reports
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
@@ -165,7 +138,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: catalog
+            port: reports
             {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
             scheme: HTTPS
             {{- end }}
@@ -174,21 +147,11 @@ spec:
           failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.anchoreCatalog.resources | nindent 10 }}
+          {{ toYaml .Values.anchoreEnterpriseReports.resources | nindent 10 }}
       volumes:
-        {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        - name: anchore-license
-          secret:
-            secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
-        {{- end }}
         - name: config-volume
           configMap:
-            name: {{ template "anchore-engine.fullname" . }}
-        {{- if .Values.anchoreGlobal.policyBundles }}
-        - name: policy-bundle-volume
-          configMap:
-            name: {{ template "anchore-engine.fullname" . }}-policy-bundles
-        {{- end }}
+            name: {{ template "anchore-engine.enterprise.fullname" . }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -197,62 +160,64 @@ spec:
         - name: run
           emptyDir: {}
         {{- end }}
-        {{- with .Values.anchoreGlobal.certStoreSecretName }}
-        - name: certs
+        - name: anchore-license
           secret:
-            secretName: {{ . }}
-        {{- end }}
+            secretName: {{ .Values.anchoreEnterpriseGlobal.licenseSecretName }}
         {{- if .Values.cloudsql.useExistingServiceAcc }}
         - name: {{ .Values.cloudsql.serviceAccSecretName }}
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
         {{- end }}
-      {{- with .Values.anchoreCatalog.nodeSelector }}
+        {{- with .Values.anchoreGlobal.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+        {{- end }}
+      {{- with .Values.anchoreEnterpriseReports.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreCatalog.affinity }}
+      {{- with .Values.anchoreEnterpriseReports.affinity }}
       affinity:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreCatalog.tolerations }}
+      {{- with .Values.anchoreEnterpriseReports.tolerations }}
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.anchoreGlobal.serviceAccountName }}
-      serviceAccountName: {{ .Values.anchoreGlobal.serviceAccountName }}
-      {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreCatalog.createServiceAccount .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
-      serviceAccountName: {{ template "anchore-engine.catalog.fullname" . }}
+      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ . }}
       {{- end }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
+  name: {{ template "anchore-engine.enterprise-reports.fullname" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: {{ $component }}
-    {{- with .Values.anchoreCatalog.service.labels }}
+    {{- with .Values.anchoreEnterpriseReports.service.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- with .Values.anchoreCatalog.service.annotations }}
+  {{- with .Values.anchoreEnterpriseReports.service.annotations }}
   annotations:
     {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.anchoreCatalog.service.type }}
+  type: {{ .Values.anchoreEnterpriseReports.service.type }}
   ports:
-    - name: anchore-catalog-api
-      port: {{ .Values.anchoreCatalog.service.port }}
-      targetPort: {{ .Values.anchoreCatalog.service.port }}
+    - name: reports
+      port: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
+      targetPort: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
       protocol: TCP
   selector:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}
+{{- end -}}

@@ -17,12 +17,8 @@
 {{- end -}}
 
 {{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
-{{- if not $vulnerabilityProvider -}}
-  {{- if .Release.IsUpgrade -}}
-    {{ required "A vulnerability provider must be explicitly set with .Values.anchorePolicyEngine.vulnerabilityProvider when upgrading to chart version v1.15.0 or higher." .Values.anchorePolicyEngine.vulnerabilityProvider }}
-  {{- else -}}
-    {{- $vulnerabilityProvider = "grype" -}}
-  {{- end -}}
+{{- if and .Values.anchoreEnterpriseGlobal.enabled (ne $vulnerabilityProvider "grype") -}}
+    {{ fail "The v2 (grype) vulnerability scanner is the only valid configuration for chart v1.18.0 and higher. Please set the following: `.Values.anchorePolicyEngine.vulnerabilityProvider=grype`." }}
 {{- end -}}
 
 kind: ConfigMap
@@ -198,8 +194,10 @@ data:
           repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
           k8s_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_watcher }}
           k8s_image_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_image_watcher }}
+          resource_metrics: {{ .Values.anchoreCatalog.cycleTimers.resource_metrics }}
+          events_gc: {{ .Values.anchoreCatalog.cycleTimers.events_gc }}
         image_gc:
-          max_worker_threads: {{ default 1 .Values.anchoreCatalog.imageGCMaxWorkerThreads }}
+          max_worker_threads: {{ .Values.anchoreCatalog.imageGCMaxWorkerThreads }}
         event_log:
           {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
         analysis_archive:
@@ -242,6 +240,7 @@ data:
         endpoint_hostname: {{ template "anchore-engine.policy-engine.fullname" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchorePolicyEngine.service.port }}
+        policy_evaluation_cache_ttl: {{ .Values.anchorePolicyEngine.cacheTTL }}
         cycle_timer_seconds: 1
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}

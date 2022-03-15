@@ -183,83 +183,6 @@ spec:
         resources:
           {{ toYaml .Values.anchoreApi.resources | nindent 10 }}
       {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseRbac.enabled }}
-      - name: {{ .Chart.Name }}-rbac-manager
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
-        envFrom:
-        {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
-        - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
-        {{- else }}
-        - secretRef:
-            name: {{ include "anchore-engine.fullname" . }}
-        - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
-        {{- end }}
-        {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
-        env:
-        {{- with .Values.anchoreGlobal.extraEnv }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.anchoreEnterpriseRbac.extraEnv }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-        - name: ANCHORE_POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        ports:
-        - containerPort: {{ .Values.anchoreEnterpriseRbac.service.apiPort }}
-          name: rbac-manager
-        volumeMounts:
-        - name: anchore-license
-          mountPath: /home/anchore/license.yaml
-          subPath: license.yaml
-        - name: enterprise-config-volume
-          mountPath: /config/config.yaml
-          subPath: config.yaml
-        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
-        - name: certs
-          mountPath: /home/anchore/certs/
-          readOnly: true
-        {{- end }}
-        {{- if .Values.anchoreGlobal.openShiftDeployment }}
-        - name: service-config-volume
-          mountPath: /anchore_service_config
-        - name: logs
-          mountPath: /var/log/anchore
-        - name: run
-          mountPath: /var/run/anchore
-        {{- end }}
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: rbac-manager
-            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-            scheme: HTTPS
-            {{- end }}
-          initialDelaySeconds: {{ .Values.anchoreGlobal.probes.liveness.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.anchoreGlobal.probes.liveness.timeoutSeconds }}
-          periodSeconds: {{ .Values.anchoreGlobal.probes.liveness.periodSeconds }}
-          failureThreshold: {{ .Values.anchoreGlobal.probes.liveness.failureThreshold }}
-          successThreshold: {{ .Values.anchoreGlobal.probes.liveness.successThreshold }}
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: rbac-manager
-            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-            scheme: HTTPS
-            {{- end }}
-          timeoutSeconds: {{ .Values.anchoreGlobal.probes.readiness.timeoutSeconds }}
-          periodSeconds: {{ .Values.anchoreGlobal.probes.readiness.periodSeconds }}
-          failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
-          successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
-        resources:
-          {{ toYaml .Values.anchoreEnterpriseRbac.managerResources | nindent 10 }}
       - name: {{ .Chart.Name }}-rbac-authorizer
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
@@ -337,12 +260,12 @@ spec:
           {{ toYaml .Values.anchoreEnterpriseRbac.authResources | nindent 10 }}
       {{- end }}
       {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled }}
-      - name: "{{ .Chart.Name }}-reports"
+      - name: "{{ .Chart.Name }}-reports-api"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
         args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports"]
         ports:
-        - containerPort: {{ .Values.anchoreEnterpriseReports.service.port }}
+        - containerPort: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
           name: reports-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -413,86 +336,7 @@ spec:
           failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.anchoreEnterpriseReports.resources | nindent 10 }}
-      {{- end }}
-      {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
-      - name: "{{ .Chart.Name }}-notifications"
-        image: {{ .Values.anchoreEnterpriseGlobal.image }}
-        imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "notifications"]
-        ports:
-        - containerPort: {{ .Values.anchoreEnterpriseNotifications.service.port }}
-          name: notifi-api
-        envFrom:
-        {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
-        - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
-        {{- else }}
-        - secretRef:
-            name: {{ include "anchore-engine.fullname" . }}
-        - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
-        {{- end }}
-        {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
-        env:
-        {{- with .Values.anchoreGlobal.extraEnv }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- with .Values.anchoreEnterpriseNotifications.extraEnv }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-        - name: ANCHORE_POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        volumeMounts:
-        - name: enterprise-config-volume
-          mountPath: /config/config.yaml
-          subPath: config.yaml
-        - name: anchore-license
-          mountPath: /home/anchore/license.yaml
-          subPath: license.yaml
-        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
-        - name: certs
-          mountPath: /home/anchore/certs/
-          readOnly: true
-        {{- end }}
-        {{- if .Values.anchoreGlobal.openShiftDeployment }}
-        - name: service-config-volume
-          mountPath: /anchore_service_config
-        - name: logs
-          mountPath: /var/log/anchore
-        - name: run
-          mountPath: /var/run/anchore
-        {{- end }}
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: notifi-api
-            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-            scheme: HTTPS
-            {{- end }}
-          initialDelaySeconds: {{ .Values.anchoreGlobal.probes.liveness.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.anchoreGlobal.probes.liveness.timeoutSeconds }}
-          periodSeconds: {{ .Values.anchoreGlobal.probes.liveness.periodSeconds }}
-          failureThreshold: {{ .Values.anchoreGlobal.probes.liveness.failureThreshold }}
-          successThreshold: {{ .Values.anchoreGlobal.probes.liveness.successThreshold }}
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: notifi-api
-            {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-            scheme: HTTPS
-            {{- end }}
-          timeoutSeconds: {{ .Values.anchoreGlobal.probes.readiness.timeoutSeconds }}
-          periodSeconds: {{ .Values.anchoreGlobal.probes.readiness.periodSeconds }}
-          failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
-          successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
-        resources:
-          {{ toYaml .Values.anchoreEnterpriseNotifications.resources | nindent 10 }}
+          {{ toYaml .Values.anchoreApi.resources | nindent 10 }}
       {{- end }}
       volumes:
         - name: config-volume
@@ -573,22 +417,10 @@ spec:
       port: {{ .Values.anchoreApi.service.port }}
       targetPort: {{ .Values.anchoreApi.service.port }}
       protocol: TCP
-    {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseRbac.enabled }}
-    - name: anchore-rbac-manager
-      port: {{ .Values.anchoreEnterpriseRbac.service.apiPort }}
-      targetPort: {{ .Values.anchoreEnterpriseRbac.service.apiPort }}
-      protocol: TCP
-    {{- end }}
     {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled }}
     - name: reports-api
-      port: {{ .Values.anchoreEnterpriseReports.service.port }}
-      targetPort: {{ .Values.anchoreEnterpriseReports.service.port }}
-      protocol: TCP
-    {{- end }}
-    {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseNotifications.enabled }}
-    - name: notifi-api
-      port: {{ .Values.anchoreEnterpriseNotifications.service.port }}
-      targetPort: {{ .Values.anchoreEnterpriseNotifications.service.port }}
+      port: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
+      targetPort: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
       protocol: TCP
     {{- end }}
   selector:
