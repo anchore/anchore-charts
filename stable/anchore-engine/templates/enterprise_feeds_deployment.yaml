@@ -43,7 +43,7 @@ spec:
       {{- with .Values.anchoreEnterpriseFeeds.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if not .Values.inject_secrets_via_env }}
+      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreEnterpriseUi.existingSecret) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_feeds_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/env: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap_env.yaml") . | sha256sum }}
