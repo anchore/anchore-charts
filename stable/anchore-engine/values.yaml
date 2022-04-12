@@ -546,8 +546,6 @@ anchoreCatalog:
       #     # Create the container if it is not already present
       #     create_container: false
 
-  imageGCMaxMaxWorkerThreads: 4
-
   # **NOTE: all runtime inventory configurations only apply to Anchore Enterprise deployments
 
   # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
