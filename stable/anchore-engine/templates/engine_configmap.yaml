@@ -197,7 +197,7 @@ data:
           resource_metrics: {{ .Values.anchoreCatalog.cycleTimers.resource_metrics }}
           events_gc: {{ .Values.anchoreCatalog.cycleTimers.events_gc }}
         image_gc:
-          max_worker_threads: {{ .Values.anchoreCatalog.imageGCMaxWorkerThreads }}
+          max_worker_threads: {{ default 4 .Values.anchoreCatalog.imageGCMaxWorkerThreads }}
         event_log:
           {{- toYaml .Values.anchoreCatalog.events | nindent 10 }}
         analysis_archive:
