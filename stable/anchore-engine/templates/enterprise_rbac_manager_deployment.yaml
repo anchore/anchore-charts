@@ -147,7 +147,7 @@ spec:
           failureThreshold: {{ .Values.anchoreGlobal.probes.readiness.failureThreshold }}
           successThreshold: {{ .Values.anchoreGlobal.probes.readiness.successThreshold }}
         resources:
-          {{ toYaml .Values.anchoreEnterpriseRbac.resources | nindent 10 }}
+          {{ toYaml .Values.anchoreEnterpriseRbac.managerResources | nindent 10 }}
       - name: {{ .Chart.Name }}-rbac-authorizer
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
