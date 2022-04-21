@@ -16,12 +16,12 @@ metadata:
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- if or .Values.anchoreGlobal.metadata.annotations .Values.anchoreEnterpriseFeeds.metadata.annotations }}
+  {{- if or .Values.anchoreGlobal.deploymentAnnotations .Values.anchoreEnterpriseFeeds.deploymentAnnotations }}
   annotations:
-  {{- with .Values.anchoreGlobal.metadata.annotations }}
+  {{- with .Values.anchoreGlobal.deploymentAnnotations }}
     {{ toYaml . | indent 4 }}
   {{- end }}
-  {{- with .Values.anchoreEnterpriseFeeds.metadata.annotations }}
+  {{- with .Values.anchoreEnterpriseFeeds.deploymentAnnotations }}
     {{ toYaml . | indent 4 }}
   {{- end }}
   {{- end }}

@@ -15,12 +15,12 @@ metadata:
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- if or .Values.anchoreGlobal.metadata.annotations .Values.anchoreSimpleQueue.metadata.annotations }}
+  {{- if or .Values.anchoreGlobal.deploymentAnnotations .Values.anchoreSimpleQueue.deploymentAnnotations }}
   annotations:
-  {{- with .Values.anchoreGlobal.metadata.annotations }}
+  {{- with .Values.anchoreGlobal.deploymentAnnotations }}
     {{ toYaml . | indent 4 }}
   {{- end }}
-  {{- with .Values.anchoreSimpleQueue.metadata.annotations }}
+  {{- with .Values.anchoreSimpleQueue.deploymentAnnotations }}
     {{ toYaml . | indent 4 }}
   {{- end }}
   {{- end }}
