@@ -385,7 +385,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreApi.serviceAccountName | default .Values.anchoreGlobal.serviceAccountName }}
+      {{- with include "anchore-engine.api.serviceAccountName" . }}
       serviceAccountName: {{ . }}
       {{- end }}
 

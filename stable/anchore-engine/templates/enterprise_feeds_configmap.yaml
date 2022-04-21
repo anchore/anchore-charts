@@ -9,9 +9,9 @@
   {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/" $anchoreFeedsHost) -}}
 {{- else -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- else -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- end -}}
 {{- end -}}
 
@@ -93,7 +93,7 @@ data:
       feeds:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseFeeds.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseFeeds.maxRequestThreads }}

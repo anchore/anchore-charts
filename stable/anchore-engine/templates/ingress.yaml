@@ -85,12 +85,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- end }}
     {{- end }}
@@ -151,12 +151,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- end }}
         {{- end }}

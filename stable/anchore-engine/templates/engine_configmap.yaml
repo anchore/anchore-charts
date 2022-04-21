@@ -8,11 +8,11 @@
   {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grypedb" $anchoreFeedsHost) -}}
 {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
-    {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- else -}}
-    {{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- end -}}
 {{- end -}}
 
@@ -165,7 +165,7 @@ data:
       catalog:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.catalog.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.catalog.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreCatalog.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreCatalog.maxRequestThreads }}
@@ -224,7 +224,7 @@ data:
       simplequeue:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.simplequeue.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.simplequeue.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreSimpleQueue.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreSimpleQueue.maxRequestThreads }}
@@ -237,7 +237,7 @@ data:
         enabled: true
         require_auth: true
         max_request_threads: {{ default 50 .Values.anchorePolicyEngine.maxRequestThreads }}
-        endpoint_hostname: {{ template "anchore-engine.policy-engine.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.policy-engine.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchorePolicyEngine.service.port }}
         policy_evaluation_cache_ttl: {{ .Values.anchorePolicyEngine.cacheTTL }}

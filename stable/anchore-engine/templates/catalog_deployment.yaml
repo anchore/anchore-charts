@@ -219,17 +219,15 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.anchoreGlobal.serviceAccountName }}
-      serviceAccountName: {{ .Values.anchoreGlobal.serviceAccountName }}
-      {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreCatalog.createServiceAccount .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
-      serviceAccountName: {{ template "anchore-engine.catalog.fullname" . }}
+      {{- if or (or .Values.anchoreGlobal.serviceAccountName .Values.anchoreEnterpriseRbac.serviceAccountName) (and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreCatalog.createServiceAccount .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled) }}
+      serviceAccountName: {{ template "anchore-engine.catalog.serviceAccountName" . }}
       {{- end }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
+  name: {{ template "anchore-engine.catalog.serviceName" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}

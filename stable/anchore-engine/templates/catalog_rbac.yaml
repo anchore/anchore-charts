@@ -1,9 +1,12 @@
+# if the user is setting a global service account name and not overriding it
+# for this component, then there is no need to create this service account.
+{{- if or (not .Values.anchoreGlobal.serviceAccountName) .Values.anchoreCatalog.serviceAccountName }}
 {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreCatalog.createServiceAccount .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "anchore-engine.catalog.fullname" . }}
+  name: {{ template "anchore-engine.catalog.serviceAccountName" . }}
   labels:
     {{- with .Values.anchoreCatalog.labels }}
     {{ toYaml . | nindent 4 }}
@@ -55,10 +58,11 @@ metadata:
   {{- end }}
 subjects:
   - kind: ServiceAccount
-    name: {{ template "anchore-engine.catalog.fullname" . }}
+    name: {{ template "anchore-engine.catalog.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: {{ template "anchore-engine.catalog.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
+{{- end }}
 {{- end }}

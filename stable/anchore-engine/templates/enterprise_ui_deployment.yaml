@@ -171,9 +171,9 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
      {{- end }}
-     {{- with .Values.anchoreEnterpriseUi.serviceAccountName | default .Values.anchoreGlobal.serviceAccountName }}
+     {{- with include "anchore-engine.enterprise-ui.serviceAccountName" . }}
       serviceAccountName: {{ . }}
-      {{- end }}
+     {{- end }}
 
 ---
 apiVersion: v1
