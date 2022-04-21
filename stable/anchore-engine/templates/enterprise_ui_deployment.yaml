@@ -171,7 +171,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
      {{- end }}
-     {{- with .Values.anchoreGlobal.serviceAccountName }}
+     {{- with .Values.anchoreEnterpriseUi.serviceAccountName | default .Values.anchoreGlobal.serviceAccountName }}
       serviceAccountName: {{ . }}
       {{- end }}
 
@@ -179,7 +179,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+  name: {{ include "anchore-engine.enterprise-ui.serviceName" . | quote }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}

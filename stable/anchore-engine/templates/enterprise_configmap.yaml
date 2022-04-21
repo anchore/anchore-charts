@@ -111,7 +111,7 @@ data:
       reports:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.api.serviceName" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
         max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
@@ -167,7 +167,7 @@ data:
         {{- if .Values.anchoreEnterpriseNotifications.uiUrl }}
         ui_url: "{{ .Values.anchoreEnterpriseNotifications.uiUrl }}"
         {{- else }}
-        ui_url: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+        ui_url: {{ include "anchore-engine.enterprise-ui.serviceName" . | quote }}
         {{- end }}
       {{- end }}
 {{- end -}}

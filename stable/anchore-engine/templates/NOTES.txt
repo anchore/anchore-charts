@@ -1,7 +1,7 @@
 To use Anchore Engine you need the URL, username, and password to access the API.
 
 Anchore Engine can be accessed via port {{ .Values.anchoreApi.service.port }} on the following DNS name from within the cluster:
-{{ template "anchore-engine.api.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ template "anchore-engine.api.serviceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
 
 Here are the steps to configure the anchore-cli (`pip install anchorecli`). Use these same values for direct API access as well.
 
@@ -13,7 +13,7 @@ To configure your anchore-cli run:
    ANCHORE_CLI_URL={{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}https{{- else }}http{{- end -}}://$(kubectl get ingress --namespace {{ .Release.Namespace }} {{ template "anchore-engine.fullname" . }} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")/v1/
 {{ else }}
 Using the service endpoint from within the cluster you can use:
-    ANCHORE_CLI_URL={{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}https{{- else }}http{{- end -}}://{{ template "anchore-engine.api.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.anchoreApi.service.port}}/v1/
+    ANCHORE_CLI_URL={{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}https{{- else }}http{{- end -}}://{{ template "anchore-engine.api.serviceName" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.anchoreApi.service.port}}/v1/
 {{ end }}
 
 To verify the service is up and running, you can run container for the Anchore Engine CLI:

@@ -17,9 +17,9 @@ metadata:
 data:
   config-ui.yaml: |
     {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-    engine_uri: 'https://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreApi.service.port }}/v1'
+    engine_uri: 'https://{{ template "anchore-engine.api.serviceName" . }}:{{ .Values.anchoreApi.service.port }}/v1'
     {{- else }}
-    engine_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreApi.service.port }}/v1'
+    engine_uri: 'http://{{ template "anchore-engine.api.serviceName" . }}:{{ .Values.anchoreApi.service.port }}/v1'
     {{- end }}
     # This value is overridden by using the `ANCHORE_REDIS_URI` environment variable.
     # redis_ui: $ANCHORE_REDIS_URI
@@ -32,9 +32,9 @@ data:
   {{- end }}
   {{- if .Values.anchoreEnterpriseReports.enabled }}
     {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
-    reports_uri: 'https://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseReports.service.apiPort}}/v1'
+    reports_uri: 'https://{{ template "anchore-engine.api.serviceName" . }}:{{ .Values.anchoreEnterpriseReports.service.apiPort}}/v1'
     {{- else}}
-    reports_uri: 'http://{{ template "anchore-engine.api.fullname" . }}:{{ .Values.anchoreEnterpriseReports.service.apiPort}}/v1'
+    reports_uri: 'http://{{ template "anchore-engine.api.serviceName" . }}:{{ .Values.anchoreEnterpriseReports.service.apiPort}}/v1'
     {{- end }}
   {{- end }}
   {{- if .Values.anchoreEnterpriseNotifications.enabled }}

@@ -379,10 +379,15 @@ anchoreApi:
 
   # kubernetes service configuration for anchore external API
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8228
     annotations: {}
     label: {}
+
+  # Specify the service account name utilized to run the API pods
+  serviceAccountName: Null
 
   # (Optional) Overrides for constructing API URLs.  All values are optional.
   # external:
@@ -1018,6 +1023,9 @@ anchoreEnterpriseUi:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the UI pods
+  serviceAccountName: Null
+
   # Specifies an existing secret to be used for db and redis endpoints
   # This secret should define the following ENV vars
   # ANCHORE_APPDB_URI
@@ -1147,6 +1155,8 @@ anchoreEnterpriseUi:
 
   # kubernetes service configuration for anchore UI
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 80
     annotations: {}

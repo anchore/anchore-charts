@@ -43,6 +43,18 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.api.serviceName" -}}
+{{- if .Values.anchoreApi.service.name }}
+    {{- print .Values.anchoreApi.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.api.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -76,6 +88,18 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "anchore-engine.enterprise-ui.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s-%s" .Release.Name $name "enterprise-ui"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-ui.serviceName" -}}
+{{- if .Values.anchoreEnterpriseUi.service.name }}
+    {{- print .Values.anchoreEnterpriseUi.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.enterprise-ui.fullname" . -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
