@@ -121,6 +121,9 @@ anchoreGlobal:
     # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
     # vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
 
+  # Add common metadata annotations to all pod deployments
+  deploymentAnnotations: {}
+
   # Set extra environment variables. These will be set on all containers.
   extraEnv: []
     # - name: foo
@@ -363,6 +366,8 @@ anchoreAnalyzer:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to analyzer deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -400,6 +405,8 @@ anchoreApi:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to api deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -594,6 +601,8 @@ anchoreCatalog:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to catalog deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -638,6 +647,8 @@ anchorePolicyEngine:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to policy engine deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -668,6 +679,8 @@ anchoreSimpleQueue:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to simplequeue deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -856,6 +869,8 @@ anchoreEnterpriseFeeds:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to feeds deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -912,6 +927,9 @@ anchoreEnterpriseRbac:
   #    cpu: 100m
   #    memory: 256M
 
+  # Add metadata annotations to rbac deployments
+  deploymentAnnotations: {}
+
 # Configure the Anchore Enterprise reporting component.
 anchoreEnterpriseReports:
   enabled: true
@@ -967,6 +985,8 @@ anchoreEnterpriseReports:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to reports deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -1002,6 +1022,8 @@ anchoreEnterpriseNotifications:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to notifications deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
@@ -1163,6 +1185,8 @@ anchoreEnterpriseUi:
 
   labels: {}
   annotations: {}
+  # Add metadata annotations to ui deployments
+  deploymentAnnotations: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
