@@ -105,7 +105,7 @@ anchoreGlobal:
   imagePullSecretName:
 
   # Specify a service account name utilized to run all Anchore pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # Set this value to true to setup the chart for OpenShift deployment compatibility.
   openShiftDeployment: false
@@ -286,7 +286,7 @@ anchoreAnalyzer:
     #   value: bar
 
   # Specify the service account name utilized to run the analyzer pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # The cycle timer is the interval between checks to the work queue for new jobs
   cycleTimers:
@@ -390,7 +390,7 @@ anchoreApi:
     label: {}
 
   # Specify the service account name utilized to run the API pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # (Optional) Overrides for constructing API URLs.  All values are optional.
   # external:
@@ -421,7 +421,7 @@ anchoreCatalog:
     #   value: bar
 
   # Specify the service account name utilized to run the catalog pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # Intervals to run specific events on (seconds)
   cycleTimers:
@@ -621,7 +621,7 @@ anchorePolicyEngine:
     #   value: bar
 
   # Specify the service account name utilized to run the policy engine pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # Intervals to run specific events on (seconds)
   cycleTimers:
@@ -670,7 +670,7 @@ anchoreSimpleQueue:
     #   value: bar
 
   # Specify the service account name utilized to run the simple queue pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # kubernetes service configuration for anchore simplequeue api
   service:
@@ -812,7 +812,7 @@ anchoreEnterpriseFeeds:
     #   value: bar
 
   # Specify the service account name utilized to run the feeds pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # Time delay in seconds between consecutive driver runs for processing data
   cycleTimers:
@@ -952,7 +952,7 @@ anchoreEnterpriseReports:
     #   value: bar
 
   # Specify the service account name utilized to run the reports pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # GraphiQL is a GUI for editing and testing GraphQL queries and mutations.
   # Set enableGraphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
@@ -1016,7 +1016,7 @@ anchoreEnterpriseNotifications:
     #   value: bar
 
   # Specify the service account name utilized to run the notification pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   cycleTimers:
     notifications: 30
@@ -1059,7 +1059,7 @@ anchoreEnterpriseUi:
     #   value: bar
 
   # Specify the service account name utilized to run the UI pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # Specifies an existing secret to be used for db and redis endpoints
   # This secret should define the following ENV vars
