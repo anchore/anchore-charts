@@ -1195,8 +1195,7 @@ anchoreEnterpriseUi:
 # Only utilized if 'anchoreEnterpriseUi.enabled: true'
 anchore-ui-redis:
   password: anchore-redis,123
-  cluster:
-    enabled: false
+  architecture: standalone
   persistence:
     enabled: false
 
