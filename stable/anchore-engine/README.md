@@ -134,7 +134,7 @@ anchore-feeds-db:
   persistence:
     size: 20Gi
 
-anchore-ui-redis:
+ui-redis:
   password: <PASSWORD>
 ```
 
@@ -231,7 +231,7 @@ anchore-feeds-db:
     persistence:
       size: 50Gi
 
-anchore-ui-redis:
+ui-redis:
   password: <PASSWORD>
 ```
 
@@ -416,7 +416,7 @@ release "my-anchore" uninstalled
 Anchore Enterprise users will want to remove the Redis DB PersistentVolumeClaim. This will delete all current session data but will not affect stability of the deployment:
 
 ```bash
-kubectl delete pvc redis-data-my-anchore-anchore-ui-redis-master-0
+kubectl delete pvc redis-data-my-anchore-ui-redis-master-0
 ```
 
 Your other PersistentVolumeClaims will still be resident in your cluster (we're showing results from an Anchore Enterprise installation that has a standalone Feeds Service below. Anchore Enterprise users without a standalone Feeds Service, and Anchore Engine users will not see `my-anchore-anchore-feeds-db`):

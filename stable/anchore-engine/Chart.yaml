@@ -40,5 +40,5 @@ dependencies:
  - name: redis
    version: "16.9.0"
    repository: "https://charts.bitnami.com/bitnami"
-   condition: anchore-ui-redis.enabled,anchoreEnterpriseGlobal.enabled
-   alias: anchore-ui-redis
+   condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+   alias: ui-redis

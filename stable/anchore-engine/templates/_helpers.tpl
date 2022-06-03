@@ -143,7 +143,7 @@ Create a default fully qualified dependency name for the db.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "redis.fullname" -}}
-{{- printf "%s-%s" .Release.Name "anchore-ui-redis" | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "ui-redis" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
