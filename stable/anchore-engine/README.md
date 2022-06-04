@@ -136,6 +136,8 @@ anchore-feeds-db:
 
 ui-redis:
   password: <PASSWORD>
+  auth:
+    password: <PASSWORD>
 ```
 
 ## Installing on OpenShift
@@ -233,6 +235,8 @@ anchore-feeds-db:
 
 ui-redis:
   password: <PASSWORD>
+  auth:
+    password: <PASSWORD>
 ```
 
 # Chart Updates
@@ -244,6 +248,16 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore database upgrade process using a Kubernetes job.
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
+
+## Chart version 1.19.0
+
+* Redis chart updated from version 10 to 16.9.0 updated to the latest version as bitnami has started removing older version of their charts.
+* * redis will by default run in the `standalone` architecture.
+* `anchore-ui-redis` in the helm values should now be `ui-redis`
+* * if you've set the the `password` value under `anchore-ui-redis`, you will now have to set the `auth.password` as well, making the end change `ui-redis.auth.password` and `ui-redis.password` should be set. Not setting both will result in the ui not being able to reach the reporting services.
+
+* WARNING: Users may be logged out from the platform after this happens since this will delete the old redis deployment and spin up a new one in its place
+  * For more information on why this is necessary, see [the breaking change here](https://github.com/bitnami/charts/tree/master/bitnami/redis/#to-1400)
 
 ## Chart version 1.18.0
 

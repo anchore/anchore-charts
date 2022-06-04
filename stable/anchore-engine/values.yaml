@@ -1194,6 +1194,8 @@ anchoreEnterpriseUi:
 # Anchore Engine Enterprise UI is dependent on redis for storing sessions
 # Only utilized if 'anchoreEnterpriseUi.enabled: true'
 ui-redis:
+  auth:
+    password: anchore-redis,123
   password: anchore-redis,123
   architecture: standalone
   persistence:
