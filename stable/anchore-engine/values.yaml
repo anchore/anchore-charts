@@ -926,9 +926,11 @@ anchoreEnterpriseRbac:
   #  requests:
   #    cpu: 100m
   #    memory: 256M
-
+  labels: {}
+  annotations: {}
   # Add metadata annotations to rbac deployments
   deploymentAnnotations: {}
+
 
 # Configure the Anchore Enterprise reporting component.
 anchoreEnterpriseReports:
