@@ -1196,7 +1196,6 @@ anchoreEnterpriseUi:
 ui-redis:
   auth:
     password: anchore-redis,123
-  password: anchore-redis,123
   architecture: standalone
   persistence:
     enabled: false
