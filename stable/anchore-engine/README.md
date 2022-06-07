@@ -249,7 +249,7 @@ The upgrade will only be considered successful when this job completes successfu
 
 ## Chart version 1.19.0
 
-* Redis chart updated from version 10 to 16.9.0 updated to the latest version as bitnami has started removing older version of their charts.
+* Redis chart updated from version 10 to 16.11.3 updated to the latest version as bitnami has started removing older version of their charts.
 * redis will by default run in the `standalone` architecture.
 * `anchore-ui-redis` in the helm values should now be `ui-redis`
   * if you've set the the `password` value under `anchore-ui-redis`, you will now have to change it to `auth.password`, making the end change `ui-redis.auth.password`
