@@ -1197,8 +1197,9 @@ ui-redis:
   auth:
     password: anchore-redis,123
   architecture: standalone
-  persistence:
-    enabled: false
+  master:
+    persistence:
+      enabled: false
 
   # To use an external redis endpoint, uncomment to set 'enabled: false'
   # enabled: false
