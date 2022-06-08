@@ -1030,7 +1030,7 @@ anchoreEnterpriseNotifications:
 
 # Configure the Anchore Enterprise UI.
 anchoreEnterpriseUi:
-  # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
+  # If enabled is set to false, set ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
   image: docker.io/anchore/enterprise-ui:v4.0.0
   imagePullPolicy: IfNotPresent
@@ -1193,12 +1193,13 @@ anchoreEnterpriseUi:
 
 # Anchore Engine Enterprise UI is dependent on redis for storing sessions
 # Only utilized if 'anchoreEnterpriseUi.enabled: true'
-anchore-ui-redis:
-  password: anchore-redis,123
-  cluster:
-    enabled: false
-  persistence:
-    enabled: false
+ui-redis:
+  auth:
+    password: anchore-redis,123
+  architecture: standalone
+  master:
+    persistence:
+      enabled: false
 
   # To use an external redis endpoint, uncomment to set 'enabled: false'
   # enabled: false
