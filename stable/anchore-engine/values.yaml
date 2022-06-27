@@ -85,7 +85,7 @@ ingress:
   #   - anchore-api.example.com
   annotations:
     # kubernetes.io/ingress.class: gce
-    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/ingress.class: nginx
     # nginx.ingress.kubernetes.io/ssl-redirect: "false"
     # kubernetes.io/ingress.allow-http: false
     # kubernetes.io/tls-acme: true
@@ -732,7 +732,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v4.0.1
+  image: docker.io/anchore/enterprise:v4.0.2
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -1070,9 +1070,9 @@ anchoreEnterpriseNotifications:
 
 # Configure the Anchore Enterprise UI.
 anchoreEnterpriseUi:
-  # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
+  # If enabled is set to false, set ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v4.0.0
+  image: docker.io/anchore/enterprise-ui:v4.0.2
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
@@ -1238,12 +1238,13 @@ anchoreEnterpriseUi:
 
 # Anchore Engine Enterprise UI is dependent on redis for storing sessions
 # Only utilized if 'anchoreEnterpriseUi.enabled: true'
-anchore-ui-redis:
-  password: anchore-redis,123
-  cluster:
-    enabled: false
-  persistence:
-    enabled: false
+ui-redis:
+  auth:
+    password: anchore-redis,123
+  architecture: standalone
+  master:
+    persistence:
+      enabled: false
 
   # To use an external redis endpoint, uncomment to set 'enabled: false'
   # enabled: false
