@@ -3,7 +3,7 @@ description: A kubernetes admission controller for validating and mutating webho
 apiVersion: v1
 appVersion: 0.3.1
 version: 0.3.0
-kubeVersion: 1.22.0
+kubeVersion: 1.*
 home: https://github.com/anchore/kubernetes-admission-controller
 maintainers:
   - name: zhill
