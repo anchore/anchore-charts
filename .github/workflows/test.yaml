@@ -2,7 +2,9 @@ name: "Test using kind and chart-testing tool"
 
 on:
   - pull_request
-
+  push:
+    branches:
+      - 'dev/devops-206'
 jobs:
   test:
     strategy:
