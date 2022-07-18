@@ -1,7 +1,7 @@
 apiVersion: v2
 name: anchore-engine
-version: 1.14.7
-appVersion: 0.10.2
+version: 1.16.1
+appVersion: 1.1.0
 description: Anchore container analysis and policy evaluation engine service
 keywords:
  - analysis
@@ -32,6 +32,11 @@ dependencies:
    repository: "file://./deps/postgresql"
    condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
    alias: anchore-feeds-db
+ - name: postgresql
+   version: "1.0.1"
+   repository: "file://./deps/postgresql"
+   condition: anchore-feeds-gem-db.enabled,anchoreEnterpriseFeeds.gemDriverEnabled
+   alias: anchore-feeds-gem-db
  - name: redis
    version: "10"
    repository: "https://charts.bitnami.com/bitnami"

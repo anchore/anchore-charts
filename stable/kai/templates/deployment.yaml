@@ -11,10 +11,11 @@ spec:
       {{- include "kai.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-    {{- with .Values.podAnnotations }}
       annotations:
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
         {{- include "kai.selectorLabels" . | nindent 8 }}
     spec:
@@ -31,8 +32,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/kai"]
-          args: ["--config", "/.kai.yaml"]
+          command: ["kai"]
           ports:
             - name: http
               containerPort: 80
@@ -40,7 +40,7 @@ spec:
           livenessProbe:
             exec:
               command:
-                - /kai
+                - kai
                 - version
             initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
@@ -50,7 +50,7 @@ spec:
           readinessProbe:
             exec:
               command:
-                - /kai
+                - kai
                 - version
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
@@ -60,7 +60,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: config-volume
-              mountPath: /.kai.yaml
+              mountPath: /home/nonroot/.kai.yaml
               subPath: .kai.yaml
           envFrom:
             {{- if not .Values.inject_secrets_via_env }}

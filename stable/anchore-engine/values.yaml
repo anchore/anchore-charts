@@ -5,18 +5,17 @@ postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
+  # If enabled=false specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore
 
-  # Specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
-  externalEndpoint: Null
-
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
-    resourcePolicy: nil
+    resourcePolicy: keep
     size: 20Gi
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
@@ -99,7 +98,7 @@ ingress:
 # Global configuration shared by all anchore-engine services.
 anchoreGlobal:
   # Image used for all anchore engine deployments (excluding enterprise components).
-  image: docker.io/anchore/anchore-engine:v0.10.2
+  image: docker.io/anchore/anchore-engine:v1.1.0
   imagePullPolicy: IfNotPresent
 
   # Set image pull secret name if using an anchore-engine image from a private registry
@@ -611,9 +610,11 @@ anchorePolicyEngine:
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
 
-  # Available providers are legacy and grype. Legacy provider offers the same matching logic as previous versions of anchore-engine (<= 0.9.4)
-  # grype is a new provider that was introduced in 1.0.0, it uses the grype tool for all things vulnerabilities
-  vulnerabilityProvider: legacy
+  # Available providers are `legacy` and `grype`.
+  # legacy provider offers the same matching logic as previous versions of anchore-engine <= 0.9.4
+  # grype is a new provider that was introduced in 0.10.0, it uses the grype tool for all things vulnerabilities
+  # When vulnerabilityProvider is left unset the provider defaults to `grype` on new deployments. When upgrading from a chart version <1.15.0, vulnerabilityProvider will default to `legacy`.
+  vulnerabilityProvider: null
 
   # kubernetes service configuration for anchore policy engine api
   service:
@@ -690,7 +691,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v3.1.2
+  image: docker.io/anchore/enterprise:v3.3.0
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -702,18 +703,17 @@ anchore-feeds-db:
   # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
+  # if enabled=false specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore-feeds
 
-  # Specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
-  externalEndpoint: Null
-
-  # Configure size of the persitant volume used with helm managed chart.
+  # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
-    resourcePolicy: nil
+    resourcePolicy: keep
     size: 20Gi
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
@@ -733,14 +733,36 @@ anchore-feeds-db:
   # - name: PATH
   #   value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+# Configure a third postgres database deployment for the enterprise feeds service Ruby Gems DB
+# This is only utilized if anchoreEnterpriseFeeds.gemDriverEnabled=true
+# Database is used for temporarily loading the Ruby gem vulnerability data by the Enterprise Feeds service.
+anchore-feeds-gem-db:
+  # To use an external DB uncomment & set 'enabled: false'
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # enabled: false
+  # If enabled=false specify an external (already existing) postgres deployment for use.
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  externalEndpoint: Null
+  postgresUser: postgres
+  postgresPassword: anchore-postgres,123
+  postgresDatabase: gems
+  persistence:
+    enabled: false
+
 # Configure & enable the Anchore Enterprise on-prem feeds service.
 anchoreEnterpriseFeeds:
-  # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unneccessary postgres instance.
+  # If enabled is set to false, set anchore-feeds-db.enabled to false to ensure that helm doesn't stand up a unnecessary postgres instance.
   enabled: true
 
   # Set custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster.
   # i.e. https://<feeds-hostname>:<feeds-port>
   url: ""
+
+  # Enable vulnerability drivers for npm data
+  npmDriverEnabled: false
+
+  # Enable vulnerability drivers for gem data
+  gemDriverEnabled: false
 
   # Enable github advisory feeds
   githubDriverEnabled: false
@@ -785,6 +807,28 @@ anchoreEnterpriseFeeds:
     # Allows you to set custom db connection pool settings
     engineArgs: {}
       # pool_recycle: 600
+
+  # persistence controls the mounting of an external volume for feed driver download workspace.
+  persistence:
+    enabled: true
+    resourcePolicy: keep  # set resource-policy Helm annotation on PVC. Can be nil or "keep"
+
+    ## A manually managed Persistent Volume and Claim
+    ## Requires anchoreEnterpriseFeeds.persistence.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    # existingClaim:
+
+    ## Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 40Gi
+    subPath: "postgresql-db"
+    mountPath: /workspace
 
   # kubernetes service configuration for anchore feeds service api
   service:
@@ -936,7 +980,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v3.1.1
+  image: docker.io/anchore/enterprise-ui:v3.3.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
