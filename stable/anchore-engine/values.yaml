@@ -1,5 +1,6 @@
 # Default values for anchore_engine chart.
 
+fullnameOverride: Null
 # Anchore engine has a dependency on Postgresql, configure here
 postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
