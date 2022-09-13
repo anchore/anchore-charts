@@ -6,7 +6,16 @@
 {{- if .Values.anchoreEnterpriseFeeds.url -}}
   {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.anchoreEnterpriseFeeds.url)) }}
   {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.anchoreEnterpriseFeeds.url) -}}
-  {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/" $anchoreFeedsHost) -}}
+
+  {{- if not .Values.anchoreEnterpriseFeeds.grypeProviderFeedsExternalURL -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/" $anchoreFeedsHost) -}}
+  {{- else -}}
+    {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
+      {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- else -}}
+      {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- end -}}
+  {{- end -}}
 {{- else -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
     {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}

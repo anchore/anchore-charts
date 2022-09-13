@@ -5,7 +5,11 @@
   {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.anchoreEnterpriseFeeds.url)) -}}
   {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.anchoreEnterpriseFeeds.url) -}}
   {{- $anchoreFeedsURL = (printf "%s/v1/feeds" $anchoreFeedsHost) -}}
-  {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grypedb" $anchoreFeedsHost) -}}
+  {{- if .Values.anchoreEnterpriseFeeds.grypeProviderFeedsExternalURL -}}
+    {{- $grypeProviderFeedsExternalURL = .Values.anchoreEnterpriseFeeds.grypeProviderFeedsExternalURL -}}
+  {{- else }}
+    {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grypedb" $anchoreFeedsHost) -}}
+  {{- end -}}
 {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
     {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
