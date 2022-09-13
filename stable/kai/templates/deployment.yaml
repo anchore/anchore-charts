@@ -60,8 +60,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: config-volume
-              mountPath: /home/nonroot/.kai.yaml
-              subPath: .kai.yaml
+              mountPath: /etc/xdg/kai/config.yaml
+              subPath: config.yaml
           envFrom:
             {{- if not .Values.inject_secrets_via_env }}
             - secretRef:

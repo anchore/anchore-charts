@@ -282,15 +282,6 @@ data:
                 {{- end }}
                 url: {{ $anchoreFeedsURL }}
               {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
-              vulndb:
-                enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | quote) }}
-                url: {{ $anchoreFeedsURL }}
-              {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreGlobal.syncVulnDB }}
-              vulndb:
-                enabled: true
-                url: {{ $anchoreFeedsURL }}
-              {{- end }}
-              {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
               microsoft:
                 enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}
                 url: {{ $anchoreFeedsURL }}
