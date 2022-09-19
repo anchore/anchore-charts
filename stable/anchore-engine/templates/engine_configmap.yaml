@@ -16,8 +16,9 @@
   {{- end -}}
 {{- end -}}
 
-{{- if or $grypeProviderFeedsExternalURL == "" .Values.anchorePolicyEngine.overrideFeedsToUpstream -}}
-  {{- $grypeProviderFeedsExternalURL := "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
+{{- /* Set the grypeProviderFeedsExternalURL to upstream feeds if still unset or if specifically overridden */}}
+{{- if or (empty $grypeProviderFeedsExternalURL) .Values.anchorePolicyEngine.overrideFeedsToUpstream -}}
+  {{- $grypeProviderFeedsExternalURL = "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
 {{- end -}}
 
 {{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
