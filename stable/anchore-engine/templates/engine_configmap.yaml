@@ -1,5 +1,5 @@
 {{- $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" -}}
-{{- $grypeProviderFeedsExternalURL := "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
+{{- $grypeProviderFeedsExternalURL := "" -}}
 
 {{- if .Values.anchoreEnterpriseFeeds.url -}}
   {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.anchoreEnterpriseFeeds.url)) -}}
@@ -14,6 +14,11 @@
     {{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
     {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- end -}}
+{{- end -}}
+
+{{- /* Set the grypeProviderFeedsExternalURL to upstream feeds if still unset or if specifically overridden */}}
+{{- if or (empty $grypeProviderFeedsExternalURL) .Values.anchorePolicyEngine.overrideFeedsToUpstream -}}
+  {{- $grypeProviderFeedsExternalURL = "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
 {{- end -}}
 
 {{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
