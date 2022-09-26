@@ -245,6 +245,7 @@ data:
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
         vulnerabilities:
+          provider: grype
           sync:
             enabled: true
             ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
