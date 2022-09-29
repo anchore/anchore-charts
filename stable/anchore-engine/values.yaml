@@ -290,7 +290,7 @@ anchoreAnalyzer:
 
   # The cycle timer is the interval between checks to the work queue for new jobs
   cycleTimers:
-    image_analyzer: 5
+    image_analyzer: 1
 
   # Controls the concurrency of the analyzer itself. Can be configured to process more than one task at a time, but it IO bound, so may not
   # necessarily be faster depending on hardware. Should test and balance this value vs. number of analyzers for your deployment cluster performance.
@@ -624,9 +624,6 @@ anchorePolicyEngine:
     feed_sync_checker: 3600
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
-
-  # After chart v1.18.0 the only valid vulnerabilityProvider setting is `grype`, any other settings will fail
-  vulnerabilityProvider: grype
 
   cacheTTL: 3600  # 1 hour
 
@@ -1071,6 +1068,26 @@ anchoreEnterpriseUi:
 
   # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
   ldapsRootCaCertName: Null
+
+  # The (optional) `logLevel` key allows you to set the descriptive detail of the
+  # application log output. The key value must be a string selected from the
+  # following priority-ordered list:
+  #
+  #  - error
+  #  - warn
+  #  - info
+  #  - http
+  #  - debug
+  #
+  # Once set, each level will automatically include the output for any levels
+  # above it—for example, `info` will include the log output for details at the
+  # `warn` and `error` details, whereas `error` will only show error output.
+  #
+  # This value can be overridden by using the `ANCHORE_LOG_LEVEL` environment
+  # variable. When no level is set, either within this configuration file or by the
+  # environment variable, a default level of `http` is used.
+  #
+  logLevel: http
 
   # Specifies whether to trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header).
   enableProxy: false

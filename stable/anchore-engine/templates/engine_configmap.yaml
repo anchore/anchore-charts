@@ -21,11 +21,6 @@
   {{- $grypeProviderFeedsExternalURL = "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
 {{- end -}}
 
-{{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
-{{- if and .Values.anchoreEnterpriseGlobal.enabled (ne $vulnerabilityProvider "grype") -}}
-    {{ fail "The v2 (grype) vulnerability scanner is the only valid configuration for chart v1.18.0 and higher. Please set the following: `.Values.anchorePolicyEngine.vulnerabilityProvider=grype`." }}
-{{- end -}}
-
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -250,7 +245,7 @@ data:
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
         vulnerabilities:
-          provider: {{ $vulnerabilityProvider }}
+          provider: grype
           sync:
             enabled: true
             ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
