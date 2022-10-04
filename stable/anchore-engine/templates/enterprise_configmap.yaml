@@ -94,7 +94,7 @@ data:
       rbac_manager:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-rbac.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-rbac.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseRbac.service.managerPort }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseRbac.maxRequestThreads }}
@@ -111,7 +111,7 @@ data:
       reports:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.api.serviceName" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
         max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
@@ -129,7 +129,7 @@ data:
       reports_worker:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-reports.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-reports.serviceName" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseReports.maxRequestThreads }}
@@ -155,7 +155,7 @@ data:
       notifications:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-notifications.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-notifications.serviceName" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseNotifications.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseNotifications.maxRequestThreads }}
@@ -167,7 +167,7 @@ data:
         {{- if .Values.anchoreEnterpriseNotifications.uiUrl }}
         ui_url: "{{ .Values.anchoreEnterpriseNotifications.uiUrl }}"
         {{- else }}
-        ui_url: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+        ui_url: {{ include "anchore-engine.enterprise-ui.serviceName" . | quote }}
         {{- end }}
       {{- end }}
 {{- end -}}

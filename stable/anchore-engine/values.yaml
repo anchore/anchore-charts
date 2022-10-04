@@ -105,7 +105,7 @@ anchoreGlobal:
   imagePullSecretName:
 
   # Specify a service account name utilized to run all Anchore pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # Set this value to true to setup the chart for OpenShift deployment compatibility.
   openShiftDeployment: false
@@ -288,6 +288,9 @@ anchoreAnalyzer:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the analyzer pods
+  # serviceAccountName: Null
+
   # The cycle timer is the interval between checks to the work queue for new jobs
   cycleTimers:
     image_analyzer: 1
@@ -384,10 +387,15 @@ anchoreApi:
 
   # kubernetes service configuration for anchore external API
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8228
     annotations: {}
     label: {}
+
+  # Specify the service account name utilized to run the API pods
+  # serviceAccountName: Null
 
   # (Optional) Overrides for constructing API URLs.  All values are optional.
   # external:
@@ -418,6 +426,9 @@ anchoreCatalog:
   extraEnv: []
     # - name: foo
     #   value: bar
+
+  # Specify the service account name utilized to run the catalog pods
+  # serviceAccountName: Null
 
   # Intervals to run specific events on (seconds)
   cycleTimers:
@@ -586,6 +597,8 @@ anchoreCatalog:
 
   # kubernetes service configuration for anchore catalog api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8082
     annotations: {}
@@ -616,6 +629,9 @@ anchorePolicyEngine:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the policy engine pods
+  # serviceAccountName: Null
+
   # Intervals to run specific events on (seconds)
   cycleTimers:
     # Interval to run a feed sync to get latest cve data
@@ -629,6 +645,8 @@ anchorePolicyEngine:
 
   # kubernetes service configuration for anchore policy engine api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8087
     annotations: {}
@@ -659,8 +677,13 @@ anchoreSimpleQueue:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the simple queue pods
+  # serviceAccountName: Null
+
   # kubernetes service configuration for anchore simplequeue api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8083
     annotations: {}
@@ -799,6 +822,9 @@ anchoreEnterpriseFeeds:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the feeds pods
+  # serviceAccountName: Null
+
   # Time delay in seconds between consecutive driver runs for processing data
   cycleTimers:
     driver_sync: 7200
@@ -852,6 +878,8 @@ anchoreEnterpriseFeeds:
 
   # kubernetes service configuration for anchore feeds service api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8448
     annotations: {}
@@ -903,6 +931,8 @@ anchoreEnterpriseRbac:
   # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
   # Due to RBAC sharing a service with the general API.
   service:
+    # Override the service name
+    # name: Null
     managerPort: 8229
     authPort: 8089
     type: ClusterIP
@@ -937,6 +967,9 @@ anchoreEnterpriseReports:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the reports pods
+  # serviceAccountName: Null
+
   # GraphiQL is a GUI for editing and testing GraphQL queries and mutations.
   # Set enableGraphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
   enableGraphiql: true
@@ -967,6 +1000,8 @@ anchoreEnterpriseReports:
     reports_data_egress: 600
 
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     apiPort: 8558
     workerPort: 8778
@@ -998,6 +1033,9 @@ anchoreEnterpriseNotifications:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the notification pods
+  # serviceAccountName: Null
+
   cycleTimers:
     notifications: 30
 
@@ -1005,6 +1043,8 @@ anchoreEnterpriseNotifications:
   # uiUrl: "http://<ui_url>"
 
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8668
     annotations: {}
@@ -1037,6 +1077,9 @@ anchoreEnterpriseUi:
   extraEnv: []
     # - name: foo
     #   value: bar
+
+  # Specify the service account name utilized to run the UI pods
+  # serviceAccountName: Null
 
   # Specifies an existing secret to be used for db and redis endpoints
   # This secret should define the following ENV vars
@@ -1187,6 +1230,8 @@ anchoreEnterpriseUi:
 
   # kubernetes service configuration for anchore UI
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 80
     annotations: {}

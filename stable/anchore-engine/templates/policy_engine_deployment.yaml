@@ -235,7 +235,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      {{- with include "anchore-engine.policy-engine.serviceAccountName" . }}
       serviceAccountName: {{ . }}
       {{- end }}
 
@@ -243,7 +243,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.policy-engine.fullname" . }}
+  name: {{ template "anchore-engine.policy-engine.serviceName" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}

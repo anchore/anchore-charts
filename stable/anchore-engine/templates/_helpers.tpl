@@ -25,12 +25,62 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.analyzer.serviceName" -}}
+{{- if .Values.anchoreAnalyzer.service.name }}
+    {{- print .Values.anchoreAnalyzer.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.analyzer.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.analyzer.serviceAccountName" -}}
+{{- if .Values.anchoreAnalyzer.serviceAccountName }}
+    {{- print .Values.anchoreAnalyzer.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "anchore-engine.catalog.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s-%s" .Release.Name $name "catalog"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.catalog.serviceName" -}}
+{{- if .Values.anchoreCatalog.service.name }}
+    {{- print .Values.anchoreCatalog.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.catalog.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.catalog.serviceAccountName" -}}
+{{- if .Values.anchoreCatalog.serviceAccountName }}
+    {{- print .Values.anchoreCatalog.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.catalog.fullname" . -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -43,6 +93,30 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.api.serviceName" -}}
+{{- if .Values.anchoreApi.service.name }}
+    {{- print .Values.anchoreApi.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.api.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.api.serviceAccountName" -}}
+{{- if .Values.anchoreApi.serviceAccountName }}
+    {{- print .Values.anchoreApi.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -52,12 +126,60 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.policy-engine.serviceName" -}}
+{{- if .Values.anchorePolicyEngine.service.name }}
+    {{- print .Values.anchorePolicyEngine.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.policy-engine.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.policy-engine.serviceAccountName" -}}
+{{- if .Values.anchorePolicyEngine.serviceAccountName }}
+    {{- print .Values.anchorePolicyEngine.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "anchore-engine.simplequeue.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s-%s" .Release.Name $name "simplequeue"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.simplequeue.serviceName" -}}
+{{- if .Values.anchoreSimpleQueue.service.name }}
+    {{- print .Values.anchoreSimpleQueue.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.simplequeue.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.simplequeue.serviceAccountName" -}}
+{{- if .Values.anchoreSimpleQueue.serviceAccountName }}
+    {{- print .Values.anchoreSimpleQueue.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -79,12 +201,60 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-ui.serviceName" -}}
+{{- if .Values.anchoreEnterpriseUi.service.name }}
+    {{- print .Values.anchoreEnterpriseUi.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.enterprise-ui.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-ui.serviceAccountName" -}}
+{{- if .Values.anchoreEnterpriseUi.serviceAccountName }}
+    {{- print .Values.anchoreEnterpriseUi.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "anchore-engine.enterprise-feeds.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s-%s" .Release.Name $name "enterprise-feeds"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-feeds.serviceName" -}}
+{{- if .Values.anchoreEnterpriseFeeds.service.name }}
+    {{- print .Values.anchoreEnterpriseFeeds.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.enterprise-feeds.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-feeds.serviceAccountName" -}}
+{{- if .Values.anchoreEnterpriseFeeds.serviceAccountName }}
+    {{- print .Values.anchoreEnterpriseFeeds.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -97,6 +267,30 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-reports.serviceName" -}}
+{{- if .Values.anchoreEnterpriseReports.service.name }}
+    {{- print .Values.anchoreEnterpriseReports.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.enterprise-reports.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-reports.serviceAccountName" -}}
+{{- if .Values.anchoreEnterpriseReports.serviceAccountName }}
+    {{- print .Values.anchoreEnterpriseReports.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -106,12 +300,60 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-notifications.serviceName" -}}
+{{- if .Values.anchoreEnterpriseNotifications.service.name }}
+    {{- print .Values.anchoreEnterpriseNotifications.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.enterprise-notifications.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-notifications.serviceAccountName" -}}
+{{- if .Values.anchoreEnterpriseNotifications.serviceAccountName }}
+    {{- print .Values.anchoreEnterpriseNotifications.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "anchore-engine.enterprise-rbac.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s-%s" .Release.Name $name "enterprise-rbac"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-rbac.serviceName" -}}
+{{- if .Values.anchoreEnterpriseRbac.service.name }}
+    {{- print .Values.anchoreEnterpriseRbac.service.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+    {{- include "anchore-engine.enterprise-rbac.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set the appropriate kubernetes service account name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "anchore-engine.enterprise-rbac.serviceAccountName" -}}
+{{- if .Values.anchoreEnterpriseRbac.serviceAccountName }}
+    {{- print .Values.anchoreEnterpriseRbac.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- else if .Values.anchoreGlobal.serviceAccountName -}}
+    {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

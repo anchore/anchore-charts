@@ -49,12 +49,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreApi.service.port }}
           {{else}}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreApi.service.port }}
           {{- end }}
     {{- end }}
@@ -67,12 +67,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- end }}
     {{- end }}
@@ -85,12 +85,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- end }}
     {{- end }}
@@ -103,12 +103,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- end }}
     {{- end }}
@@ -121,12 +121,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreApi.service.port }}
           {{else}}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreApi.service.port }}
           {{- end }}
         {{- end }}
@@ -136,12 +136,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- end }}
         {{- end }}
@@ -151,12 +151,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- end }}
         {{- end }}
@@ -166,12 +166,12 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- end }}
         {{- end }}
