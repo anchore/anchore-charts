@@ -9,9 +9,9 @@
   {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/" $anchoreFeedsHost) -}}
 {{- else -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- else -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- end -}}
 {{- end -}}
 
@@ -93,7 +93,7 @@ data:
       feeds:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseFeeds.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseFeeds.maxRequestThreads }}
@@ -130,6 +130,7 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled | quote) }}
           rhel:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
+            concurrency: {{ .Values.anchoreEnterpriseFeeds.rhelDriverConcurrency }}
           nvddb:
             enabled: {{ default "false" (.Values.anchoreEnterpriseFeeds.nvdDriverEnabled | quote) }}
           # npm and gem drivers are explicitly disabled out of the box
@@ -144,8 +145,6 @@ data:
           {{- end }}
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
-          vulndb:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | quote) }}
           sles:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.slesDriverEnabled | quote) }}
           msrc:
@@ -160,12 +159,10 @@ data:
             token: ${ANCHORE_GITHUB_TOKEN}
           {{- end }}
           grypedb:
-          {{- if eq (.Values.anchorePolicyEngine.vulnerabilityProvider | toString ) "legacy" }}
-            enabled: false
-          {{- else }}
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | quote) }}
-          {{- end }}
             external_feeds_url: {{ $grypeProviderFeedsExternalURL }}
+          anchore_match_exclusions:
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.anchoreMatchExclusionsEnabled | quote) }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"

@@ -134,8 +134,9 @@ anchore-feeds-db:
   persistence:
     size: 20Gi
 
-anchore-ui-redis:
-  password: <PASSWORD>
+ui-redis:
+  auth:
+    password: <PASSWORD>
 ```
 
 ## Installing on OpenShift
@@ -231,8 +232,9 @@ anchore-feeds-db:
     persistence:
       size: 50Gi
 
-anchore-ui-redis:
-  password: <PASSWORD>
+ui-redis:
+  auth:
+    password: <PASSWORD>
 ```
 
 # Chart Updates
@@ -241,8 +243,63 @@ See the anchore-engine [CHANGELOG](https://github.com/anchore/anchore-engine/blo
 
 ## Upgrading from previous chart versions
 
-A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore database upgrade process using a Kubernetes job. 
+A Helm post-upgrade hook job will shut down all previously running Anchore services and perform the Anchore database upgrade process using a Kubernetes job.
+
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
+
+## Chart version 1.19.0
+
+* Redis chart updated from version 10 to 16.11.3 updated to the latest version as bitnami has started removing older version of their charts.
+* redis will by default run in the `standalone` architecture.
+* `anchore-ui-redis` in the helm values should now be `ui-redis`
+  * if you've set the the `password` value under `anchore-ui-redis`, you will now have to change it to `auth.password`, making the end change `ui-redis.auth.password`
+
+* WARNING: Users may be logged out from the platform after this happens since this will delete the old redis deployment and spin up a new one in its place
+  * For more information on why this is necessary, see [the breaking change here](https://github.com/bitnami/charts/tree/master/bitnami/redis/#to-1400)
+
+## Chart version 1.18.0
+
+* Anchore Enterprise image updated to v4.0.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/400/)
+* WARNING: For Anchore Enterprise deployments the v2 (grype) vulnerability scanner is the only valid configuration. The v1 (legacy) vulnerability scanner is no longer supported.
+* The containers in the API pod have been split into 4 separate pods for better control of resource allocation & node placement. The new pods are deployed as follows:
+  * External APIs (Engine API & Reports API)
+  * Enterprise Notifications service
+  * Enterprise Reports worker
+  * Enterprise RBAC manager
+
+## Chart version 1.17.1
+
+* The number of concurrent worker threads used for downloading RHEL feeds has been made configurable and the default value has been reduced from 20 to 5. The default number of threads has been reduced due to recent throttling on concurrent requests from RHEL that was causing feed download failures.
+
+## Chart version 1.17.0
+
+Chart version 1.17.0 is an Enterprise focused release. Anchore Engine users will see no change in behavior from this release.
+
+For Enterprise users, this release specifically helps reduce downtime needed during the transition from the v1 scanner to the v2 scanner. This version sets the GrypeDB driver to run in the feed service v1-scanner deployments so that the GrypeDB is ready when the update to the v2 scanner is made and thus reduces effective downtime during the maintenance window needed for that configuration change.
+
+It is recommended that users upgrade to this chart version prior to changing the scanner configuration to move from the V1 scanner to the V2 scanner.
+
+  ### WARNING
+
+  After this upgrade, the Enterprise Feeds service requires a minimum of 10GB of memory allocated. **Failure to allocate adequate resources to this pod will result in crash loops and an unavailable feeds service.** Resource allocation example:
+
+  ```yaml
+  anchoreEnterpriseFeeds:
+    resources:
+      limits:
+        cpu: 1
+        memory: 10G
+      requests:
+        cpu: 1
+        memory: 10G
+  ```
+
+The impacts of this upgrade are as follows:
+
+* For deployments currently utilizing the V1 (legacy) vulnerability provider, configured with `.Values.anchorePolicyEngine.vulnerabilityProvider=legacy`, this upgrade will enable the GrypeDB Driver on the Enterprise Feeds service.
+  * The GrypeDB driver can be manually disabled for legacy deployments using `.Values.anchoreEnterpriseFeeds.grypeDriverEnabled=false`
+* For deployments of Anchore Engine, configured with `.Values.anchoreEnterpriseGlobal=false`, this upgrade will have zero impact.
+* For Enterprise deployments currently utilizing the Grype vulnerability provider, configured with `.Values.anchorePolicyEngine.vulnerabilityProvider=grype`, this release will have zero impact.
 
 ## Chart version 1.16.0
 
@@ -371,7 +428,7 @@ release "my-anchore" uninstalled
 Anchore Enterprise users will want to remove the Redis DB PersistentVolumeClaim. This will delete all current session data but will not affect stability of the deployment:
 
 ```bash
-kubectl delete pvc redis-data-my-anchore-anchore-ui-redis-master-0
+kubectl delete pvc redis-data-my-anchore-ui-redis-master-0
 ```
 
 Your other PersistentVolumeClaims will still be resident in your cluster (we're showing results from an Anchore Enterprise installation that has a standalone Feeds Service below. Anchore Enterprise users without a standalone Feeds Service, and Anchore Engine users will not see `my-anchore-anchore-feeds-db`):

@@ -20,12 +20,21 @@ jobs:
     - name: Shellcheck
       uses: ludeeus/action-shellcheck@1.0.0
 
+    - name: Set up chart-testing
+      uses: helm/chart-testing-action@v2.3.1
+
+    - name: Run chart-testing (list-changed)
+      id: list-changed
+      run: |
+        changed=$(ct list-changed --config 'ct-config.yaml' --target-branch ${{ github.event.repository.default_branch }})
+        if [[ -n "$changed" ]]; then
+          echo "::set-output name=changed::true"
+        fi
+
     - name: Run chart-testing (lint)
       id: lint
-      uses: helm/chart-testing-action@v1.1.0
-      with:
-        command: lint
-        config: ct-config.yaml
+      run: ct lint --config 'ct-config.yaml'
+      if: steps.list-changed.outputs.changed == 'true'
 
     - name: Install kind
       uses: helm/kind-action@v1.2.0
@@ -33,13 +42,12 @@ jobs:
         node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
         config: kind-config.yaml
         wait: 600s
-      if: steps.lint.outputs.changed == 'true'
+      if: steps.list-changed.outputs.changed == 'true'
 
     - name: Check kind nodes
       run: kubectl describe nodes
+      if: steps.list-changed.outputs.changed == 'true'
 
     - name: Run chart-testing (install)
-      uses: helm/chart-testing-action@v1.1.0
-      with:
-        command: install
-        config: ct-config.yaml
+      run: ct install --config 'ct-config.yaml'
+      if: steps.list-changed.outputs.changed == 'true'

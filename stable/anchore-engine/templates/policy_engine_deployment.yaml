@@ -15,6 +15,15 @@ metadata:
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
+  {{- if or .Values.anchoreGlobal.deploymentAnnotations .Values.anchorePolicyEngine.deploymentAnnotations }}
+  annotations:
+  {{- with .Values.anchoreGlobal.deploymentAnnotations }}
+    {{ toYaml . | indent 4 }}
+  {{- end }}
+  {{- with .Values.anchorePolicyEngine.deploymentAnnotations }}
+    {{ toYaml . | indent 4 }}
+  {{- end }}
+  {{- end }}
 spec:
   selector:
     matchLabels:
@@ -191,7 +200,11 @@ spec:
           configMap:
             name: {{ template "anchore-engine.fullname" . }}
         - name: {{ $component }}-scratch
-          {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        {{- if .Values.anchoreGlobal.scratchVolume.details }}
+          {{- toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -222,7 +235,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      {{- with include "anchore-engine.policy-engine.serviceAccountName" . }}
       serviceAccountName: {{ . }}
       {{- end }}
 
@@ -230,7 +243,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.policy-engine.fullname" . }}
+  name: {{ template "anchore-engine.policy-engine.serviceName" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}

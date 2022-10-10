@@ -16,6 +16,15 @@ metadata:
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
+  {{- if or .Values.anchoreGlobal.deploymentAnnotations .Values.anchoreEnterpriseFeeds.deploymentAnnotations }}
+  annotations:
+  {{- with .Values.anchoreGlobal.deploymentAnnotations }}
+    {{ toYaml . | indent 4 }}
+  {{- end }}
+  {{- with .Values.anchoreEnterpriseFeeds.deploymentAnnotations }}
+    {{ toYaml . | indent 4 }}
+  {{- end }}
+  {{- end }}
 spec:
   selector:
     matchLabels:
@@ -43,7 +52,7 @@ spec:
       {{- with .Values.anchoreEnterpriseFeeds.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if not .Values.inject_secrets_via_env }}
+      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreEnterpriseFeeds.existingSecret) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_feeds_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/env: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap_env.yaml") . | sha256sum }}
@@ -179,7 +188,11 @@ spec:
           configMap:
             name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
         - name: {{ $component}}-scratch
-          {{ toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        {{- if .Values.anchoreGlobal.scratchVolume.details }}
+          {{- toYaml .Values.anchoreGlobal.scratchVolume.details | nindent 10 }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
         {{- if .Values.anchoreGlobal.openShiftDeployment }}
         - name: service-config-volume
           emptyDir: {}
@@ -213,7 +226,7 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.anchoreGlobal.serviceAccountName }}
+      {{- with include "anchore-engine.enterprise-feeds.serviceAccountName" . }}
       serviceAccountName: {{ . }}
       {{- end }}
 
@@ -221,7 +234,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+  name: {{ template "anchore-engine.enterprise-feeds.serviceName" . }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
