@@ -136,6 +136,22 @@ anchoreGlobal:
   # ANCHORE_SAML_SECRET (if applicable)
   existingSecret: Null
 
+  # does `source {{ filePath }}` before starting services
+  doSourceAtEntry:
+    enabled: false
+    filePath: "/vault/secrets/config"
+
+  extraVolumes: []
+  # - name: config
+  #   secret:
+  #     secretName: config
+
+  extraVolumeMounts: []
+  # - name: config
+  #   mountPath: "/vault/secrets/config"
+  #   subPath: config
+  #   readOnly: true
+
   # The scratchVolume controls the mounting of an external volume for scratch space for image analysis. Generally speaking
   # you need to provision 3x the size of the largest image (uncompressed) that you want to analyze for this space.
   scratchVolume:

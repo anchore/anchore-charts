@@ -83,7 +83,9 @@ spec:
       - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "reports_worker"]
+        command: ["/bin/sh", "-c"]
+        args:
+        - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade reports_worker
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
           name: reports
@@ -131,6 +133,9 @@ spec:
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
+        {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
         livenessProbe:
           httpGet:
@@ -181,6 +186,9 @@ spec:
         - name: certs
           secret:
             secretName: {{ . }}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.anchoreEnterpriseReports.nodeSelector }}
       nodeSelector:

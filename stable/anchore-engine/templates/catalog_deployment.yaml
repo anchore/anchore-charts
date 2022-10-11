@@ -111,10 +111,13 @@ spec:
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
         {{- end }}
+        command: ["/bin/sh", "-c"]
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "catalog"]
+        args:
+        - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade catalog
         {{- else }}
-        args: ["anchore-manager", "service", "start", "--no-auto-upgrade", "catalog"]
+        args:
+        - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-manager service start --no-auto-upgrade catalog
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -174,6 +177,9 @@ spec:
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
+        {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
         livenessProbe:
           httpGet:
@@ -237,6 +243,9 @@ spec:
         - name: {{ .Values.cloudsql.serviceAccSecretName }}
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.anchoreCatalog.nodeSelector }}
       nodeSelector:

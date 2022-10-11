@@ -83,7 +83,9 @@ spec:
       - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_manager"]
+        command: ["/bin/sh", "-c"]
+        args:
+        - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_manager
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseRbac.service.managerPort }}
           name: rbac
@@ -132,6 +134,9 @@ spec:
           mountPath: /home/anchore/certs/
           readOnly: true
         {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         livenessProbe:
           httpGet:
             path: /health
@@ -160,7 +165,9 @@ spec:
       - name: {{ .Chart.Name }}-rbac-authorizer
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
-        args: ["anchore-enterprise-manager", "service", "start", "--no-auto-upgrade", "rbac_authorizer"]
+        command: ["/bin/sh", "-c"]
+        args:
+        - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_authorizer
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
         {{- if .Values.anchoreGlobal.existingSecret }}
@@ -209,6 +216,9 @@ spec:
         - name: run
           mountPath: /var/run/anchore
         {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         livenessProbe:
           exec:
             command:
@@ -256,6 +266,9 @@ spec:
         - name: certs
           secret:
             secretName: {{ . }}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.anchoreEnterpriseRbac.nodeSelector }}
       nodeSelector:

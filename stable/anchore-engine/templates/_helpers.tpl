@@ -412,3 +412,9 @@ Create database hostname string from supplied values file. Used for the enterpri
     {{- printf "%s:5432" $db_host -}}
   {{- end }}
 {{- end }}
+
+{{- define "doSourceFile" }}
+{{- if .Values.anchoreGlobal.doSourceAtEntry.enabled }}
+    {{- printf "source %v;" .Values.anchoreGlobal.doSourceAtEntry.filePath }}
+{{- end }}
+{{- end }}
