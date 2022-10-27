@@ -470,8 +470,6 @@ anchoreCatalog:
     repo_watcher: 60
     # Interval for when the catalog garbage collects images marked for deletion
     image_gc: 60
-    # Interval for the runtime inventory image execution poll
-    k8s_watcher: 300
     k8s_image_watcher: 150
     resource_metrics: 60
     events_gc: 43200  # 12 hours
@@ -599,21 +597,6 @@ anchoreCatalog:
     # constraints as part of that service.
     # Note: if a runtime inventory image's digest is also in anchore for regular image analysis, it won't be removed.
     imageTTLDays: 1
-
-    # Since Anchore is running in Kubernetes, we can collect runtime inventory data out of the box
-    reportAnchoreCluster:
-      # If set to true, Anchore will use its own service account's permissions
-      # (if anchoreCatalog.createServiceAccount is true, see `catalog_deployment.yaml`) to try and collect runtime
-      # inventory data for all namespaces.
-      #
-      # Note: this feature requires a value for clusterName to populate inventory image context
-      # Note: If anchoreCatalog.createServiceAccount is set to false, and anchoreGlobal.serviceAccountName is unspecified,
-      # then the Anchore Catalog service won't have enough permission to be able to read cluster information
-      # (pods & namespaces) for the embedded runtime inventory.
-      enabled: true
-      clusterName: anchore-k8s
-      namespaces:
-        - all
 
   # kubernetes service configuration for anchore catalog api
   service:
