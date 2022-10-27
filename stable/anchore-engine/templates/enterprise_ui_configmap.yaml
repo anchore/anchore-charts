@@ -73,4 +73,5 @@ data:
       standard: {{ .standard }}
     {{- end }}
     log_level: {{ .Values.anchoreEnterpriseUi.logLevel | squote }}
+    enrich_inventory_view: {{ .Values.anchoreEnterpriseUi.enrichInventoryView  }}
 {{- end -}}

@@ -62,6 +62,10 @@ data:
       # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
       hashed_passwords: {{ .Values.anchoreGlobal.hashedPasswords }}
 
+      # Set this to True in order to disable the SSO JIT provisioning during authentication. This provides an additional
+      # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+      sso_require_existing_users: {{ .Values.anchoreGlobal.ssoRequireExistingUsers }}
+
     credentials:
       database:
         {{- if not .Values.anchoreGlobal.dbConfig.ssl }}

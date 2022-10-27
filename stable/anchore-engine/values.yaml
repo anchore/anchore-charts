@@ -213,6 +213,10 @@ anchoreGlobal:
   oauthEnabled: false
   oauthTokenExpirationSeconds: 3600
 
+  # Set this to true in order to disable the SSO JIT provisioning during authentication. This provides an additional
+  # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+  ssoRequireExistingUsers: false
+
   # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
   # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
   # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
@@ -1253,6 +1257,17 @@ anchoreEnterpriseUi:
     annotations: {}
     labels: {}
     sessionAffinity: ClientIP
+
+  # The (optional) `enrich_inventory_view` key allows you to set whether the
+  # Kubernetes tab should aggregate and include compliance and vulnerability data
+  # from the reports service.
+  #
+  # Setting this key to be `False` can increase performance on high-scale systems.
+  #
+  # This value can be overridden by using the `ANCHORE_ENRICH_INVENTORY_VIEW`
+  # environment variable. When no flag is set, either within this configuration
+  # file or by the environment variable, a default setting of `True` is used.
+  enrichInventoryView: true
 
   # resources:
   #  limits:
