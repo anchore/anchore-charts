@@ -259,8 +259,13 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with include "anchore-engine.catalog.serviceAccountName" . }}
+      {{- if include "anchore-engine.catalog.serviceAccountName" . }}
       serviceAccountName: {{ . }}
+      {{- else if .Release.IsUpgrade}}
+      # Including serviceAccount to remove existing service accounts from all deployments
+      # see - https://github.com/kubernetes/kubernetes/issues/76367
+      serviceAccount: ""
+      serviceAccountName: ""
       {{- end }}
 
 ---
