@@ -78,8 +78,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
     {{- print .Values.anchoreCatalog.serviceAccountName | trunc 63 | trimSuffix "-" -}}
 {{- else if .Values.anchoreGlobal.serviceAccountName -}}
     {{- print .Values.anchoreGlobal.serviceAccountName | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-    {{- include "anchore-engine.catalog.fullname" . -}}
 {{- end -}}
 {{- end -}}
 
