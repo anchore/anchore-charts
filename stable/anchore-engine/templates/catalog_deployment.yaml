@@ -86,7 +86,7 @@ spec:
             - sh
             - -c
             - (chmod 0775 {{ .Values.anchoreGlobal.scratchVolume.mountPath }}; chgrp {{ .Values.anchoreGlobal.securityContext.fsGroup }} {{ .Values.anchoreGlobal.scratchVolume.mountPath }} )
-      {{- end }}
+    {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -259,9 +259,9 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if include "anchore-engine.catalog.serviceAccountName" . }}
-      serviceAccountName: {{ . }}
-      {{- else if .Release.IsUpgrade}}
+      {{- if or .Values.anchoreCatalog.serviceAccountName .Values.anchoreGlobal.serviceAccountName }}
+      serviceAccountName: {{ include "anchore-engine.catalog.serviceAccountName" . }}
+      {{- else if .Release.IsUpgrade }}
       # Including serviceAccount to remove existing service accounts from all deployments
       # see - https://github.com/kubernetes/kubernetes/issues/76367
       serviceAccount: ""
