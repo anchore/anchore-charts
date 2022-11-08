@@ -247,6 +247,13 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.20.0
+
+* Anchore Enterprise image update to v4.2.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/420/).
+* Removed embedded k8s runtime inventory configurations.
+  * Deletes service account, role, & rolebindigs created by `.Values.anchoreCatalog.createServiceAccount`.
+  * To enable cluster runtime inventory use the [Kai Helm Chart](https://github.com/anchore/anchore-charts/tree/main/stable/kai).
+
 ## Chart version 1.19.0
 
 * Redis chart updated from version 10 to 16.11.3 updated to the latest version as bitnami has started removing older version of their charts.
