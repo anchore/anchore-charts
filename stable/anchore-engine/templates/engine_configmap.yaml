@@ -92,6 +92,10 @@ data:
       # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
       hashed_passwords: {{ .Values.anchoreGlobal.hashedPasswords }}
 
+      # Set this to True in order to disable the SSO JIT provisioning during authentication. This provides an additional
+      # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+      sso_require_existing_users: {{ .Values.anchoreGlobal.ssoRequireExistingUsers }}
+
     credentials:
       database:
         {{- if not .Values.anchoreGlobal.dbConfig.ssl }}
@@ -192,7 +196,6 @@ data:
           service_watcher: {{ .Values.anchoreCatalog.cycleTimers.service_watcher }}
           # Interval between checks to repo for new tags
           repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
-          k8s_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_watcher }}
           k8s_image_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_image_watcher }}
           resource_metrics: {{ .Values.anchoreCatalog.cycleTimers.resource_metrics }}
           events_gc: {{ .Values.anchoreCatalog.cycleTimers.events_gc }}
@@ -215,12 +218,6 @@ data:
         {{- end }}
         runtime_inventory:
           image_ttl_days: {{ .Values.anchoreCatalog.runtimeInventory.imageTTLDays }}
-          kubernetes:
-            report_anchore_cluster:
-              enabled: {{ .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
-              anchore_cluster_name: {{ .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.clusterName }}
-              namespaces:
-                {{- toYaml .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.namespaces | nindent 16 }}
       simplequeue:
         enabled: true
         require_auth: true

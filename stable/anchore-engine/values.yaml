@@ -213,6 +213,10 @@ anchoreGlobal:
   oauthEnabled: false
   oauthTokenExpirationSeconds: 3600
 
+  # Set this to true in order to disable the SSO JIT provisioning during authentication. This provides an additional
+  # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+  ssoRequireExistingUsers: false
+
   # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
   # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
   # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
@@ -466,8 +470,6 @@ anchoreCatalog:
     repo_watcher: 60
     # Interval for when the catalog garbage collects images marked for deletion
     image_gc: 60
-    # Interval for the runtime inventory image execution poll
-    k8s_watcher: 300
     k8s_image_watcher: 150
     resource_metrics: 60
     events_gc: 43200  # 12 hours
@@ -582,34 +584,12 @@ anchoreCatalog:
 
   # **NOTE: all runtime inventory configurations only apply to Anchore Enterprise deployments
 
-  # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
-  # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
-  # detailed information on the Service Account, Cluster Role & Binding.
-  # If using an existing service account, set this value to `false` & use anchoreGlobal.serviceAccountName to specify
-  # what service account to use. Existing service account must have adequate permissions to use this feature.
-  createServiceAccount: true
-
   runtimeInventory:
     # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
     # The working set. Note: The image will still have a historical record in the reports service, subject to data history
     # constraints as part of that service.
     # Note: if a runtime inventory image's digest is also in anchore for regular image analysis, it won't be removed.
     imageTTLDays: 1
-
-    # Since Anchore is running in Kubernetes, we can collect runtime inventory data out of the box
-    reportAnchoreCluster:
-      # If set to true, Anchore will use its own service account's permissions
-      # (if anchoreCatalog.createServiceAccount is true, see `catalog_deployment.yaml`) to try and collect runtime
-      # inventory data for all namespaces.
-      #
-      # Note: this feature requires a value for clusterName to populate inventory image context
-      # Note: If anchoreCatalog.createServiceAccount is set to false, and anchoreGlobal.serviceAccountName is unspecified,
-      # then the Anchore Catalog service won't have enough permission to be able to read cluster information
-      # (pods & namespaces) for the embedded runtime inventory.
-      enabled: true
-      clusterName: anchore-k8s
-      namespaces:
-        - all
 
   # kubernetes service configuration for anchore catalog api
   service:
@@ -745,7 +725,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v4.1.1
+  image: docker.io/anchore/enterprise:v4.2.0
 
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
@@ -1086,7 +1066,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v4.1.1
+  image: docker.io/anchore/enterprise-ui:v4.2.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
@@ -1253,6 +1233,17 @@ anchoreEnterpriseUi:
     annotations: {}
     labels: {}
     sessionAffinity: ClientIP
+
+  # The (optional) `enrich_inventory_view` key allows you to set whether the
+  # Kubernetes tab should aggregate and include compliance and vulnerability data
+  # from the reports service.
+  #
+  # Setting this key to be `False` can increase performance on high-scale systems.
+  #
+  # This value can be overridden by using the `ANCHORE_ENRICH_INVENTORY_VIEW`
+  # environment variable. When no flag is set, either within this configuration
+  # file or by the environment variable, a default setting of `True` is used.
+  enrichInventoryView: true
 
   # resources:
   #  limits:
