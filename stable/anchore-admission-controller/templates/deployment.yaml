@@ -16,6 +16,10 @@ spec:
   template:
     metadata:
       labels: {{- include "anchore-admission-controller.labels" . | nindent 8 }}
+      annotations:
+      {{- with .Values.annotations }}
+        {{ toYaml . | indent 4 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ template "anchore-admission-controller.fullname" . }}
       volumes:
