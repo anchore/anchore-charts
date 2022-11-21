@@ -14,6 +14,10 @@ service:
   internalPort: 443
   externalPort: 443
 
+  annotations: {}
+    # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
+    # vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
+
 apiService:
   webhook:
     enabled: true

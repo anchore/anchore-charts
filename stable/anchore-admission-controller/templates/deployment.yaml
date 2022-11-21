@@ -3,6 +3,10 @@ kind: Deployment
 metadata:
   name: {{ template "anchore-admission-controller.fullname" . }}
   labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+  annotations:
+  {{- with .Values.annotations }}
+    {{ toYaml . | indent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
