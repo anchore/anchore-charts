@@ -23,4 +23,8 @@ webhooks:
     {{- toYaml .Values.apiService.webhook.rules | nindent 4}}
   failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
   namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
+  {{- if .Capabilities.APIVersions.Has "admissionregistration.k8s.io/v1/ValidatingWebhookConfiguration" }}
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  {{- end }}
 {{- end }}
