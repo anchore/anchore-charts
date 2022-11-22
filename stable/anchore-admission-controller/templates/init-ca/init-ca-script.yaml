@@ -88,7 +88,11 @@ data:
       sed "s/TLS_SERVING_KEY/$(base64 ${CERT_DIR}/serving-{{ template "anchore-admission-controller.fullname" . }}.{{ .Release.Namespace }}.svc.key | tr -d '\n')/g" | kubectl -n {{ .Release.Namespace }} apply -f -
 
     cat > api-service.yaml <<EOF
+    {{- if .Capabilities.APIVersions.Has "apiregistration.k8s.io/v1/APIService" }}
+    apiVersion: apiregistration.k8s.io/v1
+    {{- else }}
     apiVersion: apiregistration.k8s.io/v1beta1
+    {{- end }}
     kind: APIService
     metadata:
       name: {{ .Values.apiService.version }}.{{ .Values.apiService.group }}
