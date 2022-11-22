@@ -1,5 +1,10 @@
 {{- if .Values.apiService.webhook.enabled }}
+
+{{- if .Capabilities.APIVersions.Has "admissionregistration.k8s.io/v1/ValidatingWebhookConfiguration" }}
+apiVersion: admissionregistration.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "admissionregistration.k8s.io/v1beta1/ValidatingWebhookConfiguration" }}
 apiVersion: admissionregistration.k8s.io/v1beta1
+{{- else }}
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
