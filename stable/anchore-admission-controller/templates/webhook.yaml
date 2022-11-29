@@ -1,4 +1,26 @@
 {{- if .Values.apiService.webhook.enabled }}
+{{- if .Capabilities.APIVersions.Has "admissionregistration.k8s.io/v1" }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+webhooks:
+- name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
+  clientConfig:
+    service:
+      namespace: default
+      name: kubernetes
+      path: /apis/{{ .Values.apiService.group }}/v1beta1/imagechecks
+    {{- with .Values.apiService.webhook.caBundle }}
+    caBundle: {{ . | b64enc }}
+    {{- end }}
+  rules:
+    {{- toYaml .Values.apiService.webhook.rules | nindent 4}}
+  sideEffects: {{ .Values.apiService.webhook.sideEffects }}
+  failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
+  namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
+{{- else if .Capabilities.APIVersions.Has "admissionregistration.k8s.io/v1beta1" }}
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -19,4 +41,5 @@ webhooks:
   sideEffects: {{ .Values.apiService.webhook.sideEffects }}
   failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
   namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
+{{- end }}
 {{- end }}

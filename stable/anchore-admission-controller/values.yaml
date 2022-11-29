@@ -35,6 +35,7 @@ apiService:
           - jobs
           - cronjobs
           - daemonsets
+    sideEffects: "None"
     # caBundle value can be obtained with: kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}'
     # caBundle:
   group: admission.anchore.io
