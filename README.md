@@ -24,3 +24,13 @@ For example, for anchore-engine:
 helm dep up
 ```
 is needed.
+
+## Tests
+
+All charts are tested against a range of Kubernetes versions. This version range roughly tracks the supported versions
+available from the major cloud vendors and is close, but not exactly the same as, the Kubernetes support N-3 approach.
+
+We aim to have at least the .0 patches for the releases for predictability and stability of the tests so that they do not have to
+change with each patch update. However, specific patches may be chosen for compatibility with the test harness (kindest/node) and if there
+is a specific bug fixed in a K8s release that has material impact on the results of a chart test.
+
