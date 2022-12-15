@@ -30,11 +30,11 @@ spec:
         image: "{{ .Values.image }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         command:
-        - "/anchore-kubernetes-admission-controller"
+        - "/ko-app/kubernetes-admission-controller"
         - "--audit-log-path=-"
         - "--tls-cert-file=/var/serving-cert/tls.crt"
         - "--tls-private-key-file=/var/serving-cert/tls.key"
-        - "--v={{ .Values.logVerbosity }}"
+        - "-v{{ .Values.logVerbosity }}"
         - "--secure-port={{ .Values.service.internalPort }}"
         ports:
         - containerPort: {{ .Values.service.internalPort }}

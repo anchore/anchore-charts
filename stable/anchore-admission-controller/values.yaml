@@ -5,13 +5,13 @@
 replicaCount: 1
 logVerbosity: 3
 
-image: "anchore/kubernetes-admission-controller:v0.3.0"
+image: "anchore/kubernetes-admission-controller:v0.4.0"
 imagePullPolicy: IfNotPresent
 
 service:
   name: anchoreadmissioncontroller
   type: ClusterIP
-  internalPort: 443
+  internalPort: 8443
   externalPort: 443
 
 apiService:
