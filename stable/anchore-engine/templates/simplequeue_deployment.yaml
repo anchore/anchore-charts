@@ -77,6 +77,11 @@ spec:
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
         command: ["/cloud_sql_proxy"]
         args:
+        {{- if .Values.cloudsql.extraArgs }}
+        {{- range $arg := .Values.cloudsql.extraArgs }}
+        - {{ quote $arg }}
+        {{- end }}
+        {{- end }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
         {{- if .Values.cloudsql.useExistingServiceAcc }}
         - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"

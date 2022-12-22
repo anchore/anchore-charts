@@ -40,6 +40,11 @@ postgresql:
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
   enabled: false
+  # Inject extra arguments into the cloudsql container command, eg:
+  # extraArgs:
+  # - "-ip_address_types=PRIVATE"
+  # - "-enable_iam_login"
+  extraArgs: []
   # set CloudSQL instance: 'project:zone:instancname'
   instance: ""
   # Optional existing service account secret to use.
