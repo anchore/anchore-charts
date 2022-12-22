@@ -1,7 +1,7 @@
 # Default values for anchore-admission-controller.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
+fullnameOverride: Null
 replicaCount: 1
 logVerbosity: 3
 
