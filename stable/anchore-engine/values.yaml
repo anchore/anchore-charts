@@ -1092,6 +1092,7 @@ anchoreEnterpriseUi:
   # Specify configurations for database connection user
   # This should specifically allow overriding and separation of the ui database user
   # dbUser: anchoreengineui
+  # dbPass: anchore-postgres,123ui
 
   # The (optional) `appdbConfig` key specifies the connection options
   # for the application SQL database.
