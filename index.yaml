@@ -3,6 +3,24 @@ entries:
   anchore-admission-controller:
   - apiVersion: v1
     appVersion: 0.4.0
+    created: "2022-12-23T19:29:15.818626241Z"
+    description: A kubernetes admission controller for validating and mutating webhooks
+      that operates against Anchore Engine to make access decisions and annotations
+    digest: 9733f35b1f517ae405e87d42b40fb41dd926d8b9fb4c5eb45dc55f6a95d06125
+    home: https://github.com/anchore/kubernetes-admission-controller
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    kubeVersion: ^1.19.0
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-admission-controller
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-admission-controller-0.4.3/anchore-admission-controller-0.4.3.tgz
+    version: 0.4.3
+  - apiVersion: v1
+    appVersion: 0.4.0
     created: "2022-12-22T01:21:59.227401037Z"
     description: A kubernetes admission controller for validating and mutating webhooks
       that operates against Anchore Engine to make access decisions and annotations
@@ -288,6 +306,53 @@ entries:
     - https://github.com/anchore/anchore-charts/releases/download/anchore-admission-controller-0.1.0/anchore-admission-controller-0.1.0.tgz
     version: 0.1.0
   anchore-engine:
+  - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2022-12-23T19:29:15.984929193Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-db
+      condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-gem-db
+      condition: anchore-feeds-gem-db.enabled,anchoreEnterpriseFeeds.gemDriverEnabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: ui-redis
+      condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.11.3
+    description: Anchore container analysis and policy evaluation engine service
+    digest: e4ff183ac70cfb8975a2261496cb6fee587f42b04ad6f21866780adb09dedf99
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - security
+    - vulnerability
+    - scanner
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-engine
+    sources:
+    - https://github.com/anchore/anchore-engine
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.20.4/anchore-engine-1.20.4.tgz
+    version: 1.20.4
   - apiVersion: v2
     appVersion: 1.1.0
     created: "2022-12-22T18:28:21.933437905Z"
@@ -3878,6 +3943,32 @@ entries:
     - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.7.0/anchore-engine-1.7.0.tgz
     version: 1.7.0
   kai:
+  - apiVersion: v2
+    appVersion: 0.3.2
+    created: "2022-12-23T19:29:16.134202597Z"
+    description: A Helm chart for Kubernetes Automated Inventory, which describes
+      which images are in use in a given Kubernetes Cluster
+    digest: 6616b3fbb8102db4974648d5cfc4a45bfb16060bea21020716a78ad3730a7e93
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: kai
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/kai-0.3.2/kai-0.3.2.tgz
+    version: 0.3.2
   - apiVersion: v2
     appVersion: 0.3.2
     created: "2022-08-29T20:06:33.762669538Z"
