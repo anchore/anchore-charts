@@ -51,7 +51,7 @@ spec:
       {{- with .Values.anchoreAnalyzer.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreGlobal.existingSecret) }}
+      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreGlobal.useExistingSecrets) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
@@ -123,9 +123,9 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.fullname" . }}

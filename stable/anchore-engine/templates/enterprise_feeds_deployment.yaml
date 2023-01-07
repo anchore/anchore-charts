@@ -52,7 +52,7 @@ spec:
       {{- with .Values.anchoreEnterpriseFeeds.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreEnterpriseFeeds.existingSecret) }}
+      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreGlobal.useExistingSecrets) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_feeds_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/feeds-config: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap.yaml") . | sha256sum }}
@@ -109,9 +109,9 @@ spec:
           name: feeds-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreEnterpriseFeeds.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreEnterpriseFeeds.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseFeeds.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
