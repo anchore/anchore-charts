@@ -308,6 +308,53 @@ entries:
   anchore-engine:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2023-01-07T01:25:58.820019655Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-db
+      condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-gem-db
+      condition: anchore-feeds-gem-db.enabled,anchoreEnterpriseFeeds.gemDriverEnabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: ui-redis
+      condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.11.3
+    description: Anchore container analysis and policy evaluation engine service
+    digest: 3dccaa202b00b43b65f0d0f83b3a9f34e4fbb386bf7656e19a451ebaf250457c
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - security
+    - vulnerability
+    - scanner
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-engine
+    sources:
+    - https://github.com/anchore/anchore-engine
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.20.5/anchore-engine-1.20.5.tgz
+    version: 1.20.5
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2022-12-23T19:29:15.984929193Z"
     dependencies:
     - condition: postgresql.enabled
