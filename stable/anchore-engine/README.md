@@ -609,29 +609,63 @@ anchoreApi:
 
 ## Utilize an Existing Secret
 
-Secrets should be created prior to running `helm install`. These can be used to override the secret provisioned by the Helm chart, preventing plain text passwords in your values.yaml file.
+Rather than passing secrets into the Helm values file directly, users can create secrets in the namespace prior to deploying this Helm chart. When using existing secrets, the chart will load environment variables into deployments from the secret names specified by the following values:
+
+* `.Values.anchoreGlobal.existingSecretName` [default: anchore-engine-env]
+* `.Values.anchoreEnterpriseFeeds.existingSecretName` [default: anchore-enterprise-feeds-env]
+* `.Values.anchoreEnterpriseUi.existingSecretName` [default: anchore-enterprise-ui-env]
+
+To use existing secrets, set the following in your values file:
 
 ```yaml
 anchoreGlobal:
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  existingSecret: "anchore-engine-secrets"
+  useExistingSecrets: true
+```
 
+Create the following secrets:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-engine-env
+type: Opaque
+stringData:
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  ANCHORE_DB_NAME: anchore
+  ANCHORE_DB_USER: anchoreuser
+  ANCHORE_DB_HOST: anchore-db.example.com:5432
+  ANCHORE_DB_PASSWORD: foobar1234
+  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
 
-anchoreEnterpriseFeeds:
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_FEEDS_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  existingSecret: "anchore-feeds-secrets"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-enterprise-feeds-env
+type: Opaque
+stringData:
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  ANCHORE_FEEDS_DB_NAME: anchore-feeds
+  ANCHORE_FEEDS_DB_USER: anchorefeedsuser
+  ANCHORE_FEEDS_DB_PASSWORD: foobar1234
+  ANCHORE_FEEDS_DB_HOST: anchorefeeds-db.example.com:5432
+  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
+  # (if applicable) ANCHORE_MSRC_KEY: foobar1234
+  # (if applicable) ANCHORE_GITHUB_TOKEN: foobar1234
+  # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
+  # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
+  # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234
+  # (if applicable) ANCHORE_GEM_DB_HOST: anchorefeeds-gem-db.example.com:5432
 
-anchoreEnterpriseUI:
-  # This secret should define the following ENV vars
-  # ANCHORE_APPDB_URI
-  # ANCHORE_REDIS_URI
-  existingSeccret: "anchore-ui-secrets"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-enterprise-feeds-env
+type: Opaque
+stringData:
+  ANCHORE_APPDB_URI: postgresql://anchoreuiuser:foobar1234@anchore-db.example.com:5432/anchore
+  ANCHORE_REDIS_URI: redis://nouser:foobar1234@redis.example.com:6379
 ```
 
 ## Install using an existing/external PostgreSQL instance
