@@ -54,7 +54,6 @@ spec:
       {{- if not .Values.inject_secrets_via_env }}
         checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
         checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
@@ -119,8 +118,6 @@ spec:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}

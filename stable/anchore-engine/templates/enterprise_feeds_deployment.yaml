@@ -55,7 +55,6 @@ spec:
       {{- if not (or .Values.inject_secrets_via_env .Values.anchoreEnterpriseFeeds.existingSecret) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_feeds_secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/env: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap_env.yaml") . | sha256sum }}
         checksum/feeds-config: {{ include (print $.Template.BasePath "/enterprise_feeds_configmap.yaml") . | sha256sum }}
     spec:
       {{- with .Values.anchoreGlobal.securityContext }}
@@ -120,8 +119,6 @@ spec:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}

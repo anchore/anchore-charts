@@ -92,8 +92,6 @@ spec:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
