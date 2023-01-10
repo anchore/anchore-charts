@@ -56,7 +56,7 @@ spec:
       {{- with .Values.anchoreEnterpriseUi.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreEnterpriseUi.existingSecret) }}
+      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreGlobal.useExistingSecrets) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_ui_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/ui-config: {{ include (print $.Template.BasePath "/enterprise_ui_configmap.yaml") . | sha256sum }}
@@ -95,10 +95,6 @@ spec:
         args:
         - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh node /home/node/aui/build/server.js
         env:
-        {{- if and (not (index .Values "anchoreEnterpriseUi" "existingSecret")) (not (index .Values "ui-redis" "externalEndpoint")) }}
-        - name: ANCHORE_REDIS_URI
-          value: redis://nouser:{{ index .Values "ui-redis" "auth" "password" }}@{{ template "redis.fullname" . }}-master:6379
-        {{- end }}
         {{ if .Values.anchoreGlobal.dbConfig.ssl }}
         - name: PGSSLROOTCERT
           value: /home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }}
@@ -115,14 +111,12 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreEnterpriseUi.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreEnterpriseUi.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseUi.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.enterprise-ui.fullname" . }}
-        - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
         ports:

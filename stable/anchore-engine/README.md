@@ -247,6 +247,16 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.21.0
+
+* Revamped how the chart is configured when using existing secrets. Users upgrading from a previous chart version will need to update their values file to match the new convention. Update the following in your values file:
+  * Set `.Values.anchoreGlobal.useExistingSecrets=true`
+  * Update the following keys:
+    * `.Values.anchoreGlobal.existingSecret` -> `.Values.anchoreGlobal.existingSecretName`
+    * `.Values.anchoreEnterpriseFeeds.existingSecret` -> `.Values.anchoreEnterpriseFeeds.existingSecretName`
+    * `.Values.anchoreEnterpriseUi.existingSecret` -> `.Values.anchoreEnterpriseUi.existingSecretName`
+* See the [existing secrets section](#utilize-an-existing-secret) for more details.
+
 ## Chart version 1.20.1
 
 * Anchore Enterprise image update to v4.3.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/430/).
@@ -609,29 +619,66 @@ anchoreApi:
 
 ## Utilize an Existing Secret
 
-Secrets should be created prior to running `helm install`. These can be used to override the secret provisioned by the Helm chart, preventing plain text passwords in your values.yaml file.
+Rather than passing secrets into the Helm values file directly, users can create secrets in the namespace prior to deploying this Helm chart. When using existing secrets, the chart will load environment variables into deployments from the secret names specified by the following values:
+
+* `.Values.anchoreGlobal.existingSecretName` [default: anchore-engine-env]
+* `.Values.anchoreEnterpriseFeeds.existingSecretName` [default: anchore-enterprise-feeds-env]
+* `.Values.anchoreEnterpriseUi.existingSecretName` [default: anchore-enterprise-ui-env]
+
+To use existing secrets, set the following in your values file:
 
 ```yaml
 anchoreGlobal:
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  existingSecret: "anchore-engine-secrets"
+  useExistingSecrets: true
+```
 
+Create the following secrets:
+```yaml
+# These secrets will work as-is when using helm deployed redis/postgresql with the default chart values and a helm release name of `anchore`. When utilizing these secrets, users are expected to update the environment variables with appropriate configurations for their environment.
 
-anchoreEnterpriseFeeds:
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_FEEDS_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  existingSecret: "anchore-feeds-secrets"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-engine-env
+type: Opaque
+stringData:
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  ANCHORE_DB_NAME: anchore
+  ANCHORE_DB_USER: anchoreengine
+  ANCHORE_DB_HOST: anchore-postgresql:5432
+  ANCHORE_DB_PASSWORD: anchore-postgres,123
+  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
 
-anchoreEnterpriseUI:
-  # This secret should define the following ENV vars
-  # ANCHORE_APPDB_URI
-  # ANCHORE_REDIS_URI
-  existingSeccret: "anchore-ui-secrets"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-enterprise-feeds-env
+type: Opaque
+stringData:
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  ANCHORE_FEEDS_DB_NAME: anchore-feeds
+  ANCHORE_FEEDS_DB_USER: anchoreengine
+  ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
+  ANCHORE_FEEDS_DB_HOST: anchore-anchore-feeds-db:5432
+  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
+  # (if applicable) ANCHORE_MSRC_KEY: foobar,msrc1234
+  # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
+  # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
+  # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
+  # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234
+  # (if applicable) ANCHORE_GEM_DB_HOST: anchorefeeds-gem-db.example.com:5432
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-enterprise-ui-env
+type: Opaque
+stringData:
+  ANCHORE_APPDB_URI: postgresql://anchoreengine:anchore-postgres,123@anchore-postgresql:5432/anchore
+  ANCHORE_REDIS_URI: redis://nouser:anchore-redis,123@anchore-ui-redis-master:6379
 ```
 
 ## Install using an existing/external PostgreSQL instance

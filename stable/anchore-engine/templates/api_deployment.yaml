@@ -54,7 +54,6 @@ spec:
       {{- if not .Values.inject_secrets_via_env }}
         checksum/secrets: {{ include (print $.Template.BasePath "/engine_secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/env: {{ include (print $.Template.BasePath "/engine_configmap_env.yaml") . | sha256sum }}
         checksum/engine-config: {{ include (print $.Template.BasePath "/engine_configmap.yaml") . | sha256sum }}
       {{- if .Values.anchoreGlobal.policyBundles }}
         checksum/policy-config: {{ include (print $.Template.BasePath "/policy_bundle_configmap.yaml") . | sha256sum }}
@@ -112,9 +111,9 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.fullname" . }}
@@ -122,8 +121,6 @@ spec:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
@@ -139,7 +136,7 @@ spec:
         - name: ANCHORE_CLI_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecret }}
+              name: {{ ternary .Values.anchoreGlobal.existingSecretName (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.useExistingSecrets }}
               key: ANCHORE_ADMIN_PASSWORD
         {{- end }}
         ports:
@@ -211,9 +208,9 @@ spec:
         - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_authorizer
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.fullname" . }}
@@ -221,8 +218,6 @@ spec:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
@@ -297,9 +292,9 @@ spec:
           name: reports-api
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreGlobal.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreGlobal.existingSecret }}
+            name: {{ .Values.anchoreGlobal.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.fullname" . }}
@@ -307,8 +302,6 @@ spec:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}

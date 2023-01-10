@@ -135,12 +135,12 @@ anchoreGlobal:
     # - name: foo
     #   value: bar
 
-  # Specifies an existing secret to be used for admin and db passwords
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  existingSecret: Null
+  # When useExistingSecrets is set to `true` the chart will not create secrets specifying the environment variables used in deployments.
+  # Instead, the chart will use secrets that have already been applied to the namespace that this chart is being deployed to.
+  useExistingSecrets: false
+
+  # Set the name of your existing secret for all Anchore Engine components
+  existingSecretName: anchore-engine-env
 
   # does `source {{ filePath }}` before starting services
   doSourceAtEntry:
@@ -838,7 +838,8 @@ anchoreEnterpriseFeeds:
   # ANCHORE_SAML_SECRET (if applicable)
   # ANCHORE_GITHUB_TOKEN (if applicable)
 
-  existingSecret: Null
+  # Set the name of your existing secret for Anchore Enterprise Feeds
+  existingSecretName: anchore-enterprise-feeds-env
 
   # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
@@ -1083,11 +1084,8 @@ anchoreEnterpriseUi:
   # Specify the service account name utilized to run the UI pods
   # serviceAccountName: Null
 
-  # Specifies an existing secret to be used for db and redis endpoints
-  # This secret should define the following ENV vars
-  # ANCHORE_APPDB_URI
-  # ANCHORE_REDIS_URI
-  existingSecret: Null
+  # Set the name of your existing secret for the Anchore Enterprise UI
+  existingSecretName: anchore-enterprise-ui-env
 
   # Specify configurations for database connection user
   # This should specifically allow overriding and separation of the ui database user
