@@ -634,6 +634,9 @@ anchoreGlobal:
 
 Create the following secrets:
 ```yaml
+# These secrets will work as-is when using helm deployed redis/postgresql with the default chart values and a helm release name of `anchore`. When utilizing these secrets, users are expected to update the environment variables with appropriate configurations for their environment.
+
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -642,9 +645,9 @@ type: Opaque
 stringData:
   ANCHORE_ADMIN_PASSWORD: foobar1234
   ANCHORE_DB_NAME: anchore
-  ANCHORE_DB_USER: anchoreuser
-  ANCHORE_DB_HOST: anchore-db.example.com:5432
-  ANCHORE_DB_PASSWORD: foobar1234
+  ANCHORE_DB_USER: anchoreengine
+  ANCHORE_DB_HOST: anchore-postgresql:5432
+  ANCHORE_DB_PASSWORD: anchore-postgres,123
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
 
 ---
@@ -656,12 +659,12 @@ type: Opaque
 stringData:
   ANCHORE_ADMIN_PASSWORD: foobar1234
   ANCHORE_FEEDS_DB_NAME: anchore-feeds
-  ANCHORE_FEEDS_DB_USER: anchorefeedsuser
-  ANCHORE_FEEDS_DB_PASSWORD: foobar1234
-  ANCHORE_FEEDS_DB_HOST: anchorefeeds-db.example.com:5432
+  ANCHORE_FEEDS_DB_USER: anchoreengine
+  ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
+  ANCHORE_FEEDS_DB_HOST: anchore-anchore-feeds-db:5432
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
-  # (if applicable) ANCHORE_MSRC_KEY: foobar1234
-  # (if applicable) ANCHORE_GITHUB_TOKEN: foobar1234
+  # (if applicable) ANCHORE_MSRC_KEY: foobar,msrc1234
+  # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
   # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
   # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
   # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234
@@ -671,11 +674,11 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: anchore-enterprise-feeds-env
+  name: anchore-enterprise-ui-env
 type: Opaque
 stringData:
-  ANCHORE_APPDB_URI: postgresql://anchoreuiuser:foobar1234@anchore-db.example.com:5432/anchore
-  ANCHORE_REDIS_URI: redis://nouser:foobar1234@redis.example.com:6379
+  ANCHORE_APPDB_URI: postgresql://anchoreengine:anchore-postgres,123@anchore-postgresql:5432/anchore
+  ANCHORE_REDIS_URI: redis://nouser:anchore-redis,123@anchore-ui-redis-master:6379
 ```
 
 ## Install using an existing/external PostgreSQL instance
