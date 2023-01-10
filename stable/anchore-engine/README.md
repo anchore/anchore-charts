@@ -247,6 +247,16 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.21.0
+
+* Revamped how the chart is configured when using existing secrets. Users upgrading from a previous chart version will need to update their values file to match the new convention. Update the following in your values file:
+  * Set `.Values.anchoreGlobal.useExistingSecrets=true`
+  * Update the following keys:
+    * `.Values.anchoreGlobal.existingSecret` -> `.Values.anchoreGlobal.existingSecretName`
+    * `.Values.anchoreEnterpriseFeeds.existingSecret` -> `.Values.anchoreEnterpriseFeeds.existingSecretName`
+    * `.Values.anchoreEnterpriseUi.existingSecret` -> `.Values.anchoreEnterpriseUi.existingSecretName`
+* See the [existing secrets section](#utilize-an-existing-secret) for more details.
+
 ## Chart version 1.20.1
 
 * Anchore Enterprise image update to v4.3.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/430/).
