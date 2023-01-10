@@ -136,7 +136,7 @@ spec:
         - name: ANCHORE_CLI_PASS
           valueFrom:
             secretKeyRef:
-              name: {{ default (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.existingSecretName }}
+              name: {{ ternary .Values.anchoreGlobal.existingSecretName (print (include "anchore-engine.fullname" .) "-admin-pass") .Values.anchoreGlobal.useExistingSecrets }}
               key: ANCHORE_ADMIN_PASSWORD
         {{- end }}
         ports:
