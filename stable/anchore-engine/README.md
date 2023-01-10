@@ -251,6 +251,15 @@ The upgrade will only be considered successful when this job completes successfu
 
 * Revamped how the chart is configured when using existing secrets. Users upgrading from a previous chart version will need to update their values file to match the new convention. Update the following in your values file:
   * Set `.Values.anchoreGlobal.useExistingSecrets=true`
+  * Update your existing secrets to include all environment variables used by deployments
+    * Add to the secret specified in `.Values.anchoreGlobal.existingSecretName`:
+      * ANCHORE_DB_HOST
+      * ANCHORE_DB_USER
+      * ANCHORE_DB_NAME
+    * Add to secret specified in `.Values.anchoreEnterpriseFeeds.existingSecretName`:
+      * ANCHORE_FEEDS_DB_HOST
+      * ANCHORE_FEEDS_DB_USER
+      * ANCHORE_FEEDS_DB_NAME
   * Update the following keys:
     * `.Values.anchoreGlobal.existingSecret` -> `.Values.anchoreGlobal.existingSecretName`
     * `.Values.anchoreEnterpriseFeeds.existingSecret` -> `.Values.anchoreEnterpriseFeeds.existingSecretName`
