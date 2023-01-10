@@ -398,7 +398,21 @@ Return Anchore Engine default admin password
 {{- end -}}
 
 {{/*
-Create database hostname string from supplied values file. Used for the enterprise-ui ANCHORE_APPDB_URI environment variable secret
+Create feeds database hostname string from supplied values file. Used for setting the ANCHORE_FEEDS_DB_HOST env var in the Feeds secret.
+*/}}
+{{- define "feeds-db-hostname" }}
+  {{- if and (index .Values "anchore-feeds-db" "externalEndpoint") (not (index .Values "anchore-feeds-db" "enabled")) }}
+    {{- print ( index .Values "anchore-feeds-db" "externalEndpoint" ) }}
+  {{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "anchore-feeds-db" "enabled")) }}
+    {{- print "localhost:5432" }}
+  {{- else }}
+    {{- $db_host := include "postgres.anchore-feeds-db.fullname" . }}
+    {{- printf "%s:5432" $db_host -}}
+  {{- end }}
+{{- end }}
+
+{{/*
+Create database hostname string from supplied values file. Used for setting the ANCHORE_DB_HOST env var in the UI & Engine secret.
 */}}
 {{- define "db-hostname" }}
   {{- if and (index .Values "postgresql" "externalEndpoint") (not (index .Values "postgresql" "enabled")) }}
