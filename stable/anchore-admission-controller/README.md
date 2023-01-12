@@ -75,11 +75,13 @@ It will remove kubernetes objects which are not removed by a helm delete. Pass t
 |---|---|---|---|
 |logVerbosity | int | 6 | log verbosity of controller, 1 = error, 2 warn, 3 debug....
 |---|---|---|---|
-|image | str | release tag | Tag including registry and repository for image to use 
+|image | str | release tag | Tag including registry and repository for image to use
 |---|---|---|---|
 |imagePullPolicy | str | IfNotPresent | Standard k8s pull policy setting
 |---|---|---|---|
-|service.name | str | anchoreadmissioncontroller | Name for the svc instance 
+|imagePullSecrets | array | [] | Image pull secrets
+|---|---|---|---|
+|service.name | str | anchoreadmissioncontroller | Name for the svc instance
 |---|---|---|---|
 |service.type | str | ClusterIp | Type to use for k8s service definition
 |---|---|---|---|
@@ -98,6 +100,8 @@ It will remove kubernetes objects which are not removed by a helm delete. Pass t
 |policySelectors | array | default catch-all | Selector rules, see the project github page for detail on format and options.
 |---|---|---|---|
 |requestAnalysis | boolean | true | Ask anchore to analyze an image that isn't already analyzed
+|---|---|---|---|
+|initCa.image | str | cfssl/cfssl:latest | Tag including registry and repository for the initCa image
 |---|---|---|---|
 |initCa.extraEnv | array | [] | Define custom environment variables to pass to init-ca pod |
 |---|---|---|---|

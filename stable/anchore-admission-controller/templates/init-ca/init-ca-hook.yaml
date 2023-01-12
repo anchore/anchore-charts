@@ -21,9 +21,15 @@ spec:
       - name: init-ca-script
         configMap:
           name: {{.Release.Name}}-init-ca
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
       - name: create-ca
-        image:  "cfssl/cfssl:latest"
+        image:  "{{ .Values.initCa.image }}"
         command:
         - bash
         - -xe

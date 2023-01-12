@@ -7,6 +7,10 @@ logVerbosity: 3
 
 image: "anchore/kubernetes-admission-controller:v0.4.0"
 imagePullPolicy: IfNotPresent
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# imagePullSecrets:
+# - secretName
 
 service:
   name: anchoreadmissioncontroller
@@ -103,6 +107,7 @@ credentials: {}
 
 # Settings related to init-ca pod
 initCa:
+  image: cfssl/cfssl:latest
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
     # - name: FOO
