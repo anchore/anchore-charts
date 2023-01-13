@@ -33,6 +33,12 @@ spec:
       - name: anchore-auth
         secret:
           secretName: {{ if .Values.existingCredentialsSecret }}{{ .Values.existingCredentialsSecret }}{{ else }}{{ template "anchore-admission-controller.fullname" . }}{{ end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image }}"
