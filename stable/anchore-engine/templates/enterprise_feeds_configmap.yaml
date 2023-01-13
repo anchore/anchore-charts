@@ -132,6 +132,10 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.olDriverEnabled | quote) }}
           ubuntu:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled | quote) }}
+          {{- if .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases }}
+            releases:
+            {{- toYaml .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases | nindent 14 }}
+          {{- end }}
           rhel:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
             concurrency: {{ .Values.anchoreEnterpriseFeeds.rhelDriverConcurrency }}
