@@ -128,10 +128,18 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.centosDriverEnabled | quote) }}
           debian:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.debianDriverEnabled | quote) }}
+          {{- if .Values.anchoreEnterpriseFeeds.debianExtraReleases }}
+            releases:
+            {{- toYaml .Values.anchoreEnterpriseFeeds.debianExtraReleases | nindent 14 }}
+          {{- end }}
           ol:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.olDriverEnabled | quote) }}
           ubuntu:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled | quote) }}
+          {{- if .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases }}
+            releases:
+            {{- toYaml .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases | nindent 14 }}
+          {{- end }}
           rhel:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
             concurrency: {{ .Values.anchoreEnterpriseFeeds.rhelDriverConcurrency }}
