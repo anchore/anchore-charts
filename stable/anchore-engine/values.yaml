@@ -817,7 +817,7 @@ anchoreEnterpriseFeeds:
   # - 12345
 
   # Additional Ubuntu feed groups
-  # ubuntuExtraReleases:
+  ubuntuExtraReleases: {}
   #   kinetic: '22.10'
 
   # The number of concurrent threads used when downloading RHEL feeds
