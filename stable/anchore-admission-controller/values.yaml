@@ -110,7 +110,7 @@ credentials: {}
 initCa:
   image: cfssl/cfssl:latest
   # Define custom environment variables to pass to init-ca pod
-  extraEnv:
+  extraEnv: []
   #- name: FOO
   #  value: "bar"
   resources: {}
