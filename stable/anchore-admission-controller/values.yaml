@@ -80,7 +80,7 @@ resources: {}
   #  memory: 128Mi
   # requests:
   #  cpu: 100m
-#  memory: 128Mi
+  #  memory: 128Mi
 
 ## Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
@@ -111,8 +111,8 @@ initCa:
   image: cfssl/cfssl:latest
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
-  #- name: FOO
-  #  value: "bar"
+  # - name: FOO
+  #   value: "bar"
   resources: {}
   # requests:
   #    cpu: 100m
