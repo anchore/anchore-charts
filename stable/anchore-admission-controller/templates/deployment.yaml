@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: {{ template "anchore-admission-controller.fullname" . }}
   labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+  {{- with .Values.labels}}
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
   annotations:
   {{- with .Values.annotations }}
     {{ toYaml . | nindent 4 }}
@@ -16,6 +19,9 @@ spec:
   template:
     metadata:
       labels: {{- include "anchore-admission-controller.labels" . | nindent 8 }}
+      {{- with .Values.labels}}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
       annotations:
       {{- with .Values.annotations }}
         {{ toYaml . | nindent 8 }}

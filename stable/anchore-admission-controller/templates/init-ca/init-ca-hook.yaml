@@ -2,7 +2,10 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "{{ .Release.Name }}-init-ca"
-  labels:
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+  {{- with .Values.labels}}
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
     app: {{ template "anchore-admission-controller.fullname" . }}
     component: admission-server
   annotations:
@@ -11,7 +14,10 @@ metadata:
 spec:
   template:
     metadata:
-      labels:
+      labels: {{- include "anchore-admission-controller.labels" . | nindent 8 }}
+      {{- with .Values.labels}}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
         app: {{ template "anchore-admission-controller.fullname" . }}
         component: admission-server
     spec:
@@ -41,4 +47,10 @@ spec:
           {{- with .Values.initCa.extraEnv }}
           {{- toYaml . | nindent 8 }}
           {{- end }}
-
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
