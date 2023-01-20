@@ -21,6 +21,4 @@ webhooks:
   failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
   namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
   sideEffects: None
-  admissionReviewVersions: 
-    - v1
 {{- end }}
