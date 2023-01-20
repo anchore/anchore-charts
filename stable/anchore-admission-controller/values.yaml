@@ -96,7 +96,7 @@ affinity: {}
 labels: {}
 
 # define name of existing secret containing anchore credentials
-existingCredentialsSecret: anchore-secret
+existingCredentialsSecret: null
 
 # or define credentials here to create secrets
 credentials: {}
@@ -110,6 +110,13 @@ credentials: {}
 initCa:
   image: cfssl/cfssl:latest
   # Define custom environment variables to pass to init-ca pod
-  extraEnv: []
-    # - name: FOO
-  # value: "bar"
+  extraEnv:
+  #- name: FOO
+  #  value: "bar"
+  resources: {}
+  # requests:
+  #    cpu: 100m
+  #    memory: 128Mi
+  #  limits:
+  #    cpu: 200m
+  #    memory: 256Mi
