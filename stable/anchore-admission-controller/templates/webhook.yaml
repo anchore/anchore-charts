@@ -6,8 +6,6 @@ metadata:
   labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
 webhooks:
 - name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
-  admissionReviewVersions:
-  - v1
   clientConfig:
     service:
       namespace: default
@@ -21,4 +19,6 @@ webhooks:
   failurePolicy: {{ .Values.apiService.webhook.failurePolicy }}
   namespaceSelector: {{- toYaml .Values.apiService.namespaceSelector | nindent 4 }}
   sideEffects: None
+  admissionReviewVersions:
+  - v1
 {{- end }}
