@@ -29,6 +29,9 @@ Common labels
 app.kubernetes.io/name: {{ include "anchore-admission-controller.name" . }}
 helm.sh/chart: {{ include "anchore-admission-controller.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- with .Values.extraLabels}}
+{{ toYaml . }}
+{{- end }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}

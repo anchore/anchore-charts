@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: "{{ .Release.Name }}-init-ca"
-  labels:
+  labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
     app: {{ template "anchore-admission-controller.fullname" . }}
     component: admission-server
   annotations:
@@ -11,7 +11,7 @@ metadata:
 spec:
   template:
     metadata:
-      labels:
+      labels: {{- include "anchore-admission-controller.labels" . | nindent 8 }}
         app: {{ template "anchore-admission-controller.fullname" . }}
         component: admission-server
     spec:
@@ -41,4 +41,7 @@ spec:
           {{- with .Values.initCa.extraEnv }}
           {{- toYaml . | nindent 8 }}
           {{- end }}
-
+        {{- with .Values.initCa.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
