@@ -1,14 +1,12 @@
-name: "Test using kind and chart-testing tool"
+name: "Lint changed charts using chart-testing tool"
 
 on:
   - pull_request
 
 jobs:
-  test:
+  lint:
     strategy:
       fail-fast: false
-      matrix:
-        kubernetesVersion: ["v1.19.16", "v1.22.0", "v1.25.0"]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -31,18 +29,8 @@ jobs:
           echo "::set-output name=changed::true"
         fi
 
-    - name: Install kind
-      uses: helm/kind-action@v1.4.0
-      with:
-        node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
-        config: kind-config.yaml
-        wait: 600s
+    - name: Run chart-testing (lint)
+      id: lint
+      run: ct lint --config 'ct-config.yaml'
       if: steps.list-changed.outputs.changed == 'true'
 
-    - name: Check kind nodes
-      run: kubectl describe nodes
-      if: steps.list-changed.outputs.changed == 'true'
-
-    - name: Run chart-testing (install)
-      run: ct install --config 'ct-config.yaml'
-      if: steps.list-changed.outputs.changed == 'true'
