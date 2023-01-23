@@ -827,6 +827,14 @@ anchoreEnterpriseFeeds:
   # The number of concurrent threads used when downloading RHEL feeds
   rhelDriverConcurrency: 5
 
+  # Git Repository settings for the Ubuntu feed driver
+  ubuntuDriverGitUrl: "https://git.launchpad.net/ubuntu-cve-tracker"
+  # Switch to the git protocol endpoint for significantly improved reliability in fetches as this endpoint is not
+  # throttled heavily like the https one; however, the git protocol is not validated or encrypted and runs on a different
+  # port from https
+  # ubuntuDriverGitUrl: "git://git.launchpad.net/ubuntu-cve-tracker"
+  ubuntuDriverGitBranch: "master"
+
   # Set extra environment variables. These will be set on all feeds containers.
   extraEnv: []
     # - name: foo

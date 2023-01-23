@@ -140,6 +140,8 @@ data:
             releases:
             {{- toYaml .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases | nindent 14 }}
           {{- end }}
+            git_url: {{ (.Values.anchoreEnterpriseFeeds.ubuntuDriverGitUrl | quote) }}
+            git_branch: {{ (.Values.anchoreEnterpriseFeeds.ubuntuDriverGitBranch | quote) }}
           rhel:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
             concurrency: {{ .Values.anchoreEnterpriseFeeds.rhelDriverConcurrency }}
