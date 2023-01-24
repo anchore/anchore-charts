@@ -425,8 +425,20 @@ Create database hostname string from supplied values file. Used for setting the 
   {{- end }}
 {{- end }}
 
+{{/*
+Allows sourcing of a specified file in the entrypoint of all containers when .Values.anchoreGlobal.doSourceAtEntry.enabled=true
+*/}}
 {{- define "doSourceFile" }}
 {{- if .Values.anchoreGlobal.doSourceAtEntry.enabled }}
     {{- printf "source %v;" .Values.anchoreGlobal.doSourceAtEntry.filePath }}
+{{- end }}
+{{- end }}
+
+{{/*
+Upon upgrades, checks if .Values.existingSecret=true and fails the upgrade if .Values.useExistingSecret is not set.
+*/}}
+{{- define "checkUpgradeForExistingSecret" }}
+{{- if and .Release.IsUpgrade .Values.anchoreGlobal.existingSecret (not .Values.anchoreGlobal.useExistingSecrets) }}
+    {{- fail "WARNING: As of chart v1.21.0 `.Values.anchoreGlobal.existingSecret` is no longer a valid configuration value. See the chart README for more instructions on configuring existing secrets - https://github.com/anchore/anchore-charts/blob/main/stable/anchore-engine/README.md#chart-version-1210" }}
 {{- end }}
 {{- end }}
