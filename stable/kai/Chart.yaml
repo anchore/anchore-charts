@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kai
-version: 0.3.2
+version: 0.3.3
 appVersion: 0.3.2
 description: A Helm chart for Kubernetes Automated Inventory, which describes which images are in use in a given Kubernetes Cluster
 keywords:
