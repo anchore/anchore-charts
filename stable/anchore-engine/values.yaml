@@ -218,6 +218,7 @@ anchoreGlobal:
 
   oauthEnabled: false
   oauthTokenExpirationSeconds: 3600
+  oauthRefreshTokenExpirationSeconds: 86400
 
   # Set this to true in order to disable the SSO JIT provisioning during authentication. This provides an additional
   # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
@@ -642,6 +643,10 @@ anchorePolicyEngine:
     feed_sync_checker: 3600
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
+
+  # Controls the load of the Image Package DB Entries and disables the packages.verify gate.
+  # Reduces significant DB load as a result.
+  enablePackageDbLoad: true
 
   cacheTTL: 3600  # 1 hour
 
