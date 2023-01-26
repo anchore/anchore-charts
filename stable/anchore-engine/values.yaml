@@ -1,7 +1,7 @@
 # Default values for anchore_engine chart.
 
 fullnameOverride: Null
-# Anchore engine has a dependency on Postgresql, configure here
+# Anchore has a dependency on Postgresql, configure here
 postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
   # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
@@ -57,7 +57,7 @@ cloudsql:
     tag: 1.22.0
     pullPolicy: IfNotPresent
 
-# Create an ingress resource for all external anchore engine services (API & Enterprise UI).
+# Create an ingress resource for all external Anchore services (API & Enterprise UI).
 # By default this chart is setup to use the NGINX ingress controller which needs to be installed & configured on your cluster.
 # To utilize a GCE/ALB ingress controller comment out the nginx annotations below, change ingress.class, edit path configurations as per the comments, & set API/UI services to use NodePort.
 ingress:
@@ -101,13 +101,13 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# Global configuration shared by all anchore-engine services.
+# Global configuration shared by all Anchore services.
 anchoreGlobal:
-  # Image used for all anchore engine deployments (excluding enterprise components).
+  # Image used for all Anchore deployments (excluding enterprise components).
   image: docker.io/anchore/anchore-engine:v1.1.0
   imagePullPolicy: IfNotPresent
 
-  # Set image pull secret name if using an anchore-engine image from a private registry
+  # Set image pull secret name if using an Anchore image from a private registry
   imagePullSecretName:
 
   # Specify a service account name utilized to run all Anchore pods
@@ -121,7 +121,7 @@ anchoreGlobal:
     # app.kubernetes.io/managed-by: Helm
     # foo: bar
 
-  # Add common annotations to set on all pods. Useful expecially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
+  # Add common annotations to set on all pods. Useful especially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
   # Ref: https://banzaicloud.com/docs/bank-vaults/mutating-webhook/
   annotations: {}
     # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
@@ -139,7 +139,7 @@ anchoreGlobal:
   # Instead, the chart will use secrets that have already been applied to the namespace that this chart is being deployed to.
   useExistingSecrets: false
 
-  # Set the name of your existing secret for all Anchore Engine components
+  # Set the name of your existing secret for all Anchore components
   existingSecretName: anchore-engine-env
 
   # does `source {{ filePath }}` before starting services
@@ -169,7 +169,7 @@ anchoreGlobal:
     details: {}
       # Specify volume configuration here
 
-  # A secret must be created in the same namespace as anchore-engine is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
+  # A secret must be created in the same namespace as Anchore is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
   # Certs and keys should be added using the file name the certificate is stored at. This secret will be mounted to /home/anchore/certs.
   certStoreSecretName: Null
 
@@ -181,7 +181,7 @@ anchoreGlobal:
     fsGroup: 1000
 
   ###
-  # Start of General Anchore Engine Configurations (populates /config/config.yaml)
+  # Start of General Anchore Configurations (populates /config/config.yaml)
   ###
   # Set where default configs are placed at startup. This must be a writable location for the pod.
   serviceDir: /anchore_service
@@ -203,7 +203,7 @@ anchoreGlobal:
   # Disable auth on prometheus metrics
   metricsAuthDisabled: false
 
-  # Sets the password & email address for the default anchore-engine admin user.
+  # Sets the password & email address for the default Anchore admin user.
   defaultAdminPassword:
   defaultAdminEmail: example@email.com
 
@@ -228,7 +228,7 @@ anchoreGlobal:
   # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
   hashedPasswords: false
 
-  # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
+  # Configure the database connection within Anchore & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
     # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
@@ -245,7 +245,7 @@ anchoreGlobal:
       # pool_recycle: 600
 
   internalServicesSsl:
-    # Enable to force all anchore-engine services to communicate internally using SSL
+    # Enable to force all Anchore services to communicate internally using SSL
     enabled: false
     # specify whether cert is verfied against the local certifacte bundle (allow self-signed certs if set to false)
     verifyCerts: false
@@ -402,7 +402,7 @@ anchoreAnalyzer:
   affinity: {}
 
 
-# Pod configuration for the anchore engine api service.
+# Pod configuration for the Anchore api service.
 anchoreApi:
   replicaCount: 1
 
@@ -622,7 +622,7 @@ anchoreCatalog:
   tolerations: []
   affinity: {}
 
-# Pod configuration for the anchore engine policy service.
+# Pod configuration for the Anchore policy service.
 anchorePolicyEngine:
   replicaCount: 1
 
@@ -670,7 +670,7 @@ anchorePolicyEngine:
   tolerations: []
   affinity: {}
 
-# Pod configuration for the anchore engine simplequeue service.
+# Pod configuration for the Anchore simplequeue service.
 anchoreSimpleQueue:
   replicaCount: 1
 
@@ -849,7 +849,7 @@ anchoreEnterpriseFeeds:
   # Set the name of your existing secret for Anchore Enterprise Feeds
   existingSecretName: anchore-enterprise-feeds-env
 
-  # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
+  # Configure the database connection within Anchore & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
     # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
@@ -930,7 +930,7 @@ anchoreEnterpriseFeedsUpgradeJob:
   annotations: {}
 
 # Configure the Anchore Enterprise role based access control component.
-# This component consists of 2 containers that run as side-cars in the anchore engine api pod.
+# This component consists of 2 containers that run as side-cars in the Anchore api pod.
 anchoreEnterpriseRbac:
   enabled: true
 
@@ -985,7 +985,7 @@ anchoreEnterpriseReports:
   # Set enableGraphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
   enableGraphiql: true
 
-  # Set enableDataIngress to true for periodically syncing data from anchore engine into the reports service
+  # Set enableDataIngress to true for periodically syncing data from Anchore into the reports service
   enableDataIngress: true
 
   # Set enableDataEgress to true to periodically remove reporting data that has been removed in other parts of system
@@ -1278,7 +1278,7 @@ anchoreEnterpriseUi:
   tolerations: []
   affinity: {}
 
-# Anchore Engine Enterprise UI is dependent on redis for storing sessions
+# Anchore Enterprise UI is dependent on redis for storing sessions
 # Only utilized if 'anchoreEnterpriseUi.enabled: true'
 ui-redis:
   auth:
