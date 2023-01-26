@@ -726,7 +726,7 @@ anchoreEngineUpgradeJob:
 
 # This section is used for configuring anchore enterprise.
 anchoreEnterpriseGlobal:
-  enabled: true
+  enabled: false
   # Name of kubernetes secret containing your license.yaml file.
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license

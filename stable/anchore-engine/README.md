@@ -4,8 +4,6 @@ This chart deploys the Anchore Enterprise container image analysis system. Ancho
 
 Each of these services can be scaled and configured independently.
 
-See the [Anchore Homepage](https://anchore.com) for more project details.
-
 ## Anchore Enterprise Components
 
  The following features are available to Anchore Enterprise customers. Please contact the Anchore team for more information about getting a license for the Enterprise features. [Anchore Enterprise Demo](https://anchore.com/demo/)
@@ -90,6 +88,9 @@ anchoreGlobal:
   defaultAdminPassword: <PASSWORD>
   defaultAdminEmail: <EMAIL>
   enableMetrics: True
+
+anchoreEnterpriseGlobal:
+  enabled: true
 
 anchore-feeds-db:
   postgresPassword: <PASSWORD>
