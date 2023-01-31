@@ -184,6 +184,8 @@ The upgrade will only be considered successful when this job completes successfu
 ## Chart version 1.22.0
 
 * Anchore Enterprise image updated to v4.4.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/440/)
+* Allow configuration of the URL used for pulling Ubuntu vulnerability feed.
+* The UI now emits prometheus metrics when `.Values.anchoreGlobal.enableMetrics=true`
 
 ## Chart version 1.21.0
 
