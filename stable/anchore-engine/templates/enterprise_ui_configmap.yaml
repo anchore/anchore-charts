@@ -74,4 +74,5 @@ data:
     {{- end }}
     log_level: {{ .Values.anchoreEnterpriseUi.logLevel | squote }}
     enrich_inventory_view: {{ .Values.anchoreEnterpriseUi.enrichInventoryView  }}
+    enable_prometheus_metrics: {{ .Values.anchoreGlobal.enableMetrics }}
 {{- end -}}

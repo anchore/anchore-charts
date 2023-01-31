@@ -86,6 +86,7 @@ data:
       oauth:
         enabled: {{ .Values.anchoreGlobal.oauthEnabled }}
         default_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthTokenExpirationSeconds }}
+        refresh_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthRefreshTokenExpirationSeconds }}
 
       # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
       # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
@@ -241,6 +242,7 @@ data:
         cycle_timer_seconds: 1
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
+        enable_package_db_load: {{ .Values.anchorePolicyEngine.enablePackageDbLoad }}
         vulnerabilities:
           provider: grype
           sync:

@@ -45,7 +45,7 @@ data:
     license_file: /home/anchore/license.yaml
     metrics:
       enabled: {{ .Values.anchoreGlobal.enableMetrics }}
-      auth_disabled: {{ .Values.anchoreGlobal.metricsAuthDisabled }}
+      auth_disabled: true
 
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
@@ -65,6 +65,7 @@ data:
       oauth:
         enabled: {{ .Values.anchoreGlobal.oauthEnabled }}
         default_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthTokenExpirationSeconds }}
+        refresh_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthRefreshTokenExpirationSeconds }}
 
       # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
       # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
@@ -140,6 +141,8 @@ data:
             releases:
             {{- toYaml .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases | nindent 14 }}
           {{- end }}
+            git_url: {{ (.Values.anchoreEnterpriseFeeds.ubuntuDriverGitUrl | quote) }}
+            git_branch: {{ (.Values.anchoreEnterpriseFeeds.ubuntuDriverGitBranch | quote) }}
           rhel:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
             concurrency: {{ .Values.anchoreEnterpriseFeeds.rhelDriverConcurrency }}
