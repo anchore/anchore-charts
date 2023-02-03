@@ -450,9 +450,14 @@ upgrading from Enterprise 4.3.0 only and error out if they're upgrading from an 
 {{- define "checkUpgradeCompatibility" }}
 {{- if and .Release.IsUpgrade (regexMatch "1.22.[0-9]+" .Chart.Version) }}
     {{- $apiDeploymentContainers := (lookup "apps/v1" "Deployment" .Release.Namespace (include "anchore-engine.api.fullname" .)).spec.template.spec.containers }}
-    {{- $installedAnchoreVersion := (regexFind "v[0-9]+\\.[0-9]+\\.[0-9]+$" (index $apiDeploymentContainers 0).image | quote) }}
-    {{- if not (regexMatch "v4\\.[3-9]\\.[0-9]" $installedAnchoreVersion) }}
-        {{- fail "WARNING - Anchore Enterprise v4.4.0 only supports upgrades from Enterprise v4.3.0. See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/" }}
+    {{- range $index, $container := $apiDeploymentContainers }}
+        {{- if eq $container.name "anchore-engine-api" }}
+            {{- $apiContainerImage := $container.image }}
+            {{- $installedAnchoreVersion := (regexFind "v[0-9]+\\.[0-9]+\\.[0-9]+$" $apiContainerImage | quote) }}
+            {{- if not (regexMatch "v4\\.[3-9]\\.[0-9]" $installedAnchoreVersion) }}
+            {{- fail "WARNING - Anchore Enterprise v4.4.0 only supports upgrades from Enterprise v4.3.0. See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/" }}
+            {{- end }}
+        {{- end }}
     {{- end }}
 {{- end }}
 {{- end }}
