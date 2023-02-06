@@ -98,6 +98,9 @@ extraLabels: {}
 # define name of existing secret containing anchore credentials
 existingCredentialsSecret: null
 
+# define priority class for anchore admission services
+priorityClassName: null
+
 # or define credentials here to create secrets
 credentials: {}
   # users:
