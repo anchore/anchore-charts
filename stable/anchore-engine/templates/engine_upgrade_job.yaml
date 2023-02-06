@@ -1,3 +1,4 @@
+{{- template "checkUpgradeCompatibility" . }}
 {{- if .Values.anchoreEngineUpgradeJob.enabled }}
 apiVersion: batch/v1
 kind: Job
