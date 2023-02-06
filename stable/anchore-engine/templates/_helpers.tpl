@@ -445,7 +445,7 @@ Upon upgrades, checks if .Values.existingSecret=true and fails the upgrade if .V
 
 {{/*
 Upon upgrade, check if user is upgrading to chart v1.22.0+ (Enterprise v4.4.0). If they are, ensure that they are
-upgrading from Enterprise 4.3.0 only and error out if they're upgrading from an older version.
+upgrading from Enterprise 4.2.0 or higher and error out if they're upgrading from an older version.
 */}}
 {{- define "checkUpgradeCompatibility" }}
 {{- if and .Release.IsUpgrade (regexMatch "1.22.[0-9]+" .Chart.Version) }}
@@ -454,8 +454,8 @@ upgrading from Enterprise 4.3.0 only and error out if they're upgrading from an 
         {{- if eq $container.name "anchore-engine-api" }}
             {{- $apiContainerImage := $container.image }}
             {{- $installedAnchoreVersion := (regexFind "v[0-9]+\\.[0-9]+\\.[0-9]+$" $apiContainerImage | quote) }}
-            {{- if not (regexMatch "v4\\.[3-9]\\.[0-9]" $installedAnchoreVersion) }}
-            {{- fail "WARNING - Anchore Enterprise v4.4.0 only supports upgrades from Enterprise v4.3.0. See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/" }}
+            {{- if not (regexMatch "v4\\.[2-9]\\.[0-9]" $installedAnchoreVersion) }}
+            {{- fail "WARNING - Anchore Enterprise v4.4.0 only supports upgrades from Enterprise v4.2.0 and higher. See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/" }}
             {{- end }}
         {{- end }}
     {{- end }}
