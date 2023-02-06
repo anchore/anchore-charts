@@ -218,6 +218,7 @@ anchoreGlobal:
 
   oauthEnabled: false
   oauthTokenExpirationSeconds: 3600
+  oauthRefreshTokenExpirationSeconds: 86400
 
   # Set this to true in order to disable the SSO JIT provisioning during authentication. This provides an additional
   # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
@@ -643,6 +644,10 @@ anchorePolicyEngine:
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
 
+  # Controls the load of the Image Package DB Entries and disables the packages.verify gate.
+  # Reduces significant DB load as a result.
+  enablePackageDbLoad: true
+
   cacheTTL: 3600  # 1 hour
 
   # kubernetes service configuration for anchore policy engine api
@@ -731,7 +736,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v4.3.0
+  image: docker.io/anchore/enterprise:v4.4.0
 
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
@@ -826,6 +831,14 @@ anchoreEnterpriseFeeds:
 
   # The number of concurrent threads used when downloading RHEL feeds
   rhelDriverConcurrency: 5
+
+  # Git Repository settings for the Ubuntu feed driver
+  ubuntuDriverGitUrl: "https://git.launchpad.net/ubuntu-cve-tracker"
+  # Switch to the git protocol endpoint for significantly improved reliability in fetches as this endpoint is not
+  # throttled heavily like the https one; however, the git protocol is not validated or encrypted and runs on a different
+  # port from https
+  # ubuntuDriverGitUrl: "git://git.launchpad.net/ubuntu-cve-tracker"
+  ubuntuDriverGitBranch: "master"
 
   # Set extra environment variables. These will be set on all feeds containers.
   extraEnv: []
@@ -1081,7 +1094,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v4.3.0
+  image: docker.io/anchore/enterprise-ui:v4.4.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
