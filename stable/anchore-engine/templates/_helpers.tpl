@@ -453,9 +453,12 @@ upgrading from Enterprise 4.2.0 or higher and error out if they're upgrading fro
     {{- range $index, $container := $apiDeploymentContainers }}
         {{- if eq $container.name "anchore-engine-api" }}
             {{- $apiContainerImage := $container.image }}
-            {{- $installedAnchoreVersion := (regexFind "v[0-9]+\\.[0-9]+\\.[0-9]+$" $apiContainerImage | quote) }}
-            {{- if not (regexMatch "v4\\.[2-9]\\.[0-9]" $installedAnchoreVersion) }}
-            {{- fail "WARNING - Anchore Enterprise v4.4.0 only supports upgrades from Enterprise v4.2.0 and higher. See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/" }}
+            {{- $installedAnchoreVersion := (regexFind "v[0-9]+\\.[0-9]+\\.[0-9]+$" $apiContainerImage) }}
+
+            {{- if $installedAnchoreVersion }}
+                {{- if not (regexMatch "v4\\.[2-9]\\.[0-9]" ($installedAnchoreVersion | quote)) }}
+                {{- fail "WARNING - Anchore Enterprise v4.4.0 and v4.4.1 only supports upgrades from Enterprise v4.2.0 and higher. See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/" }}
+                {{- end }}
             {{- end }}
         {{- end }}
     {{- end }}
