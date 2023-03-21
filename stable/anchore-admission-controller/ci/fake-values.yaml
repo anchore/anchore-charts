@@ -1,3 +1,9 @@
+---
+apiService:
+  webhook:
+    annotations:
+      cert-manager.io/inject-ca-from: anchore/webhook-certificate
+      kustomize.toolkit.fluxcd.io/ssa: merge
 credentials:
   users:
   - username: user1
