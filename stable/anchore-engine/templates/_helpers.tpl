@@ -430,7 +430,9 @@ Allows sourcing of a specified file in the entrypoint of all containers when .Va
 */}}
 {{- define "doSourceFile" }}
 {{- if .Values.anchoreGlobal.doSourceAtEntry.enabled }}
-    {{- printf "source %v;" .Values.anchoreGlobal.doSourceAtEntry.filePath }}
+    {{- with .Values.anchoreGlobal.doSourceAtEntry.filePath }}
+        {{- printf "if [ -f /home/anchore/venv/bin/activate ]; then source /home/anchore/venv/bin/activate; fi; if [ -f %v ]; then source %v; fi;" . . }}
+    {{- end }}
 {{- end }}
 {{- end }}
 
