@@ -430,7 +430,12 @@ Allows sourcing of a specified file in the entrypoint of all containers when .Va
 */}}
 {{- define "doSourceFile" }}
 {{- if .Values.anchoreGlobal.doSourceAtEntry.enabled }}
-    {{- printf "source %v;" .Values.anchoreGlobal.doSourceAtEntry.filePath }}
+    {{- if .Values.anchoreGlobal.doSourceAtEntry.filePath }}
+        {{- fail "As of chart v1.23.1 `.Values.anchoreGlobal.doSourceAtEntry.filePath` is no longer valid. Update your values file to set `.Values.anchoreGlobal.doSourceAtEntry.filePaths` which accepts a list of strings." }}
+    {{- end }}
+    {{- range $index, $file := .Values.anchoreGlobal.doSourceAtEntry.filePaths }}
+        {{- printf "if [ -f %v ];then source %v;fi;" $file $file }}
+    {{- end }}
 {{- end }}
 {{- end }}
 

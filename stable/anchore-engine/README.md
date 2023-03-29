@@ -181,6 +181,19 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.24.0
+
+* `.Values.anchoreGlobal.doSourceAtEntry.filePath` has been changed to `.Values.anchoreGlobal.doSourceAtEntry.filePaths` which accepts a list of file paths. This allows for multiple files to be sourced prior to starting the Anchore services instead of a single file.
+  * Remove `.Values.anchoreGlobal.doSourceAtEntry.filePath` and add the following to your values file:
+
+    ```yaml
+    anchoreGlobal:
+      doSourceAtEntry:
+        filePaths:
+          - /path/to/file1
+          - /path/to/file2
+    ```
+
 ## Chart version 1.23.0
 
 * Anchore Enterprise image updated to v4.5.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/450/)

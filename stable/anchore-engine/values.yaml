@@ -146,7 +146,8 @@ anchoreGlobal:
   # does `source {{ filePath }}` before starting services
   doSourceAtEntry:
     enabled: false
-    filePath: "/vault/secrets/config"
+    filePaths:
+      - "/vault/secrets/config"
 
   extraVolumes: []
   # - name: config
