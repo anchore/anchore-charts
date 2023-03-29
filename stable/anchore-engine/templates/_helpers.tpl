@@ -404,10 +404,10 @@ Create feeds database hostname string from supplied values file. Used for settin
   {{- if and (index .Values "anchore-feeds-db" "externalEndpoint") (not (index .Values "anchore-feeds-db" "enabled")) }}
     {{- print ( index .Values "anchore-feeds-db" "externalEndpoint" ) }}
   {{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "anchore-feeds-db" "enabled")) }}
-    {{- print "localhost:5432" }}
+    {{- print "localhost" }}
   {{- else }}
     {{- $db_host := include "postgres.anchore-feeds-db.fullname" . }}
-    {{- printf "%s:5432" $db_host -}}
+    {{- print $db_host -}}
   {{- end }}
 {{- end }}
 
@@ -418,10 +418,10 @@ Create database hostname string from supplied values file. Used for setting the 
   {{- if and (index .Values "postgresql" "externalEndpoint") (not (index .Values "postgresql" "enabled")) }}
     {{- print ( index .Values "postgresql" "externalEndpoint" ) }}
   {{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "postgresql" "enabled")) }}
-    {{- print "localhost:5432" }}
+    {{- print "localhost" }}
   {{- else }}
     {{- $db_host := include "postgres.fullname" . }}
-    {{- printf "%s:5432" $db_host -}}
+    {{- print $db_host -}}
   {{- end }}
 {{- end }}
 

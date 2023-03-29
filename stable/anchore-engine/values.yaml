@@ -4,14 +4,15 @@ fullnameOverride: Null
 # Anchore has a dependency on Postgresql, configure here
 postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
   # enabled: false
   # If enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  # Set to the hostname eg. mypostgres.myserver.io
   externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore
+  postgresPort: 5432
 
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
@@ -747,14 +748,15 @@ anchoreEnterpriseGlobal:
 # Only utilized if anchoreEnterpriseGlobal.enabled: true
 anchore-feeds-db:
   # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
   # enabled: false
   # if enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  # Set to the hostname eg. mypostgres.myserver.io
   externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore-feeds
+  postgresPort: 5432
 
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
@@ -784,14 +786,15 @@ anchore-feeds-db:
 # Database is used for temporarily loading the Ruby gem vulnerability data by the Enterprise Feeds service.
 anchore-feeds-gem-db:
   # To use an external DB uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
   # enabled: false
   # If enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  # Set to the hostname eg. mypostgres.myserver.io
   externalEndpoint: Null
   postgresUser: postgres
   postgresPassword: anchore-postgres,123
   postgresDatabase: gems
+  postgresPort: 5432
   persistence:
     enabled: false
 

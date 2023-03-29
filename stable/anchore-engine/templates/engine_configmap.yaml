@@ -99,16 +99,27 @@ data:
 
     credentials:
       database:
-        {{- if not .Values.anchoreGlobal.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
-        {{- else if eq .Values.anchoreGlobal.dbConfig.sslMode "require" }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}"
-        {{- else }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName -}}"
-        {{- end }}
+      {{- if .Values.anchoreEnterpriseGlobal.enabled }}
+        user: ${ANCHORE_DB_USER}
+        password: ${ANCHORE_DB_PASSWORD}
+        host: ${ANCHORE_DB_HOST}
+        port: ${ANCHORE_DB_PORT}
+        name: ${ANCHORE_DB_NAME}
+      {{- else }}
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}/${ANCHORE_DB_NAME}"
+      {{- end }}
+
         db_connect_args:
           timeout: {{ .Values.anchoreGlobal.dbConfig.timeout }}
+        {{- if .Values.anchoreGlobal.dbConfig.ssl }}
+          ssl: true
+          sslmode: {{ .Values.anchoreGlobal.dbConfig.sslMode -}}
+            {{- if not (eq .Values.anchoreGlobal.dbConfig.sslMode "require") }}
+          sslrootcert: /home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName -}}
+            {{- end }}
+        {{- else }}
           ssl: false
+        {{- end }}
         db_pool_size: {{ .Values.anchoreGlobal.dbConfig.connectionPoolSize }}
         db_pool_max_overflow: {{ .Values.anchoreGlobal.dbConfig.connectionPoolMaxOverflow }}
         {{- with .Values.anchoreGlobal.dbConfig.engineArgs }}
