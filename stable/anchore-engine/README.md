@@ -183,6 +183,8 @@ The upgrade will only be considered successful when this job completes successfu
 
 ## Chart version 1.24.0
 
+* Anchore Enterprise image updated to v4.6.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/460/)
+
 * `.Values.anchoreGlobal.doSourceAtEntry.filePath` has been changed to `.Values.anchoreGlobal.doSourceAtEntry.filePaths` which accepts a list of file paths. This allows for multiple files to be sourced prior to starting the Anchore services instead of a single file.
   * Remove `.Values.anchoreGlobal.doSourceAtEntry.filePath` and add the following to your values file:
 
@@ -192,6 +194,23 @@ The upgrade will only be considered successful when this job completes successfu
         filePaths:
           - /path/to/file1
           - /path/to/file2
+    ```
+
+* Updated the configuration for Anchore Enterprise database connections. This will ensure that special characters are handled properly in database passwords. Also allows configuring the db hostname and port separately. 
+
+  * If your postgresql connection is using a non-standard port, you will need to update your values file to include the hostname and port. For example:
+
+    ```yaml
+    postgresql:
+      externalEndpoint: <HOSTNAME>
+      postgresPort: <PORT>
+    ```
+
+  * If you're using external secrets and an non-standard port, you will need to update your secrets to include the hostname and port.
+
+    ```yaml
+      ANCHORE_DB_HOST: <HOSTNAME>
+      ANCHORE_DB_PORT: <PORT>
     ```
 
 ## Chart version 1.23.0
