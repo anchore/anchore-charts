@@ -35,7 +35,7 @@ There will be no future versions released. Users are advised to use Syft and Gry
 **WARNING**
 Please update your existing secrets to use separate environment variables for the database hostname and port.
 Add the following variables to your secrets:
-
+ 
     ANCHORE_DB_HOST: <HOSTNAME>
     ANCHORE_DB_PORT: <PORT>
 {{- end }}
