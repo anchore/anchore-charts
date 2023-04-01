@@ -4,15 +4,14 @@ fullnameOverride: Null
 # Anchore has a dependency on Postgresql, configure here
 postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
   # If enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the hostname eg. mypostgres.myserver.io
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
   externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore
-  postgresPort: 5432
 
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
@@ -146,8 +145,7 @@ anchoreGlobal:
   # does `source {{ filePath }}` before starting services
   doSourceAtEntry:
     enabled: false
-    filePaths:
-      - "/vault/secrets/config"
+    filePath: "/vault/secrets/config"
 
   extraVolumes: []
   # - name: config
@@ -738,7 +736,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v4.6.0
+  image: docker.io/anchore/enterprise:v4.5.0
 
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
@@ -749,15 +747,14 @@ anchoreEnterpriseGlobal:
 # Only utilized if anchoreEnterpriseGlobal.enabled: true
 anchore-feeds-db:
   # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
   # if enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the hostname eg. mypostgres.myserver.io
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
   externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore-feeds
-  postgresPort: 5432
 
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
@@ -787,15 +784,14 @@ anchore-feeds-db:
 # Database is used for temporarily loading the Ruby gem vulnerability data by the Enterprise Feeds service.
 anchore-feeds-gem-db:
   # To use an external DB uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
   # enabled: false
   # If enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the hostname eg. mypostgres.myserver.io
+  # Set to the host and port. eg. mypostgres.myserver.io:5432
   externalEndpoint: Null
   postgresUser: postgres
   postgresPassword: anchore-postgres,123
   postgresDatabase: gems
-  postgresPort: 5432
   persistence:
     enabled: false
 
@@ -1098,7 +1094,7 @@ anchoreEnterpriseNotifications:
 anchoreEnterpriseUi:
   # If enabled is set to false, set ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v4.6.0
+  image: docker.io/anchore/enterprise-ui:v4.5.0
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
