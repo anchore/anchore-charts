@@ -20,8 +20,6 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        app: {{ template "anchore-engine.fullname" . }}
-        component: anchore-engine-upgrade
       annotations:
       {{- with .Values.anchoreGlobal.annotations }}
         {{ toYaml . | nindent 8 }}
