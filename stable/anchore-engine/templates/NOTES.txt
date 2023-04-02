@@ -1,26 +1,51 @@
-To use Anchore you need the URL, username, and password to access the API and/or the UI.
 
+To use Anchore you need the URL, username, and password to access the API and/or the UI.
 Anchore can be accessed via port {{ .Values.anchoreApi.service.port }} on the following DNS name from within the cluster:
-{{ template "anchore-engine.api.serviceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
+
+    {{ template "anchore-engine.api.serviceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
 
 * NOTE: On first startup of Anchore, the policy-engine performs a CVE data sync which may take several minutes to complete.
 During this time the system status will report 'partially_down' and any images added for analysis will stay in the 'not_analyzed' state.
 Once the sync is complete, any queued images will be analyzed and the system status will change to 'all_up'.
 
-Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state. You can check with:
+Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state. 
+You can check with:
+
     kubectl get pods -l app={{ template "anchore-engine.fullname" .}},component=api
 
-{{ if and .Release.IsUpgrade (regexMatch "1.22.[0-9]+" .Chart.Version) }}
+{{- if and .Release.IsUpgrade (regexMatch "1.22.[0-9]+" .Chart.Version) }}
 {{- $apiDeployment := (lookup "apps/v1" "Deployment" .Release.Namespace (include "anchore-engine.api.fullname" .)) }}
 {{- if not $apiDeployment }}
+
 **WARNING**
 Anchore Enterprise v4.4.x only supports upgrades from Enterprise v4.2.0 and higher.
 See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/
 {{- end }}
 {{- end }}
 
-{{ if not .Values.anchoreEnterpriseGlobal.enabled }}
+{{- if not .Values.anchoreEnterpriseGlobal.enabled }}
+
 **WARNING**
 As of January 2023, Anchore Engine is no longer maintained.
 There will be no future versions released. Users are advised to use Syft and Grype.
+{{- end }}
+
+{{- if and .Release.IsUpgrade .Values.anchoreGlobal.useExistingSecrets (regexMatch "1.24.[0-9]+" .Chart.Version) }}
+
+**WARNING**
+Please update your existing secrets to use separate environment variables for the database hostname and port.
+Add the following variables to your secrets:
+ 
+    ANCHORE_DB_HOST: <HOSTNAME>
+    ANCHORE_DB_PORT: <PORT>
+{{- end }}
+
+{{- if and .Release.IsUpgrade .Values.anchoreEnterpriseGlobal.enabled }}
+
+**WARNING**
+The upcoming 5.0 release of Anchore Enterprise will require Postgresql version 13.0 or higher.
+To verify that your Postgresql version is compatible with Anchore Enterprise v5.0 view the log output of the upgrade jobs:
+
+    kubectl logs -l component=anchore-enterprise-upgrade | grep WARN
+    kubectl logs -l component=anchore-enterprise-feeds-upgrade | grep WARN
 {{- end }}

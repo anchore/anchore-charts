@@ -78,16 +78,23 @@ data:
 
     credentials:
       database:
-        {{- if not .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_FEEDS_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_FEEDS_DB_HOST}/${ANCHORE_FEEDS_DB_NAME}"
-        {{- else if eq .Values.anchoreEnterpriseFeeds.dbConfig.sslMode "require" }}
-        db_connect: "postgresql://${ANCHORE_FEEDS_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_FEEDS_DB_HOST}/${ANCHORE_FEEDS_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}"
-        {{- else }}
-        db_connect: "postgresql://${ANCHORE_FEEDS_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_FEEDS_DB_HOST}/${ANCHORE_FEEDS_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
-        {{- end }}
+        user: ${ANCHORE_FEEDS_DB_USER}
+        password: ${ANCHORE_FEEDS_DB_PASSWORD}
+        host: ${ANCHORE_FEEDS_DB_HOST}
+        port: ${ANCHORE_FEEDS_DB_PORT}
+        name: ${ANCHORE_FEEDS_DB_NAME}
+
         db_connect_args:
           timeout: {{ .Values.anchoreEnterpriseFeeds.dbConfig.timeout }}
+        {{- if .Values.anchoreGlobal.dbConfig.ssl }}
+          ssl: true
+          sslmode: {{ .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}
+            {{- if not (eq .Values.anchoreEnterpriseFeeds.dbConfig.sslMode "require") }}
+          sslrootcert: /home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName -}}
+            {{- end }}
+        {{- else }}
           ssl: false
+        {{- end }}
         db_pool_size: {{ .Values.anchoreEnterpriseFeeds.dbConfig.connectionPoolSize }}
         db_pool_max_overflow: {{ .Values.anchoreEnterpriseFeeds.dbConfig.connectionPoolMaxOverflow }}
         {{- with .Values.anchoreEnterpriseFeeds.dbConfig.engineArgs }}
@@ -156,7 +163,7 @@ data:
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
             enabled: {{ .Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote }}
           {{- if .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
-            db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}/${ANCHORE_GEM_DB_NAME}"
+            db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}:${ANCHORE_GEM_DB_PORT}/${ANCHORE_GEM_DB_NAME}"
           {{- end }}
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
