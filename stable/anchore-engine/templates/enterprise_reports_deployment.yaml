@@ -68,6 +68,10 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
         {{- if .Values.cloudsql.extraArgs }}
@@ -87,6 +91,10 @@ spec:
       - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.anchoreEnterpriseGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseGlobal.imagePullPolicy }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         command: ["/bin/sh", "-c"]
         args:
         - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade reports_worker

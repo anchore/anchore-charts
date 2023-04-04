@@ -88,6 +88,10 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
         {{- if .Values.cloudsql.extraArgs }}
@@ -111,6 +115,10 @@ spec:
         {{- else }}
         image: {{ .Values.anchoreGlobal.image }}
         imagePullPolicy: {{ .Values.anchoreGlobal.imagePullPolicy }}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
         {{- end }}
         command: ["/bin/sh", "-c"]
         {{- if .Values.anchoreEnterpriseGlobal.enabled }}

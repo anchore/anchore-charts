@@ -52,6 +52,10 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
         {{- if .Values.cloudsql.extraArgs }}
@@ -91,9 +95,17 @@ spec:
         {{- if .Values.cloudsql.enabled }}
           - sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
         securityContext:
+          {{- with .Values.anchoreGlobal.containerSecurityContext }}
+          {{ toYaml . | nindent 10 }}
+          {{- end }}
           capabilities:
             add:
               - SYS_PTRACE
+        {{- else }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
