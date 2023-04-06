@@ -823,6 +823,9 @@ anchoreEnterpriseFeeds:
   # GitHub advisory feeds require a github developer personal access token with no permission scopes selected.
   githubDriverToken: null
 
+  # The NVD API allows for an API key to reduce rate limiting.  Request one from https://nvd.nist.gov/developers/request-an-api-key
+  nvdDriverApiKey: null
+
   # Enable microsoft feeds
   msrcDriverEnabled: false
   # Uncomment to add MSRC product IDs for generating their feed data, this extends the pre-defined list of product IDs
