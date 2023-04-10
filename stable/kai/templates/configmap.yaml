@@ -40,3 +40,4 @@ data:
       http:
         insecure: {{ .Values.kai.anchore.http.insecure }}
         timeout-seconds: {{ .Values.kai.anchore.http.timeoutSeconds }}
+    verbose-inventory-reports: {{ .Values.kai.verboseInventoryReports }}
