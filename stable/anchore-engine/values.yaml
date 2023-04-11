@@ -182,6 +182,9 @@ anchoreGlobal:
     runAsGroup: 1000
     fsGroup: 1000
 
+  # Specify your container securityContext here
+  containerSecurityContext: {}
+
   ###
   # Start of General Anchore Configurations (populates /config/config.yaml)
   ###
