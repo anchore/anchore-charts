@@ -195,6 +195,8 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.anchoreMatchExclusionsEnabled | quote) }}
           wolfi:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.wolfiDriverEnabled | quote) }}
+          chainguard:
+            enabled: {{ default true (.Values.anchoreEnterpriseFeeds.chainguardDriverEnabled) }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
