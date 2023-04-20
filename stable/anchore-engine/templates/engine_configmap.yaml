@@ -100,11 +100,11 @@ data:
     credentials:
       database:
       {{- if .Values.anchoreEnterpriseGlobal.enabled }}
-        user: ${ANCHORE_DB_USER}
-        password: ${ANCHORE_DB_PASSWORD}
-        host: ${ANCHORE_DB_HOST}
-        port: ${ANCHORE_DB_PORT}
-        name: ${ANCHORE_DB_NAME}
+        user: "${ANCHORE_DB_USER}"
+        password: "${ANCHORE_DB_PASSWORD}"
+        host: "${ANCHORE_DB_HOST}"
+        port: "${ANCHORE_DB_PORT}"
+        name: "${ANCHORE_DB_NAME}"
       {{- else }}
         db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}/${ANCHORE_DB_NAME}"
       {{- end }}
