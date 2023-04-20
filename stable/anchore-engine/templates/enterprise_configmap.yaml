@@ -69,11 +69,11 @@ data:
 
     credentials:
       database:
-        user: ${ANCHORE_DB_USER}
-        password: ${ANCHORE_DB_PASSWORD}
-        host: ${ANCHORE_DB_HOST}
-        port: ${ANCHORE_DB_PORT}
-        name: ${ANCHORE_DB_NAME}
+        user: "${ANCHORE_DB_USER}"
+        password: "${ANCHORE_DB_PASSWORD}"
+        host: "${ANCHORE_DB_HOST}"
+        port: "${ANCHORE_DB_PORT}"
+        name: "${ANCHORE_DB_NAME}"
 
         db_connect_args:
           timeout: {{ .Values.anchoreGlobal.dbConfig.timeout }}

@@ -78,11 +78,11 @@ data:
 
     credentials:
       database:
-        user: ${ANCHORE_FEEDS_DB_USER}
-        password: ${ANCHORE_FEEDS_DB_PASSWORD}
-        host: ${ANCHORE_FEEDS_DB_HOST}
-        port: ${ANCHORE_FEEDS_DB_PORT}
-        name: ${ANCHORE_FEEDS_DB_NAME}
+        user: "${ANCHORE_FEEDS_DB_USER}"
+        password: "${ANCHORE_FEEDS_DB_PASSWORD}"
+        host: "${ANCHORE_FEEDS_DB_HOST}"
+        port: "${ANCHORE_FEEDS_DB_PORT}"
+        name: "${ANCHORE_FEEDS_DB_NAME}"
 
         db_connect_args:
           timeout: {{ .Values.anchoreEnterpriseFeeds.dbConfig.timeout }}
