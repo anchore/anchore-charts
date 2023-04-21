@@ -9,6 +9,12 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    {{- with .Values.anchoreEngineUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-weight": "-5"
@@ -22,6 +28,12 @@ spec:
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         app: {{ template "anchore-engine.fullname" . }}
         component: anchore-engine-upgrade
+        {{- with .Values.anchoreEngineUpgradeJob.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
       {{- with .Values.anchoreGlobal.annotations }}
         {{ toYaml . | nindent 8 }}

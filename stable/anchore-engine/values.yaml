@@ -733,6 +733,7 @@ anchoreEngineUpgradeJob:
   tolerations: []
   affinity: {}
   annotations: {}
+  labels: {}
 
 # This section is used for configuring anchore enterprise.
 anchoreEnterpriseGlobal:
@@ -948,6 +949,7 @@ anchoreEnterpriseFeedsUpgradeJob:
   tolerations: []
   affinity: {}
   annotations: {}
+  labels: {}
 
 # Configure the Anchore Enterprise role based access control component.
 # This component consists of 2 containers that run as side-cars in the Anchore api pod.
@@ -1331,6 +1333,7 @@ anchoreEnterpriseEngineUpgradeJob:
   tolerations: []
   affinity: {}
   annotations: {}
+  labels: {}
 
 # To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
 # This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault
