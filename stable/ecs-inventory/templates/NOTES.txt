@@ -1,0 +1,6 @@
+Anchore ECS Inventory is a tool to gather an inventory of images in use by Amazon Elastic Container Service (ECS) and ship them to the Anchore platform.
+Anchore ECS Inventory must be able to resolve the Anchore URL and requires API credentials.
+
+For more info see: https://github.com/anchore/ecs-inventory
+
+ECS Inventory is now installed.

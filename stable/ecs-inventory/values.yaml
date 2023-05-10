@@ -1,0 +1,171 @@
+###################################################
+## @section Common Resource Parameters
+## Common params used by all ECS Inventory resources
+###################################################
+
+## @param replicaCount Number of replicas for the Ecs Inventory deployment
+##
+replicaCount: 1
+
+## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
+##
+image: "docker.io/anchore/ecs-inventory:v1.0.0"
+
+## @param imagePullPolicy Image pull policy used by all deployments
+## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+##
+imagePullPolicy: "Always"
+
+## @param imagePullSecretName Name of Docker credentials secret for access to private repos
+## Secrets must be manually created in the same namespace as release
+##
+imagePullSecretName: ""
+
+## @param serviceAccountName Name of a service account used to run all Anchore Ecs Inventory pods
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccountName: ""
+
+
+## @param useExistingSecret set to true to use an existing/precreated secret
+##
+useExistingSecret: false
+
+## @param existingSecretName the name of the precreated secret
+##
+existingSecretName: ""
+
+## @param injectSecretsViaEnv Enable secret injection into pod environment variables
+##
+injectSecretsViaEnv: false
+
+## @param extraEnv extra environment variables. These will be set on all containers.
+### - name: foo
+###   value: bar
+##
+extraEnv: []
+
+## @param annotations Common annotations set on all Kubernetes resources
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+annotations: {}
+
+## @param deploymentAnnotations annotations to set on the ecs-inventory deployment
+##
+deploymentAnnotations: {}
+
+## @param securityContext.runAsUser The securityContext runAsUser for all Anchore ECS Inventory pods
+## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore ECS Inventory pods
+## @param securityContext.fsGroup The securityContext fsGroup for all Anchore ECS Inventory pods
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+##
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+## @param resources Resource requests and limits for Anchore ECS Inventory pods
+##
+resources: {}
+
+## @param nodeSelector Node labels for pod assignment
+##
+nodeSelector: {}
+
+## @param tolerations Tolerations for pod assignment
+##
+tolerations: []
+
+## @param affinity Affinity for pod assignment
+##
+affinity: {}
+
+## @param labels Adds additionnal labels to all kubernetes resources
+##
+labels: {}
+
+## @param probes.liveness.initialDelaySeconds Initial delay seconds for liveness probe
+## @param probes.liveness.timeoutSeconds Timeout seconds for liveness probe
+## @param probes.liveness.periodSeconds Period seconds for liveness probe
+## @param probes.liveness.failureThreshold Failure threshold for liveness probe
+## @param probes.liveness.successThreshold Success threshold for liveness probe
+## @param probes.readiness.timeoutSeconds Timeout seconds for the readiness probe
+## @param probes.readiness.periodSeconds Period seconds for the readiness probe
+## @param probes.readiness.failureThreshold Failure threshold for the readiness probe
+## @param probes.readiness.successThreshold Success threshold for the readiness probe
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+probes:
+  liveness:
+    initialDelaySeconds: 1
+    timeoutSeconds: 10
+    periodSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  readiness:
+    timeoutSeconds: 10
+    periodSeconds: 15
+    failureThreshold: 3
+    successThreshold: 1
+
+
+######################################
+## @section ecsInventory Parameters ##
+######################################
+
+ecsInventory:
+
+  ## @param ecsInventory.quiet Determine whether or not to log the inventory report to stdout
+  ##
+  quiet: false
+
+  ## @param ecsInventory.output The output format of the report (options: table, json)
+  ##
+  output: "json"
+
+  ## @param ecsInventory.logLevel the level of verbosity for logs
+  ##
+  logLevel: "info"
+
+  ## @param ecsInventory.logFile location to write the log file (default is not to have a log file)
+  ##
+  logFile: ""
+
+  ## @param ecsInventory.pollingIntervalSeconds The polling interval of the ECS API in seconds
+  ##
+  pollingIntervalSeconds: 60
+
+  ## @param ecsInventory.anchoreUrl the url of the anchore platform
+  ##
+  anchoreUrl: "http://localhost:8228"
+
+  ## @param ecsInventory.anchoreAccount the account of the anchore platform
+  ##
+  anchoreAccount: "admin"
+
+  ## @param ecsInventory.anchoreUser the username of the anchore platform
+  ##
+  anchoreUser: "admin"
+
+  ## @param ecsInventory.anchorePassword the password of the anchore platform
+  ##
+  anchorePassword: "foobar"
+
+  ## @param ecsInventory.anchoreHttpInsecure whether or not anchore is using ssl/tls
+  ##
+  anchoreHttpInsecure: true
+
+  ## @param ecsInventory.anchoreHttpTimeoutSeconds the amount of time in seconds before timing out
+  ##
+  anchoreHttpTimeoutSeconds: 10
+
+  ## @param ecsInventory.awsAccessKeyId the AWS Access Key ID
+  ##
+  awsAccessKeyId: "foobar"
+
+  ## @param ecsInventory.awsSecretAccessKey the AWS Secret Access Key
+  ##
+  awsSecretAccessKey: "foobar"
+
+  ## @param ecsInventory.awsRegion the AWS Region
+  ##
+  awsRegion: "us-west-2"

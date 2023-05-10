@@ -1,0 +1,27 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "ecsInventory.fullname" . }}
+  annotations:
+  {{- with .Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "ecsInventory.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    output: {{ .Values.ecsInventory.output | quote }}
+    log:
+      level: {{ .Values.ecsInventory.logLevel | quote }}
+      file: {{ .Values.ecsInventory.logFile | quote }}
+    anchore:
+      url: {{ .Values.ecsInventory.anchoreUrl | quote }}
+      user: {{ .Values.ecsInventory.anchoreUser | quote }}
+      password: $ANCHORE_ECS_INVENTORY_ANCHORE_PASSWORD
+      account: {{ .Values.ecsInventory.anchoreAccount | quote }}
+      http:
+        insecure: {{ .Values.ecsInventory.anchoreHttpInsecure }}
+        timeout-seconds: {{ .Values.ecsInventory.anchoreHttpTimeoutSeconds }}
+    region: {{ .Values.ecsInventory.awsRegion | quote }}
+    polling-interval-seconds: {{ .Values.ecsInventory.pollingIntervalSeconds }}
+    quiet: {{ .Values.ecsInventory.quiet }}
