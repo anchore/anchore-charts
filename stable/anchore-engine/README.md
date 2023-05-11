@@ -181,6 +181,10 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+## Chart version 1.25.0
+
+* Anchore Enterprise image updated to v4.7.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/470/)
+
 ## Chart version 1.24.0
 
 * Anchore Enterprise image updated to v4.6.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/460/)
@@ -461,7 +465,8 @@ stringData:
   ANCHORE_ADMIN_PASSWORD: foobar1234
   ANCHORE_DB_NAME: anchore
   ANCHORE_DB_USER: anchoreengine
-  ANCHORE_DB_HOST: anchore-postgresql:5432
+  ANCHORE_DB_HOST: anchore-postgresql
+  ANCHORE_DB_PORT: 5432
   ANCHORE_DB_PASSWORD: anchore-postgres,123
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
 
@@ -476,10 +481,11 @@ stringData:
   ANCHORE_FEEDS_DB_NAME: anchore-feeds
   ANCHORE_FEEDS_DB_USER: anchoreengine
   ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
-  ANCHORE_FEEDS_DB_HOST: anchore-anchore-feeds-db:5432
+  ANCHORE_FEEDS_DB_HOST: anchore-anchore-feeds-db
+  ANCHORE_FEEDS_DB_PORT: 5432
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
-  # (if applicable) ANCHORE_MSRC_KEY: foobar,msrc1234
   # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
+  # (if applicable) ANCHORE_NVD_API_KEY: foobar,nvd1234
   # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
   # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
   # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234

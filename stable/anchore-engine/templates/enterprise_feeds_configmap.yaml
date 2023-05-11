@@ -132,8 +132,8 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.amazonDriverEnabled | quote) }}
           alpine:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.alpineDriverEnabled | quote) }}
-          centos:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.centosDriverEnabled | quote) }}
+          centos: 
+            enabled: false
           debian:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.debianDriverEnabled | quote) }}
           {{- if .Values.anchoreEnterpriseFeeds.debianExtraReleases }}
@@ -167,6 +167,9 @@ data:
           {{- end }}
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
+          {{- if .Values.anchoreEnterpriseFeeds.useNvdDriverApiKey }}
+            api_key: ${ANCHORE_NVD_API_KEY}
+          {{- end }}
           sles:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.slesDriverEnabled | quote) }}
           msrc:
@@ -183,10 +186,17 @@ data:
           grypedb:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | quote) }}
             external_feeds_url: {{ $grypeProviderFeedsExternalURL }}
+            preload:
+              enabled: {{ default true (.Values.anchoreEnterpriseFeeds.grypedbPreloadEnabled) }}
+              workspace_archive_path: {{ default "/preload/grype-db-workspace.tar.gz" (.Values.anchoreEnterpriseFeeds.grypedbPreloadWorkspaceArchivePath) }}
+            persist_provider_workspaces: {{ default true (.Values.anchoreEnterpriseFeeds.grypedbPersistProviderWorkspaces) }}
+            restore_provider_workspaces: {{ default true (.Values.anchoreEnterpriseFeeds.grypedbRestoreProviderWorkspaces) }}
           anchore_match_exclusions:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.anchoreMatchExclusionsEnabled | quote) }}
           wolfi:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.wolfiDriverEnabled | quote) }}
+          chainguard:
+            enabled: {{ default true (.Values.anchoreEnterpriseFeeds.chainguardDriverEnabled) }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"
