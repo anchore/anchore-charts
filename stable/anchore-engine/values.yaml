@@ -603,6 +603,10 @@ anchoreCatalog:
     # Note: if a runtime inventory image's digest is also in anchore for regular image analysis, it won't be removed.
     imageTTLDays: 1
 
+  # checks image status and detects that an 'analyzing' state image is being processed by an analyzer that is no
+  # longer in the 'up' state and will revert the state of the image back to 'not_analyzed' to allow fast re-queueing.
+  downAnalyzerTaskRequeue: true
+
   # kubernetes service configuration for anchore catalog api
   service:
     # Override the service name
