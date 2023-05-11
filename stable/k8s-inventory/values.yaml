@@ -1,0 +1,212 @@
+###################################################
+## @section Common Resource Parameters
+## Common params used by all K8s Inventory resources
+###################################################
+
+## @param replicaCount Number of replicas for the K8s Inventory deployment
+##
+replicaCount: 1
+
+## @param image.pullPolicy Image pull policy used by the K8s Inventory deployment
+## @param image.repository Image used for the K8s Inventory deployment
+## @param image.tag Image tag used for the K8s Inventory deployment
+##
+image:
+  pullPolicy: Always
+  repository: anchore/k8s-inventory
+  tag: "v1.0.0"
+
+## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
+##
+imagePullSecrets: []
+
+## @param nameOverride overrides the name set on resources
+##
+nameOverride: ""
+
+## @param fullnameOverride overrides the fullname set on resources
+##
+fullnameOverride: ""
+
+## @param injectSecretsViaEnv Enable secret injection into pod via environment variables instead of via k8s secrets
+## Useful for injecting secrets directly into k8s pods from Hashicorp vault
+##
+injectSecretsViaEnv: false
+
+## @param serviceAccount.create Create a service account for k8s-inventory to use
+## @param serviceAccount.annotations Annotations to add to the service account
+## @param serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the fullname template.
+##
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "k8s-inventory"
+
+## @param podAnnotations Annotations set on all pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
+
+## @param annotations Common annotations set on all Kubernetes resources
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+annotations: {}
+
+## @param podSecurityContext Security context set on all pods
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+##
+podSecurityContext: {}
+  # fsGroup: 2000
+
+## @param securityContext Security context set on all containers
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+##
+securityContext: {}
+
+## @param service.type Service type for K8s Inventory
+## @param service.port Service port for K8s Inventory
+service:
+  type: ClusterIP
+  port: 80
+
+## @param resources Resource requests and limits for K8s Inventory pods
+##
+resources: {}
+
+## @param nodeSelector Node labels for K8s Inventory pods assignment
+##
+nodeSelector: {}
+
+## @param tolerations Tolerations for K8s Inventory pods assignment
+##
+tolerations: []
+
+## @param affinity Affinity for K8s Inventory pods assignment
+##
+affinity: {}
+
+## @param labels Adds additionnal labels to all kubernetes resources
+##
+labels: {}
+
+## @param probes.liveness.initialDelaySeconds Initial delay seconds for liveness probe
+## @param probes.liveness.timeoutSeconds Timeout seconds for liveness probe
+## @param probes.liveness.periodSeconds Period seconds for liveness probe
+## @param probes.liveness.failureThreshold Failure threshold for liveness probe
+## @param probes.liveness.successThreshold Success threshold for liveness probe
+## @param probes.readiness.timeoutSeconds Timeout seconds for the readiness probe
+## @param probes.readiness.periodSeconds Period seconds for the readiness probe
+## @param probes.readiness.failureThreshold Failure threshold for the readiness probe
+## @param probes.readiness.successThreshold Success threshold for the readiness probe
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+##
+probes:
+  liveness:
+    initialDelaySeconds: 1
+    timeoutSeconds: 10
+    periodSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  readiness:
+    timeoutSeconds: 10
+    periodSeconds: 15
+    failureThreshold: 3
+    successThreshold: 1
+
+## @param useExistingSecret Specify whether to use an existing secret
+##
+useExistingSecret: false
+
+## @param existingSecretName if using an existing secret, specify the existing secret name
+##
+existingSecretName: ""
+
+######################################
+## @section k8sInventory Parameters ##
+######################################
+
+k8sInventory:
+
+  ## @param k8sInventory.output The output format of the report (options: table, json)
+  ##
+  output: "json"
+
+  ## @param k8sInventory.quiet Determine whether or not to log the inventory report to stdout
+  ##
+  quiet: false
+
+  ## @param k8sInventory.verboseInventoryReports Determine whether or not to log the inventory report to stdout
+  ##
+  verboseInventoryReports: false
+
+  ## @param k8sInventory.log.structured Determine whether or not to use structured logs
+  ## @param k8sInventory.log.level the level of verbosity for logs
+  ## @param k8sInventory.log.file location to write the log file (default is not to have a log file)
+  ##
+  log:
+    structured: false
+    level: "debug"
+    file: ""
+
+  ## @param k8sInventory.kubeconfig.path Path should not be changed
+  ## @param k8sInventory.kubeconfig.cluster Tells Anchore which cluster this inventory is coming from
+  ##
+  kubeconfig:
+    path: use-in-cluster
+    cluster: docker-desktop
+
+  ## @param k8sInventory.namespaceSelectors.include Which namespaces to search as explicit strings, not regex; Will search all namespaces if empty array
+  ## @param k8sInventory.namespaceSelectors.exclude Which namespaces to exclude can use explicit strings and/or regexes.
+  ##
+  namespaceSelectors:
+    include: []
+    exclude: []
+
+  ## @param k8sInventory.mode Can be one of adhoc, periodic (defaults to adhoc)
+  ##
+  mode: periodic
+
+  ## @param k8sInventory.pollingIntervalSeconds Only respected if mode is periodic
+  ##
+  pollingIntervalSeconds: 60
+
+  ### k8sInventory.kubernetes Kubernetes API configuration parameters (should not need tuning)
+  ## @param k8sInventory.kubernetes.requestTimeoutSeconds Sets the request timeout for kubernetes API requests
+  ## @param k8sInventory.kubernetes.requestBatchSize Sets the number of objects to iteratively return when listing resources
+  ## @param k8sInventory.kubernetes.workerPoolSize Worker pool size for collecting pods from namespaces. Adjust this if the api-server gets overwhelmed
+  #
+  kubernetes:
+    requestTimeoutSeconds: 60
+    requestBatchSize: 100
+    workerPoolSize: 100
+
+  ### k8sInventory.missingTagPolicy Handle cases where a tag is missing. For example - images designated by digest
+  ## @param k8sInventory.missingTagPolicy.policy One of the following options [digest, insert, drop]. Default is 'digest'
+  ### [digest] will use the image's digest as a dummy tag.
+  ### [insert] will insert a default tag in as a dummy tag. The dummy tag is
+  ### [drop] will drop images that do not have tags associated with them. Not recommended.
+  ## @param k8sInventory.missingTagPolicy.tag Dummy tag to use. Only applicable if policy is 'insert'. Defaults to UNKNOWN
+  ##
+  missingTagPolicy:
+    policy: digest
+    tag: UNKNOWN
+
+  ## @param k8sInventory.ignoreNotRunning Ignore images out of pods that are not in a Running state
+  ##
+  ignoreNotRunning: true
+
+  ## @param k8sInventory.anchore.url the url of the anchore platform
+  ## @param k8sInventory.anchore.user the username of the anchore platform. The user specified must be an admin user or have full-control, or read-write RBAC permissions
+  ## @param k8sInventory.anchore.password the password of the anchore platform
+  ## @param k8sInventory.anchore.account the account to send data to
+  ## @param k8sInventory.anchore.http.insecure whether or not anchore is using ssl/tls
+  ## @param k8sInventory.anchore.http.timeoutSeconds the amount of time in seconds before timing out
+  ##
+  anchore:
+    url: "http://localhost:8228"
+    user: "admin"
+    password: "foobar"
+    account: "admin"
+    http:
+      insecure: true
+      timeoutSeconds: 10
