@@ -167,7 +167,7 @@ data:
           {{- end }}
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
-          {{- if eq (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | toString) "true" }}
+          {{- if .Values.anchoreEnterpriseFeeds.useNvdDriverApiKey }}
             api_key: ${ANCHORE_NVD_API_KEY}
           {{- end }}
           sles:

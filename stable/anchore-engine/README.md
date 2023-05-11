@@ -465,7 +465,8 @@ stringData:
   ANCHORE_ADMIN_PASSWORD: foobar1234
   ANCHORE_DB_NAME: anchore
   ANCHORE_DB_USER: anchoreengine
-  ANCHORE_DB_HOST: anchore-postgresql:5432
+  ANCHORE_DB_HOST: anchore-postgresql
+  ANCHORE_DB_PORT: 5432
   ANCHORE_DB_PASSWORD: anchore-postgres,123
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
 
@@ -480,10 +481,11 @@ stringData:
   ANCHORE_FEEDS_DB_NAME: anchore-feeds
   ANCHORE_FEEDS_DB_USER: anchoreengine
   ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
-  ANCHORE_FEEDS_DB_HOST: anchore-anchore-feeds-db:5432
+  ANCHORE_FEEDS_DB_HOST: anchore-anchore-feeds-db
+  ANCHORE_FEEDS_DB_PORT: 5432
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
-  # (if applicable) ANCHORE_MSRC_KEY: foobar,msrc1234
   # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
+  # (if applicable) ANCHORE_NVD_API_KEY: foobar,nvd1234
   # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
   # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
   # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234

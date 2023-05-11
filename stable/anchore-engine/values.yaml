@@ -828,6 +828,7 @@ anchoreEnterpriseFeeds:
   githubDriverToken: null
 
   # The NVD API allows for an API key to reduce rate limiting.  Request one from https://nvd.nist.gov/developers/request-an-api-key
+  useNvdDriverApiKey: false
   nvdDriverApiKey: null
 
   # Enable microsoft feeds
@@ -866,13 +867,6 @@ anchoreEnterpriseFeeds:
   # Time delay in seconds between consecutive driver runs for processing data
   cycleTimers:
     driver_sync: 7200
-
-  # Specifies an existing secret to be used for anchore admin and db passwords
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_FEEDS_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  # ANCHORE_GITHUB_TOKEN (if applicable)
 
   # Set the name of your existing secret for Anchore Enterprise Feeds
   existingSecretName: anchore-enterprise-feeds-env
