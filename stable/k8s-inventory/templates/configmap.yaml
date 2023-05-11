@@ -1,0 +1,46 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "k8sInventory.fullname" . }}
+  {{- if .Values.annotations }}
+  annotations:
+  {{- with .Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  labels:
+    {{- include "k8sInventory.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    verbose-inventory-reports: {{ .Values.k8sInventory.verboseInventoryReports | quote }}
+    kubeconfig:
+      path: {{ .Values.k8sInventory.kubeconfig.path }}
+      cluster: {{ .Values.k8sInventory.kubeconfig.cluster }}
+    output: {{ .Values.k8sInventory.output }}
+    quiet: {{ .Values.k8sInventory.quiet }}
+    log:
+      structured: {{ .Values.k8sInventory.log.structured }}
+      level: {{ .Values.k8sInventory.log.level }}
+      file: {{ .Values.k8sInventory.log.file }}
+    namespaces:
+      {{- toYaml .Values.k8sInventory.namespaces | nindent 6 }}
+    namespace-selectors:
+      {{- toYaml .Values.k8sInventory.namespaceSelectors | nindent 6 }}
+    mode: {{ .Values.k8sInventory.mode }}
+    polling-interval-seconds: {{ .Values.k8sInventory.pollingIntervalSeconds }}
+    kubernetes-request-timeout-seconds: {{ .Values.k8sInventory.kubernetesRequestTimeoutSeconds }}
+    kubernetes:
+      request-timeout-seconds: {{ .Values.k8sInventory.kubernetes.requestTimeoutSeconds }}
+      request-batch-size: {{ .Values.k8sInventory.kubernetes.requestBatchSize }}
+      worker-pool-size: {{ .Values.k8sInventory.kubernetes.workerPoolSize }}
+    ignore-not-running: {{ .Values.k8sInventory.ignoreNotRunning }}
+    missing-tag-policy:
+      {{- toYaml .Values.k8sInventory.missingTagPolicy | nindent 6 }}
+    anchore:
+      url: {{ .Values.k8sInventory.anchore.url }}
+      user: {{ .Values.k8sInventory.anchore.user }}
+      password: $ANCHORE_K8S_INVENTORY_ANCHORE_PASSWORD
+      account: {{ .Values.k8sInventory.anchore.account }}
+      http:
+        insecure: {{ .Values.k8sInventory.anchore.http.insecure }}
+        timeout-seconds: {{ .Values.k8sInventory.anchore.http.timeoutSeconds }}
