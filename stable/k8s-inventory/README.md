@@ -49,9 +49,9 @@ See the [K8s Inventory repo](https://github.com/anchore/k8s-inventory) for more 
 | Name                                  | Description                                                                                                             | Value                   |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | `replicaCount`                        | Number of replicas for the K8s Inventory deployment                                                                     | `1`                     |
-| `image.repository`                    | Image used for the K8s Inventory deployment                                                                             | `anchore/k8s-inventory` |
 | `image.pullPolicy`                    | Image pull policy used by the K8s Inventory deployment                                                                  | `Always`                |
-| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.0.0-alpha.2`        |
+| `image.repository`                    | Image used for the K8s Inventory deployment                                                                             | `anchore/k8s-inventory` |
+| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.0.0`                |
 | `imagePullSecrets`                    | secrets where Kubernetes should get the credentials for pulling private images                                          | `[]`                    |
 | `nameOverride`                        | overrides the name set on resources                                                                                     | `""`                    |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                 | `""`                    |
