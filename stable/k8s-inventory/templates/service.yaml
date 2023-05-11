@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "k8sInventory.fullname" . }}
+  {{- if .Values.annotations }}
+  annotations:
+  {{- with .Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  labels:
+    {{- include "k8sInventory.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "k8sInventory.selectorLabels" . | nindent 4 }}
