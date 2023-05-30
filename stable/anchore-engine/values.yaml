@@ -19,9 +19,15 @@ postgresql:
   persistence:
     resourcePolicy: keep
     size: 20Gi
+    # If running on OpenShift using the RedHat images for PostgreSQL, uncomment this line to ensure the PVC is mounted properly
+    # mountPath: /var/lib/pgsql/data
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
+  # For upgrades from previous deployments on PG9.6, use this
   # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+
+  # For new installs, please use PG v13 instead of 9.6
+  # image: registry.redhat.io/rhel9/postgresql-13
   # imageTag: latest
   # extraEnv:
   # - name: POSTGRESQL_USER
