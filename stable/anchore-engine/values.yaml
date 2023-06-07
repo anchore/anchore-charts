@@ -657,6 +657,9 @@ anchorePolicyEngine:
   # Reduces significant DB load as a result.
   enablePackageDbLoad: true
 
+  # Reduces load by not requiring a re-scan of every sbom for vulnerabilities after each feed sync
+  enableImagesByVulnerabilityAPI: true
+
   cacheTTL: 3600  # 1 hour
 
   # kubernetes service configuration for anchore policy engine api

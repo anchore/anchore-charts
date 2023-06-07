@@ -178,6 +178,7 @@ data:
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
         enable_owned_package_filtering: {{ .Values.anchoreAnalyzer.enableOwnedPackageFiltering }}
+        keep_image_analysis_tmpfiles: {{ default false .Values.anchoreAnalyzer.keepImageAnalysisTmpfiles }}
       catalog:
         enabled: true
         require_auth: true
@@ -255,6 +256,7 @@ data:
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
         enable_package_db_load: {{ .Values.anchorePolicyEngine.enablePackageDbLoad }}
+        enable_images_by_vulnerability_api: {{ .Values.anchorePolicyEngine.enableImagesByVulnerabilityAPI }}
         vulnerabilities:
           provider: grype
           sync:
