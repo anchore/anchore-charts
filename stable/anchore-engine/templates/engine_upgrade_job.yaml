@@ -1,5 +1,5 @@
 {{- template "checkUpgradeCompatibility" . }}
-{{- if .Values.anchoreEngineUpgradeJob.enabled }}
+{{- if and .Values.anchoreEngineUpgradeJob.enabled (not .Values.anchoreGlobal.usePreupgradeHook) }}
 apiVersion: batch/v1
 kind: Job
 metadata:

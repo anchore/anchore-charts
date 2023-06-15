@@ -1,0 +1,30 @@
+{{- if .Values.anchoreGlobal.usePreupgradeHook -}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "anchore-engine.fullname" . }}-upgrade-role-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if .Values.anchoreGlobal.annotations }}
+  annotations:
+    {{- with .anchoreGlobal.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "anchore-engine.fullname" . }}-upgrade-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "anchore-engine.fullname" . }}-upgrade-sa
+    namespace: {{ .Release.Namespace }}
+{{- end }}

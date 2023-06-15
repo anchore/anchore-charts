@@ -308,6 +308,10 @@ anchoreGlobal:
       failureThreshold: 3
       successThreshold: 1
 
+  # using the preupgrade hook will create a service account that will use
+  # kubectl to scale down the deployment before running the upgrade job
+  usePreupgradeHook: false
+
 # Configuration for the analyzer pods that perform image analysis
 # There may be many of these analyzers but best practice is to not have more than one per node since analysis
 # is very IO intensive. Use of affinity/anti-affinity rules for scheduling the analyzers is future work.
