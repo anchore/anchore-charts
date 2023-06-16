@@ -13,10 +13,28 @@ metadata:
     {{- with .Values.anchoreGlobal.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- if .Values.anchoreGlobal.annotations }}
+    {{- with .Values.anchoreEngineUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseEngineUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.anchoreGlobal.annotations .Values.anchoreEngineUpgradeJob.annotations .Values.anchoreEnterpriseEngineUpgradeJob.annotations .Values.anchoreEnterpriseFeedsUpgradeJob.annotations }}
   annotations:
-    {{- with .anchoreGlobal.annotations }}
+    {{- with .Values.anchoreGlobal.annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEngineUpgradeJob.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseEngineUpgradeJob.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.annotations }}
+      {{ toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
 rules:
