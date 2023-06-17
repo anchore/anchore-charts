@@ -448,6 +448,19 @@ Upon upgrades, checks if .Values.existingSecret=true and fails the upgrade if .V
 {{- end }}
 {{- end }}
 
+
+{{- define "checkPreupgradeHookCompatibility" -}}
+{{- $minVersion := "1.24.0" -}}
+{{- $apiDeployment := (lookup "apps/v1" "Deployment" .Release.Namespace (include "anchore-engine.api.fullname" .)) }}
+{{- $chartVersion := $apiDeployment.metadata.labels.chart}}
+{{- $chartName := .Chart.Name}}
+{{- $version := (regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" $chartVersion | trimPrefix "$chartName-") -}}
+{{- $compareResult := semver $minVersion | (semver $version).Compare -}}
+{{- if lt $compareResult 0 -}}
+    {{- fail "using the preupgrade hook for upgrades requires the chart to be on at least version 1.24.0. Please upgrade to 1.24.0 or newer before using the preupgrade hook." }}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Upon upgrade, check if user is upgrading to chart v1.22.0+ (Enterprise v4.4.0). If they are, ensure that they are
 upgrading from Enterprise 4.2.0 or higher and error out if they're upgrading from an older version.

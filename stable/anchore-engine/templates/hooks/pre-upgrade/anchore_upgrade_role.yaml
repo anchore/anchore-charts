@@ -22,8 +22,10 @@ metadata:
     {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.labels }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- if or .Values.anchoreGlobal.annotations .Values.anchoreEngineUpgradeJob.annotations .Values.anchoreEnterpriseEngineUpgradeJob.annotations .Values.anchoreEnterpriseFeedsUpgradeJob.annotations }}
+
   annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
     {{- with .Values.anchoreGlobal.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -36,7 +38,7 @@ metadata:
     {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.annotations }}
       {{ toYaml . | nindent 4 }}
     {{- end }}
-  {{- end }}
+
 rules:
   - apiGroups:
     - extensions
@@ -55,5 +57,13 @@ rules:
     - deployments/scale
     verbs:
     - patch
+  - apiGroups:
+    - ""
+    resources:
+    - pods
+    verbs:
+    - watch
+    - list
+    - get
 
 {{- end }}

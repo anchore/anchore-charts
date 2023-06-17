@@ -1,3 +1,4 @@
+{{- template "checkPreupgradeHookCompatibility" . }}
 {{- if and .Values.anchoreGlobal.usePreupgradeHook .Values.anchoreEnterpriseGlobal.enabled -}}
 apiVersion: batch/v1
 kind: Job
@@ -145,6 +146,49 @@ spec:
           {{- end }}
           resources:
             {{ toYaml .Values.anchoreEnterpriseEngineUpgradeJob.resources | nindent 12 }}
+        - name: confirm-service-scaled-down
+          image: bitnami/kubectl:1.27
+          command: ["/bin/bash", "-c"]
+          args: ["while [[ $(kubectl get pods -l app={{ template "anchore-engine.fullname" . }} --field-selector=status.phase=Running --no-headers | wc -l) -gt 0 ]]; do echo 'waiting for pods to go down' && sleep 5; done"]
+          {{- if or .Values.anchoreGlobal.containerSecurityContext .Values.cloudsql.enabled }}
+          securityContext:
+          {{- with .Values.anchoreGlobal.containerSecurityContext }}
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+            {{- if .Values.cloudsql.enabled }}
+            capabilities:
+              add:
+                - SYS_PTRACE
+            {{- end }}
+          {{- end }}
+          envFrom:
+          {{- if not .Values.inject_secrets_via_env }}
+          {{- if .Values.anchoreGlobal.useExistingSecrets }}
+            - secretRef:
+                name: {{ .Values.anchoreGlobal.existingSecretName }}
+          {{- else }}
+            - secretRef:
+                name: {{ include "anchore-engine.fullname" . }}
+            - secretRef:
+                name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+          {{- end }}
+          {{- end }}
+          env:
+          {{- with .Values.anchoreGlobal.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
+            - name: certs
+              mountPath: /home/anchore/certs/
+              readOnly: true
+          {{- end }}
+          {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{ toYaml .Values.anchoreEnterpriseEngineUpgradeJob.resources | nindent 12 }}
+
       containers:
         {{- if .Values.cloudsql.enabled  }}
         - name: cloudsql-proxy
@@ -170,7 +214,7 @@ spec:
             readOnly: true
           {{- end }}
         {{- end }}
-        - name: upgrade-db
+        - name: upgrade-enterprise-db
           image: {{ .Values.anchoreEnterpriseGlobal.image }}
           imagePullPolicy: Always
           {{- if or .Values.anchoreGlobal.containerSecurityContext .Values.cloudsql.enabled }}
@@ -192,6 +236,65 @@ spec:
             {{- else }}
             - secretRef:
                 name: {{ include "anchore-engine.fullname" . }}
+            - secretRef:
+                name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
+            {{- end }}
+          {{- end }}
+          env:
+          {{- with .Values.anchoreGlobal.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
+            - name: certs
+              mountPath: /home/anchore/certs/
+              readOnly: true
+          {{- end }}
+          {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{ toYaml .Values.anchoreEnterpriseEngineUpgradeJob.resources | nindent 12 }}
+          command: ["/bin/bash", "-c"]
+          args:
+          {{- if not .Values.anchoreGlobal.dbConfig.ssl }}
+            - |
+              {{ print (include "doSourceFile" .) }} anchore-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}" upgrade --dontask;
+              {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" upgrade --dontask; anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" pre-upgrade-check;
+          {{- else if eq .Values.anchoreGlobal.dbConfig.sslMode "require"}}
+            - |
+              {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} upgrade --dontask;
+              {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} upgrade --dontask; anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} pre-upgrade-check;
+          {{- else }}
+            - |
+              {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask;
+              {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask; anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} pre-upgrade-check;
+          {{- end }}
+          {{- if .Values.cloudsql.enabled }}
+            - |
+              sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+          {{- end }}
+
+        - name: upgrade-feeds-db
+          image: {{ .Values.anchoreEnterpriseGlobal.image }}
+          imagePullPolicy: Always
+          {{- if or .Values.anchoreGlobal.containerSecurityContext .Values.cloudsql.enabled }}
+          securityContext:
+          {{- with .Values.anchoreGlobal.containerSecurityContext }}
+            {{ toYaml . | nindent 12 }}
+          {{- end }}
+            {{- if .Values.cloudsql.enabled }}
+            capabilities:
+              add:
+                - SYS_PTRACE
+            {{- end }}
+          {{- end }}
+          envFrom:
+          {{- if not .Values.inject_secrets_via_env }}
+            {{- if .Values.anchoreGlobal.useExistingSecrets }}
+            - secretRef:
+                name: {{ .Values.anchoreGlobal.existingSecretName }}
+            {{- else }}
             - secretRef:
                 name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
             {{- end }}
@@ -217,19 +320,6 @@ spec:
             {{ toYaml .Values.anchoreEnterpriseEngineUpgradeJob.resources | nindent 12 }}
           command: ["/bin/bash", "-c"]
           args:
-          {{- if not .Values.anchoreGlobal.dbConfig.ssl }}
-            - |
-              {{ print (include "doSourceFile" .) }} anchore-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}" upgrade --dontask;
-              {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" upgrade --dontask; anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" pre-upgrade-check;
-          {{- else if eq .Values.anchoreGlobal.dbConfig.sslMode "require" }}
-            - |
-              {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} upgrade --dontask;
-              {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} upgrade --dontask; anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} pre-upgrade-check;
-          {{- else }}
-            - |
-              {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask;
-              {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask; anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} pre-upgrade-check;
-          {{- end }}
           {{- if not .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
             - |
               {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}:${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}" upgrade --dontask; anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}:${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}" pre-upgrade-check;
@@ -241,6 +331,7 @@ spec:
               {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}:${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask; anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}:${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} pre-upgrade-check;
           {{- end }}
           {{- if .Values.cloudsql.enabled }}
-            - sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+            - |
+              sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
           {{- end }}
 {{- end }}
