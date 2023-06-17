@@ -183,7 +183,7 @@ The upgrade will only be considered successful when this job completes successfu
 
 # Chart version 1.26.1
 
-* Added `.Values.anchoreGlobal.usePreupgradeHook` to enable doing the upgrades using helm's pre-upgrade hook. Doing so requires creating a service account and role with permissions to get/update/patch deployments. See templates/anchore_upgrade_role.yaml for a complete list of roles. This is disabled by default.
+* Added `.Values.anchoreGlobal.usePreupgradeHook` to enable doing the enterprise and feeds upgrade jobs using a helm pre-upgrade hook. This is useful when doing helm upgrade with the --wait flag, or for ArgoCD. Enabling this option will create a service account and role with permissions to get/update/patch deployments and list pods. See templates/hooks/pre-upgrade/anchore_upgrade_role.yaml for a complete list of roles. This is disabled by default.
 
 # Chart version 1.26.0
 

@@ -308,8 +308,9 @@ anchoreGlobal:
       failureThreshold: 3
       successThreshold: 1
 
-  # using the preupgrade hook will create a service account that will use
-  # kubectl to scale down the deployment before running the upgrade job
+  # Using the preupgrade hook will use a job annotated with helm's pre-upgrade hook. This job utilizes a service account that will be created to call kubectl to scale down the deployment before running the upgrade job.
+  # The service account is granted deployment, deployment/scale, and pod permissions. See templates/hooks/pre-upgrade/anchore_upgrade_role.yaml for the full list.
+  # This can be useful for deployments using helm upgrade --wait or ArgoCD.
   usePreupgradeHook: false
 
 # Configuration for the analyzer pods that perform image analysis
