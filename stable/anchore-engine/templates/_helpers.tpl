@@ -412,6 +412,17 @@ Create feeds database hostname string from supplied values file. Used for settin
 {{- end }}
 
 {{/*
+Sets the port of the feeds-db. Used for the upgrade jobs.
+*/}}
+{{- define "postgres.anchore-feeds-db.port" -}}
+  {{- if (index .Values "anchore-feeds-db" "postgresPort") }}
+    {{- print (index .Values "anchore-feeds-db" "postgresPort" | quote) }}
+  {{- else }}
+    {{- print "5432" }}
+  {{- end }}
+{{- end -}}
+
+{{/*
 Create database hostname string from supplied values file. Used for setting the ANCHORE_DB_HOST env var in the UI & Engine secret.
 */}}
 {{- define "db-hostname" }}
@@ -424,6 +435,17 @@ Create database hostname string from supplied values file. Used for setting the 
     {{- print $db_host -}}
   {{- end }}
 {{- end }}
+
+{{/*
+Sets the port of the anchore-db. Used for the upgrade jobs.
+*/}}
+{{- define "postgres.anchore-db.port" -}}
+  {{- if (index .Values "postgresql" "postgresPort") }}
+    {{- print (index .Values "postgresql" "postgresPort" | quote) }}
+  {{- else }}
+    {{- print "5432" }}
+  {{- end }}
+{{- end -}}
 
 {{/*
 Allows sourcing of a specified file in the entrypoint of all containers when .Values.anchoreGlobal.doSourceAtEntry.enabled=true

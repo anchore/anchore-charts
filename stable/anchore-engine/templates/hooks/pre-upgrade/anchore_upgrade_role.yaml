@@ -1,0 +1,69 @@
+{{- if .Values.anchoreGlobal.usePreupgradeHook -}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "anchore-engine.fullname" . }}-upgrade-role
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "anchore-engine.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEngineUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseEngineUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+    {{- with .Values.anchoreGlobal.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEngineUpgradeJob.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseEngineUpgradeJob.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.annotations }}
+      {{ toYaml . | nindent 4 }}
+    {{- end }}
+
+rules:
+  - apiGroups:
+    - extensions
+    - apps
+    resources:
+    - deployments
+    verbs:
+    - get
+    - list
+    - watch
+    - update
+    - patch
+  - apiGroups: 
+    - apps
+    resources:
+    - deployments/scale
+    verbs:
+    - patch
+  - apiGroups:
+    - ""
+    resources:
+    - pods
+    verbs:
+    - watch
+    - list
+    - get
+
+{{- end }}
