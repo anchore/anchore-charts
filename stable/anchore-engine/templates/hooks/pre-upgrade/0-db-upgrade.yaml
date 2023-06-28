@@ -33,7 +33,7 @@ spec:
         app.kubernetes.io/version: {{ .Chart.AppVersion }}
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         app: {{ template "anchore-engine.fullname" . }}
-        component: anchore-upgrade
+        component: anchore-enterprise-upgrade
         {{- with .Values.anchoreGlobal.labels }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
