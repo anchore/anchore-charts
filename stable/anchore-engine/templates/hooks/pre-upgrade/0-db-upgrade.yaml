@@ -292,15 +292,14 @@ spec:
           {{- if not .Values.inject_secrets_via_env }}
             {{- if .Values.anchoreGlobal.useExistingSecrets }}
             - secretRef:
-                name: {{ .Values.anchoreGlobal.existingSecretName }}
+                name: {{ .Values.anchoreEnterpriseFeeds.existingSecretName }}
             {{- else }}
+            - secretRef:
+                name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
             - secretRef:
                 name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
             {{- end }}
-            {{- if .Values.anchoreEnterpriseFeeds.enabled }}
-            - secretRef:
-                name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
-            {{- end }}
+
           {{- end }}
           env:
           {{- with .Values.anchoreGlobal.extraEnv }}
