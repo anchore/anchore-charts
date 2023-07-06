@@ -181,6 +181,10 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+# Chart Version 1.26.3
+
+* Anchore Enterprise image updated to v4.8.1 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/481/)
+
 # Chart version 1.26.1
 
 * Added `.Values.anchoreGlobal.usePreupgradeHook` to enable doing the enterprise and feeds upgrade jobs using a helm pre-upgrade hook. This is useful when doing helm upgrade with the --wait flag, or for ArgoCD. Enabling this option will create a service account and role with permissions to get/update/patch deployments and list pods. See templates/hooks/pre-upgrade/anchore_upgrade_role.yaml for a complete list of roles. This is disabled by default.
