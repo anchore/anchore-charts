@@ -754,7 +754,7 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v4.8.0
+  image: docker.io/anchore/enterprise:v4.8.1
 
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
