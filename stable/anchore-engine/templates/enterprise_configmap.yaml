@@ -152,6 +152,11 @@ data:
         data_load_max_workers: {{ .Values.anchoreEnterpriseReports.dataLoadMaxWorkers }}
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseReports.cycleTimers | nindent 10 }}
+        runtime_report_generation:
+          inventory_images_by_vulnerability: true
+          vulnerabilities_by_k8s_namespace: {{ default true .Values.anchoreEnterpriseReports.vulnerabilitiesByK8sNamespace }}
+          vulnerabilities_by_k8s_container: {{ default true .Values.anchoreEnterpriseReports.vulnerabilitiesByK8sContainer }}
+          vulnerabilities_by_ecs_container: {{ default true .Values.anchoreEnterpriseReports.vulnerabilitiesByEcsContainer }}
         {{- if .Values.anchoreEnterpriseRbac.enabled }}
         authorization_handler: external
         authorization_handler_config:
