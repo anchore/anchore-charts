@@ -127,7 +127,7 @@ postgresql:
   - name: POSTGRESQL_USER
     value: anchoreengine
   - name: POSTGRESQL_PASSWORD
-    value: anchore-postgres,123
+    value: <PGPASSWORD>
   - name: POSTGRESQL_DATABASE
     value: anchore
   - name: PGUSER
@@ -136,7 +136,7 @@ postgresql:
     value: /opt/rh/rh-postgresql96/root/usr/lib64
   - name: PATH
      value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    postgresPassword: <PASSWORD>
+    postgresPassword: <PGPASSWORD>
     persistence:
       size: 20Gi
 
@@ -145,6 +145,10 @@ anchoreGlobal:
   defaultAdminEmail: <EMAIL>
   enableMetrics: True
   openShiftDeployment: True
+  securityContext:
+    runAsUser: null
+    runAsGroup: null
+    fsGroup: null
 
 anchore-feeds-db:
   image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
@@ -153,7 +157,7 @@ anchore-feeds-db:
   - name: POSTGRESQL_USER
     value: anchoreengine
   - name: POSTGRESQL_PASSWORD
-    value: anchore-postgres,123
+    value: <PGPASSWORD>
   - name: POSTGRESQL_DATABASE
     value: anchore
   - name: PGUSER
@@ -162,13 +166,26 @@ anchore-feeds-db:
     value: /opt/rh/rh-postgresql96/root/usr/lib64
   - name: PATH
      value: /opt/rh/rh-postgresql96/root/usr/bin:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    postgresPassword: <PASSWORD>
+    postgresPassword: <PGPASSWORD>
     persistence:
       size: 50Gi
 
 ui-redis:
   auth:
     password: <PASSWORD>
+  master:
+    podSecurityContext:
+      enabled: true
+      fsGroup: 1000670000
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 1000670000
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      seccompProfile:
+        type: "RuntimeDefault"
 ```
 
 # Chart Updates
