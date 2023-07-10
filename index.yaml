@@ -4986,6 +4986,32 @@ entries:
   ecs-inventory:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-07-10T17:29:39.343239802Z"
+    description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
+      of images in use by Amazon Elastic Container Service (ECS).
+    digest: ce915d0ba69b2e14a907bc26b620aaddeaaf236e5b109976806ec88dd7bf3c9b
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - ecs
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: ecs-inventory
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/ecs-inventory-0.0.2/ecs-inventory-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2023-05-10T21:36:07.342629675Z"
     description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
       of images in use by Amazon Elastic Container Service (ECS).
