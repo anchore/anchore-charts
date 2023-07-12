@@ -173,7 +173,7 @@ data:
           sles:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.slesDriverEnabled | quote) }}
           mariner:
-            enabled: {{ default true (.Values.anchoreEnterpriseFeeds.marinerDriverEnabled) }}
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.marinerDriverEnabled) }}
           msrc:
             enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled | quote }}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
