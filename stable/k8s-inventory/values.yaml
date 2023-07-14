@@ -10,7 +10,7 @@ replicaCount: 1
 ## @param image.pullPolicy Image pull policy used by the K8s Inventory deployment
 ## @param image.repository Image used for the K8s Inventory deployment
 ## @param image.tag Image tag used for the K8s Inventory deployment
-## use tag v1.0.2-fips if you want an image built for fips use
+## use tag v1.0.2-fips-amd64 if you want an image built for fips use
 ##
 image:
   pullPolicy: "IfNotPresent"
