@@ -96,13 +96,13 @@ spec:
         args:
         {{- if not .Values.anchoreGlobal.dbConfig.ssl }}
           - |
-            {{ print (include "doSourceFile" .) }} anchore-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"{{- print (include "db-hostname" .) -}}:{{- print (include "postgres.anchore-db.port" .) -}}"/"${ANCHORE_DB_NAME}" upgrade --dontask;
+            {{ print (include "doSourceFile" .) }} anchore-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST/:5432}:${ANCHORE_DB_PORT:-5432}"/"${ANCHORE_DB_NAME}" upgrade --dontask;
         {{- else if eq .Values.anchoreGlobal.dbConfig.sslMode "require"}}
           - |
-            {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"{{- print (include "db-hostname" .) -}}:{{- print (include "postgres.anchore-db.port" .) -}}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} upgrade --dontask;
+            {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST/:5432}:${ANCHORE_DB_PORT:-5432}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode }} upgrade --dontask;
         {{- else }}
           - |
-            {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"{{- print (include "db-hostname" .) -}}:{{- print (include "postgres.anchore-db.port" .) -}}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask;
+            {{ print (include "doSourceFile" .) }} anchore-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST/:5432}:${ANCHORE_DB_PORT:-5432}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName }} upgrade --dontask;
         {{- end }}
         {{- if .Values.cloudsql.enabled }}
           - sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
