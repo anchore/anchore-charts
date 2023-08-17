@@ -67,6 +67,8 @@ data:
     # Defines a maximum compressed image size (MB) to be added for analysis
     # Value < 0 disables feature. Disabled by default
     max_compressed_image_size_mb: {{ default -1 .Values.anchoreGlobal.maxCompressedImageSizeMB }}
+    max_source_import_size_mb: {{ default 100 .Values.anchoreGlobal.maxSourceImportSizeMB }}
+    max_import_content_size_mb: {{ default 100 .Values.anchoreGlobal.maxImportContentSizeMB }}
 
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
