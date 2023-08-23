@@ -362,6 +362,53 @@ entries:
   anchore-engine:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2023-08-23T16:24:10.298089201Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-db
+      condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-gem-db
+      condition: anchore-feeds-gem-db.enabled,anchoreEnterpriseFeeds.gemDriverEnabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: ui-redis
+      condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.11.3
+    description: Anchore container analysis and policy evaluation engine service
+    digest: 5ee5a84f53be06b9a57b2b825a9ebe464944d61354fd503d4030d3a30538ef18
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - security
+    - vulnerability
+    - scanner
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-engine
+    sources:
+    - https://github.com/anchore/anchore-engine
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.27.0/anchore-engine-1.27.0.tgz
+    version: 1.27.0
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2023-07-19T17:39:50.509163467Z"
     dependencies:
     - condition: postgresql.enabled
@@ -5127,6 +5174,32 @@ entries:
   ecs-inventory:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-08-23T16:24:10.447181194Z"
+    description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
+      of images in use by Amazon Elastic Container Service (ECS).
+    digest: 845916c639039a1e5aa6e25b2945502f5ccdced53ce8d02bd97a272d572ebddf
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - ecs
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: ecs-inventory
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/ecs-inventory-0.0.3/ecs-inventory-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2023-07-10T17:29:39.343239802Z"
     description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
       of images in use by Amazon Elastic Container Service (ECS).
@@ -5178,6 +5251,31 @@ entries:
     - https://github.com/anchore/anchore-charts/releases/download/ecs-inventory-0.0.1/ecs-inventory-0.0.1.tgz
     version: 0.0.1
   k8s-inventory:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2023-08-23T16:24:10.60441178Z"
+    description: A Helm chart for Kubernetes Automated Inventory, which describes
+      which images are in use in a given Kubernetes Cluster
+    digest: facb8a38784b4d332be01a777f7095a1cd9f179ce6d8a3dd11b44ebbdab6f140
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: k8s-inventory
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/k8s-inventory-0.0.4/k8s-inventory-0.0.4.tgz
+    version: 0.0.4
   - apiVersion: v2
     appVersion: 1.0.0
     created: "2023-07-10T17:21:26.517212664Z"
