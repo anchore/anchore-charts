@@ -4,8 +4,8 @@ This repository contains Helm charts for deploying [Anchore](https://www.anchore
 
 ## Prerequisites
 
-- [Helm](https://helm.sh/) - Helm is a package manager for Kubernetes that makes it easy to install and manage applications on your cluster.
-- [Kubernetes](https://kubernetes.io/) - Kubernetes is an open-source container orchestration platform that is required to use Helm charts.
+- [Helm](https://helm.sh/) (>=3.8) - Helm is a package manager for Kubernetes that makes it easy to install and manage applications on your cluster.
+- [Kubernetes](https://kubernetes.io/) (>=1.25) - Kubernetes is an open-source container orchestration platform that is required to use Helm charts.
 
 ## Installation
 
