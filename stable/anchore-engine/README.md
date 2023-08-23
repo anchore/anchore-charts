@@ -198,6 +198,10 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+# Chart Version 1.27.0
+
+* Anchore Enterprise image updated to v4.9.0 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/490/)
+
 # Chart Version 1.26.3
 
 * Anchore Enterprise image updated to v4.8.1 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/481/)
@@ -527,6 +531,7 @@ metadata:
   name: anchore-enterprise-ui-env
 type: Opaque
 stringData:
+  # if using TLS to connect to Postgresql you must add the ?ssl=[require|verify-ca|verify-full] parameter to the end of the URI
   ANCHORE_APPDB_URI: postgresql://anchoreengine:anchore-postgres,123@anchore-postgresql:5432/anchore
   ANCHORE_REDIS_URI: redis://nouser:anchore-redis,123@anchore-ui-redis-master:6379
 ```
