@@ -2,13 +2,12 @@ name: "Test using kind and chart-testing tool"
 
 on:
   - pull_request
-
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        kubernetesVersion: ["v1.23.17", "v1.24.14", "v1.25.11", "1.26.6", "1.27.3"]
+        kubernetesVersion: ["v1.23.17", "v1.24.15", "v1.25.11", "v1.26.6", "v1.27.3"]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
