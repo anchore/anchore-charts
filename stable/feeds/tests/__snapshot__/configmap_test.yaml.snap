@@ -124,7 +124,7 @@ should render the configmaps:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-feeds
         app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 4.8.1
+        app.kubernetes.io/version: 4.9.0
         bar: baz-label
         foo: bar-label
         helm.sh/chart: feeds-0.0.1
