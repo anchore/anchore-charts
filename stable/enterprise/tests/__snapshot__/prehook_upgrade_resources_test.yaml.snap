@@ -1,0 +1,109 @@
+rbac should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      annotations:
+        bar: baz
+        foo: bar
+        helm.sh/hook: pre-upgrade
+        helm.sh/hook-weight: "0"
+      labels:
+        app.kubernetes.io/component: upgradejob
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: test-release-enterprise
+        app.kubernetes.io/part-of: anchore
+        app.kubernetes.io/version: 9.9.9
+        bar: baz
+        foo: bar
+        helm.sh/chart: enterprise-9.9.9
+      name: test-release-enterprise-upgrade-sa
+      namespace: test-namespace
+  2: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      annotations:
+        bar: baz
+        foo: bar
+        helm.sh/hook: pre-upgrade
+        helm.sh/hook-weight: "0"
+      labels:
+        app.kubernetes.io/component: upgradejob
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: test-release-enterprise
+        app.kubernetes.io/part-of: anchore
+        app.kubernetes.io/version: 9.9.9
+        bar: baz
+        foo: bar
+        helm.sh/chart: enterprise-9.9.9
+      name: test-release-enterprise-upgrade-role-binding
+      namespace: test-namespace
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: test-release-enterprise-upgrade-role
+    subjects:
+      - kind: ServiceAccount
+        name: test-release-enterprise-upgrade-sa
+        namespace: test-namespace
+  3: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      annotations:
+        bar: baz
+        foo: bar
+        helm.sh/hook: pre-upgrade
+        helm.sh/hook-weight: "0"
+      labels:
+        app.kubernetes.io/component: upgradejob
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: test-release-enterprise
+        app.kubernetes.io/part-of: anchore
+        app.kubernetes.io/version: 9.9.9
+        bar: baz
+        foo: bar
+        helm.sh/chart: enterprise-9.9.9
+      name: test-release-enterprise-upgrade-role
+      namespace: test-namespace
+    rules:
+      - apiGroups:
+          - extensions
+          - apps
+        resources:
+          - deployments
+        verbs:
+          - get
+          - list
+          - watch
+          - update
+          - patch
+      - apiGroups:
+          - apps
+        resources:
+          - deployments/scale
+        verbs:
+          - patch
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+        verbs:
+          - watch
+          - list
+          - get
+should render proper initContainers:
+  1: |
+    - args:
+        - |
+          kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;
+          while [[ $(kubectl get pods -l app.kubernetes.io/name=test-release-enterprise --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do echo 'waiting for pods to go down...' && sleep 5; done
+      command:
+        - /bin/bash
+        - -c
+      image: bitnami/kubectl:1.27
+      name: scale-down-anchore
