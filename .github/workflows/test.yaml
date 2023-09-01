@@ -39,6 +39,11 @@ jobs:
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
         fi
 
+    - name: Run chart-testing (lint)
+      id: lint
+      run: ct lint --config 'ct-config.yaml'
+      if: steps.list-changed.outputs.CHANGED == 'true'
+
     - name: Install kind
       if: steps.list-changed.outputs.CHANGED == 'true'
       uses: helm/kind-action@v1.8.0
