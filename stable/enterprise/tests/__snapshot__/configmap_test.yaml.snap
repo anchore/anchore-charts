@@ -32,7 +32,7 @@ should render the configmaps:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-enterprise
         app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 4.8.1
+        app.kubernetes.io/version: 4.9.0
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-0.0.1
@@ -333,7 +333,7 @@ should render the configmaps:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-enterprise
         app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 4.8.1
+        app.kubernetes.io/version: 4.9.0
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-0.0.1
@@ -418,7 +418,7 @@ should render the configmaps:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-enterprise
         app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 4.8.1
+        app.kubernetes.io/version: 4.9.0
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-0.0.1
@@ -462,7 +462,7 @@ should render the configmaps:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-enterprise
         app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 4.8.1
+        app.kubernetes.io/version: 4.9.0
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-0.0.1
@@ -483,7 +483,7 @@ should render the configmaps:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-enterprise
         app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 4.8.1
+        app.kubernetes.io/version: 4.9.0
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-0.0.1
