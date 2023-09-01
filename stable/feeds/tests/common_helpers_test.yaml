@@ -1,0 +1,724 @@
+suite: Common Helper Template Tests
+templates:
+  - anchore_vars_configmap.yaml
+  - feeds-configmap.yaml
+  - feeds-deployment.yaml
+  - feeds-pvc.yaml
+  - feeds-secret.yaml
+  - ingress.yaml
+  - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+  - templates/hooks/post-upgrade/upgrade_job.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+test_templates: &test_templates
+  - anchore_vars_configmap.yaml
+  - feeds-configmap.yaml
+  - feeds-deployment.yaml
+  - feeds-pvc.yaml
+  - feeds-secret.yaml
+  - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+
+flag_enabled_test_templates: &flag_enabled_test_templates
+  - templates/hooks/post-upgrade/upgrade_job.yaml
+  - ingress.yaml
+
+tests:
+  - it: should render global annotations
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      annotations:
+        foo: bar
+        bar: baz
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            foo: bar
+            bar: baz
+
+  - it: should render file checksum/secret annotation
+    template: feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations['checksum/secrets']
+
+  - it: should render global labels
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      labels:
+        foo: bar
+        bar: baz
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/instance: test-release
+            helm.sh/chart: feeds-9.9.9
+            app.kubernetes.io/version: 9.9.9
+            app.kubernetes.io/part-of: anchore
+            app.kubernetes.io/managed-by: Helm
+            foo: bar
+            bar: baz
+
+  - it: should render docker entrypoint with no doSourceAtEntry filePaths
+    templates:
+    - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade
+
+  - it: should render docker entrypoint with doSourceAtEntry and no filePaths
+    templates:
+    - feeds-deployment.yaml
+    documentIndex: 0
+    set:
+      doSourceAtEntry.enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade
+
+  - it: should render docker entrypoint with doSourceAtEntry and some filePaths
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    set:
+      doSourceAtEntry.enabled: true
+      doSourceAtEntry.filePaths: ["myscript.sh", "myotherscript.sh"]
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^if \[ -f myscript\.sh \];then source myscript\.sh;fi;if \[ -f myotherscript\.sh \];then source myotherscript\.sh;fi; .*$
+
+  - it: should render envFrom without an existing secret
+    templates:
+      - feeds-deployment.yaml
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - configMapRef:
+                  name: test-release-feeds-config-env-vars
+              - secretRef:
+                  name: test-release-feeds
+
+  - it: should render envFrom with an existing secret
+    set:
+      useExistingSecrets: true
+      existingSecretName: "myExistingSecretName"
+    templates:
+      - feeds-deployment.yaml
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - configMapRef:
+                  name: test-release-feeds-config-env-vars
+              - secretRef:
+                  name: myExistingSecretName
+
+  - it: should not render secretRef when injecting secrets via env
+    set:
+      injectSecretsViaEnv: true
+      useExistingSecrets: true
+      existingSecretName: "myExistingSecretName"
+    templates:
+    - feeds-deployment.yaml
+    - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    asserts:
+      - isNotSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - configMapRef:
+                  name: test-release-feeds-config-env-vars
+              - secretRef:
+                  name: myExistingSecretName
+
+  - it: should render correct environment variables when extraEnv is set
+    templates:
+    - feeds-deployment.yaml
+    - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      extraEnv:
+        - name: foo
+          value: bar
+        - name: bar
+          value: baz
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: foo
+            value: bar
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: bar
+            value: baz
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+
+  - it: should render clouddsql container for all deployments and default upgrade job
+    templates:
+    - feeds-deployment.yaml
+    - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: cloudsql-proxy
+            command:
+              - /cloud_sql_proxy
+            args:
+              - "-instances==tcp:5432"
+          count: 1
+          any: true
+
+  - it: should render clouddsql container and extraArgs for all deployments and default upgrade job
+    templates:
+    - feeds-deployment.yaml
+    - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.extraArgs:
+        - myExtraArg
+        - myOtherExtraArg
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: cloudsql-proxy
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value: [ /cloud_sql_proxy ]
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - "-instances==tcp:5432"
+            - "myExtraArg"
+            - "myOtherExtraArg"
+          count: 1
+
+  - it: should render clouddsql container, additional arg, and volumeMount when useExistingServiceAcc is true for all deployments and default upgrade job
+    templates:
+    - feeds-deployment.yaml
+    - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.extraArgs:
+        - myExtraArg
+        - myOtherExtraArg
+      cloudsql.useExistingServiceAcc: true
+      cloudsql.serviceAccSecretName: cloudsqlServiceAccSecretName
+      cloudsql.serviceAccJsonName: cloudsqlServiceAccJsonName
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: cloudsql-proxy
+          count: 1
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - "-instances==tcp:5432"
+            - "myExtraArg"
+            - "myOtherExtraArg"
+            - "-credential_file=/var/cloudsqlServiceAccSecretName/cloudsqlServiceAccJsonName"
+          count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            mountPath: "/var/cloudsqlServiceAccSecretName"
+            name: "cloudsqlServiceAccSecretName"
+            readOnly: true
+          count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: "cloudsqlServiceAccSecretName"
+            secret:
+              secretName: "cloudsqlServiceAccSecretName"
+          count: 1
+
+  - it: should render fixPermissionsInitContainer
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+    templates:
+    - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /anchore_scratch
+            command: [ sh, -c, (chmod 0775 /anchore_scratch; chgrp 9999 /anchore_scratch ) ]
+          count: 1
+          any: true
+
+  - it: should not render fixPermissionsInitContainer
+    set:
+      scratchVolume.fixGroupPermissions: false
+      securityContext.fsGroup: 9999
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers
+
+  - it: should render liveness probe
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe
+          content:
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+
+  - it: should render readiness probe
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].readinessProbe
+          content:
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+
+  - it: should render pod security contexts
+    set:
+      securityContext.runAsUser: 9999
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.securityContext
+          content:
+            runAsUser: 9999
+            runAsGroup: 1000
+            fsGroup: 1000
+
+  - it: should render pod serviceAccountName
+    set:
+      serviceAccountName: myServiceAccountName
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: myServiceAccountName
+
+  - it: should not render pod serviceAccountName if not defined
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notExists:
+          path: spec.template.spec.serviceAccountName
+
+  - it: should render imagePullSecretName
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: anchore-enterprise-pullcreds
+
+  - it: should render set imagePullSecretName
+    set:
+      imagePullSecretName: mysecret
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: mysecret
+
+  - it: should render container security contexts
+    set:
+      containerSecurityContext.runAsUser: 9999
+      containerSecurityContext.runAsGroup: 9998
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].securityContext
+          content:
+            runAsUser: 9999
+            runAsGroup: 9998
+
+  - it: should not render container security contexts if none set
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext
+
+  - it: should render the rbacAuthContainer
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            args:
+              - /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade feeds
+            name: feeds-feeds
+            ports:
+              - containerPort: 8448
+                name: feeds-api
+          any: true
+
+  - it: should render volumeMounts
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-license
+            mountPath: /home/anchore/license.yaml
+            subPath: license.yaml
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config-volume
+            mountPath: /config/config.yaml
+            subPath: config.yaml
+        count: 1
+        any: true
+
+  - it: should render extraVolumeMounts
+    set:
+      extraVolumeMounts:
+        - name: my-volume
+          mountPath: /my/path
+          subPath: my-subpath
+        - name: my-volume-two
+          mountPath: /my/other/path
+          subPath: my-other-subpath
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-volume
+            mountPath: /my/path
+            subPath: my-subpath
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-volume-two
+            mountPath: /my/other/path
+            subPath: my-other-subpath
+        count: 1
+        any: true
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: certs
+        count: 1
+        any: true
+
+  - it: should render certStore volumeMount and volume
+    set:
+      certStoreSecretName: mycerts
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: certs
+            mountPath: /home/anchore/certs/
+            readOnly: true
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: certs
+            secret:
+              secretName: mycerts
+        count: 1
+        any: true
+
+  - it: should render global extraVolumes
+    set:
+      extraVolumes:
+        - name: my-volume
+          emptyDir: {}
+        - name: my-volume-two
+          emptyDir: {}
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: my-volume
+            emptyDir: {}
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: my-volume-two
+            emptyDir: {}
+        count: 1
+        any: true
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: certs
+        count: 1
+        any: true
+
+  - it: should render global volumes anchore-license, and config-volume
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-license
+            secret:
+              secretName: anchore-enterprise-license
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-feeds
+        count: 1
+        any: true
+
+  - it: should render feeds.fullname
+    templates: *test_templates
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: metadata.name
+          pattern: ^test-release-feeds
+
+  - it: should render feeds.fullname with fullnameOverride for services
+    set:
+      fullnameOverride: my-fullname-override
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 1
+    asserts:
+      - matchRegex:
+          path: spec.selector["app.kubernetes.io/name"]
+          pattern: ^my-fullname-override
+
+  - it: should render feeds.fullname with nameOverride for services
+    set:
+      nameOverride: my-name-override
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 1
+    asserts:
+      - matchRegex:
+          path: spec.selector["app.kubernetes.io/name"]
+          pattern: ^test-release-my-name-override
+
+  - it: should render dbHostname for feeds-secret.yaml
+    templates:
+      - feeds-secret.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_HOST: test-release-feeds-db
+        count: 1
+        any: true
+
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_NAME: anchore-feeds
+        count: 1
+        any: true
+
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
+        count: 1
+        any: true
+
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_PORT: "5432"
+        count: 1
+        any: true
+
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_USER: anchore-feeds
+        count: 1
+        any: true
+
+  # since postgresql is enabled, should still use the chart postgresql service name
+  - it: should render dbHostname with externalEndpoint defined and postgresql enabled
+    set:
+      feeds-db:
+        externalEndpoint: my-endpoint
+        enabled: true
+        cloudsql:
+          enabled: true
+    templates:
+      - feeds-secret.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_HOST: test-release-feeds-db
+        count: 1
+        any: true
+      - isNotSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_HOST: localhost
+
+  - it: should render dbHostname with externalEndpoint defined and postgresql disabled
+    set:
+      feeds-db:
+        externalEndpoint: my-endpoint
+        enabled: false
+    templates:
+      - feeds-secret.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_HOST: my-endpoint
+        count: 1
+        any: true
+
+  - it: should render dbHostname with cloudsql enabled and postgresql disabled
+    set:
+      feeds-db:
+        enabled: false
+      cloudsql:
+        enabled: true
+    templates:
+      - feeds-secret.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_HOST: localhost
+        count: 1
+        any: true
+
+  - it: should render default dbHostname with postgresql disabled, postgresql externalEndpoint not defined, and cloudsql disabled
+    set:
+      feeds-db:
+        enabled: false
+        externalEndpoint: ""
+      cloudsql:
+        enabled: false
+    templates:
+      - feeds-secret.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: stringData
+          content:
+            ANCHORE_FEEDS_DB_HOST: test-release-feeds-db
+        count: 1
+        any: true
+
+  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
+    set:
+      anchoreConfig.internalServicesSSL.enabled: true
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet
+          content:
+            scheme: HTTPS
+
+  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
+    set:
+      anchoreConfig.internalServicesSSL.enabled: false
+    templates:
+      - feeds-deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet
+          content:
+            scheme: HTTP
