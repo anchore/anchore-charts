@@ -1331,7 +1331,7 @@ postgresql:
     ##
     extraEnvVars: []
 
-  ## @param postgresql.image.tag [obj] Specifies the image to use for this chart.
+  ## @param postgresql.image.tag Specifies the image to use for this chart.
   ##
   image:
     tag: 13.11.0-debian-11-r15
