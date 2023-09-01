@@ -38,7 +38,7 @@ dependencies:
     alias: ui-redis
   - name: feeds
     version: "0.0.1"
-    repository: "https://charts.anchore.io/stable"
+    repository: "@anchore"
     condition: feeds.chartEnabled
     import-values:
       - child: service

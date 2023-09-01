@@ -44,7 +44,7 @@ jobs:
           for chart in ${charts_dirs_changed}; do
             echo "running helm unittest . for ${chart}"
             pushd "${chart}"
-            helm dep build
+            helm dep up
             helm unittest .
             popd
           done
