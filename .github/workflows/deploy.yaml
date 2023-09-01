@@ -7,6 +7,10 @@ on:
 
 jobs:
   release:
+    env:
+      REPO: "${{ github.repository }}"
+      REPO_NAME: "${{ github.event.repository.name }}"
+      TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,6 +23,21 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Update chart deps
+        run: |
+          cd "${REPO}"
+          files_changed="$(git diff --name-only origin/${TARGET_BRANCH} | sort | uniq)"
+          # Adding || true to avoid "Process exited with code 1" errors
+          charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
+          for chart in ${charts_dirs_changed}; do
+            if [[ "${chart}" == "stable/enterprise" ]]; then
+              pushd "${chart}"
+              helm repo add anchore https://charts.anchore.io/stable
+              helm dep up
+              popd
+            fi
+          done
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
