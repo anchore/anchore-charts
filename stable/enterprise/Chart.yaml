@@ -25,6 +25,8 @@ maintainers:
     email: zach@anchore.com
   - name: btodhunter
     email: bradyt@anchore.com
+  - name: hnguyen
+    email: hung.nguyen@anchore.com
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
 dependencies:
   - name: postgresql
