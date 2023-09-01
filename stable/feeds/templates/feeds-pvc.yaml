@@ -1,0 +1,26 @@
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "feeds.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+    "helm.sh/resource-policy": {{ default "" .Values.persistence.resourcePolicy }}
+  {{- with .Values.persistence.annotations }}
+    {{ toYaml . | indent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+{{- if .Values.persistence.storageClass }}
+  {{- if (eq "-" .Values.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: "{{ .Values.persistence.storageClass }}"
+  {{- end }}
+{{- end }}
+{{- end -}}

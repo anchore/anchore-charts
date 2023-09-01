@@ -1,0 +1,580 @@
+###################################################
+## @section Common Resource Parameters
+## Common params used by all Anchore Feeds k8s resources
+###################################################
+
+## @param standalone Enable running the Anchore Feeds service in standalone mode
+##
+standalone: true
+
+## @param enterpriseFullname set the fullname on enterprise resources. Only needed when standalone=false and fullnameOverride is set for the enterprise chart.
+##
+enterpriseFullname: ""
+
+## @param fullnameOverride overrides the fullname set on resources
+##
+fullnameOverride: ""
+
+## @param nameOverride overrides the name set on resources
+##
+nameOverride: ""
+
+## @param image Image used for feeds deployment
+##
+image: docker.io/anchore/enterprise:v4.9.0
+
+## @param imagePullPolicy Image pull policy used by all deployments
+## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+##
+imagePullPolicy: IfNotPresent
+
+## @param imagePullSecretName Name of Docker credentials secret for access to private repos
+## Pre-populated with the pull secret name specified in the Anchore docs & quickstart instructions
+## Secrets must be manually created in the same namespace as release
+##
+imagePullSecretName: anchore-enterprise-pullcreds
+
+## @param serviceAccountName Name of a service account used to run all Feeds pods
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccountName: ""
+
+## @param injectSecretsViaEnv Enable secret injection into pod via environment variables instead of via k8s secrets
+## Useful for injecting secrets directly into k8s pods from Hashicorp vault
+##
+injectSecretsViaEnv: false
+
+## @param licenseSecretName Name of the Kubernetes secret containing your license.yaml file
+## This must be manually created. For example with the following command:
+## `kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>`
+##
+licenseSecretName: anchore-enterprise-license
+
+## @param certStoreSecretName Name of secret containing the certificates & keys used for SSL, SAML & CAs
+## This secret will be mounted in pods to /home/anchore/certs
+## Secret must be manually created in the same namespace as release
+##
+certStoreSecretName: ""
+
+## @param extraEnv Common environment variables set on all containers
+## ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+##
+extraEnv: []
+
+## @param labels Common labels set on all Kubernetes resources
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+labels: {}
+
+## @param annotations Common annotations set on all Kubernetes resources
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+annotations: {}
+
+## @param resources Resource requests and limits for Anchore Feeds pods
+##
+resources: {}
+
+## @param nodeSelector Node labels for Anchore Feeds pod assignment
+##
+nodeSelector: {}
+
+## @param tolerations Tolerations for Anchore Feeds pod assignment
+##
+tolerations: []
+
+## @param affinity Affinity for Anchore Feeds pod assignment
+##
+affinity: {}
+
+## @param service.type Service type for Anchore Feeds
+## @param service.port Service port for Anchore Feeds
+## @param service.annotations Annotations for Anchore Feeds service
+## @param service.labels Labels for Anchore Feeds service
+##
+service:
+  type: ClusterIP
+  port: 8448
+  annotations: {}
+  labels: {}
+
+## @param scratchVolume.mountPath The mount path of an external volume for scratch space for image analysis
+## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions
+## @param scratchVolume.details [object] Details for the k8s volume to be created
+## Generally speaking you need to provision 3x the size of the largest image (uncompressed) that you want to analyze
+## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+scratchVolume:
+  mountPath: /anchore_scratch
+  fixGroupPermissions: false
+  details: {}
+
+## @param persistence.enabled Enable mounting an external volume for feeds driver workspace
+## @param persistence.resourcePolicy Resource policy Helm annotation on PVC. Can be nil or "keep"
+## @param persistence.existingClaim Specify an existing volume claim
+## @param persistence.storageClass Persistent volume storage class
+## If persistence.storageClass="" (the default), no storageClassName spec is set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS & OpenStack)
+## @param persistence.accessMode Access Mode for persistent volume
+## @param persistence.size Size of persistent volume
+## @param persistence.mountPath Mount path on Anchore Feeds container for persistent volume
+## @param persistence.subPath Directory name used for persistent volume storage
+## @param persistence.annotations Annotations for PVC
+##
+persistence:
+  enabled: true
+  resourcePolicy: keep
+  existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 40Gi
+  mountPath: /workspace
+  subPath: "feeds-workspace"
+  annotations: {}
+
+## @param extraVolumes mounts additional volumes to each pod
+## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+extraVolumes: []
+# - name: config
+#   secret:
+#     secretName: config
+
+## @param extraVolumeMounts mounts additional volumes to each pod
+## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+extraVolumeMounts: []
+# - name: config
+#   mountPath: "/vault/secrets/config"
+#   subPath: config
+#   readOnly: true
+
+## @param securityContext.runAsUser The securityContext runAsUser for all Feeds pods
+## @param securityContext.runAsGroup The securityContext runAsGroup for all Feeds pods
+## @param securityContext.fsGroup The securityContext fsGroup for all Feeds pods
+## By default the Feeds images utilize the user/group 'anchore' using uid/gid 1000
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+##
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+## @param containerSecurityContext The securityContext for all Feeds containers
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+##
+containerSecurityContext: {}
+
+## @param probes.liveness.initialDelaySeconds Initial delay seconds for liveness probe
+## @param probes.liveness.timeoutSeconds Timeout seconds for liveness probe
+## @param probes.liveness.periodSeconds Period seconds for liveness probe
+## @param probes.liveness.failureThreshold Failure threshold for liveness probe
+## @param probes.liveness.successThreshold Success threshold for liveness probe
+## @param probes.readiness.timeoutSeconds Timeout seconds for the readiness probe
+## @param probes.readiness.periodSeconds Period seconds for the readiness probe
+## @param probes.readiness.failureThreshold Failure threshold for the readiness probe
+## @param probes.readiness.successThreshold Success threshold for the readiness probe
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+##
+probes:
+  liveness:
+    initialDelaySeconds: 120
+    timeoutSeconds: 10
+    periodSeconds: 10
+    failureThreshold: 6
+    successThreshold: 1
+  readiness:
+    timeoutSeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+
+## @param doSourceAtEntry.enabled Does a `source` of the file paths defined before starting Anchore services
+## @param doSourceAtEntry.filePaths List of file paths to `source` before starting Anchore services
+## For example, if using hashicorp vault, set to /vault/secrets/config
+##
+doSourceAtEntry:
+  enabled: false
+  filePaths: []
+  # - "/vault/secrets/config"
+
+## @param useExistingSecrets forgoes secret creation and uses the secret defined in existingSecretName
+## When useExistingSecrets is set to `true` the chart will not create secrets specifying the environment variables used in deployments.
+## Instead, the chart will use secrets that have already been applied to the namespace that this chart is being deployed to.
+##
+useExistingSecrets: false
+
+## @param existingSecretName Name of the existing secret to be used for Anchore Feeds Service
+##
+existingSecretName: anchore-enterprise-feeds-env
+
+## @param configOverride Allows for overriding the default Anchore configuration file
+## This value can be used to pass in a custom configuration file for Anchore services
+## This config file will be templated when it is added to the configmap, so Helm values and functions can be used
+##
+configOverride: {}
+
+#####################################################################
+## @section Anchore Feeds Configuration Parameters
+## Params used for all Anchore Feeds service configuration files
+#####################################################################
+
+anchoreConfig:
+  ## @param anchoreConfig.service_dir Path to directory where default Anchore configs are placed at startup
+  ## This path must be a writable location for the pod
+  ##
+  service_dir: /anchore_service
+
+  ## @param anchoreConfig.log_level The log level for Anchore services
+  ## options available: FATAL, ERROR, WARN, INFO, DEBUG, SPEW
+  ##
+  log_level: INFO
+
+  ## @param anchoreConfig.keys.secret The shared secret used for signing & encryption, auto-generated by Helm if not set
+  ## @param anchoreConfig.keys.privateKeyFileName The file name of the private key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName
+  ## @param anchoreConfig.keys.publicKeyFileName The file name of the public key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName
+  ## Only one of anchoreConfig.keys.secret or anchoreConfig.keys.privateKeyFileName/anchoreConfig.keys.publicKeyFileName should be configured.
+  ## If all are set then the keys take precedence over the secret value.
+  ##
+  keys:
+    secret: ""
+    privateKeyFileName: ""
+    publicKeyFileName: ""
+
+  ## @param anchoreConfig.user_authentication.oauth.enabled Enable OAuth for Anchore user authentication
+  ## @param anchoreConfig.user_authentication.oauth.default_token_expiration_seconds The expiration, in seconds, for OAuth tokens
+  ## @param anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds The expiration, in seconds, for OAuth refresh tokens
+  ## ref: https://docs.anchore.com/current/docs/installation/configuration/user_credential_storage/#bearer-tokensoauth2
+  ##
+  ## @param anchoreConfig.user_authentication.hashed_passwords Enable storing passwords as secure hashes in the database
+  ## This can dramatically increase CPU usage if you don't also use OAuth and tokens for internal communications
+  ## WARNING: You should not change this after a system has been initialized as it may cause a mismatch in existing passwords
+  ## ref: https://docs.anchore.com/current/docs/installation/configuration/user_credential_storage/#configuring-hashed-passwords-and-oauth
+  ##
+  ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
+  ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
+  ##
+  user_authentication:
+    oauth:
+      enabled: false
+      default_token_expiration_seconds: 3600
+      refresh_token_expiration_seconds: 86400
+    hashed_passwords: false
+    sso_require_existing_users: false
+
+  ## @param anchoreConfig.metrics.enabled Enable Prometheus metrics for all Anchore services
+  ## @param anchoreConfig.metrics.auth_disabled Disable auth on Prometheus metrics for all Anchore services
+  ##
+  metrics:
+    enabled: false
+    auth_disabled: false
+
+  ## @param anchoreConfig.database.timeout
+  ## @param anchoreConfig.database.ssl Enable SSL/TLS for the database connection
+  ## @param anchoreConfig.database.sslMode The SSL mode to use for database connection
+  ## @param anchoreConfig.database.sslRootCertFileName File name of the database root CA certificate stored in the k8s secret specified with .Values.certStoreSecretName
+  ## @param anchoreConfig.database.db_pool_size The database max connection pool size
+  ## @param anchoreConfig.database.db_pool_max_overflow The maximum overflow size of the database connection pool
+  ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy
+  ## ref: https://docs.sqlalchemy.org/en/14/core/engines.html#engine-creation-api
+  ##
+  database:
+    timeout: 120
+    ssl: false
+    sslMode: require
+    sslRootCertFileName: ""
+    db_pool_size: 30
+    db_pool_max_overflow: 100
+    engineArgs: {}
+
+  ## @param anchoreConfig.internalServicesSSL.enabled Force all Enterprise services to use SSL for internal communication
+  ## @param anchoreConfig.internalServicesSSL.verifyCerts Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed
+  ## @param anchoreConfig.internalServicesSSL.certSecretKeyFileName File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName
+  ## @param anchoreConfig.internalServicesSSL.certSecretCertFileName File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName
+  ## ref: https://docs.anchore.com/current/docs/installation/configuration/tls_ssl_config/
+  ##
+  internalServicesSSL:
+    enabled: false
+    verifyCerts: false
+    certSecretKeyFileName: ""
+    certSecretCertFileName: ""
+
+  feeds:
+    ## @param anchoreConfig.feeds.cycle_timers.driver_sync Time delay in seconds between consecutive driver runs for processing data
+    ##
+    cycle_timers:
+      driver_sync: 7200
+
+    drivers:
+      ## @param anchoreConfig.feeds.drivers.debian.releases Additional Debian feeds groups
+      ##
+      debian:
+        releases: {}
+
+      ## @param anchoreConfig.feeds.drivers.ubuntu.releases Additional Ubuntu feed groups
+      ##
+      ubuntu:
+        releases: {}
+
+      ## @param anchoreConfig.feeds.drivers.npm.enabled Enable vulnerability drivers for npm data
+      ##
+      npm:
+        enabled: false
+
+      ## @param anchoreConfig.feeds.drivers.gem.enabled Enable vulnerability drivers for gem data
+      ## @param anchoreConfig.feeds.drivers.gem.db_connect Defines the database endpoint used for loading the rubygems package data as a PostgreSQL dump
+      ##
+      gem:
+        enabled: false
+        db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}:${ANCHORE_GEM_DB_PORT}/${ANCHORE_GEM_DB_NAME}"
+
+      ## @param anchoreConfig.feeds.drivers.nvdv2.api_key The NVD API key value
+      ## Request one from https://nvd.nist.gov/developers/request-an-api-key
+      ##
+      nvdv2:
+        api_key: null
+
+      ## @param anchoreConfig.feeds.drivers.msrc.enabled Enable Microsoft feeds
+      ## @param anchoreConfig.feeds.drivers.msrc.whitelist MSRC product IDs for generating feed data, this extends the pre-defined list of product IDs
+      ## ref: https://docs.anchore.com/current/docs/installation/feeds/#driver-configuration
+      ##
+      msrc:
+        enabled: false
+        whitelist: []
+
+      ## @param anchoreConfig.feeds.drivers.github.enabled Enable GitHub advisory feeds (requires GitHub PAT)
+      ## ref: https://docs.anchore.com/current/docs/installation/feeds/#driver-configuration
+      ## @param anchoreConfig.feeds.drivers.github.token GitHub developer personal access token with zero permission scopes
+      ## ref: https://github.com/settings/tokens/new
+      ##
+      github:
+        enabled: false
+        token: null
+
+#############################################
+## @section Anchore Feeds Database Parameters
+#############################################
+
+feeds-db:
+  ## @param feeds-db.chartEnabled Use the dependent chart for Feeds Postgresql deployment
+  ##
+  chartEnabled: true
+
+  ## @param feeds-db.externalEndpoint External Feeds Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io)
+  ## feeds-db.externalEndpoint, feeds-db.auth.username, feeds-db.auth.password,
+  ## feeds-db.auth.database, & feeds-db.postgresqlPort are required values for external Postgres
+  ##
+  externalEndpoint: ""
+
+  ## @param feeds-db.auth.username Username used to connect to Postgresql
+  ## @param feeds-db.auth.password Password used to connect to Postgresql
+  ## @param feeds-db.auth.database Database name used when connecting to Postgresql
+  ##
+  auth:
+    username: anchore-feeds
+    password: anchore-postgres,123
+    database: anchore-feeds
+
+  primary:
+    ## @param feeds-db.primary.service.ports.postgresql Port used to connect to Postgresql
+    ##
+    service:
+      ports:
+        postgresql: 5432
+
+    ## @param feeds-db.primary.persistence.size Configure size of the persistent volume used with helm managed chart
+    ##
+    persistence:
+      size: 20Gi
+
+    ## @param feeds-db.primary.extraEnvVars An array to add extra environment variables
+    ##
+    extraEnvVars: []
+
+  ## @param feeds-db.image.tag [obj] Specifies the image to use for this chart.
+  ##
+  image:
+    tag: 13.11.0-debian-11-r15
+
+#######################################
+## @section Feeds Gem Database Parameters
+#######################################
+
+gem-db:
+  ## @param gem-db.chartEnabled Use the dependent chart for Postgresql deployment
+  ## Configures a separate postgres database deployment for the feeds service Ruby Gems DB
+  ## requires feeds.gemDriverEnabled=true
+  ##
+  chartEnabled: false
+
+  ## @param gem-db.externalEndpoint External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io)
+  ## gem-db.externalEndpoint, gem-db.postgresqlUsername, gem-db.postgresqlPassword,
+  ## gem-db.postgresqlDatabase, & gem-db.postgresqlPort are required values for external Postgres
+  ##
+  externalEndpoint: ""
+
+  ## @param gem-db.auth.username Username used to connect to Postgresql
+  ## @param gem-db.auth.password Password used to connect to Postgresql
+  ## @param gem-db.auth.database Database name used when connecting to Postgresql
+  ##
+  auth:
+    username: anchore-gem-feeds
+    password: anchore-postgres,123
+    database: anchore-gem-feeds
+
+  primary:
+    ## @param gem-db.primary.service.ports.postgresql Port used to connect to Postgresql
+    ##
+    service:
+      ports:
+        postgresql: 5432
+
+    ## @param gem-db.primary.persistence.size Configure size of the persistent volume used with helm managed chart
+    ##
+    persistence:
+      size: 20Gi
+
+    ## @param gem-db.primary.extraEnvVars An array to add extra environment variables
+    ##
+    extraEnvVars: []
+
+  ## @param gem-db.image.tag [obj] Specifies the image to use for this chart.
+  ##
+  image:
+    tag: 13.11.0-debian-11-r15
+
+################################################
+## @section Anchore Feeds Upgrade Job Parameters
+## Upgrade job uses a Helm post-install-hook
+################################################
+feedsUpgradeJob:
+  ## @param feedsUpgradeJob.enabled Enable the Anchore Feeds database upgrade job
+  ##
+  enabled: true
+
+  ## @param feedsUpgradeJob.force Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook
+  ##
+  force: false
+
+  ## @param feedsUpgradeJob.rbacCreate Create RBAC resources for the upgrade job
+  ## By default, the anchore upgrade job utilizes a service account that will be created to call kubectl to scale down the deployment before running the upgrade job.
+  ## The service account is granted deployment, deployment/scale, and pod permissions. See templates/hooks/pre-upgrade/db-upgrade-rbac.yaml for the full list of permissions
+  ##
+  rbacCreate: true
+
+  ## @param feedsUpgradeJob.serviceAccountName Use an existing service account for the upgrade job
+  ##
+  serviceAccountName: ""
+
+  ## @param feedsUpgradeJob.usePostUpgradeHook Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources.
+  ## Uses the same mechanism for upgrades as the legacy anchore-engine chart. Not compatible with `helm upgrade --wait` or ArgoCD.
+  ##
+  usePostUpgradeHook: false
+
+  ## @param feedsUpgradeJob.nodeSelector Node labels for the Anchore Feeds upgrade job pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param feedsUpgradeJob.tolerations Tolerations for the Anchore Feeds upgrade job pod assignment
+  ##
+  tolerations: []
+
+  ## @param feedsUpgradeJob.affinity Affinity for the Anchore Feeds upgrade job pod assignment
+  ##
+  affinity: {}
+
+  ## @param feedsUpgradeJob.annotations Annotations for the Anchore Feeds upgrade job
+  ##
+  annotations: {}
+
+  ## @param feedsUpgradeJob.labels Labels for the Anchore Feeds upgrade job
+  ##
+  labels: {}
+
+  ## @param feedsUpgradeJob.resources Resources for the Anchore Feeds upgrade job
+  ##
+  resources: {}
+
+##############################
+## @section Ingress Parameters
+##############################
+ingress:
+  ## @param ingress.enabled Create an ingress resource for external Anchore service APIs
+  ## ref: https://kubernetes.io/docs/user-guide/ingress/
+  ##
+  enabled: false
+
+  ## @param ingress.labels Labels for the ingress resource
+  ##
+  labels: {}
+
+  ## @param ingress.annotations [object] Annotations for the ingress resource
+  ## By default this chart is setup to use an NGINX ingress controller, which needs to be installed & configured on your cluster
+  ## ref: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/annotations/
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+  ## ref: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features
+  ##
+  annotations:
+    kubernetes.io/ingress.class: nginx
+
+  ## @param ingress.hosts List of custom hostnames for the Anchore Feeds API
+  ##
+  hosts: []
+
+  ## @param ingress.path The path used for accessing the Anchore Feeds API
+  ##
+  path: /v1/feeds
+
+  ## @param ingress.tls Configure tls for the ingress resource
+  ## Secrets must be manually created in the release namespace
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  ##
+  tls: []
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
+
+  ## @param ingress.ingressClassName sets the ingress class name. As of k8s v1.18, this should be nginx
+  ## ref: # Reference: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  ##
+  ingressClassName: nginx
+
+#########################################
+## @section Google CloudSQL DB Parameters
+#########################################
+cloudsql:
+  ## @param cloudsql.enabled Use CloudSQL proxy container for GCP database access
+  ##
+  enabled: false
+
+  ## @param cloudsql.image Image to use for GCE CloudSQL Proxy
+  ##
+  image: gcr.io/cloudsql-docker/gce-proxy:1.25.0
+
+  ## @param cloudsql.imagePullPolicy Image Pull Policy to use for CloudSQL image
+  ##
+  imagePullPolicy: IfNotPresent
+
+  ## @param cloudsql.instance CloudSQL instance, eg: 'project:zone:instancename'
+  ##
+  instance: ""
+
+  ## @param cloudsql.useExistingServiceAcc Use existing service account
+  ## If using an existing Service Account, you must create a secret which includes the JSON token from Google's IAM
+  ## ref: https://cloud.google.com/sql/docs/postgres/authentication
+  ##
+  useExistingServiceAcc: false
+
+  ## @param cloudsql.serviceAccSecretName
+  ##
+  serviceAccSecretName: ""
+
+  ## @param cloudsql.serviceAccJsonName
+  ##
+  serviceAccJsonName: ""
+
+  ## @param cloudsql.extraArgs a list of extra arguments to be passed into the cloudsql container command. eg
+  ## extraArgs:
+  ## - "-ip_address_types=PRIVATE"
+  ## - "-enable_iam_login"
+  ##
+  extraArgs: []

@@ -1,0 +1,132 @@
+should render the configmaps:
+  1: |
+    apiVersion: v1
+    data:
+      config.yaml: |
+        # Anchore Feeds Service Configuration File, mounted from a configmap
+        #
+        service_dir: ${ANCHORE_SERVICE_DIR}
+        tmp_dir: ${ANCHORE_TMP_DIR}
+        log_level: ${ANCHORE_LOG_LEVEL}
+
+        host_id: "${ANCHORE_HOST_ID}"
+        internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+
+        global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
+        global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
+        server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
+
+        license_file: ${ANCHORE_LICENSE_FILE}
+        auto_restart_services: false
+
+        metrics:
+          enabled: ${ANCHORE_ENABLE_METRICS}
+          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
+
+        keys:
+          secret: ${ANCHORE_SAML_SECRET}
+          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
+          private_key_path: ${ANCHORE_AUTH_PUBKEY}
+
+        user_authentication:
+          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
+          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+          oauth:
+            enabled: ${ANCHORE_OAUTH_ENABLED}
+            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+
+        credentials:
+          database:
+            user: "${ANCHORE_FEEDS_DB_USER}"
+            password: "${ANCHORE_FEEDS_DB_PASSWORD}"
+            host: "${ANCHORE_FEEDS_DB_HOST}"
+            port: "${ANCHORE_FEEDS_DB_PORT}"
+            name: "${ANCHORE_FEEDS_DB_NAME}"
+            db_connect_args:
+              timeout: ${ANCHORE_FEEDS_DB_TIMEOUT}
+              ssl: ${ANCHORE_FEEDS_DB_SSL}
+            db_pool_size: ${ANCHORE_FEEDS_DB_POOL_SIZE}
+            db_pool_max_overflow: ${ANCHORE_FEEDS_DB_POOL_MAX_OVERFLOW}
+
+        services:
+          feeds:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            cycle_timers:
+              driver_sync: 7200
+            local_workspace: ${ANCHORE_FEEDS_LOCAL_WORKSPACE}
+            workspace_preload:
+              enabled: ${ANCHORE_FEEDS_WORKSPACE_PRELOAD}
+              workspace_preload_file: "/workspace_preload/data.tar.gz"
+            api_only: ${ANCHORE_FEEDS_API_ONLY}
+            drivers:
+              amzn:
+                enabled: ${ANCHORE_FEEDS_DRIVER_AMAZON_ENABLED}
+              alpine:
+                enabled: ${ANCHORE_FEEDS_DRIVER_ALPINE_ENABLED}
+              centos:
+                enabled: false
+              debian:
+                enabled: ${ANCHORE_FEEDS_DRIVER_DEBIAN_ENABLED}
+              ol:
+                enabled: ${ANCHORE_FEEDS_DRIVER_OL_ENABLED}
+              ubuntu:
+                enabled: ${ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED}
+                git_url: ${ANCHORE_FEEDS_DRIVER_UBUNTU_URL}
+                git_branch: ${ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH}
+              rhel:
+                enabled: ${ANCHORE_FEEDS_DRIVER_RHEL_ENBALED}
+                concurrency: ${ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY}
+              npm:
+                enabled: ${ANCHORE_FEEDS_DRIVER_NPM_ENABLED}
+              gem:
+                enabled: ${ANCHORE_FEEDS_DRIVER_GEM_ENABLED}
+              nvdv2:
+                enabled: ${ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED}
+                api_key: ${ANCHORE_NVD_API_KEY}
+              msrc:
+                enabled: ${ANCHORE_FEEDS_DRIVER_MSRC_ENABLED}
+              github:
+                enabled: ${ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED}
+                token: ${ANCHORE_GITHUB_TOKEN}
+              grypedb:
+                enabled: ${ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED}
+                external_feeds_url: "${ANCHORE_FEEDS_EXTERNAL_URL}"
+                preload:
+                  enabled: ${ANCHORE_FEEDS_GRYPEDB_PRELOAD_ENABLED}
+                  workspace_archive_path: ${ANCHORE_FEEDS_GRYPEDB_PRELOAD_PATH}
+                persist_provider_workspaces: ${ANCHORE_FEEDS_GRYPEDB_PERSIST_WORKSPACE}
+                restore_provider_workspaces: ${ANCHORE_FEEDS_GRYPEDB_RESTORE_WORKSPACE}
+              sles:
+                enabled: ${ANCHORE_FEEDS_DRIVER_SLES_ENABLED}
+              anchore_match_exclusions:
+                enabled: ${ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS}
+              wolfi:
+                enabled: ${ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED}
+              chainguard:
+                enabled: ${ANCHORE_FEEDS_DRIVER_CHAINGUARD_ENABLED}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+    kind: ConfigMap
+    metadata:
+      annotations:
+        bar: baz-annotation
+        foo: bar-annotation
+      labels:
+        app.kubernetes.io/component: feeds
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: test-release-feeds
+        app.kubernetes.io/part-of: anchore
+        app.kubernetes.io/version: 4.9.0
+        bar: baz-label
+        foo: bar-label
+        helm.sh/chart: feeds-0.0.1
+      name: test-release-feeds
+      namespace: test-namespace

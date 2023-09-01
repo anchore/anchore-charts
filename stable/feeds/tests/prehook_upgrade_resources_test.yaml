@@ -1,0 +1,253 @@
+suite: PreHook Upgrade Job Tests
+templates:
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+  - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+  - anchore_secret.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+upgrade-resource: &upgrade-resources
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+  - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+
+tests:
+  - it: rbac should match snapshot
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    asserts:
+      - matchSnapshot: {}
+
+  - it: should render helm hook annotations on rbac
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": pre-upgrade
+            "helm.sh/hook-weight": "1"
+
+  - it: should not render helm hook annotations on rbac when feedsUpgradeJob.force is true
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    set:
+      feedsUpgradeJob.force: true
+    asserts:
+      - isNotSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": pre-upgrade
+            "helm.sh/hook-weight": "1"
+
+  - it: pre-hook rbac gets created by default
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    asserts:
+      - containsDocument:
+          kind: ServiceAccount
+          apiVersion: v1
+          name: test-release-feeds-upgrade-sa
+          namespace: test-namespace
+        documentIndex: 0
+      - containsDocument:
+          kind: RoleBinding
+          apiVersion: rbac.authorization.k8s.io/v1
+          name: test-release-feeds-upgrade-role-binding
+          namespace: test-namespace
+        documentIndex: 1
+      - containsDocument:
+          kind: Role
+          apiVersion: rbac.authorization.k8s.io/v1
+          name: test-release-feeds-upgrade-role
+          namespace: test-namespace
+        documentIndex: 2
+
+  - it: pre-hook job does not get created when post-upgrade hook is enabled
+    templates: *upgrade-resources
+    set:
+      feedsUpgradeJob:
+        usePostUpgradeHook: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: pre-hook job does not get created when feedsUpgradeJob.enabled is false
+    templates: *upgrade-resources
+    set:
+      feedsUpgradeJob:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: pre-hook job gets created by default
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    asserts:
+      - containsDocument:
+          kind: Job
+          apiVersion: batch/v1
+          name: test-release-feeds-999-upgrade
+          namespace: test-namespace
+
+  - it: should render helm hook annotations
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": pre-upgrade
+            "helm.sh/hook-weight": "3"
+
+  - it: should not render helm hook annotations when feedsUpgradeJob.force is true
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.force: true
+    asserts:
+      - isNotSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": pre-upgrade
+            "helm.sh/hook-weight": "3"
+
+  - it: should render component serviceAccountName
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.serviceAccountName: feedsUpgradeJob-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: feedsUpgradeJob-test
+
+  - it: should render service account name when global serviceAccountName is set and feedsUpgradeJob.rbacCreate is true
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      serviceAccountName: feedsUpgradeJob-global-test
+      feedsUpgradeJob.rbacCreate: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-feeds-upgrade-sa
+
+  - it: should render global serviceAccountName when feedsUpgradeJob.rbacCreate is false
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      serviceAccountName: feedsUpgradeJob-global-test
+      feedsUpgradeJob.rbacCreate: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: feedsUpgradeJob-global-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      serviceAccountName: global-test
+      feedsUpgradeJob.serviceAccountName: feedsUpgradeJob-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: feedsUpgradeJob-test
+
+  - it: should render component nodeSelector
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.nodeSelector:
+        feedsUpgradeJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            feedsUpgradeJob: test
+
+  - it: should render component affinity
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.affinity:
+        feedsUpgradeJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            feedsUpgradeJob: test
+
+  - it: should render component tolerations
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.tolerations:
+        - key: "feedsUpgradeJob"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "feedsUpgradeJob"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render proper initContainers
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec.initContainers
+
+  - it: should render proper database endpoint on entrypoint
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-connect postgresql:\/\/\"\$\{ANCHORE_FEEDS_DB_USER\}\":\"\$\{ANCHORE_FEEDS_DB_PASSWORD\}\"@\"\$\{ANCHORE_FEEDS_DB_HOST\}\":\"\$\{ANCHORE_FEEDS_DB_PORT\}\"\/\"\$\{ANCHORE_FEEDS_DB_NAME\}\" upgrade --dontask;
+        count: 1
+
+  - it: should render proper database endpoint on entrypoint when ssl is enabled and mode is require
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      anchoreConfig.database.ssl: true
+      anchoreConfig.database.sslMode: require
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_FEEDS_DB_USER\}\":\"\$\{ANCHORE_FEEDS_DB_PASSWORD\}\"@\"\$\{ANCHORE_FEEDS_DB_HOST\}\":\"\$\{ANCHORE_FEEDS_DB_PORT\}\"\/\"\$\{ANCHORE_FEEDS_DB_NAME\}\"\?sslmode\=require upgrade --dontask;
+        count: 1
+
+  - it: should render proper database endpoint on entrypoint when ssl is enabled and mode is verify-full
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      anchoreConfig.database.ssl: true
+      anchoreConfig.database.sslMode: verify-full
+      anchoreConfig.database.sslRootCertFileName: test-root.crt
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_FEEDS_DB_USER\}\":\"\$\{ANCHORE_FEEDS_DB_PASSWORD\}\"@\"\$\{ANCHORE_FEEDS_DB_HOST\}\":\"\$\{ANCHORE_FEEDS_DB_PORT\}\"\/\"\$\{ANCHORE_FEEDS_DB_NAME\}\"\?sslmode\=verify-full\\&sslrootcert\=\/home\/anchore\/certs\/test-root\.crt upgrade --dontask;
+        count: 1
+
+  - it: should render component resource requests & limits
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1

@@ -1,0 +1,12 @@
+suite: ConfigMap Tests
+templates:
+  - templates/feeds-configmap.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+tests:
+  - it: should render the configmaps
+    asserts:
+      - matchSnapshot: {}

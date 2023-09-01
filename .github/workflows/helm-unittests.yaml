@@ -1,0 +1,50 @@
+# Copyright VMware, Inc.
+# SPDX-License-Identifier: APACHE-2.0
+
+name: 'Helm Unit Tests'
+
+on:
+  - pull_request
+
+# Remove all permissions by default
+permissions: {}
+jobs:
+  helm-unittests:
+    env:
+      REPO: "${{ github.repository }}"
+      REPO_NAME: "${{ github.event.repository.name }}"
+      TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout charts
+        uses: actions/checkout@v3
+        with:
+          path: ${{ github.repository }}
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+          token: ${{ secrets.CI_WRITE_GITHUB_TOKEN }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.8.0
+
+      - name: Install helm-unittest
+        run: |
+          helm plugin install https://github.com/helm-unittest/helm-unittest.git
+
+      - run: cd "${REPO}" && git fetch origin ${TARGET_BRANCH}
+
+      - name: Execute helm-unittests
+        run: |
+          cd "${REPO}"
+          files_changed="$(git diff --name-only origin/${TARGET_BRANCH} | sort | uniq)"
+          # Adding || true to avoid "Process exited with code 1" errors
+          charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
+          for chart in ${charts_dirs_changed}; do
+            echo "running helm unittest . for ${chart}"
+            pushd "${chart}"
+            helm dep build
+            helm unittest .
+            popd
+          done
