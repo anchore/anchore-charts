@@ -1,0 +1,296 @@
+suite: Notifications Resources Tests
+templates:
+  - notifications_deployment.yaml
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should set the correct resource names
+    template: notifications_deployment.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-notifications
+
+  - it: should render component labels
+    template: notifications_deployment.yaml
+    set:
+      notifications.labels:
+        notifications: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            notifications: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            notifications: test
+            test: foobar
+        template: notifications_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component annotations
+    template: notifications_deployment.yaml
+    set:
+      notifications.annotations:
+        notifications: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            notifications: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            notifications: test
+            test: foobar
+        template: notifications_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component matchLabels
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: notifications
+
+  - it: should render component replica count
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.replicaCount: 2
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 2
+
+  - it: should render component serviceAccountName
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.serviceAccountName: notifications-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: notifications-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      serviceAccountName: global-test
+      notifications.serviceAccountName: notifications-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: notifications-test
+
+  - it: should render component nodeSelector
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.nodeSelector:
+        notifications: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            notifications: test
+
+  - it: should render component affinity
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.affinity:
+        notifications: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            notifications: test
+
+  - it: should render component tolerations
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.tolerations:
+        - key: "notifications"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "notifications"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render component container name
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: rbac-auth
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: enterprise-notifications
+
+  - it: should render component entrypoint args
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade notifications$
+        count: 1
+
+  - it: should render notifications component environment variables
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.extraEnv:
+        - name: notifications
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-notifications
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: ANCHORE_PORT
+            value: "8668"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: notifications
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render component ports
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].ports
+          content:
+            name: notifications
+            containerPort: 8668
+        count: 1
+
+  - it: should render component probes
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[1].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: notifications
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[1].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: notifications
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+
+  - it: should render component resource requests & limits
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[1].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[1].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1
+
+  - it: should render component service type
+    template: notifications_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+        count: 1
+
+  - it: should render component service ports
+    template: notifications_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: notifications
+            port: 8668
+            targetPort: 8668
+            protocol: TCP
+        count: 1
+
+  - it: should render component service selectors
+    template: notifications_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - isSubset:
+          path: spec.selector
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: notifications
+        count: 1

@@ -1,0 +1,40 @@
+annotations:
+  foo: "bar"
+  bar: "baz"
+
+labels:
+  foo: "bar"
+  bar: "baz"
+
+extraEnv:
+  - name: foo
+    value: bar
+  - name: bar
+    value: baz
+
+anchoreConfig:
+  policyBundles:
+    custom_policy_bundle1.json: |
+      {
+        "id": "custom1",
+        "version": "1_0",
+        "name": "My custom bundle",
+        "comment": "My system's custom bundle",
+        "whitelisted_images": [],
+        "blacklisted_images": [],
+        "mappings": [],
+        "whitelists": [],
+        "policies": []
+      }
+    custom_policy_bundle2.json: |
+      {
+        "id": "custom2",
+        "version": "1_0",
+        "name": "My Other Bundle",
+        "comment": "My system's other custom bundle",
+        "whitelisted_images": [],
+        "blacklisted_images": ["docker.io/centos:latest"],
+        "mappings": [],
+        "whitelists": [],
+        "policies": []
+      }

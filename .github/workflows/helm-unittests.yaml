@@ -44,7 +44,8 @@ jobs:
           for chart in ${charts_dirs_changed}; do
             echo "running helm unittest . for ${chart}"
             pushd "${chart}"
-            helm dep build
+            helm repo add anchore https://charts.anchore.io/stable
+            helm dep up
             helm unittest .
             popd
           done

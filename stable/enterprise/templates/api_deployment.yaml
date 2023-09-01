@@ -1,0 +1,116 @@
+{{- $component := "api" -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "enterprise.api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
+  replicas: {{ .Values.api.replicaCount }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+      {{- if not .Values.injectSecretsViaEnv }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
+      {{- end }}
+      {{- if .Values.anchoreConfig.policyBundles }}
+        checksum/policy-config: {{ include (print $.Template.BasePath "/policybundle_configmap.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/enterprise-config: {{ include (print $.Template.BasePath "/anchore_configmap.yaml") . | sha256sum }}
+    spec:
+      {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      volumes: {{- include "enterprise.common.volumes" . | nindent 8 }}
+      {{- if .Values.anchoreConfig.policyBundles }}
+        - name: policy-bundle-volume
+          configMap:
+            name: {{ template "enterprise.fullname" . }}-policy-bundles
+      {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        {{- include "enterprise.common.rbacAuthContainer" . | nindent 8 }}
+        - name: "{{ .Chart.Name }}-{{ $component | lower }}"
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{ toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - {{ print (include "enterprise.common.dockerEntrypoint" .) }} apiext
+          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          {{- if not .Values.injectSecretsViaEnv }}
+            - name: ANCHORE_CLI_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ ternary .Values.existingSecretName (include "enterprise.fullname" .) .Values.useExistingSecrets }}
+                  key: ANCHORE_ADMIN_PASSWORD
+          {{- end }}
+          ports:
+            - name: {{ $component | lower }}
+              containerPort: {{ .Values.api.service.port }}
+          volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
+        {{- if .Values.anchoreConfig.policyBundles }}
+            - name: policy-bundle-volume
+              mountPath: "{{ $.Values.anchoreConfig.service_dir  }}/bundles/"
+        {{- end }}
+          livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
+          readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
+        {{- with .Values.api.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+
+        - name: "{{ .Chart.Name }}-reports-api"
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{ toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - {{ print (include "enterprise.common.dockerEntrypoint" .) }} reports
+          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" "reports" "api" "true") .) | nindent 12 }}
+          ports:
+            - containerPort: {{ .Values.reports.service.port }}
+              name: reports
+          volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
+          livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" "reports") .) | nindent 12 }}
+          readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" "reports") .) | nindent 12 }}
+        {{- with .Values.reports.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "enterprise.api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  type: {{ .Values.api.service.type }}
+  ports:
+    - name: {{ $component | lower }}
+      port: {{ .Values.api.service.port }}
+      targetPort: {{ .Values.api.service.port }}
+      protocol: TCP
+    - name: reports
+      port: {{ .Values.reports.service.port }}
+      targetPort: {{ .Values.reports.service.port }}
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+    app.kubernetes.io/component: {{ $component | lower }}

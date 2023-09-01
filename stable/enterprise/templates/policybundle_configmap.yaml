@@ -1,0 +1,14 @@
+{{- if .Values.anchoreConfig.policyBundles -}}
+{{- $component := "policyEngine" -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-policy-bundles
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+data:
+{{- with .Values.anchoreConfig.policyBundles }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end -}}

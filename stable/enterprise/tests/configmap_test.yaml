@@ -1,0 +1,31 @@
+suite: ConfigMap Tests
+templates:
+  - templates/*_configmap.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+tests:
+  - it: should render the configmaps
+    asserts:
+      - matchSnapshot: {}
+
+  - it: should render a custom config when configOverride is set
+    template: templates/anchore_configmap.yaml
+    set:
+      configOverride: |
+        service_dir: /foobar
+        tmp_dir: /test
+
+        log_level: DEBUG
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: |
+            # Anchore Service Configuration File, mounted from a configmap
+            #
+            service_dir: /foobar
+            tmp_dir: /test
+
+            log_level: DEBUG

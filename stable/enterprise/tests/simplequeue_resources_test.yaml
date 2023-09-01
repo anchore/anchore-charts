@@ -1,0 +1,268 @@
+suite: SimpleQueue Resources Tests
+templates:
+  - simplequeue_deployment.yaml
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should set the correct resource names
+    template: simplequeue_deployment.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-simplequeue
+
+  - it: should render component labels
+    template: simplequeue_deployment.yaml
+    set:
+      simpleQueue.labels:
+        simplequeue: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            simplequeue: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            simplequeue: test
+            test: foobar
+        template: simplequeue_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component annotations
+    template: simplequeue_deployment.yaml
+    set:
+      simpleQueue.annotations:
+        simplequeue: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            simplequeue: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            simplequeue: test
+            test: foobar
+        template: simplequeue_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component matchLabels
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: simplequeue
+
+  - it: should render component replica count
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.replicaCount: 2
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 2
+
+  - it: should render component serviceAccountName
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.serviceAccountName: simplequeue-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: simplequeue-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      serviceAccountName: global-test
+      simpleQueue.serviceAccountName: simplequeue-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: simplequeue-test
+
+  - it: should render component nodeSelector
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.nodeSelector:
+        simplequeue: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            simplequeue: test
+
+  - it: should render component affinity
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.affinity:
+        simplequeue: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            simplequeue: test
+
+  - it: should render component tolerations
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.tolerations:
+        - key: "simplequeue"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "simplequeue"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render component container name
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: enterprise-simplequeue
+
+  - it: should render component entrypoint args
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade simplequeue$
+        count: 1
+
+  - it: should render simplequeue component environment variables
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.extraEnv:
+        - name: simplequeue
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-simplequeue
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_PORT
+            value: "8083"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: simplequeue
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render component ports
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: simplequeue
+            containerPort: 8083
+        count: 1
+
+  - it: should render component probes
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: simplequeue
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: simplequeue
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+
+  - it: should render component service type
+    template: simplequeue_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+        count: 1
+
+  - it: should render component service ports
+    template: simplequeue_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: simplequeue
+            port: 8083
+            targetPort: 8083
+            protocol: TCP
+        count: 1
+
+  - it: should render component service selectors
+    template: simplequeue_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - isSubset:
+          path: spec.selector
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: simplequeue
+        count: 1

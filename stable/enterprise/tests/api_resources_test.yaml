@@ -1,0 +1,451 @@
+suite: API Resources Tests
+templates:
+  - api_deployment.yaml
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+  - policybundle_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should set the correct resource names
+    template: api_deployment.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-api
+
+  - it: should render component labels
+    template: api_deployment.yaml
+    set:
+      api.labels:
+        api: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            api: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            api: test
+            test: foobar
+        template: api_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component annotations
+    template: api_deployment.yaml
+    set:
+      api.annotations:
+        api: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            api: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            api: test
+            test: foobar
+        template: api_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component matchLabels
+    template: api_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: api
+
+  - it: should render component replica count
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.replicaCount: 2
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 2
+
+  - it: should render component serviceAccountName
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.serviceAccountName: api-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: api-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      serviceAccountName: global-test
+      api.serviceAccountName: api-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: api-test
+
+  - it: should render component nodeSelector
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.nodeSelector:
+        api: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            api: test
+
+  - it: should render component affinity
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.affinity:
+        api: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            api: test
+
+  - it: should render component tolerations
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.tolerations:
+        - key: "api"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "api"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render policy bundle volume when anchoreConfig.policyBundles is set
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policyBundles:
+        custom_policy_bundle1.json: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: policy-bundle-volume
+            configMap:
+              name: test-release-enterprise-policy-bundles
+        count: 1
+
+  - it: should render component container name
+    template: api_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: rbac-auth
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: enterprise-api
+      - equal:
+          path: spec.template.spec.containers[2].name
+          value: enterprise-reports-api
+
+  - it: should render component entrypoint args
+    template: api_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[1].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade apiext$
+        count: 1
+      - matchRegex:
+          path: spec.template.spec.containers[2].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports$
+        count: 1
+
+  - it: should render api component environment variables
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.extraEnv:
+        - name: api
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: ANCHORE_CLI_PASS
+            valueFrom: 
+              secretKeyRef:
+                name: test-release-enterprise
+                key: ANCHORE_ADMIN_PASSWORD
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-api
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: ANCHORE_PORT
+            value: "8228"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: api
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render get cli pass ENV VAR from existing secret if useExistingSecrets=true
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      useExistingSecrets: true
+      existingSecretName: existing-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].env
+          content:
+            name: ANCHORE_CLI_PASS
+            valueFrom: 
+              secretKeyRef:
+                name: existing-secret
+                key: ANCHORE_ADMIN_PASSWORD
+
+  - it: should render reports component environment variables
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      reports.extraEnv:
+        - name: reports
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[2].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-api
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[2].env
+          content:
+            name: ANCHORE_PORT
+            value: "8558"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[2].env
+          content:
+            name: reports
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[2].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render component ports
+    template: api_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].ports
+          content:
+            name: api
+            containerPort: 8228
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[2].ports
+          content:
+            name: reports
+            containerPort: 8558
+        count: 1
+
+  - it: should render policy bundle volumeMounts when policy bundles are provided
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policyBundles:
+        custom_policy_bundle1.json: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[1].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/bundles/
+        count: 1
+        any: true
+
+  - it: should render component probes
+    template: api_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[1].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: api
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[1].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: api
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[2].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: reports
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[2].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: reports
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+
+  - it: should render component resource requests & limits
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+      reports.resources:
+        requests:
+          cpu: 200m
+          memory: 228Mi
+        limits:
+          cpu: 400m
+          memory: 456Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[1].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[1].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[2].resources.requests
+          content:
+            cpu: 200m
+            memory: 228Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[2].resources.limits
+          content:
+            cpu: 400m
+            memory: 456Mi
+        count: 1
+
+  - it: should render component service type
+    template: api_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+        count: 1
+
+  - it: should render component service ports
+    template: api_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: api
+            port: 8228
+            targetPort: 8228
+            protocol: TCP
+        count: 1
+      - contains:
+          path: spec.ports
+          content:
+            name: reports
+            port: 8558
+            targetPort: 8558
+            protocol: TCP
+        count: 1
+
+  - it: should render component service selectors
+    template: api_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - isSubset:
+          path: spec.selector
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: api
+        count: 1

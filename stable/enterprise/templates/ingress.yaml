@@ -1,0 +1,169 @@
+{{- if .Values.ingress.enabled -}}
+{{- $component := "ingress" -}}
+
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+apiVersion: networking.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
+apiVersion: networking.k8s.io/v1beta1
+{{- else }}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ template "enterprise.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+{{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+{{- end }}
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts .Values.ingress.feedsHosts .Values.ingress.reportsHosts }}
+    {{- range .Values.ingress.apiHosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: {{ $.Values.ingress.apiPath }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.api.fullname" $ }}
+                port:
+                  number: {{ $.Values.api.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.api.fullname" $ }}
+              servicePort: {{ $.Values.api.service.port }}
+          {{- end }}
+    {{- end }}
+    {{- range .Values.ingress.uiHosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: {{ $.Values.ingress.uiPath }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.ui.fullname" $ }}
+                port:
+                  number: {{ $.Values.ui.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.ui.fullname" $ }}
+              servicePort: {{ $.Values.ui.service.port }}
+          {{- end }}
+    {{- end }}
+    {{- range .Values.ingress.feedsHosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: {{ $.Values.ingress.feedsPath }}
+            {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.feeds.fullname" $ }}
+                port:
+                  number: {{ $.Values.feeds.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.feeds.fullname" $ }}
+              servicePort: {{ $.Values.feeds.service.port }}
+          {{- end }}
+    {{- end }}
+    {{- range .Values.ingress.reportsHosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: {{ $.Values.ingress.reportsPath }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.api.fullname" $ }}
+                port:
+                  number: {{ $.Values.reports.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.api.fullname" $ }}
+              servicePort: {{ $.Values.reports.service.port }}
+          {{- end }}
+    {{- end }}
+  {{- else }}
+    - http:
+        paths:
+        {{- with .Values.ingress.apiPath }}
+          - path: {{ . }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.api.fullname" $ }}
+                port:
+                  number: {{ $.Values.api.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.api.fullname" $ }}
+              servicePort: {{ $.Values.api.service.port }}
+          {{- end }}
+        {{- end }}
+        {{- with .Values.ingress.uiPath }}
+          - path: {{ . }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.ui.fullname" $ }}
+                port:
+                  number: {{ $.Values.ui.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.ui.fullname" $ }}
+              servicePort: {{ $.Values.ui.service.port }}
+          {{- end }}
+        {{- end }}
+        {{- with .Values.ingress.feedsPath }}
+          - path: {{ . }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.feeds.fullname" $ }}
+                port:
+                  number: {{ $.Values.feeds.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.feeds.fullname" $ }}
+              servicePort: {{ $.Values.feeds.feeds.service.port }}
+          {{- end }}
+        {{- end }}
+        {{- with .Values.ingress.reportsPath }}
+          - path: {{ . }}
+          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ template "enterprise.api.fullname" $ }}
+                port:
+                  number: {{ $.Values.reports.service.port }}
+          {{- else }}
+            backend:
+              serviceName: {{ template "enterprise.api.fullname" $ }}
+              servicePort: {{ $.Values.reports.service.port }}
+          {{- end }}
+        {{- end }}
+  {{- end }}
+{{- end -}}

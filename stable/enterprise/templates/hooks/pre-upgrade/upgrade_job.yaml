@@ -1,0 +1,70 @@
+{{- if and .Values.upgradeJob.enabled (not .Values.upgradeJob.usePostUpgradeHook) -}}
+{{- $component := "upgradeJob" -}}
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "enterprise.upgradeJob.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+  {{- if not .Values.upgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "3"
+  {{- end }}
+spec:
+  template:
+    metadata:
+      name: {{ template "enterprise.upgradeJob.fullname" . }}
+      labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+        {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+      {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      restartPolicy: Never
+      volumes: {{- include "enterprise.common.volumes" . | nindent 8 }}
+      initContainers:
+        - name: scale-down-anchore
+          image: bitnami/kubectl:1.27
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "enterprise.fullname" . }};
+              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do echo 'waiting for pods to go down...' && sleep 5; done
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.upgradeJob.resources }}
+          resources: {{- toYaml . | nindent 10 }}
+          {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        - name: upgrade-enterprise-db
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
+        {{- with .Values.upgradeJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+          {{- if not .Values.anchoreConfig.database.ssl }}
+            - |
+              {{ print (include "enterprise.doSourceFile" .) }} anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" upgrade --dontask;
+          {{- else if eq .Values.anchoreConfig.database.sslMode "require"}}
+            - |
+              {{ print (include "enterprise.doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreConfig.database.sslMode }} upgrade --dontask;
+          {{- else }}
+            - |
+              {{ print (include "enterprise.doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreConfig.database.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreConfig.database.sslRootCertFileName }} upgrade --dontask;
+          {{- end }}
+{{- end -}}

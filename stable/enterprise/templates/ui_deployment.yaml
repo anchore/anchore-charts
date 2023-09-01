@@ -1,0 +1,137 @@
+{{- $component := "ui" -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "enterprise.ui.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+      {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/ui_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/ui-config: {{ include (print $.Template.BasePath "/ui_configmap.yaml") . | sha256sum }}
+    spec:
+      {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      volumes:
+        - name: anchore-license
+          secret:
+            secretName: {{ .Values.licenseSecretName }}
+        - name: anchore-ui-config
+          configMap:
+            name: {{ template "enterprise.ui.fullname" . }}
+      {{- with .Values.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+      {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - name: {{ .Values.cloudsql.serviceAccSecretName }}
+          secret:
+            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+      {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        - name: "{{ .Chart.Name }}-{{ $component | lower }}"
+          image: {{ .Values.ui.image }}
+          imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{ toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - {{ print (include "enterprise.doSourceFile" .) }} /docker-entrypoint.sh node /home/node/aui/build/server.js
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          {{- if .Values.anchoreConfig.database.ssl }}
+            - name: PGSSLROOTCERT
+              value: /home/anchore/certs/{{ .Values.anchoreConfig.database.sslRootCertFileName }}
+          {{- end }}
+          {{- with .Values.ui.ldapsRootCaCertName }}
+            - name: NODE_EXTRA_CA_CERTS
+              value: /home/anchore/certs/{{- . }}
+          {{- end }}
+          envFrom:
+        {{- if not .Values.injectSecretsViaEnv }}
+          {{- if .Values.useExistingSecrets }}
+            - secretRef:
+                name: {{ .Values.ui.existingSecretName }}
+          {{- else }}
+            - secretRef:
+                name: {{ template "enterprise.ui.fullname" . }}
+          {{- end }}
+        {{- end }}
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+              name: {{ $component | lower }}
+          volumeMounts:
+            - name: anchore-license
+              mountPath: /home/anchore/license.yaml
+              subPath: license.yaml
+            - name: anchore-ui-config
+              mountPath: /config/config-ui.yaml
+              subPath: config-ui.yaml
+          {{- if (.Values.certStoreSecretName) }}
+            - name: certs
+              mountPath: /home/anchore/certs/
+              readOnly: true
+          {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ $component | lower }}
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+            successThreshold: {{ .Values.probes.liveness.successThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /service/health
+              port: {{ $component | lower }}
+              scheme: HTTP
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+            successThreshold: {{ .Values.probes.readiness.successThreshold }}
+        {{- with .Values.ui.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "enterprise.ui.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  sessionAffinity: {{ .Values.ui.service.sessionAffinity }}
+  type: {{ .Values.ui.service.type }}
+  ports:
+    - name: {{ $component | lower }}
+      port: {{ .Values.ui.service.port }}
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+    app.kubernetes.io/component: {{ $component | lower }}

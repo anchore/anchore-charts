@@ -2,6 +2,8 @@ remote: origin
 target-branch: main
 chart-dirs:
   - stable
+chart-repos:
+  - anchore=https://charts.anchore.io/stable
 namespace: anchore
 release-label: anchore
 helm-extra-args: --timeout 600s

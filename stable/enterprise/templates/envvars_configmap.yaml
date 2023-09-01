@@ -1,0 +1,99 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-config-env-vars
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+
+data:
+  ANCHORE_ADMIN_EMAIL: "{{ .Values.anchoreConfig.default_admin_email }}"
+  ANCHORE_ALLOW_ECR_IAM_AUTO: "{{ .Values.anchoreConfig.allow_awsecr_iam_auto }}"
+  ANCHORE_ANALYZER_TASK_REQUEUE: "true"
+  ANCHORE_ANALYZER_MAX_THREADS: "{{ .Values.anchoreConfig.analyzer.max_threads }}"
+  ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "{{ .Values.anchoreConfig.user_authentication.hashed_passwords }}"
+{{- with .Values.anchoreConfig.keys.publicKeyFileName }}
+  ANCHORE_AUTH_PRIVKEY: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_AUTH_PRIVKEY: "null"
+{{- end }}
+{{- with .Values.anchoreConfig.keys.privateKeyFileName }}
+  ANCHORE_AUTH_PUBKEY: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_AUTH_PUBKEY: "null"
+{{- end }}
+  ANCHORE_AUTHZ_HANDLER: "external"
+  ANCHORE_AUTHZ_HANDLER_ENDPOINT: "http://localhost:8089"
+  ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
+  ANCHORE_CLI_URL: "http://localhost:8228"
+  ANCHORE_CLI_USER: "admin"
+  ANCHORECTL_URL: "http://localhost:8228"
+  ANCHORECTL_USERNAME: "admin"
+  ANCHORE_DISABLE_METRICS_AUTH: "{{ .Values.anchoreConfig.metrics.auth_disabled }}"
+  ANCHORE_DB_POOL_MAX_OVERFLOW: "{{ .Values.anchoreConfig.database.db_pool_max_overflow }}"
+  ANCHORE_DB_POOL_SIZE: "{{ .Values.anchoreConfig.database.db_pool_size }}"
+  ANCHORE_DB_SSL: "{{ .Values.anchoreConfig.database.ssl }}"
+  ANCHORE_DB_SSL_MODE: "{{ .Values.anchoreConfig.database.sslMode }}"
+{{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+  ANCHORE_DB_SSL_ROOT_CERT: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_DB_SSL_ROOT_CERT: "null"
+{{- end }}
+  ANCHORE_DB_TIMEOUT: "{{ .Values.anchoreConfig.database.timeout }}"
+  ANCHORE_ENABLE_METRICS: "{{ .Values.anchoreConfig.metrics.enabled }}"
+  ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS: "{{ .Values.anchoreConfig.reports_worker.enable_data_ingress }}"
+  ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS: "{{ .Values.anchoreConfig.reports_worker.enable_data_egress }}"
+  ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: "{{ .Values.anchoreConfig.reports_worker.data_egress_window }}"
+  ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS: "{{ .Values.anchoreConfig.reports_worker.data_refresh_max_workers }}"
+  ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "{{ .Values.anchoreConfig.reports_worker.data_load_max_workers }}"
+  ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL: "{{ .Values.anchoreConfig.reports.enable_graphiql }}"
+  ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER: "true"
+  ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER: "true"
+  ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE: "true"
+  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS: "120"
+  {{- with .Values.anchoreConfig.notifications.ui_url }}
+  ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
+  {{- else }}
+  ANCHORE_ENTERPRISE_UI_URL: {{ include "enterprise.ui.fullname" . | quote }}
+  {{- end }}
+  ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "false"
+  ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
+  ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED: "false"
+  ANCHORE_FEEDS_SSL_VERIFY: "{{ .Values.anchoreConfig.internalServicesSSL.verifyCerts }}"
+  ANCHORE_FEEDS_VULNERABILITIES_ENABLED: "true"
+  ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
+  ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
+  ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
+  ANCHORE_HINTS_ENABLED: "{{ .Values.anchoreConfig.analyzer.enable_hints }}"
+  ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "3600"
+  ANCHORE_INTERNAL_SSL_VERIFY: "{{ .Values.anchoreConfig.internalServicesSSL.verifyCerts }}"
+  ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
+  ANCHORE_LAYER_CACHE_ENABLED: {{ ternary "true" "false" (gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0) | quote }}
+  ANCHORE_LAYER_CACHE_SIZE_GB: "{{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}"
+  ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
+  ANCHORE_LOG_LEVEL: "{{ .Values.anchoreConfig.log_level }}"
+  ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
+  ANCHORE_MAX_REQUEST_THREADS: "50"
+  ANCHORE_OAUTH_ENABLED: "{{ .Values.anchoreConfig.user_authentication.oauth.enabled }}"
+  ANCHORE_OAUTH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}"
+  ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds }}"
+  ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
+  ANCHORE_POLICY_ENGINE_ENABLE_IMAGES_BY_VULN_QUERY: "true"
+  ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD: "true"
+  ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
+  ANCHORE_SAML_SECRET: "null"
+  ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
+  ANCHORE_SSL_ENABLED: "{{ .Values.anchoreConfig.internalServicesSSL.enabled }}"
+{{- with .Values.anchoreConfig.internalServicesSSL.certSecretCertFileName }}
+  ANCHORE_SSL_CERT: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_SSL_CERT: "null"
+{{- end }}
+{{- with .Values.anchoreConfig.internalServicesSSL.certSecretKeyFileName }}
+  ANCHORE_SSL_KEY: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_SSL_KEY: "null"
+{{- end }}
+  ANCHORE_SSO_REQUIRES_EXISTING_USERS: "{{ .Values.anchoreConfig.user_authentication.sso_require_existing_users }}"
+  ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
