@@ -5,8 +5,6 @@ name: 'Helm Unit Tests'
 
 on:
   pull_request_target:
-    branches:
-      - main
     paths:
       - 'stable/enterprise'
       - 'stable/feeds'
