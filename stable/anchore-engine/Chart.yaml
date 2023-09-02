@@ -39,6 +39,6 @@ dependencies:
     alias: anchore-feeds-gem-db
   - name: redis
     version: "16.11.3"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "@bitnami"
     condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
     alias: ui-redis
