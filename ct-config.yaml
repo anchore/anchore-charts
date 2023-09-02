@@ -4,6 +4,7 @@ chart-dirs:
   - stable
 chart-repos:
   - anchore=https://charts.anchore.io/stable
+  - bitnami=https://charts.bitnami.com/bitnami
 namespace: anchore
 release-label: anchore
 helm-extra-args: --timeout 600s
