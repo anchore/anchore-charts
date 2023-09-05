@@ -4,7 +4,10 @@
 name: 'Helm Unit Tests'
 
 on:
-  - pull_request
+  pull_request_target:
+    paths:
+      - 'stable/enterprise'
+      - 'stable/feeds'
 
 # Remove all permissions by default
 permissions: {}

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: anchore-engine
-version: 1.27.0
+version: 1.27.1
 appVersion: 1.1.0
 description: Anchore container analysis and policy evaluation engine service
 keywords:
@@ -39,6 +39,6 @@ dependencies:
     alias: anchore-feeds-gem-db
   - name: redis
     version: "16.11.3"
-    repository: "https://charts.bitnami.com/bitnami"
+    repository: "@bitnami"
     condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
     alias: ui-redis
