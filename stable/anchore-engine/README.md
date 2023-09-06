@@ -201,6 +201,8 @@ The upgrade will only be considered successful when this job completes successfu
 # Chart Version 1.27.2
 
 * Anchore Enterprise image updated to v4.9.1 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/491/)
+* Bumped Redis chart to the latest version.
+* Reverted the change in v1.27.1 to use an alias for the bitnami dependency. This dependency is now using an OCI url which is supported by the latest version of chart-releaser-action.
 
 # Chart Version 1.27.1
 
