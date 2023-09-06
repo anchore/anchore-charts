@@ -331,7 +331,7 @@ anchoreConfig:
       ## Request one from https://nvd.nist.gov/developers/request-an-api-key
       ##
       nvdv2:
-        api_key: null
+        api_key: ""
 
       ## @param anchoreConfig.feeds.drivers.msrc.enabled Enable Microsoft feeds
       ## @param anchoreConfig.feeds.drivers.msrc.whitelist MSRC product IDs for generating feed data, this extends the pre-defined list of product IDs
@@ -348,7 +348,7 @@ anchoreConfig:
       ##
       github:
         enabled: false
-        token: null
+        token: ""
 
 #############################################
 ## @section Anchore Feeds Database Parameters
