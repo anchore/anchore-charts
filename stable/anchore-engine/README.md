@@ -198,6 +198,10 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+# Chart Version 1.27.2
+
+* Anchore Enterprise image updated to v4.9.1 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/491/)
+
 # Chart Version 1.27.1
 
 * Updating chart-releaser-action to v1.5.0 required using an alias for the bitnami dependency because chart-releaser doesn't currently support using a url directly in the dependency declaration. You may be required to add bitnami as an alias to the bitnami repos. eg `helm repo add bitnami https://charts.bitnami.com/bitnami`
