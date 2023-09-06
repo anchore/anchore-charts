@@ -658,7 +658,7 @@ ui-redis:
 | ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
 | `fullnameOverride`                    | overrides the fullname set on resources                                               | `""`                                  |
 | `nameOverride`                        | overrides the name set on resources                                                   | `""`                                  |
-| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.0` |
+| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.1` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                  | Name of a service account used to run all Anchore pods                                | `""`                                  |
