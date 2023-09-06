@@ -390,7 +390,7 @@ feeds-db:
     ##
     extraEnvVars: []
 
-  ## @param feeds-db.image.tag [obj] Specifies the image to use for this chart.
+  ## @param feeds-db.image.tag Specifies the image to use for this chart.
   ##
   image:
     tag: 13.11.0-debian-11-r15
@@ -437,7 +437,7 @@ gem-db:
     ##
     extraEnvVars: []
 
-  ## @param gem-db.image.tag [obj] Specifies the image to use for this chart.
+  ## @param gem-db.image.tag Specifies the image to use for this chart.
   ##
   image:
     tag: 13.11.0-debian-11-r15
