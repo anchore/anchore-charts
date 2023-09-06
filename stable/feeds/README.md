@@ -216,7 +216,7 @@ feeds-db:
 | `enterpriseFullname`                  | set the fullname on enterprise resources. Only needed when standalone=false and fullnameOverride is set for the enterprise chart. | `""`                                  |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                           | `""`                                  |
 | `nameOverride`                        | overrides the name set on resources                                                                                               | `""`                                  |
-| `image`                               | Image used for feeds deployment                                                                                                   | `docker.io/anchore/enterprise:v4.9.0` |
+| `image`                               | Image used for feeds deployment                                                                                                   | `docker.io/anchore/enterprise:v4.9.1` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                                                                         | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                                                                     | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                  | Name of a service account used to run all Feeds pods                                                                              | `""`                                  |
@@ -267,7 +267,6 @@ feeds-db:
 | `existingSecretName`                  | Name of the existing secret to be used for Anchore Feeds Service                                                                  | `anchore-enterprise-feeds-env`        |
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                                                                      | `{}`                                  |
 
-
 ### Anchore Feeds Configuration Parameters
 
 | Name                                                                       | Description                                                                                                                      | Value                                                                                                                                 |
@@ -301,12 +300,11 @@ feeds-db:
 | `anchoreConfig.feeds.drivers.npm.enabled`                                  | Enable vulnerability drivers for npm data                                                                                        | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.gem.enabled`                                  | Enable vulnerability drivers for gem data                                                                                        | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.gem.db_connect`                               | Defines the database endpoint used for loading the rubygems package data as a PostgreSQL dump                                    | `postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}:${ANCHORE_GEM_DB_PORT}/${ANCHORE_GEM_DB_NAME}` |
-| `anchoreConfig.feeds.drivers.nvdv2.api_key`                                | The NVD API key value                                                                                                            | `nil`                                                                                                                                 |
+| `anchoreConfig.feeds.drivers.nvdv2.api_key`                                | The NVD API key value                                                                                                            | `""`                                                                                                                                  |
 | `anchoreConfig.feeds.drivers.msrc.enabled`                                 | Enable Microsoft feeds                                                                                                           | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.msrc.whitelist`                               | MSRC product IDs for generating feed data, this extends the pre-defined list of product IDs                                      | `[]`                                                                                                                                  |
 | `anchoreConfig.feeds.drivers.github.enabled`                               | Enable GitHub advisory feeds (requires GitHub PAT)                                                                               | `false`                                                                                                                               |
-| `anchoreConfig.feeds.drivers.github.token`                                 | GitHub developer personal access token with zero permission scopes                                                               | `nil`                                                                                                                                 |
-
+| `anchoreConfig.feeds.drivers.github.token`                                 | GitHub developer personal access token with zero permission scopes                                                               | `""`                                                                                                                                  |
 
 ### Anchore Feeds Database Parameters
 
@@ -322,7 +320,6 @@ feeds-db:
 | `feeds-db.primary.extraEnvVars`             | An array to add extra environment variables                                                       | `[]`                    |
 | `feeds-db.image.tag`                        | Specifies the image to use for this chart.                                                        | `13.11.0-debian-11-r15` |
 
-
 ### Feeds Gem Database Parameters
 
 | Name                                      | Description                                                                                 | Value                   |
@@ -336,7 +333,6 @@ feeds-db:
 | `gem-db.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
 | `gem-db.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `gem-db.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
-
 
 ### Anchore Feeds Upgrade Job Parameters
 
@@ -354,7 +350,6 @@ feeds-db:
 | `feedsUpgradeJob.labels`             | Labels for the Anchore Feeds upgrade job                                                                                                        | `{}`    |
 | `feedsUpgradeJob.resources`          | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`    |
 
-
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value       |
@@ -366,7 +361,6 @@ feeds-db:
 | `ingress.path`             | The path used for accessing the Anchore Feeds API                  | `/v1/feeds` |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`        |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`     |
-
 
 ### Google CloudSQL DB Parameters
 
