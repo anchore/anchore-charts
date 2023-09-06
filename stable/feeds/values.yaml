@@ -21,7 +21,7 @@ nameOverride: ""
 
 ## @param image Image used for feeds deployment
 ##
-image: docker.io/anchore/enterprise:v4.9.0
+image: docker.io/anchore/enterprise:v4.9.1
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -331,7 +331,7 @@ anchoreConfig:
       ## Request one from https://nvd.nist.gov/developers/request-an-api-key
       ##
       nvdv2:
-        api_key: null
+        api_key: ""
 
       ## @param anchoreConfig.feeds.drivers.msrc.enabled Enable Microsoft feeds
       ## @param anchoreConfig.feeds.drivers.msrc.whitelist MSRC product IDs for generating feed data, this extends the pre-defined list of product IDs
@@ -348,7 +348,7 @@ anchoreConfig:
       ##
       github:
         enabled: false
-        token: null
+        token: ""
 
 #############################################
 ## @section Anchore Feeds Database Parameters
@@ -390,7 +390,7 @@ feeds-db:
     ##
     extraEnvVars: []
 
-  ## @param feeds-db.image.tag [obj] Specifies the image to use for this chart.
+  ## @param feeds-db.image.tag Specifies the image to use for this chart.
   ##
   image:
     tag: 13.11.0-debian-11-r15
@@ -437,7 +437,7 @@ gem-db:
     ##
     extraEnvVars: []
 
-  ## @param gem-db.image.tag [obj] Specifies the image to use for this chart.
+  ## @param gem-db.image.tag Specifies the image to use for this chart.
   ##
   image:
     tag: 13.11.0-debian-11-r15
