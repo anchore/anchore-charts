@@ -1,0 +1,11 @@
+"existingSecretName": "global-existing-secrets"
+"feeds":
+  "existingSecretName": "feeds-existing-secrets"
+  "useExistingSecrets": true
+"ui":
+  "existingSecretName": "ui-existing-secrets"
+"useExistingSecrets": true
+"api":
+  "extraEnv":
+    - "name": "ANCHORE_MAX_REQUEST_THREADS"
+      "value": 9876543210
