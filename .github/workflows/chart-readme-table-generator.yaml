@@ -42,9 +42,14 @@ jobs:
           files_changed="$(git diff --name-only origin/${TARGET_BRANCH} | sort | uniq)"
           # Adding || true to avoid "Process exited with code 1" errors
           charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
+
           for chart in ${charts_dirs_changed}; do
-            echo "Updating README.md for ${chart}"
-            readme-generator --values "${chart}/values.yaml" --readme "${chart}/README.md" --schema "/tmp/schema.json"
+            if [[ "$chart" == "stable/enterprise" || "$chart" == "stable/feeds" ]]; then
+              echo "Updating README.md for ${chart}"
+              readme-generator --values "${chart}/values.yaml" --readme "${chart}/README.md" --schema "/tmp/schema.json"
+            else
+                echo "'chart' is not equal to 'stable/enterprise' or 'stable/feeds'. Moving on."
+            fi
           done
       - name: Push changes
         run: |
