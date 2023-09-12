@@ -264,6 +264,9 @@ spec:
       port: {{ .Values.anchoreSimpleQueue.service.port }}
       targetPort: {{ .Values.anchoreSimpleQueue.service.port }}
       protocol: TCP
+      {{- with .Values.anchoreSimpleQueue.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}

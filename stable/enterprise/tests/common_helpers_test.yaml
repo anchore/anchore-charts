@@ -1003,3 +1003,49 @@ tests:
       - matchRegex:
           path: data["config-ui.yaml"]
           pattern: "reports_uri: 'https://test-release-enterprise-api:8558/v1'"
+
+  - it: should render nodePort when set
+    set:
+      api.service.nodePort: 9999
+      catalog.service.nodePort: 9999
+      notifications.service.nodePort: 9999
+      policyEngine.service.nodePort: 9999
+      rbacManager.service.nodePort: 9999
+      reports.service.nodePort: 9999
+      simpleQueue.service.nodePort: 9999
+      ui.service.nodePort: 9999
+    templates:
+      - api_deployment.yaml
+      - catalog_deployment.yaml
+      - notifications_deployment.yaml
+      - policyengine_deployment.yaml
+      - rbacmanager_deployment.yaml
+      - reports_deployment.yaml
+      - simplequeue_deployment.yaml
+      - ui_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - isSubset:
+          path: spec.ports[0]
+          content:
+            protocol: TCP
+            nodePort: 9999
+        count: 1
+
+  - it: should not render nodePort by default
+    templates:
+    - api_deployment.yaml
+    - catalog_deployment.yaml
+    - notifications_deployment.yaml
+    - policyengine_deployment.yaml
+    - rbacmanager_deployment.yaml
+    - reports_deployment.yaml
+    - simplequeue_deployment.yaml
+    - ui_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - isNotSubset:
+          path: spec.ports[0]
+          content:
+            nodePort: 9999
+        count: 1

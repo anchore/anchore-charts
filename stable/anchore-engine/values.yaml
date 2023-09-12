@@ -436,6 +436,7 @@ anchoreApi:
     port: 8228
     annotations: {}
     label: {}
+    nodePort: null
 
   # Specify the service account name utilized to run the API pods
   # serviceAccountName: Null
@@ -626,6 +627,7 @@ anchoreCatalog:
     port: 8082
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -681,6 +683,7 @@ anchorePolicyEngine:
     port: 8087
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -718,6 +721,7 @@ anchoreSimpleQueue:
     port: 8083
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -937,6 +941,7 @@ anchoreEnterpriseFeeds:
     port: 8448
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -992,6 +997,7 @@ anchoreEnterpriseRbac:
     type: ClusterIP
     annotations: {}
     labels: {}
+    nodePort: null
 
   # authResources:
   #  limits:
@@ -1061,6 +1067,8 @@ anchoreEnterpriseReports:
     workerPort: 8778
     annotations: {}
     labels: {}
+    nodePort: null
+    apinodePort: null
 
   # resources:
   #  limits:
@@ -1103,6 +1111,7 @@ anchoreEnterpriseNotifications:
     port: 8668
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -1293,6 +1302,7 @@ anchoreEnterpriseUi:
     annotations: {}
     labels: {}
     sessionAffinity: ClientIP
+    nodePort: null
 
   # The (optional) `enrich_inventory_view` key allows you to set whether the
   # Kubernetes tab should aggregate and include compliance and vulnerability data

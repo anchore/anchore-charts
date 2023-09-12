@@ -198,6 +198,10 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+# Chart Version 1.27.3
+
+* Added option to allow nodePorts to each service created as part of an anchore deployment. For more information about nodePorts, see [The Kubernetes Docs](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport-custom-port)
+
 # Chart Version 1.27.2
 
 * Anchore Enterprise image updated to v4.9.1 - [Release Notes](https://docs.anchore.com/current/docs/releasenotes/491/)

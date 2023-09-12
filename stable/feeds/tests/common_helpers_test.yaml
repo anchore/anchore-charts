@@ -1,10 +1,10 @@
 suite: Common Helper Template Tests
 templates:
   - anchore_vars_configmap.yaml
-  - feeds-configmap.yaml
-  - feeds-deployment.yaml
-  - feeds-pvc.yaml
-  - feeds-secret.yaml
+  - feeds_configmap.yaml
+  - feeds_deployment.yaml
+  - feeds_pvc.yaml
+  - feeds_secret.yaml
   - ingress.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml
   - templates/hooks/pre-upgrade/upgrade_job.yaml
@@ -18,10 +18,10 @@ chart:
 
 test_templates: &test_templates
   - anchore_vars_configmap.yaml
-  - feeds-configmap.yaml
-  - feeds-deployment.yaml
-  - feeds-pvc.yaml
-  - feeds-secret.yaml
+  - feeds_configmap.yaml
+  - feeds_deployment.yaml
+  - feeds_pvc.yaml
+  - feeds_secret.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml
   - templates/hooks/pre-upgrade/upgrade_job.yaml
 
@@ -45,7 +45,7 @@ tests:
             bar: baz
 
   - it: should render file checksum/secret annotation
-    template: feeds-deployment.yaml
+    template: feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - exists:
@@ -72,7 +72,7 @@ tests:
 
   - it: should render docker entrypoint with no doSourceAtEntry filePaths
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
@@ -81,7 +81,7 @@ tests:
 
   - it: should render docker entrypoint with doSourceAtEntry and no filePaths
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     documentIndex: 0
     set:
       doSourceAtEntry.enabled: true
@@ -92,7 +92,7 @@ tests:
 
   - it: should render docker entrypoint with doSourceAtEntry and some filePaths
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     set:
       doSourceAtEntry.enabled: true
@@ -104,7 +104,7 @@ tests:
 
   - it: should render envFrom without an existing secret
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
       - templates/hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
@@ -122,7 +122,7 @@ tests:
       useExistingSecrets: true
       existingSecretName: "myExistingSecretName"
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
       - templates/hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
@@ -141,7 +141,7 @@ tests:
       useExistingSecrets: true
       existingSecretName: "myExistingSecretName"
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     - templates/hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
@@ -156,7 +156,7 @@ tests:
 
   - it: should render correct environment variables when extraEnv is set
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     - templates/hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     set:
@@ -186,7 +186,7 @@ tests:
 
   - it: should render clouddsql container for all deployments and default upgrade job
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     - templates/hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     set:
@@ -205,7 +205,7 @@ tests:
 
   - it: should render clouddsql container and extraArgs for all deployments and default upgrade job
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     - templates/hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     set:
@@ -232,7 +232,7 @@ tests:
 
   - it: should render clouddsql container, additional arg, and volumeMount when useExistingServiceAcc is true for all deployments and default upgrade job
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     - templates/hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     set:
@@ -276,7 +276,7 @@ tests:
       scratchVolume.fixGroupPermissions: true
       securityContext.fsGroup: 9999
     templates:
-    - feeds-deployment.yaml
+    - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -295,7 +295,7 @@ tests:
       scratchVolume.fixGroupPermissions: false
       securityContext.fsGroup: 9999
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - notExists:
@@ -303,7 +303,7 @@ tests:
 
   - it: should render liveness probe
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -317,7 +317,7 @@ tests:
 
   - it: should render readiness probe
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -332,7 +332,7 @@ tests:
     set:
       securityContext.runAsUser: 9999
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -346,7 +346,7 @@ tests:
     set:
       serviceAccountName: myServiceAccountName
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - equal:
@@ -355,7 +355,7 @@ tests:
 
   - it: should not render pod serviceAccountName if not defined
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - notExists:
@@ -363,7 +363,7 @@ tests:
 
   - it: should render imagePullSecretName
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - equal:
@@ -374,7 +374,7 @@ tests:
     set:
       imagePullSecretName: mysecret
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - equal:
@@ -386,7 +386,7 @@ tests:
       containerSecurityContext.runAsUser: 9999
       containerSecurityContext.runAsGroup: 9998
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -397,7 +397,7 @@ tests:
 
   - it: should not render container security contexts if none set
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - notExists:
@@ -405,7 +405,7 @@ tests:
 
   - it: should render the rbacAuthContainer
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -421,7 +421,7 @@ tests:
 
   - it: should render volumeMounts
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -451,7 +451,7 @@ tests:
           mountPath: /my/other/path
           subPath: my-other-subpath
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -481,7 +481,7 @@ tests:
     set:
       certStoreSecretName: mycerts
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -509,7 +509,7 @@ tests:
         - name: my-volume-two
           emptyDir: {}
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -535,7 +535,7 @@ tests:
 
   - it: should render global volumes anchore-license, and config-volume
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -567,7 +567,7 @@ tests:
     set:
       fullnameOverride: my-fullname-override
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 1
     asserts:
       - matchRegex:
@@ -578,16 +578,16 @@ tests:
     set:
       nameOverride: my-name-override
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 1
     asserts:
       - matchRegex:
           path: spec.selector["app.kubernetes.io/name"]
           pattern: ^test-release-my-name-override
 
-  - it: should render dbHostname for feeds-secret.yaml
+  - it: should render dbHostname for feeds_secret.yaml
     templates:
-      - feeds-secret.yaml
+      - feeds_secret.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -634,7 +634,7 @@ tests:
         cloudsql:
           enabled: true
     templates:
-      - feeds-secret.yaml
+      - feeds_secret.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -654,7 +654,7 @@ tests:
         externalEndpoint: my-endpoint
         enabled: false
     templates:
-      - feeds-secret.yaml
+      - feeds_secret.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -671,7 +671,7 @@ tests:
       cloudsql:
         enabled: true
     templates:
-      - feeds-secret.yaml
+      - feeds_secret.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -689,7 +689,7 @@ tests:
       cloudsql:
         enabled: false
     templates:
-      - feeds-secret.yaml
+      - feeds_secret.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -703,7 +703,7 @@ tests:
     set:
       anchoreConfig.internalServicesSSL.enabled: true
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -715,7 +715,7 @@ tests:
     set:
       anchoreConfig.internalServicesSSL.enabled: false
     templates:
-      - feeds-deployment.yaml
+      - feeds_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:

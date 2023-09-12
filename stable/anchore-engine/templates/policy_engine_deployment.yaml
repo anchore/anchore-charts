@@ -286,6 +286,9 @@ spec:
       port: {{ .Values.anchorePolicyEngine.service.port }}
       targetPort: {{ .Values.anchorePolicyEngine.service.port }}
       protocol: TCP
+      {{- with .Values.anchorePolicyEngine.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}

@@ -795,6 +795,7 @@ ui-redis:
 | `api.service.reportsPort` | Service port for Anchore Reports API                 | `8558`      |
 | `api.service.annotations` | Annotations for Anchore API service                  | `{}`        |
 | `api.service.labels`      | Labels for Anchore API service                       | `{}`        |
+| `api.service.nodePort`    | nodePort for Anchore API service                     | `""`        |
 | `api.extraEnv`            | Set extra environment variables for Anchore API pods | `[]`        |
 | `api.resources`           | Resource requests and limits for Anchore API pods    | `{}`        |
 | `api.labels`              | Labels for Anchore API pods                          | `{}`        |
@@ -828,6 +829,7 @@ ui-redis:
 | `catalog.service.port`        | Service port for Anchore Catalog                         | `8082`      |
 | `catalog.service.annotations` | Annotations for Anchore Catalog service                  | `{}`        |
 | `catalog.service.labels`      | Labels for Anchore Catalog service                       | `{}`        |
+| `catalog.service.nodePort`    | nodePort for Anchore Catalog service                     | `""`        |
 | `catalog.extraEnv`            | Set extra environment variables for Anchore Catalog pods | `[]`        |
 | `catalog.resources`           | Resource requests and limits for Anchore Catalog pods    | `{}`        |
 | `catalog.labels`              | Labels for Anchore Catalog pods                          | `{}`        |
@@ -854,6 +856,7 @@ ui-redis:
 | `policyEngine.service.port`        | Service port for Anchore Policy Engine                         | `8087`      |
 | `policyEngine.service.annotations` | Annotations for Anchore Policy Engine service                  | `{}`        |
 | `policyEngine.service.labels`      | Labels for Anchore Policy Engine service                       | `{}`        |
+| `policyEngine.service.nodePort`    | nodePort for Anchore Policy Engine service                     | `""`        |
 | `policyEngine.extraEnv`            | Set extra environment variables for Anchore Policy Engine pods | `[]`        |
 | `policyEngine.resources`           | Resource requests and limits for Anchore Policy Engine pods    | `{}`        |
 | `policyEngine.labels`              | Labels for Anchore Policy Engine pods                          | `{}`        |
@@ -872,6 +875,7 @@ ui-redis:
 | `simpleQueue.service.port`        | Service port for Anchore Simple Queue                         | `8083`      |
 | `simpleQueue.service.annotations` | Annotations for Anchore Simple Queue service                  | `{}`        |
 | `simpleQueue.service.labels`      | Labels for Anchore Simple Queue service                       | `{}`        |
+| `simpleQueue.service.nodePort`    | nodePort for Anchore Simple Queue service                     | `""`        |
 | `simpleQueue.extraEnv`            | Set extra environment variables for Anchore Simple Queue pods | `[]`        |
 | `simpleQueue.resources`           | Resource requests and limits for Anchore Simple Queue pods    | `{}`        |
 | `simpleQueue.labels`              | Labels for Anchore Simple Queue pods                          | `{}`        |
@@ -890,6 +894,7 @@ ui-redis:
 | `notifications.service.port`        | Service port for Anchore Notifications                         | `8668`      |
 | `notifications.service.annotations` | Annotations for Anchore Notifications service                  | `{}`        |
 | `notifications.service.labels`      | Labels for Anchore Notifications service                       | `{}`        |
+| `notifications.service.nodePort`    | nodePort for Anchore Notifications service                     | `""`        |
 | `notifications.extraEnv`            | Set extra environment variables for Anchore Notifications pods | `[]`        |
 | `notifications.resources`           | Resource requests and limits for Anchore Notifications pods    | `{}`        |
 | `notifications.labels`              | Labels for Anchore Notifications pods                          | `{}`        |
@@ -908,6 +913,7 @@ ui-redis:
 | `reports.service.port`        | Service port for Anchore Reports Worker                  | `8558`      |
 | `reports.service.annotations` | Annotations for Anchore Reports service                  | `{}`        |
 | `reports.service.labels`      | Labels for Anchore Reports service                       | `{}`        |
+| `reports.service.nodePort`    | nodePort for Anchore Reports service                     | `""`        |
 | `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods | `[]`        |
 | `reports.resources`           | Resource requests and limits for Anchore Reports pods    | `{}`        |
 | `reports.labels`              | Labels for Anchore Reports pods                          | `{}`        |
@@ -933,6 +939,7 @@ ui-redis:
 | `rbacManager.service.port`        | Service port for Anchore RBAC Manager                         | `8229`      |
 | `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                  | `{}`        |
 | `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                       | `{}`        |
+| `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                     | `""`        |
 | `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods | `[]`        |
 | `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods    | `{}`        |
 | `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                          | `{}`        |
@@ -955,6 +962,7 @@ ui-redis:
 | `ui.service.annotations`     | Annotations for Anchore UI service                                            | `{}`                                     |
 | `ui.service.labels`          | Labels for Anchore UI service                                                 | `{}`                                     |
 | `ui.service.sessionAffinity` | Session Affinity for Ui service                                               | `ClientIP`                               |
+| `ui.service.nodePort`        | nodePort for Anchore UI service                                               | `""`                                     |
 | `ui.extraEnv`                | Set extra environment variables for Anchore UI pods                           | `[]`                                     |
 | `ui.resources`               | Resource requests and limits for Anchore UI pods                              | `{}`                                     |
 | `ui.labels`                  | Labels for Anchore UI pods                                                    | `{}`                                     |

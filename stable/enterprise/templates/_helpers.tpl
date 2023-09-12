@@ -120,3 +120,13 @@ Return the database user for the Anchore Enterprise UI config
 {{- define "enterprise.ui.dbUser" -}}
 {{ ternary .Values.postgresql.auth.username .Values.anchoreConfig.ui.dbUser (empty .Values.anchoreConfig.ui.dbUser) }}
 {{- end -}}
+
+{{/*
+Set the nodePort for services if its defined
+*/}}
+{{- define "service.nodePort" -}}
+{{- $component := .component -}}
+{{- if (index .Values (print $component)).service.nodePort -}}
+nodePort: {{ (index .Values (print $component)).service.nodePort }}
+{{- end -}}
+{{- end -}}

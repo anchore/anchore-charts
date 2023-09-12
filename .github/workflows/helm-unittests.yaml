@@ -4,10 +4,10 @@
 name: 'Helm Unit Tests'
 
 on:
-  pull_request_target:
+  pull_request:
     paths:
-      - 'stable/enterprise'
-      - 'stable/feeds'
+      - 'stable/enterprise/Chart.yaml'
+      - 'stable/feeds/Chart.yaml'
 
 # Remove all permissions by default
 permissions: {}
