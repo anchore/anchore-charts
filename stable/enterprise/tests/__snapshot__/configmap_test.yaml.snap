@@ -35,7 +35,7 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.4
       name: test-release-enterprise-analyzer
       namespace: test-namespace
   2: |
@@ -336,7 +336,7 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.4
       name: test-release-enterprise
       namespace: test-namespace
   3: |
@@ -421,7 +421,7 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.4
       name: test-release-enterprise-config-env-vars
       namespace: test-namespace
   4: |
@@ -465,13 +465,13 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.4
       name: test-release-enterprise-policy-bundles
       namespace: test-namespace
   5: |
     apiVersion: v1
     data:
-      config-ui.yaml: "# Anchore UI configuration\nengine_uri: 'http://test-release-enterprise-api:8228/v1' \nreports_uri: 'http://test-release-enterprise-api:8558/v1'\nnotifications_uri: 'http://test-release-enterprise-notifications:8668/v1'\nrbac_uri: 'http://test-release-enterprise-rbac-manager:8229/v1'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false"
+      config-ui.yaml: "# Anchore UI configuration\nengine_uri: 'http://test-release-enterprise-api:8228/v2'\nreports_uri: 'http://test-release-enterprise-api:8558/v2'\nnotifications_uri: 'http://test-release-enterprise-notifications:8668/v2'\nrbac_uri: 'http://test-release-enterprise-rbac-manager:8229/v2'\nenterprise_uri: 'http://test-release-enterprise-api:8228/v2'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false"
     kind: ConfigMap
     metadata:
       annotations:
@@ -486,6 +486,6 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.4
       name: test-release-enterprise-ui
       namespace: test-namespace
