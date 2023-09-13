@@ -234,6 +234,7 @@ feeds-db:
 | `service.port`                        | Service port for Anchore Feeds                                                                                                    | `8448`                                |
 | `service.annotations`                 | Annotations for Anchore Feeds service                                                                                             | `{}`                                  |
 | `service.labels`                      | Labels for Anchore Feeds service                                                                                                  | `{}`                                  |
+| `service.nodePort`                    | nodePort for Anchore Feeds service                                                                                                | `""`                                  |
 | `scratchVolume.mountPath`             | The mount path of an external volume for scratch space for image analysis                                                         | `/anchore_scratch`                    |
 | `scratchVolume.fixGroupPermissions`   | Enable an initContainer that will fix the fsGroup permissions                                                                     | `false`                               |
 | `scratchVolume.details`               | Details for the k8s volume to be created                                                                                          | `{}`                                  |

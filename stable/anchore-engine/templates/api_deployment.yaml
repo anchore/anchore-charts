@@ -460,11 +460,17 @@ spec:
       port: {{ .Values.anchoreApi.service.port }}
       targetPort: {{ .Values.anchoreApi.service.port }}
       protocol: TCP
+      {{- with .Values.anchoreApi.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
     {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseReports.enabled }}
     - name: reports-api
       port: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
       targetPort: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
       protocol: TCP
+      {{- with .Values.anchoreEnterpriseReports.service.apiNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
     {{- end }}
   selector:
     app: {{ template "anchore-engine.fullname" . }}

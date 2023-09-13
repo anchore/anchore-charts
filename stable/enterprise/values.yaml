@@ -612,6 +612,8 @@ api:
   ## @param api.service.reportsPort Service port for Anchore Reports API
   ## @param api.service.annotations Annotations for Anchore API service
   ## @param api.service.labels Labels for Anchore API service
+  ## @param api.service.nodePort nodePort for Anchore API service
+  ## @param api.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -619,6 +621,8 @@ api:
     reportsPort: 8558
     annotations: {}
     labels: {}
+    nodePort: ""
+    apiVersion: v2
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -710,12 +714,14 @@ catalog:
   ## @param catalog.service.port Service port for Anchore Catalog
   ## @param catalog.service.annotations Annotations for Anchore Catalog service
   ## @param catalog.service.labels Labels for Anchore Catalog service
+  ## @param catalog.service.nodePort nodePort for Anchore Catalog service
   ##
   service:
     type: ClusterIP
     port: 8082
     annotations: {}
     labels: {}
+    nodePort: ""
 
   ## @param catalog.extraEnv Set extra environment variables for Anchore Catalog pods
   ##
@@ -778,12 +784,14 @@ policyEngine:
   ## @param policyEngine.service.port Service port for Anchore Policy Engine
   ## @param policyEngine.service.annotations Annotations for Anchore Policy Engine service
   ## @param policyEngine.service.labels Labels for Anchore Policy Engine service
+  ## @param policyEngine.service.nodePort nodePort for Anchore Policy Engine service
   ##
   service:
     type: ClusterIP
     port: 8087
     annotations: {}
     labels: {}
+    nodePort: ""
 
   ## @param policyEngine.extraEnv Set extra environment variables for Anchore Policy Engine pods
   ##
@@ -829,12 +837,14 @@ simpleQueue:
   ## @param simpleQueue.service.port Service port for Anchore Simple Queue
   ## @param simpleQueue.service.annotations Annotations for Anchore Simple Queue service
   ## @param simpleQueue.service.labels Labels for Anchore Simple Queue service
+  ## @param simpleQueue.service.nodePort nodePort for Anchore Simple Queue service
   ##
   service:
     type: ClusterIP
     port: 8083
     annotations: {}
     labels: {}
+    nodePort: ""
 
   ## @param simpleQueue.extraEnv Set extra environment variables for Anchore Simple Queue pods
   ##
@@ -880,12 +890,16 @@ notifications:
   ## @param notifications.service.port Service port for Anchore Notifications
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
   ## @param notifications.service.labels Labels for Anchore Notifications service
+  ## @param notifications.service.nodePort nodePort for Anchore Notifications service
+  ## @param notifications.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
     port: 8668
     annotations: {}
     labels: {}
+    nodePort: ""
+    apiVersion: v2
 
   ## @param notifications.extraEnv Set extra environment variables for Anchore Notifications pods
   ##
@@ -931,12 +945,16 @@ reports:
   ## @param reports.service.port Service port for Anchore Reports Worker
   ## @param reports.service.annotations Annotations for Anchore Reports service
   ## @param reports.service.labels Labels for Anchore Reports service
+  ## @param reports.service.nodePort nodePort for Anchore Reports service
+  ## @param reports.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
     port: 8558
     annotations: {}
     labels: {}
+    nodePort: ""
+    apiVersion: v2
 
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
@@ -994,12 +1012,16 @@ rbacManager:
   ## @param rbacManager.service.port Service port for Anchore RBAC Manager
   ## @param rbacManager.service.annotations Annotations for Anchore RBAC Manager service
   ## @param rbacManager.service.labels Labels for Anchore RBAC Manager service
+  ## @param rbacManager.service.nodePort nodePort for Anchore RBAC Manager service
+  ## @param rbacManager.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
     port: 8229
     annotations: {}
     labels: {}
+    nodePort: ""
+    apiVersion: v2
 
   ## @param rbacManager.extraEnv Set extra environment variables for Anchore RBAC Manager pods
   ##
@@ -1062,6 +1084,7 @@ ui:
   ## @param ui.service.annotations Annotations for Anchore UI service
   ## @param ui.service.labels Labels for Anchore UI service
   ## @param ui.service.sessionAffinity Session Affinity for Ui service
+  ## @param ui.service.nodePort nodePort for Anchore UI service
   ##
   service:
     type: ClusterIP
@@ -1070,6 +1093,8 @@ ui:
     annotations: {}
     labels: {}
     sessionAffinity: ClientIP
+    nodePort: ""
+
 
   ## @param ui.extraEnv Set extra environment variables for Anchore UI pods
   ##

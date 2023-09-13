@@ -787,22 +787,24 @@ ui-redis:
 
 ### Anchore API k8s Deployment Parameters
 
-| Name                      | Description                                          | Value       |
-| ------------------------- | ---------------------------------------------------- | ----------- |
-| `api.replicaCount`        | Number of replicas for Anchore API deployment        | `1`         |
-| `api.service.type`        | Service type for Anchore API                         | `ClusterIP` |
-| `api.service.port`        | Service port for Anchore API                         | `8228`      |
-| `api.service.reportsPort` | Service port for Anchore Reports API                 | `8558`      |
-| `api.service.annotations` | Annotations for Anchore API service                  | `{}`        |
-| `api.service.labels`      | Labels for Anchore API service                       | `{}`        |
-| `api.extraEnv`            | Set extra environment variables for Anchore API pods | `[]`        |
-| `api.resources`           | Resource requests and limits for Anchore API pods    | `{}`        |
-| `api.labels`              | Labels for Anchore API pods                          | `{}`        |
-| `api.annotations`         | Annotation for Anchore API pods                      | `{}`        |
-| `api.nodeSelector`        | Node labels for Anchore API pod assignment           | `{}`        |
-| `api.tolerations`         | Tolerations for Anchore API pod assignment           | `[]`        |
-| `api.affinity`            | Affinity for Anchore API pod assignment              | `{}`        |
-| `api.serviceAccountName`  | Service account name for Anchore API pods            | `""`        |
+| Name                      | Description                                                                      | Value       |
+| ------------------------- | -------------------------------------------------------------------------------- | ----------- |
+| `api.replicaCount`        | Number of replicas for Anchore API deployment                                    | `1`         |
+| `api.service.type`        | Service type for Anchore API                                                     | `ClusterIP` |
+| `api.service.port`        | Service port for Anchore API                                                     | `8228`      |
+| `api.service.reportsPort` | Service port for Anchore Reports API                                             | `8558`      |
+| `api.service.annotations` | Annotations for Anchore API service                                              | `{}`        |
+| `api.service.labels`      | Labels for Anchore API service                                                   | `{}`        |
+| `api.service.nodePort`    | nodePort for Anchore API service                                                 | `""`        |
+| `api.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `api.extraEnv`            | Set extra environment variables for Anchore API pods                             | `[]`        |
+| `api.resources`           | Resource requests and limits for Anchore API pods                                | `{}`        |
+| `api.labels`              | Labels for Anchore API pods                                                      | `{}`        |
+| `api.annotations`         | Annotation for Anchore API pods                                                  | `{}`        |
+| `api.nodeSelector`        | Node labels for Anchore API pod assignment                                       | `{}`        |
+| `api.tolerations`         | Tolerations for Anchore API pod assignment                                       | `[]`        |
+| `api.affinity`            | Affinity for Anchore API pod assignment                                          | `{}`        |
+| `api.serviceAccountName`  | Service account name for Anchore API pods                                        | `""`        |
 
 ### Anchore Analyzer k8s Deployment Parameters
 
@@ -828,6 +830,7 @@ ui-redis:
 | `catalog.service.port`        | Service port for Anchore Catalog                         | `8082`      |
 | `catalog.service.annotations` | Annotations for Anchore Catalog service                  | `{}`        |
 | `catalog.service.labels`      | Labels for Anchore Catalog service                       | `{}`        |
+| `catalog.service.nodePort`    | nodePort for Anchore Catalog service                     | `""`        |
 | `catalog.extraEnv`            | Set extra environment variables for Anchore Catalog pods | `[]`        |
 | `catalog.resources`           | Resource requests and limits for Anchore Catalog pods    | `{}`        |
 | `catalog.labels`              | Labels for Anchore Catalog pods                          | `{}`        |
@@ -854,6 +857,7 @@ ui-redis:
 | `policyEngine.service.port`        | Service port for Anchore Policy Engine                         | `8087`      |
 | `policyEngine.service.annotations` | Annotations for Anchore Policy Engine service                  | `{}`        |
 | `policyEngine.service.labels`      | Labels for Anchore Policy Engine service                       | `{}`        |
+| `policyEngine.service.nodePort`    | nodePort for Anchore Policy Engine service                     | `""`        |
 | `policyEngine.extraEnv`            | Set extra environment variables for Anchore Policy Engine pods | `[]`        |
 | `policyEngine.resources`           | Resource requests and limits for Anchore Policy Engine pods    | `{}`        |
 | `policyEngine.labels`              | Labels for Anchore Policy Engine pods                          | `{}`        |
@@ -872,6 +876,7 @@ ui-redis:
 | `simpleQueue.service.port`        | Service port for Anchore Simple Queue                         | `8083`      |
 | `simpleQueue.service.annotations` | Annotations for Anchore Simple Queue service                  | `{}`        |
 | `simpleQueue.service.labels`      | Labels for Anchore Simple Queue service                       | `{}`        |
+| `simpleQueue.service.nodePort`    | nodePort for Anchore Simple Queue service                     | `""`        |
 | `simpleQueue.extraEnv`            | Set extra environment variables for Anchore Simple Queue pods | `[]`        |
 | `simpleQueue.resources`           | Resource requests and limits for Anchore Simple Queue pods    | `{}`        |
 | `simpleQueue.labels`              | Labels for Anchore Simple Queue pods                          | `{}`        |
@@ -883,39 +888,43 @@ ui-redis:
 
 ### Anchore Notifications Parameters
 
-| Name                                | Description                                                    | Value       |
-| ----------------------------------- | -------------------------------------------------------------- | ----------- |
-| `notifications.replicaCount`        | Number of replicas for the Anchore Notifications deployment    | `1`         |
-| `notifications.service.type`        | Service type for Anchore Notifications                         | `ClusterIP` |
-| `notifications.service.port`        | Service port for Anchore Notifications                         | `8668`      |
-| `notifications.service.annotations` | Annotations for Anchore Notifications service                  | `{}`        |
-| `notifications.service.labels`      | Labels for Anchore Notifications service                       | `{}`        |
-| `notifications.extraEnv`            | Set extra environment variables for Anchore Notifications pods | `[]`        |
-| `notifications.resources`           | Resource requests and limits for Anchore Notifications pods    | `{}`        |
-| `notifications.labels`              | Labels for Anchore Notifications pods                          | `{}`        |
-| `notifications.annotations`         | Annotation for Anchore Notifications pods                      | `{}`        |
-| `notifications.nodeSelector`        | Node labels for Anchore Notifications pod assignment           | `{}`        |
-| `notifications.tolerations`         | Tolerations for Anchore Notifications pod assignment           | `[]`        |
-| `notifications.affinity`            | Affinity for Anchore Notifications pod assignment              | `{}`        |
-| `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods            | `""`        |
+| Name                                | Description                                                                      | Value       |
+| ----------------------------------- | -------------------------------------------------------------------------------- | ----------- |
+| `notifications.replicaCount`        | Number of replicas for the Anchore Notifications deployment                      | `1`         |
+| `notifications.service.type`        | Service type for Anchore Notifications                                           | `ClusterIP` |
+| `notifications.service.port`        | Service port for Anchore Notifications                                           | `8668`      |
+| `notifications.service.annotations` | Annotations for Anchore Notifications service                                    | `{}`        |
+| `notifications.service.labels`      | Labels for Anchore Notifications service                                         | `{}`        |
+| `notifications.service.nodePort`    | nodePort for Anchore Notifications service                                       | `""`        |
+| `notifications.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `notifications.extraEnv`            | Set extra environment variables for Anchore Notifications pods                   | `[]`        |
+| `notifications.resources`           | Resource requests and limits for Anchore Notifications pods                      | `{}`        |
+| `notifications.labels`              | Labels for Anchore Notifications pods                                            | `{}`        |
+| `notifications.annotations`         | Annotation for Anchore Notifications pods                                        | `{}`        |
+| `notifications.nodeSelector`        | Node labels for Anchore Notifications pod assignment                             | `{}`        |
+| `notifications.tolerations`         | Tolerations for Anchore Notifications pod assignment                             | `[]`        |
+| `notifications.affinity`            | Affinity for Anchore Notifications pod assignment                                | `{}`        |
+| `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods                              | `""`        |
 
 ### Anchore Reports Parameters
 
-| Name                          | Description                                              | Value       |
-| ----------------------------- | -------------------------------------------------------- | ----------- |
-| `reports.replicaCount`        | Number of replicas for the Anchore Reports deployment    | `1`         |
-| `reports.service.type`        | Service type for Anchore Reports                         | `ClusterIP` |
-| `reports.service.port`        | Service port for Anchore Reports Worker                  | `8558`      |
-| `reports.service.annotations` | Annotations for Anchore Reports service                  | `{}`        |
-| `reports.service.labels`      | Labels for Anchore Reports service                       | `{}`        |
-| `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods | `[]`        |
-| `reports.resources`           | Resource requests and limits for Anchore Reports pods    | `{}`        |
-| `reports.labels`              | Labels for Anchore Reports pods                          | `{}`        |
-| `reports.annotations`         | Annotation for Anchore Reports pods                      | `{}`        |
-| `reports.nodeSelector`        | Node labels for Anchore Reports pod assignment           | `{}`        |
-| `reports.tolerations`         | Tolerations for Anchore Reports pod assignment           | `[]`        |
-| `reports.affinity`            | Affinity for Anchore Reports pod assignment              | `{}`        |
-| `reports.serviceAccountName`  | Service account name for Anchore Reports pods            | `""`        |
+| Name                          | Description                                                                      | Value       |
+| ----------------------------- | -------------------------------------------------------------------------------- | ----------- |
+| `reports.replicaCount`        | Number of replicas for the Anchore Reports deployment                            | `1`         |
+| `reports.service.type`        | Service type for Anchore Reports                                                 | `ClusterIP` |
+| `reports.service.port`        | Service port for Anchore Reports Worker                                          | `8558`      |
+| `reports.service.annotations` | Annotations for Anchore Reports service                                          | `{}`        |
+| `reports.service.labels`      | Labels for Anchore Reports service                                               | `{}`        |
+| `reports.service.nodePort`    | nodePort for Anchore Reports service                                             | `""`        |
+| `reports.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods                         | `[]`        |
+| `reports.resources`           | Resource requests and limits for Anchore Reports pods                            | `{}`        |
+| `reports.labels`              | Labels for Anchore Reports pods                                                  | `{}`        |
+| `reports.annotations`         | Annotation for Anchore Reports pods                                              | `{}`        |
+| `reports.nodeSelector`        | Node labels for Anchore Reports pod assignment                                   | `{}`        |
+| `reports.tolerations`         | Tolerations for Anchore Reports pod assignment                                   | `[]`        |
+| `reports.affinity`            | Affinity for Anchore Reports pod assignment                                      | `{}`        |
+| `reports.serviceAccountName`  | Service account name for Anchore Reports pods                                    | `""`        |
 
 ### Anchore RBAC Authentication Parameters
 
@@ -926,21 +935,23 @@ ui-redis:
 
 ### Anchore RBAC Manager Parameters
 
-| Name                              | Description                                                   | Value       |
-| --------------------------------- | ------------------------------------------------------------- | ----------- |
-| `rbacManager.replicaCount`        | Number of replicas for the Anchore RBAC Manager deployment    | `1`         |
-| `rbacManager.service.type`        | Service type for Anchore RBAC Manager                         | `ClusterIP` |
-| `rbacManager.service.port`        | Service port for Anchore RBAC Manager                         | `8229`      |
-| `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                  | `{}`        |
-| `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                       | `{}`        |
-| `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods | `[]`        |
-| `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods    | `{}`        |
-| `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                          | `{}`        |
-| `rbacManager.annotations`         | Annotation for Anchore RBAC Manager pods                      | `{}`        |
-| `rbacManager.nodeSelector`        | Node labels for Anchore RBAC Manager pod assignment           | `{}`        |
-| `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment           | `[]`        |
-| `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment              | `{}`        |
-| `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods            | `""`        |
+| Name                              | Description                                                                      | Value       |
+| --------------------------------- | -------------------------------------------------------------------------------- | ----------- |
+| `rbacManager.replicaCount`        | Number of replicas for the Anchore RBAC Manager deployment                       | `1`         |
+| `rbacManager.service.type`        | Service type for Anchore RBAC Manager                                            | `ClusterIP` |
+| `rbacManager.service.port`        | Service port for Anchore RBAC Manager                                            | `8229`      |
+| `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                                     | `{}`        |
+| `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                                          | `{}`        |
+| `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                                        | `""`        |
+| `rbacManager.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods                    | `[]`        |
+| `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods                       | `{}`        |
+| `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                                             | `{}`        |
+| `rbacManager.annotations`         | Annotation for Anchore RBAC Manager pods                                         | `{}`        |
+| `rbacManager.nodeSelector`        | Node labels for Anchore RBAC Manager pod assignment                              | `{}`        |
+| `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment                              | `[]`        |
+| `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment                                 | `{}`        |
+| `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods                               | `""`        |
 
 ### Anchore UI Parameters
 
@@ -955,6 +966,7 @@ ui-redis:
 | `ui.service.annotations`     | Annotations for Anchore UI service                                            | `{}`                                     |
 | `ui.service.labels`          | Labels for Anchore UI service                                                 | `{}`                                     |
 | `ui.service.sessionAffinity` | Session Affinity for Ui service                                               | `ClientIP`                               |
+| `ui.service.nodePort`        | nodePort for Anchore UI service                                               | `""`                                     |
 | `ui.extraEnv`                | Set extra environment variables for Anchore UI pods                           | `[]`                                     |
 | `ui.resources`               | Resource requests and limits for Anchore UI pods                              | `{}`                                     |
 | `ui.labels`                  | Labels for Anchore UI pods                                                    | `{}`                                     |

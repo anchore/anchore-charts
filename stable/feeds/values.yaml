@@ -91,12 +91,14 @@ affinity: {}
 ## @param service.port Service port for Anchore Feeds
 ## @param service.annotations Annotations for Anchore Feeds service
 ## @param service.labels Labels for Anchore Feeds service
+## @param service.nodePort nodePort for Anchore Feeds service
 ##
 service:
   type: ClusterIP
   port: 8448
   annotations: {}
   labels: {}
+  nodePort: ""
 
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space for image analysis
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions

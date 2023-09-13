@@ -66,6 +66,7 @@ spec:
       port: {{ .Values.rbacManager.service.port }}
       targetPort: {{ .Values.rbacManager.service.port }}
       protocol: TCP
+      {{ include "service.nodePort" (merge (dict "component" $component) .) }}
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
     app.kubernetes.io/component: {{ $component | lower }}
