@@ -613,6 +613,7 @@ api:
   ## @param api.service.annotations Annotations for Anchore API service
   ## @param api.service.labels Labels for Anchore API service
   ## @param api.service.nodePort nodePort for Anchore API service
+  ## @param api.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -621,6 +622,7 @@ api:
     annotations: {}
     labels: {}
     nodePort: ""
+    apiVersion: v2
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -889,6 +891,7 @@ notifications:
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
   ## @param notifications.service.labels Labels for Anchore Notifications service
   ## @param notifications.service.nodePort nodePort for Anchore Notifications service
+  ## @param notifications.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -896,6 +899,7 @@ notifications:
     annotations: {}
     labels: {}
     nodePort: ""
+    apiVersion: v2
 
   ## @param notifications.extraEnv Set extra environment variables for Anchore Notifications pods
   ##
@@ -942,6 +946,7 @@ reports:
   ## @param reports.service.annotations Annotations for Anchore Reports service
   ## @param reports.service.labels Labels for Anchore Reports service
   ## @param reports.service.nodePort nodePort for Anchore Reports service
+  ## @param reports.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -949,6 +954,7 @@ reports:
     annotations: {}
     labels: {}
     nodePort: ""
+    apiVersion: v2
 
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
@@ -1007,6 +1013,7 @@ rbacManager:
   ## @param rbacManager.service.annotations Annotations for Anchore RBAC Manager service
   ## @param rbacManager.service.labels Labels for Anchore RBAC Manager service
   ## @param rbacManager.service.nodePort nodePort for Anchore RBAC Manager service
+  ## @param rbacManager.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -1014,6 +1021,7 @@ rbacManager:
     annotations: {}
     labels: {}
     nodePort: ""
+    apiVersion: v2
 
   ## @param rbacManager.extraEnv Set extra environment variables for Anchore RBAC Manager pods
   ##
@@ -1086,6 +1094,7 @@ ui:
     labels: {}
     sessionAffinity: ClientIP
     nodePort: ""
+
 
   ## @param ui.extraEnv Set extra environment variables for Anchore UI pods
   ##
