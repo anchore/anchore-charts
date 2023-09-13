@@ -362,6 +362,53 @@ entries:
   anchore-engine:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2023-09-13T16:29:08.526343286Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-db
+      condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-gem-db
+      condition: anchore-feeds-gem-db.enabled,anchoreEnterpriseFeeds.gemDriverEnabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: ui-redis
+      condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~18
+    description: Anchore container analysis and policy evaluation engine service
+    digest: 5f001401a34ee51b92fb1b99a4fbbd07a57102fa0b2a0dd0f559aa685ecd436f
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - security
+    - vulnerability
+    - scanner
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-engine
+    sources:
+    - https://github.com/anchore/anchore-engine
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.27.3/anchore-engine-1.27.3.tgz
+    version: 1.27.3
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2023-09-06T20:09:32.510231055Z"
     dependencies:
     - condition: postgresql.enabled
@@ -5347,6 +5394,58 @@ entries:
   enterprise:
   - apiVersion: v2
     appVersion: 4.9.1
+    created: "2023-09-13T16:29:08.815461452Z"
+    dependencies:
+    - condition: postgresql.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: ui-redis
+      condition: ui-redis.chartEnabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~17.11
+    - condition: feeds.chartEnabled
+      import-values:
+      - child: service
+        parent: feeds.service
+      name: feeds
+      repository: '@anchore'
+      version: 0.0.2
+    description: 'Anchore Enterprise is a complete container security workflow solution
+      for professional teams. Easily integrating with CI/CD systems, it allows developers
+      to bolster security without compromising velocity and enables security teams
+      to audit and verify compliance in real-time. It is based on Anchore Engine,
+      an open-source image inspection and scanning tool. '
+    digest: 2d90ddf6e74d69aadb240dd378d1682712f581ec97c71cc4bac2cc785d712459
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - anchore-enterprise
+    - image
+    - security
+    - vulnerability
+    - scanner
+    kubeVersion: 1.23.x - 1.27.x || 1.23.x-x - 1.27.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: enterprise
+    sources:
+    - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/enterprise-0.0.3/enterprise-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: 4.9.1
     created: "2023-09-07T13:10:08.185914421Z"
     dependencies:
     - condition: postgresql.chartEnabled
@@ -5448,6 +5547,39 @@ entries:
     - https://github.com/anchore/anchore-charts/releases/download/enterprise-0.0.1/enterprise-0.0.1.tgz
     version: 0.0.1
   feeds:
+  - apiVersion: v2
+    appVersion: 4.9.1
+    created: "2023-09-13T16:29:09.037010823Z"
+    dependencies:
+    - alias: feeds-db
+      condition: feeds-db.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: "12.5"
+    - alias: gem-db
+      condition: gem-db.chartEnabled,anchoreConfig.feeds.drivers.gem.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    description: Anchore feeds service
+    digest: a0554a1a960fcb604063db7942bec4cdd71ecc77bf1ccf4a16959e010ad523cd
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - anchore
+    - anchore-feeds
+    kubeVersion: 1.23.x - 1.27.x || 1.23.x-x - 1.27.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: feeds
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/feeds-0.0.3/feeds-0.0.3.tgz
+    version: 0.0.3
   - apiVersion: v2
     appVersion: 4.9.1
     created: "2023-09-06T20:51:42.996770348Z"
@@ -5909,4 +6041,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2023-09-07T13:10:08.186159521Z"
+generated: "2023-09-13T16:29:09.037613719Z"
