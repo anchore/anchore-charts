@@ -35,7 +35,7 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.5
       name: test-release-enterprise-analyzer
       namespace: test-namespace
   2: |
@@ -336,7 +336,7 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.5
       name: test-release-enterprise
       namespace: test-namespace
   3: |
@@ -421,7 +421,7 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.5
       name: test-release-enterprise-config-env-vars
       namespace: test-namespace
   4: |
@@ -465,7 +465,7 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.5
       name: test-release-enterprise-policy-bundles
       namespace: test-namespace
   5: |
@@ -486,6 +486,6 @@ should render the configmaps:
         app.kubernetes.io/version: 4.9.1
         bar: baz
         foo: bar
-        helm.sh/chart: enterprise-0.0.3
+        helm.sh/chart: enterprise-0.0.5
       name: test-release-enterprise-ui
       namespace: test-namespace

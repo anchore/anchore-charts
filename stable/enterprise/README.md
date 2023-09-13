@@ -1,5 +1,7 @@
 # Anchore Enterprise Helm Chart
 
+> :exclamation: **Important:** View the **[Chart Release Notes](#release-notes)** for the latest changes prior to installation or upgrading.
+
 This Helm chart deploys Anchore Enterprise on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 Anchore Enterprise is an software bill of materials (SBOM) - powered software supply chain management solution designed for a cloud-native world. It provides continuous visibility into supply chain security risks. Anchore Enterprise takes a developer-friendly approach that minimizes friction by embedding automation into development toolchains to generate SBOMs and accurately identify vulnerabilities, malware, misconfigurations, and secrets for faster remediation.
@@ -10,16 +12,16 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 
 - [Prerequisites](#prerequisites)
 - [Installing the Chart](#installing-the-chart)
+- [Upgrading](#upgrading-the-chart)
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Configuration](#configuration)
-  - [External Database Setup](#external-database-setup)
+  - [External Database Requirements](#external-database-requirements)
   - [Enterprise Feeds Configuration](#enterprise-feeds-configuration)
   - [Analyzer Image Layer Cache Configuration](#analyzer-image-layer-cache-configuration)
   - [Configuring Object Storage](#configuring-object-storage)
   - [Configuring Analysis Archive Storage](#configuring-analysis-archive-storage)
   - [Existing Secrets](#existing-secrets)
   - [Ingress](#ingress)
-  - [Configuring The ALB Ingress Controller](#configuring-the-alb-ingress-controller)
   - [SSO](#sso)
   - [Prometheus Metrics](#prometheus-metrics)
   - [Scaling Individual Services](#scaling-individual-services)
@@ -27,123 +29,124 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Anchore Enterprise Notifications](#anchore-enterprise-notifications)
   - [Anchore Enterprise Reports](#anchore-enterprise-reports)
   - [Installing on Openshift](#installing-on-openshift)
+  - [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart)
 - [Parameters](#parameters)
 - [Release Notes](#release-notes)
 
 ## Prerequisites
 
-* [Helm](https://helm.sh/) >=3.8- [Anchore Enterprise Helm Chart](#anchore-enterprise-helm-chart)
-* [Kubernetes](https://kubernetes.io/) >=1.23
+- [Helm](https://helm.sh/) >=3.8
+- [Kubernetes](https://kubernetes.io/) >=1.23
 
 ## Installing the Chart
 
-**View the [Chart Release Notes](#release-notes) for the latest changes prior to installation or upgrading.**
+> **Note**: For migration steps from an Anchore Engine Helm chart deployment, refer to the [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart) section.
 
-Create a kubernetes secret containing your license file
+This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration. For further customization, refer to the [Parameters](#parameters) section.
 
-```shell
-export LICENSE_PATH="PATH TO LICENSE.YAML"
+1. **Create a Kubernetes Secret for License File**: Generate a Kubernetes secret to store your Anchore Enterprise license file.
 
-kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=${LICENSE_PATH}
-```
+    ```shell
+    export LICENSE_PATH="${PWD}/license.yaml"
+    kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=${LICENSE_PATH}
+    ```
 
-Create a kubernetes secret containing DockerHub credentials with access to the private Anchore Enterprise repositories. Contact [Anchore Support](https://get.anchore.com/contact/) for access.
+1. **Create a Kubernetes Secret for DockerHub Credentials**: Generate another Kubernetes secret for DockerHub credentials. These credentials should have access to private Anchore Enterprise repositories. Contact [Anchore Support](https://get.anchore.com/contact/) to obtain access.
 
-```shell
-export DOCKERHUB_PASSWORD="YOUR DOCKERHUB PASSWORD"
-export DOCKERHUB_USER="YOUR DOCKERHUB USERNAME"
-export DOCKERHUB_EMAIL="YOUR EMAIL ADDRESS"
+    ```shell
+    export DOCKERHUB_PASSWORD="password"
+    export DOCKERHUB_USER="username"
+    export DOCKERHUB_EMAIL="example@email.com"
+    kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=${DOCKERHUB_USER} --docker-password=${DOCKERHUB_PASSWORD} --docker-email=${DOCKERHUB_EMAIL}
+    ```
 
-kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=${DOCKERHUB_USER} --docker-password=${DOCKERHUB_PASSWORD} --docker-email=${DOCKERHUB_EMAIL}
-```
+1. **Add Chart Repository & Deploy Anchore Enterprise**: Create a custom values file, named `anchore_values.yaml`, to override any chart parameters. Refer to the [Parameters](#parameters) section for available options.
 
-Add Helm Chart Repository And Install Chart
+    > :exclamation: **Important**: Default passwords are specified in the chart. It's highly recommended to modify these before deploying.
 
-```shell
-helm repo add anchore https://charts.anchore.io
-```
+    ```shell
+    export RELEASE=my-release
+    helm repo add anchore https://charts.anchore.io
+    helm install ${RELEASE} -f anchore_values.yaml anchore/enterprise
+    ```
 
-Create a new file named `anchore_values.yaml` and add all desired custom [values](#parameters); then run the following command:
+    > **Note**: This command installs Anchore Enterprise with a chart-managed PostgreSQL database, which may not be suitable for production use.
 
-> **Note:** Passwords are set to defaults specified in the chart. It is strongly recommended to change passwords from the defaults when deploying.
+1. **Post-Installation Steps**: Anchore Enterprise will take some time to initialize. After the bootstrap phase, it will begin a vulnerability feed sync. Image analysis will show zero vulnerabilities until this sync is complete. This can take several hours based on the enabled feeds. Use the following [anchorectl](https://docs.anchore.com/current/docs/deployment/anchorectl/) commands to check the system status:
 
-```shell
-export RELEASE="YOUR RELEASE NAME"
+    ```shell
+    export RELEASE=my-release
+    export ANCHORECTL_PASSWORD=$(kubectl get secret "${RELEASE}-enterprise" -o ‘go-template={{index .data “ANCHORE_ADMIN_PASSWORD”}}’ | base64 -D -)
+    kubectl port-forward svc/${RELEASE}-enterprise-api 8228:8228 # port forward for anchorectl in another terminal
+    anchorectl system wait # anchorectl defaults to the user admin, and to the password ${ANCHORECTL_PASSWORD} automatically if set
+    ```
 
-helm install ${RELEASE} -f anchore_values.yaml anchore/enterprise
-```
+    > **Tip**: List all releases using `helm list`
 
-> **Note:** This installs Anchore Enterprise with a chart-managed Postgresql database, which may not be a production ready configuration.
+## Upgrading the Chart
 
-Anchore Enterprise will take several minutes to bootstrap. After the initial bootstrap period, Anchore Enterprise will begin a vulnerability feed sync. Until the sync is completed, image analysis will show zero vulnerabilities. **This sync can take multiple hours depending on which feeds are enabled.** The following [anchorectl](https://docs.anchore.com/current/docs/deployment/anchorectl/) command is available to poll and report back when the system is bootstrapped and vulnerability feeds have finished syncing:
+A Helm pre-upgrade hook initiates a Kubernetes job that scales down all active Anchore Enterprise pods and handles the Anchore database upgrade.
 
-```shell
-export RELEASE="YOUR RELEASE NAME"
+The Helm upgrade is marked as successful only upon the job's completion. This process causes the Helm client to pause until the job finishes and new Anchore Enterprise pods are initiated. To monitor the upgrade, follow the logs of the upgrade jobs, which are automatically removed after a successful Helm upgrade.
 
-export ANCHORECTL_PASSWORD=$(kubectl get secret "${RELEASE}-enterprise" -o ‘go-template={{index .data “ANCHORE_ADMIN_PASSWORD”}}’ | base64 -D -)
-
-# port forward or set up ingress for anchorectl; example, in another terminal:
-# kubectl port-forward svc/${RELEASE}-enterprise-api 8228:8228
-
-anchorectl system wait # anchorectl defaults to the user admin, and to the password ${ANCHORECTL_PASSWORD} automatically if set
-```
-
-> **Tip**: List all releases using `helm list`
-
-These commands deploy Anchore Enterprise on the Kubernetes cluster with default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
+  ```shell
+  export RELEASE=my-release
+  helm upgrade ${RELEASE} -f anchore_values.yaml anchore/enterprise
+  ```
 
 ## Uninstalling the Chart
 
-To uninstall/delete the deployment:
+To completely remove the Anchore Enterprise deployment and associated Kubernetes resources, follow the steps below:
 
-```bash
-export RELEASE="YOUR RELEASE NAME"
-
-helm delete ${RELEASE}
-```
-
-The command removes all the Kubernetes components associated with the chart and deletes the release.
+  ```shell
+  export RELEASE=my-release
+  helm delete ${RELEASE}
+  ```
 
 ## Configuration
 
-The following sections describe the various configuration options available for Anchore Enterprise. The default configuration is set in the included [values file](https://github.com/anchore/anchore-charts-dev/blob/main/stable/enterprise/values.yaml). To override these values, create a custom `anchore_values.yaml` file and add the desired configuration options. Your custom values file can be passed to `helm install` using the `-f` flag.
+This section outlines the available configuration options for Anchore Enterprise. The default settings are specified in the bundled [values file](https://github.com/anchore/anchore-charts-dev/blob/main/stable/enterprise/values.yaml). To customize these settings, create your own `anchore_values.yaml` file and populate it with the configuration options you wish to override. To apply your custom configuration during installation, pass your custom values file to the `helm install` command:
 
-Contact [Anchore Support](get.anchore.com/contact/) for more assistance with configuring your deployment.
+```shell
+helm install my-release anchore/enterprise -f custom_values.yaml
+```
 
-### External Database Setup
+For additional guidance on customizing your Anchore Enterprise deployment, reach out to [Anchore Support](get.anchore.com/contact/).
 
-Anchore Enterprise requires access to a Postgres-compatible database, version 13 or higher to operate. An external database such as AWS RDS or Google CloudSQL is recommended for production deployments. The Helm chart provides a chart-managed database by default unless otherwise configured.
+### External Database Requirements
 
-A minimum of 100GB allocated storage is recommended for images, tags, subscriptions, policies, and other artifacts. The database should be configured for max client connections of at least 2000. This may need to be increased when running more than the default number of Anchore services.
+Anchore Enterprise requires the use of a PostgreSQL-compatible database version 13 or above. For production environments, leveraging managed database services like AWS RDS or Google Cloud SQL is advised. While the Helm chart includes a chart-managed database by default, you can override this setting to use an external database.
+
+For optimal performance, allocate a minimum of 100GB storage to accommodate images, tags, subscriptions, policies, and other data entities. Furthermore, configure the database to support a minimum of 2,000 client connections. This limit may need to be adjusted upward if you're running more Anchore services than the default configuration.
 
 #### External Postgres Database Configuration
 
 ```yaml
 postgresql:
   chartEnabled: false
-
-  # auth.username, auth.password & auth.database are required values for external Postgres
   auth.password: <PASSWORD>
   auth.username: <USER>
   auth.database: <DATABASE>
-
-  # Required for external Postgres.
-  # Specify an external (already existing) Postgres deployment for use.
-  # Set to the host eg. mypostgres.myserver.io
   externalEndpoint: <HOSTNAME>
 
 anchoreConfig:
   database:
     ssl: true
     sslMode: require
-
 ```
 
 #### RDS Postgres Database Configuration With TLS
 
-Note that the `postgresql:` configuration section is the same as the previous example.
+To obtain a comprehensive AWS RDS PostgreSQL certificate bundle, which includes both intermediate and root certificates for all AWS regions, you can download it [here](https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem). An example of creating the certificate secret can be found in [TLS Configuration](#using-tls-internally).
 
 ```yaml
+postgresql:
+  chartEnabled: false
+  auth.password: <PASSWORD>
+  auth.username: <USER>
+  auth.database: <DATABASE>
+  externalEndpoint: <HOSTNAME>
+
 certStoreSecretName: some-cert-store-secret
 
 anchoreConfig:
@@ -152,12 +155,7 @@ anchoreConfig:
     sslMode: verify-full
     # sslRootCertName is the name of the Postgres root CA certificate stored in certStoreSecretName
     sslRootCertFileName: postgres-root-ca-cert
-
 ```
-
-To get a AWS RDS Postgres certificate bundle that contains both the intermediate and root certificates for all AWS Regions, download [here](https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem).
-
-An example of creating the certificate secret can be found in [TLS Configuration](#using-tls-internally).
 
 #### Google CloudSQL Database Configuration
 
@@ -170,9 +168,7 @@ postgresql:
   auth.database: <CLOUDSQL-DATABASE>
 
 cloudsql:
-  # To use CloudSQL in GKE set 'enable: true'
   enabled: true
-  # set CloudSQL instance: 'project:zone:instancename'
   instance: "project:zone:instancename"
   # Optional existing service account secret to use. See https://cloud.google.com/sql/docs/postgres/authentication
   useExistingServiceAcc: true
@@ -197,17 +193,15 @@ feeds:
         # The GitHub feeds driver requires a GitHub developer personal access token with no permission scopes selected.
         # See https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
         token: your-github-token
-
-      # Enable microsoft feeds
       msrc:
         enabled: true
 ```
 
 #### Enterprise Feeds External Database Configuration
 
-Anchore Enterprise Feeds require access to a Postgres-compatible database, version 13 or higher to operate. Note that this is a separate database from the primary Anchore Enterprise database. For Enterprise Feeds, an external database such as AWS RDS or Google CloudSQL is recommended for production deployments. The Helm chart provides a chart-managed database by default unless otherwise configured.
+Anchore Enterprise Feeds requires the use of a PostgreSQL-compatible database version 13 or above. This database is distinct from the primary Anchore Enterprise database. For production environments, leveraging managed database services like AWS RDS or Google Cloud SQL is advised. While the Helm chart includes a chart-managed database by default, you can override this setting to use an external database.
 
-See previous examples of configuring RDS Postgres and Google CloudSQL.
+See previous [examples](#external-database-requirements) of configuring RDS Postgresql and Google CloudSQL.
 
 ```yaml
 feeds:
@@ -217,49 +211,34 @@ feeds:
       sslMode: require
 
   feeds-db:
-    # enabled: false disables the chart-managed Postgres instance; this is a Helmism
     enabled: false
-
-    # auth.username, auth.password & auth.database are required values for external Postgres
     auth.password: <PASSWORD>
     auth.username: <USER>
     auth.database: <DATABASE>
-
-    # Required for external Postgres.
-    # Specify an external (already existing) Postgres deployment for use.
-    # Set to the host eg. mypostgres.myserver.io
     externalEndpoint: <HOSTNAME>
-
 ```
 
 ### Analyzer Image Layer Cache Configuration
 
-To improve performance, the Anchore Enterprise Analyzer can be configured to cache image layers. This can be
-particularly helpful if many images analyzed are built from the same set of base images.
+To improve performance, the Anchore Enterprise Analyzer can be configured to cache image layers. This can be particularly helpful if many images analyzed are built from the same set of base images.
 
-It is recommended that layer cache data is stored in an external volume to ensure that the cache does not use all
-of the ephemeral storage allocated for an analyzer host. See [Anchore Enterprise Layer Caching](https://docs.anchore.com/current/docs/configuration/storage/layer_caching/)
-documentation for details.
+It is recommended that layer cache data is stored in an external volume to ensure that the cache does not use all of the ephemeral storage allocated for an analyzer host. See [Anchore Enterprise Layer Caching](https://docs.anchore.com/current/docs/configuration/storage/layer_caching/) documentation for details. Refer to the default values file for configuring the analysis scratch volume.
 
 ```yaml
 anchoreConfig:
   analyzer:
-    # Enable image layer caching by setting a cache size > 0GB.
     layer_cache_max_gigabytes: 6
 ```
 
-Refer to the default values file for configuring the analysis scratch volume.
-
 ### Configuring Object Storage
 
-Anchore Enterprise stores metadata for images, tags, policies, and subscriptions.
+Anchore Enterprise utilizes an object storage system to persistently store metadata related to images, tags, policies, and subscriptions.
 
 #### Configuring The Object Storage Backend
 
-In addition to a database (Postgres) storage backend, Anchore Enterprise object storage drivers
-also support S3 and Swift storage. This enables scalable external object storage without burdening Postgres.
+In addition to a database (Postgres) storage backend, Anchore Enterprise object storage drivers also support S3 and Swift storage. This enables scalable external object storage without burdening Postgres.
 
-**Note: Using external object storage is recommended for production usage.**
+> **Note:** Using external object storage is recommended for production usage.
 
 - [Database backend](https://docs.anchore.com/current/docs/configuration/storage/object_store/database_driver/): Postgres database backend; this is the default, so using Postgres as the analysis archive storage backend requires no additional configuration
 - [Local FS backend](https://docs.anchore.com/current/docs/configuration/storage/object_store/filesystem_driver/): A local filesystem on the core pod (Does not handle sharding or replication; generally recommended only for testing)
@@ -268,20 +247,17 @@ also support S3 and Swift storage. This enables scalable external object storage
 
 ### Configuring Analysis Archive Storage
 
-The analysis archive subsystem of Anchore Enterprise stores large JSON documents and can consume a large amount of storage
-depending on the volume of images analyzed. A general rule for storage provisioning is 10MB per image analyzed. Thus with thousands of
-analyzed images, you may need many gigabytes of storage. The analysis archive allows configuration of compression and storage backend.
+The Analysis Archive subsystem within Anchore Enterprise is designed to store extensive JSON documents, potentially requiring significant storage capacity based on the number of images analyzed. As a general guideline, allocate approximately 10MB of storage per analyzed image. Consequently, analyzing thousands of images could necessitate gigabytes of storage space. The Analysis Archive subsystem offers configurable options for both data compression and selection of the storage backend.
 
 Configuration of external analysis archive storage is essentially identical to configuration of external object storage. See [Anchore Enterprise Analysis Archive](https://docs.anchore.com/current/docs/configuration/storage/analysis_archive/) documentation for details.
 
-**Note: Using external analysis archive storage is recommended for production usage.**
+> **Note:** Using external analysis archive storage is recommended for production usage.
 
 ### Existing Secrets
 
-For deployment scenarios that require version-controlled configuration to be used, it is recommended that credentials not be stored in values files.
-To accomplish this, you can manually create Kubernetes secrets and specify them as existing secrets in your values files.
+For deployments where version-controlled configurations are essential, it's advised to avoid storing credentials directly in values files. Instead, manually create Kubernetes secrets and reference them as existing secrets within your values files.
 
-Below we show example Kubernetes secret objects, and how they would be used in Anchore Enterprise configuration.
+Below are sample Kubernetes secret objects and corresponding guidelines on integrating them into your Anchore Enterprise configuration.
 
 ```yaml
 ---
@@ -326,22 +302,20 @@ feeds:
 
 ### Ingress
 
-[Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on the Ingress resource. Kubernetes supports a variety of ingress controllers, including AWS ALB controllers and GCE controllers.
+[Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) serves as the gateway to expose HTTP and HTTPS routes from outside the Kubernetes cluster to services within it. Routing is governed by rules specified in the Ingress resource. Kubernetes supports a variety of ingress controllers, such as AWS ALB and GCE controllers.
 
-This Helm chart provides basic ingress configuration suitable for customization. You can expose routes for Anchore Enterprise external APIs including the core external API, UI, reporting, RBAC, and feeds by configuring the `ingress:` section in your values file.
+This Helm chart includes a foundational ingress configuration that is customizable. You can expose various Anchore Enterprise external APIs, including the core API, UI, reporting, RBAC, and feeds, by editing the `ingress` section in your values file.
 
-Ingress is disabled by default in the Helm chart. The NGINX ingress controller with the core API and UI routes can be enabled by changing the `ingress.enabled` value to `true`.
-
-Note that the [Kubernetes NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/) must be installed into the cluster for this configuration to work.
+Ingress is disabled by default in this Helm chart. To enable it, along with the [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/) for core API and UI routes, set the `ingress.enabled` value to `true`.
 
 ```yaml
 ingress:
   enabled: true
 ```
 
-### Configuring The ALB Ingress Controller
+#### ALB Ingress Controller
 
-Note that the [Kubernetes ALB ingress controller](https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html) must be installed into the cluster for this configuration to work.
+The [Kubernetes ALB ingress controller](https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html) must be installed into the cluster for this configuration to work.
 
 ```yaml
 ingress:
@@ -367,7 +341,7 @@ ui:
 
 #### GCE Ingress Controller
 
-Note that the [Kubernetes GCE ingress controller](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress) must be installed into the cluster for this configuration to work.
+The [Kubernetes GCE ingress controller](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress) must be installed into the cluster for this configuration to work.
 
 ```yaml
 ingress:
@@ -405,7 +379,7 @@ anchoreConfig:
 
 ### Prometheus Metrics
 
-Anchore Enterprise supports exporting Prometheus metrics from each container.
+Anchore Enterprise offers native support for exporting Prometheus metrics from each of its containers. When this feature is enabled, each service exposes metrics via its existing service port. If you're adding Prometheus manually to your deployment, you'll need to configure it to recognize each pod and its corresponding ports.
 
 ```yaml
 anchoreConfig:
@@ -414,16 +388,13 @@ anchoreConfig:
     auth_disabled: true
 ```
 
-When enabled, each service provides metrics over its existing service port, so your Prometheus deployment will need to
-know about each pod and the ports it provides. You'll need to know this if adding Prometheus manually to your deployment.
-
-If using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md), a ServiceMonitor can be deployed into your cluster (in same namespace as your Anchore Enterprise release) and the Prometheus operator will start scraping the configured endpoints for metrics.
+For those using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md), a ServiceMonitor can be deployed within the same namespace as your Anchore Enterprise release. Once deployed, the Prometheus operator will automatically begin scraping the pre-configured endpoints for metrics.
 
 #### Example ServiceMonitor Configuration
 
 The `targetPort` values in this example use the default Anchore Enterprise service ports.
 
-Note that you will require a ServiceAccount for Prometheus (referenced in the Prometheus configuration below).
+You will require a ServiceAccount for Prometheus (referenced in the Prometheus configuration below).
 
 ```yaml
 ---
@@ -501,9 +472,7 @@ spec:
 
 ### Scaling Individual Services
 
-Anchore Enterprise services can be scaled by adjusting replica counts.
-
-To set a specific number of service containers:
+Anchore Enterprise services can be scaled by adjusting replica counts:
 
 ```yaml
 analyzer:
@@ -513,23 +482,15 @@ policyEngine:
   replicaCount: 3
 ```
 
-To update the number in a running configuration:
-
-```shell
-export RELEASE="YOUR-RELEASE-NAME"
-
-helm upgrade --set analyzer.replicaCount=2 ${RELEASE} anchore/enterprise -f anchore_values.yaml
-```
-
-Contact [Anchore Support](https://get.anchore.com/contact/) for assistance in scaling and tuning your Anchore Enterprise installation.
+> **Note:** Contact [Anchore Support](https://get.anchore.com/contact/) for assistance in scaling and tuning your Anchore Enterprise installation.
 
 ### Using TLS Internally
 
-Communication between Anchore Enterprise services can be configured with TLS. See the [Anchore TLS](https://docs.anchore.com/current/docs/configuration/tls_ssl/) documentation for more information.
+Anchore Enterprise supports TLS for secure communication between its services. For detailed configuration steps, refer to the [Anchore TLS documentation](https://docs.anchore.com/current/docs/configuration/tls_ssl/).
 
-A Kubernetes secret needs to be created in the same namespace as the chart installation. This secret should contain all custom certificates, including CA certificates and any certificates used for internal TLS communication.
+To implement this, create a Kubernetes secret in the same namespace where the Helm chart is installed. This secret should encapsulate all custom certificates, including CA certificates and those used for internal TLS communication.
 
-This secret will be mounted to all Anchore Enterprise containers at `/home/anchore/certs`. The Anchore Enterprise entrypoint script configures all certificates found in `/home/anchore/certs` along with the operating system's default CA bundle.
+The Kubernetes secret will be mounted into all Anchore Enterprise containers at the path `/home/anchore/certs`. Anchore Enterprise's entrypoint script will auto-configure all certificates located in this directory, supplementing them with the operating system's default CA bundle.
 
 ```yaml
 ---
@@ -560,22 +521,20 @@ certStoreSecretName: anchore-tls-certs
 anchoreConfig:
   database:
     timeout: 120
-    # Use SSL, but the default Postgres config in helm's stable repo does not support SSL on server side, so this should be set for external DBs only.
-    # All SSL dbConfig values are only utilized when ssl=true
     ssl: true
     sslMode: verify-full
     # sslRootCertName is the name of the Postgres root CA certificate stored in certStoreSecretName
     sslRootCertFileName: rds-combined-ca-cert-bundle.pem
 
   internalServicesSSL:
-    # Set internalServicesSSL.enabled to true to force all Enterprise services to use SSL for internal communication
     enabled: true
-    # Specify whether cert is verfied against the local certifacte bundle (If set to false, self-signed certs are allowed)
+    # Specify whether cert is verified against the local certificate bundle (If set to false, self-signed certs are allowed)
     verifyCerts: true
     certSecretKeyFileName: internal-cert-key.pem
     certSecretCertFileName: internal-cert.pem
 
 ui:
+  # Specify an LDAP CA cert if using LDAP authenication
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
 
@@ -593,39 +552,42 @@ See the [Anchore Reports](https://docs.anchore.com/current/docs/configuration/re
 
 ### Installing on Openshift
 
-As of August 2nd, 2023, helm does not support passing `null` values to child/dependency charts. See the [helm issue](https://github.com/helm/helm/issues/9027) for more details. With the feeds chart being a dependency, you will need to deploy the `feeds` chart as a standalone chart and point the `enterprise` deployment to the standalone feeds deployment. Also note that you need to disable or set the appropriate values for the containerSecurityContext, runAsUser, and fsGroup for ui-redis and any postgres db you're using the enteprise chart to deploy (eg. postgresql.chartEnabled or feeds-db.chartEnabled).
+As of August 2, 2023, Helm does not offer native support for passing `null` values to child or dependency charts. For details, refer to this [Helm GitHub issue](https://github.com/helm/helm/issues/9027). Given that the `feeds` chart is a dependency, a workaround is to deploy it as a standalone chart and configure the `enterprise` deployment to point to this separate `feeds` deployment.
+
+Additionally, be aware that you'll need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled` or `feeds-db.chartEnabled`).
 
 For example:
 
-1. deploy feeds chart as a standalone deployment
-```shell
-helm install feedsy anchore/feeds \
-  --set securityContext.fsGroup=null \
-  --set securityContext.runAsGroup=null \
-  --set securityContext.runAsUser=null \
-  --set feeds-db.primary.containerSecurityContext.enabled=false \
-  --set feeds-db.primary.podSecurityContext.enabled=false
-```
+1. **deploy feeds chart as a standalone deployment:**
 
-2. deploy the enterprise chart with appropriate values
-```shell
-helm install anchore . \
-  --set securityContext.fsGroup=null \
-  --set securityContext.runAsGroup=null \
-  --set securityContext.runAsUser=null \
-  --set feeds.chartEnabled=false \
-  --set feeds.url=feedsy-feeds \
-  --set postgresql.primary.containerSecurityContext.enabled=false \
-  --set postgresql.primary.podSecurityContext.enabled=false \
-  --set ui-redis.master.podSecurityContext.enabled=false \
-  --set ui-redis.master.containerSecurityContext.enabled=false
-```
+    ```shell
+    helm install my-release anchore/feeds \
+      --set securityContext.fsGroup=null \
+      --set securityContext.runAsGroup=null \
+      --set securityContext.runAsUser=null \
+      --set feeds-db.primary.containerSecurityContext.enabled=false \
+      --set feeds-db.primary.podSecurityContext.enabled=false
+    ```
 
-Note: disabling the containerSecurityContext and podSecurityContext may not be suitable for production. See [Redhat's documentation](https://docs.openshift.com/container-platform/4.13/authentication/managing-security-context-constraints.html#managing-pod-security-policies) on what may be suitable for production.
+1. **deploy the enterprise chart with appropriate values:**
 
-For more information on the openshift.io/sa.scc.uid-range annotation, see the [openshift docs](https://docs.openshift.com/dedicated/authentication/managing-security-context-constraints.html#security-context-constraints-pre-allocated-values_configuring-internal-oauth)
+    ```shell
+    helm install anchore . \
+      --set securityContext.fsGroup=null \
+      --set securityContext.runAsGroup=null \
+      --set securityContext.runAsUser=null \
+      --set feeds.chartEnabled=false \
+      --set feeds.url=my-release-feeds \
+      --set postgresql.primary.containerSecurityContext.enabled=false \
+      --set postgresql.primary.podSecurityContext.enabled=false \
+      --set ui-redis.master.podSecurityContext.enabled=false \
+      --set ui-redis.master.containerSecurityContext.enabled=false
+    ```
 
-#### Example Openshift values file:
+    > **Note:** disabling the containerSecurityContext and podSecurityContext may not be suitable for production. See [Redhat's documentation](https://docs.openshift.com/container-platform/4.13/authentication/managing-security-context-constraints.html#managing-pod-security-policies) on what may be suitable for production. For more information on the openshift.io/sa.scc.uid-range annotation, see the [openshift docs](https://docs.openshift.com/dedicated/authentication/managing-security-context-constraints.html#security-context-constraints-pre-allocated-values_configuring-internal-oauth)
+
+#### Example Openshift values file
+
 ```yaml
 # NOTE: This is not a production ready values file for an openshift deployment.
 
@@ -635,7 +597,7 @@ securityContext:
   runAsUser: null
 feeds:
   chartEnabled: false
-  url: feedsy-feeds
+  url: my-release-feeds
 postgresql:
   primary:
     containerSecurityContext:
@@ -649,6 +611,109 @@ ui-redis:
     containerSecurityContext:
       enabled: false
 ```
+
+### Migrating to the Anchore Enterprise Helm Chart
+
+This guide provides steps for transitioning from an Anchore Engine Helm chart deployment to the updated Anchore Enterprise Helm chart, a necessary step for users planning to upgrade to Anchore Enterprise version 5.0.0 or later.
+
+  > :warning: **Warning**: The values file used by the Anchore Enterprise Helm chart is different from the one used by the Anchore Engine Helm chart. Make sure to convert your existing values file accordingly.
+
+A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts) is available to automate the conversion of your Anchore Engine values file to the new Enterprise format.
+
+#### Migration Prerequisites
+
+- **Anchore Version**: Ensure that your current deployment is running Anchore Enterprise version 4.9.0 or higher.
+
+- **PostgreSQL Version**: You need PostgreSQL version 13 or higher. For upgrading your existing PostgreSQL installation, refer to the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html).
+  > **Note:** This chart deploys PostgreSQL 13 by default.
+
+- **Runtime Environment**: Docker or Podman must be installed on the machine where the migration will run.
+
+#### Step-by-Step Migration Process
+
+1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format. This command mounts a local volume to persistently store the output files, and it mounts the input values file within the container for conversion.It's imperative to review both the output and the new [values file](values.yaml) before moving forward.
+
+    ```shell
+    export VALUES_FILE_NAME=my-values-file.yaml
+    docker run -v ${PWD}:/tmp -v ${PWD}/${VALUES_FILE_NAME}:/app/${VALUES_FILE_NAME} docker.io/anchore/enterprise-helm-migrator:latest -e /app/${VALUES_FILE_NAME} -d /tmp/output
+    ```
+
+#### If Using an External PostgreSQL Database
+
+1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
+
+    ```shell
+    export ENGINE_RELEASE=my-engine-release
+    export NAMESPACE=anchore
+    kubectl scale deployment --replicas=0 -l app=${ENGINE_RELEASE}-anchore-engine -n ${NAMESPACE}
+    ```
+
+1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
+
+    ```shell
+    export ENTERPRISE_RELEASE=my-enterprise-release
+    export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
+    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true anchore/enterprise
+    ```
+
+    > **Note:** The `upgradeJob.force` flag is required to force the upgrade job to run upon installation. This value is not needed for future upgrades.
+
+1. **Verification and Cleanup**: After confirming that the Anchore Enterprise deployment is functional, you can safely uninstall the old Anchore Engine deployment.
+
+    ```shell
+    helm uninstall ${ENGINE_RELEASE} -n ${NAMESPACE}
+    ```
+
+#### If Using the Dependent PostgreSQL Chart
+
+1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
+
+    ```shell
+    export ENGINE_RELEASE=my-engine-release
+    export NAMESPACE=anchore
+    kubectl scale deployment --replicas=0 -l app=${ENGINE_RELEASE}-anchore-engine -n ${NAMESPACE}
+    ```
+
+1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
+
+    ```shell
+    export ENTERPRISE_RELEASE=my-enterprise-release
+    export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
+    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true anchore/enterprise
+    ```
+
+1. **Scale Down Anchore Enterprise**: Before migrating the database, scale down the new Anchore Enterprise deployment to zero replicas.
+
+    ```shell
+    kubectl scale deployment --replicas=0 -l app=${ENTERPRISE_RELEASE}-enterprise
+    ```
+
+1. **Database Preparation**: Replace the existing Anchore database with a new database in PostgreSQL 13.
+
+    ```shell
+    export NEW_DB_HOST=${ENTERPRISE_RELEASE}-postgresql
+    export ANCHORE_DATABASE_NAME=anchore
+    dropdb -h ${NEW_DB_HOST} -U ${PGUSER} ${ANCHORE_DATABASE_NAME}; psql -h ${NEW_DB_HOST} -c 'CREATE DATABASE ${ANCHORE_DATABASE_NAME}'
+    ```
+
+1. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
+
+    ```shell
+    export OLD_PG_DB_HOST=${ENGINE_RELEASE}-postgresql
+    pg_dump -h ${OLD_PG_DB_HOST} -c ${ANCHORE_DATABASE_NAME} | psql -h ${NEW_DB_HOST} ${ANCHORE_DATABASE_NAME}
+    ```
+
+1. **Upgrade Anchore Enterprise**: After migrating the data, upgrade the Anchore Enterprise Helm deployment.
+
+    ```shell
+    helm upgrade ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} anchore/enterprise
+    ```
+
+1. **Final Verification and Cleanup**: After ensuring the new deployment is operational, uninstall the old Anchore Engine deployment.
+
+    ```shell
+    helm uninstall ${ENGINE_RELEASE} -n ${NAMESPACE}
+    ```
 
 ## Parameters
 
@@ -1050,12 +1115,11 @@ ui-redis:
 
 ## Release Notes
 
-See the Anchore [Release Notes](https://docs.anchore.com/current/docs/releasenotes/) for updates to Anchore Enterprise.
+For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
 
-A major chart version change (v0.1.2 -> v1.0.0) indicates that there is an **incompatible breaking change needing manual actions.**
+- **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention.
+- **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a modification that may require adjustments to your values file.
 
-A minor chart version change (v0.1.2 -> v0.2.0) indicates a change that **may require updates to your values file.**
+### v0.0.x
 
-### v0.0.1
-
-* This is a pre-release version of the Anchore Enterprise Helm chart. It is not intended for production use.
+- This is a pre-release version of the Anchore Enterprise Helm chart and is not recommended for production deployments.
