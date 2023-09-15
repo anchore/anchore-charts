@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
         dot_string_dict = {
             "anchorePolicyEngine.replicaCount": 2,
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'replicaCount': 2
             }
@@ -33,7 +33,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
             "anchorePolicyEngine.resources.requests.cpu": 1,
             "anchorePolicyEngine.resources.requests.memory": "1G"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'resources': {
                     'limits': {
@@ -55,7 +55,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
             "anchorePolicyEngine.labels.foobar": "baz",
             "anchorePolicyEngine.labels.with.a.dot.foobar": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'labels':
                     {
@@ -72,7 +72,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
             "anchorePolicyEngine.annotations.foobar": "baz",
             "anchorePolicyEngine.annotations.with.a.dot.foobar": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'annotations':
                     {
@@ -89,7 +89,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
             "anchorePolicyEngine.deploymentAnnotations.foobar": "baz",
             "anchorePolicyEngine.deploymentAnnotations.with.a.dot.foobar": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'deploymentAnnotations': {
                     'foobar': 'baz',
@@ -105,7 +105,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
             "anchorePolicyEngine.nodeSelector.name": "foo",
             "anchorePolicyEngine.nodeSelector.with.a.dot.name": "bar"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'nodeSelector': {
                     'name': 'foo',
@@ -127,7 +127,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'tolerations': [
                     {
@@ -147,7 +147,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
             "anchorePolicyEngine.affinity.name": "foo",
             "anchorePolicyEngine.affinity.with.a.dot.name": "bar"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'affinity':
                     {
@@ -168,7 +168,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'extraEnv': [
                     {
@@ -185,7 +185,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
         dot_string_dict = {
             "anchorePolicyEngine.serviceAccountName": "Null"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'serviceAccountName': "Null"
             }
@@ -205,7 +205,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
             "anchorePolicyEngine.service.labels.with.a.dot": "qux",
         }
 
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'service': {
                     "name": "Null",
@@ -234,6 +234,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'policy_engine': {
                     'cycle_timers': {
                         "feed_sync": 14400,
@@ -253,6 +254,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'policy_engine': {
                     'overrideFeedsToUpstream': True
                 }

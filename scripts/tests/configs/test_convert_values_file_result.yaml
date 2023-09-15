@@ -8,4 +8,10 @@
 "api":
   "extraEnv":
     - "name": "ANCHORE_MAX_REQUEST_THREADS"
-      "value": 9876543210
+      "value": "9876543210"
+"anchoreConfig":
+  "user_authentication":
+    "hashed_passwords": False
+"extraEnv":
+  - "name": "ANCHORE_MAX_REQUEST_THREADS"
+    "value": "9876543210"

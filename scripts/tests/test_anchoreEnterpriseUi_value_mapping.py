@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseUi.enabled": True, # deprecated
         }
-        expected_result = {}
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -26,7 +26,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.image": "docker.io/anchore/enterprise-ui:v5.0.0",
             "anchoreEnterpriseUi.imagePullPolicy": "IfNotPresent"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'image': "docker.io/anchore/enterprise-ui:v5.0.0",
                 'imagePullPolicy': "IfNotPresent"
@@ -39,7 +39,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseUi.replicaCount": 2,
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'replicaCount': 2
             }
@@ -55,7 +55,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.resources.requests.cpu": 1,
             "anchoreEnterpriseUi.resources.requests.memory": "1G"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'resources': {
                     'limits': {
@@ -79,7 +79,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.labels.myOtherLabel": "myOtherValue",
             "anchoreEnterpriseUi.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'labels':
                     {
@@ -98,7 +98,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.annotations.bar": "baz",
             "anchoreEnterpriseUi.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'annotations':
                     {
@@ -118,7 +118,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.deploymentAnnotations.bar": "baz",
             "anchoreEnterpriseUi.deploymentAnnotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'deploymentAnnotations':
                     {
@@ -137,7 +137,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.nodeSelector.value": "bar",
             "anchoreEnterpriseUi.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'nodeSelector':
                     {
@@ -159,7 +159,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'tolerations': [
                     {
@@ -178,7 +178,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.affinity.value": "bar",
             "anchoreEnterpriseUi.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'affinity':{
                     'name': 'foo',
@@ -202,7 +202,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'extraEnv': [
                     {
@@ -222,7 +222,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseUi.serviceAccountName": "Null"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'serviceAccountName': "Null"
             }
@@ -242,7 +242,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.service.labels": {},
             "anchoreEnterpriseUi.service.sessionAffinity": "ClientIP"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'service': {
                     "name": "Null",
@@ -266,7 +266,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "anchoreEnterpriseUi.dbUser": "anchoreengineui",
             "anchoreEnterpriseUi.dbPass": "anchore-postgres,123ui"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'dbUser': "anchoreengineui",
                 'dbPass': "anchore-postgres,123ui"
@@ -285,6 +285,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'appdb_config': {
                         'native': True,
@@ -305,7 +306,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseUi.ldapsRootCaCertName": "Null"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'ldapsRootCaCertName': "Null"
             }
@@ -319,6 +320,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'log_level': "http"
                 }
@@ -333,6 +335,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'enable_proxy': False
                 }
@@ -347,6 +350,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'enable_ssl': False
                 }
@@ -361,6 +365,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'enable_shared_login': True
                 }
@@ -375,6 +380,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'redis_flushdb': True
                 }
@@ -389,6 +395,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'force_websocket': False
                 }
@@ -404,6 +411,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'authentication_lock': {
                         'count': 5,
@@ -431,6 +439,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'custom_links': {
                         'title': "Custom External Links",
@@ -458,6 +467,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'enable_add_repositories': {
                         'admin': True,
@@ -475,6 +485,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'ui': {
                     'enrich_inventory_view': True
                 }
@@ -488,6 +499,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
             "ui-redis.auth.password": "anchore-redis,123"
         }
         expected_result = {
+                'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
                 'ui-redis': {
                     'auth': {
                         'password': "anchore-redis,123"
@@ -501,7 +513,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "ui-redis.architecture": "standalone"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
                 'ui-redis': {
                     'architecture': "standalone"
                 }
@@ -513,7 +525,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "ui-redis.master.persistence.enabled": False
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
                 'ui-redis': {
                     'master': {
                         'persistence': {
@@ -529,7 +541,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "ui-redis.enabled": False
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
                 'ui-redis': {
                     'chartEnabled': False
                 }
@@ -541,7 +553,7 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "ui-redis.externalEndpoint": "my-redis-place.someplace"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
                 'ui-redis': {
                     'externalEndpoint': "my-redis-place.someplace"
                 }

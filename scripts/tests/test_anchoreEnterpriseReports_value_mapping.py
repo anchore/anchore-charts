@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseReports.enabled": True, # deprecated
         }
-        expected_result = {}
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -25,7 +25,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseReports.replicaCount": 2,
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'replicaCount': 2
             }
@@ -41,7 +41,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
             "anchoreEnterpriseReports.resources.requests.cpu": 1,
             "anchoreEnterpriseReports.resources.requests.memory": "1G"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'resources': {
                     'limits': {
@@ -65,7 +65,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
             "anchoreEnterpriseReports.labels.myOtherLabel": "myOtherValue",
             "anchoreEnterpriseReports.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'labels':
                     {
@@ -84,7 +84,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
             "anchoreEnterpriseReports.annotations.bar": "baz",
             "anchoreEnterpriseReports.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'annotations':
                     {
@@ -104,7 +104,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
             "anchoreEnterpriseReports.deploymentAnnotations.bar": "baz",
             "anchoreEnterpriseReports.deploymentAnnotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'deploymentAnnotations':
                     {
@@ -123,7 +123,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
             "anchoreEnterpriseReports.nodeSelector.value": "bar",
             "anchoreEnterpriseReports.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'nodeSelector':
                     {
@@ -145,7 +145,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'tolerations': [
                     {
@@ -164,7 +164,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
             "anchoreEnterpriseReports.affinity.value": "bar",
             "anchoreEnterpriseReports.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'affinity':{
                     'name': 'foo',
@@ -180,7 +180,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseReports.extraEnv": []
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'extraEnv': []
             }
@@ -192,7 +192,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseReports.serviceAccountName": ""
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'serviceAccountName': ""
             }
@@ -211,7 +211,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
             "anchoreEnterpriseReports.service.labels.foobar": "baz",
             "anchoreEnterpriseReports.service.labels.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'reports': {
                 'service': {
                     "name": "Null",
@@ -234,6 +234,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'reports': {
                     'enable_graphiql': True
                 }
@@ -248,6 +249,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'reports_worker': {
                     'enable_data_ingress': True
                 }
@@ -262,6 +264,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'reports_worker': {
                     'enable_data_egress': False
                 }
@@ -276,6 +279,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'reports_worker': {
                     'data_egress_window': 1
                 }
@@ -290,6 +294,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'reports_worker': {
                     'data_refresh_max_workers': 1
                 }
@@ -304,6 +309,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'reports_worker': {
                     'data_load_max_workers': 1
                 }
@@ -321,6 +327,7 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'reports_worker': {
                     'cycle_timers': {
                         'reports_data_load': 600,

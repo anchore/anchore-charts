@@ -19,6 +19,13 @@ def represent_block_scalar(dumper, data):
     style = "|" if "\n" in data else '"'
     return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=style)
 
+def convert_to_str(env_var):
+    if isinstance(env_var, dict):
+        if not isinstance(env_var.get('value'), str):
+            env_var['value'] = str(env_var.get('value'))
+    else:
+        return str(env_var)
+
 def convert_values_file(file, results_dir):
     file_name = os.path.basename(file)
     prep_dir(path=results_dir, clean=True)
@@ -33,11 +40,26 @@ def convert_values_file(file, results_dir):
 
     for key, val in enterprise_chart_env_var_dict.items():
         if isinstance(val, list):
+            for index, env_var in enumerate(val):
+                val[index] = convert_to_str(env_var) or env_var
+        elif isinstance(val, dict):
+            for index, env_var in enumerate(val.get("extraEnv", [])):
+                val["extraEnv"][index] = convert_to_str(env_var) or env_var
+
+        # taking the environment variables and adding it into the enterprise_chart_values_dict to make one dictionary
+        if key not in enterprise_chart_values_dict:
+            val_type = type(val)
+            enterprise_chart_values_dict[key] = val_type()
+        if isinstance(val, list):
             enterprise_chart_values_dict[key] = enterprise_chart_values_dict[key] + val
         elif isinstance(val, dict):
             enterprise_chart_values_dict[key] = enterprise_chart_values_dict.get(key, {})
             enterprise_chart_values_dict[key]["extraEnv"] = enterprise_chart_values_dict[key].get("extraEnv", [])
             enterprise_chart_values_dict[key]["extraEnv"] = enterprise_chart_values_dict[key]["extraEnv"] + val.get("extraEnv", [])
+
+    # for the current bitnami postgres chart, if your user is specifically the 'postgres' admin user, you need to override global.postgresql.auth.postgresPassword
+    if (enterprise_chart_values_dict.get('postgresql', {}).get('auth', {}).get('username') == 'postgres') and (enterprise_chart_values_dict.get('postgresql', {}).get('auth', {}).get('password')):
+        enterprise_chart_values_dict['postgresql']['auth']['postgresPassword'] = enterprise_chart_values_dict['postgresql']['auth']['password']
 
     yaml.add_representer(str, represent_block_scalar)
     yaml_data = yaml.dump(enterprise_chart_values_dict, default_flow_style=False)
@@ -93,6 +115,10 @@ def replace_keys_with_mappings(dot_string_dict, results_dir):
 
     env_var_mapping = {**enterprise_env_var_mapping, **feeds_env_var_mapping}
     logs_dir = f"{results_dir}/logs"
+    if not dot_string_dict.get("anchoreGlobal.hashedPasswords"):
+        log_file_name = "warning.log"
+        write_to_file(f"hashedPasswords is not currently used. You should _really_ consider using it. Please see docs on how to migrate to hashed passwords.\n", os.path.join(logs_dir, log_file_name), "a")
+        dot_string_dict["anchoreGlobal.hashedPasswords"] = False
     for dotstring_key, val in dot_string_dict.items():
         keys = dotstring_key.split('.')
 

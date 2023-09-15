@@ -128,7 +128,7 @@ FULL_CHANGE_KEY_MAPPING = {
     "postgresql.postgresPassword": "postgresql.auth.password",
     "postgresql.postgresUser": "postgresql.auth.username",
     "postgresql.postgresPort": "postgresql.primary.service.ports.postgresql",
-    "postgresql.imageTag": "postgresql.imageTag",
+    "postgresql.imageTag": "postgresql.image.tag",
 
     "anchore-feeds-db.imageTag": "feeds.feeds-db.image.tag",
     "anchore-feeds-gem-db.imageTag": "feeds.gem-db.image.tag",

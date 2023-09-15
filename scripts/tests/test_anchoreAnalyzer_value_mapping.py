@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         dot_string_dict = {
             "anchoreAnalyzer.replicaCount": 2,
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'replicaCount': 2
             }
@@ -29,7 +29,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         dot_string_dict = {
             "anchoreAnalyzer.containerPort": 8084,
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'service': {
                     'port': 8084
@@ -48,7 +48,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'extraEnv': [
                     {
@@ -65,7 +65,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         dot_string_dict = {
             "anchoreAnalyzer.serviceAccountName": "foo",
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'serviceAccountName': 'foo'
             }
@@ -80,7 +80,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
             "anchoreAnalyzer.resources.requests.cpu": 1,
             "anchoreAnalyzer.resources.requests.memory": "1G",
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'resources': {
                     'limits': {
@@ -103,7 +103,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
             "anchoreAnalyzer.labels.value": "bar",
             "anchoreAnalyzer.labels.kubernetes.io/description": "baz",
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'labels':
                     {
@@ -122,7 +122,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
             "anchoreAnalyzer.annotations.value": "bar",
             "anchoreAnalyzer.annotations.kubernetes.io/description": "baz",
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'annotations':
                     {
@@ -140,7 +140,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
             "anchoreAnalyzer.deploymentAnnotations.name": "foo",
             "anchoreAnalyzer.deploymentAnnotations.value": "bar",
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'deploymentAnnotations': {
                     'name': 'foo',
@@ -157,7 +157,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
             "anchoreAnalyzer.nodeSelector.value": "bar",
 
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'nodeSelector':
                     {
@@ -179,7 +179,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'tolerations': [
                     {
@@ -197,7 +197,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
             "anchoreAnalyzer.affinity.name": "foo",
             "anchoreAnalyzer.affinity.value": "bar",
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'analyzer': {
                 'affinity': {
                     'name': 'foo',
@@ -214,6 +214,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'analyzer': {
                     'cycle_timers': {
                         'image_analyzer': 1
@@ -231,6 +232,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'analyzer': {
                     'max_threads': 1
                 }
@@ -246,6 +248,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'analyzer': {
                     'layer_cache_max_gigabytes': 1
                 }
@@ -261,6 +264,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'analyzer': {
                     'enable_hints': False
                 }
@@ -294,6 +298,7 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         }
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'analyzer': {
                     'configFile': {
                         'retrieve_files': {
@@ -341,5 +346,5 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
                 }
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
-        self.assertEqual(result[0], {})
+        self.assertEqual(result[0], {'anchoreConfig': {'user_authentication': {'hashed_passwords': False}}})
         self.assertEqual(result[1], expected_result)

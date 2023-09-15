@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
         dot_string_dict = {
             "anchoreCatalog.replicaCount": 2,
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'replicaCount': 2
             }
@@ -34,7 +34,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'extraEnv': [
                     {
@@ -51,7 +51,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
         dot_string_dict = {
             "anchoreCatalog.serviceAccountName": "Null"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'serviceAccountName': "Null"
             }
@@ -70,7 +70,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreCatalog.service.labels.foobar": "baz",
             "anchoreCatalog.service.labels.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'service': {
                     "name": "Null",
@@ -98,7 +98,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreCatalog.resources.requests.cpu": 1,
             "anchoreCatalog.resources.requests.memory": "1G"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'resources': {
                     'limits': {
@@ -121,7 +121,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreCatalog.labels.myOtherLabel": "myOtherValue",
             "anchoreCatalog.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'labels':
                     {
@@ -140,7 +140,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreCatalog.annotations.bar": "baz",
             "anchoreCatalog.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'annotations':
                     {
@@ -160,7 +160,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreCatalog.deploymentAnnotations.bar": "baz",
             "anchoreCatalog.deploymentAnnotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'deploymentAnnotations':
                     {
@@ -179,7 +179,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreCatalog.nodeSelector.value": "bar",
             "anchoreCatalog.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'nodeSelector':
                     {
@@ -201,7 +201,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'tolerations': [
                     {
@@ -220,7 +220,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreCatalog.affinity.value": "bar",
             "anchoreCatalog.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'affinity':{
                     'name': 'foo',
@@ -250,6 +250,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'catalog': {
                     'cycle_timers': {
                         'analyzer_queue': 1,
@@ -282,6 +283,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'catalog': {
                     'event_log': {
                         'max_retention_age_days': 0,
@@ -315,6 +317,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'catalog': {
                     'analysis_archive': {
                         'compression': {
@@ -351,6 +354,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'catalog': {
                     'object_store': {
                         'compression': {
@@ -375,6 +379,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'catalog': {
                     'runtime_inventory': {
                         'image_ttl_days': 1
@@ -392,6 +397,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
 
         expected_result = {
             'anchoreConfig': {
+                'user_authentication': {'hashed_passwords': False},
                 'catalog': {
                     'down_analyzer_task_requeue': True
                 }
