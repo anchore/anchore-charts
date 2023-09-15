@@ -3,23 +3,31 @@ name: "Lint changed charts using chart-testing tool"
 on:
   - pull_request
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+      with:
+        egress-policy: audit
+
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
 
     - name: Fetch history
       run: git fetch --prune --unshallow
 
     - name: Shellcheck
-      uses: ludeeus/action-shellcheck@2.0.0
+      uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
 
     - name: Set up chart-testing
-      uses: helm/chart-testing-action@v2.4.0
+      uses: helm/chart-testing-action@e8788873172cb653a90ca2e819d79d65a66d4e76 # v2.4.0
 
     - name: Run chart-testing (list-changed)
       id: list-changed

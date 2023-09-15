@@ -23,11 +23,16 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          egress-policy: audit
+
       - name: Install readme-generator-for-helm
         run: npm install -g @bitnami/readme-generator-for-helm
 
       - name: Checkout charts
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
           path: ${{ github.repository }}
           ref: ${{github.event.pull_request.head.ref}}
