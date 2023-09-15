@@ -382,6 +382,6 @@ A major chart version change (v0.1.2 -> v1.0.0) indicates that there is an **inc
 
 A minor chart version change (v0.1.2 -> v0.2.0) indicates a change that **may require updates to your values file.**
 
-### v0.0.1
+### v0.0.x
 
 * This is a pre-release version of the Anchore Enterprise Helm chart. It is not intended for production use.

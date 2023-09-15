@@ -1,8 +1,8 @@
 suite: Feeds Resources Tests
 templates:
-  - feeds_deployment.yaml
-  - feeds_secret.yaml
-  - feeds_configmap.yaml
+  - deployment.yaml
+  - secret.yaml
+  - configmap.yaml
 release:
   name: test-release
   namespace: test-namespace
@@ -14,7 +14,7 @@ values:
 
 tests:
   - it: should render a valid feeds config file
-    template: feeds_configmap.yaml
+    template: configmap.yaml
     asserts:
       - matchRegex:
           path: data["config.yaml"]
@@ -27,7 +27,7 @@ tests:
           value: test-release-feeds
 
   - it: should render component labels
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -43,7 +43,7 @@ tests:
 
   - it: should render component annotations
     templates:
-      - feeds_deployment.yaml
+      - deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -58,7 +58,7 @@ tests:
             bar: "baz-annotation"
 
   - it: should render component matchLabels
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -68,7 +68,7 @@ tests:
             app.kubernetes.io/component: feeds
 
   - it: should render component serviceAccountName
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     set:
       serviceAccountName: feeds-test
@@ -78,7 +78,7 @@ tests:
           value: feeds-test
 
   - it: should render component nodeSelector
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     set:
       nodeSelector:
@@ -90,7 +90,7 @@ tests:
             feeds: test
 
   - it: should render component affinity
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     set:
       affinity:
@@ -102,7 +102,7 @@ tests:
             feeds: test
 
   - it: should render component tolerations
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     set:
       tolerations:
@@ -121,7 +121,7 @@ tests:
           count: 1
 
   - it: should render scratch volume as emptyDir by default
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -132,7 +132,7 @@ tests:
         count: 1
 
   - it: should render scratch volume using details from values
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     set:
       scratchVolume.details:
@@ -149,8 +149,8 @@ tests:
               type: Directory
         count: 1
 
-  - it: should render feeds_configmap volume
-    template: feeds_deployment.yaml
+  - it: should render configmap volume
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -175,7 +175,7 @@ tests:
         count: 1
 
   - it: should render component container name
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - equal:
@@ -183,7 +183,7 @@ tests:
           value: feeds-feeds
 
   - it: should render component entrypoint args
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
@@ -192,7 +192,7 @@ tests:
         count: 1
 
   - it: should render component environment variables
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     set:
       extraEnv:
@@ -226,7 +226,7 @@ tests:
             value: foobar
 
   - it: should render component ports
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -237,7 +237,7 @@ tests:
         count: 1
 
   - it: should render component volumeMounts
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
@@ -257,7 +257,7 @@ tests:
         any: true
 
   - it: should render component probes
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -287,7 +287,7 @@ tests:
         count: 1
 
   - it: should render component resource requests & limits
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 0
     set:
       resources:
@@ -313,7 +313,7 @@ tests:
 
 
   - it: should not render nodePorts
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 1
     asserts:
       - isNotSubset:
@@ -322,7 +322,7 @@ tests:
             nodePort: 9999
         count: 1
   - it: should render nodePorts
-    template: feeds_deployment.yaml
+    template: deployment.yaml
     documentIndex: 1
     set:
       service.nodePort: 9999

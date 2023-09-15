@@ -16,9 +16,9 @@ spec:
       labels: {{- include "feeds.common.labels" . | nindent 8 }}
       annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 8 }}
       {{- if not .Values.injectSecretsViaEnv }}
-        checksum/secrets: {{ include (print $.Template.BasePath "/feeds_secret.yaml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/feeds-config: {{ include (print $.Template.BasePath "/feeds_configmap.yaml") . | sha256sum }}
+        checksum/feeds-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
     {{- with .Values.securityContext }}
       securityContext: {{- toYaml . | nindent 8 }}

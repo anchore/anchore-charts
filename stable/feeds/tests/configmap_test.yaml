@@ -1,6 +1,6 @@
 suite: ConfigMap Tests
 templates:
-  - templates/feeds_configmap.yaml
+  - configmap.yaml
 values:
   - values.yaml
 release:

@@ -53,7 +53,7 @@ data:
   ANCHORE_FEEDS_DRIVER_UBUNTU_URL: "https://git.launchpad.net/ubuntu-cve-tracker"
   ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH: "master"
   ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED: "true"
-  ANCHORE_FEEDS_EXTERNAL_URL: "null"
+  ANCHORE_FEEDS_EXTERNAL_URL: "{{ printf "http://localhost:%s/v2/" (.Values.service.port | toString) }}"
   ANCHORE_FEEDS_LOCAL_WORKSPACE: "{{ .Values.persistence.mountPath }}"
   ANCHORE_FEEDS_GRYPEDB_PRELOAD_ENABLED: "true"
   ANCHORE_FEEDS_GRYPEDB_PRELOAD_PATH: "/preload/grype-db-workspace.tar.gz"
