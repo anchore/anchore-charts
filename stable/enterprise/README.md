@@ -757,6 +757,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `doSourceAtEntry.filePaths`           | List of file paths to `source` before starting Anchore services                       | `[]`                                  |
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                          | `""`                                  |
 
+
 ### Anchore Configuration Parameters
 
 | Name                                                                       | Description                                                                                                                      | Value              |
@@ -850,6 +851,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `anchoreConfig.ui.dbUser`                                                  | allows overriding and separation of the ui database user.                                                                        | `""`               |
 | `anchoreConfig.ui.dbPassword`                                              | allows overriding and separation of the ui database user authentication                                                          | `""`               |
 
+
 ### Anchore API k8s Deployment Parameters
 
 | Name                      | Description                                                                      | Value       |
@@ -871,6 +873,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `api.affinity`            | Affinity for Anchore API pod assignment                                          | `{}`        |
 | `api.serviceAccountName`  | Service account name for Anchore API pods                                        | `""`        |
 
+
 ### Anchore Analyzer k8s Deployment Parameters
 
 | Name                          | Description                                                           | Value  |
@@ -885,6 +888,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `analyzer.tolerations`        | Tolerations for Anchore Analyzer pod assignment                       | `[]`   |
 | `analyzer.affinity`           | Affinity for Anchore Analyzer pod assignment                          | `{}`   |
 | `analyzer.serviceAccountName` | Service account name for Anchore API pods                             | `""`   |
+
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -905,6 +909,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `catalog.affinity`            | Affinity for Anchore Catalog pod assignment              | `{}`        |
 | `catalog.serviceAccountName`  | Service account name for Anchore Catalog pods            | `""`        |
 
+
 ### Anchore Feeds Chart Parameters
 
 | Name                 | Description                                                                                    | Value   |
@@ -912,6 +917,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `feeds.chartEnabled` | Enable the Anchore Feeds chart                                                                 | `true`  |
 | `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
 | `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
+
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -932,6 +938,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `policyEngine.affinity`            | Affinity for Anchore Policy Engine pod assignment              | `{}`        |
 | `policyEngine.serviceAccountName`  | Service account name for Anchore Policy Engine pods            | `""`        |
 
+
 ### Anchore Simple Queue Parameters
 
 | Name                              | Description                                                   | Value       |
@@ -950,6 +957,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `simpleQueue.tolerations`         | Tolerations for Anchore Simple Queue pod assignment           | `[]`        |
 | `simpleQueue.affinity`            | Affinity for Anchore Simple Queue pod assignment              | `{}`        |
 | `simpleQueue.serviceAccountName`  | Service account name for Anchore Simple Queue pods            | `""`        |
+
 
 ### Anchore Notifications Parameters
 
@@ -971,6 +979,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `notifications.affinity`            | Affinity for Anchore Notifications pod assignment                                | `{}`        |
 | `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods                              | `""`        |
 
+
 ### Anchore Reports Parameters
 
 | Name                          | Description                                                                      | Value       |
@@ -991,12 +1000,14 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `reports.affinity`            | Affinity for Anchore Reports pod assignment                                      | `{}`        |
 | `reports.serviceAccountName`  | Service account name for Anchore Reports pods                                    | `""`        |
 
+
 ### Anchore RBAC Authentication Parameters
 
 | Name                 | Description                                                                | Value |
 | -------------------- | -------------------------------------------------------------------------- | ----- |
 | `rbacAuth.extraEnv`  | Set extra environment variables for Anchore RBAC Authentication containers | `[]`  |
 | `rbacAuth.resources` | Resource requests and limits for Anchore RBAC Authentication containers    | `{}`  |
+
 
 ### Anchore RBAC Manager Parameters
 
@@ -1017,6 +1028,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment                              | `[]`        |
 | `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment                                 | `{}`        |
 | `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods                               | `""`        |
+
 
 ### Anchore UI Parameters
 
@@ -1041,6 +1053,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `ui.affinity`                | Affinity for Anchore ui pod assignment                                        | `{}`                                     |
 | `ui.serviceAccountName`      | Service account name for Anchore UI pods                                      | `""`                                     |
 
+
 ### Anchore Upgrade Job Parameters
 
 | Name                            | Description                                                                                                                                     | Value   |
@@ -1056,6 +1069,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `upgradeJob.annotations`        | Annotations for the Anchore upgrade job                                                                                                         | `{}`    |
 | `upgradeJob.resources`          | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`    |
 | `upgradeJob.labels`             | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
+
 
 ### Ingress Parameters
 
@@ -1075,6 +1089,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`    |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx` |
 
+
 ### Google CloudSQL DB Parameters
 
 | Name                             | Description                                                                    | Value                                     |
@@ -1088,6 +1103,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
+
 ### Anchore UI Redis Parameters
 
 | Name                                  | Description                                                                                            | Value               |
@@ -1097,6 +1113,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `ui-redis.auth.password`              | Password used for connecting to Redis                                                                  | `anchore-redis,123` |
 | `ui-redis.architecture`               | Redis deployment architecture                                                                          | `standalone`        |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                                    | `false`             |
+
 
 ### Anchore Database Parameters
 

@@ -1,4 +1,18 @@
 repos:
+# - repo: local
+#   hooks:
+#   - id: helm-unittest
+#     name: helm-unittest
+#     entry: scripts/hooks/helm-unittest.sh
+#     language: script
+#     files: ^stable/(enterprise|feeds)/templates/.*$
+- repo: local
+  hooks:
+  - id: readme-generator
+    name: readme-generator
+    entry: scripts/hooks/readme-generator.sh
+    language: script
+    files: ^stable/(enterprise|feeds|ecs-inventory)/values\.yaml$
 - repo: https://github.com/gitleaks/gitleaks
   rev: v8.16.3
   hooks:

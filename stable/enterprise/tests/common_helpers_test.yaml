@@ -1,5 +1,5 @@
 suite: Common Helper Template Tests
-templates: 
+templates:
   - analyzer_deployment.yaml
   - api_deployment.yaml
   - catalog_deployment.yaml
@@ -435,7 +435,7 @@ tests:
           path: spec.template.spec.containers[0].securityContext
 
   - it: should render the rbacAuthContainer
-    templates: 
+    templates:
       - api_deployment.yaml
       - notifications_deployment.yaml
       - rbacmanager_deployment.yaml

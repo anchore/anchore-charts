@@ -55,36 +55,37 @@ See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more 
 
 ### Common Resource Parameters
 
-| Name                                  | Description                                                             | Value                                    |
-| ------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------- |
-| `replicaCount`                        | Number of replicas for the Ecs Inventory deployment                     | `1`                                      |
-| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI | `docker.io/anchore/ecs-inventory:v1.0.0` |
-| `imagePullPolicy`                     | Image pull policy used by all deployments                               | `Always`                                 |
-| `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos           | `""`                                     |
-| `serviceAccountName`                  | Name of a service account used to run all Anchore Ecs Inventory pods    | `""`                                     |
-| `useExistingSecret`                   | set to true to use an existing/precreated secret                        | `false`                                  |
-| `existingSecretName`                  | the name of the precreated secret                                       | `""`                                     |
-| `injectSecretsViaEnv`                 | Enable secret injection into pod environment variables                  | `false`                                  |
-| `extraEnv`                            | extra environment variables. These will be set on all containers.       | `[]`                                     |
-| `annotations`                         | Common annotations set on all Kubernetes resources                      | `{}`                                     |
-| `deploymentAnnotations`               | annotations to set on the ecs-inventory deployment                      | `{}`                                     |
-| `securityContext.runAsUser`           | The securityContext runAsUser for all Anchore ECS Inventory pods        | `1000`                                   |
-| `securityContext.runAsGroup`          | The securityContext runAsGroup for all Anchore ECS Inventory pods       | `1000`                                   |
-| `securityContext.fsGroup`             | The securityContext fsGroup for all Anchore ECS Inventory pods          | `1000`                                   |
-| `resources`                           | Resource requests and limits for Anchore ECS Inventory pods             | `{}`                                     |
-| `nodeSelector`                        | Node labels for pod assignment                                          | `{}`                                     |
-| `tolerations`                         | Tolerations for pod assignment                                          | `[]`                                     |
-| `affinity`                            | Affinity for pod assignment                                             | `{}`                                     |
-| `labels`                              | Adds additionnal labels to all kubernetes resources                     | `{}`                                     |
-| `probes.liveness.initialDelaySeconds` | Initial delay seconds for liveness probe                                | `1`                                      |
-| `probes.liveness.timeoutSeconds`      | Timeout seconds for liveness probe                                      | `10`                                     |
-| `probes.liveness.periodSeconds`       | Period seconds for liveness probe                                       | `5`                                      |
-| `probes.liveness.failureThreshold`    | Failure threshold for liveness probe                                    | `6`                                      |
-| `probes.liveness.successThreshold`    | Success threshold for liveness probe                                    | `1`                                      |
-| `probes.readiness.timeoutSeconds`     | Timeout seconds for the readiness probe                                 | `10`                                     |
-| `probes.readiness.periodSeconds`      | Period seconds for the readiness probe                                  | `15`                                     |
-| `probes.readiness.failureThreshold`   | Failure threshold for the readiness probe                               | `3`                                      |
-| `probes.readiness.successThreshold`   | Success threshold for the readiness probe                               | `1`                                      |
+| Name                                  | Description                                                          | Value                                    |
+| ------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- |
+| `replicaCount`                        | Number of replicas for the Ecs Inventory deployment                  | `1`                                      |
+| `image`                               | Image used for all Ecs Inventory deployment deployments              | `docker.io/anchore/ecs-inventory:v1.1.0` |
+| `imagePullPolicy`                     | Image pull policy used by all deployments                            | `IfNotPresent`                           |
+| `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos        | `""`                                     |
+| `serviceAccountName`                  | Name of a service account used to run all Anchore Ecs Inventory pods | `""`                                     |
+| `useExistingSecret`                   | set to true to use an existing/precreated secret                     | `false`                                  |
+| `existingSecretName`                  | the name of the precreated secret                                    | `""`                                     |
+| `injectSecretsViaEnv`                 | Enable secret injection into pod environment variables               | `false`                                  |
+| `extraEnv`                            | extra environment variables. These will be set on all containers.    | `[]`                                     |
+| `annotations`                         | Common annotations set on all Kubernetes resources                   | `{}`                                     |
+| `deploymentAnnotations`               | annotations to set on the ecs-inventory deployment                   | `{}`                                     |
+| `securityContext.runAsUser`           | The securityContext runAsUser for all Anchore ECS Inventory pods     | `1000`                                   |
+| `securityContext.runAsGroup`          | The securityContext runAsGroup for all Anchore ECS Inventory pods    | `1000`                                   |
+| `securityContext.fsGroup`             | The securityContext fsGroup for all Anchore ECS Inventory pods       | `1000`                                   |
+| `resources`                           | Resource requests and limits for Anchore ECS Inventory pods          | `{}`                                     |
+| `nodeSelector`                        | Node labels for pod assignment                                       | `{}`                                     |
+| `tolerations`                         | Tolerations for pod assignment                                       | `[]`                                     |
+| `affinity`                            | Affinity for pod assignment                                          | `{}`                                     |
+| `labels`                              | Adds additionnal labels to all kubernetes resources                  | `{}`                                     |
+| `probes.liveness.initialDelaySeconds` | Initial delay seconds for liveness probe                             | `1`                                      |
+| `probes.liveness.timeoutSeconds`      | Timeout seconds for liveness probe                                   | `10`                                     |
+| `probes.liveness.periodSeconds`       | Period seconds for liveness probe                                    | `5`                                      |
+| `probes.liveness.failureThreshold`    | Failure threshold for liveness probe                                 | `6`                                      |
+| `probes.liveness.successThreshold`    | Success threshold for liveness probe                                 | `1`                                      |
+| `probes.readiness.timeoutSeconds`     | Timeout seconds for the readiness probe                              | `10`                                     |
+| `probes.readiness.periodSeconds`      | Period seconds for the readiness probe                               | `15`                                     |
+| `probes.readiness.failureThreshold`   | Failure threshold for the readiness probe                            | `3`                                      |
+| `probes.readiness.successThreshold`   | Success threshold for the readiness probe                            | `1`                                      |
+
 
 ### ecsInventory Parameters ##
 

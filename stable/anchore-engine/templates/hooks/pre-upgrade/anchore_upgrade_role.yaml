@@ -51,7 +51,7 @@ rules:
     - watch
     - update
     - patch
-  - apiGroups: 
+  - apiGroups:
     - apps
     resources:
     - deployments/scale

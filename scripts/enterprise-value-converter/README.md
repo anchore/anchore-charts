@@ -9,7 +9,7 @@ This script converts the values file of Anchore Engine to the values file format
 ## Usage
 
 1. **The Docker Image**:
-    To build the docker image yourself, from the `scripts` directory, build the Docker image using the following command:
+    To build the docker image yourself, from the `scripts/enterprise-value-converter` directory, build the Docker image using the following command:
 
     ```bash
     docker build -t script-container .

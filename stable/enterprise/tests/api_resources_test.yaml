@@ -199,7 +199,7 @@ tests:
           path: spec.template.spec.containers[1].env
           content:
             name: ANCHORE_CLI_PASS
-            valueFrom: 
+            valueFrom:
               secretKeyRef:
                 name: test-release-enterprise
                 key: ANCHORE_ADMIN_PASSWORD
@@ -239,7 +239,7 @@ tests:
           path: spec.template.spec.containers[1].env
           content:
             name: ANCHORE_CLI_PASS
-            valueFrom: 
+            valueFrom:
               secretKeyRef:
                 name: existing-secret
                 key: ANCHORE_ADMIN_PASSWORD

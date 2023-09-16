@@ -41,4 +41,3 @@ jobs:
       id: lint
       run: ct lint --config 'ct-config.yaml'
       if: steps.list-changed.outputs.CHANGED == 'true'
-

@@ -268,6 +268,7 @@ feeds-db:
 | `existingSecretName`                  | Name of the existing secret to be used for Anchore Feeds Service                                                                  | `anchore-enterprise-feeds-env`        |
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                                                                      | `{}`                                  |
 
+
 ### Anchore Feeds Configuration Parameters
 
 | Name                                                                       | Description                                                                                                                      | Value                                                                                                                                 |
@@ -307,6 +308,7 @@ feeds-db:
 | `anchoreConfig.feeds.drivers.github.enabled`                               | Enable GitHub advisory feeds (requires GitHub PAT)                                                                               | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.github.token`                                 | GitHub developer personal access token with zero permission scopes                                                               | `""`                                                                                                                                  |
 
+
 ### Anchore Feeds Database Parameters
 
 | Name                                        | Description                                                                                       | Value                   |
@@ -321,6 +323,7 @@ feeds-db:
 | `feeds-db.primary.extraEnvVars`             | An array to add extra environment variables                                                       | `[]`                    |
 | `feeds-db.image.tag`                        | Specifies the image to use for this chart.                                                        | `13.11.0-debian-11-r15` |
 
+
 ### Feeds Gem Database Parameters
 
 | Name                                      | Description                                                                                 | Value                   |
@@ -334,6 +337,7 @@ feeds-db:
 | `gem-db.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
 | `gem-db.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `gem-db.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
+
 
 ### Anchore Feeds Upgrade Job Parameters
 
@@ -351,6 +355,7 @@ feeds-db:
 | `feedsUpgradeJob.labels`             | Labels for the Anchore Feeds upgrade job                                                                                                        | `{}`    |
 | `feedsUpgradeJob.resources`          | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`    |
 
+
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value       |
@@ -362,6 +367,7 @@ feeds-db:
 | `ingress.path`             | The path used for accessing the Anchore Feeds API                  | `/v1/feeds` |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`        |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`     |
+
 
 ### Google CloudSQL DB Parameters
 
@@ -375,6 +381,7 @@ feeds-db:
 | `cloudsql.serviceAccSecretName`  |                                                                                | `""`                                      |
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
+
 
 ## Release Notes
 

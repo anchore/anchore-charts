@@ -255,7 +255,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
-    
+
     def test_anchoreEnterpriseNotifications_uiUrl_value(self):
         dot_string_dict = {
             "anchoreEnterpriseNotifications.uiUrl": "http://myurl.myurl"

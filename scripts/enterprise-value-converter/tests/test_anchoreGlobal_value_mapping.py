@@ -189,7 +189,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
         self.assertEqual(result[1], {})
-    
+
     def test_anchoreGlobal_labels_value(self):
         dot_string_dict = {
             "anchoreGlobal.labels.mylabel": "myvalue",
