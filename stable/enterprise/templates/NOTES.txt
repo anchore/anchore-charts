@@ -16,7 +16,7 @@ Get the default admin password using the following command:
 During this time the system status will report 'partially_down' and any images added for analysis will stay in the 'not_analyzed' state.
 Once the sync is complete, any queued images will be analyzed and the system status will change to 'all_up'.
 
-Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state. 
+Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state.
 You can check with:
 
     kubectl get pods -l app.kubernetes.io/name={{- template "enterprise.fullname" . -}},app.kubernetes.io/component=api

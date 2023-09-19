@@ -132,7 +132,7 @@ data:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.amazonDriverEnabled | quote) }}
           alpine:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.alpineDriverEnabled | quote) }}
-          centos: 
+          centos:
             enabled: false
           debian:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.debianDriverEnabled | quote) }}

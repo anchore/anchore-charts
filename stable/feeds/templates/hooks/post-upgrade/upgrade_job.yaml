@@ -89,7 +89,7 @@ spec:
                 name: {{ template "feeds.fullname" . }}-config-env-vars
           {{- if not .Values.standalone }}
             - configMapRef:
-                name: {{ template "feeds.enterprise.fullname" . }}-config-env-vars
+                name: {{ template "enterprise.fullname" . }}-config-env-vars
           {{- end }}
         {{- if not .Values.injectSecretsViaEnv }}
           {{- if .Values.useExistingSecrets }}

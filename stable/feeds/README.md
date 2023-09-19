@@ -213,6 +213,7 @@ feeds-db:
 | Name                                  | Description                                                                                                                       | Value                                 |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
 | `standalone`                          | Enable running the Anchore Feeds service in standalone mode                                                                       | `true`                                |
+| `url`                                 | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster.                             | `""`                                  |
 | `enterpriseFullname`                  | set the fullname on enterprise resources. Only needed when standalone=false and fullnameOverride is set for the enterprise chart. | `""`                                  |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                           | `""`                                  |
 | `nameOverride`                        | overrides the name set on resources                                                                                               | `""`                                  |
@@ -376,12 +377,13 @@ feeds-db:
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
+
 ## Release Notes
 
 A major chart version change (v0.1.2 -> v1.0.0) indicates that there is an **incompatible breaking change needing manual actions.**
 
 A minor chart version change (v0.1.2 -> v0.2.0) indicates a change that **may require updates to your values file.**
 
-### v0.0.1
+### v0.0.x
 
 * This is a pre-release version of the Anchore Enterprise Helm chart. It is not intended for production use.

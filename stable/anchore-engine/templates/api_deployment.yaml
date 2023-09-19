@@ -216,7 +216,7 @@ spec:
           {{ toYaml . | nindent 10 }}
         {{- end }}
         command: ["/bin/sh", "-c"]
-        args: 
+        args:
         - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_authorizer
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
@@ -301,7 +301,7 @@ spec:
           {{ toYaml . | nindent 10 }}
         {{- end }}
         command: ["/bin/sh", "-c"]
-        args: 
+        args:
         - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade reports
         ports:
         - containerPort: {{ .Values.anchoreEnterpriseReports.service.apiPort }}

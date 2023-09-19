@@ -1,7 +1,7 @@
 # K8s Inventory Helm Chart
 K8s Inventory is the foundation of Anchore Enterprise's Runtime Inventory feature. Running K8s Inventory via Helm is a great way to retrieve your Kubernetes Image inventory without providing Cluster Credentials to Anchore. The minimum version of the Anchore Enterprise platform required for K8s Inventory is 4.7.
 
-K8s Inventory runs as a read-only service account in the cluster it's deployed to. 
+K8s Inventory runs as a read-only service account in the cluster it's deployed to.
 
 In order to report the inventory to Anchore, K8s Inventory does require authentication material for your Anchore Enterprise deployment.
 K8s Inventory's helm chart automatically creates a kubernetes secret for the Anchore Password based on the values file you use, Ex.:
@@ -31,7 +31,7 @@ You can install the chart via via:
 ```
 helm repo add anchore https://charts.anchore.io
 helm install <release-name> -f <values.yaml> anchore/k8s-inventory
-``` 
+```
 A basic values file can always be found [here](https://github.com/anchore/anchore-charts/tree/master/stable/k8s-inventory/values.yaml)
 
 The key configurations are in the k8sInventory.anchore section. K8s Inventory must be able to resolve the Anchore URL and requires API credentials.
@@ -49,9 +49,9 @@ See the [K8s Inventory repo](https://github.com/anchore/k8s-inventory) for more 
 | Name                                  | Description                                                                                                             | Value                   |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | `replicaCount`                        | Number of replicas for the K8s Inventory deployment                                                                     | `1`                     |
-| `image.pullPolicy`                    | Image pull policy used by the K8s Inventory deployment                                                                  | `Always`                |
+| `image.pullPolicy`                    | Image pull policy used by the K8s Inventory deployment                                                                  | `IfNotPresent`          |
 | `image.repository`                    | Image used for the K8s Inventory deployment                                                                             | `anchore/k8s-inventory` |
-| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.0.0`                |
+| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.1.1`                |
 | `imagePullSecrets`                    | secrets where Kubernetes should get the credentials for pulling private images                                          | `[]`                    |
 | `nameOverride`                        | overrides the name set on resources                                                                                     | `""`                    |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                 | `""`                    |
@@ -81,6 +81,7 @@ See the [K8s Inventory repo](https://github.com/anchore/k8s-inventory) for more 
 | `probes.readiness.successThreshold`   | Success threshold for the readiness probe                                                                               | `1`                     |
 | `useExistingSecret`                   | Specify whether to use an existing secret                                                                               | `false`                 |
 | `existingSecretName`                  | if using an existing secret, specify the existing secret name                                                           | `""`                    |
+
 
 ### k8sInventory Parameters ##
 

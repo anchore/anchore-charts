@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
         dot_string_dict = {
             "anchoreEnterpriseEngineUpgradeJob.enabled": True
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'enabled': True
             }
@@ -32,7 +32,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
             "anchoreEnterpriseEngineUpgradeJob.resources.requests.cpu": 1,
             "anchoreEnterpriseEngineUpgradeJob.resources.requests.memory": "1G"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'resources': {
                     'limits': {
@@ -56,7 +56,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
             "anchoreEnterpriseEngineUpgradeJob.labels.myOtherLabel": "myOtherValue",
             "anchoreEnterpriseEngineUpgradeJob.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'labels':
                     {
@@ -75,7 +75,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
             "anchoreEnterpriseEngineUpgradeJob.annotations.bar": "baz",
             "anchoreEnterpriseEngineUpgradeJob.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'annotations':
                     {
@@ -95,7 +95,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
             "anchoreEnterpriseEngineUpgradeJob.nodeSelector.value": "bar",
             "anchoreEnterpriseEngineUpgradeJob.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'nodeSelector':
                     {
@@ -117,7 +117,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'tolerations': [
                     {
@@ -136,7 +136,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
             "anchoreEnterpriseEngineUpgradeJob.affinity.value": "bar",
             "anchoreEnterpriseEngineUpgradeJob.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'affinity':{
                     'name': 'foo',
@@ -157,7 +157,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'extraEnv': [
                     {
@@ -174,7 +174,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
         dot_string_dict = {
             "anchoreEnterpriseEngineUpgradeJob.serviceAccountName": "Null"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'serviceAccountName': "Null"
             }

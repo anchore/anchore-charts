@@ -1,7 +1,7 @@
 # KAI Helm Chart
 KAI is the foundation of Anchore Enterprise's Runtime Inventory feature. Running KAI via Helm is a great way to retrieve your Kubernetes Image inventory without providing Cluster Credentials to Anchore.
 
-KAI runs as a read-only service account in the cluster it's deployed to. 
+KAI runs as a read-only service account in the cluster it's deployed to.
 
 In order to report the inventory to Anchore, KAI does require authentication material for your Anchore Enterprise deployment.
 KAI's helm chart automatically creates a kubernetes secret for the Anchore Password based on the values file you use, Ex.:
@@ -31,7 +31,7 @@ You can install the chart via via:
 ```
 helm repo add anchore https://charts.anchore.io
 helm install <release-name> -f <values.yaml> anchore/kai
-``` 
+```
 A basic values file can always be found [here](https://github.com/anchore/anchore-charts/tree/master/stable/kai/values.yaml)
 
 The key configurations are in the kai.anchore section. Kai must be able to resolve the Anchore URL and requires API credentials.

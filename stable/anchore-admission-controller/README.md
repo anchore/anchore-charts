@@ -16,7 +16,7 @@ to deploy one with:
 helm install --name anchore stable/anchore-engine
 ```
 
-Setup of policies and users is covered in the anchore documentation, for this readme we'll use admin user credentials, but it 
+Setup of policies and users is covered in the anchore documentation, for this readme we'll use admin user credentials, but it
 is *strongly* suggested that you use a non-admin user for the controller credential.
 
 1. Create a secret for the anchore credentials that the controller will use to make api calls to Anchore. This must be done out-of-band of the chart creation and should be in the
@@ -27,7 +27,7 @@ same namespace you will deploy the chart to. The file must be a json file with t
   "users": [
     { "username": "user1", "password": "password"},
     { "uesrname": "user2", "password": "password2"},
-    ...      
+    ...
   ]
 }
 ```
@@ -71,7 +71,7 @@ It will remove kubernetes objects which are not removed by a helm delete. Pass t
 
 | Key | Expected Type | Default Value | Description |
 |---|---|---|---|
-|replicaCount | int | 1 | replicas, should generally only need one 
+|replicaCount | int | 1 | replicas, should generally only need one
 |---|---|---|---|
 |logVerbosity | int | 6 | log verbosity of controller, 1 = error, 2 warn, 3 debug....
 |---|---|---|---|

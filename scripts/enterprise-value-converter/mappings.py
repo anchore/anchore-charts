@@ -1,8 +1,7 @@
 # If we see this as first level, just skip them
 KEYS_WITHOUT_CHANGES = {
     "cloudsql",
-    "ingress",
-    "fullnameOverride"
+    "ingress"
 }
 
 # check this last. If this is the last thing, and it starts with this, drop the key. eg anchoreGlobal.something -> something
@@ -123,12 +122,14 @@ LEVEL_THREE_CHANGE_KEY_MAPPING = {
 
 # We need to go all the way down to the value. Replace the whole original key
 FULL_CHANGE_KEY_MAPPING = {
+    "fullnameOverride": "global.fullnameOverride",
+    "nameOverride": "global.nameOverride",
     "postgresql.enabled": "postgresql.chartEnabled",
     "postgresql.postgresDatabase": "postgresql.auth.database",
     "postgresql.postgresPassword": "postgresql.auth.password",
     "postgresql.postgresUser": "postgresql.auth.username",
     "postgresql.postgresPort": "postgresql.primary.service.ports.postgresql",
-    "postgresql.imageTag": "postgresql.imageTag",
+    "postgresql.imageTag": "postgresql.image.tag",
 
     "anchore-feeds-db.imageTag": "feeds.feeds-db.image.tag",
     "anchore-feeds-gem-db.imageTag": "feeds.gem-db.image.tag",
@@ -255,7 +256,7 @@ FEEDS_ENV_VAR_MAPPING = {
 
     "anchoreEnterpriseFeeds.olDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_OL_ENABLED",
     "anchoreEnterpriseFeeds.rhelDriverConcurrency": "feeds.ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY",
-    "anchoreEnterpriseFeeds.rhelDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_RHEL_ENBALED",
+    "anchoreEnterpriseFeeds.rhelDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_RHEL_ENABLED",
     "anchoreEnterpriseFeeds.slesDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_SLES_ENABLED",
     "anchoreEnterpriseFeeds.ubuntuDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED",
     "anchoreEnterpriseFeeds.ubuntuDriverGitBranch": "feeds.ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH",

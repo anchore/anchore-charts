@@ -32,4 +32,3 @@ if [ "${do_push}" == "true" ]; then
 else
 	echo "Skipping push"
 fi
-

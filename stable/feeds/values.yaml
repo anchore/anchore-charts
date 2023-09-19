@@ -7,6 +7,10 @@
 ##
 standalone: true
 
+## @param url Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster.
+## i.e. https://<feeds-hostname>:<feeds-port>
+url: ""
+
 ## @param enterpriseFullname set the fullname on enterprise resources. Only needed when standalone=false and fullnameOverride is set for the enterprise chart.
 ##
 enterpriseFullname: ""

@@ -6,6 +6,7 @@ This repository contains Helm charts for deploying [Anchore](https://www.anchore
 
 - [Helm](https://helm.sh/) (>=3.8) - Helm is a package manager for Kubernetes that makes it easy to install and manage applications on your cluster.
 - [Kubernetes](https://kubernetes.io/) (>=1.23) - Kubernetes is an open-source container orchestration platform that is required to use Helm charts.
+- [pre-commit](https://pre-commit.com/) (>=3.4) - pre-commit is a tool that is used to ensure that all commits to the repository are properly formatted. It is not required to use the charts in this repository, but it is recommended to install it to ensure that your commits are properly formatted.
 
 ## Installation
 

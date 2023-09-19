@@ -6,6 +6,9 @@ values:
 release:
   name: test-release
   namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
 tests:
   - it: should render the configmaps
     asserts:

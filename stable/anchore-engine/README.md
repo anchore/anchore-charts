@@ -247,7 +247,7 @@ The upgrade will only be considered successful when this job completes successfu
           - /path/to/file2
     ```
 
-* Updated the configuration for Anchore Enterprise database connections. This will ensure that special characters are handled properly in database passwords. Also allows configuring the db hostname and port separately. 
+* Updated the configuration for Anchore Enterprise database connections. This will ensure that special characters are handled properly in database passwords. Also allows configuring the db hostname and port separately.
 
   * If your postgresql connection is using a non-standard port, you will need to update your values file to include the hostname and port. For example:
 
@@ -680,7 +680,7 @@ anchoreCatalog:
 ```yaml
 anchoreCatalog:
   archive:
-    storage_driver:    
+    storage_driver:
       name: swift
       config:
         auth_version: '2'
@@ -731,7 +731,7 @@ know about each pod, and the ports it provides to scrape the metrics.
 
 ## Using custom certificates
 
-A secret needs to be created in the same namespace as the anchore-engine chart installation. This secret should contain all custom certs, including CA certs & any certs used for internal TLS communication. 
+A secret needs to be created in the same namespace as the anchore-engine chart installation. This secret should contain all custom certs, including CA certs & any certs used for internal TLS communication.
 This secret will be mounted to all Anchore pods at /home/anchore/certs to be utilized by the system.
 
 ## Event Notifications

@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
         dot_string_dict = {
             "anchoreEnterpriseFeedsUpgradeJob.enabled": True,
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'enabled': True
@@ -34,7 +34,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
             "anchoreEnterpriseFeedsUpgradeJob.resources.requests.cpu": 1,
             "anchoreEnterpriseFeedsUpgradeJob.resources.requests.memory": "1G"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'resources': {
@@ -60,7 +60,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
             "anchoreEnterpriseFeedsUpgradeJob.labels.myOtherLabel": "myOtherValue",
             "anchoreEnterpriseFeedsUpgradeJob.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'labels':
@@ -81,7 +81,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
             "anchoreEnterpriseFeedsUpgradeJob.annotations.bar": "baz",
             "anchoreEnterpriseFeedsUpgradeJob.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'annotations':
@@ -102,7 +102,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
             "anchoreEnterpriseFeedsUpgradeJob.nodeSelector.value": "bar",
             "anchoreEnterpriseFeedsUpgradeJob.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'nodeSelector':
@@ -126,7 +126,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'tolerations': [
@@ -147,7 +147,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
             "anchoreEnterpriseFeedsUpgradeJob.affinity.value": "bar",
             "anchoreEnterpriseFeedsUpgradeJob.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'affinity':{
@@ -170,7 +170,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
                 }
             ]
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'extraEnv': [
@@ -189,7 +189,7 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
         dot_string_dict = {
             "anchoreEnterpriseFeedsUpgradeJob.serviceAccountName": "Null"
         }
-        expected_result = {
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'serviceAccountName': "Null"

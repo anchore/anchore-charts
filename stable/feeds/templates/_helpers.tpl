@@ -33,3 +33,18 @@ Return the proper protocol when internal SSL is enabled
   {{- print "http" }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Return a URL for the external feeds service
+*/}}
+{{- define "feeds.setGrypeProviderURL" -}}
+{{- $grypeProviderFeedsExternalURL := "" }}
+{{- if .Values.url }}
+  {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.url) ) }}
+  {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.url) }}
+  {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/" $anchoreFeedsHost) }}
+{{- else }}
+    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/v1/" (include "feeds.setProtocol" .) (include "feeds.fullname" .) (.Values.service.port | toString) ) -}}
+{{- end }}
+{{- print $grypeProviderFeedsExternalURL }}
+{{- end -}}

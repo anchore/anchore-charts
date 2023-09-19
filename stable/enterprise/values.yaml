@@ -1,15 +1,20 @@
 ###################################################
+## @section Global Resource Parameters
+## Global params used by all child charts
+###################################################
+global:
+  ## @param global.fullnameOverride overrides the fullname set on resources
+  ##
+  fullnameOverride: ""
+
+  ## @param global.nameOverride overrides the name set on resources
+  ##
+  nameOverride: ""
+
+###################################################
 ## @section Common Resource Parameters
 ## Common params used by all Anchore k8s resources
 ###################################################
-
-## @param fullnameOverride overrides the fullname set on resources
-##
-fullnameOverride: ""
-
-## @param nameOverride overrides the name set on resources
-##
-nameOverride: ""
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
