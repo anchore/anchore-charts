@@ -18,7 +18,15 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
     def test_fullnameOverride(self):
         dot_string_dict = {"fullnameOverride": "overridden"}
         expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
-            'fullnameOverride': 'overridden'
+            'global': {'fullnameOverride': 'overridden'}
+        }
+        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
+        self.assertEqual(result[0], expected_result)
+
+    def test_nameOverride(self):
+        dot_string_dict = {"nameOverride": "overridden"}
+        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+            'global': {'nameOverride': 'overridden'}
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)

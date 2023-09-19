@@ -49,8 +49,6 @@ TOP_LEVEL_MAPPING = {
     "anchoreEnterpriseUi": "ui",
     "anchorePolicyEngine": "policyEngine",
     "anchoreSimpleQueue": "simpleQueue",
-    "fullnameOverride": "global.fullnameOverride",
-    "nameOverride": "global.nameOverride",
     "ingress": "ingress"
 }
 
@@ -124,6 +122,8 @@ LEVEL_THREE_CHANGE_KEY_MAPPING = {
 
 # We need to go all the way down to the value. Replace the whole original key
 FULL_CHANGE_KEY_MAPPING = {
+    "fullnameOverride": "global.fullnameOverride",
+    "nameOverride": "global.nameOverride",
     "postgresql.enabled": "postgresql.chartEnabled",
     "postgresql.postgresDatabase": "postgresql.auth.database",
     "postgresql.postgresPassword": "postgresql.auth.password",
