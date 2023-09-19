@@ -48,7 +48,7 @@ Returns the proper URL for the feeds service
     {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
     {{- $anchoreFeedsURL = (printf "%s/v1/feeds" $anchoreFeedsHost) -}}
   {{- else if .Values.feeds.chartEnabled }}
-    {{- $anchoreFeedsURL = (printf "%s://%s:%s/v1/feeds" (include "enterprise.setProtocol" .) (include "feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
+    {{- $anchoreFeedsURL = (printf "%s://%s:%s/v1/feeds" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
   {{- end }}
     {{- print $anchoreFeedsURL -}}
 {{- end -}}
@@ -65,7 +65,7 @@ Returns the proper URL for the grype provider
     {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
     {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grypedb" $anchoreFeedsHost) -}}
   {{- else if .Values.feeds.chartEnabled }}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/v1/databases/grypedb"  (include "enterprise.setProtocol" .) (include "feeds.fullname" .) (.Values.feeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/v1/databases/grypedb" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString) ) -}}
   {{- end }}
 
   {{- /* Set the grypeProviderFeedsExternalURL to upstream feeds if still unset or if specifically overridden */}}
@@ -99,6 +99,18 @@ Return the proper protocol when Anchore internal SSL is enabled
 */}}
 {{- define "enterprise.setProtocol" -}}
   {{- if .Values.anchoreConfig.internalServicesSSL.enabled }}
+{{- print "https" -}}
+  {{- else -}}
+{{- print "http" -}}
+  {{- end }}
+{{- end -}}
+
+
+{{/*
+Return the proper protocol when Anchore internal SSL is enabled
+*/}}
+{{- define "enterprise.feeds.setProtocol" -}}
+  {{- if .Values.feeds.anchoreConfig.internalServicesSSL.enabled }}
 {{- print "https" -}}
   {{- else -}}
 {{- print "http" -}}

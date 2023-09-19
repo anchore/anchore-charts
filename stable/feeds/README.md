@@ -213,6 +213,7 @@ feeds-db:
 | Name                                  | Description                                                                                                                       | Value                                 |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
 | `standalone`                          | Enable running the Anchore Feeds service in standalone mode                                                                       | `true`                                |
+| `url`                                 | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster.                             | `""`                                  |
 | `enterpriseFullname`                  | set the fullname on enterprise resources. Only needed when standalone=false and fullnameOverride is set for the enterprise chart. | `""`                                  |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                           | `""`                                  |
 | `nameOverride`                        | overrides the name set on resources                                                                                               | `""`                                  |

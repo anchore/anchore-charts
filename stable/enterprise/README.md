@@ -717,12 +717,18 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 ## Parameters
 
+### Global Resource Parameters
+
+| Name                      | Description                             | Value |
+| ------------------------- | --------------------------------------- | ----- |
+| `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
+| `global.nameOverride`     | overrides the name set on resources     | `""`  |
+
+
 ### Common Resource Parameters
 
 | Name                                  | Description                                                                           | Value                                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| `fullnameOverride`                    | overrides the fullname set on resources                                               | `""`                                  |
-| `nameOverride`                        | overrides the name set on resources                                                   | `""`                                  |
 | `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.1` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |

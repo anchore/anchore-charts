@@ -1,8 +1,7 @@
 # If we see this as first level, just skip them
 KEYS_WITHOUT_CHANGES = {
     "cloudsql",
-    "ingress",
-    "fullnameOverride"
+    "ingress"
 }
 
 # check this last. If this is the last thing, and it starts with this, drop the key. eg anchoreGlobal.something -> something
@@ -50,6 +49,8 @@ TOP_LEVEL_MAPPING = {
     "anchoreEnterpriseUi": "ui",
     "anchorePolicyEngine": "policyEngine",
     "anchoreSimpleQueue": "simpleQueue",
+    "fullnameOverride": "global.fullnameOverride",
+    "nameOverride": "global.nameOverride",
     "ingress": "ingress"
 }
 
@@ -255,7 +256,7 @@ FEEDS_ENV_VAR_MAPPING = {
 
     "anchoreEnterpriseFeeds.olDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_OL_ENABLED",
     "anchoreEnterpriseFeeds.rhelDriverConcurrency": "feeds.ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY",
-    "anchoreEnterpriseFeeds.rhelDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_RHEL_ENBALED",
+    "anchoreEnterpriseFeeds.rhelDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_RHEL_ENABLED",
     "anchoreEnterpriseFeeds.slesDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_SLES_ENABLED",
     "anchoreEnterpriseFeeds.ubuntuDriverEnabled": "feeds.ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED",
     "anchoreEnterpriseFeeds.ubuntuDriverGitBranch": "feeds.ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH",

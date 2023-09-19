@@ -204,12 +204,6 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].env
           content:
-            name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-feeds
-        count: 1
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
             name: ANCHORE_PORT
             value: "8448"
         count: 1

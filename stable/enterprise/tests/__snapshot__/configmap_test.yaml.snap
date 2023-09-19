@@ -221,22 +221,22 @@ should render the configmaps:
                 data:
                   grypedb:
                     enabled: true
-                    url: http://test-release-enterprise:8448/v1/databases/grypedb
+                    url: http://test-release-feeds:8448/v1/databases/grypedb
                   vulnerabilities:
                     enabled: ${ANCHORE_FEEDS_VULNERABILITIES_ENABLED}
-                    url: http://test-release-enterprise:8448/v1/feeds
+                    url: http://test-release-feeds:8448/v1/feeds
                   nvdv2:
                     enabled: ${ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED}
-                    url: http://test-release-enterprise:8448/v1/feeds
+                    url: http://test-release-feeds:8448/v1/feeds
                   github:
                     enabled: ${ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED}
-                    url: http://test-release-enterprise:8448/v1/feeds
+                    url: http://test-release-feeds:8448/v1/feeds
                   packages:
                     enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-                    url: http://test-release-enterprise:8448/v1/feeds
+                    url: http://test-release-feeds:8448/v1/feeds
                   microsoft:
                     enabled: ${ANCHORE_FEEDS_DRIVER_MSRC_ENABLED}
-                    url: http://test-release-enterprise:8448/v1/feeds
+                    url: http://test-release-feeds:8448/v1/feeds
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}

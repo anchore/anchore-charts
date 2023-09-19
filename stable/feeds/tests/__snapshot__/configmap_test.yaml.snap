@@ -57,12 +57,15 @@ should render the configmaps:
             listen: '0.0.0.0'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
             cycle_timers:
               driver_sync: 7200
             local_workspace: ${ANCHORE_FEEDS_LOCAL_WORKSPACE}
             workspace_preload:
               enabled: ${ANCHORE_FEEDS_WORKSPACE_PRELOAD}
-              workspace_preload_file: "/workspace_preload/data.tar.gz"
+              workspace_preload_file: ${ANCHORE_FEEDS_LOCAL_WORKSPACE}/data.tar.gz
             api_only: ${ANCHORE_FEEDS_API_ONLY}
             drivers:
               amzn:
@@ -80,7 +83,7 @@ should render the configmaps:
                 git_url: ${ANCHORE_FEEDS_DRIVER_UBUNTU_URL}
                 git_branch: ${ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH}
               rhel:
-                enabled: ${ANCHORE_FEEDS_DRIVER_RHEL_ENBALED}
+                enabled: ${ANCHORE_FEEDS_DRIVER_RHEL_ENABLED}
                 concurrency: ${ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY}
               npm:
                 enabled: ${ANCHORE_FEEDS_DRIVER_NPM_ENABLED}
@@ -89,6 +92,8 @@ should render the configmaps:
               nvdv2:
                 enabled: ${ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED}
                 api_key: ${ANCHORE_NVD_API_KEY}
+              mariner:
+                enabled: ${ANCHORE_FEEDS_DRIVER_MARINER_ENABLED}
               msrc:
                 enabled: ${ANCHORE_FEEDS_DRIVER_MSRC_ENABLED}
               github:
@@ -96,7 +101,7 @@ should render the configmaps:
                 token: ${ANCHORE_GITHUB_TOKEN}
               grypedb:
                 enabled: ${ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED}
-                external_feeds_url: "${ANCHORE_FEEDS_EXTERNAL_URL}"
+                external_feeds_url: ${ANCHORE_FEEDS_EXTERNAL_URL}
                 preload:
                   enabled: ${ANCHORE_FEEDS_GRYPEDB_PRELOAD_ENABLED}
                   workspace_archive_path: ${ANCHORE_FEEDS_GRYPEDB_PRELOAD_PATH}
@@ -110,9 +115,6 @@ should render the configmaps:
                 enabled: ${ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED}
               chainguard:
                 enabled: ${ANCHORE_FEEDS_DRIVER_CHAINGUARD_ENABLED}
-            ssl_enable: ${ANCHORE_SSL_ENABLED}
-            ssl_cert: ${ANCHORE_SSL_CERT}
-            ssl_key: ${ANCHORE_SSL_KEY}
     kind: ConfigMap
     metadata:
       annotations:

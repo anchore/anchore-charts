@@ -591,9 +591,9 @@ tests:
           path: metadata.name
           pattern: ^test-release-enterprise
 
-  - it: should render enterprise.fullname with fullnameOverride for services
+  - it: should render enterprise.fullname with global.fullnameOverride for services
     set:
-      fullnameOverride: my-fullname-override
+      global.fullnameOverride: my-fullname-override
     templates:
       - api_deployment.yaml
       - catalog_deployment.yaml
@@ -609,9 +609,9 @@ tests:
           path: spec.selector["app.kubernetes.io/name"]
           pattern: ^my-fullname-override
 
-  - it: should render enterprise.fullname with nameOverride for services
+  - it: should render enterprise.fullname with global.nameOverride for services
     set:
-      nameOverride: my-name-override
+      global.nameOverride: my-name-override
     templates:
       - api_deployment.yaml
       - catalog_deployment.yaml
@@ -849,11 +849,11 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v1/feeds"
 
   - it: should render grypeProviderURL with anchoreConfig.policy_engine.overrideFeedsToUpstream
     set:
@@ -865,7 +865,7 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
@@ -882,34 +882,34 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
           pattern: "url: https://toolbox-data.anchore.io/grype/databases/listing.json"
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for anchore_configmap.yaml
+  - it: should set the correct protocol with feeds.anchoreConfig.internalServicesSSL.enabled to true for anchore_configmap.yaml
     set:
-      anchoreConfig.internalServicesSSL.enabled: true
+      feeds.anchoreConfig.internalServicesSSL.enabled: true
     templates:
       - anchore_configmap.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-enterprise:8448/v1/databases/grypedb"
+          pattern: "url: https://test-release-feeds:8448/v1/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-enterprise:8448/v1/feeds"
+          pattern: "url: https://test-release-feeds:8448/v1/feeds"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v1/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
     set:
@@ -926,7 +926,7 @@ tests:
           content:
             scheme: HTTPS
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for anchore_configmap.yaml
+  - it: should set the correct protocol with feeds.anchoreConfig.internalServicesSSL.enabled to false for anchore_configmap.yaml
     set:
       anchoreConfig.internalServicesSSL.enabled: false
     templates:
@@ -935,19 +935,19 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-enterprise:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v1/feeds"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-enterprise:8448/v1/databases/grypedb"
+          pattern: "url: https://test-release-feeds:8448/v1/databases/grypedb"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-enterprise:8448/v1/feeds"
+          pattern: "url: https://test-release-feeds:8448/v1/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
     set:
