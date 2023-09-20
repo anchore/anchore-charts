@@ -148,17 +148,17 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].name
-          value: rbac-auth
+          value: enterprise-notifications
       - equal:
           path: spec.template.spec.containers[1].name
-          value: enterprise-notifications
+          value: rbac-auth
 
   - it: should render component entrypoint args
     template: notifications_deployment.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
+          path: spec.template.spec.containers[0].args[0]
           pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade notifications$
         count: 1
 
@@ -173,25 +173,25 @@ tests:
           value: foobar
     asserts:
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
             value: test-release-enterprise-notifications
         count: 1
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_PORT
             value: "8668"
         count: 1
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: notifications
             value: test
         count: 1
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: test
             value: foobar
@@ -201,7 +201,7 @@ tests:
     documentIndex: 0
     asserts:
       - contains:
-          path: spec.template.spec.containers[1].ports
+          path: spec.template.spec.containers[0].ports
           content:
             name: notifications
             containerPort: 8668
@@ -212,7 +212,7 @@ tests:
     documentIndex: 0
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[1].livenessProbe
+          path: spec.template.spec.containers[0].livenessProbe
           content:
             httpGet:
               path: /health
@@ -225,7 +225,7 @@ tests:
             successThreshold: 1
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[1].readinessProbe
+          path: spec.template.spec.containers[0].readinessProbe
           content:
             httpGet:
               path: /health
@@ -250,13 +250,13 @@ tests:
           memory: 256Mi
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[1].resources.requests
+          path: spec.template.spec.containers[0].resources.requests
           content:
             cpu: 100m
             memory: 128Mi
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[1].resources.limits
+          path: spec.template.spec.containers[0].resources.limits
           content:
             cpu: 200m
             memory: 256Mi

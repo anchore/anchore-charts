@@ -11,10 +11,6 @@ standalone: true
 ## i.e. https://<feeds-hostname>:<feeds-port>
 url: ""
 
-## @param enterpriseFullname set the fullname on enterprise resources. Only needed when standalone=false and fullnameOverride is set for the enterprise chart.
-##
-enterpriseFullname: ""
-
 ## @param fullnameOverride overrides the fullname set on resources
 ##
 fullnameOverride: ""

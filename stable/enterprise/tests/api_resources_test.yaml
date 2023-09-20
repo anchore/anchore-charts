@@ -164,13 +164,13 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].name
-          value: rbac-auth
-      - equal:
-          path: spec.template.spec.containers[1].name
           value: enterprise-api
       - equal:
-          path: spec.template.spec.containers[2].name
+          path: spec.template.spec.containers[1].name
           value: enterprise-reports-api
+      - equal:
+          path: spec.template.spec.containers[2].name
+          value: rbac-auth
 
   - it: should render component entrypoint args
     template: api_deployment.yaml
@@ -178,11 +178,11 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[1].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade apiext$
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports$
         count: 1
       - matchRegex:
-          path: spec.template.spec.containers[2].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports$
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade apiext$
         count: 1
 
   - it: should render api component environment variables
@@ -196,7 +196,7 @@ tests:
           value: foobar
     asserts:
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_CLI_PASS
             valueFrom:
@@ -205,25 +205,25 @@ tests:
                 key: ANCHORE_ADMIN_PASSWORD
         count: 1
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
             value: test-release-enterprise-api
         count: 1
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_PORT
             value: "8228"
         count: 1
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: api
             value: test
         count: 1
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: test
             value: foobar
@@ -236,7 +236,7 @@ tests:
       existingSecretName: existing-secret
     asserts:
       - contains:
-          path: spec.template.spec.containers[1].env
+          path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_CLI_PASS
             valueFrom:
@@ -255,25 +255,25 @@ tests:
           value: foobar
     asserts:
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
             value: test-release-enterprise-api
         count: 1
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: ANCHORE_PORT
             value: "8558"
         count: 1
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: reports
             value: test
         count: 1
       - contains:
-          path: spec.template.spec.containers[2].env
+          path: spec.template.spec.containers[1].env
           content:
             name: test
             value: foobar
@@ -283,13 +283,13 @@ tests:
     documentIndex: 0
     asserts:
       - contains:
-          path: spec.template.spec.containers[1].ports
+          path: spec.template.spec.containers[0].ports
           content:
             name: api
             containerPort: 8228
         count: 1
       - contains:
-          path: spec.template.spec.containers[2].ports
+          path: spec.template.spec.containers[1].ports
           content:
             name: reports
             containerPort: 8558
@@ -303,7 +303,7 @@ tests:
         custom_policy_bundle1.json: {}
     asserts:
       - contains:
-          path: spec.template.spec.containers[1].volumeMounts
+          path: spec.template.spec.containers[0].volumeMounts
           content:
             name: policy-bundle-volume
             mountPath: /anchore_service/bundles/
@@ -315,7 +315,7 @@ tests:
     documentIndex: 0
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[1].livenessProbe
+          path: spec.template.spec.containers[0].livenessProbe
           content:
             httpGet:
               path: /health
@@ -328,7 +328,7 @@ tests:
             successThreshold: 1
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[1].readinessProbe
+          path: spec.template.spec.containers[0].readinessProbe
           content:
             httpGet:
               path: /health
@@ -340,7 +340,7 @@ tests:
             successThreshold: 1
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[2].livenessProbe
+          path: spec.template.spec.containers[1].livenessProbe
           content:
             httpGet:
               path: /health
@@ -353,7 +353,7 @@ tests:
             successThreshold: 1
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[2].readinessProbe
+          path: spec.template.spec.containers[1].readinessProbe
           content:
             httpGet:
               path: /health
@@ -385,25 +385,25 @@ tests:
           memory: 456Mi
     asserts:
       - isSubset:
-          path: spec.template.spec.containers[1].resources.requests
+          path: spec.template.spec.containers[0].resources.requests
           content:
             cpu: 100m
             memory: 128Mi
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[1].resources.limits
+          path: spec.template.spec.containers[0].resources.limits
           content:
             cpu: 200m
             memory: 256Mi
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[2].resources.requests
+          path: spec.template.spec.containers[1].resources.requests
           content:
             cpu: 200m
             memory: 228Mi
         count: 1
       - isSubset:
-          path: spec.template.spec.containers[2].resources.limits
+          path: spec.template.spec.containers[1].resources.limits
           content:
             cpu: 400m
             memory: 456Mi
