@@ -28,7 +28,6 @@ spec:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
-        {{- include "enterprise.common.rbacAuthContainer" . | nindent 8 }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -50,6 +49,7 @@ spec:
         {{- with .Values.notifications.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
+        {{- include "enterprise.common.rbacAuthContainer" . | nindent 8 }}
 
 ---
 apiVersion: v1

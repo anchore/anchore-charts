@@ -1,3 +1,6 @@
+# Entry point for the enterprise value converter script
+# This script is used to convert the values files from the anchore-engine chart to the enterprise values files
+
 import sys
 sys.dont_write_bytecode = True
 

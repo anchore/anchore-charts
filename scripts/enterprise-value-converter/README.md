@@ -32,6 +32,15 @@ This script converts the values file of Anchore Engine to the values file format
 
     After running the Docker container, the converted Helm chart values file will be available in the `${PWD}/output` directory on your local machine.
 
+## Running tests
+
+To run the unit tests, run the following command from the `scripts/enterprise-value-converter` directory:
+
+```bash
+pip install argparse pyyaml
+python -m unittest tests/*.py
+```
+
 ## Important Note
 
 Please ensure that you have reviewed and understood the content of the input file before running the conversion. The script provided is specifically tailored to convert Anchore Engine values files to the format expected by the Anchore Enterprise Helm chart.

@@ -1,7 +1,10 @@
 name: "Test using kind and chart-testing tool"
 
 on:
-  - pull_request
+  pull_request:
+    paths:
+      - 'stable/**'
+
 permissions:
   contents: read
 

@@ -15,7 +15,11 @@ If release name contains chart name it will be used as a full name.
 
 {{- define "feeds.upgradeJob.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride }}
-{{- printf "%s-%s-%s-%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "upgrade" | trunc 63 | trimSuffix "-" }}
+{{- $forcedRevision := "" -}}
+{{- if .Values.feedsUpgradeJob.force }}
+{{- $forcedRevision = printf "-forced-%s" (randAlphaNum 5 | lower) -}}
+{{- end }}
+{{- printf "%s-%s-%s-%s%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "upgrade" $forcedRevision | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{- define "feeds-db.fullname" -}}
