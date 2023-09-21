@@ -1,0 +1,11 @@
+{{- $component := "scripts" -}}
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Values.scripts.configMapName }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+data:
+  {{ .Values.scripts.scripts | toYaml | nindent 2 }}

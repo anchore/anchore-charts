@@ -676,17 +676,21 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
 
-    ```shell
-    export ENTERPRISE_RELEASE=my-enterprise-release
-    export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
-    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true anchore/enterprise
-    ```
+   **NOTE**: You will have to migrate data from the old database to the new one after the chart is installed. The enterprise chart contains a helper pod to aid with this, to enable this pod, use the following in your helm install command line
+   ```shell
+   --set startMigrationPod=true
+   ```
+   ```shell
+   export ENTERPRISE_RELEASE=my-enterprise-release
+   export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
+   helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true --set startMigrationPod=true anchore/enterprise
+   ```
 
 1. **Scale Down Anchore Enterprise**: Before migrating the database, scale down the new Anchore Enterprise deployment to zero replicas.
 
-    ```shell
-    kubectl scale deployment --replicas=0 -l app=${ENTERPRISE_RELEASE}-enterprise
-    ```
+   ```shell
+   kubectl scale deployment --replicas=0 -l app=${ENTERPRISE_RELEASE}-enterprise
+   ```
 
 1. **Database Preparation**: Replace the existing Anchore database with a new database in PostgreSQL 13.
 
@@ -696,11 +700,19 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
     dropdb -h ${NEW_DB_HOST} -U ${PGUSER} ${ANCHORE_DATABASE_NAME}; psql -h ${NEW_DB_HOST} -c 'CREATE DATABASE ${ANCHORE_DATABASE_NAME}'
     ```
 
-1. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
-
-    ```shell
-    export OLD_PG_DB_HOST=${ENGINE_RELEASE}-postgresql
-    pg_dump -h ${OLD_PG_DB_HOST} -c ${ANCHORE_DATABASE_NAME} | psql -h ${NEW_DB_HOST} ${ANCHORE_DATABASE_NAME}
+2. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
+   1. If you are using the included migration helper pod, the exec to that pod and run the following command:
+   ```shell
+   kubectl -n <chart namespace> exec -it enterprise-migrate-db
+   PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} -c ${NEW_DB_NAME}
+   ```
+   2. If you are using your own pod then follow these steps
+      1. Gather old DB parameters from the secret <old release name>-anchore-engine
+      2. Gather new DB parameters from the new secret <new release name>-enterprise
+      3. Start a migration pod that has all the psql binaries required e.g. docker.io/postgresql:13
+      4. Export all the required environment variables
+   ```shell
+    PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} -c ${NEW_DB_NAME}
     ```
 
 1. **Upgrade Anchore Enterprise**: After migrating the data, upgrade the Anchore Enterprise Helm deployment.

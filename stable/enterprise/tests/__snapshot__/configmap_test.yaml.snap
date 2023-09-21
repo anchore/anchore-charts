@@ -471,6 +471,47 @@ should render the configmaps:
   5: |
     apiVersion: v1
     data:
+      wait-for-db.sh: |
+        #!/bin/bash
+        while true
+        do
+          CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+          if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+            CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+          fi
+
+          if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+            CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_DB_SSL_ROOT_CERT}
+          fi
+
+          err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+          if [[ !$err ]]; then
+            echo "Database is ready"
+            exit 0
+          fi
+          echo "Database is not ready yet, sleeping 10 seconds..."
+          sleep 10
+        done
+    kind: ConfigMap
+    metadata:
+      annotations:
+        bar: baz
+        foo: bar
+      labels:
+        app.kubernetes.io/component: scripts
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: test-release-enterprise
+        app.kubernetes.io/part-of: anchore
+        app.kubernetes.io/version: 9.9.9
+        bar: baz
+        foo: bar
+        helm.sh/chart: enterprise-9.9.9
+      name: anchore-scripts
+      namespace: test-namespace
+  6: |
+    apiVersion: v1
+    data:
       config-ui.yaml: "# Anchore UI configuration\nengine_uri: 'http://test-release-enterprise-api:8228/v2'\nreports_uri: 'http://test-release-enterprise-api:8558/v2'\nnotifications_uri: 'http://test-release-enterprise-notifications:8668/v2'\nrbac_uri: 'http://test-release-enterprise-rbac-manager:8229/v2'\nenterprise_uri: 'http://test-release-enterprise-api:8228/v2'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false\n"
     kind: ConfigMap
     metadata:
