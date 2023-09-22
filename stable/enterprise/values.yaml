@@ -31,6 +31,18 @@ imagePullPolicy: IfNotPresent
 ##
 imagePullSecretName: anchore-enterprise-pullcreds
 
+## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema
+##
+startMigrationPod: false
+
+## @param migrationPodImage The image reference to the migration pod
+##
+migrationPodImage: docker.io/postgres:13-bookworm
+
+## @param migrationAnchoreEngineSecretName The name of the secret that has anchore-engine values
+##
+migrationAnchoreEngineSecretName: my-engine-anchore-engine
+
 ## @param serviceAccountName Name of a service account used to run all Anchore pods
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 ##
@@ -1185,6 +1197,12 @@ upgradeJob:
   ##
   labels: {}
 
+  ## @param upgradeJob.ttlAfterCompletion The time period in seconds the upgrade job, and it's related pods should be retained for
+  ## Defaults to 0 == immediate deletion after completion
+  ## Set this to -1 to disable deleting the job automatically (NOTE: This can cause issues with upgrades)
+  ##
+  ttlAfterCompletion: -1
+
 ##############################
 ## @section Ingress Parameters
 ##############################
@@ -1365,3 +1383,34 @@ postgresql:
   ##
   image:
     tag: 13.11.0-debian-11-r15
+
+## @param scripts Collection of helper scripts used in anchore enterprise charts
+##
+scripts:
+  ## @param configMapName Name of the configmap to store scripts
+  ##
+  configMapName: anchore-scripts
+  ## @param scripts Name and value of each helper script
+  ##
+  scripts:
+    wait-for-db.sh: |
+      #!/bin/bash
+      while true
+      do
+        CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+        if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+          CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+        fi
+
+        if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+          CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_DB_SSL_ROOT_CERT}
+        fi
+
+        err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+        if [[ !$err ]]; then
+          echo "Database is ready"
+          exit 0
+        fi
+        echo "Database is not ready yet, sleeping 10 seconds..."
+        sleep 10
+      done

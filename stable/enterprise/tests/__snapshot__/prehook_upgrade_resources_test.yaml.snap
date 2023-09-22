@@ -107,3 +107,30 @@ should render proper initContainers:
         - -c
       image: bitnami/kubectl:1.27
       name: scale-down-anchore
+    - command:
+        - /scripts/wait-for-db.sh
+      env:
+        - name: foo
+          value: bar
+        - name: bar
+          value: baz
+        - name: ANCHORE_ENDPOINT_HOSTNAME
+          value: test-release-enterprise-999-upgrade
+        - name: ANCHORE_PORT
+          value: "null"
+        - name: ANCHORE_HOST_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      image: docker.io/anchore/enterprise:v4.9.1
+      imagePullPolicy: IfNotPresent
+      name: wait-for-db
+      volumeMounts:
+        - mountPath: /home/anchore/license.yaml
+          name: anchore-license
+          subPath: license.yaml
+        - mountPath: /config/config.yaml
+          name: config-volume
+          subPath: config.yaml
+        - mountPath: /scripts
+          name: anchore-scripts
