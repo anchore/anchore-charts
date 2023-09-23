@@ -287,9 +287,12 @@ Setup the common anchore volume mounts
 - name: config-volume
   mountPath: /config/config.yaml
   subPath: config.yaml
+{{- $configmap := lookup "v1" "ConfigMap" .Release.Namespace "anchore-scripts" }}
+{{- if $configmap }}
 - name: anchore-scripts
   mountPath: /scripts
-{{- if (.Values.certStoreSecretName) }}
+{{- end }}
+{{- if .Values.certStoreSecretName }}
 - name: certs
   mountPath: /home/anchore/certs/
   readOnly: true
@@ -307,10 +310,13 @@ Setup the common anchore volumes
 - name: anchore-license
   secret:
     secretName: {{ .Values.licenseSecretName }}
-- name: {{ .Values.scripts.configMapName }}
+{{- $configmap := lookup "v1" "ConfigMap" .Release.Namespace "anchore-scripts" }}
+{{- if $configmap }}
+- name: anchore-scripts
   configMap:
-    name: {{ .Values.scripts.configMapName }}
+    name: anchore-scripts
     defaultMode: 0755
+{{- end }}
 - name: config-volume
   configMap:
     name: {{ template "enterprise.fullname" . }}

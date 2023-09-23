@@ -183,6 +183,19 @@ doSourceAtEntry:
 ##
 configOverride: ""
 
+## @param scripts [object] Collection of helper scripts usable in all anchore enterprise pods
+##
+scripts:
+  anchore-config: |
+    #!/bin/bash
+    while IFS= read -r line; do
+      while [[ "$line" =~ (\$\{[a-zA-Z_][a-zA-Z_0-9]*\}) ]]; do
+        VAR_NAME=${BASH_REMATCH[1]#*\{}; VAR_NAME=${VAR_NAME%\}};
+        line=${line//${BASH_REMATCH[1]}/${!VAR_NAME}};
+      done;
+      printf '%s\n' "$line";
+    done < /config/config.yaml
+
 #####################################################################
 ## @section Anchore Configuration Parameters
 ## Params used for all Anchore Enterprise service configuration files
@@ -1383,34 +1396,3 @@ postgresql:
   ##
   image:
     tag: 13.11.0-debian-11-r15
-
-## @param scripts Collection of helper scripts used in anchore enterprise charts
-##
-scripts:
-  ## @param configMapName Name of the configmap to store scripts
-  ##
-  configMapName: anchore-scripts
-  ## @param scripts Name and value of each helper script
-  ##
-  scripts:
-    wait-for-db.sh: |
-      #!/bin/bash
-      while true
-      do
-        CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-        if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-          CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-        fi
-
-        if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-          CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_DB_SSL_ROOT_CERT}
-        fi
-
-        err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-        if [[ !$err ]]; then
-          echo "Database is ready"
-          exit 0
-        fi
-        echo "Database is not ready yet, sleeping 10 seconds..."
-        sleep 10
-      done

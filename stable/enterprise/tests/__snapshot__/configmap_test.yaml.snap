@@ -471,27 +471,15 @@ should render the configmaps:
   5: |
     apiVersion: v1
     data:
-      wait-for-db.sh: |
+      anchore-config: |
         #!/bin/bash
-        while true
-        do
-          CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-          if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-            CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-          fi
-
-          if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-            CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_DB_SSL_ROOT_CERT}
-          fi
-
-          err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-          if [[ !$err ]]; then
-            echo "Database is ready"
-            exit 0
-          fi
-          echo "Database is not ready yet, sleeping 10 seconds..."
-          sleep 10
-        done
+        while IFS= read -r line; do
+          while [[ "$line" =~ (\$\{[a-zA-Z_][a-zA-Z_0-9]*\}) ]]; do
+            VAR_NAME=${BASH_REMATCH[1]#*\{}; VAR_NAME=${VAR_NAME%\}};
+            line=${line//${BASH_REMATCH[1]}/${!VAR_NAME}};
+          done;
+          printf '%s\n' "$line";
+        done < /config/config.yaml
     kind: ConfigMap
     metadata:
       annotations:

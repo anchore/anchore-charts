@@ -36,7 +36,9 @@ spec:
           args:
             - |
               kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "enterprise.fullname" . }};
-              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do echo 'waiting for pods to go down...' && sleep 5; done
+              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+                echo 'waiting for pods to go down...' && sleep 5;
+              done
         {{- with .Values.containerSecurityContext }}
           securityContext: {{ toYaml . | nindent 10 }}
         {{- end }}
@@ -47,8 +49,25 @@ spec:
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
-          command: [ "/scripts/wait-for-db.sh" ]
-          volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              while true; do
+                CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+                if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                  CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+                fi
+                if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                  CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_DB_SSL_ROOT_CERT}
+                fi
+                err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+                if [[ !$err ]]; then
+                  echo "Database is ready"
+                  exit 0
+                fi
+                echo "Database is not ready yet, sleeping 10 seconds..."
+                sleep 10
+              done
           {{- with .Values.containerSecurityContext }}
           securityContext: {{ toYaml . | nindent 10 }}
           {{- end }}
