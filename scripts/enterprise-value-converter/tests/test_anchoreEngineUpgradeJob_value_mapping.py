@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsEngineUpgradeJob(unittest.TestCase):
         dot_string_dict = {
             "anchoreEngineUpgradeJob.enabled": True
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -28,7 +28,7 @@ class TestReplaceKeysWithMappingsEngineUpgradeJob(unittest.TestCase):
             "anchoreEngineUpgradeJob.resources.requests.cpu": 1,
             "anchoreEngineUpgradeJob.resources.requests.memory": "1G"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -38,7 +38,7 @@ class TestReplaceKeysWithMappingsEngineUpgradeJob(unittest.TestCase):
             "anchoreEngineUpgradeJob.labels.myOtherLabel": "myOtherValue",
             "anchoreEngineUpgradeJob.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -48,7 +48,7 @@ class TestReplaceKeysWithMappingsEngineUpgradeJob(unittest.TestCase):
             "anchoreEngineUpgradeJob.annotations.bar": "baz",
             "anchoreEngineUpgradeJob.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -58,7 +58,7 @@ class TestReplaceKeysWithMappingsEngineUpgradeJob(unittest.TestCase):
             "anchoreEngineUpgradeJob.nodeSelector.value": "bar",
             "anchoreEngineUpgradeJob.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -71,7 +71,7 @@ class TestReplaceKeysWithMappingsEngineUpgradeJob(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -81,6 +81,6 @@ class TestReplaceKeysWithMappingsEngineUpgradeJob(unittest.TestCase):
             "anchoreEngineUpgradeJob.affinity.value": "bar",
             "anchoreEngineUpgradeJob.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)

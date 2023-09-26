@@ -115,6 +115,10 @@ def replace_keys_with_mappings(dot_string_dict, results_dir):
 
     env_var_mapping = {**enterprise_env_var_mapping, **feeds_env_var_mapping}
     logs_dir = f"{results_dir}/logs"
+    if not dot_string_dict.get("postgresql.postgresUser"):
+        log_file_name = "info.log"
+        write_to_file(f"setting postgres user as anchoreengine as one was not set and this value was changed in enterprise.\n", os.path.join(logs_dir, log_file_name), "a")
+        dot_string_dict["postgresql.postgresUser"] = "anchoreengine"
     if not dot_string_dict.get("anchoreGlobal.hashedPasswords"):
         log_file_name = "warning.log"
         write_to_file(f"hashedPasswords is not currently used. You should _really_ consider using it. Please see docs on how to migrate to hashed passwords.\n", os.path.join(logs_dir, log_file_name), "a")

@@ -284,6 +284,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
 
         dot_string_dict = {"anchore-feeds-db.persistence.size": 100}
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             "feeds": {
                 "feeds-db": {
@@ -312,6 +313,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
 
         anchore_config_expected_results = {
             'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+            'postgresql': {'auth': {'username': 'anchoreengine'}}
         }
         self.assertEqual(result[0], anchore_config_expected_results)
 

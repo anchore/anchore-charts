@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseFeeds.enabled": True,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'chartEnabled': True
             }
@@ -29,7 +29,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseFeeds.replicaCount": 2,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'replicaCount': 2
             }
@@ -45,7 +45,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.resources.requests.cpu": 1,
             "anchoreEnterpriseFeeds.resources.requests.memory": "1G"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'resources': {
                     'limits': {
@@ -69,7 +69,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.labels.myOtherLabel": "myOtherValue",
             "anchoreEnterpriseFeeds.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'labels':
                     {
@@ -88,7 +88,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.annotations.bar": "baz",
             "anchoreEnterpriseFeeds.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'annotations':
                     {
@@ -108,7 +108,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.deploymentAnnotations.bar": "baz",
             "anchoreEnterpriseFeeds.deploymentAnnotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'deploymentAnnotations':
                     {
@@ -127,7 +127,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.nodeSelector.value": "bar",
             "anchoreEnterpriseFeeds.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'nodeSelector':
                     {
@@ -149,7 +149,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'tolerations': [
                     {
@@ -168,7 +168,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.affinity.value": "bar",
             "anchoreEnterpriseFeeds.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'affinity':{
                     'name': 'foo',
@@ -189,7 +189,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'extraEnv': [
                     {
@@ -206,7 +206,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseFeeds.serviceAccountName": "Null"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'serviceAccountName': "Null"
             }
@@ -226,7 +226,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.service.labels.foobar": "baz",
             "anchoreEnterpriseFeeds.service.labels.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'service': {
                     "name": "Null",
@@ -251,7 +251,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseFeeds.url": "https://myhostname:9999"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'url': "https://myhostname:9999"
             }
@@ -273,7 +273,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             ]
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'feeds': {
@@ -297,7 +297,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.ubuntuExtraReleases.kinetic": "22.10"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'feeds': {
@@ -321,7 +321,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.ubuntuExtraReleases": {}
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'feeds': {
@@ -343,7 +343,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.debianExtraReleases.trixie": "13"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'feeds': {
@@ -367,7 +367,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.debianExtraReleases": {}
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'feeds': {
@@ -389,7 +389,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.cycleTimers.driver_sync": 7200
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'feeds': {
@@ -416,7 +416,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.dbConfig.engineArgs.pool_recycle": 600
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'dbConfig': {
@@ -449,7 +449,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.dbConfig.engineArgs": {}
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'anchoreConfig': {
                     'dbConfig': {
@@ -475,7 +475,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.persistence.resourcePolicy": None
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'persistence': {
                     'enabled': False,
@@ -500,7 +500,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchoreEnterpriseFeeds.persistence.mountPath": "/workspace"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'persistence': {
                     'enabled': True,
@@ -538,6 +538,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
 
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {'user_authentication': {'hashed_passwords': False}}
         })
         self.assertEqual(result[1], expected_result)
@@ -559,6 +560,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
 
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {'user_authentication': {'hashed_passwords': False}}
         })
         self.assertEqual(result[1], expected_result)
@@ -574,7 +576,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchore-feeds-db.postgresPort": 5432
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             "feeds": {
                 "feeds-db": {
                     "chartEnabled": True,
@@ -605,7 +607,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchore-feeds-db.persistence.size": "20Gi"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feeds-db': {
                     'primary': {
@@ -628,7 +630,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchore-feeds-db.imageTag": "latest"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feeds-db': {
                     'image': {
@@ -656,7 +658,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             ]
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feeds-db':{
                     'primary': {
@@ -682,7 +684,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchore-feeds-gem-db.postgresPort": 5432
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             "feeds": {
                 "gem-db": {
                     "chartEnabled": True,
@@ -713,7 +715,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchore-feeds-gem-db.persistence.size": "20Gi"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'gem-db': {
                     'primary': {
@@ -736,7 +738,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             "anchore-feeds-gem-db.imageTag": "latest"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'gem-db': {
                     'image': {
@@ -764,7 +766,7 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
             ]
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'gem-db':{
                     'primary': {

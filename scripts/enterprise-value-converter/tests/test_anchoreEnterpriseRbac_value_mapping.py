@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseRbac.replicaCount": 2,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'replicaCount': 2
             }
@@ -33,7 +33,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.resources.requests.cpu": 1,
             "anchoreEnterpriseRbac.resources.requests.memory": "1G"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'resources': {
                     'limits': {
@@ -57,7 +57,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.labels.myOtherLabel": "myOtherValue",
             "anchoreEnterpriseRbac.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'labels':
                     {
@@ -76,7 +76,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.annotations.bar": "baz",
             "anchoreEnterpriseRbac.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'annotations':
                     {
@@ -96,7 +96,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.deploymentAnnotations.bar": "baz",
             "anchoreEnterpriseRbac.deploymentAnnotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'deploymentAnnotations':
                     {
@@ -115,7 +115,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.nodeSelector.value": "bar",
             "anchoreEnterpriseRbac.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'nodeSelector':
                     {
@@ -137,7 +137,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'tolerations': [
                     {
@@ -156,7 +156,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.affinity.value": "bar",
             "anchoreEnterpriseRbac.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'affinity':{
                     'name': 'foo',
@@ -177,7 +177,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'extraEnv': [
                     {
@@ -203,7 +203,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseRbac.serviceAccountName": "Null"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'serviceAccountName': "Null"
             }
@@ -223,7 +223,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.service.annotations.anotherLabel.with.a.dot": "qux",
             "anchoreEnterpriseRbac.service.labels": {},
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'service': {
                     'name': 'Null',
@@ -248,7 +248,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseRbac.enabled": True # deprecated
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
 
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
@@ -260,7 +260,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.authResources.requests.cpu": "100m",
             "anchoreEnterpriseRbac.authResources.requests.memory": "256M"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacAuth': {
                 'resources': {
                     'limits': {
@@ -284,7 +284,7 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.managerResources.requests.cpu": "100m",
             "anchoreEnterpriseRbac.managerResources.requests.memory": "256M"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'resources': {
                     'limits': {
