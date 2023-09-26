@@ -63,10 +63,10 @@ spec:
               name: feeds-api
           envFrom:
             - configMapRef:
-                name: {{ template "feeds.fullname" . }}-config-env-vars
+                name: {{ .Release.Name }}-feeds-config-env-vars
           {{- if not .Values.standalone }}
             - configMapRef:
-                name: {{ template "enterprise.fullname" . }}-config-env-vars
+                name: {{ .Release.Name }}-enterprise-config-env-vars
           {{- end }}
         {{- if not .Values.injectSecretsViaEnv }}
           {{- if .Values.useExistingSecrets }}
@@ -90,7 +90,9 @@ spec:
             - name: anchore-license
               mountPath: /home/anchore/license.yaml
               subPath: license.yaml
-          {{- if (.Values.certStoreSecretName) }}
+            - name: anchore-scripts
+              mountPath: /scripts
+          {{- if .Values.certStoreSecretName }}
             - name: certs
               mountPath: /home/anchore/certs/
               readOnly: true
@@ -129,6 +131,10 @@ spec:
         - name: config-volume
           configMap:
             name: {{ template "feeds.fullname" . }}
+        - name: anchore-scripts
+          configMap:
+            name: {{ printf "%s-%s-scripts" .Release.Name (ternary "feeds" "enterprise" .Values.standalone) }}
+            defaultMode: 0755
         - name: "anchore-scratch"
         {{- if .Values.scratchVolume.details }}
           {{- toYaml .Values.scratchVolume.details | nindent 10 }}

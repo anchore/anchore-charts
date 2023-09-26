@@ -1,6 +1,6 @@
 suite: Common Helper Template Tests
 templates:
-  - anchore_vars_configmap.yaml
+  - envvars_configmap.yaml
   - configmap.yaml
   - deployment.yaml
   - pvc.yaml
@@ -17,7 +17,7 @@ chart:
   appVersion: 9.9.9
 
 test_templates: &test_templates
-  - anchore_vars_configmap.yaml
+  - envvars_configmap.yaml
   - configmap.yaml
   - deployment.yaml
   - pvc.yaml

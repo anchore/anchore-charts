@@ -1210,11 +1210,11 @@ upgradeJob:
   ##
   labels: {}
 
-  ## @param upgradeJob.ttlAfterCompletion The time period in seconds the upgrade job, and it's related pods should be retained for
+  ## @param upgradeJob.ttlSecondsAfterFinished The time period in seconds the upgrade job, and it's related pods should be retained for
   ## Defaults to 0 == immediate deletion after completion
   ## Set this to -1 to disable deleting the job automatically (NOTE: This can cause issues with upgrades)
   ##
-  ttlAfterCompletion: -1
+  ttlSecondsAfterFinished: -1
 
 ##############################
 ## @section Ingress Parameters

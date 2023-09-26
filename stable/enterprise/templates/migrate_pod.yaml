@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: enterprise-migrate-db
+  name: {{ .Release.Name }}-enterprise-migrate-db
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/component: upgradejob
@@ -13,7 +13,7 @@ spec:
     args: [ "sleep infinity" ]
     image: {{ .Values.migrationPodImage }}
     imagePullPolicy: {{ .Values.imagePullPolicy }}
-    name: enterprise-db-migrate
+    name: enterprise-migrate-db
     env:
       - name: NEW_DB_HOST
         value: {{ .Release.Name }}-postgresql

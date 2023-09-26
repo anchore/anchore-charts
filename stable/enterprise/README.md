@@ -703,7 +703,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 2. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
    1. If you are using the included migration helper pod, the exec to that pod and run the following command:
    ```shell
-   kubectl -n <chart namespace> exec -it enterprise-migrate-db
+   kubectl -n <chart namespace> exec -it <RELEASE_NAME>-enterprise-migrate-db
    PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} -c ${NEW_DB_NAME}
    ```
    2. If you are using your own pod then follow these steps
@@ -1078,20 +1078,20 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 ### Anchore Upgrade Job Parameters
 
-| Name                            | Description                                                                                                                                     | Value   |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `upgradeJob.enabled`            | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`  |
-| `upgradeJob.force`              | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false` |
-| `upgradeJob.rbacCreate`         | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`  |
-| `upgradeJob.serviceAccountName` | Use an existing service account for the Anchore upgrade job                                                                                     | `""`    |
-| `upgradeJob.usePostUpgradeHook` | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false` |
-| `upgradeJob.nodeSelector`       | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`    |
-| `upgradeJob.tolerations`        | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`    |
-| `upgradeJob.affinity`           | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`    |
-| `upgradeJob.annotations`        | Annotations for the Anchore upgrade job                                                                                                         | `{}`    |
-| `upgradeJob.resources`          | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`    |
-| `upgradeJob.labels`             | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
-| `upgradeJob.ttlAfterCompletion` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
+| Name                                 | Description                                                                                                                                     | Value   |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `upgradeJob.enabled`                 | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`  |
+| `upgradeJob.force`                   | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false` |
+| `upgradeJob.rbacCreate`              | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`  |
+| `upgradeJob.serviceAccountName`      | Use an existing service account for the Anchore upgrade job                                                                                     | `""`    |
+| `upgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false` |
+| `upgradeJob.nodeSelector`            | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`    |
+| `upgradeJob.tolerations`             | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`    |
+| `upgradeJob.affinity`                | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`    |
+| `upgradeJob.annotations`             | Annotations for the Anchore upgrade job                                                                                                         | `{}`    |
+| `upgradeJob.resources`               | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`    |
+| `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
+| `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
 
 
 ### Ingress Parameters

@@ -14,8 +14,8 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation
   {{- end }}
 spec:
-  {{- if ne (.Values.upgradeJob.ttlAfterCompletion | quote) (-1 | quote) }}
-  ttlSecondsAfterFinished: {{ .Values.upgradeJob.ttlAfterCompletion }}
+  {{- if ne (.Values.upgradeJob.ttlSecondsAfterFinished | quote) (-1 | quote) }}
+  ttlSecondsAfterFinished: {{ .Values.upgradeJob.ttlSecondsAfterFinished }}
   {{- end }}
   template:
     metadata:

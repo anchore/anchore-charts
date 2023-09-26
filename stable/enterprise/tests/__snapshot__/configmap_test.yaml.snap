@@ -481,7 +481,6 @@ should render the configmaps:
         bar: baz
         foo: bar
       labels:
-        app.kubernetes.io/component: scripts
         app.kubernetes.io/instance: test-release
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-enterprise
@@ -490,7 +489,7 @@ should render the configmaps:
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-9.9.9
-      name: anchore-scripts
+      name: test-release-enterprise-scripts
       namespace: test-namespace
   6: |
     apiVersion: v1
