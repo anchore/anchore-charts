@@ -456,14 +456,14 @@ anchoreConfig:
     ## @param anchoreConfig.catalog.analysis_archive [object] Custom analysis archive YAML configuration
     ## ref: https://docs.anchore.com/current/docs/configuration/storage/analysis_archive/
     ##
-    analysis_archive:
-      compression:
-        enabled: true
-        min_size_kbytes: 100
-      storage_driver:
-        # Valid storage driver names: 'db', 's3', 'swift'
-        name: db
-        config: {}
+    analysis_archive: {}
+    ##  compression:
+    ##    enabled: true
+    ##    min_size_kbytes: 100
+    ##  storage_driver:
+    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    name: db
+    ##    config: {}
 
     ## @param anchoreConfig.catalog.object_store [object] Custom object storage YAML configuration
     ## ref: https://docs.anchore.com/current/docs/configuration/storage/object_store/

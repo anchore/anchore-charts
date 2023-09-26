@@ -170,12 +170,7 @@ should render the configmaps:
               object_store_bucket: "runtime_compliance_check"
             down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
             analysis_archive:
-              compression:
-                enabled: true
-                min_size_kbytes: 100
-              storage_driver:
-                config: {}
-                name: db
+              {}
             object_store:
               compression:
                 enabled: true
