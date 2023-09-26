@@ -215,6 +215,19 @@ existingSecretName: anchore-enterprise-feeds-env
 ##
 configOverride: {}
 
+## @param scripts [object] Collection of helper scripts usable in all anchore enterprise pods
+##
+scripts:
+  anchore-config: |
+    #!/bin/bash
+    while IFS= read -r line; do
+      while [[ "$line" =~ (\$\{[a-zA-Z_][a-zA-Z_0-9]*\}) ]]; do
+        VAR_NAME=${BASH_REMATCH[1]#*\{}; VAR_NAME=${VAR_NAME%\}};
+        line=${line//${BASH_REMATCH[1]}/${!VAR_NAME}};
+      done;
+      printf '%s\n' "$line";
+    done < /config/config.yaml
+
 #####################################################################
 ## @section Anchore Feeds Configuration Parameters
 ## Params used for all Anchore Feeds service configuration files
@@ -495,6 +508,12 @@ feedsUpgradeJob:
   ## @param feedsUpgradeJob.resources Resources for the Anchore Feeds upgrade job
   ##
   resources: {}
+
+  ## @param feedsUpgradeJob.ttlSecondsAfterFinished The time period in seconds the upgrade job, and it's related pods should be retained for
+  ## Defaults to 0 == immediate deletion after completion
+  ## Set this to -1 to disable deleting the job automatically (NOTE: This can cause issues with upgrades)
+  ##
+  ttlSecondsAfterFinished: -1
 
 ##############################
 ## @section Ingress Parameters

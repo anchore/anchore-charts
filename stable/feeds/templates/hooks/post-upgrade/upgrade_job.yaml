@@ -86,10 +86,10 @@ spec:
           {{- end }}
           envFrom:
             - configMapRef:
-                name: {{ template "feeds.fullname" . }}-config-env-vars
+                name: {{ .Release.Name }}-feeds-config-env-vars
           {{- if not .Values.standalone }}
             - configMapRef:
-                name: {{ template "enterprise.fullname" . }}-config-env-vars
+                name: {{ .Release.Name }}-enterprise-config-env-vars
           {{- end }}
         {{- if not .Values.injectSecretsViaEnv }}
           {{- if .Values.useExistingSecrets }}

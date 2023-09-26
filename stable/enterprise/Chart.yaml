@@ -1,6 +1,6 @@
 apiVersion: v2
 name: enterprise
-version: "0.0.10"
+version: "0.0.16"
 appVersion: "4.9.1"
 kubeVersion: 1.23.x - 1.27.x || 1.23.x-x - 1.27.x-x
 description: |
@@ -41,6 +41,7 @@ dependencies:
   - name: feeds
     version: "~0.0"
     repository: "@anchore"
+    # repository: file://../feeds
     condition: feeds.chartEnabled
     import-values:
       - child: service

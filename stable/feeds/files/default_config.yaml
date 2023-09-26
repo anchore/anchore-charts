@@ -1,5 +1,5 @@
 service_dir: ${ANCHORE_SERVICE_DIR}
-tmp_dir: ${ANCHORE_TMP_DIR}
+tmp_dir: ${ANCHORE_FEEDS_TMP_DIR}
 log_level: ${ANCHORE_LOG_LEVEL}
 
 host_id: "${ANCHORE_HOST_ID}"

@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
         dot_string_dict = {
             "anchoreApi.replicaCount": 2,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'replicaCount': 2
             }
@@ -34,7 +34,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'extraEnv': [
                     {
@@ -59,7 +59,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.service.labels.with.a.dot.foobar": "baz"
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'service': {
                     "name": "null",
@@ -84,7 +84,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
         dot_string_dict = {
             "anchoreApi.serviceAccountName": "Null"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'serviceAccountName': "Null"
             }
@@ -100,7 +100,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.resources.requests.memory": "1G",
             }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'resources': {
                     'limits': {
@@ -123,7 +123,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.labels.value": "bar",
             "anchoreApi.labels.anotherLabel.with.a.dot": "baz",
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'labels':
                     {
@@ -141,7 +141,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.annotations.foo": "bar",
             "anchoreApi.annotations.baz": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'annotations':
                     {
@@ -158,7 +158,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.deploymentAnnotations.name": "foo",
             "anchoreApi.deploymentAnnotations.mydot.value": "bar"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'deploymentAnnotations': {
                     'name': 'foo',
@@ -174,7 +174,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.nodeSelector.name": "foo",
             "anchoreApi.nodeSelector.value": "bar"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'nodeSelector':
                     {
@@ -195,7 +195,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'tolerations': [
                     {
@@ -213,7 +213,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.affinity.name": "foo",
             "anchoreApi.affinity.value": "bar"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'api': {
                 'affinity': {
                     'name': 'foo',
@@ -231,6 +231,7 @@ class TestReplaceKeysWithMappingsApi(unittest.TestCase):
             "anchoreApi.external.port": 8443
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'apiext': {

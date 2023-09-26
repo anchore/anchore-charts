@@ -1,7 +1,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ template "feeds.fullname" . }}-config-env-vars
+  name: {{ .Release.Name }}-feeds-config-env-vars
   namespace: {{ .Release.Namespace }}
   labels: {{- include "feeds.common.labels" . | nindent 4 }}
   annotations: {{- include "feeds.common.annotations" . | nindent 4 }}
@@ -61,6 +61,7 @@ data:
   ANCHORE_FEEDS_GRYPEDB_PERSIST_WORKSPACE: "true"
   ANCHORE_FEEDS_GRYPEDB_RESTORE_WORKSPACE: "true"
   ANCHORE_FEEDS_PACKAGES_ENABLED: "false"
+  ANCHORE_FEEDS_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
   ANCHORE_FEEDS_WORKSPACE_PRELOAD: "true"
   ANCHORE_GITHUB_TOKEN: "null"
   ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
@@ -88,4 +89,3 @@ data:
   ANCHORE_SSL_KEY: "null"
 {{- end }}
   ANCHORE_SSO_REQUIRES_EXISTING_USERS: "{{ .Values.anchoreConfig.user_authentication.sso_require_existing_users }}"
-  ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"

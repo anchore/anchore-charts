@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseNotifications.enabled": True, # deprecated
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -25,7 +25,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseNotifications.replicaCount": 2,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'replicaCount': 2
             }
@@ -41,7 +41,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.resources.requests.cpu": 1,
             "anchoreEnterpriseNotifications.resources.requests.memory": "1G"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'resources': {
                     'limits': {
@@ -65,7 +65,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.labels.myOtherLabel": "myOtherValue",
             "anchoreEnterpriseNotifications.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'labels':
                     {
@@ -84,7 +84,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.annotations.bar": "baz",
             "anchoreEnterpriseNotifications.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'annotations':
                     {
@@ -104,7 +104,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.deploymentAnnotations.bar": "baz",
             "anchoreEnterpriseNotifications.deploymentAnnotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'deploymentAnnotations':
                     {
@@ -123,7 +123,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.nodeSelector.value": "bar",
             "anchoreEnterpriseNotifications.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'nodeSelector':
                     {
@@ -145,7 +145,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'tolerations': [
                     {
@@ -164,7 +164,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.affinity.value": "bar",
             "anchoreEnterpriseNotifications.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'affinity':{
                     'name': 'foo',
@@ -185,7 +185,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'extraEnv': [
                     {
@@ -202,7 +202,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseNotifications.serviceAccountName": "Null"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'serviceAccountName': "Null"
             }
@@ -221,7 +221,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.service.annotations.with.a.dot": "quux",
             "anchoreEnterpriseNotifications.service.labels": {}
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'service': {
                     "name": "Null",
@@ -244,6 +244,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.cycleTimers.notifications": 30
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'notifications': {
@@ -261,6 +262,7 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
             "anchoreEnterpriseNotifications.uiUrl": "http://myurl.myurl"
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'notifications': {

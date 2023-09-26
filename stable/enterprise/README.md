@@ -629,6 +629,8 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 - **Runtime Environment**: Docker or Podman must be installed on the machine where the migration will run.
 
+- **Existing Secrets**: If you are not currently using existing secrets, you will have to create them to be used for the new enterprise deployment, or you will have to update the secrets created manually. See the section on [Existing Secrets](#existing-secrets) for more information on what is required.
+
 #### Step-by-Step Migration Process
 
 1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format. This command mounts a local volume to persistently store the output files, and it mounts the input values file within the container for conversion.It's imperative to review both the output and the new [values file](values.yaml) before moving forward.
@@ -637,6 +639,22 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
     export VALUES_FILE_NAME=my-values-file.yaml
     docker run -v ${PWD}:/tmp -v ${PWD}/${VALUES_FILE_NAME}:/app/${VALUES_FILE_NAME} docker.io/anchore/enterprise-helm-migrator:latest -e /app/${VALUES_FILE_NAME} -d /tmp/output
     ```
+
+For anchore enterprise 4.9.x, you will need to additionally set the following values in your values file to use the v1 api of Anchore.
+```
+api:
+  service:
+    apiVersion: v1
+notifications:
+  service:
+    apiVersion: v1
+reports:
+  service:
+    apiVersion: v1
+rbacManager:
+  service:
+    apiVersion: v1
+```
 
 #### If Using an External PostgreSQL Database
 
@@ -656,7 +674,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
     helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true anchore/enterprise
     ```
 
-    > **Note:** The `upgradeJob.force` flag is required to force the upgrade job to run upon installation. This value is not needed for future upgrades.
+    > **Note:** The `upgradeJob.force` flag is required to force the upgrade job to run upon installation. This value is not needed for future upgrades. Remember to unset it if passing it in via the command line or helm may persist the value.
 
 1. **Verification and Cleanup**: After confirming that the Anchore Enterprise deployment is functional, you can safely uninstall the old Anchore Engine deployment.
 
@@ -676,31 +694,45 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
 
-    ```shell
-    export ENTERPRISE_RELEASE=my-enterprise-release
-    export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
-    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true anchore/enterprise
-    ```
+   **NOTE**: You will have to migrate data from the old database to the new one after the chart is installed. The enterprise chart contains a helper pod to aid with this, to enable this pod, use the following in your helm install command line
+   ```shell
+   --set startMigrationPod=true
+   --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine
+   ```
+   ```shell
+   export ENGINE_RELEASE=my-engine-release
+   export ENTERPRISE_RELEASE=my-enterprise-release
+   export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
+   helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true --set startMigrationPod=true anchore/enterprise --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine
+   ```
 
 1. **Scale Down Anchore Enterprise**: Before migrating the database, scale down the new Anchore Enterprise deployment to zero replicas.
 
-    ```shell
-    kubectl scale deployment --replicas=0 -l app=${ENTERPRISE_RELEASE}-enterprise
-    ```
+   ```shell
+   kubectl scale deployment --replicas=0 -l app.kubernetes.io/name=${ENTERPRISE_RELEASE}-enterprise
+   ```
 
 1. **Database Preparation**: Replace the existing Anchore database with a new database in PostgreSQL 13.
 
+  1. If you set startMigrationPod=true as per the step above, you can exec into the migrator pod to run the commands.
     ```shell
-    export NEW_DB_HOST=${ENTERPRISE_RELEASE}-postgresql
-    export ANCHORE_DATABASE_NAME=anchore
-    dropdb -h ${NEW_DB_HOST} -U ${PGUSER} ${ANCHORE_DATABASE_NAME}; psql -h ${NEW_DB_HOST} -c 'CREATE DATABASE ${ANCHORE_DATABASE_NAME}'
+    kubectl -n <chart namespace> exec -it <RELEASE_NAME>-enterprise-migrate-db
+    PGPASSWORD=$NEW_DB_PASSWORD dropdb -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}; PGPASSWORD=$NEW_DB_PASSWORD psql -h ${NEW_DB_HOST}  -U ${NEW_DB_USERNAME} -c "CREATE DATABASE ${NEW_DB_NAME}" postgres
     ```
 
-1. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
-
-    ```shell
-    export OLD_PG_DB_HOST=${ENGINE_RELEASE}-postgresql
-    pg_dump -h ${OLD_PG_DB_HOST} -c ${ANCHORE_DATABASE_NAME} | psql -h ${NEW_DB_HOST} ${ANCHORE_DATABASE_NAME}
+2. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
+   1. If you are using the included migration helper pod, the exec to that pod and run the following command:
+   ```shell
+   kubectl -n <chart namespace> exec -it <RELEASE_NAME>-enterprise-migrate-db
+   PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
+   ```
+   2. If you are using your own pod then follow these steps
+      1. Gather old DB parameters from the secret <old release name>-anchore-engine
+      2. Gather new DB parameters from the new secret <new release name>-enterprise
+      3. Start a migration pod that has all the psql binaries required e.g. docker.io/postgresql:13
+      4. Export all the required environment variables
+   ```shell
+    PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
     ```
 
 1. **Upgrade Anchore Enterprise**: After migrating the data, upgrade the Anchore Enterprise Helm deployment.
@@ -724,6 +756,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
 | `global.nameOverride`     | overrides the name set on resources     | `""`  |
 
+
 ### Common Resource Parameters
 
 | Name                                  | Description                                                                           | Value                                 |
@@ -731,6 +764,9 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.1` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |
+| `startMigrationPod`                   | Spin up a Database migration pod to help migrate the database to the new schema       | `false`                               |
+| `migrationPodImage`                   | The image reference to the migration pod                                              | `docker.io/postgres:13-bookworm`      |
+| `migrationAnchoreEngineSecretName`    | The name of the secret that has anchore-engine values                                 | `my-engine-anchore-engine`            |
 | `serviceAccountName`                  | Name of a service account used to run all Anchore pods                                | `""`                                  |
 | `injectSecretsViaEnv`                 | Enable secret injection into pod via environment variables instead of via k8s secrets | `false`                               |
 | `licenseSecretName`                   | Name of the Kubernetes secret containing your license.yaml file                       | `anchore-enterprise-license`          |
@@ -761,6 +797,8 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `doSourceAtEntry.enabled`             | Does a `source` of the file path defined before starting Anchore services             | `false`                               |
 | `doSourceAtEntry.filePaths`           | List of file paths to `source` before starting Anchore services                       | `[]`                                  |
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                          | `""`                                  |
+| `scripts`                             | Collection of helper scripts usable in all anchore enterprise pods                    | `{}`                                  |
+
 
 ### Anchore Configuration Parameters
 
@@ -855,6 +893,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `anchoreConfig.ui.dbUser`                                                  | allows overriding and separation of the ui database user.                                                                        | `""`               |
 | `anchoreConfig.ui.dbPassword`                                              | allows overriding and separation of the ui database user authentication                                                          | `""`               |
 
+
 ### Anchore API k8s Deployment Parameters
 
 | Name                      | Description                                                                      | Value       |
@@ -876,6 +915,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `api.affinity`            | Affinity for Anchore API pod assignment                                          | `{}`        |
 | `api.serviceAccountName`  | Service account name for Anchore API pods                                        | `""`        |
 
+
 ### Anchore Analyzer k8s Deployment Parameters
 
 | Name                          | Description                                                           | Value  |
@@ -890,6 +930,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `analyzer.tolerations`        | Tolerations for Anchore Analyzer pod assignment                       | `[]`   |
 | `analyzer.affinity`           | Affinity for Anchore Analyzer pod assignment                          | `{}`   |
 | `analyzer.serviceAccountName` | Service account name for Anchore API pods                             | `""`   |
+
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -910,6 +951,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `catalog.affinity`            | Affinity for Anchore Catalog pod assignment              | `{}`        |
 | `catalog.serviceAccountName`  | Service account name for Anchore Catalog pods            | `""`        |
 
+
 ### Anchore Feeds Chart Parameters
 
 | Name                 | Description                                                                                    | Value   |
@@ -917,6 +959,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `feeds.chartEnabled` | Enable the Anchore Feeds chart                                                                 | `true`  |
 | `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
 | `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
+
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -937,6 +980,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `policyEngine.affinity`            | Affinity for Anchore Policy Engine pod assignment              | `{}`        |
 | `policyEngine.serviceAccountName`  | Service account name for Anchore Policy Engine pods            | `""`        |
 
+
 ### Anchore Simple Queue Parameters
 
 | Name                              | Description                                                   | Value       |
@@ -955,6 +999,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `simpleQueue.tolerations`         | Tolerations for Anchore Simple Queue pod assignment           | `[]`        |
 | `simpleQueue.affinity`            | Affinity for Anchore Simple Queue pod assignment              | `{}`        |
 | `simpleQueue.serviceAccountName`  | Service account name for Anchore Simple Queue pods            | `""`        |
+
 
 ### Anchore Notifications Parameters
 
@@ -976,6 +1021,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `notifications.affinity`            | Affinity for Anchore Notifications pod assignment                                | `{}`        |
 | `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods                              | `""`        |
 
+
 ### Anchore Reports Parameters
 
 | Name                          | Description                                                                      | Value       |
@@ -996,12 +1042,14 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `reports.affinity`            | Affinity for Anchore Reports pod assignment                                      | `{}`        |
 | `reports.serviceAccountName`  | Service account name for Anchore Reports pods                                    | `""`        |
 
+
 ### Anchore RBAC Authentication Parameters
 
 | Name                 | Description                                                                | Value |
 | -------------------- | -------------------------------------------------------------------------- | ----- |
 | `rbacAuth.extraEnv`  | Set extra environment variables for Anchore RBAC Authentication containers | `[]`  |
 | `rbacAuth.resources` | Resource requests and limits for Anchore RBAC Authentication containers    | `{}`  |
+
 
 ### Anchore RBAC Manager Parameters
 
@@ -1022,6 +1070,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment                              | `[]`        |
 | `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment                                 | `{}`        |
 | `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods                               | `""`        |
+
 
 ### Anchore UI Parameters
 
@@ -1046,21 +1095,24 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `ui.affinity`                | Affinity for Anchore ui pod assignment                                        | `{}`                                     |
 | `ui.serviceAccountName`      | Service account name for Anchore UI pods                                      | `""`                                     |
 
+
 ### Anchore Upgrade Job Parameters
 
-| Name                            | Description                                                                                                                                     | Value   |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `upgradeJob.enabled`            | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`  |
-| `upgradeJob.force`              | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false` |
-| `upgradeJob.rbacCreate`         | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`  |
-| `upgradeJob.serviceAccountName` | Use an existing service account for the Anchore upgrade job                                                                                     | `""`    |
-| `upgradeJob.usePostUpgradeHook` | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false` |
-| `upgradeJob.nodeSelector`       | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`    |
-| `upgradeJob.tolerations`        | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`    |
-| `upgradeJob.affinity`           | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`    |
-| `upgradeJob.annotations`        | Annotations for the Anchore upgrade job                                                                                                         | `{}`    |
-| `upgradeJob.resources`          | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`    |
-| `upgradeJob.labels`             | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
+| Name                                 | Description                                                                                                                                     | Value   |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `upgradeJob.enabled`                 | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`  |
+| `upgradeJob.force`                   | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false` |
+| `upgradeJob.rbacCreate`              | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`  |
+| `upgradeJob.serviceAccountName`      | Use an existing service account for the Anchore upgrade job                                                                                     | `""`    |
+| `upgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false` |
+| `upgradeJob.nodeSelector`            | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`    |
+| `upgradeJob.tolerations`             | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`    |
+| `upgradeJob.affinity`                | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`    |
+| `upgradeJob.annotations`             | Annotations for the Anchore upgrade job                                                                                                         | `{}`    |
+| `upgradeJob.resources`               | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`    |
+| `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
+| `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
+
 
 ### Ingress Parameters
 
@@ -1080,6 +1132,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`    |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx` |
 
+
 ### Google CloudSQL DB Parameters
 
 | Name                             | Description                                                                    | Value                                     |
@@ -1093,6 +1146,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
+
 ### Anchore UI Redis Parameters
 
 | Name                                  | Description                                                                                            | Value               |
@@ -1102,6 +1156,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 | `ui-redis.auth.password`              | Password used for connecting to Redis                                                                  | `anchore-redis,123` |
 | `ui-redis.architecture`               | Redis deployment architecture                                                                          | `standalone`        |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                                    | `false`             |
+
 
 ### Anchore Database Parameters
 

@@ -10,8 +10,12 @@ metadata:
   {{- if not .Values.feedsUpgradeJob.force }}
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation
   {{- end }}
 spec:
+{{- if ne (.Values.feedsUpgradeJob.ttlSecondsAfterFinished | quote) (-1 | quote) }}
+  ttlSecondsAfterFinished: {{ .Values.feedsUpgradeJob.ttlSecondsAfterFinished }}
+{{- end }}
   template:
     metadata:
       name: {{ template "feeds.upgradeJob.fullname" . }}
@@ -65,12 +69,43 @@ spec:
           args:
             - |
               kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "feeds.fullname" . }};
-              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "feeds.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do echo 'waiting for pods to go down...' && sleep 5; done
+              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "feeds.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+                echo 'waiting for pods to go down...' && sleep 5;
+              done
         {{- with .Values.containerSecurityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
         {{- end }}
         {{- with .Values.feedsUpgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: wait-for-db
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env: {{- include "feeds.common.environment" . | nindent 12 }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              while true; do
+                CONNSTR=postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}":"${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}"
+                if [[ ${ANCHORE_FEEDS_DB_SSL_MODE} != null ]]; then
+                  CONNSTR=${CONNSTR}?sslmode=${ANCHORE_FEEDS_DB_SSL_MODE}
+                fi
+                if [[ ${ANCHORE_FEEDS_DB_SSL_ROOT_CERT} != null ]]; then
+                  CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_FEEDS_DB_SSL_ROOT_CERT}
+                fi
+                err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+                if [[ !$err ]]; then
+                  echo "Database is ready"
+                  exit 0
+                fi
+                echo "Database is not ready yet, sleeping 10 seconds..."
+                sleep 10
+              done
+          {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 10 }}
+          {{- end }}
+          {{- with .Values.feedsUpgradeJob.resources }}
+          resources: {{- toYaml . | nindent 10 }}
           {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -84,10 +119,10 @@ spec:
         {{- end }}
           envFrom:
             - configMapRef:
-                name: {{ template "feeds.fullname" . }}-config-env-vars
+                name: {{ .Release.Name }}-feeds-config-env-vars
           {{- if not .Values.standalone }}
             - configMapRef:
-                name: {{ template "enterprise.fullname" . }}-config-env-vars
+                name: {{ .Release.Name }}-enterprise-config-env-vars
           {{- end }}
         {{- if not .Values.injectSecretsViaEnv }}
           {{- if .Values.useExistingSecrets }}

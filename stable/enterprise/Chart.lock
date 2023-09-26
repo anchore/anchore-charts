@@ -9,4 +9,4 @@ dependencies:
   repository: https://charts.anchore.io/stable
   version: 0.0.8
 digest: sha256:7d3bf18cb22105e08420375b32ce9179f4cca2db82e2b54e25ce42c0aadcccfb
-generated: "2023-09-20T17:21:27.814898-07:00"
+generated: "2023-09-25T22:28:23.16166-07:00"

@@ -62,7 +62,7 @@ Setup the common envFrom configs
 */}}
 {{- define "enterprise.common.envFrom" -}}
 - configMapRef:
-    name: {{ template "enterprise.fullname" . }}-config-env-vars
+    name: {{ .Release.Name }}-enterprise-config-env-vars
 {{- if not .Values.injectSecretsViaEnv }}
   {{- if .Values.useExistingSecrets }}
 - secretRef:
@@ -287,7 +287,9 @@ Setup the common anchore volume mounts
 - name: config-volume
   mountPath: /config/config.yaml
   subPath: config.yaml
-{{- if (.Values.certStoreSecretName) }}
+- name: anchore-scripts
+  mountPath: /scripts
+{{- if .Values.certStoreSecretName }}
 - name: certs
   mountPath: /home/anchore/certs/
   readOnly: true
@@ -305,6 +307,10 @@ Setup the common anchore volumes
 - name: anchore-license
   secret:
     secretName: {{ .Values.licenseSecretName }}
+- name: anchore-scripts
+  configMap:
+    name: {{ .Release.Name }}-enterprise-scripts
+    defaultMode: 0755
 - name: config-volume
   configMap:
     name: {{ template "enterprise.fullname" . }}

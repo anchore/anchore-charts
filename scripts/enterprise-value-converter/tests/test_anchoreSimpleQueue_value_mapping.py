@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
         dot_string_dict = {
             "anchoreSimpleQueue.replicaCount": 2,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'replicaCount': 2
             }
@@ -33,7 +33,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
             "anchoreSimpleQueue.resources.requests.cpu": 1,
             "anchoreSimpleQueue.resources.requests.memory": "1G"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'resources': {
                     'limits': {
@@ -57,7 +57,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
             "anchoreSimpleQueue.labels.myOtherLabel": "myOtherValue",
             "anchoreSimpleQueue.labels.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'labels':
                     {
@@ -76,7 +76,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
             "anchoreSimpleQueue.annotations.bar": "baz",
             "anchoreSimpleQueue.annotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'annotations':
                     {
@@ -96,7 +96,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
             "anchoreSimpleQueue.deploymentAnnotations.bar": "baz",
             "anchoreSimpleQueue.deploymentAnnotations.anotherLabel.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'deploymentAnnotations':
                     {
@@ -115,7 +115,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
             "anchoreSimpleQueue.nodeSelector.value": "bar",
             "anchoreSimpleQueue.nodeSelector.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'nodeSelector':
                     {
@@ -137,7 +137,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'tolerations': [
                     {
@@ -156,7 +156,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
             "anchoreSimpleQueue.affinity.value": "bar",
             "anchoreSimpleQueue.affinity.anotherLabel.with.a.dot": "baz"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'affinity':{
                     'name': 'foo',
@@ -177,7 +177,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
                 }
             ]
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'extraEnv': [
                     {
@@ -194,7 +194,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
         dot_string_dict = {
             "anchoreSimpleQueue.serviceAccountName": "Null"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'serviceAccountName': "Null"
             }
@@ -214,7 +214,7 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
             "anchoreSimpleQueue.service.labels.foobar": "baz",
             "anchoreSimpleQueue.service.labels.with.a.dot": "qux"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'service': {
                     "name": "Null",

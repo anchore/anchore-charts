@@ -17,7 +17,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
 
     def test_fullnameOverride(self):
         dot_string_dict = {"fullnameOverride": "overridden"}
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'global': {'fullnameOverride': 'overridden'}
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
@@ -25,7 +25,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
 
     def test_nameOverride(self):
         dot_string_dict = {"nameOverride": "overridden"}
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'global': {'nameOverride': 'overridden'}
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
@@ -44,7 +44,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "postgresql.extraEnv": [{'name': 'POSTGRES_USER', 'value': 'myuser'}, {'name': 'POSTGRES_PASSWORD', 'value': 'mypass'}],
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'postgresql':{
                 'chartEnabled': True,
                 'auth':{
@@ -87,7 +87,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "cloudsql.image.tag": "1.11",
             "cloudsql.image.pullPolicy": "Always",
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'cloudsql': {
                 'enabled': True,
                 'extraArgs': ['--max_connections=1000'],
@@ -126,7 +126,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             ]
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ingress': {
                 'enabled': False,
                 'apiPath': '/v1/',
@@ -167,7 +167,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreEnterpriseGlobal.enabled": True,
             "anchoreEnterpriseGlobal.licenseSecretName": "my-anchore-enterprise-license"
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'image': 'my.repo/anchore-enterprise:v4.9.0',
             'imagePullPolicy': 'ifNotPresent',
             'imagePullSecretName': 'enterprise-pull-secret',
@@ -182,7 +182,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         dot_string_dict = {
             "openShiftDeployment": True,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
         self.assertEqual(result[1], {})
@@ -191,7 +191,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         dot_string_dict = {
             "anchoreGlobal.serviceAccountName": "my-sa-anchore-engine",
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'serviceAccountName': 'my-sa-anchore-engine'
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
@@ -203,7 +203,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.labels.mylabel": "myvalue",
             "anchoreGlobal.labels.myotherlabel": "myothervalue",
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'labels': {
                 'mylabel': 'myvalue',
                 'myotherlabel': 'myothervalue'
@@ -218,7 +218,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.annotations.myannotation": "myvalue",
             "anchoreGlobal.annotations.myotherannotation": "myothervalue",
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'annotations': {
                 'myannotation': 'myvalue',
                 'myotherannotation': 'myothervalue'
@@ -235,7 +235,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
                 {"name": "MY_OTHER_ENV_VAR", "value": "myothervalue"}
             ],
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'extraEnv': [
                 {'name': 'MY_ENV_VAR', 'value': 'myvalue'},
                 {'name': 'MY_OTHER_ENV_VAR', 'value': 'myothervalue'}
@@ -251,7 +251,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.deploymentAnnotations.myannotation": "myvalue",
             "anchoreGlobal.deploymentAnnotations.myotherannotation": "myothervalue",
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'deploymentAnnotations': {
                 'myannotation': 'myvalue',
                 'myotherannotation': 'myothervalue'
@@ -269,7 +269,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreEnterpriseFeeds.existingSecretName": "my-existing-secret-feeds",
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'useExistingSecret': True,
             'existingSecretName': 'my-existing-secret',
             'ui': {
@@ -291,7 +291,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.doSourceAtEntry.enabled": True,
             "anchoreGlobal.doSourceAtEntry.filePaths": ["/vault/secrets/config"],
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'doSourceAtEntry': {
                 'enabled': True,
                 'filePaths': ['/vault/secrets/config']
@@ -312,7 +312,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
                 }
             ],
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'extraVolumes': [
                 {
                     'name': 'config',
@@ -337,7 +337,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
                 }
             ],
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'extraVolumeMounts': [
                 {
                     'name': 'config',
@@ -357,7 +357,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.scratchVolume.mountPath": "/analysis_scratch",
             "anchoreGlobal.scratchVolume.details": {},
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'scratchVolume': {
                 'fixGroupPermissions': False,
                 'mountPath': '/analysis_scratch',
@@ -372,7 +372,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         dot_string_dict = {
             "anchoreGlobal.certStoreSecretName": "my-cert-store-secret",
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'certStoreSecretName': 'my-cert-store-secret'
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
@@ -385,7 +385,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.securityContext.runAsGroup": 1000,
             "anchoreGlobal.securityContext.fsGroup": 1000,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'securityContext': {
                 'runAsUser': 1000,
                 'runAsGroup': 1000,
@@ -401,7 +401,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.containerSecurityContext.securityContext.runAsGroup": 1000,
             "anchoreGlobal.containerSecurityContext.securityContext.fsGroup": 1000,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'containerSecurityContext': {
                 'securityContext': {
                     'runAsUser': 1000,
@@ -418,6 +418,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.serviceDir": "/anchore_service",
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'service_dir': '/anchore_service'
@@ -431,6 +432,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.logLevel": "INFO",
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'log_level': 'INFO'
@@ -444,7 +446,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         dot_string_dict = {
             "anchoreGlobal.imageAnalyzeTimeoutSeconds": 100,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -453,6 +455,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.allowECRUseIAMRole": True,
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'allow_awsecr_iam_auto': True
@@ -466,6 +469,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.enableMetrics": False,
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'metrics': {
@@ -481,6 +485,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.metricsAuthDisabled": True,
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'metrics': {
@@ -497,6 +502,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.defaultAdminEmail": "myadminemail@email.com",
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'default_admin_password': 'myadminpassword',
@@ -520,6 +526,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         }
 
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'keys': {
@@ -540,6 +547,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.oauthRefreshTokenExpirationSeconds": 200,
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {
                     'hashed_passwords': False,
@@ -559,6 +567,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.ssoRequireExistingUsers": True,
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {
                     'hashed_passwords': False,
@@ -574,6 +583,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.hashedPasswords": True,
         }
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {
                     'hashed_passwords': True
@@ -595,6 +605,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         }
 
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'database': {
@@ -622,6 +633,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         }
 
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'internalServicesSSL': {
@@ -646,6 +658,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         }
 
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'webhooks': {
@@ -666,6 +679,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         }
 
         expected_result = {
+            'postgresql': {'auth': {'username': 'anchoreengine'}},
             'anchoreConfig': {
                 'user_authentication': {'hashed_passwords': False},
                 'policyBundles': {
@@ -692,7 +706,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             "anchoreGlobal.probes.readiness.successThreshold": 1,
         }
 
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'probes': {
                 'liveness': {
                     'failureThreshold': 6,
@@ -717,47 +731,47 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         dot_string_dict = {
             "inject_secrets_via_env": True,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'injectSecretsViaEnv': True
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
-    # def test_replace_keys_with_mappings_env_var(self):
+    def test_replace_keys_with_mappings_env_var(self):
 
-    #     dot_string_dict = {"anchoreApi.maxRequestThreads": 999}
-    #     expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
-    #         'api':
-    #             {'extraEnv': [
-    #                 {'name': 'ANCHORE_MAX_REQUEST_THREADS', 'value': 999}
-    #             ]}
-    #     }
-    #     result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
-    #     self.assertEqual(result[1], expected_result)
+        dot_string_dict = {"anchoreApi.maxRequestThreads": 999}
+        expected_result = {
+            'api':
+                {'extraEnv': [
+                    {'name': 'ANCHORE_MAX_REQUEST_THREADS', 'value': 999}
+                ]}
+        }
+        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
+        self.assertEqual(result[1], expected_result)
 
-    # def test_replace_keys_with_mappings(self):
+    def test_replace_keys_with_mappings(self):
 
-    #     dot_string_dict = {"anchore-feeds-db.persistence.size": 100}
-    #     expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
-    #         "feeds": {
-    #             "feeds-db": {
-    #                 "primary": {
-    #                     "persistence": {
-    #                         "size": 100
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     }
-    #     result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
-    #     self.assertEqual(result[0], expected_result)
+        dot_string_dict = {"anchore-feeds-db.persistence.size": 100}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+            "feeds": {
+                "feeds-db": {
+                    "primary": {
+                        "persistence": {
+                            "size": 100
+                        }
+                    }
+                }
+            }
+        }
+        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
+        self.assertEqual(result[0], expected_result)
 
     # now an environment variable
     def test_anchoreGlobal_serverRequestTimeout_value(self):
         dot_string_dict = {
             "anchoreGlobal.serverRequestTimeout": 300,
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
@@ -776,7 +790,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
         dot_string_dict = {
             "anchoreGlobal.maxCompressedImageSizeMB": 700
         }
-        expected_result = { 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
+        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
         }
 
         expected_env_result = {
