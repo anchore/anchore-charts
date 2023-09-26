@@ -287,7 +287,7 @@ Setup the common anchore volume mounts
 - name: config-volume
   mountPath: /config/config.yaml
   subPath: config.yaml
-- name: {{ .Release.Name -}}-enterprise-scripts
+- name: anchore-scripts
   mountPath: /scripts
 {{- if .Values.certStoreSecretName }}
 - name: certs
@@ -307,7 +307,7 @@ Setup the common anchore volumes
 - name: anchore-license
   secret:
     secretName: {{ .Values.licenseSecretName }}
-- name: {{ .Release.Name }}-enterprise-scripts
+- name: anchore-scripts
   configMap:
     name: {{ .Release.Name }}-enterprise-scripts
     defaultMode: 0755
