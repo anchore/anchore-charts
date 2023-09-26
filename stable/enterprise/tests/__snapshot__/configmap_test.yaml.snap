@@ -157,7 +157,7 @@ should render the configmaps:
               service_watcher: 15
               vulnerability_scan: 14400
             event_log:
-              max_retention_age_days: 0
+              max_retention_age_days: 180
               notification:
                 enabled: false
                 level:

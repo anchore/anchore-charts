@@ -446,7 +446,7 @@ anchoreConfig:
     ## ref: https://docs.anchore.com/current/docs/using/cli_usage/event/#sending-events-as-webhook-notifications
     ##
     event_log:
-      max_retention_age_days: 0
+      max_retention_age_days: 180
       notification:
         enabled: false
         level:
