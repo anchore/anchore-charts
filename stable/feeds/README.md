@@ -235,6 +235,7 @@ feeds-db:
 | `service.annotations`                 | Annotations for Anchore Feeds service                                                                 | `{}`                                  |
 | `service.labels`                      | Labels for Anchore Feeds service                                                                      | `{}`                                  |
 | `service.nodePort`                    | nodePort for Anchore Feeds service                                                                    | `""`                                  |
+| `service.apiVersion`                  | the apiVersion for the service when communicating with Anchore Feeds                                  | `v2`                                  |
 | `scratchVolume.mountPath`             | The mount path of an external volume for scratch space for image analysis                             | `/anchore_scratch`                    |
 | `scratchVolume.fixGroupPermissions`   | Enable an initContainer that will fix the fsGroup permissions                                         | `false`                               |
 | `scratchVolume.details`               | Details for the k8s volume to be created                                                              | `{}`                                  |
@@ -268,7 +269,6 @@ feeds-db:
 | `existingSecretName`                  | Name of the existing secret to be used for Anchore Feeds Service                                      | `anchore-enterprise-feeds-env`        |
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                                          | `{}`                                  |
 | `scripts`                             | Collection of helper scripts usable in all anchore enterprise pods                                    | `{}`                                  |
-
 
 ### Anchore Feeds Configuration Parameters
 
@@ -309,7 +309,6 @@ feeds-db:
 | `anchoreConfig.feeds.drivers.github.enabled`                               | Enable GitHub advisory feeds (requires GitHub PAT)                                                                               | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.github.token`                                 | GitHub developer personal access token with zero permission scopes                                                               | `""`                                                                                                                                  |
 
-
 ### Anchore Feeds Database Parameters
 
 | Name                                        | Description                                                                                       | Value                   |
@@ -324,7 +323,6 @@ feeds-db:
 | `feeds-db.primary.extraEnvVars`             | An array to add extra environment variables                                                       | `[]`                    |
 | `feeds-db.image.tag`                        | Specifies the image to use for this chart.                                                        | `13.11.0-debian-11-r15` |
 
-
 ### Feeds Gem Database Parameters
 
 | Name                                      | Description                                                                                 | Value                   |
@@ -338,7 +336,6 @@ feeds-db:
 | `gem-db.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
 | `gem-db.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `gem-db.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
-
 
 ### Anchore Feeds Upgrade Job Parameters
 
@@ -357,7 +354,6 @@ feeds-db:
 | `feedsUpgradeJob.resources`               | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`    |
 | `feedsUpgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
 
-
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value       |
@@ -369,7 +365,6 @@ feeds-db:
 | `ingress.path`             | The path used for accessing the Anchore Feeds API                  | `/v1/feeds` |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`        |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`     |
-
 
 ### Google CloudSQL DB Parameters
 

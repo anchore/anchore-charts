@@ -132,3 +132,86 @@ should render the configmaps:
         helm.sh/chart: feeds-9.9.9
       name: test-release-feeds
       namespace: test-namespace
+  2: |
+    apiVersion: v1
+    data:
+      ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "false"
+      ANCHORE_AUTH_PRIVKEY: "null"
+      ANCHORE_AUTH_PUBKEY: "null"
+      ANCHORE_CLI_URL: http://localhost:8228
+      ANCHORE_CLI_USER: admin
+      ANCHORE_DISABLE_METRICS_AUTH: "false"
+      ANCHORE_ENABLE_METRICS: "false"
+      ANCHORE_FEEDS_API_ONLY: "false"
+      ANCHORE_FEEDS_DB_POOL_MAX_OVERFLOW: "100"
+      ANCHORE_FEEDS_DB_POOL_SIZE: "30"
+      ANCHORE_FEEDS_DB_SSL: "false"
+      ANCHORE_FEEDS_DB_SSL_MODE: require
+      ANCHORE_FEEDS_DB_SSL_ROOT_CERT: "null"
+      ANCHORE_FEEDS_DB_TIMEOUT: "120"
+      ANCHORE_FEEDS_DRIVER_ALPINE_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_AMAZON_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_CHAINGUARD_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_DEBIAN_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_GEM_ENABLED: "false"
+      ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "false"
+      ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_MARINER_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS: "true"
+      ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
+      ANCHORE_FEEDS_DRIVER_NPM_ENABLED: "false"
+      ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_OL_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY: "5"
+      ANCHORE_FEEDS_DRIVER_RHEL_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_SLES_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH: master
+      ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_UBUNTU_URL: https://git.launchpad.net/ubuntu-cve-tracker
+      ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED: "true"
+      ANCHORE_FEEDS_EXTERNAL_URL: http://test-release-feeds:8448/v2/
+      ANCHORE_FEEDS_GRYPEDB_PERSIST_WORKSPACE: "true"
+      ANCHORE_FEEDS_GRYPEDB_PRELOAD_ENABLED: "true"
+      ANCHORE_FEEDS_GRYPEDB_PRELOAD_PATH: /preload/grype-db-workspace.tar.gz
+      ANCHORE_FEEDS_GRYPEDB_RESTORE_WORKSPACE: "true"
+      ANCHORE_FEEDS_LOCAL_WORKSPACE: /workspace
+      ANCHORE_FEEDS_PACKAGES_ENABLED: "false"
+      ANCHORE_FEEDS_TMP_DIR: /anchore_scratch
+      ANCHORE_FEEDS_WORKSPACE_PRELOAD: "true"
+      ANCHORE_GITHUB_TOKEN: "null"
+      ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
+      ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
+      ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
+      ANCHORE_INTERNAL_SSL_VERIFY: "false"
+      ANCHORE_LICENSE_FILE: /home/anchore/license.yaml
+      ANCHORE_LOG_LEVEL: INFO
+      ANCHORE_MAX_REQUEST_THREADS: "50"
+      ANCHORE_NVD_API_KEY: "null"
+      ANCHORE_OAUTH_ENABLED: "false"
+      ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "86400"
+      ANCHORE_OAUTH_TOKEN_EXPIRATION: "3600"
+      ANCHORE_SAML_SECRET: "null"
+      ANCHORE_SERVICE_DIR: /anchore_service
+      ANCHORE_SSL_CERT: "null"
+      ANCHORE_SSL_ENABLED: "false"
+      ANCHORE_SSL_KEY: "null"
+      ANCHORE_SSO_REQUIRES_EXISTING_USERS: "false"
+      ANCHORECTL_URL: http://localhost:8228
+      ANCHORECTL_USERNAME: admin
+    kind: ConfigMap
+    metadata:
+      annotations:
+        bar: baz-annotation
+        foo: bar-annotation
+      labels:
+        app.kubernetes.io/component: feeds
+        app.kubernetes.io/instance: test-release
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: test-release-feeds
+        app.kubernetes.io/part-of: anchore
+        app.kubernetes.io/version: 9.9.9
+        bar: baz-label
+        foo: bar-label
+        helm.sh/chart: feeds-9.9.9
+      name: test-release-feeds-config-env-vars
+      namespace: test-namespace

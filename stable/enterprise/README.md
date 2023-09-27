@@ -756,7 +756,6 @@ rbacManager:
 | `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
 | `global.nameOverride`     | overrides the name set on resources     | `""`  |
 
-
 ### Common Resource Parameters
 
 | Name                                  | Description                                                                           | Value                                 |
@@ -798,7 +797,6 @@ rbacManager:
 | `doSourceAtEntry.filePaths`           | List of file paths to `source` before starting Anchore services                       | `[]`                                  |
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                          | `""`                                  |
 | `scripts`                             | Collection of helper scripts usable in all anchore enterprise pods                    | `{}`                                  |
-
 
 ### Anchore Configuration Parameters
 
@@ -893,7 +891,6 @@ rbacManager:
 | `anchoreConfig.ui.dbUser`                                                  | allows overriding and separation of the ui database user.                                                                        | `""`               |
 | `anchoreConfig.ui.dbPassword`                                              | allows overriding and separation of the ui database user authentication                                                          | `""`               |
 
-
 ### Anchore API k8s Deployment Parameters
 
 | Name                      | Description                                                                      | Value       |
@@ -915,7 +912,6 @@ rbacManager:
 | `api.affinity`            | Affinity for Anchore API pod assignment                                          | `{}`        |
 | `api.serviceAccountName`  | Service account name for Anchore API pods                                        | `""`        |
 
-
 ### Anchore Analyzer k8s Deployment Parameters
 
 | Name                          | Description                                                           | Value  |
@@ -930,7 +926,6 @@ rbacManager:
 | `analyzer.tolerations`        | Tolerations for Anchore Analyzer pod assignment                       | `[]`   |
 | `analyzer.affinity`           | Affinity for Anchore Analyzer pod assignment                          | `{}`   |
 | `analyzer.serviceAccountName` | Service account name for Anchore API pods                             | `""`   |
-
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -951,15 +946,14 @@ rbacManager:
 | `catalog.affinity`            | Affinity for Anchore Catalog pod assignment              | `{}`        |
 | `catalog.serviceAccountName`  | Service account name for Anchore Catalog pods            | `""`        |
 
-
 ### Anchore Feeds Chart Parameters
 
-| Name                 | Description                                                                                    | Value   |
-| -------------------- | ---------------------------------------------------------------------------------------------- | ------- |
-| `feeds.chartEnabled` | Enable the Anchore Feeds chart                                                                 | `true`  |
-| `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
-| `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
-
+| Name                       | Description                                                                                    | Value   |
+| -------------------------- | ---------------------------------------------------------------------------------------------- | ------- |
+| `feeds.chartEnabled`       | Enable the Anchore Feeds chart                                                                 | `true`  |
+| `feeds.standalone`         | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
+| `feeds.url`                | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
+| `feeds.service.apiVersion` | the apiVersion for the service when communicating with Anchore Feeds                           | `v2`    |
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -980,7 +974,6 @@ rbacManager:
 | `policyEngine.affinity`            | Affinity for Anchore Policy Engine pod assignment              | `{}`        |
 | `policyEngine.serviceAccountName`  | Service account name for Anchore Policy Engine pods            | `""`        |
 
-
 ### Anchore Simple Queue Parameters
 
 | Name                              | Description                                                   | Value       |
@@ -999,7 +992,6 @@ rbacManager:
 | `simpleQueue.tolerations`         | Tolerations for Anchore Simple Queue pod assignment           | `[]`        |
 | `simpleQueue.affinity`            | Affinity for Anchore Simple Queue pod assignment              | `{}`        |
 | `simpleQueue.serviceAccountName`  | Service account name for Anchore Simple Queue pods            | `""`        |
-
 
 ### Anchore Notifications Parameters
 
@@ -1021,7 +1013,6 @@ rbacManager:
 | `notifications.affinity`            | Affinity for Anchore Notifications pod assignment                                | `{}`        |
 | `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods                              | `""`        |
 
-
 ### Anchore Reports Parameters
 
 | Name                          | Description                                                                      | Value       |
@@ -1042,14 +1033,12 @@ rbacManager:
 | `reports.affinity`            | Affinity for Anchore Reports pod assignment                                      | `{}`        |
 | `reports.serviceAccountName`  | Service account name for Anchore Reports pods                                    | `""`        |
 
-
 ### Anchore RBAC Authentication Parameters
 
 | Name                 | Description                                                                | Value |
 | -------------------- | -------------------------------------------------------------------------- | ----- |
 | `rbacAuth.extraEnv`  | Set extra environment variables for Anchore RBAC Authentication containers | `[]`  |
 | `rbacAuth.resources` | Resource requests and limits for Anchore RBAC Authentication containers    | `{}`  |
-
 
 ### Anchore RBAC Manager Parameters
 
@@ -1070,7 +1059,6 @@ rbacManager:
 | `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment                              | `[]`        |
 | `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment                                 | `{}`        |
 | `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods                               | `""`        |
-
 
 ### Anchore UI Parameters
 
@@ -1095,7 +1083,6 @@ rbacManager:
 | `ui.affinity`                | Affinity for Anchore ui pod assignment                                        | `{}`                                     |
 | `ui.serviceAccountName`      | Service account name for Anchore UI pods                                      | `""`                                     |
 
-
 ### Anchore Upgrade Job Parameters
 
 | Name                                 | Description                                                                                                                                     | Value   |
@@ -1113,7 +1100,6 @@ rbacManager:
 | `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
 | `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
 
-
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value   |
@@ -1122,7 +1108,7 @@ rbacManager:
 | `ingress.labels`           | Labels for the ingress resource                                    | `{}`    |
 | `ingress.annotations`      | Annotations for the ingress resource                               | `{}`    |
 | `ingress.apiHosts`         | List of custom hostnames for the Anchore API                       | `[]`    |
-| `ingress.apiPath`          | The path used for accessing the Anchore API                        | `/v1/`  |
+| `ingress.apiPath`          | The path used for accessing the Anchore API                        | `/v2/`  |
 | `ingress.uiHosts`          | List of custom hostnames for the Anchore UI                        | `[]`    |
 | `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`     |
 | `ingress.feedsHosts`       | List of custom hostnames for the Anchore Feeds API                 | `[]`    |
@@ -1131,7 +1117,6 @@ rbacManager:
 | `ingress.reportsPath`      | The path used for accessing the Anchore Reports API                | `""`    |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`    |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx` |
-
 
 ### Google CloudSQL DB Parameters
 
@@ -1146,7 +1131,6 @@ rbacManager:
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
-
 ### Anchore UI Redis Parameters
 
 | Name                                  | Description                                                                                            | Value               |
@@ -1156,7 +1140,6 @@ rbacManager:
 | `ui-redis.auth.password`              | Password used for connecting to Redis                                                                  | `anchore-redis,123` |
 | `ui-redis.architecture`               | Redis deployment architecture                                                                          | `standalone`        |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                                    | `false`             |
-
 
 ### Anchore Database Parameters
 

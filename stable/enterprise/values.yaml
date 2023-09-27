@@ -511,7 +511,7 @@ anchoreConfig:
 
   reports:
     ## @param anchoreConfig.reports.enable_graphiql Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations
-    ## Go to http://<host>:<port>/v1/reports/graphql in a browser for the reports API
+    ## Go to http://<host>:<port>/v2/reports/graphql in a browser for the reports API
     ## ref: https://docs.anchore.com/current/docs/using/api_usage/reports/
     ##
     enable_graphiql: true
@@ -801,6 +801,12 @@ feeds:
   ## @param feeds.url Set the URL for a standalone Feeds service. Use when chartEnabled=false.
   ##
   url: ""
+
+  ## @param feeds.service.apiVersion the apiVersion for the service when communicating with Anchore Feeds
+  ##
+  service:
+    apiVersion: v2
+
 
 ###########################################################
 ## @section Anchore Policy Engine k8s Deployment Parameters
@@ -1244,7 +1250,7 @@ ingress:
 
   ## @param ingress.apiPath The path used for accessing the Anchore API
   ##
-  apiPath: /v1/
+  apiPath: /v2/
 
   ## @param ingress.uiHosts List of custom hostnames for the Anchore UI
   ##
@@ -1259,7 +1265,7 @@ ingress:
   feedsHosts: []
 
   ## @param ingress.feedsPath The path used for accessing the Anchore Feeds API
-  ## Exposing the feeds API is for special cases only, use /v1/feeds for ingress.feedsPath
+  ## Exposing the feeds API is for special cases only, use /v2/feeds for ingress.feedsPath
   ##
   feedsPath: ""
 
@@ -1268,7 +1274,7 @@ ingress:
   reportsHosts: []
 
   ## @param ingress.reportsPath The path used for accessing the Anchore Reports API
-  ## Exposing the reports API enables the GraphQL interface, use /v1/reports/graphql for ingress.reportsPath
+  ## Exposing the reports API enables the GraphQL interface, use /v2/reports/graphql for ingress.reportsPath
   ##
   reportsPath: ""
 
