@@ -198,6 +198,29 @@ A Helm post-upgrade hook job will shut down all previously running Anchore servi
 
 The upgrade will only be considered successful when this job completes successfully. Performing an upgrade will cause the Helm client to block until the upgrade job completes and the new Anchore service pods are started. To view progress of the upgrade process, tail the logs of the upgrade jobs `anchore-engine-upgrade` and `anchore-enterprise-upgrade`. These job resources will be removed upon a successful Helm upgrade.
 
+# Chart Version 1.28.0
+
+* Updated ingress configuration to allow exposing both v1 and v2 api endpoints.
+* **WARNING** this version of the chart makes breaking changes to the following Ingress values. These values have all been updated from a string to a list.
+  * `.Values.ingress.apiPath` -> `.Values.ingress.apiPaths`
+  * `.Values.ingress.feedsPath` -> `.Values.ingress.feedsPaths`
+  * `.Values.ingress.reportsPath` -> `.Values.ingress.reportsPaths`
+* Update your values file accordingly:
+
+  ```yaml
+  ingress:
+    apiPaths:
+      - /v1/
+      - /v2/
+      - /version/
+    feedsPaths:
+      - /v1/feeds/
+      - /v2/feeds/
+    reportsPaths:
+      - /v1/reports/
+      - /v2/reports/
+  ```
+
 # Chart Version 1.27.3
 
 * Added option to allow nodePorts to each service created as part of an anchore deployment. For more information about nodePorts, see [The Kubernetes Docs](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport-custom-port)
@@ -436,10 +459,23 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
-  apiPath: /v1/*
+  apiPaths:
+    - /v1/*
+    - /v2/*
+    - /version/*
+  feedsPaths:
+    - /v1/feeds/*
+    - /v2/feeds/*
+  reportsPaths:
+    - /v1/reports/*
+    - /v2/reports/*
   uiPath: /*
   apiHosts:
     - anchore-api.example.com
+  feedsHosts:
+    - anchore-feeds.example.com
+  reportsHosts:
+    - anchore-reports.example.com
   uiHosts:
     - anchore-ui.example.com
 
@@ -447,8 +483,16 @@ anchoreApi:
   service:
     type: NodePort
 
+anchoreEnterpriseFeeds:
+  service:
+    type: NodePort
+
+anchoreEnterpriseReports:
+  service:
+    type: NodePort
+
 anchoreEnterpriseUi:
-  service
+  service:
     type: NodePort
 ```
 
@@ -459,10 +503,23 @@ ingress:
   enabled: true
   annotations:
     kubernetes.io/ingress.class: gce
-  apiPath: /v1/*
+  apiPaths:
+    - /v1/*
+    - /v2/*
+    - /version/*
+  feedsPaths:
+    - /v1/feeds/*
+    - /v2/feeds/*
+  reportsPaths:
+    - /v1/reports/*
+    - /v2/reports/*
   uiPath: /*
   apiHosts:
     - anchore-api.example.com
+  feedsHosts:
+    - anchore-feeds.example.com
+  reportsHosts:
+    - anchore-reports.example.com
   uiHosts:
     - anchore-ui.example.com
 
@@ -470,8 +527,16 @@ anchoreApi:
   service:
     type: NodePort
 
+anchoreEnterpriseFeeds:
+  service:
+    type: NodePort
+
+anchoreEnterpriseReports:
+  service:
+    type: NodePort
+
 anchoreEnterpriseUi:
-  service
+  service:
     type: NodePort
 ```
 
