@@ -4,6 +4,15 @@ metadata:
   name: {{ .Release.Name }}-enterprise-scripts
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" . | nindent 4 }}
-  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+  annotations: 
+  {{- if not .Release.IsInstall }}
+    {{- include "enterprise.common.annotations" (merge (dict "nil" true) .) | nindent 4}}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+  {{- else }}
+    {{- include "enterprise.common.annotations" . | nindent 4}}
+  {{- end }}
+
 data:
   {{ .Values.scripts | toYaml | nindent 2 }}

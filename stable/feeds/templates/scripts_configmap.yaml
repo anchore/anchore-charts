@@ -5,7 +5,16 @@ metadata:
   name: {{ .Release.Name }}-feeds-scripts
   namespace: {{ .Release.Namespace }}
   labels: {{- include "feeds.common.labels" . | nindent 4 }}
-  annotations: {{- include "feeds.common.annotations" . | nindent 4 }}
+  annotations:
+  {{- if not .Release.IsInstall }}
+    {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+  {{- else }}
+    {{- include "feeds.common.annotations" . | nindent 4 }}
+  {{- end }}
+
 data:
   {{ .Values.scripts | toYaml | nindent 2 }}
 {{- end }}

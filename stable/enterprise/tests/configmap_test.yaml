@@ -1,6 +1,11 @@
 suite: ConfigMap Tests
 templates:
-  - templates/*_configmap.yaml
+  - templates/analyzer_configmap.yaml
+  - templates/anchore_configmap.yaml
+  - templates/envvars_configmap.yaml
+  - templates/policybundle_configmap.yaml
+  - templates/scripts_configmap.yaml
+  - templates/ui_configmap.yaml
 values:
   - values.yaml
 release:
