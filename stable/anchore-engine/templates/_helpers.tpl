@@ -471,3 +471,12 @@ upgrading from Enterprise 4.2.0 or higher and error out if they're upgrading fro
     {{- end }}
 {{- end }}
 {{- end }}
+
+{{/*
+Upon upgrade, check if the user uses non-default values for ingress path configurations
+*/}}
+{{- define "checkIngressValues" -}}
+{{- if and .Release.IsUpgrade (or .Values.ingress.feedsPath .Values.ingress.reportsPath .Values.ingress.apiPath) }}
+{{- fail "As of chart v1.28.0, the `ingress.feedsPath`, `ingress.reportsPath`, and `ingress.apiPath` values are no longer valid. See README for more information - https://github.com/anchore/anchore-charts/blob/main/stable/anchore-engine/README.md#chart-version-1280" }}
+{{- end }}
+{{- end -}}
