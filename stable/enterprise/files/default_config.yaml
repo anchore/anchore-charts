@@ -14,6 +14,9 @@ server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
 license_file: ${ANCHORE_LICENSE_FILE}
 auto_restart_services: false
 
+max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+
 max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
 
 metrics:
@@ -110,6 +113,7 @@ services:
     event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
     runtime_inventory:
       image_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS}
+      image_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_INGEST_OVERWRITE}
     image_gc:
       max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
     runtime_compliance:

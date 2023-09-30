@@ -833,6 +833,24 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
+          pattern: "url: my-feeds-url/v2/databases/grypedb"
+
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "url: my-feeds-url/v2/feeds"
+
+  - it: should render v1 anchoreFeedsURL with feeds.url set
+    set:
+      feeds:
+        url: my-feeds-url
+        service:
+          apiVersion: v1
+    templates:
+      - anchore_configmap.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
           pattern: "url: my-feeds-url/v1/databases/grypedb"
 
       - matchRegex:
@@ -849,11 +867,11 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v2/feeds"
 
   - it: should render grypeProviderURL with anchoreConfig.policy_engine.overrideFeedsToUpstream
     set:
@@ -865,7 +883,7 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
@@ -882,7 +900,7 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
@@ -897,19 +915,19 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/feeds"
+          pattern: "url: https://test-release-feeds:8448/v2/feeds"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v2/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
     set:
@@ -935,19 +953,19 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v2/feeds"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/feeds"
+          pattern: "url: https://test-release-feeds:8448/v2/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
     set:

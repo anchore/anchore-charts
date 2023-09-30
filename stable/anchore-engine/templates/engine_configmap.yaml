@@ -233,6 +233,7 @@ data:
         {{- end }}
         runtime_inventory:
           image_ttl_days: {{ .Values.anchoreCatalog.runtimeInventory.imageTTLDays }}
+          image_ingest_overwrite: {{ default false .Values.anchoreCatalog.runtimeInventory.imageIngestOverwrite }}
         down_analyzer_task_requeue: {{ .Values.anchoreCatalog.downAnalyzerTaskRequeue }}
       simplequeue:
         enabled: true
