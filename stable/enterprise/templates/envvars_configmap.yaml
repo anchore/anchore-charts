@@ -51,6 +51,7 @@ data:
   ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER: "true"
   ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE: "true"
   ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS: "120"
+  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_INGEST_OVERWRITE: "false"
   {{- with .Values.anchoreConfig.notifications.ui_url }}
   ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
   {{- else }}
@@ -74,6 +75,8 @@ data:
   ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
   ANCHORE_LOG_LEVEL: "{{ .Values.anchoreConfig.log_level }}"
   ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
+  ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
+  ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
   ANCHORE_MAX_REQUEST_THREADS: "50"
   ANCHORE_OAUTH_ENABLED: "{{ .Values.anchoreConfig.user_authentication.oauth.enabled }}"
   ANCHORE_OAUTH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}"

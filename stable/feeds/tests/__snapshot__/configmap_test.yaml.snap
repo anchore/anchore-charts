@@ -19,6 +19,11 @@ should render the configmaps:
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
 
+        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+
+        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+
         metrics:
           enabled: ${ANCHORE_ENABLE_METRICS}
           auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
@@ -185,6 +190,9 @@ should render the configmaps:
       ANCHORE_INTERNAL_SSL_VERIFY: "false"
       ANCHORE_LICENSE_FILE: /home/anchore/license.yaml
       ANCHORE_LOG_LEVEL: INFO
+      ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
+      ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
+      ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
       ANCHORE_MAX_REQUEST_THREADS: "50"
       ANCHORE_NVD_API_KEY: "null"
       ANCHORE_OAUTH_ENABLED: "false"
