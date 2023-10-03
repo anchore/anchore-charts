@@ -43,12 +43,12 @@ spec:
   {{- end }}
   rules:
   {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts .Values.ingress.feedsHosts .Values.ingress.reportsHosts }}
-    {{- range .Values.ingress.apiHosts }}
-    - host: {{ . | quote }}
+    {{- range $apiHostIndex, $apiHostName := .Values.ingress.apiHosts }}
+    - host: {{ $apiHostName | quote }}
       http:
         paths:
-        {{- range .Values.ingress.apiPaths }}
-        - path: {{ . | quote }}
+        {{- range $apiPathIndex, $apiPath := $.Values.ingress.apiPaths }}
+        - path: {{ $apiPath | quote }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
@@ -63,8 +63,8 @@ spec:
           {{- end }}
         {{- end }}
     {{- end }}
-    {{- range .Values.ingress.uiHosts }}
-    - host: {{ . | quote }}
+    {{- range $uiHostIndex, $uiHostName := .Values.ingress.uiHosts }}
+    - host: {{ $uiHostName | quote }}
       http:
         paths:
         - path: {{ $.Values.ingress.uiPath }}
@@ -81,12 +81,12 @@ spec:
             servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- end }}
     {{- end }}
-    {{- range .Values.ingress.feedsHosts }}
-    - host: {{ . | quote }}
+    {{- range $feedsHostIndex, $feedsHostName := .Values.ingress.feedsHosts }}
+    - host: {{ $feedsHostName | quote }}
       http:
         paths:
-        {{ range .Values.ingress.feedsPaths }}
-        - path: {{ . }}
+        {{ range $feedsPathIndex, $feedsPath := $.Values.ingress.feedsPaths }}
+        - path: {{ $feedsPath }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
@@ -101,12 +101,12 @@ spec:
           {{- end }}
         {{- end }}
     {{- end }}
-    {{- range .Values.ingress.reportsHosts }}
-    - host: {{ . | quote }}
+    {{- range $reportsHostIndex, $reportsHostName := .Values.ingress.reportsHosts }}
+    - host: {{ $reportsHostName | quote }}
       http:
         paths:
-        {{- range .Values.ingress.reportsPaths }}
-        - path: {{ . }}
+        {{- range $reportsPathIndex, $reportsPath := $.Values.ingress.reportsPaths }}
+        - path: {{ $reportsPath }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
