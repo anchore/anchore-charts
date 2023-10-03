@@ -321,16 +321,27 @@ The [Kubernetes ALB ingress controller](https://docs.aws.amazon.com/eks/latest/u
 ingress:
   enabled: true
   annotations:
-    kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
-  apiPath: /v1/*
-  uiPath: /*
+  ingressClassName: alb
+
   apiHosts:
     - anchore-api.example.com
   uiHosts:
     - anchore-ui.example.com
+  feedsHosts:
+    - anchore-feeds.example.com
+  reportsHosts:
+    - anchore-reports.example.com
 
 api:
+  service:
+    type: NodePort
+
+feeds:
+  service:
+    type: NodePort
+
+reports:
   service:
     type: NodePort
 
@@ -346,16 +357,37 @@ The [Kubernetes GCE ingress controller](https://cloud.google.com/kubernetes-engi
 ```yaml
 ingress:
   enabled: true
-  annotations:
-    kubernetes.io/ingress.class: gce
-  apiPath: /v1/*
+  ingressClassName: gce
+  apiPaths:
+    - /v1/*
+    - /v2/*
+    - /version/*
+  feedsPaths:
+    - /v1/feeds/*
+    - /v2/feeds/*
+  reportsPaths:
+    - /v1/reports/*
+    - /v2/reports/*
   uiPath: /*
+
   apiHosts:
     - anchore-api.example.com
   uiHosts:
     - anchore-ui.example.com
+  feedsHosts:
+    - anchore-feeds.example.com
+  reportsHosts:
+    - anchore-reports.example.com
 
 api:
+  service:
+    type: NodePort
+
+feeds:
+  service:
+    type: NodePort
+
+reports:
   service:
     type: NodePort
 

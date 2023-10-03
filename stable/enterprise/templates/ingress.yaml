@@ -30,11 +30,12 @@ spec:
 {{- end }}
   rules:
   {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts .Values.ingress.feedsHosts .Values.ingress.reportsHosts }}
-    {{- range .Values.ingress.apiHosts }}
-    - host: {{ . | quote }}
+    {{- range $apiHostIndex, $apiHostName := .Values.ingress.apiHosts }}
+    - host: {{ $apiHostName | quote }}
       http:
         paths:
-          - path: {{ $.Values.ingress.apiPath }}
+        {{- range $apiPathIndex, $apiPath := $.Values.ingress.apiPaths }}
+          - path: {{ $apiPath }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
@@ -47,9 +48,10 @@ spec:
               serviceName: {{ template "enterprise.api.fullname" $ }}
               servicePort: {{ $.Values.api.service.port }}
           {{- end }}
+        {{- end }}
     {{- end }}
-    {{- range .Values.ingress.uiHosts }}
-    - host: {{ . | quote }}
+    {{- range $uiHostIndex, $uiHostName := .Values.ingress.uiHosts }}
+    - host: {{ $uiHostName | quote }}
       http:
         paths:
           - path: {{ $.Values.ingress.uiPath }}
@@ -66,11 +68,12 @@ spec:
               servicePort: {{ $.Values.ui.service.port }}
           {{- end }}
     {{- end }}
-    {{- range .Values.ingress.feedsHosts }}
-    - host: {{ . | quote }}
+    {{- range $feedsHostIndex, $feedsHostName := .Values.ingress.feedsHosts }}
+    - host: {{ $feedsHostName | quote }}
       http:
         paths:
-          - path: {{ $.Values.ingress.feedsPath }}
+        {{- range $feedsPathIndex, $feedsPath := $.Values.ingress.feedsPaths }}
+          - path: {{ $feedsPath }}
             {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
@@ -83,29 +86,32 @@ spec:
               serviceName: {{ template "enterprise.feeds.fullname" $ }}
               servicePort: {{ $.Values.feeds.service.port }}
           {{- end }}
+        {{- end }}
     {{- end }}
-    {{- range .Values.ingress.reportsHosts }}
-    - host: {{ . | quote }}
+    {{- range $reportsHostIndex, $reportsHostName := .Values.ingress.reportsHosts }}
+    - host: {{ $reportsHostName | quote }}
       http:
         paths:
-          - path: {{ $.Values.ingress.reportsPath }}
+        {{- range $reportsPathIndex, $reportsPath := $.Values.ingress.reportsPaths }}
+          - path: {{ $reportsPath }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
               service:
                 name: {{ template "enterprise.api.fullname" $ }}
                 port:
-                  number: {{ $.Values.reports.service.port }}
+                  number: {{ $.Values.api.service.reportsPort }}
           {{- else }}
             backend:
               serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.reports.service.port }}
+              servicePort: {{ $.Values.api.service.reportsPort }}
           {{- end }}
+        {{- end }}
     {{- end }}
   {{- else }}
     - http:
         paths:
-        {{- with .Values.ingress.apiPath }}
+        {{- range .Values.ingress.apiPaths }}
           - path: {{ . }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
@@ -135,7 +141,7 @@ spec:
               servicePort: {{ $.Values.ui.service.port }}
           {{- end }}
         {{- end }}
-        {{- with .Values.ingress.feedsPath }}
+        {{- range .Values.ingress.feedsPaths }}
           - path: {{ . }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
@@ -147,10 +153,10 @@ spec:
           {{- else }}
             backend:
               serviceName: {{ template "enterprise.feeds.fullname" $ }}
-              servicePort: {{ $.Values.feeds.feeds.service.port }}
+              servicePort: {{ $.Values.feeds.service.port }}
           {{- end }}
         {{- end }}
-        {{- with .Values.ingress.reportsPath }}
+        {{- range .Values.ingress.reportsPaths }}
           - path: {{ . }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
@@ -158,11 +164,11 @@ spec:
               service:
                 name: {{ template "enterprise.api.fullname" $ }}
                 port:
-                  number: {{ $.Values.reports.service.port }}
+                  number: {{ $.Values.api.service.reportsPort }}
           {{- else }}
             backend:
               serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.reports.service.port }}
+              servicePort: {{ $.Values.api.service.reportsPort }}
           {{- end }}
         {{- end }}
   {{- end }}

@@ -1241,8 +1241,7 @@ ingress:
   ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
   ## ref: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features
   ##
-  annotations:
-    kubernetes.io/ingress.class: nginx
+  annotations: {}
 
   ## @param ingress.apiHosts List of custom hostnames for the Anchore API
   ##
@@ -1250,7 +1249,10 @@ ingress:
 
   ## @param ingress.apiPath The path used for accessing the Anchore API
   ##
-  apiPath: /v2/
+  apiPaths:
+    - /v1/
+    - /v2/
+    - /version/
 
   ## @param ingress.uiHosts List of custom hostnames for the Anchore UI
   ##
@@ -1267,7 +1269,9 @@ ingress:
   ## @param ingress.feedsPath The path used for accessing the Anchore Feeds API
   ## Exposing the feeds API is for special cases only, use /v2/feeds for ingress.feedsPath
   ##
-  feedsPath: ""
+  feedsPaths:
+    - /v1/feeds/
+    - /v2/feeds/
 
   ## @param ingress.reportsHosts List of custom hostnames for the Anchore Reports API
   ##
@@ -1276,7 +1280,9 @@ ingress:
   ## @param ingress.reportsPath The path used for accessing the Anchore Reports API
   ## Exposing the reports API enables the GraphQL interface, use /v2/reports/graphql for ingress.reportsPath
   ##
-  reportsPath: ""
+  reportsPaths:
+    - /v1/reports/
+    - /v2/reports/
 
   ## @param ingress.tls Configure tls for the ingress resource
   ## Secrets must be manually created in the release namespace
