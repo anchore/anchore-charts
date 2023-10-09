@@ -16,6 +16,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Configuration](#configuration)
   - [External Database Requirements](#external-database-requirements)
+  - [Installing on Openshift](#installing-on-openshift)
   - [Enterprise Feeds Configuration](#enterprise-feeds-configuration)
   - [Analyzer Image Layer Cache Configuration](#analyzer-image-layer-cache-configuration)
   - [Configuring Object Storage](#configuring-object-storage)
@@ -26,9 +27,6 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Prometheus Metrics](#prometheus-metrics)
   - [Scaling Individual Services](#scaling-individual-services)
   - [Using TLS Internally](#using-tls-internally)
-  - [Anchore Enterprise Notifications](#anchore-enterprise-notifications)
-  - [Anchore Enterprise Reports](#anchore-enterprise-reports)
-  - [Installing on Openshift](#installing-on-openshift)
   - [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart)
 - [Parameters](#parameters)
 - [Release Notes](#release-notes)
@@ -569,18 +567,6 @@ ui:
   # Specify an LDAP CA cert if using LDAP authenication
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
-
-### Anchore Enterprise Notifications
-
-Anchore Enterprise includes Notifications service to alert external endpoints about the system’s activity. Notifications can be configured to send alerts to Slack, GitHub Issues, and Jira.
-
-See the [Anchore Notifications](https://docs.anchore.com/current/docs/configuration/notifications/) documentation for details.
-
-### Anchore Enterprise Reports
-
-Anchore Enterprise Reports aggregates data to provide insightful analytics and metrics for account-wide artifacts. The service employs GraphQL to expose a rich API for querying the aggregated data and metrics.
-
-See the [Anchore Reports](https://docs.anchore.com/current/docs/configuration/reports/) documentation for details.
 
 ### Installing on Openshift
 
@@ -1205,6 +1191,6 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a modification that may require adjustments to your values file.
 
-### v0.0.x
+### v0.1.x
 
 - This is a pre-release version of the Anchore Enterprise Helm chart and is not recommended for production deployments.
