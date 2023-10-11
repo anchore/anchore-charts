@@ -16,6 +16,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Configuration](#configuration)
   - [External Database Requirements](#external-database-requirements)
+  - [Installing on Openshift](#installing-on-openshift)
   - [Enterprise Feeds Configuration](#enterprise-feeds-configuration)
   - [Analyzer Image Layer Cache Configuration](#analyzer-image-layer-cache-configuration)
   - [Configuring Object Storage](#configuring-object-storage)
@@ -26,9 +27,6 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Prometheus Metrics](#prometheus-metrics)
   - [Scaling Individual Services](#scaling-individual-services)
   - [Using TLS Internally](#using-tls-internally)
-  - [Anchore Enterprise Notifications](#anchore-enterprise-notifications)
-  - [Anchore Enterprise Reports](#anchore-enterprise-reports)
-  - [Installing on Openshift](#installing-on-openshift)
   - [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart)
 - [Parameters](#parameters)
 - [Release Notes](#release-notes)
@@ -76,7 +74,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
 
     ```shell
     export RELEASE=my-release
-    export ANCHORECTL_PASSWORD=$(kubectl get secret "${RELEASE}-enterprise" -o ‘go-template={{index .data “ANCHORE_ADMIN_PASSWORD”}}’ | base64 -D -)
+    export ANCHORECTL_PASSWORD=$(kubectl get secret "${RELEASE}-enterprise" -o ‘go-template={{index .data “ANCHORE_ADMIN_PASSWORD”}}’ | base64 -d -)
     kubectl port-forward svc/${RELEASE}-enterprise-api 8228:8228 # port forward for anchorectl in another terminal
     anchorectl system wait # anchorectl defaults to the user admin, and to the password ${ANCHORECTL_PASSWORD} automatically if set
     ```
@@ -570,18 +568,6 @@ ui:
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
 
-### Anchore Enterprise Notifications
-
-Anchore Enterprise includes Notifications service to alert external endpoints about the system’s activity. Notifications can be configured to send alerts to Slack, GitHub Issues, and Jira.
-
-See the [Anchore Notifications](https://docs.anchore.com/current/docs/configuration/notifications/) documentation for details.
-
-### Anchore Enterprise Reports
-
-Anchore Enterprise Reports aggregates data to provide insightful analytics and metrics for account-wide artifacts. The service employs GraphQL to expose a rich API for querying the aggregated data and metrics.
-
-See the [Anchore Reports](https://docs.anchore.com/current/docs/configuration/reports/) documentation for details.
-
 ### Installing on Openshift
 
 As of August 2, 2023, Helm does not offer native support for passing `null` values to child or dependency charts. For details, refer to this [Helm GitHub issue](https://github.com/helm/helm/issues/9027). Given that the `feeds` chart is a dependency, a workaround is to deploy it as a standalone chart and configure the `enterprise` deployment to point to this separate `feeds` deployment.
@@ -646,17 +632,18 @@ ui-redis:
 
 ### Migrating to the Anchore Enterprise Helm Chart
 
-This guide provides steps for transitioning from an Anchore Engine Helm chart deployment to the updated Anchore Enterprise Helm chart, a necessary step for users planning to upgrade to Anchore Enterprise version 5.0.0 or later.
+This guide provides steps for transitioning from an Anchore Engine Helm chart deployment to the updated Anchore Enterprise Helm chart, a necessary step for users planning to upgrade to Anchore Enterprise version v5.0.0 or later.
 
   > :warning: **Warning**: The values file used by the Anchore Enterprise Helm chart is different from the one used by the Anchore Engine Helm chart. Make sure to convert your existing values file accordingly.
 
-A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts) is available to automate the conversion of your Anchore Engine values file to the new Enterprise format.
+A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts) is available to automate the conversion of your Anchore Engine values file to the new Enterprise format. A usage 
+example is provided below.
 
 #### Migration Prerequisites
 
-- **Anchore Version**: Ensure that your current deployment is running Anchore Enterprise version 4.9.0 or higher.
+- **Anchore Version**: Ensure that your current deployment is running Anchore Enterprise version 4.9.0 or higher (but not v5.0.0+).
 
-- **PostgreSQL Version**: You need PostgreSQL version 13 or higher. For upgrading your existing PostgreSQL installation, refer to the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html).
+- **PostgreSQL Version**: You need PostgreSQL version 13 or higher. For upgrading your existing PostgreSQL installation, refer to the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html). Database migration help is provided below.
   > **Note:** This chart deploys PostgreSQL 13 by default.
 
 - **Runtime Environment**: Docker or Podman must be installed on the machine where the migration will run.
@@ -665,14 +652,14 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 #### Step-by-Step Migration Process
 
-1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format. This command mounts a local volume to persistently store the output files, and it mounts the input values file within the container for conversion.It's imperative to review both the output and the new [values file](values.yaml) before moving forward.
+1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format. This command mounts a local volume to persistently store the output files, and it mounts the input values file within the container for conversion. It's imperative to review both the output and the new [values file](values.yaml) before moving forward.
 
     ```shell
-    export VALUES_FILE_NAME=my-values-file.yaml
+    export VALUES_FILE_NAME=my-values-file.yaml  # Existing Engine chart values file
     docker run -v ${PWD}:/tmp -v ${PWD}/${VALUES_FILE_NAME}:/app/${VALUES_FILE_NAME} docker.io/anchore/enterprise-helm-migrator:latest -e /app/${VALUES_FILE_NAME} -d /tmp/output
     ```
 
-For anchore enterprise 4.9.x, you will need to additionally set the following values in your values file to use the v1 api of Anchore.
+:rotating_light: For Anchore enterprise ">= 4.9.0, < 5.0.0", you will need to additionally set the following values in your values file to use the v1 api of Anchore. These will need to be removed once you upgrade to v5.0.0+
 ```
 api:
   service:
@@ -697,6 +684,7 @@ rbacManager:
     export NAMESPACE=anchore
     kubectl scale deployment --replicas=0 -l app=${ENGINE_RELEASE}-anchore-engine -n ${NAMESPACE}
     ```
+1. **Perform database upgrade**: Upgrade your external database, we suggest you make a backup first. If using a managed cloud database service refer to their documentation.
 
 1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
 
@@ -731,10 +719,11 @@ rbacManager:
    --set startMigrationPod=true
    --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine
    ```
+   As an example with the above commands:
    ```shell
    export ENGINE_RELEASE=my-engine-release
    export ENTERPRISE_RELEASE=my-enterprise-release
-   export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
+   export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml  # The converted file
    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true --set startMigrationPod=true anchore/enterprise --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine
    ```
 
@@ -746,26 +735,26 @@ rbacManager:
 
 1. **Database Preparation**: Replace the existing Anchore database with a new database in PostgreSQL 13.
 
-  1. If you set startMigrationPod=true as per the step above, you can exec into the migrator pod to run the commands.
+    1. If you set startMigrationPod=true as per the step above, you can exec into the migrator pod to run the commands.
     ```shell
-    kubectl -n <chart namespace> exec -it <RELEASE_NAME>-enterprise-migrate-db
-    PGPASSWORD=$NEW_DB_PASSWORD dropdb -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}; PGPASSWORD=$NEW_DB_PASSWORD psql -h ${NEW_DB_HOST}  -U ${NEW_DB_USERNAME} -c "CREATE DATABASE ${NEW_DB_NAME}" postgres
+    kubectl -n ${NAMESPACE} exec -it ${ENTERPRISE_RELEASE}-enterprise-migrate-db
+    PGPASSWORD=${NEW_DB_PASSWORD} dropdb -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}; PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST}  -U ${NEW_DB_USERNAME} -c "CREATE DATABASE ${NEW_DB_NAME}" postgres
     ```
 
-2. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
-   1. If you are using the included migration helper pod, the exec to that pod and run the following command:
-   ```shell
-   kubectl -n <chart namespace> exec -it <RELEASE_NAME>-enterprise-migrate-db
-   PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
-   ```
-   2. If you are using your own pod then follow these steps
-      1. Gather old DB parameters from the secret <old release name>-anchore-engine
-      2. Gather new DB parameters from the new secret <new release name>-enterprise
-      3. Start a migration pod that has all the psql binaries required e.g. docker.io/postgresql:13
-      4. Export all the required environment variables
-   ```shell
-    PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
-    ```
+  1. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
+      1. If you are using the included migration helper pod, the exec to that pod and run the following command:
+      ```shell
+      kubectl -n ${NAMESPACE} exec -it ${ENTEPRRISE_RELEASE}-enterprise-migrate-db
+      PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
+      ```
+      2. If you are using your own pod then follow these steps
+          1. Gather old DB parameters from the secret ${OLD_ENGINE_RELEASE}-anchore-engine
+          2. Gather new DB parameters from the new secret ${NEW_ENTERPRISE_RELEASE}-enterprise
+          3. Start a migration pod that has all the psql binaries required e.g. docker.io/postgresql:13
+          4. Export all the required environment variables
+          ```shell
+          PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
+          ```
 
 1. **Upgrade Anchore Enterprise**: After migrating the data, upgrade the Anchore Enterprise Helm deployment.
 
@@ -777,6 +766,13 @@ rbacManager:
 
     ```shell
     helm uninstall ${ENGINE_RELEASE} -n ${NAMESPACE}
+    ```
+    You may now have old engine persistent volume claims to delete. Delete these only when you are confident with the new Enterprise Chart deployment.
+    ```shell
+    kubectl get pvc
+    kubectl delete pvc ${ENGINE_RELEASE}-anchore-engine-enterprise-feeds
+    kubectl delete pvc ${ENGINE_RELEASE}-anchore-feeds-db
+    kubectl delete pvc ${ENGINE_RELEASE}-postgresql
     ```
 
 ## Parameters
@@ -1195,6 +1191,6 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a modification that may require adjustments to your values file.
 
-### v0.0.x
+### v0.1.x
 
 - This is a pre-release version of the Anchore Enterprise Helm chart and is not recommended for production deployments.
