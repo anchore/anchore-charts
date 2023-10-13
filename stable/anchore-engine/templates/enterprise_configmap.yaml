@@ -1,3 +1,4 @@
+{{- template "checkAnchoreEnterpriseCompatibility" . }}
 {{- if and .Values.anchoreEnterpriseGlobal.enabled (or .Values.anchoreEnterpriseRbac.enabled .Values.anchoreEnterpriseReports.enabled) -}}
 {{- $component := "enterprise" -}}
 apiVersion: v1

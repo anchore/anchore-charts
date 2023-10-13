@@ -788,7 +788,7 @@ rbacManager:
 
 | Name                                  | Description                                                                           | Value                                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.2` |
+| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.3` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |
 | `startMigrationPod`                   | Spin up a Database migration pod to help migrate the database to the new schema       | `false`                               |
