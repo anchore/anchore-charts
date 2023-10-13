@@ -24,6 +24,16 @@ Return Anchore default admin password
   {{- end -}}
 {{- end -}}
 
+{{/*
+Return Anchore SAML SECRET
+*/}}
+{{- define "enterprise.samlSecret" -}}
+  {{- if .Values.anchoreConfig.keys.secret }}
+    {{- .Values.anchoreConfig.keys.secret -}}
+  {{- else -}}
+    {{- randAlphaNum 32 -}}
+  {{- end -}}
+{{- end -}}
 
 {{/*
 Allows sourcing of a specified file in the entrypoint of all containers when .Values.doSourceAtEntry.enabled == true
