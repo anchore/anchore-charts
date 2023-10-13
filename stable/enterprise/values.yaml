@@ -18,7 +18,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v4.9.2
+image: docker.io/anchore/enterprise:v4.9.3
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -245,10 +245,10 @@ anchoreConfig:
   ##
   user_authentication:
     oauth:
-      enabled: false
+      enabled: true
       default_token_expiration_seconds: 3600
       refresh_token_expiration_seconds: 86400
-    hashed_passwords: false
+    hashed_passwords: true
     sso_require_existing_users: false
 
   ## @param anchoreConfig.metrics.enabled Enable Prometheus metrics for all Anchore services
@@ -1247,7 +1247,7 @@ ingress:
   ##
   apiHosts: []
 
-  ## @param ingress.apiPath The path used for accessing the Anchore API
+  ## @param ingress.apiPaths The path used for accessing the Anchore API
   ##
   apiPaths:
     - /v1/
@@ -1266,7 +1266,7 @@ ingress:
   ##
   feedsHosts: []
 
-  ## @param ingress.feedsPath The path used for accessing the Anchore Feeds API
+  ## @param ingress.feedsPaths The path used for accessing the Anchore Feeds API
   ## Exposing the feeds API is for special cases only, use /v2/feeds for ingress.feedsPath
   ##
   feedsPaths:
@@ -1277,7 +1277,7 @@ ingress:
   ##
   reportsHosts: []
 
-  ## @param ingress.reportsPath The path used for accessing the Anchore Reports API
+  ## @param ingress.reportsPaths The path used for accessing the Anchore Reports API
   ## Exposing the reports API enables the GraphQL interface, use /v2/reports/graphql for ingress.reportsPath
   ##
   reportsPaths:

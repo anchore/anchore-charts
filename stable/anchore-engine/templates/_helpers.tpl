@@ -480,3 +480,14 @@ Upon upgrade, check if the user uses non-default values for ingress path configu
 {{- fail "As of chart v1.28.0, the `ingress.feedsPath`, `ingress.reportsPath`, and `ingress.apiPath` values are no longer valid. See README for more information - https://github.com/anchore/anchore-charts/blob/main/stable/anchore-engine/README.md#chart-version-1280" }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Fail if the enterprise image is v5.0.0 or greater
+*/}}
+{{- define "checkAnchoreEnterpriseCompatibility" -}}
+{{- $imageVersion := (index (splitList ":" .Values.anchoreEnterpriseGlobal.image) 1) -}}
+{{- $majorVersion := int (index (splitList "." (trimPrefix "v" $imageVersion)) 0) -}}
+{{- if ge $majorVersion 5 -}}
+    {{- fail "Upgrading to Anchore 5.0.0+ is not supported with the engine chart. For information on migrating to the enterprise chart, please refer to https://github.com/anchore/anchore-charts/tree/main/stable/enterprise#migrating-to-the-anchore-enterprise-helm-chart" }}
+{{- end -}}
+{{- end -}}
