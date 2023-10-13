@@ -50,13 +50,17 @@ data:
   ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER: "true"
   ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER: "true"
   ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE: "true"
-  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS: "120"
-  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_INGEST_OVERWRITE: "false"
-  {{- with .Values.anchoreConfig.notifications.ui_url }}
+{{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" }}
+  {{- fail "The Value `-1` is no longer valid for `.Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `.Values.anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update. `.Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days` must be set to a value >1." -}}
+{{- else }}
+  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days }}"
+  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_INGEST_OVERWRITE: "{{ .Values.anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite }}"
+{{- end }}
+{{- with .Values.anchoreConfig.notifications.ui_url }}
   ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
-  {{- else }}
+{{- else }}
   ANCHORE_ENTERPRISE_UI_URL: {{ include "enterprise.ui.fullname" . | quote }}
-  {{- end }}
+{{- end }}
   ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "false"
   ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
   ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
