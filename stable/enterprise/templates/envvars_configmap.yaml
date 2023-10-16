@@ -10,7 +10,6 @@ data:
   ANCHORE_ADMIN_EMAIL: "{{ .Values.anchoreConfig.default_admin_email }}"
   ANCHORE_ALLOW_ECR_IAM_AUTO: "{{ .Values.anchoreConfig.allow_awsecr_iam_auto }}"
   ANCHORE_ANALYZER_TASK_REQUEUE: "true"
-  ANCHORE_ANALYZER_MAX_THREADS: "{{ .Values.anchoreConfig.analyzer.max_threads }}"
   ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "{{ .Values.anchoreConfig.user_authentication.hashed_passwords }}"
 {{- with .Values.anchoreConfig.keys.publicKeyFileName }}
   ANCHORE_AUTH_PRIVKEY: "/home/anchore/certs/{{- . }}"
