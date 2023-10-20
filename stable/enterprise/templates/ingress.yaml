@@ -15,7 +15,7 @@ metadata:
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
 spec:
-{{- if .Values.ingress.ingressClassName }}
+{{- if and .Values.ingress.ingressClassName (not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class")) }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
 {{- end }}
 {{- if .Values.ingress.tls }}
