@@ -131,20 +131,21 @@ def replace_keys_with_mappings(dot_string_dict, results_dir):
             write_to_file(f"{dotstring_key}: no longer used\n", os.path.join(logs_dir, log_file_name), "a")
             continue
 
-        # serviceName.annotations
-        if len(keys) > 1 and keys[1] in ['annotations', 'labels', 'nodeSelector', 'affinity', 'deploymentAnnotations']:
-            if val != {}:
-                val = {
-                    '.'.join(keys[2:]): val
-                }
-            keys = keys[:2]
         # serviceName.service.annotations
-        elif len(keys) > 2 and keys[2] in ['annotations', 'labels']:
+        if len(keys) > 2 and keys[2] in ['annotations', 'labels']:
             if val != {}:
                 val = {
                     '.'.join(keys[3:]): val
                 }
             keys = keys[:3]
+
+        # serviceName.annotations
+        elif len(keys) > 1 and keys[1] in ['annotations', 'labels', 'nodeSelector', 'deploymentAnnotations']:
+            if val != {}:
+                val = {
+                    '.'.join(keys[2:]): val
+                }
+            keys = keys[:2]
 
         update_result = False
         errored = True

@@ -176,14 +176,12 @@ class TestReplaceKeysWithMappingsEnterpriseUi(unittest.TestCase):
         dot_string_dict = {
             "anchoreEnterpriseUi.affinity.name": "foo",
             "anchoreEnterpriseUi.affinity.value": "bar",
-            "anchoreEnterpriseUi.affinity.anotherLabel.with.a.dot": "baz"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'ui': {
                 'affinity':{
                     'name': 'foo',
                     'value': 'bar',
-                    'anotherLabel.with.a.dot': 'baz'
                 }
             }
         }

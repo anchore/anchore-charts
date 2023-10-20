@@ -144,16 +144,14 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseFeedsUpgradeJob(unittest.TestC
     def test_anchoreEnterpriseFeedsUpgradeJob_affinity_value(self):
         dot_string_dict = {
             "anchoreEnterpriseFeedsUpgradeJob.affinity.name": "foo",
-            "anchoreEnterpriseFeedsUpgradeJob.affinity.value": "bar",
-            "anchoreEnterpriseFeedsUpgradeJob.affinity.anotherLabel.with.a.dot": "baz"
+            "anchoreEnterpriseFeedsUpgradeJob.affinity.value": "bar"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'feedsUpgradeJob': {
                     'affinity':{
                         'name': 'foo',
-                        'value': 'bar',
-                        'anotherLabel.with.a.dot': 'baz'
+                        'value': 'bar'
                     }
                 }
             }

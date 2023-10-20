@@ -217,15 +217,13 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
     def test_anchoreCatalog_affinity_value(self):
         dot_string_dict = {
             "anchoreCatalog.affinity.name": "foo",
-            "anchoreCatalog.affinity.value": "bar",
-            "anchoreCatalog.affinity.anotherLabel.with.a.dot": "baz"
+            "anchoreCatalog.affinity.value": "bar"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'catalog': {
                 'affinity':{
                     'name': 'foo',
-                    'value': 'bar',
-                    'anotherLabel.with.a.dot': 'baz'
+                    'value': 'bar'
                 }
             }
         }

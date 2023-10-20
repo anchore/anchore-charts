@@ -161,15 +161,13 @@ class TestReplaceKeysWithMappingsEnterpriseNotifications(unittest.TestCase):
     def test_anchoreEnterpriseNotifications_affinity_value(self):
         dot_string_dict = {
             "anchoreEnterpriseNotifications.affinity.name": "foo",
-            "anchoreEnterpriseNotifications.affinity.value": "bar",
-            "anchoreEnterpriseNotifications.affinity.anotherLabel.with.a.dot": "baz"
+            "anchoreEnterpriseNotifications.affinity.value": "bar"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'notifications': {
                 'affinity':{
                     'name': 'foo',
-                    'value': 'bar',
-                    'anotherLabel.with.a.dot': 'baz'
+                    'value': 'bar'
                 }
             }
         }
