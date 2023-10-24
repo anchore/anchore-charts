@@ -50,3 +50,88 @@ tests:
       - equal:
           path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
           value: "true"
+
+  - it: should not throw a templating error if feeds.something is set but drivers are not
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.chartEnabled: false
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "false"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "false"
+
+  - it: should set the msrc and github drivers if set differently
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.anchoreConfig.feeds.drivers.github.enabled: false
+      feeds.anchoreConfig.feeds.drivers.msrc.enabled: true
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "true"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "false"
+
+  - it: should not throw a templating error if feeds.anchoreConfig.something is set but drivers are not
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.anchoreConfig.log_level: ERROR
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "false"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "false"
+
+  - it: should not throw a templating error if feeds.anchoreConfig.feeds.something is set but drivers are not
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.anchoreConfig.feeds.cycle_timers.driver_sync: 9001
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "false"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "false"
+
+  - it: should not throw a templating error if feeds.anchoreConfig.feeds.drivers.something is set but github and msrc drivers are not
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.anchoreConfig.feeds.drivers.npm.enabled: true
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "false"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "false"
+
+  - it: should set the msrc and github drivers correctly if only one is set
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.anchoreConfig.feeds.drivers.github.enabled: true
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "false"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "true"
+
+  - it: should set the msrc and github drivers correctly if only the other is set
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.anchoreConfig.feeds.drivers.msrc.enabled: true
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "true"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "false"
