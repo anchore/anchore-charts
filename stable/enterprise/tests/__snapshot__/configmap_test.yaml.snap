@@ -62,6 +62,7 @@ should render the configmaps:
 
         max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
         max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+
         max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
 
         metrics:
@@ -125,6 +126,7 @@ should render the configmaps:
             cycle_timer_seconds: 1
             cycle_timers:
               image_analyzer: 1
+            max_threads: ${ANCHORE_ANALYZER_MAX_THREADS}
             analyzer_driver: 'nodocker'
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
@@ -341,6 +343,7 @@ should render the configmaps:
     data:
       ANCHORE_ADMIN_EMAIL: admin@myanchore
       ANCHORE_ALLOW_ECR_IAM_AUTO: "true"
+      ANCHORE_ANALYZER_MAX_THREADS: "1"
       ANCHORE_ANALYZER_TASK_REQUEUE: "true"
       ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "true"
       ANCHORE_AUTH_PRIVKEY: "null"
