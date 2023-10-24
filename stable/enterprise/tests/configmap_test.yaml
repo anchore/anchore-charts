@@ -37,3 +37,16 @@ tests:
             tmp_dir: /test
 
             log_level: DEBUG
+
+  - it: should set the msrc and github drivers if set
+    template: templates/envvars_configmap.yaml
+    set:
+      feeds.anchoreConfig.feeds.drivers.github.enabled: true
+      feeds.anchoreConfig.feeds.drivers.msrc.enabled: true
+    asserts:
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_MSRC_ENABLED"]
+          value: "true"
+      - equal:
+          path: data["ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED"]
+          value: "true"
