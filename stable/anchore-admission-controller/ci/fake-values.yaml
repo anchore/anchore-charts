@@ -4,3 +4,4 @@ credentials:
     password: password1
   - username: user2
     password: password2
+anchoreEndpoint: http://engine-anchore-engine-api:8228
