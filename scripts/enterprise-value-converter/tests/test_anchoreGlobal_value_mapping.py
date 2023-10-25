@@ -171,6 +171,7 @@ class TestReplaceKeysWithMappings(unittest.TestCase):
             'image': 'my.repo/anchore-enterprise:v4.9.0',
             'imagePullPolicy': 'ifNotPresent',
             'imagePullSecretName': 'enterprise-pull-secret',
+            'feeds': { 'imagePullSecretName': 'enterprise-pull-secret' },
             'licenseSecretName': 'my-anchore-enterprise-license',
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)

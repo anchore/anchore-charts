@@ -322,6 +322,10 @@ POST_PROCESSING = {
         "action": "duplicate",
         "new_keys": ["rbacAuth.extraEnv", "rbacManager.extraEnv"]
     },
+    "anchoreEnterpriseGlobal.imagePullSecretName": {
+        "action": "duplicate",
+        "new_keys": ["imagePullSecretName", "feeds.imagePullSecretName"]
+    },
     "anchoreEnterpriseFeeds.existingSecretName": {
         "action": "key_addition",
         "new_keys": [("feeds.existingSecretName", "default"), ("feeds.useExistingSecrets", True)]
