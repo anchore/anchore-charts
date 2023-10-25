@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   anchore-admission-controller:
   - apiVersion: v1
+    appVersion: 0.5.0
+    created: "2023-10-25T03:08:34.618475884Z"
+    description: A kubernetes admission controller for validating and mutating webhooks
+      that operates against Anchore Engine to make access decisions and annotations
+    digest: e6dc1f14255dfc8d5a3776b0472facc6ee128f6c1f57f1395c558b183cd4f7b9
+    home: https://github.com/anchore/kubernetes-admission-controller
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    kubeVersion: ^1.19.0-0
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-admission-controller
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-admission-controller-0.5.0/anchore-admission-controller-0.5.0.tgz
+    version: 0.5.0
+  - apiVersion: v1
     appVersion: 0.4.0
     created: "2023-09-19T22:14:49.744875245Z"
     description: A kubernetes admission controller for validating and mutating webhooks
@@ -5673,6 +5691,60 @@ entries:
   enterprise:
   - apiVersion: v2
     appVersion: 4.9.3
+    created: "2023-10-25T03:08:34.836564743Z"
+    dependencies:
+    - condition: postgresql.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: ui-redis
+      condition: ui-redis.chartEnabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~17.11
+    - condition: feeds.chartEnabled
+      import-values:
+      - child: service
+        parent: feeds.service
+      - child: anchoreConfig.internalServicesSSL
+        parent: feeds.anchoreConfig.internalServicesSSL
+      name: feeds
+      repository: '@anchore'
+      version: ~0.0
+    description: 'Anchore Enterprise is a complete container security workflow solution
+      for professional teams. Easily integrating with CI/CD systems, it allows developers
+      to bolster security without compromising velocity and enables security teams
+      to audit and verify compliance in real-time. It is based on Anchore Engine,
+      an open-source image inspection and scanning tool. '
+    digest: 9383e39ababd2af81749dfa3203b15e7ddc549d6c92cd270ba93ec2e0704c3a6
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - anchore-enterprise
+    - image
+    - security
+    - vulnerability
+    - scanner
+    kubeVersion: 1.23.x - 1.27.x || 1.23.x-x - 1.27.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: enterprise
+    sources:
+    - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/enterprise-0.2.2/enterprise-0.2.2.tgz
+    version: 0.2.2
+  - apiVersion: v2
+    appVersion: 4.9.3
     created: "2023-10-13T17:58:57.240722385Z"
     dependencies:
     - condition: postgresql.chartEnabled
@@ -7107,4 +7179,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-13T17:58:57.463532904Z"
+generated: "2023-10-25T03:08:34.837408347Z"
