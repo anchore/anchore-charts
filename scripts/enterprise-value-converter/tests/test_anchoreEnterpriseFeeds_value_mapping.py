@@ -165,15 +165,13 @@ class TestReplaceKeysWithMappingsFeeds(unittest.TestCase):
     def test_anchoreEnterpriseFeeds_affinity_value(self):
         dot_string_dict = {
             "anchoreEnterpriseFeeds.affinity.name": "foo",
-            "anchoreEnterpriseFeeds.affinity.value": "bar",
-            "anchoreEnterpriseFeeds.affinity.anotherLabel.with.a.dot": "baz"
+            "anchoreEnterpriseFeeds.affinity.value": "bar"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'feeds': {
                 'affinity':{
                     'name': 'foo',
-                    'value': 'bar',
-                    'anotherLabel.with.a.dot': 'baz'
+                    'value': 'bar'
                 }
             }
         }

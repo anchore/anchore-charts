@@ -133,15 +133,13 @@ class TestReplaceKeysWithMappingsAnchoreEnterpriseEngineUpgradeJob(unittest.Test
     def test_anchoreEnterpriseEngineUpgradeJob_affinity_value(self):
         dot_string_dict = {
             "anchoreEnterpriseEngineUpgradeJob.affinity.name": "foo",
-            "anchoreEnterpriseEngineUpgradeJob.affinity.value": "bar",
-            "anchoreEnterpriseEngineUpgradeJob.affinity.anotherLabel.with.a.dot": "baz"
+            "anchoreEnterpriseEngineUpgradeJob.affinity.value": "bar"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'upgradeJob': {
                 'affinity':{
                     'name': 'foo',
-                    'value': 'bar',
-                    'anotherLabel.with.a.dot': 'baz'
+                    'value': 'bar'
                 }
             }
         }

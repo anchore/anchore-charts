@@ -74,6 +74,24 @@ jobs:
         DOCKER_USER: ${{ secrets.ANCHORECI_DOCKER_USER }}
         DOCKER_PASS: ${{ secrets.ANCHORECI_DOCKER_PASS }}
 
+    - name: Check if anchore-engine endpoint is required for admission controller chart
+      id: engine_required
+      run: |
+        if [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'anchore-admission-controller') ]]; then
+          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an engine deployment"
+          echo "::set-output name=changed::true"
+        else
+          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping engine deployment"
+          echo "::set-output name=changed::false"
+        fi
+      shell: bash
+
+    - name: Deploy Engine
+      if: steps.engine_required.outputs.changed == 'true'
+      run: |
+        helm install engine anchore/anchore-engine --namespace anchore --wait
+        kubectl --namespace anchore get pods
+
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
       run: ct install --config ct-config.yaml

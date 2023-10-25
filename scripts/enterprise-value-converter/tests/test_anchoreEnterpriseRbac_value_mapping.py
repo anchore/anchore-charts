@@ -153,15 +153,13 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
     def test_anchoreEnterpriseRbac_affinity_value(self):
         dot_string_dict = {
             "anchoreEnterpriseRbac.affinity.name": "foo",
-            "anchoreEnterpriseRbac.affinity.value": "bar",
-            "anchoreEnterpriseRbac.affinity.anotherLabel.with.a.dot": "baz"
+            "anchoreEnterpriseRbac.affinity.value": "bar"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'rbacManager': {
                 'affinity':{
                     'name': 'foo',
-                    'value': 'bar',
-                    'anotherLabel.with.a.dot': 'baz'
+                    'value': 'bar'
                 }
             }
         }

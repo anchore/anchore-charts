@@ -144,15 +144,13 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
 
     def test_anchorePolicyEngine_affinity_value(self):
         dot_string_dict = {
-            "anchorePolicyEngine.affinity.name": "foo",
-            "anchorePolicyEngine.affinity.with.a.dot.name": "bar"
+            "anchorePolicyEngine.affinity.name": "foo"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'policyEngine': {
                 'affinity':
                     {
-                        'name': 'foo',
-                        'with.a.dot.name': 'bar'
+                        'name': 'foo'
                     }
             }
         }

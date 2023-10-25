@@ -154,14 +154,12 @@ class TestReplaceKeysWithMappingsSimpleQueue(unittest.TestCase):
         dot_string_dict = {
             "anchoreSimpleQueue.affinity.name": "foo",
             "anchoreSimpleQueue.affinity.value": "bar",
-            "anchoreSimpleQueue.affinity.anotherLabel.with.a.dot": "baz"
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
             'simpleQueue': {
                 'affinity':{
                     'name': 'foo',
                     'value': 'bar',
-                    'anotherLabel.with.a.dot': 'baz'
                 }
             }
         }

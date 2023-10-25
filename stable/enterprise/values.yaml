@@ -478,10 +478,14 @@ anchoreConfig:
         config: {}
 
     ## @param anchoreConfig.catalog.runtime_inventory.image_ttl_days TTL for images in the inventory report working set
+    ## @param anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite disables the image_ttl cycle timer.
+    ## When `image_ingest_overwrite=true` upon ingestion of inventory, removes anything previously reported by the namespace and only keep the latest inventory posted.
+    ## This new config value is used instead of setting `image_ttl_days=-1`
     ## ref: https://docs.anchore.com/current/docs/configuration/runtime_inventory/
     ##
     runtime_inventory:
-      image_ttl_days: 1
+      image_ttl_days: 120
+      image_ingest_overwrite: false
 
     ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
     ##
