@@ -417,11 +417,11 @@ feeds-db:
 #######################################
 
 gem-db:
-  ## @param gem-db.chartEnabled Use the dependent chart for Postgresql deployment
+  ## @extra gem-db.chartEnabled Use the dependent chart for Postgresql deployment
   ## Configures a separate postgres database deployment for the feeds service Ruby Gems DB
   ## requires feeds.gemDriverEnabled=true
   ##
-  chartEnabled: false
+  ## chartEnabled: false
 
   ## @param gem-db.externalEndpoint External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io)
   ## gem-db.externalEndpoint, gem-db.postgresqlUsername, gem-db.postgresqlPassword,
@@ -542,7 +542,7 @@ ingress:
   ##
   hosts: []
 
-  ## @param ingress.path The path used for accessing the Anchore Feeds API
+  ## @param ingress.paths The path used for accessing the Anchore Feeds API
   ##
   paths:
     - /v1/feeds/

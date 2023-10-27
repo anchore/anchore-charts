@@ -1,5 +1,7 @@
 # Anchore Enterprise Feeds Helm Chart
 
+> :exclamation: **Important:** View the **[Chart Release Notes](#release-notes)** for the latest changes prior to installation or upgrading.
+
 This Helm chart deploys the Anchore Enterprise Feeds service on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 Anchore Enterprise Feeds is an On-Premises service that supplies operating system and non-operating system vulnerability data and package data for consumption by Anchore Policy Engine. Policy Engine uses this data for finding vulnerabilities and evaluating policies.
@@ -10,80 +12,152 @@ See the [Anchore Feeds Documentation](https://docs.anchore.com/current/docs/over
 
 - [Prerequisites](#prerequisites)
 - [Installing the Chart](#installing-the-chart)
+- [Installing on Openshift](#installing-on-openshift)
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Configuration](#configuration)
   - [Feeds External Database Configuration](#feeds-external-database-configuration)
   - [Feeds Driver Configuration](#feeds-driver-configuration)
   - [Existing Secrets](#existing-secrets)
   - [Ingress](#ingress)
-  - [Installing on Openshift](#installing-on-openshift)
+  - [Prometheus Metrics](#prometheus-metrics)
 - [Parameters](#parameters)
 - [Release Notes](#release-notes)
 
 ## Prerequisites
 
-* [Helm](https://helm.sh/) >=3.8
-* [Kubernetes](https://kubernetes.io/) >=1.23
+- [Helm](https://helm.sh/) >=3.8
+- [Kubernetes](https://kubernetes.io/) >=1.23
 
 ## Installing the Chart
 
-**View the [Chart Release Notes](#release-notes) for the latest changes prior to installation or upgrading.**
+This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration.
 
-Create a kubernetes secret containing your license file
+This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration. For production deployments, refer to the [Configuration](#configuration) section for additional guidance.
+
+1. **Create a Kubernetes Secret for License File**: Generate a Kubernetes secret to store your Anchore Enterprise license file.
+
+    ```shell
+    export NAMESPACE=anchore
+    export LICENSE_PATH="license.yaml"
+
+    kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=${LICENSE_PATH} -n ${NAMESPACE}
+    ```
+
+1. **Create a Kubernetes Secret for DockerHub Credentials**: Generate another Kubernetes secret for DockerHub credentials. These credentials should have access to private Anchore Enterprise repositories. We recommend that you create a brand new DockerHub user for these pull credentials. Contact [Anchore Support](https://get.anchore.com/contact/) to obtain access.
+
+    ```shell
+    export NAMESPACE=anchore
+    export DOCKERHUB_PASSWORD="password"
+    export DOCKERHUB_USER="username"
+    export DOCKERHUB_EMAIL="example@email.com"
+
+    kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=${DOCKERHUB_USER} --docker-password=${DOCKERHUB_PASSWORD} --docker-email=${DOCKERHUB_EMAIL} -n ${NAMESPACE}
+    ```
+
+1. **Add Chart Repository & Deploy Anchore Enterprise**: Create a custom values file, named `anchore_values.yaml`, to override any chart parameters. Refer to the [Parameters](#parameters) section for available options.
+
+    > :exclamation: **Important**: Default passwords are specified in the chart. It's highly recommended to modify these before deploying.
+
+    ```shell
+    export NAMESPACE=anchore
+    export RELEASE=my-release
+
+    helm repo add anchore https://charts.anchore.io
+    helm install ${RELEASE} -n ${NAMESPACE} anchore/feeds -f anchore_values.yaml
+    ```
+
+    > **Note**: This command installs Anchore Enterprise with a chart-managed PostgreSQL database, which may not be suitable for production use. See the [External Database](#external-database-requirements) section for details on using an external database.
+
+1. **Post-Installation Steps**: Anchore Enterprise will take some time to initialize. After the bootstrap phase, it will begin a vulnerability feed sync. Image analysis will show zero vulnerabilities until this sync is complete. This can take several hours based on the enabled feeds.
+
+    > **Tip**: List all releases using `helm list`
+
+### Installing on Openshift
+
+By default, we assign the `securityContext.fsGroup`, `securityContext.runAsGroup`, and `securityContext.runAsUser` to `1000`. This will most likely fail on openshift for not being in the range determined by the `openshift.io/sa.scc.uid-range` annotation openshift attaches to the namespace when created. If using the chartEnabled postgresql, postgres will fail to come up as well due to this reason.
+
+1. Either disable the securityContext or set the appropriate values.
+1. If using the chartEnabled postgres, you will also need to either disable the feeds-db.primary.podSecurityContext and feeds-db.primary.containerSecurityContext, or set the appropriate values for them
+
+Note: disabling the containerSecurityContext and podSecurityContext may not be suitable for production. See [Redhat's documentation](https://docs.openshift.com/container-platform/4.13/authentication/managing-security-context-constraints.html#managing-pod-security-policies) on what may be suitable for production.
+
+For more information on the openshift.io/sa.scc.uid-range annotation, see the [openshift docs](https://docs.openshift.com/dedicated/authentication/managing-security-context-constraints.html#security-context-constraints-pre-allocated-values_configuring-internal-oauth)
 
 ```shell
-export LICENSE_PATH="PATH TO LICENSE.YAML"
-
-kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=${LICENSE_PATH}
+helm install feedsy anchore/feeds \
+  --set securityContext.fsGroup=null \
+  --set securityContext.runAsGroup=null \
+  --set securityContext.runAsUser=null \
+  --set feeds-db.primary.containerSecurityContext.enabled=false \
+  --set feeds-db.primary.podSecurityContext.enabled=false
 ```
 
-Create a kubernetes secret containing DockerHub credentials with access to the private Anchore Enterprise repositories. Contact [Anchore Support](https://get.anchore.com/contact/) for access.
+#### Example OpenShift values file
 
-```shell
-export DOCKERHUB_PASSWORD="YOUR DOCKERHUB PASSWORD"
-export DOCKERHUB_USER="YOUR DOCKERHUB USERNAME"
-export DOCKERHUB_EMAIL="YOUR EMAIL ADDRESS"
+```yaml
+# NOTE: This is not a production ready values file for an openshift deployment.
+securityContext:
+  fsGroup: null
+  runAsGroup: null
+  runAsUser: null
 
-kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=${DOCKERHUB_USER} --docker-password=${DOCKERHUB_PASSWORD} --docker-email=${DOCKERHUB_EMAIL}
+feeds-db:
+  primary:
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
 ```
 
-Add Helm Chart Repository And Install Chart
+## Upgrading the Chart
 
-```shell
-helm repo add anchore https://charts.anchore.io
-```
+A Helm pre-upgrade hook initiates a Kubernetes job that scales down all active Anchore Feeds pods and handles the Anchore database upgrade.
 
-Create a new file named `anchore_values.yaml` and add all desired custom [values](#parameters); then run the following command:
+The Helm upgrade is marked as successful only upon the job's completion. This process causes the Helm client to pause until the job finishes and new Anchore Enterprise pods are initiated. To monitor the upgrade, follow the logs of the upgrade job, which is automatically removed after a successful Helm upgrade.
 
-```shell
-export RELEASE="YOUR RELEASE NAME"
+  ```shell
+  export NAMESPACE=anchore
+  export RELEASE=my-release
 
-helm install ${RELEASE} -f anchore_values.yaml anchore/feeds
-```
+  helm upgrade ${RELEASE} -n ${NAMESPACE} anchore/feeds -f anchore_values.yaml
+  ```
 
-> **Note:** This installs Anchore Feeds with a chart-managed Postgresql database, which may not be a production ready configuration.
-
-> **Tip**: List all releases using `helm list`
-
-These commands deploy the Anchore Enterprise Feeds service on the Kubernetes cluster with default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
+An optional post-upgrade hook is available to perform Anchore Feeds upgrades without forcing all pods to terminate prior to running the upgrade. This is the same upgrade behavior that was enabled by default in the legacy anchore-engine chart. To enable the post-upgrade hook, set `feedsUpgradeJob.usePostUpgradeHook=true` in your values file.
 
 ## Uninstalling the Chart
 
-To uninstall/delete the deployment:
+To completely remove the Anchore Feeds deployment and associated Kubernetes resources, follow the steps below:
 
-```bash
-export RELEASE="YOUR RELEASE NAME"
+  ```shell
+  export NAMESPACE=anchore
+  export RELEASE=my-release
 
-helm delete ${RELEASE}
-```
+  helm delete ${RELEASE} -n ${NAMESPACE}
+  ```
 
-The command removes all the Kubernetes components associated with the chart and deletes the release.
+After deleting the helm release, there are still a few persistent volume claims to delete. Delete these only if you're certain you no longer need them.
+
+  ```shell
+  export NAMESPACE=anchore
+  export RELEASE=my-release
+
+  kubectl get pvc -n ${NAMESPACE}
+  kubectl delete pvc ${RELEASE}-feeds -n ${NAMESPACE}
+  kubectl delete pvc ${RELEASE}-feeds-db -n ${NAMESPACE}
+  ```
 
 ## Configuration
 
-The following sections describe the various configuration options available for Anchore Enterprise. The default configuration is set in the included [values file](https://github.com/anchore/anchore-charts-dev/blob/main/stable/enterprise/values.yaml). To override these values, create a custom `anchore_values.yaml` file and add the desired configuration options. You custom values file can be passed to `helm install` using the `-f` flag.
+This section outlines the available configuration options for Anchore Enterprise. The default settings are specified in the bundled [values file](https://github.com/anchore/anchore-charts-dev/blob/main/stable/feeds/values.yaml). To customize these settings, create your own `anchore_values.yaml` file and populate it with the configuration options you wish to override. To apply your custom configuration during installation, pass your custom values file to the `helm install` command:
 
-Contact [Anchore Support](get.anchore.com/contact/) for more assistance with configuring your deployment.
+```shell
+export NAMESPACE=anchore
+export RELEASE="my-release"
+
+helm install ${RELEASE} -n ${NAMESPACE} anchore/feeds -f custom_values.yaml
+```
+
+For additional guidance on customizing your Anchore Enterprise deployment, reach out to [Anchore Support](get.anchore.com/contact/).
 
 ### Feeds External Database Configuration
 
@@ -134,9 +208,15 @@ anchoreConfig:
 
 ### Existing Secrets
 
-For deployment scenarios that require version-controlled configuration to be used, it is recommended that credentials not be stored in values files. To accomplish this, you can manually create Kubernetes secrets and specify them as existing secrets in your values files.
+For deployments where version-controlled configurations are essential, it's advised to avoid storing credentials directly in values files. Instead, manually create Kubernetes secrets and reference them as existing secrets within your values files. When using existing secrets, the chart will load environment variables into deployments from the secret names specified by the following values:
 
-Below we show example Kubernetes secret objects, and how they would be used in Anchore Enterprise configuration.
+- `.Values.existingSecretName` [default: anchore-enterprise-feeds-env]
+
+To enable this feature, set the following values to `true` in your values file:
+
+```yaml
+useExistingSecrets: true
+```
 
 ```yaml
 apiVersion: v1
@@ -146,64 +226,80 @@ metadata:
     app: anchore
 type: Opaque
 stringData:
-  ANCHORE_ADMIN_PASSWORD: "<ADMIN_PASS>"
-  ANCHORE_FEEDS_DB_PASSWORD: "<FEEDS_DB_PASS>"
-```
-
-```yaml
-useExistingSecrets: true
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  ANCHORE_FEEDS_DB_NAME: anchore-feeds
+  ANCHORE_FEEDS_DB_USER: anchoreengine
+  ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
+  ANCHORE_FEEDS_DB_HOST: anchore-enterprise-feeds-db
+  ANCHORE_FEEDS_DB_PORT: 5432
+  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
+  # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
+  # (if applicable) ANCHORE_NVD_API_KEY: foobar,nvd1234
+  # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
+  # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
+  # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234
+  # (if applicable) ANCHORE_GEM_DB_HOST: anchorefeeds-gem-db.example.com:5432
 ```
 
 ### Ingress
 
-[Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on the Ingress resource. Kubernetes supports a variety of ingress controllers, including AWS ALB controllers and GCE controllers.
+[Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) serves as the gateway to expose HTTP and HTTPS routes from outside the Kubernetes cluster to services within it. Routing is governed by rules specified in the Ingress resource. Kubernetes supports a variety of ingress controllers, such as AWS ALB and GCE controllers.
 
-This Helm chart provides basic ingress configuration suitable for customization. You can expose routes for Anchore Feeds APIs by configuring the `ingress:` section in your values file.
+This Helm chart includes a foundational ingress configuration that is customizable. You can expose various Anchore Enterprise external APIs, including the core API, UI, reporting, RBAC, and feeds, by editing the `ingress` section in your values file.
 
-Ingress is disabled by default in the Helm chart. The NGINX ingress controller with the core API and UI routes can be enabled by changing the `ingress.enabled` value to `true`.
-
-Note that the [Kubernetes NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/) must be installed into the cluster for this configuration to work.
+Ingress is disabled by default in this Helm chart. To enable it, along with the [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/) for core API and UI routes, set the `ingress.enabled` value to `true`.
 
 ```yaml
 ingress:
   enabled: true
 ```
 
-### Installing on Openshift
+#### ALB Ingress Controller
 
-By default, we assign the `securityContext.fsGroup`, `securityContext.runAsGroup`, and `securityContext.runAsUser` to `1000`. This will most likely fail on openshift for not being in the range determined by the `openshift.io/sa.scc.uid-range` annotation openshift attaches to the namespace when created. If using the chartEnabled postgresql, postgres will fail to come up as well due to this reason.
-
-1. Either disable the securityContext or set the appropriate values.
-2. If using the chartEnabled postgres, you will also need to either disable the feeds-db.primary.podSecurityContext and feeds-db.primary.containerSecurityContext, or set the appropriate values for them
-
-Note: disabling the containerSecurityContext and podSecurityContext may not be suitable for production. See [Redhat's documentation](https://docs.openshift.com/container-platform/4.13/authentication/managing-security-context-constraints.html#managing-pod-security-policies) on what may be suitable for production.
-
-For more information on the openshift.io/sa.scc.uid-range annotation, see the [openshift docs](https://docs.openshift.com/dedicated/authentication/managing-security-context-constraints.html#security-context-constraints-pre-allocated-values_configuring-internal-oauth)
-
-```shell
-helm install feedsy anchore/feeds \
-  --set securityContext.fsGroup=null \
-  --set securityContext.runAsGroup=null \
-  --set securityContext.runAsUser=null \
-  --set feeds-db.primary.containerSecurityContext.enabled=false \
-  --set feeds-db.primary.podSecurityContext.enabled=false
-```
-
-#### Example OpenShift values file
+The [Kubernetes ALB ingress controller](https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html) must be installed into the cluster for this configuration to work.
 
 ```yaml
-# NOTE: This is not a production ready values file for an openshift deployment.
-securityContext:
-  fsGroup: null
-  runAsGroup: null
-  runAsUser: null
+ingress:
+  enabled: true
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  ingressClassName: alb
 
-feeds-db:
-  primary:
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
+  hosts:
+    - anchore-feeds.example.com
+
+service:
+  type: NodePort
+```
+
+#### GCE Ingress Controller
+
+The [Kubernetes GCE ingress controller](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress) must be installed into the cluster for this configuration to work.
+
+```yaml
+ingress:
+  enabled: true
+  ingressClassName: gce
+  paths:
+    - /v1/feeds/*
+    - /v2/feeds/*
+
+  hosts:
+    - anchore-feeds.example.com
+
+service:
+  type: NodePort
+```
+
+### Prometheus Metrics
+
+Anchore Enterprise offers native support for exporting Prometheus metrics from each of its containers. When this feature is enabled, each service exposes metrics via its existing service port. If you're adding Prometheus manually to your deployment, you'll need to configure it to recognize each pod and its corresponding ports.
+
+```yaml
+anchoreConfig:
+  metrics:
+    enabled: true
+    auth_disabled: true
 ```
 
 ## Parameters
@@ -216,7 +312,7 @@ feeds-db:
 | `url`                                 | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster. | `""`                                  |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                               | `""`                                  |
 | `nameOverride`                        | overrides the name set on resources                                                                   | `""`                                  |
-| `image`                               | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v4.9.1` |
+| `image`                               | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v4.9.3` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                                         | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                  | Name of a service account used to run all Feeds pods                                                  | `""`                                  |
@@ -270,6 +366,7 @@ feeds-db:
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                                          | `{}`                                  |
 | `scripts`                             | Collection of helper scripts usable in all anchore enterprise pods                                    | `{}`                                  |
 
+
 ### Anchore Feeds Configuration Parameters
 
 | Name                                                                       | Description                                                                                                                      | Value                                                                                                                                 |
@@ -309,6 +406,7 @@ feeds-db:
 | `anchoreConfig.feeds.drivers.github.enabled`                               | Enable GitHub advisory feeds (requires GitHub PAT)                                                                               | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.github.token`                                 | GitHub developer personal access token with zero permission scopes                                                               | `""`                                                                                                                                  |
 
+
 ### Anchore Feeds Database Parameters
 
 | Name                                        | Description                                                                                       | Value                   |
@@ -323,11 +421,12 @@ feeds-db:
 | `feeds-db.primary.extraEnvVars`             | An array to add extra environment variables                                                       | `[]`                    |
 | `feeds-db.image.tag`                        | Specifies the image to use for this chart.                                                        | `13.11.0-debian-11-r15` |
 
+
 ### Feeds Gem Database Parameters
 
 | Name                                      | Description                                                                                 | Value                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------- |
-| `gem-db.chartEnabled`                     | Use the dependent chart for Postgresql deployment                                           | `false`                 |
+| `gem-db.chartEnabled`                     | Use the dependent chart for Postgresql deployment                                           |                         |
 | `gem-db.externalEndpoint`                 | External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io) | `""`                    |
 | `gem-db.auth.username`                    | Username used to connect to Postgresql                                                      | `anchore-gem-feeds`     |
 | `gem-db.auth.password`                    | Password used to connect to Postgresql                                                      | `anchore-postgres,123`  |
@@ -336,6 +435,7 @@ feeds-db:
 | `gem-db.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
 | `gem-db.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `gem-db.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
+
 
 ### Anchore Feeds Upgrade Job Parameters
 
@@ -354,17 +454,19 @@ feeds-db:
 | `feedsUpgradeJob.resources`               | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`    |
 | `feedsUpgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
 
+
 ### Ingress Parameters
 
-| Name                       | Description                                                        | Value       |
-| -------------------------- | ------------------------------------------------------------------ | ----------- |
-| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`     |
-| `ingress.labels`           | Labels for the ingress resource                                    | `{}`        |
-| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`        |
-| `ingress.hosts`            | List of custom hostnames for the Anchore Feeds API                 | `[]`        |
-| `ingress.path`             | The path used for accessing the Anchore Feeds API                  | `/v1/feeds` |
-| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`        |
-| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`     |
+| Name                       | Description                                                        | Value                         |
+| -------------------------- | ------------------------------------------------------------------ | ----------------------------- |
+| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`                       |
+| `ingress.labels`           | Labels for the ingress resource                                    | `{}`                          |
+| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`                          |
+| `ingress.hosts`            | List of custom hostnames for the Anchore Feeds API                 | `[]`                          |
+| `ingress.paths`            | The path used for accessing the Anchore Feeds API                  | `["/v1/feeds/","/v2/feeds/"]` |
+| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                          |
+| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                       |
+
 
 ### Google CloudSQL DB Parameters
 
@@ -380,12 +482,12 @@ feeds-db:
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
 
-## Release Notes
+For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
 
-A major chart version change (v0.1.2 -> v1.0.0) indicates that there is an **incompatible breaking change needing manual actions.**
+- **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
+- **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
+- **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-A minor chart version change (v0.1.2 -> v0.2.0) indicates a change that **may require updates to your values file.**
+### v0.x.x
 
-### v0.0.x
-
-* This is a pre-release version of the Anchore Enterprise Helm chart. It is not intended for production use.
+- This is a pre-release version of the Anchore Enterprise Helm chart and is not recommended for production deployments.
