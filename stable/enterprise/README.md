@@ -996,8 +996,8 @@ If you encounter any issues during the migration process, a rollback can be perf
 | `anchoreConfig.catalog.event_log`                                          | Event log for webhooks, YAML configuration                                                                                       | `{}`               |
 | `anchoreConfig.catalog.analysis_archive`                                   | Custom analysis archive YAML configuration                                                                                       | `{}`               |
 | `anchoreConfig.catalog.object_store`                                       | Custom object storage YAML configuration                                                                                         | `{}`               |
-| `anchoreConfig.catalog.runtime_inventory.image_ttl_days`                   | TTL for images in the inventory report working set                                                                               | `120`              |
-| `anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite`           | disables the image_ttl cycle timer.                                                                                              | `false`            |
+| `anchoreConfig.catalog.runtime_inventory.image_ttl_days`                   | TTL for runtime inventory.                                                                                                       | `120`              |
+| `anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite`           | force runtime inventory to be overwritten upon every update for that reported context.                                           | `false`            |
 | `anchoreConfig.catalog.down_analyzer_task_requeue`                         | Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state                      | `true`             |
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync`                       | Interval to run a feed sync to get latest cve data                                                                               | `14400`            |
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync_checker`               | Interval between checks to see if there needs to be a task queued                                                                | `3600`             |
@@ -1321,6 +1321,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v1.0.0
+
+- This is a stable release of the Anchore Enterprise Helm chart and is recommended for production deployments.
+- Deploys Anchore Enterprise v4.9.3.
+- This version of the chart is required for the migration from the anchore-engine chart, and is a pre-requisite for Anchore Enterprise 5.0.
 
 ### v0.x.x
 
