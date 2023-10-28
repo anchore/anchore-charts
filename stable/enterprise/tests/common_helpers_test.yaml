@@ -808,9 +808,8 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_ADMIN_PASSWORD: '"my-password"'
-            ANCHORECLI_PASS: '"my-password"'
-            ANCHORECTL_PASSWORD: '"my-password"'
+            ANCHORE_ADMIN_PASSWORD: my-password
+            ANCHORECTL_PASSWORD: my-password
         count: 1
         any: true
 
@@ -821,7 +820,7 @@ tests:
     asserts:
       - matchRegex:
           path: stringData["ANCHORE_ADMIN_PASSWORD"]
-          pattern: ^\"[a-zA-Z0-9]{32}\"$
+          pattern: ^[a-zA-Z0-9]{32}$
 
   - it: should render anchoreFeedsURL with feeds.url set
     set:
