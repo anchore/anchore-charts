@@ -40,7 +40,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 
 > **Note**: For migration steps from an Anchore Engine Helm chart deployment, refer to the [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart) section.
 
-This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration. For production deployments, refer to the [Configuration](#configuration) section for additional guidance.
+This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration. Refer to the [Configuration](#configuration) section for additional guidance on production deployments.
 
 1. **Create a Kubernetes Secret for License File**: Generate a Kubernetes secret to store your Anchore Enterprise license file.
 
@@ -156,7 +156,7 @@ ui-redis:
 
 A Helm pre-upgrade hook initiates a Kubernetes job that scales down all active Anchore Enterprise pods and handles the Anchore database upgrade.
 
-The Helm upgrade is marked as successful only upon the job's completion. This process causes the Helm client to pause until the job finishes and new Anchore Enterprise pods are initiated. To monitor the upgrade, follow the logs of the upgrade jobs, which are automatically removed after a successful Helm upgrade.
+The Helm upgrade is marked as successful only upon the job's completion. This process causes the Helm client to pause until the job finishes and new Anchore Enterprise pods are initiated. To monitor the upgrade, follow the logs of the upgrade jobs. These jobs are automatically removed after a subsequent successful Helm upgrade.
 
   ```shell
   export NAMESPACE=anchore
@@ -192,7 +192,7 @@ After deleting the helm release, there are still a few persistent volume claims 
 
 ## Configuration
 
-This section outlines the available configuration options for Anchore Enterprise. The default settings are specified in the bundled [values file](https://github.com/anchore/anchore-charts-dev/blob/main/stable/enterprise/values.yaml). To customize these settings, create your own `anchore_values.yaml` file and populate it with the configuration options you wish to override. To apply your custom configuration during installation, pass your custom values file to the `helm install` command:
+This section outlines some of the available configuration options for Anchore Enterprise. The default settings are specified in the bundled [values file](https://github.com/anchore/anchore-charts-dev/blob/main/stable/enterprise/values.yaml). To customize these settings, create your own `anchore_values.yaml` file and populate it with the configuration options you wish to override. To apply your custom configuration during installation, pass your custom values file to the `helm install` command:
 
 ```shell
 export NAMESPACE=anchore
@@ -691,9 +691,9 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 ### Migration Rollback Strategy
 
-The migration process is designed to be non-destructive by utilizing a blue/green deployment strategy. If you encounter any issues during the migration process, you can roll back to your previous deployment by simply scaling your Anchore-Engine deployment back up.
+The migration employs a blue/green deployment strategy to minimize risk and facilitate easy rollback. Should you encounter issues during the migration, reverting to the prior state is straightforward: simply scale your Anchore-Engine deployment back up.
 
-If you are using an external PostgreSQL database and were unable to use a blue/green deployment strategy for the migration, you will have to manually restore your database to the previous version using a backup that was taken prior to the migration. Then scale your Anchore-Engine deployment back up.
+For those using an external PostgreSQL database without the benefit of a blue/green deployment strategy, a manual database restoration is necessary. Utilize a pre-migration backup to restore the database to its previous version, and then proceed to scale your Anchore-Engine deployment back up.
 
 See the [Migration Rollback Steps](#migration-rollback-steps) section for more details.
 
@@ -710,7 +710,9 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
     helm upgrade ${ENGINE_RELEASE} -n ${NAMESPACE} anchore/anchore-engine -f ${VALUES_FILE_NAME} --version=^1.28.0
     ```
 
-1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format. This command mounts a local volume to persistently store the output files, and it mounts the input values file within the container for conversion. It's imperative to review both the output and the new [values file](values.yaml) before moving forward.
+1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format.
+
+    >**Note**: This command mounts a local volume to persistently store the output files, it also mounts the input values file within the container for conversion. It's critical to review both the output logs and the new `output/enterprise.values.yaml` file before moving forward.
 
     ```shell
     export VALUES_FILE_NAME=my-values-file.yaml  # Existing Engine chart values file
@@ -733,9 +735,9 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
 
 1. **Perform database upgrade**: Upgrade your external database. See the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html) for guidance. If using a managed cloud database service refer to their documentation.
 
-    > Tip: If you're able to start a new database instance using a backup, you can use that instance for your upgrade & Enterprise deployment. This allows you to perform the migration without modifying your original database. Using a blue/green deployment strategy for the migration makes for very simple rollbacks if any errors are encountered during the migration.
+    > Tip: Leveraging a backup to instantiate a new database instance enables a non-intrusive database upgrade and Enterprise chart migration. This approach preserves the integrity of your original database. By adopting a blue/green deployment strategy for the migration, you gain the advantage of effortless rollbacks in case of migration-related issues.
 
-1. **(Optional) Update Database Hostname**: Manually update the database hostname in your values file and/or your existing secrets to the hostname of your newly created database for the Enterprise chart. This is only necessary if you're using the blue/green deployment strategy for the database upgrade.
+1. **(Optional) Update Database Hostname**: If you're employing a blue/green deployment strategy for the database upgrade, update the database hostname in your values file and/or existing Kubernetes secrets to point to your newly created database instance. This step is essential for properly configuring the Enterprise chart to use the new database.
 
 1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
 
@@ -876,15 +878,16 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
 
 ### Migration Rollback Steps
 
-If you encounter any issues during the migration process, a rollback can be performed by following these steps:
+In case of issues during the migration, execute the following rollback steps:
 
-1. **Uninstall Anchore Enterprise chart deployment**
-1. **Delete values file created by the migration script**
-1. **Delete existing secrets created for the Enterprise chart**
-1. **Delete the Anchore Enterprise deployment database**
-1. **(Optional)Restore the Anchore-Engine deployment database**
-1. **Scale Anchore Engine chart deployment back up**
-1. **Attempt migration process again**
+1. **Uninstall the Anchore Enterprise Chart**: Remove the Anchore Enterprise deployment from your cluster.
+1. **Remove Migrated Values File**: Delete the `output` directory generated by the migration script.
+1. **Erase Enterprise Database**: Delete the database associated with the Anchore Enterprise deployment.
+1. **(Optional) Restore Anchore-Engine Database**: If necessary, restore the Anchore-Engine database from a backup.
+1. **Reactivate Anchore Engine**: Scale the Anchore Engine deployment back to its original state.
+1. **Retry Migration**: Re-attempt the migration process following the initial steps.
+
+This rollback procedure is designed to revert your environment to its pre-migration state, allowing for a fresh migration attempt.
 
 ## Parameters
 
