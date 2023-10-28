@@ -27,7 +27,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Prometheus Metrics](#prometheus-metrics)
   - [Scaling Individual Services](#scaling-individual-services)
   - [Using TLS Internally](#using-tls-internally)
-  - [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart)
+- [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart)
 - [Parameters](#parameters)
 - [Release Notes](#release-notes)
 
@@ -669,7 +669,7 @@ ui:
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
 
-### Migrating to the Anchore Enterprise Helm Chart
+## Migrating to the Anchore Enterprise Helm Chart
 
 This guide provides steps for transitioning from an Anchore Engine Helm chart deployment to the updated Anchore Enterprise Helm chart, a necessary step for users planning to upgrade to Anchore Enterprise version v5.0.0 or later.
 
@@ -677,7 +677,7 @@ This guide provides steps for transitioning from an Anchore Engine Helm chart de
 
 A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts) is available to automate the conversion of your Anchore Engine values file to the new Enterprise format. A usage example is provided below.
 
-#### Migration Prerequisites
+### Migration Prerequisites
 
 - **Anchore Version**: Ensure that your current deployment is running Anchore Enterprise version 4.9.x (but not v5.0.0+). This is required to ensure that the migration script can properly convert your values file.
 
@@ -689,7 +689,7 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 - **Runtime Environment**: Docker or Podman must be installed on the machine where the migration will run.
 
-#### Migration Rollback Strategy
+### Migration Rollback Strategy
 
 The migration process is designed to be non-destructive by utilizing a blue/green deployment strategy. If you encounter any issues during the migration process, you can roll back to your previous deployment by simply scaling your Anchore-Engine deployment back up.
 
@@ -697,7 +697,7 @@ If you are using an external PostgreSQL database and were unable to use a blue/g
 
 See the [Migration Rollback Steps](#migration-rollback-steps) section for more details.
 
-#### Step-by-Step Migration Process
+### Step-by-Step Migration Process
 
 1. **Upgrade Existing Anchore Engine Deployment**: Upgrade your existing Anchore Engine deployment to chart version 1.28.0 or higher. This will ensure that your deployment is running Anchore Enterprise v4.9.x.
 
@@ -874,7 +874,7 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
     kubectl delete pvc ${ENGINE_RELEASE}-postgresql -n ${NAMESPACE}
     ```
 
-#### Migration Rollback Steps
+### Migration Rollback Steps
 
 If you encounter any issues during the migration process, a rollback can be performed by following these steps:
 
