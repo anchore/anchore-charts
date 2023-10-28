@@ -1,7 +1,7 @@
 apiVersion: v2
 name: feeds
 type: application
-version: "1.0.0"
+version: "1.0.1"
 appVersion: "4.9.3"
 kubeVersion: 1.23.x - 1.27.x || 1.23.x-x - 1.27.x-x
 description: Anchore feeds service

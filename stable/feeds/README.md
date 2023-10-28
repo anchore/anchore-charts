@@ -488,6 +488,11 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v1.0.0
+
+- This is a stable release of the Anchore Feeds Helm chart and is recommended for production deployments.
+- Deploys Anchore Feeds v4.9.3.
+
 ### v0.x.x
 
 - This is a pre-release version of the Anchore Enterprise Helm chart and is not recommended for production deployments.
