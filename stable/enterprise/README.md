@@ -12,6 +12,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 
 - [Prerequisites](#prerequisites)
 - [Installing the Chart](#installing-the-chart)
+- [Installing on Openshift](#installing-on-openshift)
 - [Upgrading](#upgrading-the-chart)
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Configuration](#configuration)
@@ -23,7 +24,6 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Configuring Analysis Archive Storage](#configuring-analysis-archive-storage)
   - [Existing Secrets](#existing-secrets)
   - [Ingress](#ingress)
-  - [SSO](#sso)
   - [Prometheus Metrics](#prometheus-metrics)
   - [Scaling Individual Services](#scaling-individual-services)
   - [Using TLS Internally](#using-tls-internally)
@@ -40,22 +40,26 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 
 > **Note**: For migration steps from an Anchore Engine Helm chart deployment, refer to the [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart) section.
 
-This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration. For further customization, refer to the [Parameters](#parameters) section.
+This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration. For production deployments, refer to the [Configuration](#configuration) section for additional guidance.
 
 1. **Create a Kubernetes Secret for License File**: Generate a Kubernetes secret to store your Anchore Enterprise license file.
 
     ```shell
-    export LICENSE_PATH="${PWD}/license.yaml"
-    kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=${LICENSE_PATH}
+    export NAMESPACE=anchore
+    export LICENSE_PATH="license.yaml"
+
+    kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=${LICENSE_PATH} -n ${NAMESPACE}
     ```
 
-1. **Create a Kubernetes Secret for DockerHub Credentials**: Generate another Kubernetes secret for DockerHub credentials. These credentials should have access to private Anchore Enterprise repositories. Contact [Anchore Support](https://get.anchore.com/contact/) to obtain access.
+1. **Create a Kubernetes Secret for DockerHub Credentials**: Generate another Kubernetes secret for DockerHub credentials. These credentials should have access to private Anchore Enterprise repositories. We recommend that you create a brand new DockerHub user for these pull credentials. Contact [Anchore Support](https://get.anchore.com/contact/) to obtain access.
 
     ```shell
+    export NAMESPACE=anchore
     export DOCKERHUB_PASSWORD="password"
     export DOCKERHUB_USER="username"
     export DOCKERHUB_EMAIL="example@email.com"
-    kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=${DOCKERHUB_USER} --docker-password=${DOCKERHUB_PASSWORD} --docker-email=${DOCKERHUB_EMAIL}
+
+    kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=${DOCKERHUB_USER} --docker-password=${DOCKERHUB_PASSWORD} --docker-email=${DOCKERHUB_EMAIL} -n ${NAMESPACE}
     ```
 
 1. **Add Chart Repository & Deploy Anchore Enterprise**: Create a custom values file, named `anchore_values.yaml`, to override any chart parameters. Refer to the [Parameters](#parameters) section for available options.
@@ -63,23 +67,90 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
     > :exclamation: **Important**: Default passwords are specified in the chart. It's highly recommended to modify these before deploying.
 
     ```shell
+    export NAMESPACE=anchore
     export RELEASE=my-release
+
     helm repo add anchore https://charts.anchore.io
-    helm install ${RELEASE} -f anchore_values.yaml anchore/enterprise
+    helm install ${RELEASE} -n ${NAMESPACE} anchore/enterprise -f anchore_values.yaml
     ```
 
-    > **Note**: This command installs Anchore Enterprise with a chart-managed PostgreSQL database, which may not be suitable for production use.
+    > **Note**: This command installs Anchore Enterprise with a chart-managed PostgreSQL database, which may not be suitable for production use. See the [External Database](#external-database-requirements) section for details on using an external database.
 
 1. **Post-Installation Steps**: Anchore Enterprise will take some time to initialize. After the bootstrap phase, it will begin a vulnerability feed sync. Image analysis will show zero vulnerabilities until this sync is complete. This can take several hours based on the enabled feeds. Use the following [anchorectl](https://docs.anchore.com/current/docs/deployment/anchorectl/) commands to check the system status:
 
     ```shell
+    export NAMESPACE=anchore
     export RELEASE=my-release
-    export ANCHORECTL_PASSWORD=$(kubectl get secret "${RELEASE}-enterprise" -o ‘go-template={{index .data “ANCHORE_ADMIN_PASSWORD”}}’ | base64 -d -)
-    kubectl port-forward svc/${RELEASE}-enterprise-api 8228:8228 # port forward for anchorectl in another terminal
-    anchorectl system wait # anchorectl defaults to the user admin, and to the password ${ANCHORECTL_PASSWORD} automatically if set
+    export ANCHORECTL_URL=http://localhost:8228/v1/
+    export ANCHORECTL_PASSWORD=$(kubectl get secret "${RELEASE}-enterprise" -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -d -)
+
+    kubectl port-forward -n ${NAMESPACE} svc/${RELEASE}-enterprise-api 8228:8228 # port forward for anchorectl in another terminal
+    anchorectl system status # anchorectl defaults to the user admin, and to the password ${ANCHORECTL_PASSWORD} automatically if set
     ```
 
     > **Tip**: List all releases using `helm list`
+
+### Installing on Openshift
+
+As of August 2, 2023, Helm does not offer native support for passing `null` values to child or dependency charts. For details, refer to this [Helm GitHub issue](https://github.com/helm/helm/issues/9027). Given that the `feeds` chart is a dependency, a workaround is to deploy it as a standalone chart and configure the `enterprise` deployment to point to this separate `feeds` deployment.
+
+Additionally, be aware that you'll need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled` or `feeds-db.chartEnabled`).
+
+For example:
+
+1. **Deploy feeds chart as a standalone deployment:**
+
+    ```shell
+    helm install my-release anchore/feeds \
+      --set securityContext.fsGroup=null \
+      --set securityContext.runAsGroup=null \
+      --set securityContext.runAsUser=null \
+      --set feeds-db.primary.containerSecurityContext.enabled=false \
+      --set feeds-db.primary.podSecurityContext.enabled=false
+    ```
+
+1. **Deploy the enterprise chart with appropriate values:**
+
+    ```shell
+    helm install anchore anchore/enterprise \
+      --set securityContext.fsGroup=null \
+      --set securityContext.runAsGroup=null \
+      --set securityContext.runAsUser=null \
+      --set feeds.chartEnabled=false \
+      --set feeds.url=my-release-feeds \
+      --set postgresql.primary.containerSecurityContext.enabled=false \
+      --set postgresql.primary.podSecurityContext.enabled=false \
+      --set ui-redis.master.podSecurityContext.enabled=false \
+      --set ui-redis.master.containerSecurityContext.enabled=false
+    ```
+
+    > **Note:** disabling the containerSecurityContext and podSecurityContext may not be suitable for production. See [Redhat's documentation](https://docs.openshift.com/container-platform/4.13/authentication/managing-security-context-constraints.html#managing-pod-security-policies) on what may be suitable for production. For more information on the openshift.io/sa.scc.uid-range annotation, see the [openshift docs](https://docs.openshift.com/dedicated/authentication/managing-security-context-constraints.html#security-context-constraints-pre-allocated-values_configuring-internal-oauth)
+
+#### Example Openshift values file
+
+```yaml
+# NOTE: This is not a production ready values file for an openshift deployment.
+
+securityContext:
+  fsGroup: null
+  runAsGroup: null
+  runAsUser: null
+feeds:
+  chartEnabled: false
+  url: my-release-feeds
+postgresql:
+  primary:
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+ui-redis:
+  master:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+```
 
 ## Upgrading the Chart
 
@@ -88,17 +159,35 @@ A Helm pre-upgrade hook initiates a Kubernetes job that scales down all active A
 The Helm upgrade is marked as successful only upon the job's completion. This process causes the Helm client to pause until the job finishes and new Anchore Enterprise pods are initiated. To monitor the upgrade, follow the logs of the upgrade jobs, which are automatically removed after a successful Helm upgrade.
 
   ```shell
+  export NAMESPACE=anchore
   export RELEASE=my-release
-  helm upgrade ${RELEASE} -f anchore_values.yaml anchore/enterprise
+
+  helm upgrade ${RELEASE} -n ${NAMESPACE} anchore/enterprise -f anchore_values.yaml
   ```
+
+An optional post-upgrade hook is available to perform Anchore Enterprise upgrades without forcing all pods to terminate prior to running the upgrade. This is the same upgrade behavior that was enabled by default in the legacy anchore-engine chart. To enable the post-upgrade hook, set `upgradeJob.usePostUpgradeHook=true` in your values file.
 
 ## Uninstalling the Chart
 
 To completely remove the Anchore Enterprise deployment and associated Kubernetes resources, follow the steps below:
 
   ```shell
+  export NAMESPACE=anchore
   export RELEASE=my-release
-  helm delete ${RELEASE}
+
+  helm delete ${RELEASE} -n ${NAMESPACE}
+  ```
+
+After deleting the helm release, there are still a few persistent volume claims to delete. Delete these only if you're certain you no longer need them.
+
+  ```shell
+  export NAMESPACE=anchore
+  export RELEASE=my-release
+
+  kubectl get pvc -n ${NAMESPACE}
+  kubectl delete pvc ${RELEASE}-feeds -n ${NAMESPACE}
+  kubectl delete pvc ${RELEASE}-feeds-db -n ${NAMESPACE}
+  kubectl delete pvc ${RELEASE}-postgresql -n ${NAMESPACE}
   ```
 
 ## Configuration
@@ -106,7 +195,10 @@ To completely remove the Anchore Enterprise deployment and associated Kubernetes
 This section outlines the available configuration options for Anchore Enterprise. The default settings are specified in the bundled [values file](https://github.com/anchore/anchore-charts-dev/blob/main/stable/enterprise/values.yaml). To customize these settings, create your own `anchore_values.yaml` file and populate it with the configuration options you wish to override. To apply your custom configuration during installation, pass your custom values file to the `helm install` command:
 
 ```shell
-helm install my-release anchore/enterprise -f custom_values.yaml
+export NAMESPACE=anchore
+export RELEASE="my-release"
+
+helm install ${RELEASE} -n ${NAMESPACE} anchore/enterprise -f custom_values.yaml
 ```
 
 For additional guidance on customizing your Anchore Enterprise deployment, reach out to [Anchore Support](get.anchore.com/contact/).
@@ -253,7 +345,20 @@ Configuration of external analysis archive storage is essentially identical to c
 
 ### Existing Secrets
 
-For deployments where version-controlled configurations are essential, it's advised to avoid storing credentials directly in values files. Instead, manually create Kubernetes secrets and reference them as existing secrets within your values files.
+For deployments where version-controlled configurations are essential, it's advised to avoid storing credentials directly in values files. Instead, manually create Kubernetes secrets and reference them as existing secrets within your values files. When using existing secrets, the chart will load environment variables into deployments from the secret names specified by the following values:
+
+- `.Values.existingSecretName` [default: anchore-enterprise-env]
+- `.Values.feeds.existingSecretName` [default: anchore-enterprise-feeds-env]
+- `.Values.ui.existingSecretName` [default: anchore-enterprise-ui-env]
+
+To enable this feature, set the following values to `true` in your values file:
+
+```yaml
+useExistingSecrets: true
+
+feeds:
+  useExistingSecrets: true
+```
 
 Below are sample Kubernetes secret objects and corresponding guidelines on integrating them into your Anchore Enterprise configuration.
 
@@ -265,8 +370,13 @@ metadata:
   name: anchore-enterprise-env
 type: Opaque
 stringData:
-  ANCHORE_ADMIN_PASSWORD: "<ADMIN_PASS>"
-  ANCHORE_DB_PASSWORD: "<DB_PASS>"
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  ANCHORE_DB_NAME: anchore
+  ANCHORE_DB_USER: anchore
+  ANCHORE_DB_HOST: anchore-postgresql
+  ANCHORE_DB_PORT: 5432
+  ANCHORE_DB_PASSWORD: anchore-postgres,123
+  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
 
 ---
 apiVersion: v1
@@ -275,9 +385,9 @@ metadata:
   name: anchore-enterprise-ui-env
 type: Opaque
 stringData:
-  ANCHORE_ADMIN_PASSWORD: "<ADMIN_PASS>"
-  ANCHORE_APPDB_URI: "postgresql://<PG_USER>:<DB_PASS>@<DB_HOSTNAME>:5432/<DATABASE_NAME>"
-  ANCHORE_REDIS_URI: "redis://nouser:<REDIS_PASS>@<REDIS_HOSTNAME>:6379"
+  # if using TLS to connect to Postgresql you must add the ?ssl=[require|verify-ca|verify-full] parameter to the end of the URI
+  ANCHORE_APPDB_URI: postgresql://anchoreengine:anchore-postgres,123@anchore-postgresql:5432/anchore
+  ANCHORE_REDIS_URI: redis://nouser:anchore-redis,123@anchore-ui-redis-master:6379
 
 ---
 apiVersion: v1
@@ -287,15 +397,19 @@ metadata:
     app: anchore
 type: Opaque
 stringData:
-  ANCHORE_ADMIN_PASSWORD: "<ADMIN_PASS>"
-  ANCHORE_FEEDS_DB_PASSWORD: "<FEEDS_DB_PASS>"
-```
-
-```yaml
-useExistingSecrets: true
-
-feeds:
-  useExistingSecrets: true
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  ANCHORE_FEEDS_DB_NAME: anchore-feeds
+  ANCHORE_FEEDS_DB_USER: anchoreengine
+  ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
+  ANCHORE_FEEDS_DB_HOST: anchore-enterprise-feeds-db
+  ANCHORE_FEEDS_DB_PORT: 5432
+  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
+  # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
+  # (if applicable) ANCHORE_NVD_API_KEY: foobar,nvd1234
+  # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
+  # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
+  # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234
+  # (if applicable) ANCHORE_GEM_DB_HOST: anchorefeeds-gem-db.example.com:5432
 ```
 
 ### Ingress
@@ -392,19 +506,6 @@ reports:
 ui:
   service:
     type: NodePort
-```
-
-### SSO
-
-See [Anchore Enterprise SSO](https://docs.anchore.com/current/docs/configuration/sso/) documentation for information on configuring single sign-on.
-
-```yaml
-anchoreConfig:
-  user_authentication:
-    oauth:
-      enabled: true
-    # WARNING: You should not change hashed_paswords after a system has been initialized as it may cause a mismatch in existing passwords
-    hashed_passwords: true
 ```
 
 ### Prometheus Metrics
@@ -568,212 +669,222 @@ ui:
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
 
-### Installing on Openshift
-
-As of August 2, 2023, Helm does not offer native support for passing `null` values to child or dependency charts. For details, refer to this [Helm GitHub issue](https://github.com/helm/helm/issues/9027). Given that the `feeds` chart is a dependency, a workaround is to deploy it as a standalone chart and configure the `enterprise` deployment to point to this separate `feeds` deployment.
-
-Additionally, be aware that you'll need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled` or `feeds-db.chartEnabled`).
-
-For example:
-
-1. **deploy feeds chart as a standalone deployment:**
-
-    ```shell
-    helm install my-release anchore/feeds \
-      --set securityContext.fsGroup=null \
-      --set securityContext.runAsGroup=null \
-      --set securityContext.runAsUser=null \
-      --set feeds-db.primary.containerSecurityContext.enabled=false \
-      --set feeds-db.primary.podSecurityContext.enabled=false
-    ```
-
-1. **deploy the enterprise chart with appropriate values:**
-
-    ```shell
-    helm install anchore . \
-      --set securityContext.fsGroup=null \
-      --set securityContext.runAsGroup=null \
-      --set securityContext.runAsUser=null \
-      --set feeds.chartEnabled=false \
-      --set feeds.url=my-release-feeds \
-      --set postgresql.primary.containerSecurityContext.enabled=false \
-      --set postgresql.primary.podSecurityContext.enabled=false \
-      --set ui-redis.master.podSecurityContext.enabled=false \
-      --set ui-redis.master.containerSecurityContext.enabled=false
-    ```
-
-    > **Note:** disabling the containerSecurityContext and podSecurityContext may not be suitable for production. See [Redhat's documentation](https://docs.openshift.com/container-platform/4.13/authentication/managing-security-context-constraints.html#managing-pod-security-policies) on what may be suitable for production. For more information on the openshift.io/sa.scc.uid-range annotation, see the [openshift docs](https://docs.openshift.com/dedicated/authentication/managing-security-context-constraints.html#security-context-constraints-pre-allocated-values_configuring-internal-oauth)
-
-#### Example Openshift values file
-
-```yaml
-# NOTE: This is not a production ready values file for an openshift deployment.
-
-securityContext:
-  fsGroup: null
-  runAsGroup: null
-  runAsUser: null
-feeds:
-  chartEnabled: false
-  url: my-release-feeds
-postgresql:
-  primary:
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
-ui-redis:
-  master:
-    podSecurityContext:
-      enabled: false
-    containerSecurityContext:
-      enabled: false
-```
-
 ### Migrating to the Anchore Enterprise Helm Chart
 
 This guide provides steps for transitioning from an Anchore Engine Helm chart deployment to the updated Anchore Enterprise Helm chart, a necessary step for users planning to upgrade to Anchore Enterprise version v5.0.0 or later.
 
   > :warning: **Warning**: The values file used by the Anchore Enterprise Helm chart is different from the one used by the Anchore Engine Helm chart. Make sure to convert your existing values file accordingly.
 
-A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts) is available to automate the conversion of your Anchore Engine values file to the new Enterprise format. A usage 
-example is provided below.
+A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts) is available to automate the conversion of your Anchore Engine values file to the new Enterprise format. A usage example is provided below.
 
 #### Migration Prerequisites
 
-- **Anchore Version**: Ensure that your current deployment is running Anchore Enterprise version 4.9.0 or higher (but not v5.0.0+).
+- **Anchore Version**: Ensure that your current deployment is running Anchore Enterprise version 4.9.x (but not v5.0.0+). This is required to ensure that the migration script can properly convert your values file.
 
-- **PostgreSQL Version**: You need PostgreSQL version 13 or higher. For upgrading your existing PostgreSQL installation, refer to the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html). Database migration help is provided below.
+  > **Note:** Upgrade your [anchore-engine](https://github.com/anchore/anchore-charts/tree/main/stable/anchore-engine) chart deployment to `v1.28.0` or higher to ensure that you're running Anchore Enterprise v4.9.x.
+
+- **PostgreSQL Version**: You need PostgreSQL version 13 or higher. For upgrading your existing PostgreSQL installation, refer to the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html). Database migration help for helm managed PostgreSQL deployments is provided below.
+
   > **Note:** This chart deploys PostgreSQL 13 by default.
 
 - **Runtime Environment**: Docker or Podman must be installed on the machine where the migration will run.
 
-- **Existing Secrets**: If you are not currently using existing secrets, you will have to create them to be used for the new enterprise deployment, or you will have to update the secrets created manually. See the section on [Existing Secrets](#existing-secrets) for more information on what is required.
+#### Migration Rollback Strategy
+
+The migration process is designed to be non-destructive by utilizing a blue/green deployment strategy. If you encounter any issues during the migration process, you can roll back to your previous deployment by simply scaling your Anchore-Engine deployment back up.
+
+If you are using an external PostgreSQL database and were unable to use a blue/green deployment strategy for the migration, you will have to manually restore your database to the previous version using a backup that was taken prior to the migration. Then scale your Anchore-Engine deployment back up.
+
+See the [Migration Rollback Steps](#migration-rollback-steps) section for more details.
 
 #### Step-by-Step Migration Process
+
+1. **Upgrade Existing Anchore Engine Deployment**: Upgrade your existing Anchore Engine deployment to chart version 1.28.0 or higher. This will ensure that your deployment is running Anchore Enterprise v4.9.x.
+
+    ```shell
+    export NAMESPACE=anchore
+    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME> # Existing Engine release name
+    export VALUES_FILE_NAME=my-values-file.yaml  # Existing Engine chart values file
+
+    helm repo update
+    helm upgrade ${ENGINE_RELEASE} -n ${NAMESPACE} anchore/anchore-engine -f ${VALUES_FILE_NAME} --version=^1.28.0
+    ```
 
 1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format. This command mounts a local volume to persistently store the output files, and it mounts the input values file within the container for conversion. It's imperative to review both the output and the new [values file](values.yaml) before moving forward.
 
     ```shell
     export VALUES_FILE_NAME=my-values-file.yaml  # Existing Engine chart values file
+
     docker run -v ${PWD}:/tmp -v ${PWD}/${VALUES_FILE_NAME}:/app/${VALUES_FILE_NAME} docker.io/anchore/enterprise-helm-migrator:latest -e /app/${VALUES_FILE_NAME} -d /tmp/output
     ```
-
-:rotating_light: For Anchore enterprise ">= 4.9.0, < 5.0.0", you will need to additionally set the following values in your values file to use the v1 api of Anchore. These will need to be removed once you upgrade to v5.0.0+
-```
-api:
-  service:
-    apiVersion: v1
-notifications:
-  service:
-    apiVersion: v1
-reports:
-  service:
-    apiVersion: v1
-rbacManager:
-  service:
-    apiVersion: v1
-```
 
 #### If Using an External PostgreSQL Database
 
 1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
 
     ```shell
-    export ENGINE_RELEASE=my-engine-release
     export NAMESPACE=anchore
+    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
+
     kubectl scale deployment --replicas=0 -l app=${ENGINE_RELEASE}-anchore-engine -n ${NAMESPACE}
     ```
-1. **Perform database upgrade**: Upgrade your external database, we suggest you make a backup first. If using a managed cloud database service refer to their documentation.
+
+1. **Perform database backup**: Backup your external database. See the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/backup.html) for guidance. If using a managed cloud database service refer to their documentation.
+
+1. **Perform database upgrade**: Upgrade your external database. See the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html) for guidance. If using a managed cloud database service refer to their documentation.
+
+    > Tip: If you're able to start a new database instance using a backup, you can use that instance for your upgrade & Enterprise deployment. This allows you to perform the migration without modifying your original database. Using a blue/green deployment strategy for the migration makes for very simple rollbacks if any errors are encountered during the migration.
+
+1. **(Optional) Update Database Hostname**: Manually update the database hostname in your values file and/or your existing secrets to the hostname of your newly created database for the Enterprise chart. This is only necessary if you're using the blue/green deployment strategy for the database upgrade.
 
 1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
 
-    ```shell
-    export ENTERPRISE_RELEASE=my-enterprise-release
-    export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml
-    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true anchore/enterprise
-    ```
+    >**Note:** If you are **not using existing secrets**, you will need to uncomment the `ADMIN_PASS` and `SET_ADMIN_PASS` export commands below. This is needed to ensure that your Enterprise deployment stores the correct Anchore admin password in the secret.
 
-    > **Note:** The `upgradeJob.force` flag is required to force the upgrade job to run upon installation. This value is not needed for future upgrades. Remember to unset it if passing it in via the command line or helm may persist the value.
+    ```shell
+    export NAMESPACE=anchore
+    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
+    export ENTERPRISE_VALUES_FILE=${PWD}/output/enterprise.my-values-file.yaml
+
+    # If you are not using existing secrets, uncomment the following export commands
+    #
+    # export ADMIN_PASS=$(kubectl get secret -n ${NAMESPACE} ${ENGINE_RELEASE}-anchore-engine-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 -d -)
+    # export SET_ADMIN_PASS=("--set" "anchoreConfig.default_admin_password=${ADMIN_PASS}")
+
+    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} ${SET_ADMIN_PASS[@]} -f ${ENTERPRISE_VALUES_FILE} anchore/enterprise --version=1.0.0
+    ```
 
 1. **Verification and Cleanup**: After confirming that the Anchore Enterprise deployment is functional, you can safely uninstall the old Anchore Engine deployment.
 
     ```shell
+    export NAMESPACE=anchore
+    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
+
     helm uninstall ${ENGINE_RELEASE} -n ${NAMESPACE}
     ```
+
+    You may now have old engine persistent volume claims to delete. Delete these only when you are confident with the state of your new Enterprise Chart deployment.
+
+      ```shell
+      export NAMESPACE=anchore
+      export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
+
+      kubectl get pvc -n ${NAMESPACE}
+      kubectl delete pvc ${ENGINE_RELEASE}-anchore-engine-enterprise-feeds -n ${NAMESPACE}
 
 #### If Using the Dependent PostgreSQL Chart
 
 1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
 
     ```shell
-    export ENGINE_RELEASE=my-engine-release
     export NAMESPACE=anchore
+    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
+
     kubectl scale deployment --replicas=0 -l app=${ENGINE_RELEASE}-anchore-engine -n ${NAMESPACE}
     ```
 
 1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
 
-   **NOTE**: You will have to migrate data from the old database to the new one after the chart is installed. The enterprise chart contains a helper pod to aid with this, to enable this pod, use the following in your helm install command line
-   ```shell
-   --set startMigrationPod=true
-   --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine
-   ```
-   As an example with the above commands:
-   ```shell
-   export ENGINE_RELEASE=my-engine-release
-   export ENTERPRISE_RELEASE=my-enterprise-release
-   export VALUES_FILE_NAME=${PWD}/output/my-values-file.yaml  # The converted file
-   helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} --set upgradeJob.force=true --set startMigrationPod=true anchore/enterprise --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine
-   ```
+    >**Note:** You will have to migrate data from the old database to the new one after the chart is installed. The enterprise chart contains a helper pod to aid with this. This helper pod is enabled using the `startMigrationPod=true` & `migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine` flags in the following command.
+    >
+    > If you **are using existing secrets**, you should ignore setting the `ADMIN_PASS` and `SET_ADMIN_PASS` environment variables.
+
+    ```shell
+    export NAMESPACE=anchore
+    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
+    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
+    export ENTERPRISE_VALUES_FILE=${PWD}/output/enterprise.my-values-file.yaml  # The converted file
+
+    # If you are using existing secrets, ignore the following export commands
+    #
+    export ADMIN_PASS=$(kubectl get secret -n ${NAMESPACE} ${ENGINE_RELEASE}-anchore-engine-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 -d -)
+    export SET_ADMIN_PASS=("--set" "anchoreConfig.default_admin_password=${ADMIN_PASS}")
+
+    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=true --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine ${SET_ADMIN_PASS[@]} anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=1.0.0
+    ```
 
 1. **Scale Down Anchore Enterprise**: Before migrating the database, scale down the new Anchore Enterprise deployment to zero replicas.
 
-   ```shell
-   kubectl scale deployment --replicas=0 -l app.kubernetes.io/name=${ENTERPRISE_RELEASE}-enterprise
-   ```
-
-1. **Database Preparation**: Replace the existing Anchore database with a new database in PostgreSQL 13.
-
-    1. If you set startMigrationPod=true as per the step above, you can exec into the migrator pod to run the commands.
     ```shell
-    kubectl -n ${NAMESPACE} exec -it ${ENTERPRISE_RELEASE}-enterprise-migrate-db
-    PGPASSWORD=${NEW_DB_PASSWORD} dropdb -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}; PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST}  -U ${NEW_DB_USERNAME} -c "CREATE DATABASE ${NEW_DB_NAME}" postgres
+    export NAMESPACE=anchore
+    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
+
+    kubectl scale deployment -n ${NAMESPACE} --replicas=0 -l app.kubernetes.io/instance=${ENTERPRISE_RELEASE}
     ```
 
-  1. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
-      1. If you are using the included migration helper pod, the exec to that pod and run the following command:
-      ```shell
-      kubectl -n ${NAMESPACE} exec -it ${ENTEPRRISE_RELEASE}-enterprise-migrate-db
-      PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
-      ```
-      2. If you are using your own pod then follow these steps
-          1. Gather old DB parameters from the secret ${OLD_ENGINE_RELEASE}-anchore-engine
-          2. Gather new DB parameters from the new secret ${NEW_ENTERPRISE_RELEASE}-enterprise
-          3. Start a migration pod that has all the psql binaries required e.g. docker.io/postgresql:13
-          4. Export all the required environment variables
-          ```shell
-          PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
-          ```
+1. **Database Preparation**: Replace the existing Anchore database schema with a new database schema in the PostgreSQL 13 deployment. If you set `startMigrationPod=true` as per the step above, you can exec into the migrator pod using the following commands:
+
+    ```shell
+    export NAMESPACE=anchore
+    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
+
+    kubectl -n ${NAMESPACE} exec -it ${ENTERPRISE_RELEASE}-enterprise-migrate-db -- /bin/bash -c 'PGPASSWORD=${NEW_DB_PASSWORD} dropdb -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}; PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST}  -U ${NEW_DB_USERNAME} -c "CREATE DATABASE ${NEW_DB_NAME}" postgres'
+    ```
+
+1. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
+
+    - If you are using the migration helper pod, exec into that pod and perform the database migration using following commands:
+
+        ```shell
+        export NAMESPACE=anchore
+        export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
+
+        kubectl -n ${NAMESPACE} exec -it ${ENTERPRISE_RELEASE}-enterprise-migrate-db -- /bin/bash -c 'PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}'
+        ```
+
+    - If you are using your own pod then follow these steps
+
+         1. Gather old DB parameters from the secret ${OLD_ENGINE_RELEASE}-anchore-engine
+         1. Gather new DB parameters from the new secret ${NEW_ENTERPRISE_RELEASE}-enterprise
+         1. Start a migration pod that has all the psql binaries required e.g. docker.io/postgresql:13
+         1. Export all the required environment variables
+
+        ```shell
+        PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
+        ```
 
 1. **Upgrade Anchore Enterprise**: After migrating the data, upgrade the Anchore Enterprise Helm deployment.
 
     ```shell
-    helm upgrade ${ENTERPRISE_RELEASE} -n ${NAMESPACE} -f ${VALUES_FILE_NAME} anchore/enterprise
+    export NAMESPACE=anchore
+    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
+    export ENTERPRISE_VALUES_FILE=${PWD}/output/enterprise.my-values-file.yaml  # The converted file
+
+    helm upgrade ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=false anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=1.0.0
     ```
 
 1. **Final Verification and Cleanup**: After ensuring the new deployment is operational, uninstall the old Anchore Engine deployment.
 
     ```shell
+    export NAMESPACE=anchore
+    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
+
     helm uninstall ${ENGINE_RELEASE} -n ${NAMESPACE}
     ```
-    You may now have old engine persistent volume claims to delete. Delete these only when you are confident with the new Enterprise Chart deployment.
+
+    You may now have old engine persistent volume claims to delete. Delete these only when you are confident with the state of your new Enterprise Chart deployment.
+
     ```shell
-    kubectl get pvc
-    kubectl delete pvc ${ENGINE_RELEASE}-anchore-engine-enterprise-feeds
-    kubectl delete pvc ${ENGINE_RELEASE}-anchore-feeds-db
-    kubectl delete pvc ${ENGINE_RELEASE}-postgresql
+    export NAMESPACE=anchore
+    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
+
+    kubectl get pvc -n ${NAMESPACE}
+    kubectl delete pvc ${ENGINE_RELEASE}-anchore-engine-enterprise-feeds -n ${NAMESPACE}
+    kubectl delete pvc ${ENGINE_RELEASE}-anchore-feeds-db -n ${NAMESPACE}
+    kubectl delete pvc ${ENGINE_RELEASE}-postgresql -n ${NAMESPACE}
     ```
+
+#### Migration Rollback Steps
+
+If you encounter any issues during the migration process, a rollback can be performed by following these steps:
+
+1. **Uninstall Anchore Enterprise chart deployment**
+1. **Delete values file created by the migration script**
+1. **Delete existing secrets created for the Enterprise chart**
+1. **Delete the Anchore Enterprise deployment database**
+1. **(Optional)Restore the Anchore-Engine deployment database**
+1. **Scale Anchore Engine chart deployment back up**
+1. **Attempt migration process again**
 
 ## Parameters
 
@@ -783,6 +894,7 @@ rbacManager:
 | ------------------------- | --------------------------------------- | ----- |
 | `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
 | `global.nameOverride`     | overrides the name set on resources     | `""`  |
+
 
 ### Common Resource Parameters
 
@@ -825,6 +937,7 @@ rbacManager:
 | `doSourceAtEntry.filePaths`           | List of file paths to `source` before starting Anchore services                       | `[]`                                  |
 | `configOverride`                      | Allows for overriding the default Anchore configuration file                          | `""`                                  |
 | `scripts`                             | Collection of helper scripts usable in all anchore enterprise pods                    | `{}`                                  |
+
 
 ### Anchore Configuration Parameters
 
@@ -920,6 +1033,7 @@ rbacManager:
 | `anchoreConfig.ui.dbUser`                                                  | allows overriding and separation of the ui database user.                                                                        | `""`               |
 | `anchoreConfig.ui.dbPassword`                                              | allows overriding and separation of the ui database user authentication                                                          | `""`               |
 
+
 ### Anchore API k8s Deployment Parameters
 
 | Name                      | Description                                                                      | Value       |
@@ -931,7 +1045,7 @@ rbacManager:
 | `api.service.annotations` | Annotations for Anchore API service                                              | `{}`        |
 | `api.service.labels`      | Labels for Anchore API service                                                   | `{}`        |
 | `api.service.nodePort`    | nodePort for Anchore API service                                                 | `""`        |
-| `api.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `api.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
 | `api.extraEnv`            | Set extra environment variables for Anchore API pods                             | `[]`        |
 | `api.resources`           | Resource requests and limits for Anchore API pods                                | `{}`        |
 | `api.labels`              | Labels for Anchore API pods                                                      | `{}`        |
@@ -940,6 +1054,7 @@ rbacManager:
 | `api.tolerations`         | Tolerations for Anchore API pod assignment                                       | `[]`        |
 | `api.affinity`            | Affinity for Anchore API pod assignment                                          | `{}`        |
 | `api.serviceAccountName`  | Service account name for Anchore API pods                                        | `""`        |
+
 
 ### Anchore Analyzer k8s Deployment Parameters
 
@@ -955,6 +1070,7 @@ rbacManager:
 | `analyzer.tolerations`        | Tolerations for Anchore Analyzer pod assignment                       | `[]`   |
 | `analyzer.affinity`           | Affinity for Anchore Analyzer pod assignment                          | `{}`   |
 | `analyzer.serviceAccountName` | Service account name for Anchore API pods                             | `""`   |
+
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -975,6 +1091,7 @@ rbacManager:
 | `catalog.affinity`            | Affinity for Anchore Catalog pod assignment              | `{}`        |
 | `catalog.serviceAccountName`  | Service account name for Anchore Catalog pods            | `""`        |
 
+
 ### Anchore Feeds Chart Parameters
 
 | Name                       | Description                                                                                    | Value   |
@@ -982,7 +1099,8 @@ rbacManager:
 | `feeds.chartEnabled`       | Enable the Anchore Feeds chart                                                                 | `true`  |
 | `feeds.standalone`         | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
 | `feeds.url`                | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
-| `feeds.service.apiVersion` | the apiVersion for the service when communicating with Anchore Feeds                           | `v2`    |
+| `feeds.service.apiVersion` | the apiVersion for the service when communicating with Anchore Feeds                           | `v1`    |
+
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -1003,6 +1121,7 @@ rbacManager:
 | `policyEngine.affinity`            | Affinity for Anchore Policy Engine pod assignment              | `{}`        |
 | `policyEngine.serviceAccountName`  | Service account name for Anchore Policy Engine pods            | `""`        |
 
+
 ### Anchore Simple Queue Parameters
 
 | Name                              | Description                                                   | Value       |
@@ -1022,6 +1141,7 @@ rbacManager:
 | `simpleQueue.affinity`            | Affinity for Anchore Simple Queue pod assignment              | `{}`        |
 | `simpleQueue.serviceAccountName`  | Service account name for Anchore Simple Queue pods            | `""`        |
 
+
 ### Anchore Notifications Parameters
 
 | Name                                | Description                                                                      | Value       |
@@ -1032,7 +1152,7 @@ rbacManager:
 | `notifications.service.annotations` | Annotations for Anchore Notifications service                                    | `{}`        |
 | `notifications.service.labels`      | Labels for Anchore Notifications service                                         | `{}`        |
 | `notifications.service.nodePort`    | nodePort for Anchore Notifications service                                       | `""`        |
-| `notifications.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `notifications.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
 | `notifications.extraEnv`            | Set extra environment variables for Anchore Notifications pods                   | `[]`        |
 | `notifications.resources`           | Resource requests and limits for Anchore Notifications pods                      | `{}`        |
 | `notifications.labels`              | Labels for Anchore Notifications pods                                            | `{}`        |
@@ -1041,6 +1161,7 @@ rbacManager:
 | `notifications.tolerations`         | Tolerations for Anchore Notifications pod assignment                             | `[]`        |
 | `notifications.affinity`            | Affinity for Anchore Notifications pod assignment                                | `{}`        |
 | `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods                              | `""`        |
+
 
 ### Anchore Reports Parameters
 
@@ -1052,7 +1173,7 @@ rbacManager:
 | `reports.service.annotations` | Annotations for Anchore Reports service                                          | `{}`        |
 | `reports.service.labels`      | Labels for Anchore Reports service                                               | `{}`        |
 | `reports.service.nodePort`    | nodePort for Anchore Reports service                                             | `""`        |
-| `reports.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `reports.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
 | `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods                         | `[]`        |
 | `reports.resources`           | Resource requests and limits for Anchore Reports pods                            | `{}`        |
 | `reports.labels`              | Labels for Anchore Reports pods                                                  | `{}`        |
@@ -1062,12 +1183,14 @@ rbacManager:
 | `reports.affinity`            | Affinity for Anchore Reports pod assignment                                      | `{}`        |
 | `reports.serviceAccountName`  | Service account name for Anchore Reports pods                                    | `""`        |
 
+
 ### Anchore RBAC Authentication Parameters
 
 | Name                 | Description                                                                | Value |
 | -------------------- | -------------------------------------------------------------------------- | ----- |
 | `rbacAuth.extraEnv`  | Set extra environment variables for Anchore RBAC Authentication containers | `[]`  |
 | `rbacAuth.resources` | Resource requests and limits for Anchore RBAC Authentication containers    | `{}`  |
+
 
 ### Anchore RBAC Manager Parameters
 
@@ -1079,7 +1202,7 @@ rbacManager:
 | `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                                     | `{}`        |
 | `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                                          | `{}`        |
 | `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                                        | `""`        |
-| `rbacManager.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v2`        |
+| `rbacManager.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
 | `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods                    | `[]`        |
 | `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods                       | `{}`        |
 | `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                                             | `{}`        |
@@ -1088,6 +1211,7 @@ rbacManager:
 | `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment                              | `[]`        |
 | `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment                                 | `{}`        |
 | `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods                               | `""`        |
+
 
 ### Anchore UI Parameters
 
@@ -1112,6 +1236,7 @@ rbacManager:
 | `ui.affinity`                | Affinity for Anchore ui pod assignment                                        | `{}`                                     |
 | `ui.serviceAccountName`      | Service account name for Anchore UI pods                                      | `""`                                     |
 
+
 ### Anchore Upgrade Job Parameters
 
 | Name                                 | Description                                                                                                                                     | Value   |
@@ -1128,6 +1253,7 @@ rbacManager:
 | `upgradeJob.resources`               | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`    |
 | `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
 | `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
+
 
 ### Ingress Parameters
 
@@ -1147,6 +1273,7 @@ rbacManager:
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                              |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                           |
 
+
 ### Google CloudSQL DB Parameters
 
 | Name                             | Description                                                                    | Value                                     |
@@ -1160,6 +1287,7 @@ rbacManager:
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
+
 ### Anchore UI Redis Parameters
 
 | Name                                  | Description                                                                                            | Value               |
@@ -1169,6 +1297,7 @@ rbacManager:
 | `ui-redis.auth.password`              | Password used for connecting to Redis                                                                  | `anchore-redis,123` |
 | `ui-redis.architecture`               | Redis deployment architecture                                                                          | `standalone`        |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                                    | `false`             |
+
 
 ### Anchore Database Parameters
 
@@ -1189,9 +1318,10 @@ rbacManager:
 
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
 
-- **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention.
-- **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a modification that may require adjustments to your values file.
+- **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
+- **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
+- **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-### v0.1.x
+### v0.x.x
 
 - This is a pre-release version of the Anchore Enterprise Helm chart and is not recommended for production deployments.

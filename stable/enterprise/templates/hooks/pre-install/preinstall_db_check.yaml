@@ -1,0 +1,121 @@
+{{- if not .Values.postgresql.chartEnabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-db-check" (include "enterprise.fullname" .) }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name:
+      labels: {{- include "enterprise.common.labels" . | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" . | nindent 8 }}
+    spec:
+      {{- include "enterprise.common.podSpec" . | indent 6 }}
+      restartPolicy: Never
+      volumes:
+      {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+      {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - name: {{ .Values.cloudsql.serviceAccSecretName }}
+          secret:
+            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        - name: check-enterprise-db
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+          {{- if .Values.useExistingSecrets }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.existingSecretName }}
+          {{- end }}
+          {{- if or .Values.anchoreConfig.database.ssl (not .Values.useExistingSecrets) }}
+          env:
+          {{- if not .Values.useExistingSecrets }}
+            - name: ANCHORE_DB_USER
+              value: {{ .Values.postgresql.auth.username | quote }}
+            - name: ANCHORE_DB_PASSWORD
+              value: {{ .Values.postgresql.auth.password | quote }}
+            - name: ANCHORE_DB_HOST
+              value: {{ .Values.postgresql.externalEndpoint | quote }}
+            - name: ANCHORE_DB_PORT
+              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+            - name: ANCHORE_DB_NAME
+              value: {{ .Values.postgresql.auth.database | quote }}
+          {{- end }}
+          {{- if .Values.anchoreConfig.database.ssl }}
+            - name: ANCHORE_DB_SSL_MODE
+              value: {{ .Values.anchoreConfig.database.sslMode | quote }}
+            - name: ANCHORE_DB_SSL_ROOT_CERT
+              value: {{ .Values.anchoreConfig.database.sslRootCertFileName | quote }}
+          {{- end }}
+          {{- end }}
+          volumeMounts:
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.certStoreSecretName }}
+            - name: certs
+              mountPath: /home/anchore/certs/
+              readOnly: true
+          {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              timeout=600  # 10 minutes in seconds
+              start_time=$(date +%s)
+
+              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+
+              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+              fi
+
+              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_DB_SSL_ROOT_CERT}
+              fi
+
+              while true; do
+                current_time=$(date +%s)
+                elapsed_time=$((current_time - start_time))
+                
+                if [[ $elapsed_time -ge $timeout ]]; then
+                  echo "Database connection timeout"
+                  exit 1
+                fi
+
+                output=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1)
+
+                if [ $? -eq 0 ]; then
+                  echo "Database is ready"
+                  exit 0
+                elif [[ "$output" == *"Enterprise requires Postgres version 13.0 or higher"* ]]; then
+                  echo "Error: Enterprise requires Postgres version 13.0 or higher"
+                  exit 1
+                else
+                  echo "Database is not ready yet, sleeping 10 seconds..."
+                  sleep 10
+                fi
+  
+              done
+
+{{- end -}}
