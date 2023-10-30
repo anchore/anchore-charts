@@ -477,8 +477,8 @@ anchoreConfig:
         name: db
         config: {}
 
-    ## @param anchoreConfig.catalog.runtime_inventory.image_ttl_days TTL for images in the inventory report working set
-    ## @param anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite disables the image_ttl cycle timer.
+    ## @param anchoreConfig.catalog.runtime_inventory.image_ttl_days TTL for runtime inventory.
+    ## @param anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite force runtime inventory to be overwritten upon every update for that reported context.
     ## When `image_ingest_overwrite=true` upon ingestion of inventory, removes anything previously reported by the namespace and only keep the latest inventory posted.
     ## This new config value is used instead of setting `image_ttl_days=-1`
     ## ref: https://docs.anchore.com/current/docs/configuration/runtime_inventory/
@@ -656,7 +656,7 @@ api:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v2
+    apiVersion: v1
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -809,7 +809,7 @@ feeds:
   ## @param feeds.service.apiVersion the apiVersion for the service when communicating with Anchore Feeds
   ##
   service:
-    apiVersion: v2
+    apiVersion: v1
 
 
 ###########################################################
@@ -939,7 +939,7 @@ notifications:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v2
+    apiVersion: v1
 
   ## @param notifications.extraEnv Set extra environment variables for Anchore Notifications pods
   ##
@@ -994,7 +994,7 @@ reports:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v2
+    apiVersion: v1
 
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
@@ -1061,7 +1061,7 @@ rbacManager:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v2
+    apiVersion: v1
 
   ## @param rbacManager.extraEnv Set extra environment variables for Anchore RBAC Manager pods
   ##

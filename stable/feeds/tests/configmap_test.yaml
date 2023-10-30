@@ -29,7 +29,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
-          pattern: http://test-release-feeds:8448/v2/$
+          pattern: http://test-release-feeds:8448/v1/$
 
   - it: should render grype url correctly if .Values.url is set
     template: envvars_configmap.yaml
@@ -41,11 +41,11 @@ tests:
           path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
           pattern: https://something/v1/$
 
-  - it: should render grype url correctly if .Values.url is set to a v2 url
+  - it: should render grype url correctly if .Values.url is set to a v1 url
     template: envvars_configmap.yaml
     set:
-      url: https://something/v2/my-grype/something
+      url: https://something/v1/my-grype/something
     asserts:
       - matchRegex:
           path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
-          pattern: https://something/v2/$
+          pattern: https://something/v1/$
