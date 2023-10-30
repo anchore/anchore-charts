@@ -173,7 +173,7 @@ should render the configmaps:
       ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED: "true"
       ANCHORE_FEEDS_DRIVER_UBUNTU_URL: https://git.launchpad.net/ubuntu-cve-tracker
       ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED: "true"
-      ANCHORE_FEEDS_EXTERNAL_URL: http://test-release-feeds:8448/v2/
+      ANCHORE_FEEDS_EXTERNAL_URL: http://test-release-feeds:8448/v1/
       ANCHORE_FEEDS_GRYPEDB_PERSIST_WORKSPACE: "true"
       ANCHORE_FEEDS_GRYPEDB_PRELOAD_ENABLED: "true"
       ANCHORE_FEEDS_GRYPEDB_PRELOAD_PATH: /preload/grype-db-workspace.tar.gz
