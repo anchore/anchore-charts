@@ -100,7 +100,7 @@ service:
   annotations: {}
   labels: {}
   nodePort: ""
-  apiVersion: v2
+  apiVersion: v1
 
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space for image analysis
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions
