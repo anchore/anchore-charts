@@ -18,7 +18,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v4.9.3
+image: docker.io/anchore/enterprise:v5.0.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -469,6 +469,8 @@ anchoreConfig:
     ## ref: https://docs.anchore.com/current/docs/configuration/storage/object_store/
     ##
     object_store:
+      # Ensures the data read for the object store has the same digest as what was written. Set to false ONLY for debugging and other special cases.
+      verify_content_digests: true
       compression:
         enabled: true
         min_size_kbytes: 100
@@ -477,15 +479,15 @@ anchoreConfig:
         name: db
         config: {}
 
-    ## @param anchoreConfig.catalog.runtime_inventory.image_ttl_days TTL for runtime inventory.
-    ## @param anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite force runtime inventory to be overwritten upon every update for that reported context.
-    ## When `image_ingest_overwrite=true` upon ingestion of inventory, removes anything previously reported by the namespace and only keep the latest inventory posted.
+    ## @param anchoreConfig.catalog.runtime_inventory.inventory_ttl_days TTL for images in the inventory report working set
+    ## @param anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite disables the inventory_ttl cycle timer.
+    ## When `inventory_ingest_overwrite=true` upon ingestion of inventory, removes anything previously reported by the namespace and only keep the latest inventory posted.
     ## This new config value is used instead of setting `image_ttl_days=-1`
     ## ref: https://docs.anchore.com/current/docs/configuration/runtime_inventory/
     ##
     runtime_inventory:
-      image_ttl_days: 120
-      image_ingest_overwrite: false
+      inventory_ttl_days: 120
+      inventory_ingest_overwrite: false
 
     ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
     ##
@@ -519,6 +521,11 @@ anchoreConfig:
     ## ref: https://docs.anchore.com/current/docs/using/api_usage/reports/
     ##
     enable_graphiql: true
+
+    ## @param anchoreConfig.reports.async_execution_timeout Configure how long a scheduled query must be running for before it is considered timed out
+    ## This may need to be adjusted if the system has large amounts of data and reports are being prematurely timed out.
+    ## The value should be a number followed by "w", "d", or "h" to represent weeks, days or hours
+    async_execution_timeout: 48h
 
   reports_worker:
     ## @param anchoreConfig.reports_worker.enable_data_ingress Enable periodically syncing data into the Anchore Reports Service
@@ -647,7 +654,6 @@ api:
   ## @param api.service.annotations Annotations for Anchore API service
   ## @param api.service.labels Labels for Anchore API service
   ## @param api.service.nodePort nodePort for Anchore API service
-  ## @param api.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -656,7 +662,6 @@ api:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v1
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -806,12 +811,6 @@ feeds:
   ##
   url: ""
 
-  ## @param feeds.service.apiVersion the apiVersion for the service when communicating with Anchore Feeds
-  ##
-  service:
-    apiVersion: v1
-
-
 ###########################################################
 ## @section Anchore Policy Engine k8s Deployment Parameters
 ###########################################################
@@ -931,7 +930,6 @@ notifications:
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
   ## @param notifications.service.labels Labels for Anchore Notifications service
   ## @param notifications.service.nodePort nodePort for Anchore Notifications service
-  ## @param notifications.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -939,7 +937,6 @@ notifications:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v1
 
   ## @param notifications.extraEnv Set extra environment variables for Anchore Notifications pods
   ##
@@ -986,7 +983,6 @@ reports:
   ## @param reports.service.annotations Annotations for Anchore Reports service
   ## @param reports.service.labels Labels for Anchore Reports service
   ## @param reports.service.nodePort nodePort for Anchore Reports service
-  ## @param reports.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -994,7 +990,6 @@ reports:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v1
 
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
@@ -1053,7 +1048,6 @@ rbacManager:
   ## @param rbacManager.service.annotations Annotations for Anchore RBAC Manager service
   ## @param rbacManager.service.labels Labels for Anchore RBAC Manager service
   ## @param rbacManager.service.nodePort nodePort for Anchore RBAC Manager service
-  ## @param rbacManager.service.apiVersion apiVersion for Anchore UI service to use when reaching out to the enterprise api
   ##
   service:
     type: ClusterIP
@@ -1061,7 +1055,6 @@ rbacManager:
     annotations: {}
     labels: {}
     nodePort: ""
-    apiVersion: v1
 
   ## @param rbacManager.extraEnv Set extra environment variables for Anchore RBAC Manager pods
   ##
@@ -1101,7 +1094,7 @@ rbacManager:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v4.9.0
+  image: docker.io/anchore/enterprise-ui:v5.0.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1254,7 +1247,6 @@ ingress:
   ## @param ingress.apiPaths The path used for accessing the Anchore API
   ##
   apiPaths:
-    - /v1/
     - /v2/
     - /version/
 
@@ -1274,7 +1266,6 @@ ingress:
   ## Exposing the feeds API is for special cases only, use /v2/feeds for ingress.feedsPath
   ##
   feedsPaths:
-    - /v1/feeds/
     - /v2/feeds/
 
   ## @param ingress.reportsHosts List of custom hostnames for the Anchore Reports API
@@ -1285,7 +1276,6 @@ ingress:
   ## Exposing the reports API enables the GraphQL interface, use /v2/reports/graphql for ingress.reportsPath
   ##
   reportsPaths:
-    - /v1/reports/
     - /v2/reports/
 
   ## @param ingress.tls Configure tls for the ingress resource
