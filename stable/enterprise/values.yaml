@@ -479,8 +479,8 @@ anchoreConfig:
         name: db
         config: {}
 
-    ## @param anchoreConfig.catalog.runtime_inventory.inventory_ttl_days TTL for images in the inventory report working set
-    ## @param anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite disables the inventory_ttl cycle timer.
+    ## @param anchoreConfig.catalog.runtime_inventory.inventory_ttl_days TTL for runtime inventory.
+    ## @param anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite force runtime inventory to be overwritten upon every update for that reported context.
     ## When `inventory_ingest_overwrite=true` upon ingestion of inventory, removes anything previously reported by the namespace and only keep the latest inventory posted.
     ## This new config value is used instead of setting `image_ttl_days=-1`
     ## ref: https://docs.anchore.com/current/docs/configuration/runtime_inventory/
