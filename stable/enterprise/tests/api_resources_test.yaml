@@ -306,7 +306,7 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: policy-bundle-volume
-            mountPath: /anchore_service/bundles/
+            mountPath: /anchore_service/policies/
         count: 1
         any: true
 

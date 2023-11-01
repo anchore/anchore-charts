@@ -314,7 +314,7 @@ anchoreConfig:
     certSecretCertFileName: ""
 
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
-  ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/bundles of all Anchore services
+  ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
   ## ref: https://docs.anchore.com/current/docs/overview/concepts/policy/bundles/
   ##
   policyBundles: {}
