@@ -39,13 +39,13 @@ Return a URL for the external feeds service
 */}}
 {{- define "feeds.setGrypeProviderURL" -}}
 {{- $grypeProviderFeedsExternalURL := "" }}
-{{- $regexSearchPattern := (printf "/%s.*$" .Values.service.apiVersion | toString) }}
+{{- $regexSearchPattern := (printf "/v2.*$" | toString) }}
 {{- if .Values.url }}
   {{- $urlPathSuffix := (default "" (regexFind $regexSearchPattern .Values.url) ) }}
   {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.url) }}
-  {{- $grypeProviderFeedsExternalURL = (printf "%s/%s/" $anchoreFeedsHost .Values.service.apiVersion) }}
+  {{- $grypeProviderFeedsExternalURL = (printf "%s/v2/" $anchoreFeedsHost) }}
 {{- else }}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/%s/" (include "feeds.setProtocol" .) (include "feeds.fullname" .) (.Values.service.port | toString) .Values.service.apiVersion ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/v2/" (include "feeds.setProtocol" .) (include "feeds.fullname" .) (.Values.service.port | toString)) -}}
 {{- end }}
 {{- print $grypeProviderFeedsExternalURL }}
 {{- end -}}
