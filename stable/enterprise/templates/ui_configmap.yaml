@@ -26,11 +26,11 @@ data:
       admin: {{ .admin }}
       standard: {{ .standard }}
   {{- end }}
-    engine_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/{{- default "v2" .Values.api.service.apiVersion -}}'
-    reports_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.reports.service.port -}}/{{- default "v2" .Values.reports.service.apiVersion -}}'
-    notifications_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.notifications.fullname" . -}}:{{- .Values.notifications.service.port -}}/{{- default "v2" .Values.notifications.service.apiVersion -}}'
-    rbac_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.rbacManager.fullname" . -}}:{{- .Values.rbacManager.service.port -}}/{{- default "v2" .Values.rbacManager.service.apiVersion -}}'
-    enterprise_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
+    engine_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/{{- .Values.api.service.apiVersion -}}'
+    reports_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.reports.service.port -}}/{{- .Values.reports.service.apiVersion -}}'
+    notifications_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.notifications.fullname" . -}}:{{- .Values.notifications.service.port -}}/{{- .Values.notifications.service.apiVersion -}}'
+    rbac_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.rbacManager.fullname" . -}}:{{- .Values.rbacManager.service.port -}}/{{- .Values.rbacManager.service.apiVersion -}}'
+    enterprise_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/{{- .Values.api.service.apiVersion -}}'
     # redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable
     # appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable
     license_path: '/home/anchore/'
