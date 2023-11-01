@@ -689,6 +689,45 @@ A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts
 
 - **Runtime Environment**: Docker or Podman must be installed on the machine where the migration will run.
 
+### Expected Changes to Your Deployment
+
+The Anchore Enterprise Helm chart introduces several changes to the deployment compared to the Anchore Engine chart deployment. These changes are outlined below.
+
+#### Service Names
+
+- All service names have been updated to follow the Enterprise naming convention:
+  - `<RELEASE_NAME>-anchore-engine-api` -> `<RELEASE_NAME>-enterprise-api`
+  - `<RELEASE_NAME>-anchore-engine-catalog` -> `<RELEASE_NAME>-enterprise-catalog`
+  - `<RELEASE_NAME>-anchore-engine-enterprise-feeds` -> `<RELEASE_NAME>-feeds`
+  - `<RELEASE_NAME>-anchore-engine-enterprise-notifications` -> `<RELEASE_NAME>-enterprise-notifications`
+  - `<RELEASE_NAME>-anchore-engine-enterprise-rbac` -> `<RELEASE_NAME>-enterprise-rbac-manager`
+  - `<RELEASE_NAME>-anchore-engine-enterprise-reports` -> `<RELEASE_NAME>-enterprise-reports`
+  - `<RELEASE_NAME>-anchore-engine-enterprise-ui` -> `<RELEASE_NAME>-enterprise-ui`
+  - `<RELEASE_NAME>-anchore-engine-policy` -> `<RELEASE_NAME>-enterprise-policy`
+  - `<RELEASE_NAME>-anchore-engine-simplequeue` -> `<RELEASE_NAME>-enterprise-simplequeue`
+
+#### Labels, Annotations & Selectors
+
+- Standard Kubernetes labels and annotations replace the custom ones used in Anchore Engine:
+  - `component` -> `app.kubernetes.io/component`
+  - `release` -> `app.kubernetes.io/instance`
+  - `app` -> `app.kubernetes.io/name`
+  - `chart` -> `helm.sh/chart`
+
+#### Dependent Services
+
+- The Feeds service is now deployed as a dependent chart, it can be configured using the [Feeds Values](https://github.com/anchore/anchore-charts/blob/main/stable/feeds/values.yaml)
+- The bundled PostgreSQL chart has been replaced with the Bitnami PostgreSQL Chart as a dependency. Configuration options can be found in the [Postgresql Values](https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml).
+
+#### Upgrade Behavior
+
+- Pre-upgrade Helm hooks, along with a Bitnami/kubectl init container, are used to terminate all pods before running the Anchore upgrade. You can revert to legacy post-upgrade hooks by setting `upgradeJob.usePostUpgradeHook=true`.
+
+#### Application Configuration
+
+- Configuration is now primarily managed through environment variables, specified in the `<RELEASE_NAME>-enterprise-config-env-vars` ConfigMap and set via the values file.
+- Previously, unexposed values for advanced Anchore configurations have been removed. Instead, you can use the `extraEnv` value to set the required environment variables.
+
 ### Migration Rollback Strategy
 
 The migration employs a blue/green deployment strategy to minimize risk and facilitate easy rollback. Should you encounter issues during the migration, reverting to the prior state is straightforward: simply scale your Anchore-Engine deployment back up.
@@ -720,7 +759,7 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
     docker run -v ${PWD}:/tmp -v ${PWD}/${VALUES_FILE_NAME}:/app/${VALUES_FILE_NAME} docker.io/anchore/enterprise-helm-migrator:latest -e /app/${VALUES_FILE_NAME} -d /tmp/output
     ```
 
-#### If Using an External PostgreSQL Database
+### If Using an External PostgreSQL Database
 
 1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
 
@@ -774,7 +813,7 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
       kubectl get pvc -n ${NAMESPACE}
       kubectl delete pvc ${ENGINE_RELEASE}-anchore-engine-enterprise-feeds -n ${NAMESPACE}
 
-#### If Using the Dependent PostgreSQL Chart
+### If Using the Dependent PostgreSQL Chart
 
 1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
 
