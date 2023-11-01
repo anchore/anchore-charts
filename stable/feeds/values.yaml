@@ -21,7 +21,7 @@ nameOverride: ""
 
 ## @param image Image used for feeds deployment
 ##
-image: docker.io/anchore/enterprise:v4.9.3
+image: docker.io/anchore/enterprise:v5.0.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -92,7 +92,6 @@ affinity: {}
 ## @param service.annotations Annotations for Anchore Feeds service
 ## @param service.labels Labels for Anchore Feeds service
 ## @param service.nodePort nodePort for Anchore Feeds service
-## @param service.apiVersion the apiVersion for the service when communicating with Anchore Feeds
 ##
 service:
   type: ClusterIP
@@ -100,7 +99,6 @@ service:
   annotations: {}
   labels: {}
   nodePort: ""
-  apiVersion: v1
 
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space for image analysis
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions
@@ -545,7 +543,6 @@ ingress:
   ## @param ingress.paths The path used for accessing the Anchore Feeds API
   ##
   paths:
-    - /v1/feeds/
     - /v2/feeds/
 
   ## @param ingress.tls Configure tls for the ingress resource

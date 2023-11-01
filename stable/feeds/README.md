@@ -312,7 +312,7 @@ anchoreConfig:
 | `url`                                 | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster. | `""`                                  |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                               | `""`                                  |
 | `nameOverride`                        | overrides the name set on resources                                                                   | `""`                                  |
-| `image`                               | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v4.9.3` |
+| `image`                               | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.0.0` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                                         | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                  | Name of a service account used to run all Feeds pods                                                  | `""`                                  |
@@ -331,7 +331,6 @@ anchoreConfig:
 | `service.annotations`                 | Annotations for Anchore Feeds service                                                                 | `{}`                                  |
 | `service.labels`                      | Labels for Anchore Feeds service                                                                      | `{}`                                  |
 | `service.nodePort`                    | nodePort for Anchore Feeds service                                                                    | `""`                                  |
-| `service.apiVersion`                  | the apiVersion for the service when communicating with Anchore Feeds                                  | `v2`                                  |
 | `scratchVolume.mountPath`             | The mount path of an external volume for scratch space for image analysis                             | `/anchore_scratch`                    |
 | `scratchVolume.fixGroupPermissions`   | Enable an initContainer that will fix the fsGroup permissions                                         | `false`                               |
 | `scratchVolume.details`               | Details for the k8s volume to be created                                                              | `{}`                                  |
@@ -457,15 +456,15 @@ anchoreConfig:
 
 ### Ingress Parameters
 
-| Name                       | Description                                                        | Value                         |
-| -------------------------- | ------------------------------------------------------------------ | ----------------------------- |
-| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`                       |
-| `ingress.labels`           | Labels for the ingress resource                                    | `{}`                          |
-| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`                          |
-| `ingress.hosts`            | List of custom hostnames for the Anchore Feeds API                 | `[]`                          |
-| `ingress.paths`            | The path used for accessing the Anchore Feeds API                  | `["/v1/feeds/","/v2/feeds/"]` |
-| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                          |
-| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                       |
+| Name                       | Description                                                        | Value            |
+| -------------------------- | ------------------------------------------------------------------ | ---------------- |
+| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`          |
+| `ingress.labels`           | Labels for the ingress resource                                    | `{}`             |
+| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`             |
+| `ingress.hosts`            | List of custom hostnames for the Anchore Feeds API                 | `[]`             |
+| `ingress.paths`            | The path used for accessing the Anchore Feeds API                  | `["/v2/feeds/"]` |
+| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`             |
+| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`          |
 
 
 ### Google CloudSQL DB Parameters
@@ -482,11 +481,20 @@ anchoreConfig:
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
 
+## Release Notes
+
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
 
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v2.0.0
+
+- Updated Anchore Feeds image to v5.0.0
+- Anchore Feeds v5.0.0 introduces a breaking change to the API endpoints, and requires updating any external integrations to use the new endpoints. See the [Migration Guide](https://docs.anchore.com/current/docs/migration_guide/) for more information.
+- The following values were removed as only the `v2` API is supported in Anchore Feeds 5.0.0:
+  - `feeds.service.apiVersion`
 
 ### v1.0.0
 

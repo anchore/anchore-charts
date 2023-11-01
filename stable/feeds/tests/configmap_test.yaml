@@ -15,37 +15,20 @@ tests:
     asserts:
       - matchSnapshot: {}
 
-  - it: should render v1 correctly if service.apiVersion is set as v1
-    template: envvars_configmap.yaml
-    set:
-      service.apiVersion: v1
-    asserts:
-      - matchRegex:
-          path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
-          pattern: http://test-release-feeds:8448/v1/$
-
-  - it: should render v1 correctly if service.apiVersion is default
-    template: envvars_configmap.yaml
-    asserts:
-      - matchRegex:
-          path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
-          pattern: http://test-release-feeds:8448/v1/$
-
   - it: should render grype url correctly if .Values.url is set
     template: envvars_configmap.yaml
     set:
-      service.apiVersion: v1
-      url: https://something/v1/my-grype/something
+      url: https://something/v2/my-grype/something
     asserts:
       - matchRegex:
           path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
-          pattern: https://something/v1/$
+          pattern: https://something/v2/$
 
   - it: should render grype url correctly if .Values.url is set to a v1 url
     template: envvars_configmap.yaml
     set:
-      url: https://something/v1/my-grype/something
+      url: https://something/v2/my-grype/something
     asserts:
       - matchRegex:
           path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
-          pattern: https://something/v1/$
+          pattern: https://something/v2/$
