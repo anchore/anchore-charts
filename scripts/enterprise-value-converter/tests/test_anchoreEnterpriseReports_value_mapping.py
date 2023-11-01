@@ -345,3 +345,32 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
+
+
+    def test_anchoreEnterpriseReports_vulnerabilitiesByK8sNamespace_value(self):
+
+        dot_string_dict = {"anchoreEnterpriseReports.vulnerabilitiesByK8sNamespace": True}
+        expected_result = {
+            'extraEnv': [
+                {'name': 'ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE', 'value': True}
+            ]}
+        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
+        self.assertEqual(result[1], expected_result)
+
+    def test_anchoreEnterpriseReports_vulnerabilitiesByK8sContainer_value(self):
+        dot_string_dict = {"anchoreEnterpriseReports.vulnerabilitiesByK8sContainer": True}
+        expected_result = {
+            'extraEnv': [
+                {'name': 'ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER', 'value': True}
+            ]}
+        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
+        self.assertEqual(result[1], expected_result)
+
+    def test_anchoreEnterpriseReports_vulnerabilitiesByEcsContainer_value(self):
+        dot_string_dict = {"anchoreEnterpriseReports.vulnerabilitiesByEcsContainer": True}
+        expected_result = {
+            'extraEnv': [
+                {'name': 'ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER', 'value': True}
+            ]}
+        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
+        self.assertEqual(result[1], expected_result)

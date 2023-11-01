@@ -235,7 +235,9 @@ ENTERPRISE_ENV_VAR_MAPPING = {
     "anchorePolicyEngine.enablePackageDbLoad": "policyEngine.ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD",
     "anchorePolicyEngine.maxRequestThreads": "policyEngine.ANCHORE_MAX_REQUEST_THREADS",
     "anchoreSimpleQueue.maxRequestThreads": "simpleQueue.ANCHORE_MAX_REQUEST_THREADS",
-
+    "anchoreEnterpriseReports.vulnerabilitiesByK8sNamespace": "ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE",
+    "anchoreEnterpriseReports.vulnerabilitiesByK8sContainer": "ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER",
+    "anchoreEnterpriseReports.vulnerabilitiesByEcsContainer": "ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER"
 }
 
 #### ENGINE TO FEEDS KEYS THAT ARE NOW ENV VARS ####
