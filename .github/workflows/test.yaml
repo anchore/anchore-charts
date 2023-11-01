@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetesVersion: ["v1.23.17", "v1.24.15", "v1.25.11", "v1.26.6", "v1.27.3"]
+        kubernetesVersion: ["v1.23.17", "v1.24.15", "v1.25.11", "v1.26.6", "v1.27.3", "v1.28.0"]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -35,7 +35,7 @@ jobs:
         version: v3.8.0
 
     - name: Set up chart-testing
-      uses: helm/chart-testing-action@e8788873172cb653a90ca2e819d79d65a66d4e76 # v2.4.0
+      uses: helm/chart-testing-action@b43128a8b25298e1e7b043b78ea6613844e079b1 # v2.7.0
 
     - name: Run chart-testing (list-changed)
       id: list-changed
@@ -94,4 +94,4 @@ jobs:
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
-      run: ct install --config ct-config.yaml
+      run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"

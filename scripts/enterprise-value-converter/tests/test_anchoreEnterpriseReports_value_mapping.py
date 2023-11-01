@@ -346,7 +346,6 @@ class TestReplaceKeysWithMappingsReports(unittest.TestCase):
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
-
     def test_anchoreEnterpriseReports_vulnerabilitiesByK8sNamespace_value(self):
 
         dot_string_dict = {"anchoreEnterpriseReports.vulnerabilitiesByK8sNamespace": True}
