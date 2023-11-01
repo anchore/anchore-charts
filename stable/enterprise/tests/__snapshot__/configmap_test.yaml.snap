@@ -166,13 +166,14 @@ should render the configmaps:
                 level:
                 - error
             runtime_inventory:
-              image_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS}
-              image_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_INGEST_OVERWRITE}
+              inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
+              inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
             image_gc:
               max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
             down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
+            import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
             analysis_archive:
               {}
             object_store:
@@ -182,6 +183,7 @@ should render the configmaps:
               storage_driver:
                 config: {}
                 name: db
+              verify_content_digests: true
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -210,7 +212,6 @@ should render the configmaps:
               feed_sync: 14400
               feed_sync_checker: 3600
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
-            enable_images_by_vulnerability_api: ${ANCHORE_POLICY_ENGINE_ENABLE_IMAGES_BY_VULN_QUERY}
             vulnerabilities:
               sync:
                 enabled: true
@@ -220,22 +221,45 @@ should render the configmaps:
                 data:
                   grypedb:
                     enabled: true
-                    url: http://test-release-feeds:8448/v1/databases/grypedb
-                  vulnerabilities:
-                    enabled: ${ANCHORE_FEEDS_VULNERABILITIES_ENABLED}
-                    url: http://test-release-feeds:8448/v1/feeds
-                  nvdv2:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED}
-                    url: http://test-release-feeds:8448/v1/feeds
-                  github:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED}
-                    url: http://test-release-feeds:8448/v1/feeds
+                    url: http://test-release-feeds:8448/v2/databases/grypedb
                   packages:
                     enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-                    url: http://test-release-feeds:8448/v1/feeds
-                  microsoft:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_MSRC_ENABLED}
-                    url: http://test-release-feeds:8448/v1/feeds
+                    url: http://test-release-feeds:8448/v2/feeds
+              matching:
+                default:
+                  search:
+                    by_cpe:
+                      enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+                ecosystem_specific:
+                  dotnet:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+                  golang:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+                  java:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+                  javascript:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+                  python:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+                  ruby:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+                  stock:
+                    search:
+                      by_cpe:
+                        # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -273,6 +297,8 @@ should render the configmaps:
             authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
             authorization_handler_config:
               endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
+            max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
+            async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -299,9 +325,6 @@ should render the configmaps:
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
               vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
-            authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
-            authorization_handler_config:
-              endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -361,17 +384,19 @@ should render the configmaps:
       ANCHORE_DB_TIMEOUT: "120"
       ANCHORE_DISABLE_METRICS_AUTH: "false"
       ANCHORE_ENABLE_METRICS: "false"
+      ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT: 48h
       ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: "0"
       ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "10"
       ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS: "10"
       ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS: "false"
       ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS: "true"
       ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL: "true"
+      ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS: "1"
       ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER: "true"
       ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER: "true"
       ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE: "true"
-      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_INGEST_OVERWRITE: "false"
-      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS: "120"
+      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "false"
+      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "120"
       ANCHORE_ENTERPRISE_UI_URL: test-release-enterprise-ui
       ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "false"
       ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
@@ -384,6 +409,7 @@ should render the configmaps:
       ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
       ANCHORE_HINTS_ENABLED: "false"
       ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "3600"
+      ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
       ANCHORE_INTERNAL_SSL_VERIFY: "false"
       ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
       ANCHORE_LAYER_CACHE_ENABLED: "false"
@@ -398,7 +424,6 @@ should render the configmaps:
       ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "86400"
       ANCHORE_OAUTH_TOKEN_EXPIRATION: "3600"
       ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
-      ANCHORE_POLICY_ENGINE_ENABLE_IMAGES_BY_VULN_QUERY: "true"
       ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD: "true"
       ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
       ANCHORE_SAML_SECRET: "null"
@@ -408,6 +433,13 @@ should render the configmaps:
       ANCHORE_SSL_KEY: "null"
       ANCHORE_SSO_REQUIRES_EXISTING_USERS: "false"
       ANCHORE_TMP_DIR: /analysis_scratch
+      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED: "true"
+      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED: "true"
+      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED: "true"
+      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED: "false"
+      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED: "true"
+      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED: "true"
+      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED: "true"
       ANCHORECTL_URL: http://localhost:8228
       ANCHORECTL_USERNAME: admin
     kind: ConfigMap
@@ -501,7 +533,7 @@ should render the configmaps:
   6: |
     apiVersion: v1
     data:
-      config-ui.yaml: "# Anchore UI configuration\nengine_uri: 'http://test-release-enterprise-api:8228/v1'\nreports_uri: 'http://test-release-enterprise-api:8558/v1'\nnotifications_uri: 'http://test-release-enterprise-notifications:8668/v1'\nrbac_uri: 'http://test-release-enterprise-rbac-manager:8229/v1'\nenterprise_uri: 'http://test-release-enterprise-api:8228/v1'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false\n"
+      config-ui.yaml: "# Anchore UI configuration\nreports_uri: 'http://test-release-enterprise-api:8228/v2'\nnotifications_uri: 'http://test-release-enterprise-api:8228/v2'\nrbac_uri: 'http://test-release-enterprise-api:8228/v2'\nenterprise_uri: 'http://test-release-enterprise-api:8228/v2'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false\n"
     kind: ConfigMap
     metadata:
       annotations:

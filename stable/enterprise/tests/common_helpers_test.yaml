@@ -832,29 +832,29 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v1/databases/grypedb"
+          pattern: "url: my-feeds-url/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v1/feeds"
+          pattern: "url: my-feeds-url/v2/feeds"
 
-  - it: should render v1 anchoreFeedsURL with feeds.url set
+  - it: should render v2 anchoreFeedsURL with feeds.url set
     set:
       feeds:
         url: my-feeds-url
         service:
-          apiVersion: v1
+          apiVersion: v2
     templates:
       - anchore_configmap.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v1/databases/grypedb"
+          pattern: "url: my-feeds-url/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v1/feeds"
+          pattern: "url: my-feeds-url/v2/feeds"
 
   - it: should render anchoreFeedsURL with feeds.chartEnabled
     set:
@@ -866,11 +866,11 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v2/feeds"
 
   - it: should render grypeProviderURL with anchoreConfig.policy_engine.overrideFeedsToUpstream
     set:
@@ -882,7 +882,7 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
@@ -899,7 +899,7 @@ tests:
     asserts:
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
@@ -914,19 +914,19 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/feeds"
+          pattern: "url: https://test-release-feeds:8448/v2/feeds"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v2/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
     set:
@@ -952,19 +952,19 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
 
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v1/feeds"
+          pattern: "url: http://test-release-feeds:8448/v2/feeds"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/databases/grypedb"
+          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
 
       - notMatchRegex:
           path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v1/feeds"
+          pattern: "url: https://test-release-feeds:8448/v2/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
     set:
@@ -990,16 +990,16 @@ tests:
     asserts:
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "engine_uri: 'http://test-release-enterprise-api:8228/v1'"
+          pattern: "enterprise_uri: 'http://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "rbac_uri: 'http://test-release-enterprise-rbac-manager:8229/v1'"
+          pattern: "rbac_uri: 'http://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "notifications_uri: 'http://test-release-enterprise-notifications:8668/v1'"
+          pattern: "notifications_uri: 'http://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "reports_uri: 'http://test-release-enterprise-api:8558/v1'"
+          pattern: "reports_uri: 'http://test-release-enterprise-api:8228/v2'"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for ui_configmap.yaml
     set:
@@ -1010,39 +1010,16 @@ tests:
     asserts:
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "engine_uri: 'https://test-release-enterprise-api:8228/v1'"
+          pattern: "enterprise_uri: 'https://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "rbac_uri: 'https://test-release-enterprise-rbac-manager:8229/v1'"
+          pattern: "rbac_uri: 'https://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "notifications_uri: 'https://test-release-enterprise-notifications:8668/v1'"
+          pattern: "notifications_uri: 'https://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "reports_uri: 'https://test-release-enterprise-api:8558/v1'"
-
-  - it: should set the correct apiVersion for ui_configmap.yaml
-    set:
-      api.service.apiVersion: "v1"
-      reports.service.apiVersion: "v1"
-      notifications.service.apiVersion: "v1"
-      rbacManager.service.apiVersion: "v1"
-    templates:
-      - ui_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config-ui.yaml"]
-          pattern: "engine_uri: 'http://test-release-enterprise-api:8228/v1'"
-      - matchRegex:
-          path: data["config-ui.yaml"]
-          pattern: "rbac_uri: 'http://test-release-enterprise-rbac-manager:8229/v1'"
-      - matchRegex:
-          path: data["config-ui.yaml"]
-          pattern: "notifications_uri: 'http://test-release-enterprise-notifications:8668/v1'"
-      - matchRegex:
-          path: data["config-ui.yaml"]
-          pattern: "reports_uri: 'http://test-release-enterprise-api:8558/v1'"
+          pattern: "reports_uri: 'https://test-release-enterprise-api:8228/v2'"
 
   - it: should render nodePort when set
     set:

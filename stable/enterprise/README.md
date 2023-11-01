@@ -942,7 +942,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 | Name                                  | Description                                                                           | Value                                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.3` |
+| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v5.0.0` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |
 | `startMigrationPod`                   | Spin up a Database migration pod to help migrate the database to the new schema       | `false`                               |
@@ -1038,8 +1038,8 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `anchoreConfig.catalog.event_log`                                          | Event log for webhooks, YAML configuration                                                                                       | `{}`               |
 | `anchoreConfig.catalog.analysis_archive`                                   | Custom analysis archive YAML configuration                                                                                       | `{}`               |
 | `anchoreConfig.catalog.object_store`                                       | Custom object storage YAML configuration                                                                                         | `{}`               |
-| `anchoreConfig.catalog.runtime_inventory.image_ttl_days`                   | TTL for runtime inventory.                                                                                                       | `120`              |
-| `anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite`           | force runtime inventory to be overwritten upon every update for that reported context.                                           | `false`            |
+| `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days`               | TTL for runtime inventory.                                                                                                       | `120`              |
+| `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite`       | force runtime inventory to be overwritten upon every update for that reported context.                                           | `false`            |
 | `anchoreConfig.catalog.down_analyzer_task_requeue`                         | Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state                      | `true`             |
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync`                       | Interval to run a feed sync to get latest cve data                                                                               | `14400`            |
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync_checker`               | Interval between checks to see if there needs to be a task queued                                                                | `3600`             |
@@ -1047,6 +1047,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `anchoreConfig.notifications.cycle_timers.notifications`                   | Interval that notifications are sent                                                                                             | `30`               |
 | `anchoreConfig.notifications.ui_url`                                       | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`               |
 | `anchoreConfig.reports.enable_graphiql`                                    | Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations                                                     | `true`             |
+| `anchoreConfig.reports.async_execution_timeout`                            | Configure how long a scheduled query must be running for before it is considered timed out                                       | `48h`              |
 | `anchoreConfig.reports_worker.enable_data_ingress`                         | Enable periodically syncing data into the Anchore Reports Service                                                                | `true`             |
 | `anchoreConfig.reports_worker.enable_data_egress`                          | Periodically remove reporting data that has been removed in other parts of system                                                | `false`            |
 | `anchoreConfig.reports_worker.data_egress_window`                          | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `0`                |
@@ -1078,24 +1079,23 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore API k8s Deployment Parameters
 
-| Name                      | Description                                                                      | Value       |
-| ------------------------- | -------------------------------------------------------------------------------- | ----------- |
-| `api.replicaCount`        | Number of replicas for Anchore API deployment                                    | `1`         |
-| `api.service.type`        | Service type for Anchore API                                                     | `ClusterIP` |
-| `api.service.port`        | Service port for Anchore API                                                     | `8228`      |
-| `api.service.reportsPort` | Service port for Anchore Reports API                                             | `8558`      |
-| `api.service.annotations` | Annotations for Anchore API service                                              | `{}`        |
-| `api.service.labels`      | Labels for Anchore API service                                                   | `{}`        |
-| `api.service.nodePort`    | nodePort for Anchore API service                                                 | `""`        |
-| `api.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
-| `api.extraEnv`            | Set extra environment variables for Anchore API pods                             | `[]`        |
-| `api.resources`           | Resource requests and limits for Anchore API pods                                | `{}`        |
-| `api.labels`              | Labels for Anchore API pods                                                      | `{}`        |
-| `api.annotations`         | Annotation for Anchore API pods                                                  | `{}`        |
-| `api.nodeSelector`        | Node labels for Anchore API pod assignment                                       | `{}`        |
-| `api.tolerations`         | Tolerations for Anchore API pod assignment                                       | `[]`        |
-| `api.affinity`            | Affinity for Anchore API pod assignment                                          | `{}`        |
-| `api.serviceAccountName`  | Service account name for Anchore API pods                                        | `""`        |
+| Name                      | Description                                          | Value       |
+| ------------------------- | ---------------------------------------------------- | ----------- |
+| `api.replicaCount`        | Number of replicas for Anchore API deployment        | `1`         |
+| `api.service.type`        | Service type for Anchore API                         | `ClusterIP` |
+| `api.service.port`        | Service port for Anchore API                         | `8228`      |
+| `api.service.reportsPort` | Service port for Anchore Reports API                 | `8558`      |
+| `api.service.annotations` | Annotations for Anchore API service                  | `{}`        |
+| `api.service.labels`      | Labels for Anchore API service                       | `{}`        |
+| `api.service.nodePort`    | nodePort for Anchore API service                     | `""`        |
+| `api.extraEnv`            | Set extra environment variables for Anchore API pods | `[]`        |
+| `api.resources`           | Resource requests and limits for Anchore API pods    | `{}`        |
+| `api.labels`              | Labels for Anchore API pods                          | `{}`        |
+| `api.annotations`         | Annotation for Anchore API pods                      | `{}`        |
+| `api.nodeSelector`        | Node labels for Anchore API pod assignment           | `{}`        |
+| `api.tolerations`         | Tolerations for Anchore API pod assignment           | `[]`        |
+| `api.affinity`            | Affinity for Anchore API pod assignment              | `{}`        |
+| `api.serviceAccountName`  | Service account name for Anchore API pods            | `""`        |
 
 
 ### Anchore Analyzer k8s Deployment Parameters
@@ -1136,12 +1136,11 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore Feeds Chart Parameters
 
-| Name                       | Description                                                                                    | Value   |
-| -------------------------- | ---------------------------------------------------------------------------------------------- | ------- |
-| `feeds.chartEnabled`       | Enable the Anchore Feeds chart                                                                 | `true`  |
-| `feeds.standalone`         | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
-| `feeds.url`                | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
-| `feeds.service.apiVersion` | the apiVersion for the service when communicating with Anchore Feeds                           | `v1`    |
+| Name                 | Description                                                                                    | Value   |
+| -------------------- | ---------------------------------------------------------------------------------------------- | ------- |
+| `feeds.chartEnabled` | Enable the Anchore Feeds chart                                                                 | `true`  |
+| `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
+| `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
 
 
 ### Anchore Policy Engine k8s Deployment Parameters
@@ -1186,44 +1185,42 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore Notifications Parameters
 
-| Name                                | Description                                                                      | Value       |
-| ----------------------------------- | -------------------------------------------------------------------------------- | ----------- |
-| `notifications.replicaCount`        | Number of replicas for the Anchore Notifications deployment                      | `1`         |
-| `notifications.service.type`        | Service type for Anchore Notifications                                           | `ClusterIP` |
-| `notifications.service.port`        | Service port for Anchore Notifications                                           | `8668`      |
-| `notifications.service.annotations` | Annotations for Anchore Notifications service                                    | `{}`        |
-| `notifications.service.labels`      | Labels for Anchore Notifications service                                         | `{}`        |
-| `notifications.service.nodePort`    | nodePort for Anchore Notifications service                                       | `""`        |
-| `notifications.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
-| `notifications.extraEnv`            | Set extra environment variables for Anchore Notifications pods                   | `[]`        |
-| `notifications.resources`           | Resource requests and limits for Anchore Notifications pods                      | `{}`        |
-| `notifications.labels`              | Labels for Anchore Notifications pods                                            | `{}`        |
-| `notifications.annotations`         | Annotation for Anchore Notifications pods                                        | `{}`        |
-| `notifications.nodeSelector`        | Node labels for Anchore Notifications pod assignment                             | `{}`        |
-| `notifications.tolerations`         | Tolerations for Anchore Notifications pod assignment                             | `[]`        |
-| `notifications.affinity`            | Affinity for Anchore Notifications pod assignment                                | `{}`        |
-| `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods                              | `""`        |
+| Name                                | Description                                                    | Value       |
+| ----------------------------------- | -------------------------------------------------------------- | ----------- |
+| `notifications.replicaCount`        | Number of replicas for the Anchore Notifications deployment    | `1`         |
+| `notifications.service.type`        | Service type for Anchore Notifications                         | `ClusterIP` |
+| `notifications.service.port`        | Service port for Anchore Notifications                         | `8668`      |
+| `notifications.service.annotations` | Annotations for Anchore Notifications service                  | `{}`        |
+| `notifications.service.labels`      | Labels for Anchore Notifications service                       | `{}`        |
+| `notifications.service.nodePort`    | nodePort for Anchore Notifications service                     | `""`        |
+| `notifications.extraEnv`            | Set extra environment variables for Anchore Notifications pods | `[]`        |
+| `notifications.resources`           | Resource requests and limits for Anchore Notifications pods    | `{}`        |
+| `notifications.labels`              | Labels for Anchore Notifications pods                          | `{}`        |
+| `notifications.annotations`         | Annotation for Anchore Notifications pods                      | `{}`        |
+| `notifications.nodeSelector`        | Node labels for Anchore Notifications pod assignment           | `{}`        |
+| `notifications.tolerations`         | Tolerations for Anchore Notifications pod assignment           | `[]`        |
+| `notifications.affinity`            | Affinity for Anchore Notifications pod assignment              | `{}`        |
+| `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods            | `""`        |
 
 
 ### Anchore Reports Parameters
 
-| Name                          | Description                                                                      | Value       |
-| ----------------------------- | -------------------------------------------------------------------------------- | ----------- |
-| `reports.replicaCount`        | Number of replicas for the Anchore Reports deployment                            | `1`         |
-| `reports.service.type`        | Service type for Anchore Reports                                                 | `ClusterIP` |
-| `reports.service.port`        | Service port for Anchore Reports Worker                                          | `8558`      |
-| `reports.service.annotations` | Annotations for Anchore Reports service                                          | `{}`        |
-| `reports.service.labels`      | Labels for Anchore Reports service                                               | `{}`        |
-| `reports.service.nodePort`    | nodePort for Anchore Reports service                                             | `""`        |
-| `reports.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
-| `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods                         | `[]`        |
-| `reports.resources`           | Resource requests and limits for Anchore Reports pods                            | `{}`        |
-| `reports.labels`              | Labels for Anchore Reports pods                                                  | `{}`        |
-| `reports.annotations`         | Annotation for Anchore Reports pods                                              | `{}`        |
-| `reports.nodeSelector`        | Node labels for Anchore Reports pod assignment                                   | `{}`        |
-| `reports.tolerations`         | Tolerations for Anchore Reports pod assignment                                   | `[]`        |
-| `reports.affinity`            | Affinity for Anchore Reports pod assignment                                      | `{}`        |
-| `reports.serviceAccountName`  | Service account name for Anchore Reports pods                                    | `""`        |
+| Name                          | Description                                              | Value       |
+| ----------------------------- | -------------------------------------------------------- | ----------- |
+| `reports.replicaCount`        | Number of replicas for the Anchore Reports deployment    | `1`         |
+| `reports.service.type`        | Service type for Anchore Reports                         | `ClusterIP` |
+| `reports.service.port`        | Service port for Anchore Reports Worker                  | `8558`      |
+| `reports.service.annotations` | Annotations for Anchore Reports service                  | `{}`        |
+| `reports.service.labels`      | Labels for Anchore Reports service                       | `{}`        |
+| `reports.service.nodePort`    | nodePort for Anchore Reports service                     | `""`        |
+| `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods | `[]`        |
+| `reports.resources`           | Resource requests and limits for Anchore Reports pods    | `{}`        |
+| `reports.labels`              | Labels for Anchore Reports pods                          | `{}`        |
+| `reports.annotations`         | Annotation for Anchore Reports pods                      | `{}`        |
+| `reports.nodeSelector`        | Node labels for Anchore Reports pod assignment           | `{}`        |
+| `reports.tolerations`         | Tolerations for Anchore Reports pod assignment           | `[]`        |
+| `reports.affinity`            | Affinity for Anchore Reports pod assignment              | `{}`        |
+| `reports.serviceAccountName`  | Service account name for Anchore Reports pods            | `""`        |
 
 
 ### Anchore RBAC Authentication Parameters
@@ -1236,30 +1233,29 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore RBAC Manager Parameters
 
-| Name                              | Description                                                                      | Value       |
-| --------------------------------- | -------------------------------------------------------------------------------- | ----------- |
-| `rbacManager.replicaCount`        | Number of replicas for the Anchore RBAC Manager deployment                       | `1`         |
-| `rbacManager.service.type`        | Service type for Anchore RBAC Manager                                            | `ClusterIP` |
-| `rbacManager.service.port`        | Service port for Anchore RBAC Manager                                            | `8229`      |
-| `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                                     | `{}`        |
-| `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                                          | `{}`        |
-| `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                                        | `""`        |
-| `rbacManager.service.apiVersion`  | apiVersion for Anchore UI service to use when reaching out to the enterprise api | `v1`        |
-| `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods                    | `[]`        |
-| `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods                       | `{}`        |
-| `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                                             | `{}`        |
-| `rbacManager.annotations`         | Annotation for Anchore RBAC Manager pods                                         | `{}`        |
-| `rbacManager.nodeSelector`        | Node labels for Anchore RBAC Manager pod assignment                              | `{}`        |
-| `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment                              | `[]`        |
-| `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment                                 | `{}`        |
-| `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods                               | `""`        |
+| Name                              | Description                                                   | Value       |
+| --------------------------------- | ------------------------------------------------------------- | ----------- |
+| `rbacManager.replicaCount`        | Number of replicas for the Anchore RBAC Manager deployment    | `1`         |
+| `rbacManager.service.type`        | Service type for Anchore RBAC Manager                         | `ClusterIP` |
+| `rbacManager.service.port`        | Service port for Anchore RBAC Manager                         | `8229`      |
+| `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                  | `{}`        |
+| `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                       | `{}`        |
+| `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                     | `""`        |
+| `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods | `[]`        |
+| `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods    | `{}`        |
+| `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                          | `{}`        |
+| `rbacManager.annotations`         | Annotation for Anchore RBAC Manager pods                      | `{}`        |
+| `rbacManager.nodeSelector`        | Node labels for Anchore RBAC Manager pod assignment           | `{}`        |
+| `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment           | `[]`        |
+| `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment              | `{}`        |
+| `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods            | `""`        |
 
 
 ### Anchore UI Parameters
 
 | Name                         | Description                                                                   | Value                                    |
 | ---------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------- |
-| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v4.9.0` |
+| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v5.0.0` |
 | `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                        | `IfNotPresent`                           |
 | `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints   | `anchore-enterprise-ui-env`              |
 | `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName` | `""`                                     |
@@ -1299,21 +1295,21 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Ingress Parameters
 
-| Name                       | Description                                                        | Value                             |
-| -------------------------- | ------------------------------------------------------------------ | --------------------------------- |
-| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`                           |
-| `ingress.labels`           | Labels for the ingress resource                                    | `{}`                              |
-| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`                              |
-| `ingress.apiHosts`         | List of custom hostnames for the Anchore API                       | `[]`                              |
-| `ingress.apiPaths`         | The path used for accessing the Anchore API                        | `["/v1/","/v2/","/version/"]`     |
-| `ingress.uiHosts`          | List of custom hostnames for the Anchore UI                        | `[]`                              |
-| `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`                               |
-| `ingress.feedsHosts`       | List of custom hostnames for the Anchore Feeds API                 | `[]`                              |
-| `ingress.feedsPaths`       | The path used for accessing the Anchore Feeds API                  | `["/v1/feeds/","/v2/feeds/"]`     |
-| `ingress.reportsHosts`     | List of custom hostnames for the Anchore Reports API               | `[]`                              |
-| `ingress.reportsPaths`     | The path used for accessing the Anchore Reports API                | `["/v1/reports/","/v2/reports/"]` |
-| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                              |
-| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                           |
+| Name                       | Description                                                        | Value                  |
+| -------------------------- | ------------------------------------------------------------------ | ---------------------- |
+| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`                |
+| `ingress.labels`           | Labels for the ingress resource                                    | `{}`                   |
+| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`                   |
+| `ingress.apiHosts`         | List of custom hostnames for the Anchore API                       | `[]`                   |
+| `ingress.apiPaths`         | The path used for accessing the Anchore API                        | `["/v2/","/version/"]` |
+| `ingress.uiHosts`          | List of custom hostnames for the Anchore UI                        | `[]`                   |
+| `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`                    |
+| `ingress.feedsHosts`       | List of custom hostnames for the Anchore Feeds API                 | `[]`                   |
+| `ingress.feedsPaths`       | The path used for accessing the Anchore Feeds API                  | `["/v2/feeds/"]`       |
+| `ingress.reportsHosts`     | List of custom hostnames for the Anchore Reports API               | `[]`                   |
+| `ingress.reportsPaths`     | The path used for accessing the Anchore Reports API                | `["/v2/reports/"]`     |
+| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                   |
+| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                |
 
 
 ### Google CloudSQL DB Parameters
@@ -1363,6 +1359,17 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v2.0.0
+
+- Deploys Anchore Enterprise v5.0.0
+- Anchore Enterprise v5.0.0 introduces a breaking change to the API endpoints, and requires updating any external integrations to use the new endpoints. See the [Migration Guide](https://docs.anchore.com/current/docs/deployment/upgrade/5.0/) for more information.
+- The following values were removed as only the `v2` API is supported in Anchore Enterprise 5.0.0:
+  - `api.service.apiVersion`
+  - `notifications.service.apiVersion`
+  - `reports.service.apiVersion`
+  - `rbacManager.service.apiVersion`
+  - `feeds.service.apiVersion`
 
 ### v1.0.0
 

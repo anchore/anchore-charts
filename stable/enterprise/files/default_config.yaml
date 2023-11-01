@@ -112,13 +112,14 @@ services:
     cycle_timers: {{- toYaml .Values.anchoreConfig.catalog.cycle_timers | nindent 6 }}
     event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
     runtime_inventory:
-      image_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_TTL_DAYS}
-      image_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_IMAGE_INGEST_OVERWRITE}
+      inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
+      inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
     image_gc:
       max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
     runtime_compliance:
       object_store_bucket: "runtime_compliance_check"
     down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
+    import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
     analysis_archive: {{- toYaml .Values.anchoreConfig.catalog.analysis_archive | nindent 6 }}
     object_store: {{- toYaml .Values.anchoreConfig.catalog.object_store | nindent 6 }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -147,7 +148,6 @@ services:
     cycle_timer_seconds: 1
     cycle_timers: {{- toYaml .Values.anchoreConfig.policy_engine.cycle_timers | nindent 6 }}
     enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
-    enable_images_by_vulnerability_api: ${ANCHORE_POLICY_ENGINE_ENABLE_IMAGES_BY_VULN_QUERY}
     vulnerabilities:
       sync:
         enabled: true
@@ -158,21 +158,44 @@ services:
           grypedb:
             enabled: true
             url: {{ template "enterprise.grypeProviderURL" . }}
-          vulnerabilities:
-            enabled: ${ANCHORE_FEEDS_VULNERABILITIES_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
-          nvdv2:
-            enabled: ${ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
-          github:
-            enabled: ${ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
           packages:
             enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
             url: {{ template "enterprise.feedsURL" . }}
-          microsoft:
-            enabled: ${ANCHORE_FEEDS_DRIVER_MSRC_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
+      matching:
+        default:
+          search:
+            by_cpe:
+              enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+        ecosystem_specific:
+          dotnet:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+          golang:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+          java:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+          javascript:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+          python:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+          ruby:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+          stock:
+            search:
+              by_cpe:
+                # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
@@ -210,6 +233,8 @@ services:
     authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
     authorization_handler_config:
       endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
+    max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
+    async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
@@ -232,9 +257,6 @@ services:
       vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
       vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
       vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
-    authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
-    authorization_handler_config:
-      endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}

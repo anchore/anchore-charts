@@ -54,12 +54,12 @@ Returns the proper URL for the feeds service
 {{- $anchoreFeedsURL := "" }}
   {{- if .Values.feeds.url }}
     {{- /* remove everything from the URL after /v2 to get the hostname, then use that to construct the proper URL */}}
-    {{- $regexSearchPattern := (printf "/%s.*$" .Values.feeds.service.apiVersion | toString) }}
+    {{- $regexSearchPattern := (printf "/v2.*$" | toString) }}
     {{- $urlPathSuffix := (default "" (regexFind $regexSearchPattern .Values.feeds.url) ) }}
     {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
-    {{- $anchoreFeedsURL = (printf "%s/%s/feeds" $anchoreFeedsHost .Values.feeds.service.apiVersion) -}}
+    {{- $anchoreFeedsURL = (printf "%s/v2/feeds" $anchoreFeedsHost) -}}
   {{- else if .Values.feeds.chartEnabled }}
-    {{- $anchoreFeedsURL = (printf "%s://%s:%s/%s/feeds" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString) .Values.feeds.service.apiVersion) -}}
+    {{- $anchoreFeedsURL = (printf "%s://%s:%s/v2/feeds" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
   {{- end }}
     {{- print $anchoreFeedsURL -}}
 {{- end -}}
@@ -70,14 +70,14 @@ Returns the proper URL for the grype provider
 */}}
 {{- define "enterprise.grypeProviderURL" }}
 {{- $grypeProviderFeedsExternalURL := "" -}}
-{{- $regexSearchPattern := (printf "/%s.*$" .Values.feeds.service.apiVersion | toString) }}
+{{- $regexSearchPattern := (printf "/v2.*$" | toString) }}
   {{- if .Values.feeds.url }}
     {{- /* remove everything from the URL after /v2 to get the hostname, then use that to construct the proper URL */}}
     {{- $urlPathSuffix := (default "" ( regexFind $regexSearchPattern .Values.feeds.url )) -}}
     {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s/%s/databases/grypedb" $anchoreFeedsHost .Values.feeds.service.apiVersion) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "%s/v2/databases/grypedb" $anchoreFeedsHost) -}}
   {{- else if .Values.feeds.chartEnabled }}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/%s/databases/grypedb" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString) .Values.feeds.service.apiVersion ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/v2/databases/grypedb" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
   {{- end }}
 
   {{- /* Set the grypeProviderFeedsExternalURL to upstream feeds if still unset or if specifically overridden */}}

@@ -61,7 +61,7 @@ spec:
           volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
         {{- if .Values.anchoreConfig.policyBundles }}
             - name: policy-bundle-volume
-              mountPath: "{{ $.Values.anchoreConfig.service_dir  }}/bundles/"
+              mountPath: "{{ $.Values.anchoreConfig.service_dir  }}/policies/"
         {{- end }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
           readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
