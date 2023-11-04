@@ -37,7 +37,7 @@ It can be useful when developing to install a chart directly from the source cod
 
 ```bash
 RELEASE_NAME="my-release"
-CHART_PATH="anchore-charts/stable/anchore-engine"
+CHART_PATH="anchore-charts/stable/enterprise"
 
 git clone https://github.com/anchore/anchore-charts-dev.git
 cd "$CHART_PATH"
