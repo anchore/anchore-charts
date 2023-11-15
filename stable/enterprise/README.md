@@ -175,7 +175,7 @@ To completely remove the Anchore Enterprise deployment and associated Kubernetes
   export NAMESPACE=anchore
   export RELEASE=my-release
 
-  helm delete ${RELEASE} -n ${NAMESPACE}
+  helm uninstall ${RELEASE} -n ${NAMESPACE}
   ```
 
 After deleting the helm release, there are still a few persistent volume claims to delete. Delete these only if you're certain you no longer need them.
