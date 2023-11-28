@@ -60,8 +60,11 @@ spec:
               containerPort: {{ .Values.api.service.port }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
         {{- if .Values.anchoreConfig.policyBundles }}
+          {{- range $key, $value := .Values.anchoreConfig.policyBundles }}
             - name: policy-bundle-volume
-              mountPath: "{{ $.Values.anchoreConfig.service_dir  }}/policies/"
+              mountPath: {{ $.Values.anchoreConfig.service_dir  }}/tempPolicies/{{ $key }}
+              subPath: {{ $key }}
+          {{- end }}
         {{- end }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
           readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}

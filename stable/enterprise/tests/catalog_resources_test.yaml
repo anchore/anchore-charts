@@ -201,7 +201,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade catalog$
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade catalog$
         count: 1
 
   - it: should render catalog component environment variables
@@ -272,7 +272,8 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: policy-bundle-volume
-            mountPath: /anchore_service/policies/
+            mountPath: /anchore_service/tempPolicies/custom_policy_bundle1.json
+            subPath: custom_policy_bundle1.json
         count: 1
         any: true
 

@@ -188,7 +188,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade analyzer$
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade analyzer$
         count: 1
 
   - it: should render component environment variables

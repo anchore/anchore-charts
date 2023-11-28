@@ -146,7 +146,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^/docker-entrypoint\.sh node \/home\/node\/aui\/build\/server.js$
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint\.sh node \/home\/node\/aui\/build\/server.js$
         count: 1
 
   - it: should render ui component environment variables
