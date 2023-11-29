@@ -295,7 +295,7 @@ tests:
             containerPort: 8558
         count: 1
 
-  - it: should render policy bundle volumeMounts when policy bundles are provided
+  - it: should render policy bundle volumeMounts when a policy bundle is provided
     template: api_deployment.yaml
     documentIndex: 0
     set:
@@ -310,6 +310,31 @@ tests:
             subPath: custom_policy_bundle1.json
         count: 1
         any: true
+  
+  - it: should render policy bundle volumeMounts when multiple policy bundles are provided
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policyBundles:
+        custom_policy_bundle1.json: {}
+        custom_policy_bundle2.json: {}        
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/tempPolicies/custom_policy_bundle1.json
+            subPath: custom_policy_bundle1.json
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/tempPolicies/custom_policy_bundle2.json
+            subPath: custom_policy_bundle2.json
+        count: 1
+        any: true        
 
   - it: should render component probes
     template: api_deployment.yaml
