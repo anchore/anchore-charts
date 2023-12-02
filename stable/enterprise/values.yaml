@@ -407,10 +407,10 @@ anchoreConfig:
         #     - "EXAMPLE_MATCH="
         #
         ## Malware scanning occurs only at analysis time when the image content itself is available
-        malware:
-          clamav:
-            enabled: false
-            db_update_enabled: true
+      malware:
+        clamav:
+          enabled: false
+          db_update_enabled: true
 
   catalog:
     ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
