@@ -178,11 +178,11 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[1].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports$
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports$
         count: 1
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade apiext$
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade apiext$
         count: 1
 
   - it: should render api component environment variables
@@ -295,7 +295,7 @@ tests:
             containerPort: 8558
         count: 1
 
-  - it: should render policy bundle volumeMounts when policy bundles are provided
+  - it: should render policy bundle volumeMounts when a policy bundle is provided
     template: api_deployment.yaml
     documentIndex: 0
     set:
@@ -306,9 +306,35 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: policy-bundle-volume
-            mountPath: /anchore_service/policies/
+            mountPath: /anchore_service/tempPolicies/custom_policy_bundle1.json
+            subPath: custom_policy_bundle1.json
         count: 1
         any: true
+  
+  - it: should render policy bundle volumeMounts when multiple policy bundles are provided
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policyBundles:
+        custom_policy_bundle1.json: {}
+        custom_policy_bundle2.json: {}        
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/tempPolicies/custom_policy_bundle1.json
+            subPath: custom_policy_bundle1.json
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/tempPolicies/custom_policy_bundle2.json
+            subPath: custom_policy_bundle2.json
+        count: 1
+        any: true        
 
   - it: should render component probes
     template: api_deployment.yaml

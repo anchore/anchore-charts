@@ -102,7 +102,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^\/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  \/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade
 
   - it: should render docker entrypoint with doSourceAtEntry and no filePaths
     templates: *backend_test_templates
@@ -112,7 +112,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^\/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade
 
   - it: should render docker entrypoint with doSourceAtEntry and some filePaths
     templates: *test_templates
@@ -123,7 +123,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^if \[ -f myscript\.sh \];then source myscript\.sh;fi;if \[ -f myotherscript\.sh \];then source myotherscript\.sh;fi; .*$
+          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo && if \[ -f myscript\.sh \];then source myscript\.sh;fi;if \[ -f myotherscript\.sh \];then source myotherscript\.sh;fi; .*$
 
   - it: should render envFrom without an existing secret
     templates:
@@ -445,7 +445,7 @@ tests:
           path: spec.template.spec.containers
           content:
             args:
-              - /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_authorizer
+              - mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_authorizer
             name: rbac-auth
             ports:
               - containerPort: 8089

@@ -4,14 +4,14 @@ should render the configmaps:
     data:
       analyzer_config.yaml: |
         # Anchore analyzer configuration
+        malware:
+          clamav:
+            db_update_enabled: true
+            enabled: false
         retrieve_files:
           file_list:
           - /etc/passwd
         secret_search:
-          malware:
-            clamav:
-              db_update_enabled: true
-              enabled: false
           match_params:
           - MAXFILESIZE=10000
           - STOREONMATCH=n
