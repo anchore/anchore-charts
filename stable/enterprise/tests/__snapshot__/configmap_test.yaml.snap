@@ -316,10 +316,15 @@ should render the configmaps:
             data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
             data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
             cycle_timers:
-              reports_data_egress: 600
-              reports_data_load: 600
-              reports_data_refresh: 7200
+              reports_extended_runtime_vuln_load: 1800
+              reports_image_egress: 600
+              reports_image_load: 600
+              reports_image_refresh: 7200
               reports_metrics: 3600
+              reports_runtime_inventory_load: 600
+              reports_tag_egress: 600
+              reports_tag_load: 600
+              reports_tag_refresh: 7200
             runtime_report_generation:
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}

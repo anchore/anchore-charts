@@ -549,16 +549,26 @@ anchoreConfig:
     ##
     data_load_max_workers: 10
 
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_data_load Interval that images and tags are synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_data_refresh Interval that policy evaluations and vulnerabilities are synced
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_load Interval that vulnerabilities for images are synced
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_load Interval that vulnerabilties by tags are synced
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_runtime_inventory_load Interval that the runtime inventory is synced
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_extended_runtime_vuln_load Interval extended runtime reports are synched (ecs, k8s containers and namespaces)
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_refresh Interval that images are refreshed
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_refresh Interval that tags are refreshed
     ## @param anchoreConfig.reports_worker.cycle_timers.reports_metrics Interval for how often reporting metrics are generated
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_data_egress Interval that stale reporting data removal is synced
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_egress Interval stale states are removed by image
+    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_egress Interval stale states are removed by tag
     ##
     cycle_timers:
-      reports_data_load: 600
-      reports_data_refresh: 7200
+      reports_image_load: 600
+      reports_tag_load: 600
+      reports_runtime_inventory_load: 600
+      reports_extended_runtime_vuln_load: 1800
+      reports_image_refresh: 7200
+      reports_tag_refresh: 7200
       reports_metrics: 3600
-      reports_data_egress: 600
+      reports_image_egress: 600
+      reports_tag_egress: 600
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
