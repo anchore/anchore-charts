@@ -1342,7 +1342,7 @@ ui-redis:
   ##
   chartEnabled: true
 
-  ## @param ui-redis.externalEndpoint External Redis endpoint when not using Helm managed chart (eg redis://nouser:<password>@hostname:6379)
+  ## @param ui-redis.externalEndpoint External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379)
   ##
   externalEndpoint: ""
 

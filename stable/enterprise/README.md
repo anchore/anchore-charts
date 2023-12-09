@@ -1328,13 +1328,13 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore UI Redis Parameters
 
-| Name                                  | Description                                                                                            | Value               |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------- |
-| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                                    | `true`              |
-| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://nouser:<password>@hostname:6379) | `""`                |
-| `ui-redis.auth.password`              | Password used for connecting to Redis                                                                  | `anchore-redis,123` |
-| `ui-redis.architecture`               | Redis deployment architecture                                                                          | `standalone`        |
-| `ui-redis.master.persistence.enabled` | enables persistence                                                                                    | `false`             |
+| Name                                  | Description                                                                                      | Value               |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
+| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`              |
+| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                |
+| `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123` |
+| `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`        |
+| `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`             |
 
 
 ### Anchore Database Parameters
