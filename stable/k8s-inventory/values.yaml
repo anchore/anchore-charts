@@ -204,9 +204,9 @@ k8sInventory:
   ## @param k8sInventory.anchore.http.timeoutSeconds the amount of time in seconds before timing out
   ##
   anchore:
-    url: "http://localhost:8228"
-    user: "admin"
-    password: "foobar"
+    url: ""
+    user: ""
+    password: ""
     account: "admin"
     http:
       insecure: true
