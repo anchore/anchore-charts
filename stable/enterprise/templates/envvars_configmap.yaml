@@ -22,8 +22,6 @@ data:
 {{- else }}
   ANCHORE_AUTH_PUBKEY: "null"
 {{- end }}
-  ANCHORE_AUTHZ_HANDLER: "external"
-  ANCHORE_AUTHZ_HANDLER_ENDPOINT: "http://localhost:8089"
   ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
   ANCHORE_CLI_URL: "http://localhost:8228"
   ANCHORE_CLI_USER: "admin"

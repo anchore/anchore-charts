@@ -67,7 +67,7 @@ spec:
         {{- if .Values.anchoreConfig.policyBundles }}
           {{- range $key, $value := .Values.anchoreConfig.policyBundles }}
             - name: policy-bundle-volume
-              mountPath: {{ $.Values.anchoreConfig.service_dir  }}/tempPolicies/{{ $key }}
+              mountPath: {{ $.Values.anchoreConfig.service_dir  }}/policies/{{ $key }}
               subPath: {{ $key }}
           {{- end }}
         {{- end }}

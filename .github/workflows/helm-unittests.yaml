@@ -19,6 +19,7 @@ jobs:
       REPO: "${{ github.repository }}"
       REPO_NAME: "${{ github.event.repository.name }}"
       TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
+      HELM_UNITTEST_VERSION: 0.3.5
     runs-on: ubuntu-latest
     steps:
       - name: Checkout charts
@@ -36,7 +37,7 @@ jobs:
 
       - name: Install helm-unittest
         run: |
-          helm plugin install https://github.com/helm-unittest/helm-unittest.git
+          helm plugin install https://github.com/helm-unittest/helm-unittest.git --version ${HELM_UNITTEST_VERSION}
 
       - run: cd "${REPO}" && git fetch origin ${TARGET_BRANCH}
 

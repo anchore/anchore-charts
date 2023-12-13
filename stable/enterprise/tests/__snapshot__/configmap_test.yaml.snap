@@ -87,6 +87,9 @@ should render the configmaps:
             enabled: ${ANCHORE_OAUTH_ENABLED}
             default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
             refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+            allow_api_keys_for_saml_users: false
+            max_api_key_age_days: 365
+            max_api_keys_per_user: 100
 
         credentials:
           database:
@@ -109,9 +112,9 @@ should render the configmaps:
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             listen: '0.0.0.0'
             port: ${ANCHORE_PORT}
-            authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
+            authorization_handler: external
             authorization_handler_config:
-              endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
+              endpoint: http://localhost:8089
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -148,6 +151,7 @@ should render the configmaps:
             cycle_timers:
               analyzer_queue: 1
               archive_tasks: 43200
+              artifact_lifecycle_policy_tasks: 43200
               events_gc: 43200
               image_gc: 60
               image_watcher: 3600
@@ -279,9 +283,9 @@ should render the configmaps:
             listen: '0.0.0.0'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-            authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
+            authorization_handler: external
             authorization_handler_config:
-              endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
+              endpoint: http://localhost:8089
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -294,9 +298,9 @@ should render the configmaps:
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
-            authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
+            authorization_handler: external
             authorization_handler_config:
-              endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
+              endpoint: http://localhost:8089
             max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
             async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -316,10 +320,15 @@ should render the configmaps:
             data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
             data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
             cycle_timers:
-              reports_data_egress: 600
-              reports_data_load: 600
-              reports_data_refresh: 7200
+              reports_extended_runtime_vuln_load: 1800
+              reports_image_egress: 600
+              reports_image_load: 600
+              reports_image_refresh: 7200
               reports_metrics: 3600
+              reports_runtime_inventory_load: 600
+              reports_tag_egress: 600
+              reports_tag_load: 600
+              reports_tag_refresh: 7200
             runtime_report_generation:
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
@@ -336,9 +345,9 @@ should render the configmaps:
             listen: '0.0.0.0'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-            authorization_handler: ${ANCHORE_AUTHZ_HANDLER}
+            authorization_handler: external
             authorization_handler_config:
-              endpoint: ${ANCHORE_AUTHZ_HANDLER_ENDPOINT}
+              endpoint: http://localhost:8089
             cycle_timers:
               notifications: 30
             ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
@@ -371,8 +380,6 @@ should render the configmaps:
       ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "true"
       ANCHORE_AUTH_PRIVKEY: "null"
       ANCHORE_AUTH_PUBKEY: "null"
-      ANCHORE_AUTHZ_HANDLER: external
-      ANCHORE_AUTHZ_HANDLER_ENDPOINT: http://localhost:8089
       ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
       ANCHORE_CLI_URL: http://localhost:8228
       ANCHORE_CLI_USER: admin

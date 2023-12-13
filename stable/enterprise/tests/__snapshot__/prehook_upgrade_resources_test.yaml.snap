@@ -143,6 +143,6 @@ should render proper initContainers:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-      image: docker.io/anchore/enterprise:v5.0.0
+      image: docker.io/anchore/enterprise:v5.1.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db
