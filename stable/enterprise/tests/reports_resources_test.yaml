@@ -156,7 +156,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^mkdir -p /anchore_service/policies /anchore_service/tempPolicies && cp -rp /anchore_service/tempPolicies/* /anchore_service/policies || echo &&  /docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports_worker$
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports_worker$
         count: 1
 
   - it: should render reports component environment variables

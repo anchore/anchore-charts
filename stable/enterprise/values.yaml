@@ -18,7 +18,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.0.0
+image: docker.io/anchore/enterprise:v5.1.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -233,6 +233,10 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.oauth.enabled Enable OAuth for Anchore user authentication
   ## @param anchoreConfig.user_authentication.oauth.default_token_expiration_seconds The expiration, in seconds, for OAuth tokens
   ## @param anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds The expiration, in seconds, for OAuth refresh tokens
+  ## @param anchoreConfig.user_authentication.oauth.allow_api_keys_for_saml_users Enable API key generation and authentication for SAML users
+  ## NOTE: Enterprise cannot automatically revoke or delete keys for disabled SAML users, the admin must revoke all keys assigned to a SAML user after disabling that user.
+  ## @param anchoreConfig.user_authentication.oauth.max_api_key_age_days The maximum age, in days, for API keys
+  ## @param anchoreConfig.user_authentication.oauth.max_api_keys_per_user The maximum number of API keys per user
   ## ref: https://docs.anchore.com/current/docs/installation/configuration/user_credential_storage/#bearer-tokensoauth2
   ##
   ## @param anchoreConfig.user_authentication.hashed_passwords Enable storing passwords as secure hashes in the database
@@ -248,6 +252,9 @@ anchoreConfig:
       enabled: true
       default_token_expiration_seconds: 3600
       refresh_token_expiration_seconds: 86400
+      allow_api_keys_for_saml_users: false
+      max_api_key_age_days: 365
+      max_api_keys_per_user: 100
     hashed_passwords: true
     sso_require_existing_users: false
 
@@ -426,6 +433,7 @@ anchoreConfig:
     ## @param anchoreConfig.catalog.cycle_timers.k8s_image_watcher Interval for the runtime inventory image analysis poll
     ## @param anchoreConfig.catalog.cycle_timers.resource_metrics Interval (seconds) for computing metrics from the DB
     ## @param anchoreConfig.catalog.cycle_timers.events_gc Interval (seconds) for cleaning up events in the system based on timestamp
+    ## @param anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks Interval (seconds) for running artifact lifecycle policy tasks
     ##
     cycle_timers:
       image_watcher: 3600
@@ -441,6 +449,7 @@ anchoreConfig:
       k8s_image_watcher: 150
       resource_metrics: 60
       events_gc: 43200
+      artifact_lifecycle_policy_tasks: 43200
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
     ## ref: https://docs.anchore.com/current/docs/using/cli_usage/event/#sending-events-as-webhook-notifications
@@ -1104,7 +1113,7 @@ rbacManager:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.0.0
+  image: docker.io/anchore/enterprise-ui:v5.1.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##

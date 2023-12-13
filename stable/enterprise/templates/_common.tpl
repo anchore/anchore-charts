@@ -53,7 +53,7 @@ Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsq
 Setup the common docker-entrypoint command for all Anchore Enterprise containers
 */}}
 {{- define "enterprise.common.dockerEntrypoint" -}}
-mkdir -p {{ $.Values.anchoreConfig.service_dir  }}/policies {{ $.Values.anchoreConfig.service_dir  }}/tempPolicies && cp -rp {{ $.Values.anchoreConfig.service_dir  }}/tempPolicies/* {{ $.Values.anchoreConfig.service_dir  }}/policies || echo && {{ print (include "enterprise.doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade
+{{ print (include "enterprise.doSourceFile" .) }} /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade
 {{- end -}}
 
 
