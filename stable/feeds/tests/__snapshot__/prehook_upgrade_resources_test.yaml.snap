@@ -143,6 +143,6 @@ should render proper initContainers:
           value: test-release-feeds
         - name: ANCHORE_PORT
           value: "8448"
-      image: docker.io/anchore/enterprise:v5.0.0
+      image: docker.io/anchore/enterprise:v5.1.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db
