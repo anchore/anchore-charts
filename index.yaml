@@ -5690,6 +5690,60 @@ entries:
     version: 0.0.1
   enterprise:
   - apiVersion: v2
+    appVersion: 5.1.0
+    created: "2023-12-13T14:41:25.297437884Z"
+    dependencies:
+    - condition: postgresql.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: ui-redis
+      condition: ui-redis.chartEnabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~17.11
+    - condition: feeds.chartEnabled
+      import-values:
+      - child: service
+        parent: feeds.service
+      - child: anchoreConfig.internalServicesSSL
+        parent: feeds.anchoreConfig.internalServicesSSL
+      name: feeds
+      repository: '@anchore'
+      version: ~2
+    description: 'Anchore Enterprise is a complete container security workflow solution
+      for professional teams. Easily integrating with CI/CD systems, it allows developers
+      to bolster security without compromising velocity and enables security teams
+      to audit and verify compliance in real-time. It is based on Anchore Engine,
+      an open-source image inspection and scanning tool. '
+    digest: 744b50433a96391d247cdc76c874c53090c36ca09eef837c9b0ec916b2004553
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - anchore-enterprise
+    - image
+    - security
+    - vulnerability
+    - scanner
+    kubeVersion: 1.23.x - 1.28.x || 1.23.x-x - 1.28.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: enterprise
+    sources:
+    - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/enterprise-2.1.0/enterprise-2.1.0.tgz
+    version: 2.1.0
+  - apiVersion: v2
     appVersion: 5.0.0
     created: "2023-12-04T21:48:34.089624972Z"
     dependencies:
@@ -7137,6 +7191,31 @@ entries:
     version: 0.0.1
   k8s-inventory:
   - apiVersion: v2
+    appVersion: 1.1.1
+    created: "2023-12-13T14:41:25.524020208Z"
+    description: A Helm chart for Kubernetes Automated Inventory, which describes
+      which images are in use in a given Kubernetes Cluster
+    digest: 835cd075bf76def233d37738a9e61a944b05366d743269c6e3368efc64bc0224
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: k8s-inventory
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/k8s-inventory-0.1.0/k8s-inventory-0.1.0.tgz
+    version: 0.1.0
+  - apiVersion: v2
     appVersion: 1.0.0
     created: "2023-09-19T22:14:50.59197339Z"
     description: A Helm chart for Kubernetes Automated Inventory, which describes
@@ -7581,4 +7660,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2023-12-13T03:34:15.670326853Z"
+generated: "2023-12-13T14:41:25.524366687Z"
