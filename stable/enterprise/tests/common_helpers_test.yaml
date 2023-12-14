@@ -112,7 +112,7 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^\/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade
 
   - it: should render docker entrypoint with doSourceAtEntry and some filePaths
     templates: *test_templates

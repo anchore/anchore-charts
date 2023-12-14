@@ -261,18 +261,28 @@ tests:
         count: 1
         any: true
 
-  - it: should render policy bundle volumeMounts when policy bundles are provided
+  - it: should render policy bundle volumeMounts when multiple policy bundles are provided
     template: catalog_deployment.yaml
     documentIndex: 0
     set:
       anchoreConfig.policyBundles:
         custom_policy_bundle1.json: {}
+        custom_policy_bundle2.json: {}
     asserts:
       - contains:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: policy-bundle-volume
-            mountPath: /anchore_service/policies/
+            mountPath: /anchore_service/policies/custom_policy_bundle1.json
+            subPath: custom_policy_bundle1.json
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/policies/custom_policy_bundle2.json
+            subPath: custom_policy_bundle2.json
         count: 1
         any: true
 

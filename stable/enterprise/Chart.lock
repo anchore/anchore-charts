@@ -7,6 +7,6 @@ dependencies:
   version: 17.11.8
 - name: feeds
   repository: https://charts.anchore.io/stable
-  version: 2.0.0
-digest: sha256:710754bebf235a60f134179a3d3b92b0738d15eee6bb6ae687e3ea5b9afb8dad
-generated: "2023-11-01T16:06:45.488156-07:00"
+  version: 2.1.0
+digest: sha256:385067b7a0ee56787d1a987313cdafd1345eb935eb73af5480453f03de36277a
+generated: "2023-12-12T19:37:54.203291-08:00"
