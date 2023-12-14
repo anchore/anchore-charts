@@ -37,4 +37,9 @@ jobs:
     - name: Run chart-testing (lint)
       id: lint
       run: ct lint --config 'ct-config.yaml'
-      if: steps.list-changed.outputs.CHANGED == 'true'
+      if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
+
+    - name: Run chart-testing but skip version check (lint)
+      id: lintskipversion
+      run: ct lint --config 'ct-config.yaml' --check-version-increment=false
+      if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref != 'main'
