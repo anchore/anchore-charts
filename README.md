@@ -51,7 +51,7 @@ The charts in this repository include a number of configuration options that can
 
 ## Contributing
 
-We welcome contributions to the anchore Helm charts repository. If you have a chart change that you would like to share, please submit a pull request with your change and any relevant documentation.
+We welcome contributions to the Anchore Helm charts repository. If you have a chart change that you would like to share, please submit a pull request with your change and any relevant documentation.
 
 All commits must be signed with the DCO as defined in [CONTRIBUTING](./CONTRIBUTING.rst). In git this can be done using the '-s' flag on commit.
 
@@ -65,4 +65,4 @@ We aim to have at least the .0 patches for the releases for predictability and s
 
 ## Support
 
-If you have any questions or need assistance with the charts in this repository, please visit the [Anchore documentation](https://docs.anchore.com/) or contact the anchore support team through the channels listed on the [Anchore support site](https://www.anchore.com/support/).
+If you have any questions or need assistance with the charts in this repository, please visit the [Anchore documentation](https://docs.anchore.com/) or contact the Anchore support team through the [Anchore support site](https://support.anchore.com/hc/en-us).
