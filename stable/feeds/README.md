@@ -312,7 +312,7 @@ anchoreConfig:
 | `url`                                 | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster. | `""`                                  |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                               | `""`                                  |
 | `nameOverride`                        | overrides the name set on resources                                                                   | `""`                                  |
-| `image`                               | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v4.9.3` |
+| `image`                               | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v4.9.4` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                                         | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                  | Name of a service account used to run all Feeds pods                                                  | `""`                                  |
@@ -331,7 +331,7 @@ anchoreConfig:
 | `service.annotations`                 | Annotations for Anchore Feeds service                                                                 | `{}`                                  |
 | `service.labels`                      | Labels for Anchore Feeds service                                                                      | `{}`                                  |
 | `service.nodePort`                    | nodePort for Anchore Feeds service                                                                    | `""`                                  |
-| `service.apiVersion`                  | the apiVersion for the service when communicating with Anchore Feeds                                  | `v2`                                  |
+| `service.apiVersion`                  | the apiVersion for the service when communicating with Anchore Feeds                                  | `v1`                                  |
 | `scratchVolume.mountPath`             | The mount path of an external volume for scratch space for image analysis                             | `/anchore_scratch`                    |
 | `scratchVolume.fixGroupPermissions`   | Enable an initContainer that will fix the fsGroup permissions                                         | `false`                               |
 | `scratchVolume.details`               | Details for the k8s volume to be created                                                              | `{}`                                  |
