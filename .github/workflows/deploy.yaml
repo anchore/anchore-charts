@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'release-*'
     paths:
       - 'stable/**'
 
@@ -36,8 +37,20 @@ jobs:
           helm repo add anchore https://charts.anchore.io/stable
           helm repo add bitnami https://charts.bitnami.com/bitnami
 
+      - name: Run chart-releaser not latest
+        if: github.event.pull_request.base.ref != 'main'
+        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
+        with:
+          charts_dir: stable
+          charts_repo_url: https://charts.anchore.io
+          mark_as_latest: false
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_MAKE_RELEASE_LATEST: "false"
+
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # v1.5.0
+        if: github.event.pull_request.base.ref == 'main'
+        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
         with:
           charts_dir: stable
           charts_repo_url: https://charts.anchore.io
