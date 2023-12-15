@@ -942,7 +942,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 | Name                                  | Description                                                                           | Value                                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.3` |
+| `image`                               | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v4.9.4` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |
 | `startMigrationPod`                   | Spin up a Database migration pod to help migrate the database to the new schema       | `false`                               |
@@ -1363,6 +1363,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v1.0.2
+
+- Updated Anchore Enterprise image to v4.9.4
 
 ### v1.0.0
 
