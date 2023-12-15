@@ -26,7 +26,7 @@ To install a chart, use the `helm install` command and specify the chart name an
 
 ```bash
 RELEASE_NAME="my-release"
-CHART_NAME="anchore/anchore-engine"
+CHART_NAME="anchore/enterprise"
 
 helm install "$RELEASE_NAME" "$CHART_NAME" --values values.yaml
 ```
@@ -39,7 +39,7 @@ It can be useful when developing to install a chart directly from the source cod
 RELEASE_NAME="my-release"
 CHART_PATH="anchore-charts/stable/enterprise"
 
-git clone https://github.com/anchore/anchore-charts-dev.git
+git clone https://github.com/anchore/anchore-charts.git
 cd "$CHART_PATH"
 helm dependency up
 helm install "$RELEASE_NAME" . --values values.yaml
