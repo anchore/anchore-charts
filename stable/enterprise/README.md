@@ -1366,7 +1366,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### v1.0.2
 
-- Updated Anchore Enterprise image to v4.9.3
+- Updated Anchore Enterprise image to v4.9.4
 
 ### v1.0.0
 
