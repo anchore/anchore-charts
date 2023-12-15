@@ -20,3 +20,14 @@ Initial setup time can be >120sec for postgresql setup and readiness checks to p
 You can check with:
 
     kubectl get pods -l app.kubernetes.io/name={{- template "enterprise.fullname" . -}},app.kubernetes.io/component=api
+
+{{ if and .Values.useExistingSecret .Release.IsUpgrade (semverCompare "~2.1.0" .Chart.Version) }}
+******************
+
+WARNING: This deployment is utilizing Existing Secrets. Your ANCHORE_REDIS_URI environment variable needs to be updated.
+A username is no longer required, please remove `nouser` from the URI. The UI will not function unless this update is performed.
+
+For more details see the v2.1.0 release notes - https://github.com/anchore/anchore-charts/blob/main/stable/enterprise/README.md#v210
+
+******************
+{{ end }}
