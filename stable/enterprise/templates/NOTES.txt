@@ -21,7 +21,7 @@ You can check with:
 
     kubectl get pods -l app.kubernetes.io/name={{- template "enterprise.fullname" . -}},app.kubernetes.io/component=api
 
-{{ if and .Values.useExistingSecret .Release.IsUpgrade (semverCompare "~2.1.0" .Chart.Version) }}
+{{ if and .Values.useExistingSecrets .Release.IsUpgrade (semverCompare "~2.1.0" .Chart.Version) }}
 ******************
 
 WARNING: This deployment is utilizing Existing Secrets. Your ANCHORE_REDIS_URI environment variable needs to be updated.
