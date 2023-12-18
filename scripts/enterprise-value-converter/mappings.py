@@ -150,7 +150,6 @@ FULL_CHANGE_KEY_MAPPING = {
     "anchore-feeds-gem-db.postgresUser": "feeds.gem-db.auth.username",
 
 
-    "anchoreAnalyzer.concurrentTasksPerWorker": "anchoreConfig.analyzer.max_threads",
     "anchoreAnalyzer.containerPort": "analyzer.service.port",
     "anchoreAnalyzer.enableHints": "anchoreConfig.analyzer.enable_hints",
 
@@ -292,6 +291,7 @@ DEPRECATED_KEYS = {
     "postgresql.persistence.resourcePolicy": "deprecated",
     "anchoreGlobal.saml.useExistingSecret": "deprecated",
     "anchoreEnterpriseReports.service.workerPort": "deprecated",
+    "anchoreAnalyzer.concurrentTasksPerWorker": "deprecated",
 }
 
 POST_PROCESSING = {

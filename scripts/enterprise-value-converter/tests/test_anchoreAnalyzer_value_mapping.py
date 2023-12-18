@@ -227,23 +227,6 @@ class TestReplaceKeysWithMappingsAnalyzer(unittest.TestCase):
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 
-    def test_anchoreAnalyzer_concurrentTasksPerWorker_value(self):
-        dot_string_dict = {
-            "anchoreAnalyzer.concurrentTasksPerWorker": 1,
-        }
-        expected_result = {
-            'postgresql': {'auth': {'username': 'anchoreengine'}},
-            'anchoreConfig': {
-                'user_authentication': {'hashed_passwords': False},
-                'analyzer': {
-                    'max_threads': 1
-                }
-            }
-
-        }
-        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
-        self.assertEqual(result[0], expected_result)
-
     def test_anchoreAnalyzer_layerCacheMaxGigabytes_value(self):
         dot_string_dict = {
             "anchoreAnalyzer.layerCacheMaxGigabytes": 1,

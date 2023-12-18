@@ -129,7 +129,6 @@ should render the configmaps:
             cycle_timer_seconds: 1
             cycle_timers:
               image_analyzer: 1
-            max_threads: ${ANCHORE_ANALYZER_MAX_THREADS}
             analyzer_driver: 'nodocker'
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
