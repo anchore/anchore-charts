@@ -374,7 +374,6 @@ should render the configmaps:
     data:
       ANCHORE_ADMIN_EMAIL: admin@myanchore
       ANCHORE_ALLOW_ECR_IAM_AUTO: "true"
-      ANCHORE_ANALYZER_MAX_THREADS: "1"
       ANCHORE_ANALYZER_TASK_REQUEUE: "true"
       ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "true"
       ANCHORE_AUTH_PRIVKEY: "null"
