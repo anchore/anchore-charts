@@ -361,12 +361,6 @@ anchoreConfig:
     cycle_timers:
       image_analyzer: 1
 
-    ## @param anchoreConfig.analyzer.max_threads The concurrency of the Anchore Analyzer worker process
-    ## Can be configured to process more than one task at a time. This is IO bound so may not necessarily be faster depending on hardware.
-    ## Operators should test and balance this value vs. number of Anchore Analyzer replicas deployed.
-    ##
-    max_threads: 1
-
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
     ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.scratchVolume
     ## When setting .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes, ensure the scratch volume has sufficient storage space
