@@ -992,9 +992,9 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `anchoreConfig.user_authentication.oauth.enabled`                              | Enable OAuth for Anchore user authentication                                                                                     | `true`             |
 | `anchoreConfig.user_authentication.oauth.default_token_expiration_seconds`     | The expiration, in seconds, for OAuth tokens                                                                                     | `3600`             |
 | `anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds`     | The expiration, in seconds, for OAuth refresh tokens                                                                             | `86400`            |
-| `anchoreConfig.user_authentication.oauth.allow_api_keys_for_saml_users`        | Enable API key generation and authentication for SAML users                                                                      | `false`            |
-| `anchoreConfig.user_authentication.oauth.max_api_key_age_days`                 | The maximum age, in days, for API keys                                                                                           | `365`              |
-| `anchoreConfig.user_authentication.oauth.max_api_keys_per_user`                | The maximum number of API keys per user                                                                                          | `100`              |
+| `anchoreConfig.user_authentication.allow_api_keys_for_saml_users`        | Enable API key generation and authentication for SAML users                                                                      | `false`            |
+| `anchoreConfig.user_authentication.max_api_key_age_days`                 | The maximum age, in days, for API keys                                                                                           | `365`              |
+| `anchoreConfig.user_authentication.max_api_keys_per_user`                | The maximum number of API keys per user                                                                                          | `100`              |
 | `anchoreConfig.user_authentication.hashed_passwords`                           | Enable storing passwords as secure hashes in the database                                                                        | `true`             |
 | `anchoreConfig.user_authentication.sso_require_existing_users`                 | set to true in order to disable the SSO JIT provisioning during authentication                                                   | `false`            |
 | `anchoreConfig.metrics.enabled`                                                | Enable Prometheus metrics for all Anchore services                                                                               | `false`            |
@@ -1349,6 +1349,13 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V2.2.0
+
+- The following keys were changed:
+    1. anchoreConfig.user_authentication.oauth.allow_api_keys_for_saml_users -> anchoreConfig.user_authentication.allow_api_keys_for_saml_users
+    2. anchoreConfig.user_authentication.oauth.max_api_key_age_days -> anchoreConfig.user_authentication.max_api_key_age_days
+    3. anchoreConfig.user_authentication.oauth.max_api_keys_per_user -> anchoreConfig.user_authentication.max_api_keys_per_user
 
 ### V2.1.0
 

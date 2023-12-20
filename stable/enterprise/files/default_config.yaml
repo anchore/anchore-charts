@@ -40,9 +40,9 @@ user_authentication:
     enabled: ${ANCHORE_OAUTH_ENABLED}
     default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
     refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-    allow_api_keys_for_saml_users: {{ .Values.anchoreConfig.user_authentication.oauth.allow_api_keys_for_saml_users }}
-    max_api_key_age_days: {{ .Values.anchoreConfig.user_authentication.oauth.max_api_key_age_days }}
-    max_api_keys_per_user: {{ .Values.anchoreConfig.user_authentication.oauth.max_api_keys_per_user }}
+  allow_api_keys_for_saml_users: {{ .Values.anchoreConfig.user_authentication.allow_api_keys_for_saml_users }}
+  max_api_key_age_days: {{ .Values.anchoreConfig.user_authentication.max_api_key_age_days }}
+  max_api_keys_per_user: {{ .Values.anchoreConfig.user_authentication.max_api_keys_per_user }}
 
 credentials:
   database:

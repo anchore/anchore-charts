@@ -87,9 +87,9 @@ should render the configmaps:
             enabled: ${ANCHORE_OAUTH_ENABLED}
             default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
             refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-            allow_api_keys_for_saml_users: false
-            max_api_key_age_days: 365
-            max_api_keys_per_user: 100
+          allow_api_keys_for_saml_users: false
+          max_api_key_age_days: 365
+          max_api_keys_per_user: 100
 
         credentials:
           database:
