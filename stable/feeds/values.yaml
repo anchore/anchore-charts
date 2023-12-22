@@ -486,7 +486,7 @@ feedsUpgradeJob:
   usePostUpgradeHook: false
 
 
-  ## @param feedsUpgradeJob.kubectlImage the image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
+  ## @param feedsUpgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
   ## This is only used in the preupgrade job.
   ##
   kubectlImage: bitnami/kubectl:1.27

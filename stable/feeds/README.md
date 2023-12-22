@@ -434,20 +434,21 @@ anchoreConfig:
 
 ### Anchore Feeds Upgrade Job Parameters
 
-| Name                                      | Description                                                                                                                                     | Value   |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `feedsUpgradeJob.enabled`                 | Enable the Anchore Feeds database upgrade job                                                                                                   | `true`  |
-| `feedsUpgradeJob.force`                   | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false` |
-| `feedsUpgradeJob.rbacCreate`              | Create RBAC resources for the upgrade job                                                                                                       | `true`  |
-| `feedsUpgradeJob.serviceAccountName`      | Use an existing service account for the upgrade job                                                                                             | `""`    |
-| `feedsUpgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false` |
-| `feedsUpgradeJob.nodeSelector`            | Node labels for the Anchore Feeds upgrade job pod assignment                                                                                    | `{}`    |
-| `feedsUpgradeJob.tolerations`             | Tolerations for the Anchore Feeds upgrade job pod assignment                                                                                    | `[]`    |
-| `feedsUpgradeJob.affinity`                | Affinity for the Anchore Feeds upgrade job pod assignment                                                                                       | `{}`    |
-| `feedsUpgradeJob.annotations`             | Annotations for the Anchore Feeds upgrade job                                                                                                   | `{}`    |
-| `feedsUpgradeJob.labels`                  | Labels for the Anchore Feeds upgrade job                                                                                                        | `{}`    |
-| `feedsUpgradeJob.resources`               | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`    |
-| `feedsUpgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
+| Name                                      | Description                                                                                                                                     | Value                  |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `feedsUpgradeJob.enabled`                 | Enable the Anchore Feeds database upgrade job                                                                                                   | `true`                 |
+| `feedsUpgradeJob.force`                   | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false`                |
+| `feedsUpgradeJob.rbacCreate`              | Create RBAC resources for the upgrade job                                                                                                       | `true`                 |
+| `feedsUpgradeJob.serviceAccountName`      | Use an existing service account for the upgrade job                                                                                             | `""`                   |
+| `feedsUpgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                |
+| `feedsUpgradeJob.kubectlImage`            | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.27` |
+| `feedsUpgradeJob.nodeSelector`            | Node labels for the Anchore Feeds upgrade job pod assignment                                                                                    | `{}`                   |
+| `feedsUpgradeJob.tolerations`             | Tolerations for the Anchore Feeds upgrade job pod assignment                                                                                    | `[]`                   |
+| `feedsUpgradeJob.affinity`                | Affinity for the Anchore Feeds upgrade job pod assignment                                                                                       | `{}`                   |
+| `feedsUpgradeJob.annotations`             | Annotations for the Anchore Feeds upgrade job                                                                                                   | `{}`                   |
+| `feedsUpgradeJob.labels`                  | Labels for the Anchore Feeds upgrade job                                                                                                        | `{}`                   |
+| `feedsUpgradeJob.resources`               | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`                   |
+| `feedsUpgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
 
 ### Ingress Parameters
 
