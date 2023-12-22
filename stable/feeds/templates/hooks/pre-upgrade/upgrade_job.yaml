@@ -64,7 +64,7 @@ spec:
       {{- end }}
       initContainers:
         - name: scale-down-anchore
-          image: bitnami/kubectl:1.27
+          image: {{ .Values.feedsUpgradeJob.kubectlImage }}
           command: ["/bin/bash", "-c"]
           args:
             - |
