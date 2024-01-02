@@ -992,9 +992,9 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `anchoreConfig.user_authentication.oauth.enabled`                              | Enable OAuth for Anchore user authentication                                                                                     | `true`             |
 | `anchoreConfig.user_authentication.oauth.default_token_expiration_seconds`     | The expiration, in seconds, for OAuth tokens                                                                                     | `3600`             |
 | `anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds`     | The expiration, in seconds, for OAuth refresh tokens                                                                             | `86400`            |
-| `anchoreConfig.user_authentication.allow_api_keys_for_saml_users`        | Enable API key generation and authentication for SAML users                                                                      | `false`            |
-| `anchoreConfig.user_authentication.max_api_key_age_days`                 | The maximum age, in days, for API keys                                                                                           | `365`              |
-| `anchoreConfig.user_authentication.max_api_keys_per_user`                | The maximum number of API keys per user                                                                                          | `100`              |
+| `anchoreConfig.user_authentication.allow_api_keys_for_saml_users`              | Enable API key generation and authentication for SAML users                                                                      | `false`            |
+| `anchoreConfig.user_authentication.max_api_key_age_days`                       | The maximum age, in days, for API keys                                                                                           | `365`              |
+| `anchoreConfig.user_authentication.max_api_keys_per_user`                      | The maximum number of API keys per user                                                                                          | `100`              |
 | `anchoreConfig.user_authentication.hashed_passwords`                           | Enable storing passwords as secure hashes in the database                                                                        | `true`             |
 | `anchoreConfig.user_authentication.sso_require_existing_users`                 | set to true in order to disable the SSO JIT provisioning during authentication                                                   | `false`            |
 | `anchoreConfig.metrics.enabled`                                                | Enable Prometheus metrics for all Anchore services                                                                               | `false`            |
@@ -1271,20 +1271,21 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore Upgrade Job Parameters
 
-| Name                                 | Description                                                                                                                                     | Value   |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `upgradeJob.enabled`                 | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`  |
-| `upgradeJob.force`                   | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false` |
-| `upgradeJob.rbacCreate`              | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`  |
-| `upgradeJob.serviceAccountName`      | Use an existing service account for the Anchore upgrade job                                                                                     | `""`    |
-| `upgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false` |
-| `upgradeJob.nodeSelector`            | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`    |
-| `upgradeJob.tolerations`             | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`    |
-| `upgradeJob.affinity`                | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`    |
-| `upgradeJob.annotations`             | Annotations for the Anchore upgrade job                                                                                                         | `{}`    |
-| `upgradeJob.resources`               | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`    |
-| `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`    |
-| `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`    |
+| Name                                 | Description                                                                                                                                     | Value                  |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `upgradeJob.enabled`                 | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`                 |
+| `upgradeJob.force`                   | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false`                |
+| `upgradeJob.rbacCreate`              | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                 |
+| `upgradeJob.serviceAccountName`      | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                   |
+| `upgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                |
+| `upgradeJob.kubectlImage`            | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.27` |
+| `upgradeJob.nodeSelector`            | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                   |
+| `upgradeJob.tolerations`             | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                   |
+| `upgradeJob.affinity`                | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                   |
+| `upgradeJob.annotations`             | Annotations for the Anchore upgrade job                                                                                                         | `{}`                   |
+| `upgradeJob.resources`               | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                   |
+| `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`                   |
+| `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
 
 ### Ingress Parameters
 
