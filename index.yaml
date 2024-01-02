@@ -5738,6 +5738,60 @@ entries:
   enterprise:
   - apiVersion: v2
     appVersion: 5.1.0
+    created: "2024-01-02T22:34:34.663057165Z"
+    dependencies:
+    - condition: postgresql.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: ui-redis
+      condition: ui-redis.chartEnabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~17.11
+    - condition: feeds.chartEnabled
+      import-values:
+      - child: service
+        parent: feeds.service
+      - child: anchoreConfig.internalServicesSSL
+        parent: feeds.anchoreConfig.internalServicesSSL
+      name: feeds
+      repository: '@anchore'
+      version: ~2
+    description: 'Anchore Enterprise is a complete container security workflow solution
+      for professional teams. Easily integrating with CI/CD systems, it allows developers
+      to bolster security without compromising velocity and enables security teams
+      to audit and verify compliance in real-time. It is based on Anchore Engine,
+      an open-source image inspection and scanning tool. '
+    digest: fe09cf0cc0d231e836d7f1cb03565d3458aff389efa0a5e57dd3d5c32c47a84b
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - anchore-enterprise
+    - image
+    - security
+    - vulnerability
+    - scanner
+    kubeVersion: 1.23.x - 1.28.x || 1.23.x-x - 1.28.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: enterprise
+    sources:
+    - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/enterprise-2.2.1/enterprise-2.2.1.tgz
+    version: 2.2.1
+  - apiVersion: v2
+    appVersion: 5.1.0
     created: "2023-12-20T17:09:47.811486181Z"
     dependencies:
     - condition: postgresql.chartEnabled
@@ -7989,4 +8043,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-02T21:48:27.568829807Z"
+generated: "2024-01-02T22:34:34.663414791Z"
