@@ -915,6 +915,7 @@ anchoreEnterpriseFeeds:
   # persistence controls the mounting of an external volume for feed driver download workspace.
   persistence:
     enabled: true
+    fixGroupPermissions: false
     resourcePolicy: keep  # set resource-policy Helm annotation on PVC. Can be nil or "keep"
 
     ## A manually managed Persistent Volume and Claim
