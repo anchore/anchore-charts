@@ -33,7 +33,7 @@ spec:
     {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
       initContainers:
         - name: mode-fixer
-          image: alpine
+          image: {{ .Values.scratchVolume.fixerInitContainerImage }}
           securityContext:
             runAsUser: 0
           volumeMounts:

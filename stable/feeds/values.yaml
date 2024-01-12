@@ -109,6 +109,7 @@ service:
 scratchVolume:
   mountPath: /anchore_scratch
   fixGroupPermissions: false
+  fixerInitContainerImage: alpine
   details: {}
 
 ## @param persistence.enabled Enable mounting an external volume for feeds driver workspace
