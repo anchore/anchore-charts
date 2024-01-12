@@ -117,7 +117,7 @@ should render proper initContainers:
               CONNSTR=${CONNSTR}?sslmode=${ANCHORE_FEEDS_DB_SSL_MODE}
             fi
             if [[ ${ANCHORE_FEEDS_DB_SSL_ROOT_CERT} != null ]]; then
-              CONNSTR=${CONNSTR}&sslrootcert=/home/anchore/certs/${ANCHORE_FEEDS_DB_SSL_ROOT_CERT}
+              CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_FEEDS_DB_SSL_ROOT_CERT}
             fi
             err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
             if [[ !$err ]]; then

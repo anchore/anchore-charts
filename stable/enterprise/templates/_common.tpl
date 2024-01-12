@@ -115,7 +115,7 @@ Setup the common fix permissions init container for all pods using a scratch vol
 */}}
 {{- define "enterprise.common.fixPermissionsInitContainer" -}}
 - name: mode-fixer
-  image: alpine
+  image: {{ .Values.scratchVolume.fixerInitContainerImage }}
   securityContext:
     runAsUser: 0
   volumeMounts:

@@ -173,6 +173,7 @@ anchoreGlobal:
     # Some k8s Volumes do not properly respect the fsGroup permissions. These volumes will get mounted as root:root
     # regardless of the security permissions requested. The fixGroupPermissions will create an initContainer that will
     # fixup the permissions.
+    initContainerImage: alpine
     fixGroupPermissions: false
     mountPath: /analysis_scratch
     details: {}

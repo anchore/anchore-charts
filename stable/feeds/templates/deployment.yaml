@@ -30,19 +30,30 @@ spec:
       imagePullSecrets:
         - name: {{ . }}
     {{- end }}
-    {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
+    {{- if and (or .Values.scratchVolume.fixGroupPermissions .Values.persistence.fixGroupPermissions) .Values.securityContext.fsGroup }}
       initContainers:
         - name: mode-fixer
-          image: alpine
+          image: {{ .Values.scratchVolume.fixerInitContainerImage }}
           securityContext:
             runAsUser: 0
           volumeMounts:
+          {{- if .Values.scratchVolume.fixGroupPermissions }}
             - name: "anchore-scratch"
               mountPath: {{ .Values.scratchVolume.mountPath }}
-          command:
-            - sh
-            - -c
+          {{- end }}
+          {{- if .Values.persistence.fixGroupPermissions }}
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+              subPath: {{ .Values.persistence.subPath }}
+          {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+          {{- if .Values.scratchVolume.fixGroupPermissions }}
             - (chmod 0775 {{ .Values.scratchVolume.mountPath }}; chgrp {{ .Values.securityContext.fsGroup }} {{ .Values.scratchVolume.mountPath }} )
+          {{- end }}
+          {{- if .Values.persistence.fixGroupPermissions }}
+            - (chmod 0775 {{ .Values.persistence.mountPath }}; chgrp {{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }} )
+          {{- end }}
     {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
