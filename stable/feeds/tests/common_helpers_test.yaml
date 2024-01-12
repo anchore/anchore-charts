@@ -286,7 +286,11 @@ tests:
             volumeMounts:
               - name: "anchore-scratch"
                 mountPath: /anchore_scratch
-            command: [ sh, -c, (chmod 0775 /anchore_scratch; chgrp 9999 /anchore_scratch ) ]
+            args:
+              - (chmod 0775 /anchore_scratch; chgrp 9999 /anchore_scratch )
+            command:
+              - /bin/sh
+              - -c
           count: 1
           any: true
 
