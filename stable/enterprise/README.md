@@ -632,8 +632,6 @@ metadata:
   namespace: ...
 type: Opaque
 data:
-  internal-ca-cert-bundle.pam:
-[base64 encoded text]
   rds-combined-ca-cert-bundle.pem:
 [base64 encoded text]
   internal-cert.pem:
@@ -665,7 +663,8 @@ anchoreConfig:
     certSecretCertFileName: internal-cert.pem
 
 ui:
-  # Specify an LDAP CA cert if using LDAP authenication
+  # Specify an LDAP CA cert if using LDAP authenication.
+  # Note if using an internal ca cert for internalServicesSSL, combine that into the ldap-combined-ca-cert-bundle.pem
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
 
