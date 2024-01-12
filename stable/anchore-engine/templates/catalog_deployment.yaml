@@ -75,7 +75,7 @@ spec:
     {{- if and .Values.anchoreGlobal.scratchVolume.fixGroupPermissions .Values.anchoreGlobal.securityContext.fsGroup }}
       initContainers:
         - name: mode-fixer
-          image: alpine
+          image: {{ .Values.anchoreGlobal.scratchVolume.initContainerImage }}
           securityContext:
             runAsUser: 0
           volumeMounts:
