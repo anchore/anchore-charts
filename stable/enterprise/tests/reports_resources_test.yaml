@@ -291,3 +291,78 @@ tests:
             app.kubernetes.io/name: test-release-enterprise
             app.kubernetes.io/component: reports
         count: 1
+
+  - it: should render scratch volume as emptyDir by default if use_disk is enabled
+    template: reports_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.reports.use_volume: true
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+
+  - it: should render scratch volume as per details if specified
+    template: reports_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.reports.use_volume: true
+      scratchVolume.details: 
+        csi:
+          driver: inline.storage.kubernetes.io
+          volumeAttributes:
+            foo: bar
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            csi:
+              driver: inline.storage.kubernetes.io
+              volumeAttributes:
+                foo: bar
+        count: 1
+
+  - it: should not render scratch volume use_disk is not enabled (default)
+    template: reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+
+  - it: should render fixPermissionsInitContainer 
+    templates:
+      - reports_deployment.yaml
+    documentIndex: 0
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+      anchoreConfig.reports.use_volume: true
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
+
+  - it: should not render fixPermissionsInitContainer if use_volume isn't enabled
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+    templates:
+      - reports_deployment.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers

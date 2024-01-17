@@ -24,6 +24,18 @@ spec:
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       volumes: {{- include "enterprise.common.volumes" . | nindent 8 }}
+        {{- if .Values.anchoreConfig.reports.use_volume }}
+        - name: "anchore-scratch"
+        {{- if .Values.scratchVolume.details }}
+          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+        {{- end }}
+    {{- if and .Values.anchoreConfig.reports.use_volume .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
+      initContainers:
+        {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
+    {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
@@ -44,6 +56,10 @@ spec:
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
+          {{- if .Values.anchoreConfig.reports.use_volume }}
+            - name: "anchore-scratch"
+              mountPath: {{ .Values.scratchVolume.mountPath }}
+          {{- end }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
           readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
         {{- with .Values.reports.resources }}
