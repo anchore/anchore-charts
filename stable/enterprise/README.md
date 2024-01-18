@@ -791,7 +791,7 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
     # export ADMIN_PASS=$(kubectl get secret -n ${NAMESPACE} ${ENGINE_RELEASE}-anchore-engine-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 -d -)
     # export SET_ADMIN_PASS=("--set" "anchoreConfig.default_admin_password=${ADMIN_PASS}")
 
-    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} ${SET_ADMIN_PASS[@]} -f ${ENTERPRISE_VALUES_FILE} anchore/enterprise --version=1.0.0
+    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} ${SET_ADMIN_PASS[@]} -f ${ENTERPRISE_VALUES_FILE} anchore/enterprise --version=^1.0.0
     ```
 
 1. **Verification and Cleanup**: After confirming that the Anchore Enterprise deployment is functional, you can safely uninstall the old Anchore Engine deployment.
@@ -840,7 +840,7 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
     export ADMIN_PASS=$(kubectl get secret -n ${NAMESPACE} ${ENGINE_RELEASE}-anchore-engine-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 -d -)
     export SET_ADMIN_PASS=("--set" "anchoreConfig.default_admin_password=${ADMIN_PASS}")
 
-    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=true --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine ${SET_ADMIN_PASS[@]} anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=1.0.0
+    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=true --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine ${SET_ADMIN_PASS[@]} anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=^1.0.0
     ```
 
 1. **Scale Down Anchore Enterprise**: Before migrating the database, scale down the new Anchore Enterprise deployment to zero replicas.
@@ -890,7 +890,7 @@ See the [Migration Rollback Steps](#migration-rollback-steps) section for more d
     export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
     export ENTERPRISE_VALUES_FILE=${PWD}/output/enterprise.my-values-file.yaml  # The converted file
 
-    helm upgrade ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=false anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=1.0.0
+    helm upgrade ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=false anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=^1.0.0
     ```
 
 1. **Final Verification and Cleanup**: After ensuring the new deployment is operational, uninstall the old Anchore Engine deployment.
