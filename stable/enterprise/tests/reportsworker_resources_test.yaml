@@ -1,6 +1,6 @@
 suite: Reports Resources Tests
 templates:
-  - reports_deployment.yaml
+  - reportsworker_deployment.yaml
   - anchore_secret.yaml
   - anchore_configmap.yaml
 release:
@@ -12,16 +12,16 @@ chart:
 
 tests:
   - it: should set the correct resource names
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     asserts:
       - equal:
           path: metadata.name
-          value: test-release-enterprise-reports
+          value: test-release-enterprise-reportsworker
 
   - it: should render component labels
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     set:
-      reports.labels:
+      reportsWorker.labels:
         reports: test
         test: foobar
     asserts:
@@ -35,13 +35,13 @@ tests:
           content:
             reports: test
             test: foobar
-        template: reports_deployment.yaml
+        template: reportsworker_deployment.yaml
         documentIndex: 0
 
   - it: should render component annotations
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     set:
-      reports.annotations:
+      reportsWorker.annotations:
         reports: test
         test: foobar
     asserts:
@@ -55,55 +55,55 @@ tests:
           content:
             reports: test
             test: foobar
-        template: reports_deployment.yaml
+        template: reportsworker_deployment.yaml
         documentIndex: 0
 
   - it: should render component matchLabels
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
           path: spec.selector.matchLabels
           content:
             app.kubernetes.io/name: test-release-enterprise
-            app.kubernetes.io/component: reports
+            app.kubernetes.io/component: reportsworker
 
   - it: should render component replica count
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
-      reports.replicaCount: 2
+      reportsWorker.replicaCount: 2
     asserts:
       - equal:
           path: spec.replicas
           value: 2
 
   - it: should render component serviceAccountName
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
-      reports.serviceAccountName: reports-test
+      reportsWorker.serviceAccountName: reports-test
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
           value: reports-test
 
   - it: should render component serviceAccountName even when global serviceAccountName is set
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
       serviceAccountName: global-test
-      reports.serviceAccountName: reports-test
+      reportsWorker.serviceAccountName: reports-test
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
           value: reports-test
 
   - it: should render component nodeSelector
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
-      reports.nodeSelector:
+      reportsWorker.nodeSelector:
         reports: test
     asserts:
       - isSubset:
@@ -112,10 +112,10 @@ tests:
             reports: test
 
   - it: should render component affinity
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
-      reports.affinity:
+      reportsWorker.affinity:
         reports: test
     asserts:
       - isSubset:
@@ -124,10 +124,10 @@ tests:
             reports: test
 
   - it: should render component tolerations
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
-      reports.tolerations:
+      reportsWorker.tolerations:
         - key: "reports"
           operator: "Equal"
           value: "test"
@@ -143,27 +143,27 @@ tests:
           count: 1
 
   - it: should render component container name
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     asserts:
       - equal:
           path: spec.template.spec.containers[0].name
-          value: enterprise-reports
+          value: enterprise-reportsworker
 
   - it: should render component entrypoint args
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports$
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports_worker$
         count: 1
 
   - it: should render reports component environment variables
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
-      reports.extraEnv:
+      reportsWorker.extraEnv:
         - name: reports
           value: test
         - name: test
@@ -173,13 +173,13 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-reports
+            value: test-release-enterprise-reportsworker
         count: 1
       - contains:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_PORT
-            value: "8558"
+            value: "8559"
         count: 1
       - contains:
           path: spec.template.spec.containers[0].env
@@ -194,18 +194,18 @@ tests:
             value: foobar
 
   - it: should render component ports
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     asserts:
       - contains:
           path: spec.template.spec.containers[0].ports
           content:
-            name: reports
-            containerPort: 8558
+            name: reportsworker
+            containerPort: 8559
         count: 1
 
   - it: should render component probes
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -213,7 +213,7 @@ tests:
           content:
             httpGet:
               path: /health
-              port: reports
+              port: reportsworker
               scheme: HTTP
             initialDelaySeconds: 120
             timeoutSeconds: 10
@@ -226,7 +226,7 @@ tests:
           content:
             httpGet:
               path: /health
-              port: reports
+              port: reportsworker
               scheme: HTTP
             timeoutSeconds: 10
             periodSeconds: 10
@@ -235,10 +235,10 @@ tests:
         count: 1
 
   - it: should render component resource requests & limits
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 0
     set:
-      reports.resources:
+      reportsWorker.resources:
         requests:
           cpu: 100m
           memory: 128Mi
@@ -260,7 +260,7 @@ tests:
         count: 1
 
   - it: should render component service type
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 1
     asserts:
       - equal:
@@ -269,100 +269,25 @@ tests:
         count: 1
 
   - it: should render component service ports
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 1
     asserts:
       - contains:
           path: spec.ports
           content:
-            name: reports
-            port: 8558
-            targetPort: 8558
+            name: reportsworker
+            port: 8559
+            targetPort: 8559
             protocol: TCP
         count: 1
 
   - it: should render component service selectors
-    template: reports_deployment.yaml
+    template: reportsworker_deployment.yaml
     documentIndex: 1
     asserts:
       - isSubset:
           path: spec.selector
           content:
             app.kubernetes.io/name: test-release-enterprise
-            app.kubernetes.io/component: reports
+            app.kubernetes.io/component: reportsworker
         count: 1
-
-  - it: should render scratch volume as emptyDir by default if use_disk is enabled
-    template: reports_deployment.yaml
-    documentIndex: 0
-    set:
-      anchoreConfig.reports.use_volume: true
-    asserts:
-      - contains:
-          path: spec.template.spec.volumes
-          content:
-            name: anchore-scratch
-            emptyDir: {}
-        count: 1
-
-  - it: should render scratch volume as per details if specified
-    template: reports_deployment.yaml
-    documentIndex: 0
-    set:
-      anchoreConfig.reports.use_volume: true
-      scratchVolume.details:
-        csi:
-          driver: inline.storage.kubernetes.io
-          volumeAttributes:
-            foo: bar
-    asserts:
-      - contains:
-          path: spec.template.spec.volumes
-          content:
-            name: anchore-scratch
-            csi:
-              driver: inline.storage.kubernetes.io
-              volumeAttributes:
-                foo: bar
-        count: 1
-
-  - it: should not render scratch volume use_disk is not enabled (default)
-    template: reports_deployment.yaml
-    documentIndex: 0
-    asserts:
-      - notContains:
-          path: spec.template.spec.volumes
-          content:
-            name: anchore-scratch
-            emptyDir: {}
-        count: 1
-
-  - it: should render fixPermissionsInitContainer
-    templates:
-      - reports_deployment.yaml
-    documentIndex: 0
-    set:
-      scratchVolume.fixGroupPermissions: true
-      securityContext.fsGroup: 9999
-      anchoreConfig.reports.use_volume: true
-    asserts:
-      - contains:
-          path: spec.template.spec.initContainers
-          content:
-            name: mode-fixer
-            volumeMounts:
-              - name: "anchore-scratch"
-                mountPath: /analysis_scratch
-            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
-          count: 1
-          any: true
-
-  - it: should not render fixPermissionsInitContainer if use_volume isn't enabled
-    set:
-      scratchVolume.fixGroupPermissions: true
-      securityContext.fsGroup: 9999
-    templates:
-      - reports_deployment.yaml
-    asserts:
-      - notExists:
-          path: spec.template.spec.initContainers

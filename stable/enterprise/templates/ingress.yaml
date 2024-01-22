@@ -98,13 +98,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ template "enterprise.api.fullname" $ }}
+                name: {{ template "enterprise.reports.fullname" $ }}
                 port:
-                  number: {{ $.Values.api.service.reportsPort }}
+                  number: {{ $.Values.reports.service.port }}
           {{- else }}
             backend:
-              serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.api.service.reportsPort }}
+              serviceName: {{ template "enterprise.reports.fullname" $ }}
+              servicePort: {{ $.Values.reports.service.port }}
           {{- end }}
         {{- end }}
     {{- end }}
@@ -162,13 +162,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ template "enterprise.api.fullname" $ }}
+                name: {{ template "enterprise.reports.fullname" $ }}
                 port:
-                  number: {{ $.Values.api.service.reportsPort }}
+                  number: {{ $.Values.reports.service.port }}
           {{- else }}
             backend:
-              serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.api.service.reportsPort }}
+              serviceName: {{ template "enterprise.reports.fullname" $ }}
+              servicePort: {{ $.Values.reports.service.port }}
           {{- end }}
         {{- end }}
   {{- end }}

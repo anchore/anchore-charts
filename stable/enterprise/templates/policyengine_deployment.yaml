@@ -77,7 +77,7 @@ spec:
       port: {{ .Values.policyEngine.service.port }}
       targetPort: {{ .Values.policyEngine.service.port }}
       protocol: TCP
-      {{ include "service.nodePort" (merge (dict "component" $component) .) }}
+      {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
     app.kubernetes.io/component: {{ $component | lower }}

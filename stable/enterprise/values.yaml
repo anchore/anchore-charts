@@ -678,7 +678,6 @@ api:
 
   ## @param api.service.type Service type for Anchore API
   ## @param api.service.port Service port for Anchore API
-  ## @param api.service.reportsPort Service port for Anchore Reports API
   ## @param api.service.annotations Annotations for Anchore API service
   ## @param api.service.labels Labels for Anchore API service
   ## @param api.service.nodePort nodePort for Anchore API service
@@ -686,7 +685,6 @@ api:
   service:
     type: ClusterIP
     port: 8228
-    reportsPort: 8558
     annotations: {}
     labels: {}
     nodePort: ""
@@ -839,111 +837,6 @@ feeds:
   ##
   url: ""
 
-###########################################################
-## @section Anchore Policy Engine k8s Deployment Parameters
-###########################################################
-policyEngine:
-  ## @param policyEngine.replicaCount Number of replicas for the Anchore Policy Engine deployment
-  ##
-  replicaCount: 1
-
-  ## @param policyEngine.service.type Service type for Anchore Policy Engine
-  ## @param policyEngine.service.port Service port for Anchore Policy Engine
-  ## @param policyEngine.service.annotations Annotations for Anchore Policy Engine service
-  ## @param policyEngine.service.labels Labels for Anchore Policy Engine service
-  ## @param policyEngine.service.nodePort nodePort for Anchore Policy Engine service
-  ##
-  service:
-    type: ClusterIP
-    port: 8087
-    annotations: {}
-    labels: {}
-    nodePort: ""
-
-  ## @param policyEngine.extraEnv Set extra environment variables for Anchore Policy Engine pods
-  ##
-  extraEnv: []
-
-  ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
-  ##
-  resources: {}
-
-  ## @param policyEngine.labels Labels for Anchore Policy Engine pods
-  ##
-  labels: {}
-
-  ## @param policyEngine.annotations Annotation for Anchore Policy Engine pods
-  ##
-  annotations: {}
-
-  ## @param policyEngine.nodeSelector Node labels for Anchore Policy Engine pod assignment
-  ##
-  nodeSelector: {}
-
-  ## @param policyEngine.tolerations Tolerations for Anchore Policy Engine pod assignment
-  ##
-  tolerations: []
-
-  ## @param policyEngine.affinity Affinity for Anchore Policy Engine pod assignment
-  ##
-  affinity: {}
-
-  ## @param policyEngine.serviceAccountName Service account name for Anchore Policy Engine pods
-  ##
-  serviceAccountName: ""
-
-###########################################
-## @section Anchore Simple Queue Parameters
-###########################################
-simpleQueue:
-  ## @param simpleQueue.replicaCount Number of replicas for the Anchore Simple Queue deployment
-  ##
-  replicaCount: 1
-
-  ## @param simpleQueue.service.type Service type for Anchore Simple Queue
-  ## @param simpleQueue.service.port Service port for Anchore Simple Queue
-  ## @param simpleQueue.service.annotations Annotations for Anchore Simple Queue service
-  ## @param simpleQueue.service.labels Labels for Anchore Simple Queue service
-  ## @param simpleQueue.service.nodePort nodePort for Anchore Simple Queue service
-  ##
-  service:
-    type: ClusterIP
-    port: 8083
-    annotations: {}
-    labels: {}
-    nodePort: ""
-
-  ## @param simpleQueue.extraEnv Set extra environment variables for Anchore Simple Queue pods
-  ##
-  extraEnv: []
-
-  ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
-  ##
-  resources: {}
-
-  ## @param simpleQueue.labels Labels for Anchore Simple Queue pods
-  ##
-  labels: {}
-
-  ## @param simpleQueue.annotations Annotation for Anchore Simple Queue pods
-  ##
-  annotations: {}
-
-  ## @param simpleQueue.nodeSelector Node labels for Anchore Simple Queue pod assignment
-  ##
-  nodeSelector: {}
-
-  ## @param simpleQueue.tolerations Tolerations for Anchore Simple Queue pod assignment
-  ##
-  tolerations: []
-
-  ## @param simpleQueue.affinity Affinity for Anchore Simple Queue pod assignment
-  ##
-  affinity: {}
-
-  ## @param simpleQueue.serviceAccountName Service account name for Anchore Simple Queue pods
-  ##
-  serviceAccountName: ""
 
 ############################################
 ## @section Anchore Notifications Parameters
@@ -998,6 +891,59 @@ notifications:
   ##
   serviceAccountName: ""
 
+###########################################################
+## @section Anchore Policy Engine k8s Deployment Parameters
+###########################################################
+policyEngine:
+  ## @param policyEngine.replicaCount Number of replicas for the Anchore Policy Engine deployment
+  ##
+  replicaCount: 1
+
+  ## @param policyEngine.service.type Service type for Anchore Policy Engine
+  ## @param policyEngine.service.port Service port for Anchore Policy Engine
+  ## @param policyEngine.service.annotations Annotations for Anchore Policy Engine service
+  ## @param policyEngine.service.labels Labels for Anchore Policy Engine service
+  ## @param policyEngine.service.nodePort nodePort for Anchore Policy Engine service
+  ##
+  service:
+    type: ClusterIP
+    port: 8087
+    annotations: {}
+    labels: {}
+    nodePort: ""
+
+  ## @param policyEngine.extraEnv Set extra environment variables for Anchore Policy Engine pods
+  ##
+  extraEnv: []
+
+  ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
+  ##
+  resources: {}
+
+  ## @param policyEngine.labels Labels for Anchore Policy Engine pods
+  ##
+  labels: {}
+
+  ## @param policyEngine.annotations Annotation for Anchore Policy Engine pods
+  ##
+  annotations: {}
+
+  ## @param policyEngine.nodeSelector Node labels for Anchore Policy Engine pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param policyEngine.tolerations Tolerations for Anchore Policy Engine pod assignment
+  ##
+  tolerations: []
+
+  ## @param policyEngine.affinity Affinity for Anchore Policy Engine pod assignment
+  ##
+  affinity: {}
+
+  ## @param policyEngine.serviceAccountName Service account name for Anchore Policy Engine pods
+  ##
+  serviceAccountName: ""
+
 ########################################
 ## @section Anchore Reports Parameters
 ########################################
@@ -1007,7 +953,7 @@ reports:
   replicaCount: 1
 
   ## @param reports.service.type Service type for Anchore Reports
-  ## @param reports.service.port Service port for Anchore Reports Worker
+  ## @param reports.service.port Service port for Anchore Reports
   ## @param reports.service.annotations Annotations for Anchore Reports service
   ## @param reports.service.labels Labels for Anchore Reports service
   ## @param reports.service.nodePort nodePort for Anchore Reports service
@@ -1048,6 +994,59 @@ reports:
   affinity: {}
 
   ## @param reports.serviceAccountName Service account name for Anchore Reports pods
+  ##
+  serviceAccountName: ""
+
+#############################################
+## @section Anchore Reports Worker Parameters
+#############################################
+reportsWorker:
+  ## @param reportsWorker.replicaCount Number of replicas for the Anchore Reports deployment
+  ##
+  replicaCount: 1
+
+  ## @param reportsWorker.service.type Service type for Anchore Reports Worker
+  ## @param reportsWorker.service.port Service port for Anchore Reports Worker
+  ## @param reportsWorker.service.annotations Annotations for Anchore Reports Worker service
+  ## @param reportsWorker.service.labels Labels for Anchore Reports Worker service
+  ## @param reportsWorker.service.nodePort nodePort for Anchore Reports Worker service
+  ##
+  service:
+    type: ClusterIP
+    port: 8559
+    annotations: {}
+    labels: {}
+    nodePort: ""
+
+  ## @param reportsWorker.extraEnv Set extra environment variables for Anchore Reports Worker pods
+  ##
+  extraEnv: []
+
+  ## @param reportsWorker.resources Resource requests and limits for Anchore Reports Worker pods
+  ##
+  resources: {}
+
+  ## @param reportsWorker.labels Labels for Anchore Reports Worker pods
+  ##
+  labels: {}
+
+  ## @param reportsWorker.annotations Annotation for Anchore Reports Worker pods
+  ##
+  annotations: {}
+
+  ## @param reportsWorker.nodeSelector Node labels for Anchore Reports Worker pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param reportsWorker.tolerations Tolerations for Anchore Reports Worker pod assignment
+  ##
+  tolerations: []
+
+  ## @param reportsWorker.affinity Affinity for Anchore Reports Worker pod assignment
+  ##
+  affinity: {}
+
+  ## @param reportsWorker.serviceAccountName Service account name for Anchore Reports Worker pods
   ##
   serviceAccountName: ""
 
@@ -1113,6 +1112,59 @@ rbacManager:
   affinity: {}
 
   ## @param rbacManager.serviceAccountName Service account name for Anchore RBAC Manager pods
+  ##
+  serviceAccountName: ""
+
+###########################################
+## @section Anchore Simple Queue Parameters
+###########################################
+simpleQueue:
+  ## @param simpleQueue.replicaCount Number of replicas for the Anchore Simple Queue deployment
+  ##
+  replicaCount: 1
+
+  ## @param simpleQueue.service.type Service type for Anchore Simple Queue
+  ## @param simpleQueue.service.port Service port for Anchore Simple Queue
+  ## @param simpleQueue.service.annotations Annotations for Anchore Simple Queue service
+  ## @param simpleQueue.service.labels Labels for Anchore Simple Queue service
+  ## @param simpleQueue.service.nodePort nodePort for Anchore Simple Queue service
+  ##
+  service:
+    type: ClusterIP
+    port: 8083
+    annotations: {}
+    labels: {}
+    nodePort: ""
+
+  ## @param simpleQueue.extraEnv Set extra environment variables for Anchore Simple Queue pods
+  ##
+  extraEnv: []
+
+  ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
+  ##
+  resources: {}
+
+  ## @param simpleQueue.labels Labels for Anchore Simple Queue pods
+  ##
+  labels: {}
+
+  ## @param simpleQueue.annotations Annotation for Anchore Simple Queue pods
+  ##
+  annotations: {}
+
+  ## @param simpleQueue.nodeSelector Node labels for Anchore Simple Queue pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param simpleQueue.tolerations Tolerations for Anchore Simple Queue pod assignment
+  ##
+  tolerations: []
+
+  ## @param simpleQueue.affinity Affinity for Anchore Simple Queue pod assignment
+  ##
+  affinity: {}
+
+  ## @param simpleQueue.serviceAccountName Service account name for Anchore Simple Queue pods
   ##
   serviceAccountName: ""
 

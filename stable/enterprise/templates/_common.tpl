@@ -90,11 +90,7 @@ When calling this template, .component can be included in the context for compon
 {{ toYaml . }}
   {{- end }}
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  {{- if and (eq $component "reports") (eq .api "true") }}
-  value: {{ template "enterprise.api.fullname" . }}
-  {{- else }}
   value: {{ include (printf "enterprise.%s.fullname" $component) . }}
-  {{- end }}
   {{- with (index .Values (print $component)).service }}
 - name: ANCHORE_PORT
   value: {{ .port | quote }}
