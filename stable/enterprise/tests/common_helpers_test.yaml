@@ -442,6 +442,7 @@ tests:
     templates:
       - api_deployment.yaml
       - notifications_deployment.yaml
+      - reports_deployment.yaml
       - rbacmanager_deployment.yaml
     documentIndex: 0
     asserts:
