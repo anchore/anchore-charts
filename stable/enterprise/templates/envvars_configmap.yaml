@@ -50,7 +50,7 @@ data:
   ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER: "true"
   ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE: "true"
 {{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" }}
-  {{- fail "The Value `-1` is no longer valid for `.Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `.Values.anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `.Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days` must be set to a value >1." -}}
+  {{- fail "The Value `-1` is no longer valid for `.Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `.Values.anchoreConfig.catalog.runtime_inventory.image_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `.Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days` must be set to a value >1." -}}
 {{- else }}
   ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days }}"
   ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite }}"
