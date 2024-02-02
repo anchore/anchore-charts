@@ -72,11 +72,11 @@ should render the configmaps:
         webhooks:
           {}
 
-        default_admin_password: ${ANCHORE_ADMIN_PASSWORD}
+        default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
         default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
         keys:
-          secret: ${ANCHORE_SAML_SECRET}
+          secret: "${ANCHORE_SAML_SECRET}"
           public_key_path: ${ANCHORE_AUTH_PRIVKEY}
           private_key_path: ${ANCHORE_AUTH_PUBKEY}
 
