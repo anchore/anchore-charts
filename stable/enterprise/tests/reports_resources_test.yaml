@@ -292,7 +292,7 @@ tests:
             app.kubernetes.io/component: reports
         count: 1
 
-  - it: should render scratch volume as emptyDir by default if use_disk is enabled
+  - it: should render emptyDir scratch volume when use_volume is enabled
     template: reports_deployment.yaml
     documentIndex: 0
     set:
@@ -305,28 +305,68 @@ tests:
             emptyDir: {}
         count: 1
 
-  - it: should render scratch volume as per details if specified
+  - it: should render scratch volume details from global values when use_volume is enabled
     template: reports_deployment.yaml
     documentIndex: 0
     set:
       anchoreConfig.reports.use_volume: true
       scratchVolume.details:
-        csi:
-          driver: inline.storage.kubernetes.io
-          volumeAttributes:
-            foo: bar
+        emptyDir:
+          medium: Memory
+          memoryLimit: 128Mi
     asserts:
       - contains:
           path: spec.template.spec.volumes
           content:
             name: anchore-scratch
-            csi:
-              driver: inline.storage.kubernetes.io
-              volumeAttributes:
-                foo: bar
+            emptyDir:
+              medium: Memory
+              memoryLimit: 128Mi
         count: 1
 
-  - it: should not render scratch volume use_disk is not enabled (default)
+  - it: should render scratch volume using details from reports values, even when global scratchVolume is explicitly set
+    template: reports_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.reports.use_volume: true
+      reports.scratchVolume.details:
+        hostPath:
+          path: /tmp
+          type: Directory
+      scratchVolume.details:
+        emptyDir:
+          medium: Memory
+          memoryLimit: 128Mi
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            hostPath:
+              path: /tmp
+              type: Directory
+        count: 1
+
+  - it: should render scratch volume using details from global values, when reports values are not set
+    template: reports_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.reports.use_volume: true
+      scratchVolume.details:
+        emptyDir:
+          medium: Memory
+          memoryLimit: 128Mi
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir:
+              medium: Memory
+              memoryLimit: 128Mi
+        count: 1
+
+  - it: should not render scratch volume when use_volume is not enabled (default)
     template: reports_deployment.yaml
     documentIndex: 0
     asserts:
@@ -337,7 +377,7 @@ tests:
             emptyDir: {}
         count: 1
 
-  - it: should render fixPermissionsInitContainer
+  - it: should render fixPermissionsInitContainer when use_volume is enabled and fixGroupPermissions is set
     templates:
       - reports_deployment.yaml
     documentIndex: 0

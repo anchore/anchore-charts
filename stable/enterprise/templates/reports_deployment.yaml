@@ -24,14 +24,10 @@ spec:
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       volumes: {{- include "enterprise.common.volumes" . | nindent 8 }}
-        {{- if .Values.anchoreConfig.reports.use_volume }}
+      {{- if .Values.anchoreConfig.reports.use_volume }}
         - name: "anchore-scratch"
-        {{- if .Values.scratchVolume.details }}
-          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
-        {{- else }}
-          emptyDir: {}
-        {{- end }}
-        {{- end }}
+          {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
+      {{- end }}
     {{- if and .Values.anchoreConfig.reports.use_volume .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
       initContainers:
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}

@@ -940,46 +940,46 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Common Resource Parameters
 
-| Name                                    | Description                                                                           | Value                                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v5.1.1` |
-| `imagePullPolicy`                       | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
-| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |
-| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema       | `false`                               |
-| `migrationPodImage`                     | The image reference to the migration pod                                              | `docker.io/postgres:13-bookworm`      |
-| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                 | `my-engine-anchore-engine`            |
-| `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                | `""`                                  |
-| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets | `false`                               |
-| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                       | `anchore-enterprise-license`          |
-| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs            | `""`                                  |
-| `extraEnv`                              | Common environment variables set on all containers                                    | `[]`                                  |
-| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName             | `false`                               |
-| `existingSecretName`                    | Name of an existing secret to be used for Anchore core services, excluding Anchore UI | `anchore-enterprise-env`              |
-| `labels`                                | Common labels set on all Kubernetes resources                                         | `{}`                                  |
-| `annotations`                           | Common annotations set on all Kubernetes resources                                    | `{}`                                  |
-| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space for image analysis             | `/analysis_scratch`                   |
-| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions                         | `false`                               |
-| `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                     | `alpine`                              |
-| `scratchVolume.details`                 | Details for the k8s volume to be created                                              | `{}`                                  |
-| `extraVolumes`                          | mounts additional volumes to each pod                                                 | `[]`                                  |
-| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                 | `[]`                                  |
-| `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                    | `1000`                                |
-| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                   | `1000`                                |
-| `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                      | `1000`                                |
-| `containerSecurityContext`              | The securityContext for all containers                                                | `{}`                                  |
-| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                              | `120`                                 |
-| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                    | `10`                                  |
-| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                     | `10`                                  |
-| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                  | `6`                                   |
-| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                  | `1`                                   |
-| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                               | `10`                                  |
-| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                | `10`                                  |
-| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                             | `3`                                   |
-| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                             | `1`                                   |
-| `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services             | `false`                               |
-| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                       | `[]`                                  |
-| `configOverride`                        | Allows for overriding the default Anchore configuration file                          | `""`                                  |
-| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                    | `{}`                                  |
+| Name                                    | Description                                                                                                                        | Value                                 |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.1.1` |
+| `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                        |
+| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`        |
+| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema                                                    | `false`                               |
+| `migrationPodImage`                     | The image reference to the migration pod                                                                                           | `docker.io/postgres:13-bookworm`      |
+| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                                                              | `my-engine-anchore-engine`            |
+| `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                                                             | `""`                                  |
+| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                                              | `false`                               |
+| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                                                                    | `anchore-enterprise-license`          |
+| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs                                                         | `""`                                  |
+| `extraEnv`                              | Common environment variables set on all containers                                                                                 | `[]`                                  |
+| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                                                          | `false`                               |
+| `existingSecretName`                    | Name of an existing secret to be used for Anchore core services, excluding Anchore UI                                              | `anchore-enterprise-env`              |
+| `labels`                                | Common labels set on all Kubernetes resources                                                                                      | `{}`                                  |
+| `annotations`                           | Common annotations set on all Kubernetes resources                                                                                 | `{}`                                  |
+| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports | `/analysis_scratch`                   |
+| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions on all scratch volumes                                               | `false`                               |
+| `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                                                                  | `alpine`                              |
+| `scratchVolume.details`                 | Details for the k8s volume to be created (defaults to default emptyDir)                                                            | `{}`                                  |
+| `extraVolumes`                          | mounts additional volumes to each pod                                                                                              | `[]`                                  |
+| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                              | `[]`                                  |
+| `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                                                                 | `1000`                                |
+| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                                                                | `1000`                                |
+| `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                                                                   | `1000`                                |
+| `containerSecurityContext`              | The securityContext for all containers                                                                                             | `{}`                                  |
+| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                                                                           | `120`                                 |
+| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                                                                 | `10`                                  |
+| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                                                                  | `10`                                  |
+| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                                                               | `6`                                   |
+| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                                                               | `1`                                   |
+| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                                                                            | `10`                                  |
+| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                                             | `10`                                  |
+| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                          | `3`                                   |
+| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                          | `1`                                   |
+| `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services                                                          | `false`                               |
+| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                  |
+| `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                  |
+| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                  |
 
 
 ### Anchore Configuration Parameters
@@ -1054,7 +1054,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `anchoreConfig.reports.enable_graphiql`                                          | Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations                                                     | `true`             |
 | `anchoreConfig.reports.async_execution_timeout`                                  | Configure how long a scheduled query must be running for before it is considered timed out                                       | `48h`              |
 | `anchoreConfig.reports.cycle_timers.reports_scheduled_queries`                   | Interval  in seconds to check for scheduled queries that need to be run                                                          | `600`              |
-| `anchoreConfig.reports.use_volume`                                               | Configure the reports worker to buffer report generation to disk instead of in memory.                                           | `false`            |
+| `anchoreConfig.reports.use_volume`                                               | Configure the reports worker to buffer report generation to disk instead of in memory                                            | `false`            |
 | `anchoreConfig.reports_worker.enable_data_ingress`                               | Enable periodically syncing data into the Anchore Reports Service                                                                | `true`             |
 | `anchoreConfig.reports_worker.enable_data_egress`                                | Periodically remove reporting data that has been removed in other parts of system                                                | `false`            |
 | `anchoreConfig.reports_worker.data_egress_window`                                | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `0`                |
@@ -1111,38 +1111,40 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore Analyzer k8s Deployment Parameters
 
-| Name                          | Description                                                           | Value  |
-| ----------------------------- | --------------------------------------------------------------------- | ------ |
-| `analyzer.replicaCount`       | Number of replicas for the Anchore Analyzer deployment                | `1`    |
-| `analyzer.service.port`       | The port used for gatherings metrics when .Values.metricsEnabled=true | `8084` |
-| `analyzer.extraEnv`           | Set extra environment variables for Anchore Analyzer pods             | `[]`   |
-| `analyzer.resources`          | Resource requests and limits for Anchore Analyzer pods                | `{}`   |
-| `analyzer.labels`             | Labels for Anchore Analyzer pods                                      | `{}`   |
-| `analyzer.annotations`        | Annotation for Anchore Analyzer pods                                  | `{}`   |
-| `analyzer.nodeSelector`       | Node labels for Anchore Analyzer pod assignment                       | `{}`   |
-| `analyzer.tolerations`        | Tolerations for Anchore Analyzer pod assignment                       | `[]`   |
-| `analyzer.affinity`           | Affinity for Anchore Analyzer pod assignment                          | `{}`   |
-| `analyzer.serviceAccountName` | Service account name for Anchore API pods                             | `""`   |
+| Name                             | Description                                                                 | Value  |
+| -------------------------------- | --------------------------------------------------------------------------- | ------ |
+| `analyzer.replicaCount`          | Number of replicas for the Anchore Analyzer deployment                      | `1`    |
+| `analyzer.service.port`          | The port used for gatherings metrics when .Values.metricsEnabled=true       | `8084` |
+| `analyzer.extraEnv`              | Set extra environment variables for Anchore Analyzer pods                   | `[]`   |
+| `analyzer.resources`             | Resource requests and limits for Anchore Analyzer pods                      | `{}`   |
+| `analyzer.labels`                | Labels for Anchore Analyzer pods                                            | `{}`   |
+| `analyzer.annotations`           | Annotation for Anchore Analyzer pods                                        | `{}`   |
+| `analyzer.nodeSelector`          | Node labels for Anchore Analyzer pod assignment                             | `{}`   |
+| `analyzer.tolerations`           | Tolerations for Anchore Analyzer pod assignment                             | `[]`   |
+| `analyzer.affinity`              | Affinity for Anchore Analyzer pod assignment                                | `{}`   |
+| `analyzer.serviceAccountName`    | Service account name for Anchore API pods                                   | `""`   |
+| `analyzer.scratchVolume.details` | Details for the k8s volume to be created for Anchore Analyzer scratch space | `{}`   |
 
 
 ### Anchore Catalog k8s Deployment Parameters
 
-| Name                          | Description                                              | Value       |
-| ----------------------------- | -------------------------------------------------------- | ----------- |
-| `catalog.replicaCount`        | Number of replicas for the Anchore Catalog deployment    | `1`         |
-| `catalog.service.type`        | Service type for Anchore Catalog                         | `ClusterIP` |
-| `catalog.service.port`        | Service port for Anchore Catalog                         | `8082`      |
-| `catalog.service.annotations` | Annotations for Anchore Catalog service                  | `{}`        |
-| `catalog.service.labels`      | Labels for Anchore Catalog service                       | `{}`        |
-| `catalog.service.nodePort`    | nodePort for Anchore Catalog service                     | `""`        |
-| `catalog.extraEnv`            | Set extra environment variables for Anchore Catalog pods | `[]`        |
-| `catalog.resources`           | Resource requests and limits for Anchore Catalog pods    | `{}`        |
-| `catalog.labels`              | Labels for Anchore Catalog pods                          | `{}`        |
-| `catalog.annotations`         | Annotation for Anchore Catalog pods                      | `{}`        |
-| `catalog.nodeSelector`        | Node labels for Anchore Catalog pod assignment           | `{}`        |
-| `catalog.tolerations`         | Tolerations for Anchore Catalog pod assignment           | `[]`        |
-| `catalog.affinity`            | Affinity for Anchore Catalog pod assignment              | `{}`        |
-| `catalog.serviceAccountName`  | Service account name for Anchore Catalog pods            | `""`        |
+| Name                            | Description                                                                | Value       |
+| ------------------------------- | -------------------------------------------------------------------------- | ----------- |
+| `catalog.replicaCount`          | Number of replicas for the Anchore Catalog deployment                      | `1`         |
+| `catalog.service.type`          | Service type for Anchore Catalog                                           | `ClusterIP` |
+| `catalog.service.port`          | Service port for Anchore Catalog                                           | `8082`      |
+| `catalog.service.annotations`   | Annotations for Anchore Catalog service                                    | `{}`        |
+| `catalog.service.labels`        | Labels for Anchore Catalog service                                         | `{}`        |
+| `catalog.service.nodePort`      | nodePort for Anchore Catalog service                                       | `""`        |
+| `catalog.extraEnv`              | Set extra environment variables for Anchore Catalog pods                   | `[]`        |
+| `catalog.resources`             | Resource requests and limits for Anchore Catalog pods                      | `{}`        |
+| `catalog.labels`                | Labels for Anchore Catalog pods                                            | `{}`        |
+| `catalog.annotations`           | Annotation for Anchore Catalog pods                                        | `{}`        |
+| `catalog.nodeSelector`          | Node labels for Anchore Catalog pod assignment                             | `{}`        |
+| `catalog.tolerations`           | Tolerations for Anchore Catalog pod assignment                             | `[]`        |
+| `catalog.affinity`              | Affinity for Anchore Catalog pod assignment                                | `{}`        |
+| `catalog.serviceAccountName`    | Service account name for Anchore Catalog pods                              | `""`        |
+| `catalog.scratchVolume.details` | Details for the k8s volume to be created for Anchore Catalog scratch space | `{}`        |
 
 
 ### Anchore Feeds Chart Parameters
@@ -1176,42 +1178,44 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
-| Name                               | Description                                                    | Value       |
-| ---------------------------------- | -------------------------------------------------------------- | ----------- |
-| `policyEngine.replicaCount`        | Number of replicas for the Anchore Policy Engine deployment    | `1`         |
-| `policyEngine.service.type`        | Service type for Anchore Policy Engine                         | `ClusterIP` |
-| `policyEngine.service.port`        | Service port for Anchore Policy Engine                         | `8087`      |
-| `policyEngine.service.annotations` | Annotations for Anchore Policy Engine service                  | `{}`        |
-| `policyEngine.service.labels`      | Labels for Anchore Policy Engine service                       | `{}`        |
-| `policyEngine.service.nodePort`    | nodePort for Anchore Policy Engine service                     | `""`        |
-| `policyEngine.extraEnv`            | Set extra environment variables for Anchore Policy Engine pods | `[]`        |
-| `policyEngine.resources`           | Resource requests and limits for Anchore Policy Engine pods    | `{}`        |
-| `policyEngine.labels`              | Labels for Anchore Policy Engine pods                          | `{}`        |
-| `policyEngine.annotations`         | Annotation for Anchore Policy Engine pods                      | `{}`        |
-| `policyEngine.nodeSelector`        | Node labels for Anchore Policy Engine pod assignment           | `{}`        |
-| `policyEngine.tolerations`         | Tolerations for Anchore Policy Engine pod assignment           | `[]`        |
-| `policyEngine.affinity`            | Affinity for Anchore Policy Engine pod assignment              | `{}`        |
-| `policyEngine.serviceAccountName`  | Service account name for Anchore Policy Engine pods            | `""`        |
+| Name                                 | Description                                                                      | Value       |
+| ------------------------------------ | -------------------------------------------------------------------------------- | ----------- |
+| `policyEngine.replicaCount`          | Number of replicas for the Anchore Policy Engine deployment                      | `1`         |
+| `policyEngine.service.type`          | Service type for Anchore Policy Engine                                           | `ClusterIP` |
+| `policyEngine.service.port`          | Service port for Anchore Policy Engine                                           | `8087`      |
+| `policyEngine.service.annotations`   | Annotations for Anchore Policy Engine service                                    | `{}`        |
+| `policyEngine.service.labels`        | Labels for Anchore Policy Engine service                                         | `{}`        |
+| `policyEngine.service.nodePort`      | nodePort for Anchore Policy Engine service                                       | `""`        |
+| `policyEngine.extraEnv`              | Set extra environment variables for Anchore Policy Engine pods                   | `[]`        |
+| `policyEngine.resources`             | Resource requests and limits for Anchore Policy Engine pods                      | `{}`        |
+| `policyEngine.labels`                | Labels for Anchore Policy Engine pods                                            | `{}`        |
+| `policyEngine.annotations`           | Annotation for Anchore Policy Engine pods                                        | `{}`        |
+| `policyEngine.nodeSelector`          | Node labels for Anchore Policy Engine pod assignment                             | `{}`        |
+| `policyEngine.tolerations`           | Tolerations for Anchore Policy Engine pod assignment                             | `[]`        |
+| `policyEngine.affinity`              | Affinity for Anchore Policy Engine pod assignment                                | `{}`        |
+| `policyEngine.serviceAccountName`    | Service account name for Anchore Policy Engine pods                              | `""`        |
+| `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space | `{}`        |
 
 
 ### Anchore Reports Parameters
 
-| Name                          | Description                                              | Value       |
-| ----------------------------- | -------------------------------------------------------- | ----------- |
-| `reports.replicaCount`        | Number of replicas for the Anchore Reports deployment    | `1`         |
-| `reports.service.type`        | Service type for Anchore Reports                         | `ClusterIP` |
-| `reports.service.port`        | Service port for Anchore Reports                         | `8558`      |
-| `reports.service.annotations` | Annotations for Anchore Reports service                  | `{}`        |
-| `reports.service.labels`      | Labels for Anchore Reports service                       | `{}`        |
-| `reports.service.nodePort`    | nodePort for Anchore Reports service                     | `""`        |
-| `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods | `[]`        |
-| `reports.resources`           | Resource requests and limits for Anchore Reports pods    | `{}`        |
-| `reports.labels`              | Labels for Anchore Reports pods                          | `{}`        |
-| `reports.annotations`         | Annotation for Anchore Reports pods                      | `{}`        |
-| `reports.nodeSelector`        | Node labels for Anchore Reports pod assignment           | `{}`        |
-| `reports.tolerations`         | Tolerations for Anchore Reports pod assignment           | `[]`        |
-| `reports.affinity`            | Affinity for Anchore Reports pod assignment              | `{}`        |
-| `reports.serviceAccountName`  | Service account name for Anchore Reports pods            | `""`        |
+| Name                            | Description                                                                | Value       |
+| ------------------------------- | -------------------------------------------------------------------------- | ----------- |
+| `reports.replicaCount`          | Number of replicas for the Anchore Reports deployment                      | `1`         |
+| `reports.service.type`          | Service type for Anchore Reports                                           | `ClusterIP` |
+| `reports.service.port`          | Service port for Anchore Reports                                           | `8558`      |
+| `reports.service.annotations`   | Annotations for Anchore Reports service                                    | `{}`        |
+| `reports.service.labels`        | Labels for Anchore Reports service                                         | `{}`        |
+| `reports.service.nodePort`      | nodePort for Anchore Reports service                                       | `""`        |
+| `reports.extraEnv`              | Set extra environment variables for Anchore Reports pods                   | `[]`        |
+| `reports.resources`             | Resource requests and limits for Anchore Reports pods                      | `{}`        |
+| `reports.labels`                | Labels for Anchore Reports pods                                            | `{}`        |
+| `reports.annotations`           | Annotation for Anchore Reports pods                                        | `{}`        |
+| `reports.nodeSelector`          | Node labels for Anchore Reports pod assignment                             | `{}`        |
+| `reports.tolerations`           | Tolerations for Anchore Reports pod assignment                             | `[]`        |
+| `reports.affinity`              | Affinity for Anchore Reports pod assignment                                | `{}`        |
+| `reports.serviceAccountName`    | Service account name for Anchore Reports pods                              | `""`        |
+| `reports.scratchVolume.details` | Details for the k8s volume to be created for Anchore Reports scratch space | `{}`        |
 
 
 ### Anchore Reports Worker Parameters

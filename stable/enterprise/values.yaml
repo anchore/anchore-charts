@@ -100,10 +100,11 @@ labels: {}
 ##
 annotations: {}
 
-## @param scratchVolume.mountPath The mount path of an external volume for scratch space for image analysis
-## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions
+## @param scratchVolume.mountPath The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports
+## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
 ## @param scratchVolume.fixerInitContainerImage The image to use for the mode-fixer initContainer
-## @param scratchVolume.details [object] Details for the k8s volume to be created
+## @param scratchVolume.details [object] Details for the k8s volume to be created (defaults to default emptyDir)
+## Scratch volume details can be specified per component using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume)
 ## Generally speaking you need to provision 3x the size of the largest image (uncompressed) that you want to analyze
 ## ref: https://kubernetes.io/docs/concepts/storage/volumes/
 ##
@@ -539,9 +540,11 @@ anchoreConfig:
     cycle_timers:
       reports_scheduled_queries: 600
 
-    ## @param anchoreConfig.reports.use_volume Configure the reports worker to buffer report generation to disk instead of in memory.
-    ## This should be configured in production systems with large amounts of data (10s of thousands of images or more).
-    ## Scratch volumes should be configured for the reports pods when this option is enabled.
+    ## @param anchoreConfig.reports.use_volume Configure the reports worker to buffer report generation to disk instead of in memory
+    ## This should be configured in production systems with large amounts of data (10s of thousands of images or more)
+    ## Generally speaking you need to provision 2x the size of the largest report that you expect to generate
+    ## We recommend utilizing an ephemeral PVC for your scratch volume, this makes it easy to provision enough storage for large reports
+    ## Scratch volume can be configured using .Values.reports.scratchVolume.details object
     ##
     use_volume: false
 
@@ -767,6 +770,11 @@ analyzer:
   ##
   serviceAccountName: ""
 
+  ## @param analyzer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Analyzer scratch space
+  ##
+  scratchVolume:
+    details: {}
+
 #####################################################
 ## @section Anchore Catalog k8s Deployment Parameters
 #####################################################
@@ -819,6 +827,11 @@ catalog:
   ## @param catalog.serviceAccountName Service account name for Anchore Catalog pods
   ##
   serviceAccountName: ""
+
+  ## @param catalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Catalog scratch space
+  ##
+  scratchVolume:
+    details: {}
 
 ##########################################
 ## @section Anchore Feeds Chart Parameters
@@ -944,6 +957,11 @@ policyEngine:
   ##
   serviceAccountName: ""
 
+  ## @param policyEngine.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Policy Engine scratch space
+  ##
+  scratchVolume:
+    details: {}
+
 ########################################
 ## @section Anchore Reports Parameters
 ########################################
@@ -996,6 +1014,21 @@ reports:
   ## @param reports.serviceAccountName Service account name for Anchore Reports pods
   ##
   serviceAccountName: ""
+
+  ## @param reports.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Reports scratch space
+  ## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  ##
+  scratchVolume:
+    details: {}
+      # ephemeral:
+      #   volumeClaimTemplate:
+      #     spec:
+      #       accessModes:
+      #       - ReadWriteOnce
+      #       resources:
+      #         requests:
+      #           storage: 100Gi
+      #       storageClassName: ""
 
 #############################################
 ## @section Anchore Reports Worker Parameters

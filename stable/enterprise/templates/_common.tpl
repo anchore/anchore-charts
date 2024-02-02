@@ -271,6 +271,21 @@ successThreshold: {{ .Values.probes.readiness.successThreshold }}
 
 
 {{/*
+Setup the common anchore scratch volume details config
+*/}}
+{{- define "enterprise.common.scratchVolume.details" -}}
+{{- $component := .component -}}
+{{- if (index .Values (print $component)).scratchVolume.details }}
+  {{- toYaml (index .Values (print $component)).scratchVolume.details }}
+{{- else if .Values.scratchVolume.details }}
+  {{- toYaml .Values.scratchVolume.details }}
+{{- else }}
+emptyDir: {}
+{{- end }}
+{{- end -}}
+
+
+{{/*
 Setup the common anchore volume mounts
 */}}
 {{- define "enterprise.common.volumeMounts" -}}

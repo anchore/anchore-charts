@@ -513,6 +513,43 @@ tests:
         count: 1
         any: true
 
+  - it: should render emptyDir scratchVolume if no global or component specific values are set
+    templates:
+      - analyzer_deployment.yaml
+      - catalog_deployment.yaml
+      - policyengine_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+        any: true
+
+  - it: should render global scratchVolume if no component specific values are set
+    templates:
+      - analyzer_deployment.yaml
+      - catalog_deployment.yaml
+      - policyengine_deployment.yaml
+    set:
+      scratchVolume.details:
+        hostPath:
+          path: /tmp
+          type: Directory
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            hostPath:
+              path: /tmp
+              type: Directory
+        count: 1
+        any: true
+
   - it: should render certStore volumeMount and volume
     set:
       certStoreSecretName: mycerts

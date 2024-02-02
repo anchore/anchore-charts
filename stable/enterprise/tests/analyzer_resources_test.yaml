@@ -138,23 +138,36 @@ tests:
             effect: "NoSchedule"
           count: 1
 
-  - it: should render scratch volume as emptyDir by default
+  - it: should render scratch volume details from Analyzer values
     template: analyzer_deployment.yaml
+    set:
+      analyzer.scratchVolume.details:
+        csi:
+          driver: inline.storage.kubernetes.io
+          volumeAttributes:
+            foo: bar
     asserts:
       - contains:
           path: spec.template.spec.volumes
           content:
             name: anchore-scratch
-            emptyDir: {}
+            csi:
+              driver: inline.storage.kubernetes.io
+              volumeAttributes:
+                foo: bar
         count: 1
 
-  - it: should render scratch volume using details from values
+  - it: should render scratch volume using details from analyzer values, even when global scratchVolume is explicitly set
     template: analyzer_deployment.yaml
     set:
-      scratchVolume.details:
+      analyzer.scratchVolume.details:
         hostPath:
           path: /tmp
           type: Directory
+      scratchVolume.details:
+        emptyDir:
+          medium: Memory
+          memoryLimit: 128Mi
     asserts:
       - contains:
           path: spec.template.spec.volumes
