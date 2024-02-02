@@ -1472,16 +1472,6 @@ ingress:
   feedsPaths:
     - /v2/feeds/
 
-  ## @param ingress.reportsHosts List of custom hostnames for the Anchore Reports API
-  ##
-  reportsHosts: []
-
-  ## @param ingress.reportsPaths The path used for accessing the Anchore Reports API
-  ## Exposing the reports API enables the GraphQL interface, use /v2/reports/graphql for ingress.reportsPath
-  ##
-  reportsPaths:
-    - /v2/reports/
-
   ## @param ingress.tls Configure tls for the ingress resource
   ## Secrets must be manually created in the release namespace
   ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls

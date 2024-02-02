@@ -445,18 +445,12 @@ ingress:
     - anchore-ui.example.com
   feedsHosts:
     - anchore-feeds.example.com
-  reportsHosts:
-    - anchore-reports.example.com
 
 api:
   service:
     type: NodePort
 
 feeds:
-  service:
-    type: NodePort
-
-reports:
   service:
     type: NodePort
 
@@ -480,9 +474,6 @@ ingress:
   feedsPaths:
     - /v1/feeds/*
     - /v2/feeds/*
-  reportsPaths:
-    - /v1/reports/*
-    - /v2/reports/*
   uiPath: /*
 
   apiHosts:
@@ -491,18 +482,12 @@ ingress:
     - anchore-ui.example.com
   feedsHosts:
     - anchore-feeds.example.com
-  reportsHosts:
-    - anchore-reports.example.com
 
 api:
   service:
     type: NodePort
 
 feeds:
-  service:
-    type: NodePort
-
-reports:
   service:
     type: NodePort
 
@@ -1345,8 +1330,6 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`                    |
 | `ingress.feedsHosts`       | List of custom hostnames for the Anchore Feeds API                 | `[]`                   |
 | `ingress.feedsPaths`       | The path used for accessing the Anchore Feeds API                  | `["/v2/feeds/"]`       |
-| `ingress.reportsHosts`     | List of custom hostnames for the Anchore Reports API               | `[]`                   |
-| `ingress.reportsPaths`     | The path used for accessing the Anchore Reports API                | `["/v2/reports/"]`     |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                   |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                |
 
@@ -1403,7 +1386,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 - Deploys Anchore Enterprise v5.2.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/520/) for more information.
 - The reports pod has been split out of the API deployment and is now a separate deployment. A new deployment called `reports_worker` has been added. This allows for more granular control over the resources allocated to the reports and reports_worker services.
-  - :warning: **WARNING:** Resource requests & limits were previously set for both reports pods found in the `reports_deployment` and `api_deployment`. These have been split into separate deployments and the resources are now set in the `reports` and `reports_worker` sections of the values file. If you are using custom resources, you will need to update your values file to reflect this change.
+  - :warning: **WARNING:** Values file changes necessary:
+    - If you are using a custom port for the reports service, previously set with `api.service.reportsPort`, you will need to update your values file to use `reports.service.port` instead.
+    - Resource requests & limits were previously set for both reports pods found in the `reports_deployment` and `api_deployment` using the `reports.resources` section of the values file. These have been split into separate deployments and the resources are now set in the `reports.resources` and `reports_worker.resources` sections of the values file. If you are using custom resources, you will need to update your values file to reflect this change.
+- The reports service no longer has an accessible API endpoint, all API requests should be made to the API service. This version of the chart removed deprecated ingress configurations to accommodate this change. Update your values file to remove all references to the `reports` service in the `ingress` section.
 
 ### V2.2.0
 
