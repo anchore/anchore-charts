@@ -18,7 +18,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v4.9.4
+image: docker.io/anchore/enterprise:v4.9.5
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -1101,7 +1101,7 @@ rbacManager:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v4.9.0
+  image: docker.io/anchore/enterprise-ui:v4.9.1
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
