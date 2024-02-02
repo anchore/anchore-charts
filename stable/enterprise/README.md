@@ -1091,6 +1091,23 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `anchoreConfig.ui.dbPassword`                                                    | allows overriding and separation of the ui database user authentication                                                          | `""`               |
 
 
+### Anchore Analyzer k8s Deployment Parameters
+
+| Name                             | Description                                                                 | Value  |
+| -------------------------------- | --------------------------------------------------------------------------- | ------ |
+| `analyzer.replicaCount`          | Number of replicas for the Anchore Analyzer deployment                      | `1`    |
+| `analyzer.service.port`          | The port used for gatherings metrics when .Values.metricsEnabled=true       | `8084` |
+| `analyzer.extraEnv`              | Set extra environment variables for Anchore Analyzer pods                   | `[]`   |
+| `analyzer.resources`             | Resource requests and limits for Anchore Analyzer pods                      | `{}`   |
+| `analyzer.labels`                | Labels for Anchore Analyzer pods                                            | `{}`   |
+| `analyzer.annotations`           | Annotation for Anchore Analyzer pods                                        | `{}`   |
+| `analyzer.nodeSelector`          | Node labels for Anchore Analyzer pod assignment                             | `{}`   |
+| `analyzer.tolerations`           | Tolerations for Anchore Analyzer pod assignment                             | `[]`   |
+| `analyzer.affinity`              | Affinity for Anchore Analyzer pod assignment                                | `{}`   |
+| `analyzer.serviceAccountName`    | Service account name for Anchore API pods                                   | `""`   |
+| `analyzer.scratchVolume.details` | Details for the k8s volume to be created for Anchore Analyzer scratch space | `{}`   |
+
+
 ### Anchore API k8s Deployment Parameters
 
 | Name                      | Description                                          | Value       |
@@ -1109,23 +1126,6 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `api.tolerations`         | Tolerations for Anchore API pod assignment           | `[]`        |
 | `api.affinity`            | Affinity for Anchore API pod assignment              | `{}`        |
 | `api.serviceAccountName`  | Service account name for Anchore API pods            | `""`        |
-
-
-### Anchore Analyzer k8s Deployment Parameters
-
-| Name                             | Description                                                                 | Value  |
-| -------------------------------- | --------------------------------------------------------------------------- | ------ |
-| `analyzer.replicaCount`          | Number of replicas for the Anchore Analyzer deployment                      | `1`    |
-| `analyzer.service.port`          | The port used for gatherings metrics when .Values.metricsEnabled=true       | `8084` |
-| `analyzer.extraEnv`              | Set extra environment variables for Anchore Analyzer pods                   | `[]`   |
-| `analyzer.resources`             | Resource requests and limits for Anchore Analyzer pods                      | `{}`   |
-| `analyzer.labels`                | Labels for Anchore Analyzer pods                                            | `{}`   |
-| `analyzer.annotations`           | Annotation for Anchore Analyzer pods                                        | `{}`   |
-| `analyzer.nodeSelector`          | Node labels for Anchore Analyzer pod assignment                             | `{}`   |
-| `analyzer.tolerations`           | Tolerations for Anchore Analyzer pod assignment                             | `[]`   |
-| `analyzer.affinity`              | Affinity for Anchore Analyzer pod assignment                                | `{}`   |
-| `analyzer.serviceAccountName`    | Service account name for Anchore API pods                                   | `""`   |
-| `analyzer.scratchVolume.details` | Details for the k8s volume to be created for Anchore Analyzer scratch space | `{}`   |
 
 
 ### Anchore Catalog k8s Deployment Parameters
@@ -1156,6 +1156,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `feeds.chartEnabled` | Enable the Anchore Feeds chart                                                                 | `true`  |
 | `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
 | `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
+| `feeds.resources`    | Resource requests and limits for Anchore Feeds pods                                            | `{}`    |
 
 
 ### Anchore Notifications Parameters
@@ -1199,6 +1200,34 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space | `{}`        |
 
 
+### Anchore RBAC Authentication Parameters
+
+| Name                 | Description                                                                | Value |
+| -------------------- | -------------------------------------------------------------------------- | ----- |
+| `rbacAuth.extraEnv`  | Set extra environment variables for Anchore RBAC Authentication containers | `[]`  |
+| `rbacAuth.resources` | Resource requests and limits for Anchore RBAC Authentication containers    | `{}`  |
+
+
+### Anchore RBAC Manager Parameters
+
+| Name                              | Description                                                   | Value       |
+| --------------------------------- | ------------------------------------------------------------- | ----------- |
+| `rbacManager.replicaCount`        | Number of replicas for the Anchore RBAC Manager deployment    | `1`         |
+| `rbacManager.service.type`        | Service type for Anchore RBAC Manager                         | `ClusterIP` |
+| `rbacManager.service.port`        | Service port for Anchore RBAC Manager                         | `8229`      |
+| `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                  | `{}`        |
+| `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                       | `{}`        |
+| `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                     | `""`        |
+| `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods | `[]`        |
+| `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods    | `{}`        |
+| `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                          | `{}`        |
+| `rbacManager.annotations`         | Annotation for Anchore RBAC Manager pods                      | `{}`        |
+| `rbacManager.nodeSelector`        | Node labels for Anchore RBAC Manager pod assignment           | `{}`        |
+| `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment           | `[]`        |
+| `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment              | `{}`        |
+| `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods            | `""`        |
+
+
 ### Anchore Reports Parameters
 
 | Name                            | Description                                                                | Value       |
@@ -1238,34 +1267,6 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `reportsWorker.tolerations`         | Tolerations for Anchore Reports Worker pod assignment           | `[]`        |
 | `reportsWorker.affinity`            | Affinity for Anchore Reports Worker pod assignment              | `{}`        |
 | `reportsWorker.serviceAccountName`  | Service account name for Anchore Reports Worker pods            | `""`        |
-
-
-### Anchore RBAC Authentication Parameters
-
-| Name                 | Description                                                                | Value |
-| -------------------- | -------------------------------------------------------------------------- | ----- |
-| `rbacAuth.extraEnv`  | Set extra environment variables for Anchore RBAC Authentication containers | `[]`  |
-| `rbacAuth.resources` | Resource requests and limits for Anchore RBAC Authentication containers    | `{}`  |
-
-
-### Anchore RBAC Manager Parameters
-
-| Name                              | Description                                                   | Value       |
-| --------------------------------- | ------------------------------------------------------------- | ----------- |
-| `rbacManager.replicaCount`        | Number of replicas for the Anchore RBAC Manager deployment    | `1`         |
-| `rbacManager.service.type`        | Service type for Anchore RBAC Manager                         | `ClusterIP` |
-| `rbacManager.service.port`        | Service port for Anchore RBAC Manager                         | `8229`      |
-| `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                  | `{}`        |
-| `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                       | `{}`        |
-| `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                     | `""`        |
-| `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods | `[]`        |
-| `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods    | `{}`        |
-| `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                          | `{}`        |
-| `rbacManager.annotations`         | Annotation for Anchore RBAC Manager pods                      | `{}`        |
-| `rbacManager.nodeSelector`        | Node labels for Anchore RBAC Manager pod assignment           | `{}`        |
-| `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment           | `[]`        |
-| `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment              | `{}`        |
-| `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods            | `""`        |
 
 
 ### Anchore Simple Queue Parameters
@@ -1401,6 +1402,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### V2.3.0
 
 - Deploys Anchore Enterprise v5.2.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/520/) for more information.
+- The reports pod has been split out of the API deployment and is now a separate deployment. A new deployment called `reports_worker` has been added. This allows for more granular control over the resources allocated to the reports and reports_worker services.
+  - :warning: **WARNING:** Resource requests & limits were previously set for both reports pods found in the `reports_deployment` and `api_deployment`. These have been split into separate deployments and the resources are now set in the `reports` and `reports_worker` sections of the values file. If you are using custom resources, you will need to update your values file to reflect this change.
 
 ### V2.2.0
 
