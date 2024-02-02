@@ -195,15 +195,16 @@ See the [Anchore Enterprise Feeds](https://docs.anchore.com/current/docs/configu
 ```yaml
 anchoreConfig:
   feeds:
-    github:
-      enabled: true
-      # The GitHub feeds driver requires a GitHub developer personal access token with no permission scopes selected.
-      # See https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
-      token: your-github-token
+    drivers:
+      github:
+        enabled: true
+        # The GitHub feeds driver requires a GitHub developer personal access token with no permission scopes selected.
+        # See https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
+        token: your-github-token
 
-    # Enable microsoft feeds
-    msrc:
-      enabled: true
+      # Enable microsoft feeds
+      msrc:
+        enabled: true
 ```
 
 ### Existing Secrets
@@ -312,7 +313,7 @@ anchoreConfig:
 | `url`                                   | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster. | `""`                                  |
 | `fullnameOverride`                      | overrides the fullname set on resources                                                               | `""`                                  |
 | `nameOverride`                          | overrides the name set on resources                                                                   | `""`                                  |
-| `image`                                 | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.1.1` |
+| `image`                                 | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.2.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                         | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                    | Name of a service account used to run all Feeds pods                                                  | `""`                                  |
