@@ -29,7 +29,7 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts .Values.ingress.feedsHosts .Values.ingress.reportsHosts }}
+  {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts .Values.ingress.feedsHosts }}
     {{- range $apiHostIndex, $apiHostName := .Values.ingress.apiHosts }}
     - host: {{ $apiHostName | quote }}
       http:
@@ -88,26 +88,6 @@ spec:
           {{- end }}
         {{- end }}
     {{- end }}
-    {{- range $reportsHostIndex, $reportsHostName := .Values.ingress.reportsHosts }}
-    - host: {{ $reportsHostName | quote }}
-      http:
-        paths:
-        {{- range $reportsPathIndex, $reportsPath := $.Values.ingress.reportsPaths }}
-          - path: {{ $reportsPath }}
-          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ template "enterprise.api.fullname" $ }}
-                port:
-                  number: {{ $.Values.api.service.reportsPort }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.api.service.reportsPort }}
-          {{- end }}
-        {{- end }}
-    {{- end }}
   {{- else }}
     - http:
         paths:
@@ -154,21 +134,6 @@ spec:
             backend:
               serviceName: {{ template "enterprise.feeds.fullname" $ }}
               servicePort: {{ $.Values.feeds.service.port }}
-          {{- end }}
-        {{- end }}
-        {{- range .Values.ingress.reportsPaths }}
-          - path: {{ . }}
-          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ template "enterprise.api.fullname" $ }}
-                port:
-                  number: {{ $.Values.api.service.reportsPort }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.api.service.reportsPort }}
           {{- end }}
         {{- end }}
   {{- end }}

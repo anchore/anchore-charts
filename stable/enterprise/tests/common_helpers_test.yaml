@@ -7,6 +7,7 @@ templates:
   - policyengine_deployment.yaml
   - rbacmanager_deployment.yaml
   - reports_deployment.yaml
+  - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
   - hooks/pre-upgrade/upgrade_job.yaml
@@ -30,6 +31,7 @@ backend_test_templates: &backend_test_templates
   - policyengine_deployment.yaml
   - rbacmanager_deployment.yaml
   - reports_deployment.yaml
+  - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
 
 test_templates: &test_templates
@@ -40,6 +42,7 @@ test_templates: &test_templates
   - policyengine_deployment.yaml
   - rbacmanager_deployment.yaml
   - reports_deployment.yaml
+  - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
   - hooks/pre-upgrade/upgrade_job.yaml
@@ -52,6 +55,7 @@ deployment_templates: &deployment_templates
   - policyengine_deployment.yaml
   - rbacmanager_deployment.yaml
   - reports_deployment.yaml
+  - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
 
@@ -438,6 +442,7 @@ tests:
     templates:
       - api_deployment.yaml
       - notifications_deployment.yaml
+      - reports_deployment.yaml
       - rbacmanager_deployment.yaml
     documentIndex: 0
     asserts:
@@ -505,6 +510,43 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: certs
+        count: 1
+        any: true
+
+  - it: should render emptyDir scratchVolume if no global or component specific values are set
+    templates:
+      - analyzer_deployment.yaml
+      - catalog_deployment.yaml
+      - policyengine_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+        any: true
+
+  - it: should render global scratchVolume if no component specific values are set
+    templates:
+      - analyzer_deployment.yaml
+      - catalog_deployment.yaml
+      - policyengine_deployment.yaml
+    set:
+      scratchVolume.details:
+        hostPath:
+          path: /tmp
+          type: Directory
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            hostPath:
+              path: /tmp
+              type: Directory
         count: 1
         any: true
 
@@ -601,6 +643,7 @@ tests:
       - policyengine_deployment.yaml
       - rbacmanager_deployment.yaml
       - reports_deployment.yaml
+      - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
       - ui_deployment.yaml
     documentIndex: 1
@@ -619,6 +662,7 @@ tests:
       - policyengine_deployment.yaml
       - rbacmanager_deployment.yaml
       - reports_deployment.yaml
+      - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
       - ui_deployment.yaml
     documentIndex: 1
@@ -935,6 +979,7 @@ tests:
       - catalog_deployment.yaml
       - policyengine_deployment.yaml
       - reports_deployment.yaml
+      - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
     documentIndex: 0
     asserts:
@@ -973,6 +1018,7 @@ tests:
       - catalog_deployment.yaml
       - policyengine_deployment.yaml
       - reports_deployment.yaml
+      - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
     documentIndex: 0
     asserts:
@@ -1029,6 +1075,7 @@ tests:
       policyEngine.service.nodePort: 9999
       rbacManager.service.nodePort: 9999
       reports.service.nodePort: 9999
+      reportsWorker.service.nodePort: 9999
       simpleQueue.service.nodePort: 9999
       ui.service.nodePort: 9999
     templates:
@@ -1038,6 +1085,7 @@ tests:
       - policyengine_deployment.yaml
       - rbacmanager_deployment.yaml
       - reports_deployment.yaml
+      - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
       - ui_deployment.yaml
     documentIndex: 1
@@ -1057,6 +1105,7 @@ tests:
     - policyengine_deployment.yaml
     - rbacmanager_deployment.yaml
     - reports_deployment.yaml
+    - reportsworker_deployment.yaml
     - simplequeue_deployment.yaml
     - ui_deployment.yaml
     documentIndex: 1

@@ -1,37 +1,29 @@
-{{- $component := "api" -}}
+{{- $component := "reportsWorker" -}}
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "enterprise.api.fullname" . }}
+  name: {{ template "enterprise.reportsWorker.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
 spec:
   selector:
     matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
-  replicas: {{ .Values.api.replicaCount }}
+  replicas: {{ .Values.reportsWorker.replicaCount }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
       annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
-      {{- if not .Values.injectSecretsViaEnv }}
+      {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
       {{- end }}
-      {{- if .Values.anchoreConfig.policyBundles }}
-        checksum/policy-config: {{ include (print $.Template.BasePath "/policybundle_configmap.yaml") . | sha256sum }}
-      {{- end }}
-        checksum/enterprise-config: {{ include (print $.Template.BasePath "/anchore_configmap.yaml") . | sha256sum }}
+        checksum/enterprise-config: {{ tpl (print $.Files.BasePath "/default_config.yaml") . | sha256sum }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       volumes: {{- include "enterprise.common.volumes" . | nindent 8 }}
-      {{- if .Values.anchoreConfig.policyBundles }}
-        - name: policy-bundle-volume
-          configMap:
-            name: {{ template "enterprise.fullname" . }}-policy-bundles
-      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
@@ -45,48 +37,33 @@ spec:
         {{- end }}
           command: ["/bin/sh", "-c"]
           args:
-            - {{ print (include "enterprise.common.dockerEntrypoint" .) }} apiext
+            -  {{ print (include "enterprise.common.dockerEntrypoint" .) }} reports_worker
+          ports:
+            - containerPort: {{ .Values.reportsWorker.service.port }}
+              name: {{ $component | lower }}
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
-          {{- if not .Values.injectSecretsViaEnv }}
-            - name: ANCHORE_CLI_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ ternary .Values.existingSecretName (include "enterprise.fullname" .) .Values.useExistingSecrets }}
-                  key: ANCHORE_ADMIN_PASSWORD
-          {{- end }}
-          ports:
-            - name: {{ $component | lower }}
-              containerPort: {{ .Values.api.service.port }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
-        {{- if .Values.anchoreConfig.policyBundles }}
-          {{- range $key, $value := .Values.anchoreConfig.policyBundles }}
-            - name: policy-bundle-volume
-              mountPath: {{ $.Values.anchoreConfig.service_dir  }}/policies/{{ $key }}
-              subPath: {{ $key }}
-          {{- end }}
-        {{- end }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
           readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
-        {{- with .Values.api.resources }}
+        {{- with .Values.reportsWorker.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
-        {{- include "enterprise.common.rbacAuthContainer" . | nindent 8 }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "enterprise.api.fullname" . }}
+  name: {{ template "enterprise.reportsWorker.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
 spec:
-  type: {{ .Values.api.service.type }}
+  type: {{ .Values.reportsWorker.service.type }}
   ports:
     - name: {{ $component | lower }}
-      port: {{ .Values.api.service.port }}
-      targetPort: {{ .Values.api.service.port }}
+      port: {{ .Values.reportsWorker.service.port }}
+      targetPort: {{ .Values.reportsWorker.service.port }}
       protocol: TCP
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:

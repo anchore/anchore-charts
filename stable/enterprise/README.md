@@ -154,6 +154,8 @@ ui-redis:
 
 ## Upgrading the Chart
 
+> :exclamation: **Important:** View the **[Chart Release Notes](#release-notes)** for the latest changes prior to upgrading.
+
 A Helm pre-upgrade hook initiates a Kubernetes job that scales down all active Anchore Enterprise pods and handles the Anchore database upgrade.
 
 The Helm upgrade is marked as successful only upon the job's completion. This process causes the Helm client to pause until the job finishes and new Anchore Enterprise pods are initiated. To monitor the upgrade, follow the logs of the upgrade jobs. These jobs are automatically removed after a subsequent successful Helm upgrade.
@@ -278,13 +280,14 @@ See the [Anchore Enterprise Feeds](https://docs.anchore.com/current/docs/configu
 feeds:
   anchoreConfig:
     feeds:
-      github:
-        enabled: true
-        # The GitHub feeds driver requires a GitHub developer personal access token with no permission scopes selected.
-        # See https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
-        token: your-github-token
-      msrc:
-        enabled: true
+      drivers:
+        github:
+          enabled: true
+          # The GitHub feeds driver requires a GitHub developer personal access token with no permission scopes selected.
+          # See https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
+          token: your-github-token
+        msrc:
+          enabled: true
 ```
 
 #### Enterprise Feeds External Database Configuration
@@ -442,18 +445,12 @@ ingress:
     - anchore-ui.example.com
   feedsHosts:
     - anchore-feeds.example.com
-  reportsHosts:
-    - anchore-reports.example.com
 
 api:
   service:
     type: NodePort
 
 feeds:
-  service:
-    type: NodePort
-
-reports:
   service:
     type: NodePort
 
@@ -477,9 +474,6 @@ ingress:
   feedsPaths:
     - /v1/feeds/*
     - /v2/feeds/*
-  reportsPaths:
-    - /v1/reports/*
-    - /v2/reports/*
   uiPath: /*
 
   apiHosts:
@@ -488,18 +482,12 @@ ingress:
     - anchore-ui.example.com
   feedsHosts:
     - anchore-feeds.example.com
-  reportsHosts:
-    - anchore-reports.example.com
 
 api:
   service:
     type: NodePort
 
 feeds:
-  service:
-    type: NodePort
-
-reports:
   service:
     type: NodePort
 
@@ -939,150 +927,170 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 ### Common Resource Parameters
 
-| Name                                    | Description                                                                           | Value                                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI               | `docker.io/anchore/enterprise:v5.1.1` |
-| `imagePullPolicy`                       | Image pull policy used by all deployments                                             | `IfNotPresent`                        |
-| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                         | `anchore-enterprise-pullcreds`        |
-| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema       | `false`                               |
-| `migrationPodImage`                     | The image reference to the migration pod                                              | `docker.io/postgres:13-bookworm`      |
-| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                 | `my-engine-anchore-engine`            |
-| `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                | `""`                                  |
-| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets | `false`                               |
-| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                       | `anchore-enterprise-license`          |
-| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs            | `""`                                  |
-| `extraEnv`                              | Common environment variables set on all containers                                    | `[]`                                  |
-| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName             | `false`                               |
-| `existingSecretName`                    | Name of an existing secret to be used for Anchore core services, excluding Anchore UI | `anchore-enterprise-env`              |
-| `labels`                                | Common labels set on all Kubernetes resources                                         | `{}`                                  |
-| `annotations`                           | Common annotations set on all Kubernetes resources                                    | `{}`                                  |
-| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space for image analysis             | `/analysis_scratch`                   |
-| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions                         | `false`                               |
-| `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                     | `alpine`                              |
-| `scratchVolume.details`                 | Details for the k8s volume to be created                                              | `{}`                                  |
-| `extraVolumes`                          | mounts additional volumes to each pod                                                 | `[]`                                  |
-| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                 | `[]`                                  |
-| `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                    | `1000`                                |
-| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                   | `1000`                                |
-| `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                      | `1000`                                |
-| `containerSecurityContext`              | The securityContext for all containers                                                | `{}`                                  |
-| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                              | `120`                                 |
-| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                    | `10`                                  |
-| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                     | `10`                                  |
-| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                  | `6`                                   |
-| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                  | `1`                                   |
-| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                               | `10`                                  |
-| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                | `10`                                  |
-| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                             | `3`                                   |
-| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                             | `1`                                   |
-| `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services             | `false`                               |
-| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                       | `[]`                                  |
-| `configOverride`                        | Allows for overriding the default Anchore configuration file                          | `""`                                  |
-| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                    | `{}`                                  |
+| Name                                    | Description                                                                                                                        | Value                                 |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.2.0` |
+| `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                        |
+| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`        |
+| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema                                                    | `false`                               |
+| `migrationPodImage`                     | The image reference to the migration pod                                                                                           | `docker.io/postgres:13-bookworm`      |
+| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                                                              | `my-engine-anchore-engine`            |
+| `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                                                             | `""`                                  |
+| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                                              | `false`                               |
+| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                                                                    | `anchore-enterprise-license`          |
+| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs                                                         | `""`                                  |
+| `extraEnv`                              | Common environment variables set on all containers                                                                                 | `[]`                                  |
+| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                                                          | `false`                               |
+| `existingSecretName`                    | Name of an existing secret to be used for Anchore core services, excluding Anchore UI                                              | `anchore-enterprise-env`              |
+| `labels`                                | Common labels set on all Kubernetes resources                                                                                      | `{}`                                  |
+| `annotations`                           | Common annotations set on all Kubernetes resources                                                                                 | `{}`                                  |
+| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports | `/analysis_scratch`                   |
+| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions on all scratch volumes                                               | `false`                               |
+| `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                                                                  | `alpine`                              |
+| `scratchVolume.details`                 | Details for the k8s volume to be created (defaults to default emptyDir)                                                            | `{}`                                  |
+| `extraVolumes`                          | mounts additional volumes to each pod                                                                                              | `[]`                                  |
+| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                              | `[]`                                  |
+| `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                                                                 | `1000`                                |
+| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                                                                | `1000`                                |
+| `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                                                                   | `1000`                                |
+| `containerSecurityContext`              | The securityContext for all containers                                                                                             | `{}`                                  |
+| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                                                                           | `120`                                 |
+| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                                                                 | `10`                                  |
+| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                                                                  | `10`                                  |
+| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                                                               | `6`                                   |
+| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                                                               | `1`                                   |
+| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                                                                            | `10`                                  |
+| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                                             | `10`                                  |
+| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                          | `3`                                   |
+| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                          | `1`                                   |
+| `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services                                                          | `false`                               |
+| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                  |
+| `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                  |
+| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                  |
 
 
 ### Anchore Configuration Parameters
 
-| Name                                                                           | Description                                                                                                                      | Value              |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `anchoreConfig.service_dir`                                                    | Path to directory where default Anchore config files are placed at startup                                                       | `/anchore_service` |
-| `anchoreConfig.log_level`                                                      | The log level for Anchore services                                                                                               | `INFO`             |
-| `anchoreConfig.allow_awsecr_iam_auto`                                          | Enable AWS IAM instance role for ECR auth                                                                                        | `true`             |
-| `anchoreConfig.keys.secret`                                                    | The shared secret used for signing & encryption, auto-generated by Helm if not set.                                              | `""`               |
-| `anchoreConfig.keys.privateKeyFileName`                                        | The file name of the private key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName | `""`               |
-| `anchoreConfig.keys.publicKeyFileName`                                         | The file name of the public key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName  | `""`               |
-| `anchoreConfig.user_authentication.oauth.enabled`                              | Enable OAuth for Anchore user authentication                                                                                     | `true`             |
-| `anchoreConfig.user_authentication.oauth.default_token_expiration_seconds`     | The expiration, in seconds, for OAuth tokens                                                                                     | `3600`             |
-| `anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds`     | The expiration, in seconds, for OAuth refresh tokens                                                                             | `86400`            |
-| `anchoreConfig.user_authentication.allow_api_keys_for_saml_users`              | Enable API key generation and authentication for SAML users                                                                      | `false`            |
-| `anchoreConfig.user_authentication.max_api_key_age_days`                       | The maximum age, in days, for API keys                                                                                           | `365`              |
-| `anchoreConfig.user_authentication.max_api_keys_per_user`                      | The maximum number of API keys per user                                                                                          | `100`              |
-| `anchoreConfig.user_authentication.hashed_passwords`                           | Enable storing passwords as secure hashes in the database                                                                        | `true`             |
-| `anchoreConfig.user_authentication.sso_require_existing_users`                 | set to true in order to disable the SSO JIT provisioning during authentication                                                   | `false`            |
-| `anchoreConfig.metrics.enabled`                                                | Enable Prometheus metrics for all Anchore services                                                                               | `false`            |
-| `anchoreConfig.metrics.auth_disabled`                                          | Disable auth on Prometheus metrics for all Anchore services                                                                      | `false`            |
-| `anchoreConfig.webhooks`                                                       | Enable Anchore services to provide webhooks for external system updates                                                          | `{}`               |
-| `anchoreConfig.default_admin_password`                                         | The password for the Anchore Enterprise admin user                                                                               | `""`               |
-| `anchoreConfig.default_admin_email`                                            | The email address used for the Anchore Enterprise admin user                                                                     | `admin@myanchore`  |
-| `anchoreConfig.database.timeout`                                               |                                                                                                                                  | `120`              |
-| `anchoreConfig.database.ssl`                                                   | Enable SSL/TLS for the database connection                                                                                       | `false`            |
-| `anchoreConfig.database.sslMode`                                               | The SSL mode to use for database connection                                                                                      | `verify-full`      |
-| `anchoreConfig.database.sslRootCertFileName`                                   | File name of the database root CA certificate stored in the k8s secret specified with .Values.certStoreSecretName                | `""`               |
-| `anchoreConfig.database.db_pool_size`                                          | The database max connection pool size                                                                                            | `30`               |
-| `anchoreConfig.database.db_pool_max_overflow`                                  | The maximum overflow size of the database connection pool                                                                        | `100`              |
-| `anchoreConfig.database.engineArgs`                                            | Set custom database engine arguments for SQLAlchemy                                                                              | `{}`               |
-| `anchoreConfig.internalServicesSSL.enabled`                                    | Force all Enterprise services to use SSL for internal communication                                                              | `false`            |
-| `anchoreConfig.internalServicesSSL.verifyCerts`                                | Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed                       | `false`            |
-| `anchoreConfig.internalServicesSSL.certSecretKeyFileName`                      | File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName                 | `""`               |
-| `anchoreConfig.internalServicesSSL.certSecretCertFileName`                     | File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName         | `""`               |
-| `anchoreConfig.policyBundles`                                                  | Include custom Anchore policy bundles                                                                                            | `{}`               |
-| `anchoreConfig.apiext.external.enabled`                                        | Allow overrides for constructing Anchore API URLs                                                                                | `false`            |
-| `anchoreConfig.apiext.external.useTLS`                                         | Enable TLS for external API access                                                                                               | `true`             |
-| `anchoreConfig.apiext.external.hostname`                                       | Hostname for the external Anchore API                                                                                            | `""`               |
-| `anchoreConfig.apiext.external.port`                                           | Port configured for external Anchore API                                                                                         | `8443`             |
-| `anchoreConfig.analyzer.cycle_timers.image_analyzer`                           | The interval between checks of the work queue for new analysis jobs                                                              | `1`                |
-| `anchoreConfig.analyzer.layer_cache_max_gigabytes`                             | Specify a cache size > 0GB to enable image layer caching                                                                         | `0`                |
-| `anchoreConfig.analyzer.enable_hints`                                          | Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis                      | `false`            |
-| `anchoreConfig.analyzer.configFile`                                            | Custom Anchore Analyzer configuration file contents in YAML                                                                      | `{}`               |
-| `anchoreConfig.catalog.cycle_timers.image_watcher`                             | Interval (seconds) to check for an update to a tag                                                                               | `3600`             |
-| `anchoreConfig.catalog.cycle_timers.policy_eval`                               | Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated                                  | `3600`             |
-| `anchoreConfig.catalog.cycle_timers.vulnerability_scan`                        | Interval to run a vulnerability scan on images with vuln_update subscription activated                                           | `14400`            |
-| `anchoreConfig.catalog.cycle_timers.analyzer_queue`                            | Interval to add new work on the image analysis queue                                                                             | `1`                |
-| `anchoreConfig.catalog.cycle_timers.archive_tasks`                             | Interval to trigger Anchore Catalog archive Tasks                                                                                | `43200`            |
-| `anchoreConfig.catalog.cycle_timers.notifications`                             | Interval in which notifications will be processed for state changes                                                              | `30`               |
-| `anchoreConfig.catalog.cycle_timers.service_watcher`                           | Interval of service state update poll, used for system status                                                                    | `15`               |
-| `anchoreConfig.catalog.cycle_timers.policy_bundle_sync`                        | Interval of policy bundle sync                                                                                                   | `300`              |
-| `anchoreConfig.catalog.cycle_timers.repo_watcher`                              | Interval between checks to repo for new tags                                                                                     | `60`               |
-| `anchoreConfig.catalog.cycle_timers.image_gc`                                  | Interval for garbage collection of images marked for deletion                                                                    | `60`               |
-| `anchoreConfig.catalog.cycle_timers.k8s_image_watcher`                         | Interval for the runtime inventory image analysis poll                                                                           | `150`              |
-| `anchoreConfig.catalog.cycle_timers.resource_metrics`                          | Interval (seconds) for computing metrics from the DB                                                                             | `60`               |
-| `anchoreConfig.catalog.cycle_timers.events_gc`                                 | Interval (seconds) for cleaning up events in the system based on timestamp                                                       | `43200`            |
-| `anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks`           | Interval (seconds) for running artifact lifecycle policy tasks                                                                   | `43200`            |
-| `anchoreConfig.catalog.event_log`                                              | Event log for webhooks, YAML configuration                                                                                       | `{}`               |
-| `anchoreConfig.catalog.analysis_archive`                                       | Custom analysis archive YAML configuration                                                                                       | `{}`               |
-| `anchoreConfig.catalog.object_store`                                           | Custom object storage YAML configuration                                                                                         | `{}`               |
-| `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days`                   | TTL for runtime inventory.                                                                                                       | `120`              |
-| `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite`           | force runtime inventory to be overwritten upon every update for that reported context.                                           | `false`            |
-| `anchoreConfig.catalog.down_analyzer_task_requeue`                             | Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state                      | `true`             |
-| `anchoreConfig.policy_engine.cycle_timers.feed_sync`                           | Interval to run a feed sync to get latest cve data                                                                               | `14400`            |
-| `anchoreConfig.policy_engine.cycle_timers.feed_sync_checker`                   | Interval between checks to see if there needs to be a task queued                                                                | `3600`             |
-| `anchoreConfig.policy_engine.overrideFeedsToUpstream`                          | Override the Anchore Feeds URL to use the public upstream Anchore Feeds                                                          | `false`            |
-| `anchoreConfig.notifications.cycle_timers.notifications`                       | Interval that notifications are sent                                                                                             | `30`               |
-| `anchoreConfig.notifications.ui_url`                                           | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`               |
-| `anchoreConfig.reports.enable_graphiql`                                        | Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations                                                     | `true`             |
-| `anchoreConfig.reports.async_execution_timeout`                                | Configure how long a scheduled query must be running for before it is considered timed out                                       | `48h`              |
-| `anchoreConfig.reports_worker.enable_data_ingress`                             | Enable periodically syncing data into the Anchore Reports Service                                                                | `true`             |
-| `anchoreConfig.reports_worker.enable_data_egress`                              | Periodically remove reporting data that has been removed in other parts of system                                                | `false`            |
-| `anchoreConfig.reports_worker.data_egress_window`                              | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `0`                |
-| `anchoreConfig.reports_worker.data_refresh_max_workers`                        | The maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service.   | `10`               |
-| `anchoreConfig.reports_worker.data_load_max_workers`                           | The maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service.           | `10`               |
-| `anchoreConfig.reports_worker.cycle_timers.reports_image_load`                 | Interval that vulnerabilities for images are synced                                                                              | `600`              |
-| `anchoreConfig.reports_worker.cycle_timers.reports_tag_load`                   | Interval that vulnerabilties by tags are synced                                                                                  | `600`              |
-| `anchoreConfig.reports_worker.cycle_timers.reports_runtime_inventory_load`     | Interval that the runtime inventory is synced                                                                                    | `600`              |
-| `anchoreConfig.reports_worker.cycle_timers.reports_extended_runtime_vuln_load` | Interval extended runtime reports are synched (ecs, k8s containers and namespaces)                                               | `1800`             |
-| `anchoreConfig.reports_worker.cycle_timers.reports_image_refresh`              | Interval that images are refreshed                                                                                               | `7200`             |
-| `anchoreConfig.reports_worker.cycle_timers.reports_tag_refresh`                | Interval that tags are refreshed                                                                                                 | `7200`             |
-| `anchoreConfig.reports_worker.cycle_timers.reports_metrics`                    | Interval for how often reporting metrics are generated                                                                           | `3600`             |
-| `anchoreConfig.reports_worker.cycle_timers.reports_image_egress`               | Interval stale states are removed by image                                                                                       | `600`              |
-| `anchoreConfig.reports_worker.cycle_timers.reports_tag_egress`                 | Interval stale states are removed by tag                                                                                         | `600`              |
-| `anchoreConfig.ui.enable_proxy`                                                | Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)                                           | `false`            |
-| `anchoreConfig.ui.enable_ssl`                                                  | Enable SSL in the Anchore UI container                                                                                           | `false`            |
-| `anchoreConfig.ui.enable_shared_login`                                         | Allow single user to start multiple Anchore UI sessions                                                                          | `true`             |
-| `anchoreConfig.ui.redis_flushdb`                                               | Flush user session keys and empty data on Anchore UI startup                                                                     | `true`             |
-| `anchoreConfig.ui.force_websocket`                                             | Force WebSocket protocol for socket message communications                                                                       | `false`            |
-| `anchoreConfig.ui.authentication_lock.count`                                   | Number of failed authentication attempts allowed before a temporary lock is applied                                              | `5`                |
-| `anchoreConfig.ui.authentication_lock.expires`                                 | Authentication lock duration                                                                                                     | `300`              |
-| `anchoreConfig.ui.custom_links`                                                | List of up to 10 external links provided                                                                                         | `{}`               |
-| `anchoreConfig.ui.enable_add_repositories`                                     | Specify what users can add image repositories to the Anchore UI                                                                  | `{}`               |
-| `anchoreConfig.ui.log_level`                                                   | Descriptive detail of the application log output                                                                                 | `http`             |
-| `anchoreConfig.ui.enrich_inventory_view`                                       | aggregate and include compliance and vulnerability data from the reports service.                                                | `true`             |
-| `anchoreConfig.ui.appdb_config.native`                                         | toggle the postgreSQL drivers used to connect to the database between the native and the NodeJS drivers.                         | `true`             |
-| `anchoreConfig.ui.appdb_config.pool.max`                                       | maximum number of simultaneous connections allowed in the connection pool                                                        | `10`               |
-| `anchoreConfig.ui.appdb_config.pool.min`                                       | minimum number of connections                                                                                                    | `0`                |
-| `anchoreConfig.ui.appdb_config.pool.acquire`                                   | the timeout in milliseconds used when acquiring a new connection                                                                 | `30000`            |
-| `anchoreConfig.ui.appdb_config.pool.idle`                                      | the maximum time that a connection can be idle before being released                                                             | `10000`            |
-| `anchoreConfig.ui.dbUser`                                                      | allows overriding and separation of the ui database user.                                                                        | `""`               |
-| `anchoreConfig.ui.dbPassword`                                                  | allows overriding and separation of the ui database user authentication                                                          | `""`               |
+| Name                                                                             | Description                                                                                                                      | Value              |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `anchoreConfig.service_dir`                                                      | Path to directory where default Anchore config files are placed at startup                                                       | `/anchore_service` |
+| `anchoreConfig.log_level`                                                        | The log level for Anchore services                                                                                               | `INFO`             |
+| `anchoreConfig.allow_awsecr_iam_auto`                                            | Enable AWS IAM instance role for ECR auth                                                                                        | `true`             |
+| `anchoreConfig.keys.secret`                                                      | The shared secret used for signing & encryption, auto-generated by Helm if not set.                                              | `""`               |
+| `anchoreConfig.keys.privateKeyFileName`                                          | The file name of the private key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName | `""`               |
+| `anchoreConfig.keys.publicKeyFileName`                                           | The file name of the public key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName  | `""`               |
+| `anchoreConfig.user_authentication.oauth.enabled`                                | Enable OAuth for Anchore user authentication                                                                                     | `true`             |
+| `anchoreConfig.user_authentication.oauth.default_token_expiration_seconds`       | The expiration, in seconds, for OAuth tokens                                                                                     | `3600`             |
+| `anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds`       | The expiration, in seconds, for OAuth refresh tokens                                                                             | `86400`            |
+| `anchoreConfig.user_authentication.allow_api_keys_for_saml_users`                | Enable API key generation and authentication for SAML users                                                                      | `false`            |
+| `anchoreConfig.user_authentication.max_api_key_age_days`                         | The maximum age, in days, for API keys                                                                                           | `365`              |
+| `anchoreConfig.user_authentication.max_api_keys_per_user`                        | The maximum number of API keys per user                                                                                          | `100`              |
+| `anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days` | The number of days elapsed after a user API key is deleted before it is garbage collected (-1 to disable)                        | `365`              |
+| `anchoreConfig.user_authentication.hashed_passwords`                             | Enable storing passwords as secure hashes in the database                                                                        | `true`             |
+| `anchoreConfig.user_authentication.sso_require_existing_users`                   | set to true in order to disable the SSO JIT provisioning during authentication                                                   | `false`            |
+| `anchoreConfig.metrics.enabled`                                                  | Enable Prometheus metrics for all Anchore services                                                                               | `false`            |
+| `anchoreConfig.metrics.auth_disabled`                                            | Disable auth on Prometheus metrics for all Anchore services                                                                      | `false`            |
+| `anchoreConfig.webhooks`                                                         | Enable Anchore services to provide webhooks for external system updates                                                          | `{}`               |
+| `anchoreConfig.default_admin_password`                                           | The password for the Anchore Enterprise admin user                                                                               | `""`               |
+| `anchoreConfig.default_admin_email`                                              | The email address used for the Anchore Enterprise admin user                                                                     | `admin@myanchore`  |
+| `anchoreConfig.database.timeout`                                                 |                                                                                                                                  | `120`              |
+| `anchoreConfig.database.ssl`                                                     | Enable SSL/TLS for the database connection                                                                                       | `false`            |
+| `anchoreConfig.database.sslMode`                                                 | The SSL mode to use for database connection                                                                                      | `verify-full`      |
+| `anchoreConfig.database.sslRootCertFileName`                                     | File name of the database root CA certificate stored in the k8s secret specified with .Values.certStoreSecretName                | `""`               |
+| `anchoreConfig.database.db_pool_size`                                            | The database max connection pool size                                                                                            | `30`               |
+| `anchoreConfig.database.db_pool_max_overflow`                                    | The maximum overflow size of the database connection pool                                                                        | `100`              |
+| `anchoreConfig.database.engineArgs`                                              | Set custom database engine arguments for SQLAlchemy                                                                              | `{}`               |
+| `anchoreConfig.internalServicesSSL.enabled`                                      | Force all Enterprise services to use SSL for internal communication                                                              | `false`            |
+| `anchoreConfig.internalServicesSSL.verifyCerts`                                  | Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed                       | `false`            |
+| `anchoreConfig.internalServicesSSL.certSecretKeyFileName`                        | File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName                 | `""`               |
+| `anchoreConfig.internalServicesSSL.certSecretCertFileName`                       | File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName         | `""`               |
+| `anchoreConfig.policyBundles`                                                    | Include custom Anchore policy bundles                                                                                            | `{}`               |
+| `anchoreConfig.apiext.external.enabled`                                          | Allow overrides for constructing Anchore API URLs                                                                                | `false`            |
+| `anchoreConfig.apiext.external.useTLS`                                           | Enable TLS for external API access                                                                                               | `true`             |
+| `anchoreConfig.apiext.external.hostname`                                         | Hostname for the external Anchore API                                                                                            | `""`               |
+| `anchoreConfig.apiext.external.port`                                             | Port configured for external Anchore API                                                                                         | `8443`             |
+| `anchoreConfig.analyzer.cycle_timers.image_analyzer`                             | The interval between checks of the work queue for new analysis jobs                                                              | `1`                |
+| `anchoreConfig.analyzer.layer_cache_max_gigabytes`                               | Specify a cache size > 0GB to enable image layer caching                                                                         | `0`                |
+| `anchoreConfig.analyzer.enable_hints`                                            | Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis                      | `false`            |
+| `anchoreConfig.analyzer.configFile`                                              | Custom Anchore Analyzer configuration file contents in YAML                                                                      | `{}`               |
+| `anchoreConfig.catalog.cycle_timers.image_watcher`                               | Interval (seconds) to check for an update to a tag                                                                               | `3600`             |
+| `anchoreConfig.catalog.cycle_timers.policy_eval`                                 | Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated                                  | `3600`             |
+| `anchoreConfig.catalog.cycle_timers.vulnerability_scan`                          | Interval to run a vulnerability scan on images with vuln_update subscription activated                                           | `14400`            |
+| `anchoreConfig.catalog.cycle_timers.analyzer_queue`                              | Interval to add new work on the image analysis queue                                                                             | `1`                |
+| `anchoreConfig.catalog.cycle_timers.archive_tasks`                               | Interval to trigger Anchore Catalog archive Tasks                                                                                | `43200`            |
+| `anchoreConfig.catalog.cycle_timers.notifications`                               | Interval in which notifications will be processed for state changes                                                              | `30`               |
+| `anchoreConfig.catalog.cycle_timers.service_watcher`                             | Interval of service state update poll, used for system status                                                                    | `15`               |
+| `anchoreConfig.catalog.cycle_timers.policy_bundle_sync`                          | Interval of policy bundle sync                                                                                                   | `300`              |
+| `anchoreConfig.catalog.cycle_timers.repo_watcher`                                | Interval between checks to repo for new tags                                                                                     | `60`               |
+| `anchoreConfig.catalog.cycle_timers.image_gc`                                    | Interval for garbage collection of images marked for deletion                                                                    | `60`               |
+| `anchoreConfig.catalog.cycle_timers.k8s_image_watcher`                           | Interval for the runtime inventory image analysis poll                                                                           | `150`              |
+| `anchoreConfig.catalog.cycle_timers.resource_metrics`                            | Interval (seconds) for computing metrics from the DB                                                                             | `60`               |
+| `anchoreConfig.catalog.cycle_timers.events_gc`                                   | Interval (seconds) for cleaning up events in the system based on timestamp                                                       | `43200`            |
+| `anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks`             | Interval (seconds) for running artifact lifecycle policy tasks                                                                   | `43200`            |
+| `anchoreConfig.catalog.event_log`                                                | Event log for webhooks, YAML configuration                                                                                       | `{}`               |
+| `anchoreConfig.catalog.analysis_archive`                                         | Custom analysis archive YAML configuration                                                                                       | `{}`               |
+| `anchoreConfig.catalog.object_store`                                             | Custom object storage YAML configuration                                                                                         | `{}`               |
+| `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days`                     | TTL for runtime inventory.                                                                                                       | `120`              |
+| `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite`             | force runtime inventory to be overwritten upon every update for that reported context.                                           | `false`            |
+| `anchoreConfig.catalog.down_analyzer_task_requeue`                               | Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state                      | `true`             |
+| `anchoreConfig.policy_engine.cycle_timers.feed_sync`                             | Interval to run a feed sync to get latest cve data                                                                               | `14400`            |
+| `anchoreConfig.policy_engine.cycle_timers.feed_sync_checker`                     | Interval between checks to see if there needs to be a task queued                                                                | `3600`             |
+| `anchoreConfig.policy_engine.overrideFeedsToUpstream`                            | Override the Anchore Feeds URL to use the public upstream Anchore Feeds                                                          | `false`            |
+| `anchoreConfig.notifications.cycle_timers.notifications`                         | Interval that notifications are sent                                                                                             | `30`               |
+| `anchoreConfig.notifications.ui_url`                                             | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`               |
+| `anchoreConfig.reports.enable_graphiql`                                          | Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations                                                     | `true`             |
+| `anchoreConfig.reports.async_execution_timeout`                                  | Configure how long a scheduled query must be running for before it is considered timed out                                       | `48h`              |
+| `anchoreConfig.reports.cycle_timers.reports_scheduled_queries`                   | Interval  in seconds to check for scheduled queries that need to be run                                                          | `600`              |
+| `anchoreConfig.reports.use_volume`                                               | Configure the reports worker to buffer report generation to disk instead of in memory                                            | `false`            |
+| `anchoreConfig.reports_worker.enable_data_ingress`                               | Enable periodically syncing data into the Anchore Reports Service                                                                | `true`             |
+| `anchoreConfig.reports_worker.enable_data_egress`                                | Periodically remove reporting data that has been removed in other parts of system                                                | `false`            |
+| `anchoreConfig.reports_worker.data_egress_window`                                | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `0`                |
+| `anchoreConfig.reports_worker.data_refresh_max_workers`                          | The maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service.   | `10`               |
+| `anchoreConfig.reports_worker.data_load_max_workers`                             | The maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service.           | `10`               |
+| `anchoreConfig.reports_worker.cycle_timers.reports_image_load`                   | Interval that vulnerabilities for images are synced                                                                              | `600`              |
+| `anchoreConfig.reports_worker.cycle_timers.reports_tag_load`                     | Interval that vulnerabilties by tags are synced                                                                                  | `600`              |
+| `anchoreConfig.reports_worker.cycle_timers.reports_runtime_inventory_load`       | Interval that the runtime inventory is synced                                                                                    | `600`              |
+| `anchoreConfig.reports_worker.cycle_timers.reports_extended_runtime_vuln_load`   | Interval extended runtime reports are synched (ecs, k8s containers and namespaces)                                               | `1800`             |
+| `anchoreConfig.reports_worker.cycle_timers.reports_image_refresh`                | Interval that images are refreshed                                                                                               | `7200`             |
+| `anchoreConfig.reports_worker.cycle_timers.reports_tag_refresh`                  | Interval that tags are refreshed                                                                                                 | `7200`             |
+| `anchoreConfig.reports_worker.cycle_timers.reports_metrics`                      | Interval for how often reporting metrics are generated                                                                           | `3600`             |
+| `anchoreConfig.reports_worker.cycle_timers.reports_image_egress`                 | Interval stale states are removed by image                                                                                       | `600`              |
+| `anchoreConfig.reports_worker.cycle_timers.reports_tag_egress`                   | Interval stale states are removed by tag                                                                                         | `600`              |
+| `anchoreConfig.ui.enable_proxy`                                                  | Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)                                           | `false`            |
+| `anchoreConfig.ui.enable_ssl`                                                    | Enable SSL in the Anchore UI container                                                                                           | `false`            |
+| `anchoreConfig.ui.enable_shared_login`                                           | Allow single user to start multiple Anchore UI sessions                                                                          | `true`             |
+| `anchoreConfig.ui.redis_flushdb`                                                 | Flush user session keys and empty data on Anchore UI startup                                                                     | `true`             |
+| `anchoreConfig.ui.force_websocket`                                               | Force WebSocket protocol for socket message communications                                                                       | `false`            |
+| `anchoreConfig.ui.authentication_lock.count`                                     | Number of failed authentication attempts allowed before a temporary lock is applied                                              | `5`                |
+| `anchoreConfig.ui.authentication_lock.expires`                                   | Authentication lock duration                                                                                                     | `300`              |
+| `anchoreConfig.ui.custom_links`                                                  | List of up to 10 external links provided                                                                                         | `{}`               |
+| `anchoreConfig.ui.enable_add_repositories`                                       | Specify what users can add image repositories to the Anchore UI                                                                  | `{}`               |
+| `anchoreConfig.ui.log_level`                                                     | Descriptive detail of the application log output                                                                                 | `http`             |
+| `anchoreConfig.ui.enrich_inventory_view`                                         | aggregate and include compliance and vulnerability data from the reports service.                                                | `true`             |
+| `anchoreConfig.ui.appdb_config.native`                                           | toggle the postgreSQL drivers used to connect to the database between the native and the NodeJS drivers.                         | `true`             |
+| `anchoreConfig.ui.appdb_config.pool.max`                                         | maximum number of simultaneous connections allowed in the connection pool                                                        | `10`               |
+| `anchoreConfig.ui.appdb_config.pool.min`                                         | minimum number of connections                                                                                                    | `0`                |
+| `anchoreConfig.ui.appdb_config.pool.acquire`                                     | the timeout in milliseconds used when acquiring a new connection                                                                 | `30000`            |
+| `anchoreConfig.ui.appdb_config.pool.idle`                                        | the maximum time that a connection can be idle before being released                                                             | `10000`            |
+| `anchoreConfig.ui.dbUser`                                                        | allows overriding and separation of the ui database user.                                                                        | `""`               |
+| `anchoreConfig.ui.dbPassword`                                                    | allows overriding and separation of the ui database user authentication                                                          | `""`               |
+
+
+### Anchore Analyzer k8s Deployment Parameters
+
+| Name                             | Description                                                                 | Value  |
+| -------------------------------- | --------------------------------------------------------------------------- | ------ |
+| `analyzer.replicaCount`          | Number of replicas for the Anchore Analyzer deployment                      | `1`    |
+| `analyzer.service.port`          | The port used for gatherings metrics when .Values.metricsEnabled=true       | `8084` |
+| `analyzer.extraEnv`              | Set extra environment variables for Anchore Analyzer pods                   | `[]`   |
+| `analyzer.resources`             | Resource requests and limits for Anchore Analyzer pods                      | `{}`   |
+| `analyzer.labels`                | Labels for Anchore Analyzer pods                                            | `{}`   |
+| `analyzer.annotations`           | Annotation for Anchore Analyzer pods                                        | `{}`   |
+| `analyzer.nodeSelector`          | Node labels for Anchore Analyzer pod assignment                             | `{}`   |
+| `analyzer.tolerations`           | Tolerations for Anchore Analyzer pod assignment                             | `[]`   |
+| `analyzer.affinity`              | Affinity for Anchore Analyzer pod assignment                                | `{}`   |
+| `analyzer.serviceAccountName`    | Service account name for Anchore API pods                                   | `""`   |
+| `analyzer.scratchVolume.details` | Details for the k8s volume to be created for Anchore Analyzer scratch space | `{}`   |
 
 
 ### Anchore API k8s Deployment Parameters
@@ -1092,7 +1100,6 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `api.replicaCount`        | Number of replicas for Anchore API deployment        | `1`         |
 | `api.service.type`        | Service type for Anchore API                         | `ClusterIP` |
 | `api.service.port`        | Service port for Anchore API                         | `8228`      |
-| `api.service.reportsPort` | Service port for Anchore Reports API                 | `8558`      |
 | `api.service.annotations` | Annotations for Anchore API service                  | `{}`        |
 | `api.service.labels`      | Labels for Anchore API service                       | `{}`        |
 | `api.service.nodePort`    | nodePort for Anchore API service                     | `""`        |
@@ -1106,40 +1113,25 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `api.serviceAccountName`  | Service account name for Anchore API pods            | `""`        |
 
 
-### Anchore Analyzer k8s Deployment Parameters
-
-| Name                          | Description                                                           | Value  |
-| ----------------------------- | --------------------------------------------------------------------- | ------ |
-| `analyzer.replicaCount`       | Number of replicas for the Anchore Analyzer deployment                | `1`    |
-| `analyzer.service.port`       | The port used for gatherings metrics when .Values.metricsEnabled=true | `8084` |
-| `analyzer.extraEnv`           | Set extra environment variables for Anchore Analyzer pods             | `[]`   |
-| `analyzer.resources`          | Resource requests and limits for Anchore Analyzer pods                | `{}`   |
-| `analyzer.labels`             | Labels for Anchore Analyzer pods                                      | `{}`   |
-| `analyzer.annotations`        | Annotation for Anchore Analyzer pods                                  | `{}`   |
-| `analyzer.nodeSelector`       | Node labels for Anchore Analyzer pod assignment                       | `{}`   |
-| `analyzer.tolerations`        | Tolerations for Anchore Analyzer pod assignment                       | `[]`   |
-| `analyzer.affinity`           | Affinity for Anchore Analyzer pod assignment                          | `{}`   |
-| `analyzer.serviceAccountName` | Service account name for Anchore API pods                             | `""`   |
-
-
 ### Anchore Catalog k8s Deployment Parameters
 
-| Name                          | Description                                              | Value       |
-| ----------------------------- | -------------------------------------------------------- | ----------- |
-| `catalog.replicaCount`        | Number of replicas for the Anchore Catalog deployment    | `1`         |
-| `catalog.service.type`        | Service type for Anchore Catalog                         | `ClusterIP` |
-| `catalog.service.port`        | Service port for Anchore Catalog                         | `8082`      |
-| `catalog.service.annotations` | Annotations for Anchore Catalog service                  | `{}`        |
-| `catalog.service.labels`      | Labels for Anchore Catalog service                       | `{}`        |
-| `catalog.service.nodePort`    | nodePort for Anchore Catalog service                     | `""`        |
-| `catalog.extraEnv`            | Set extra environment variables for Anchore Catalog pods | `[]`        |
-| `catalog.resources`           | Resource requests and limits for Anchore Catalog pods    | `{}`        |
-| `catalog.labels`              | Labels for Anchore Catalog pods                          | `{}`        |
-| `catalog.annotations`         | Annotation for Anchore Catalog pods                      | `{}`        |
-| `catalog.nodeSelector`        | Node labels for Anchore Catalog pod assignment           | `{}`        |
-| `catalog.tolerations`         | Tolerations for Anchore Catalog pod assignment           | `[]`        |
-| `catalog.affinity`            | Affinity for Anchore Catalog pod assignment              | `{}`        |
-| `catalog.serviceAccountName`  | Service account name for Anchore Catalog pods            | `""`        |
+| Name                            | Description                                                                | Value       |
+| ------------------------------- | -------------------------------------------------------------------------- | ----------- |
+| `catalog.replicaCount`          | Number of replicas for the Anchore Catalog deployment                      | `1`         |
+| `catalog.service.type`          | Service type for Anchore Catalog                                           | `ClusterIP` |
+| `catalog.service.port`          | Service port for Anchore Catalog                                           | `8082`      |
+| `catalog.service.annotations`   | Annotations for Anchore Catalog service                                    | `{}`        |
+| `catalog.service.labels`        | Labels for Anchore Catalog service                                         | `{}`        |
+| `catalog.service.nodePort`      | nodePort for Anchore Catalog service                                       | `""`        |
+| `catalog.extraEnv`              | Set extra environment variables for Anchore Catalog pods                   | `[]`        |
+| `catalog.resources`             | Resource requests and limits for Anchore Catalog pods                      | `{}`        |
+| `catalog.labels`                | Labels for Anchore Catalog pods                                            | `{}`        |
+| `catalog.annotations`           | Annotation for Anchore Catalog pods                                        | `{}`        |
+| `catalog.nodeSelector`          | Node labels for Anchore Catalog pod assignment                             | `{}`        |
+| `catalog.tolerations`           | Tolerations for Anchore Catalog pod assignment                             | `[]`        |
+| `catalog.affinity`              | Affinity for Anchore Catalog pod assignment                                | `{}`        |
+| `catalog.serviceAccountName`    | Service account name for Anchore Catalog pods                              | `""`        |
+| `catalog.scratchVolume.details` | Details for the k8s volume to be created for Anchore Catalog scratch space | `{}`        |
 
 
 ### Anchore Feeds Chart Parameters
@@ -1149,46 +1141,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `feeds.chartEnabled` | Enable the Anchore Feeds chart                                                                 | `true`  |
 | `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
 | `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
-
-
-### Anchore Policy Engine k8s Deployment Parameters
-
-| Name                               | Description                                                    | Value       |
-| ---------------------------------- | -------------------------------------------------------------- | ----------- |
-| `policyEngine.replicaCount`        | Number of replicas for the Anchore Policy Engine deployment    | `1`         |
-| `policyEngine.service.type`        | Service type for Anchore Policy Engine                         | `ClusterIP` |
-| `policyEngine.service.port`        | Service port for Anchore Policy Engine                         | `8087`      |
-| `policyEngine.service.annotations` | Annotations for Anchore Policy Engine service                  | `{}`        |
-| `policyEngine.service.labels`      | Labels for Anchore Policy Engine service                       | `{}`        |
-| `policyEngine.service.nodePort`    | nodePort for Anchore Policy Engine service                     | `""`        |
-| `policyEngine.extraEnv`            | Set extra environment variables for Anchore Policy Engine pods | `[]`        |
-| `policyEngine.resources`           | Resource requests and limits for Anchore Policy Engine pods    | `{}`        |
-| `policyEngine.labels`              | Labels for Anchore Policy Engine pods                          | `{}`        |
-| `policyEngine.annotations`         | Annotation for Anchore Policy Engine pods                      | `{}`        |
-| `policyEngine.nodeSelector`        | Node labels for Anchore Policy Engine pod assignment           | `{}`        |
-| `policyEngine.tolerations`         | Tolerations for Anchore Policy Engine pod assignment           | `[]`        |
-| `policyEngine.affinity`            | Affinity for Anchore Policy Engine pod assignment              | `{}`        |
-| `policyEngine.serviceAccountName`  | Service account name for Anchore Policy Engine pods            | `""`        |
-
-
-### Anchore Simple Queue Parameters
-
-| Name                              | Description                                                   | Value       |
-| --------------------------------- | ------------------------------------------------------------- | ----------- |
-| `simpleQueue.replicaCount`        | Number of replicas for the Anchore Simple Queue deployment    | `1`         |
-| `simpleQueue.service.type`        | Service type for Anchore Simple Queue                         | `ClusterIP` |
-| `simpleQueue.service.port`        | Service port for Anchore Simple Queue                         | `8083`      |
-| `simpleQueue.service.annotations` | Annotations for Anchore Simple Queue service                  | `{}`        |
-| `simpleQueue.service.labels`      | Labels for Anchore Simple Queue service                       | `{}`        |
-| `simpleQueue.service.nodePort`    | nodePort for Anchore Simple Queue service                     | `""`        |
-| `simpleQueue.extraEnv`            | Set extra environment variables for Anchore Simple Queue pods | `[]`        |
-| `simpleQueue.resources`           | Resource requests and limits for Anchore Simple Queue pods    | `{}`        |
-| `simpleQueue.labels`              | Labels for Anchore Simple Queue pods                          | `{}`        |
-| `simpleQueue.annotations`         | Annotation for Anchore Simple Queue pods                      | `{}`        |
-| `simpleQueue.nodeSelector`        | Node labels for Anchore Simple Queue pod assignment           | `{}`        |
-| `simpleQueue.tolerations`         | Tolerations for Anchore Simple Queue pod assignment           | `[]`        |
-| `simpleQueue.affinity`            | Affinity for Anchore Simple Queue pod assignment              | `{}`        |
-| `simpleQueue.serviceAccountName`  | Service account name for Anchore Simple Queue pods            | `""`        |
+| `feeds.resources`    | Resource requests and limits for Anchore Feeds pods                                            | `{}`    |
 
 
 ### Anchore Notifications Parameters
@@ -1211,24 +1164,25 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods            | `""`        |
 
 
-### Anchore Reports Parameters
+### Anchore Policy Engine k8s Deployment Parameters
 
-| Name                          | Description                                              | Value       |
-| ----------------------------- | -------------------------------------------------------- | ----------- |
-| `reports.replicaCount`        | Number of replicas for the Anchore Reports deployment    | `1`         |
-| `reports.service.type`        | Service type for Anchore Reports                         | `ClusterIP` |
-| `reports.service.port`        | Service port for Anchore Reports Worker                  | `8558`      |
-| `reports.service.annotations` | Annotations for Anchore Reports service                  | `{}`        |
-| `reports.service.labels`      | Labels for Anchore Reports service                       | `{}`        |
-| `reports.service.nodePort`    | nodePort for Anchore Reports service                     | `""`        |
-| `reports.extraEnv`            | Set extra environment variables for Anchore Reports pods | `[]`        |
-| `reports.resources`           | Resource requests and limits for Anchore Reports pods    | `{}`        |
-| `reports.labels`              | Labels for Anchore Reports pods                          | `{}`        |
-| `reports.annotations`         | Annotation for Anchore Reports pods                      | `{}`        |
-| `reports.nodeSelector`        | Node labels for Anchore Reports pod assignment           | `{}`        |
-| `reports.tolerations`         | Tolerations for Anchore Reports pod assignment           | `[]`        |
-| `reports.affinity`            | Affinity for Anchore Reports pod assignment              | `{}`        |
-| `reports.serviceAccountName`  | Service account name for Anchore Reports pods            | `""`        |
+| Name                                 | Description                                                                      | Value       |
+| ------------------------------------ | -------------------------------------------------------------------------------- | ----------- |
+| `policyEngine.replicaCount`          | Number of replicas for the Anchore Policy Engine deployment                      | `1`         |
+| `policyEngine.service.type`          | Service type for Anchore Policy Engine                                           | `ClusterIP` |
+| `policyEngine.service.port`          | Service port for Anchore Policy Engine                                           | `8087`      |
+| `policyEngine.service.annotations`   | Annotations for Anchore Policy Engine service                                    | `{}`        |
+| `policyEngine.service.labels`        | Labels for Anchore Policy Engine service                                         | `{}`        |
+| `policyEngine.service.nodePort`      | nodePort for Anchore Policy Engine service                                       | `""`        |
+| `policyEngine.extraEnv`              | Set extra environment variables for Anchore Policy Engine pods                   | `[]`        |
+| `policyEngine.resources`             | Resource requests and limits for Anchore Policy Engine pods                      | `{}`        |
+| `policyEngine.labels`                | Labels for Anchore Policy Engine pods                                            | `{}`        |
+| `policyEngine.annotations`           | Annotation for Anchore Policy Engine pods                                        | `{}`        |
+| `policyEngine.nodeSelector`          | Node labels for Anchore Policy Engine pod assignment                             | `{}`        |
+| `policyEngine.tolerations`           | Tolerations for Anchore Policy Engine pod assignment                             | `[]`        |
+| `policyEngine.affinity`              | Affinity for Anchore Policy Engine pod assignment                                | `{}`        |
+| `policyEngine.serviceAccountName`    | Service account name for Anchore Policy Engine pods                              | `""`        |
+| `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space | `{}`        |
 
 
 ### Anchore RBAC Authentication Parameters
@@ -1259,11 +1213,72 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods            | `""`        |
 
 
+### Anchore Reports Parameters
+
+| Name                            | Description                                                                | Value       |
+| ------------------------------- | -------------------------------------------------------------------------- | ----------- |
+| `reports.replicaCount`          | Number of replicas for the Anchore Reports deployment                      | `1`         |
+| `reports.service.type`          | Service type for Anchore Reports                                           | `ClusterIP` |
+| `reports.service.port`          | Service port for Anchore Reports                                           | `8558`      |
+| `reports.service.annotations`   | Annotations for Anchore Reports service                                    | `{}`        |
+| `reports.service.labels`        | Labels for Anchore Reports service                                         | `{}`        |
+| `reports.service.nodePort`      | nodePort for Anchore Reports service                                       | `""`        |
+| `reports.extraEnv`              | Set extra environment variables for Anchore Reports pods                   | `[]`        |
+| `reports.resources`             | Resource requests and limits for Anchore Reports pods                      | `{}`        |
+| `reports.labels`                | Labels for Anchore Reports pods                                            | `{}`        |
+| `reports.annotations`           | Annotation for Anchore Reports pods                                        | `{}`        |
+| `reports.nodeSelector`          | Node labels for Anchore Reports pod assignment                             | `{}`        |
+| `reports.tolerations`           | Tolerations for Anchore Reports pod assignment                             | `[]`        |
+| `reports.affinity`              | Affinity for Anchore Reports pod assignment                                | `{}`        |
+| `reports.serviceAccountName`    | Service account name for Anchore Reports pods                              | `""`        |
+| `reports.scratchVolume.details` | Details for the k8s volume to be created for Anchore Reports scratch space | `{}`        |
+
+
+### Anchore Reports Worker Parameters
+
+| Name                                | Description                                                     | Value       |
+| ----------------------------------- | --------------------------------------------------------------- | ----------- |
+| `reportsWorker.replicaCount`        | Number of replicas for the Anchore Reports deployment           | `1`         |
+| `reportsWorker.service.type`        | Service type for Anchore Reports Worker                         | `ClusterIP` |
+| `reportsWorker.service.port`        | Service port for Anchore Reports Worker                         | `8559`      |
+| `reportsWorker.service.annotations` | Annotations for Anchore Reports Worker service                  | `{}`        |
+| `reportsWorker.service.labels`      | Labels for Anchore Reports Worker service                       | `{}`        |
+| `reportsWorker.service.nodePort`    | nodePort for Anchore Reports Worker service                     | `""`        |
+| `reportsWorker.extraEnv`            | Set extra environment variables for Anchore Reports Worker pods | `[]`        |
+| `reportsWorker.resources`           | Resource requests and limits for Anchore Reports Worker pods    | `{}`        |
+| `reportsWorker.labels`              | Labels for Anchore Reports Worker pods                          | `{}`        |
+| `reportsWorker.annotations`         | Annotation for Anchore Reports Worker pods                      | `{}`        |
+| `reportsWorker.nodeSelector`        | Node labels for Anchore Reports Worker pod assignment           | `{}`        |
+| `reportsWorker.tolerations`         | Tolerations for Anchore Reports Worker pod assignment           | `[]`        |
+| `reportsWorker.affinity`            | Affinity for Anchore Reports Worker pod assignment              | `{}`        |
+| `reportsWorker.serviceAccountName`  | Service account name for Anchore Reports Worker pods            | `""`        |
+
+
+### Anchore Simple Queue Parameters
+
+| Name                              | Description                                                   | Value       |
+| --------------------------------- | ------------------------------------------------------------- | ----------- |
+| `simpleQueue.replicaCount`        | Number of replicas for the Anchore Simple Queue deployment    | `1`         |
+| `simpleQueue.service.type`        | Service type for Anchore Simple Queue                         | `ClusterIP` |
+| `simpleQueue.service.port`        | Service port for Anchore Simple Queue                         | `8083`      |
+| `simpleQueue.service.annotations` | Annotations for Anchore Simple Queue service                  | `{}`        |
+| `simpleQueue.service.labels`      | Labels for Anchore Simple Queue service                       | `{}`        |
+| `simpleQueue.service.nodePort`    | nodePort for Anchore Simple Queue service                     | `""`        |
+| `simpleQueue.extraEnv`            | Set extra environment variables for Anchore Simple Queue pods | `[]`        |
+| `simpleQueue.resources`           | Resource requests and limits for Anchore Simple Queue pods    | `{}`        |
+| `simpleQueue.labels`              | Labels for Anchore Simple Queue pods                          | `{}`        |
+| `simpleQueue.annotations`         | Annotation for Anchore Simple Queue pods                      | `{}`        |
+| `simpleQueue.nodeSelector`        | Node labels for Anchore Simple Queue pod assignment           | `{}`        |
+| `simpleQueue.tolerations`         | Tolerations for Anchore Simple Queue pod assignment           | `[]`        |
+| `simpleQueue.affinity`            | Affinity for Anchore Simple Queue pod assignment              | `{}`        |
+| `simpleQueue.serviceAccountName`  | Service account name for Anchore Simple Queue pods            | `""`        |
+
+
 ### Anchore UI Parameters
 
 | Name                         | Description                                                                   | Value                                    |
 | ---------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------- |
-| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v5.1.0` |
+| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v5.2.0` |
 | `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                        | `IfNotPresent`                           |
 | `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints   | `anchore-enterprise-ui-env`              |
 | `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName` | `""`                                     |
@@ -1315,8 +1330,6 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`                    |
 | `ingress.feedsHosts`       | List of custom hostnames for the Anchore Feeds API                 | `[]`                   |
 | `ingress.feedsPaths`       | The path used for accessing the Anchore Feeds API                  | `["/v2/feeds/"]`       |
-| `ingress.reportsHosts`     | List of custom hostnames for the Anchore Reports API               | `[]`                   |
-| `ingress.reportsPaths`     | The path used for accessing the Anchore Reports API                | `["/v2/reports/"]`     |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                   |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                |
 
@@ -1368,6 +1381,15 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V2.3.0
+
+- Deploys Anchore Enterprise v5.2.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/520/) for more information.
+- The reports pod has been split out of the API deployment and is now a separate deployment. A new deployment called `reports_worker` has been added. This allows for more granular control over the resources allocated to the reports and reports_worker services.
+  - :warning: **WARNING:** Values file changes necessary:
+    - If you are using a custom port for the reports service, previously set with `api.service.reportsPort`, you will need to update your values file to use `reports.service.port` instead.
+    - Resource requests & limits were previously set for both reports pods found in the `reports_deployment` and `api_deployment` using the `reports.resources` section of the values file. These have been split into separate deployments and the resources are now set in the `reports.resources` and `reports_worker.resources` sections of the values file. If you are using custom resources, you will need to update your values file to reflect this change.
+- The reports service no longer has an accessible API endpoint, all API requests should be made to the API service. This version of the chart removed deprecated ingress configurations to accommodate this change. Update your values file to remove all references to the `reports` service in the `ingress` section.
 
 ### V2.2.0
 

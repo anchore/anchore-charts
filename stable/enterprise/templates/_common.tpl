@@ -90,11 +90,7 @@ When calling this template, .component can be included in the context for compon
 {{ toYaml . }}
   {{- end }}
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  {{- if and (eq $component "reports") (eq .api "true") }}
-  value: {{ template "enterprise.api.fullname" . }}
-  {{- else }}
   value: {{ include (printf "enterprise.%s.fullname" $component) . }}
-  {{- end }}
   {{- with (index .Values (print $component)).service }}
 - name: ANCHORE_PORT
   value: {{ .port | quote }}
@@ -271,6 +267,21 @@ timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
 periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
 failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
 successThreshold: {{ .Values.probes.readiness.successThreshold }}
+{{- end -}}
+
+
+{{/*
+Setup the common anchore scratch volume details config
+*/}}
+{{- define "enterprise.common.scratchVolume.details" -}}
+{{- $component := .component -}}
+{{- if (index .Values (print $component)).scratchVolume.details }}
+  {{- toYaml (index .Values (print $component)).scratchVolume.details }}
+{{- else if .Values.scratchVolume.details }}
+  {{- toYaml .Values.scratchVolume.details }}
+{{- else }}
+emptyDir: {}
+{{- end }}
 {{- end -}}
 
 

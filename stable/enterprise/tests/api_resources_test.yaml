@@ -167,19 +167,12 @@ tests:
           value: enterprise-api
       - equal:
           path: spec.template.spec.containers[1].name
-          value: enterprise-reports-api
-      - equal:
-          path: spec.template.spec.containers[2].name
           value: rbac-auth
 
   - it: should render component entrypoint args
     template: api_deployment.yaml
     documentIndex: 0
     asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[1].args[0]
-          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade reports$
-        count: 1
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
           pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade apiext$
@@ -244,40 +237,6 @@ tests:
                 name: existing-secret
                 key: ANCHORE_ADMIN_PASSWORD
 
-  - it: should render reports component environment variables
-    template: api_deployment.yaml
-    documentIndex: 0
-    set:
-      reports.extraEnv:
-        - name: reports
-          value: test
-        - name: test
-          value: foobar
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[1].env
-          content:
-            name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-api
-        count: 1
-      - contains:
-          path: spec.template.spec.containers[1].env
-          content:
-            name: ANCHORE_PORT
-            value: "8558"
-        count: 1
-      - contains:
-          path: spec.template.spec.containers[1].env
-          content:
-            name: reports
-            value: test
-        count: 1
-      - contains:
-          path: spec.template.spec.containers[1].env
-          content:
-            name: test
-            value: foobar
-
   - it: should render component ports
     template: api_deployment.yaml
     documentIndex: 0
@@ -287,12 +246,6 @@ tests:
           content:
             name: api
             containerPort: 8228
-        count: 1
-      - contains:
-          path: spec.template.spec.containers[1].ports
-          content:
-            name: reports
-            containerPort: 8558
         count: 1
 
   - it: should render policy bundle volumeMounts when a policy bundle is provided
@@ -365,31 +318,6 @@ tests:
             failureThreshold: 3
             successThreshold: 1
         count: 1
-      - isSubset:
-          path: spec.template.spec.containers[1].livenessProbe
-          content:
-            httpGet:
-              path: /health
-              port: reports
-              scheme: HTTP
-            initialDelaySeconds: 120
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 6
-            successThreshold: 1
-        count: 1
-      - isSubset:
-          path: spec.template.spec.containers[1].readinessProbe
-          content:
-            httpGet:
-              path: /health
-              port: reports
-              scheme: HTTP
-            timeoutSeconds: 10
-            periodSeconds: 10
-            failureThreshold: 3
-            successThreshold: 1
-        count: 1
 
   - it: should render component resource requests & limits
     template: api_deployment.yaml
@@ -402,13 +330,6 @@ tests:
         limits:
           cpu: 200m
           memory: 256Mi
-      reports.resources:
-        requests:
-          cpu: 200m
-          memory: 228Mi
-        limits:
-          cpu: 400m
-          memory: 456Mi
     asserts:
       - isSubset:
           path: spec.template.spec.containers[0].resources.requests
@@ -421,18 +342,6 @@ tests:
           content:
             cpu: 200m
             memory: 256Mi
-        count: 1
-      - isSubset:
-          path: spec.template.spec.containers[1].resources.requests
-          content:
-            cpu: 200m
-            memory: 228Mi
-        count: 1
-      - isSubset:
-          path: spec.template.spec.containers[1].resources.limits
-          content:
-            cpu: 400m
-            memory: 456Mi
         count: 1
 
   - it: should render component service type
@@ -454,14 +363,6 @@ tests:
             name: api
             port: 8228
             targetPort: 8228
-            protocol: TCP
-        count: 1
-      - contains:
-          path: spec.ports
-          content:
-            name: reports
-            port: 8558
-            targetPort: 8558
             protocol: TCP
         count: 1
 

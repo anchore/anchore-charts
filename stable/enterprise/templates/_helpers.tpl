@@ -148,7 +148,7 @@ Return the database user for the Anchore Enterprise UI config
 {{/*
 Set the nodePort for services if its defined
 */}}
-{{- define "service.nodePort" -}}
+{{- define "enterprise.service.nodePort" -}}
 {{- $component := .component -}}
 {{- if (index .Values (print $component)).service.nodePort -}}
 nodePort: {{ (index .Values (print $component)).service.nodePort }}
