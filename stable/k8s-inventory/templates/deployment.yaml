@@ -45,7 +45,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["anchore-k8s-inventory"]
+          command: ["/anchore-k8s-inventory"]
           ports:
             - name: http
               containerPort: 80
@@ -53,7 +53,7 @@ spec:
           livenessProbe:
             exec:
               command:
-                - anchore-k8s-inventory
+                - /anchore-k8s-inventory
                 - version
             initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
@@ -63,7 +63,7 @@ spec:
           readinessProbe:
             exec:
               command:
-                - anchore-k8s-inventory
+                - /anchore-k8s-inventory
                 - version
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}

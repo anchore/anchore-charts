@@ -1,7 +1,7 @@
 apiVersion: v2
 name: k8s-inventory
-version: 0.1.0
-appVersion: "1.1.1"
+version: 0.2.0
+appVersion: "1.2.0"
 description: A Helm chart for Kubernetes Automated Inventory, which describes which images are in use in a given Kubernetes Cluster
 keywords:
   - analysis
