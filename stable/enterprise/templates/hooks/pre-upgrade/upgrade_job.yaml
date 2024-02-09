@@ -53,10 +53,10 @@ spec:
                 echo 'waiting for pods to go down...' && sleep 5;
               done
         {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 10 }}
+          securityContext: {{ toYaml . | nindent 12 }}
         {{- end }}
         {{- with .Values.upgradeJob.resources }}
-          resources: {{- toYaml . | nindent 10 }}
+          resources: {{- toYaml . | nindent 12 }}
           {{- end }}
         - name: wait-for-db
           image: {{ .Values.image }}
@@ -82,10 +82,10 @@ spec:
                 sleep 10
               done
           {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 10 }}
+          securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.upgradeJob.resources }}
-          resources: {{- toYaml . | nindent 10 }}
+          resources: {{- toYaml . | nindent 12 }}
           {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
