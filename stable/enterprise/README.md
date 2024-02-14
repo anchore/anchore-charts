@@ -82,7 +82,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
     export NAMESPACE=anchore
     export RELEASE=my-release
     export ANCHORECTL_URL=http://localhost:8228/v1/
-    export ANCHORECTL_PASSWORD=$(kubectl get secret "${RELEASE}-enterprise" -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -d -)
+    export ANCHORECTL_PASSWORD=$(kubectl get secret -n ${NAMESPACE} "${RELEASE}-enterprise" -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -d -)
 
     kubectl port-forward -n ${NAMESPACE} svc/${RELEASE}-enterprise-api 8228:8228 # port forward for anchorectl in another terminal
     anchorectl system status # anchorectl defaults to the user admin, and to the password ${ANCHORECTL_PASSWORD} automatically if set
