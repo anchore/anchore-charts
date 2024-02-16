@@ -72,7 +72,7 @@ Create the name of the service account to use
 Require Anchore endpoint and Anchore credentials
 */}}
 {{- define "checkAnchoreRequisites" }}
-{{- if or (not .Values.k8sInventory.anchore.url) (not .Values.k8sInventory.anchore.user) (not .Values.k8sInventory.anchore.password) }}
+{{- if or (not .Values.k8sInventory.anchore.url) (not .Values.k8sInventory.anchore.user) (and (not .Values.useExistingSecret) (not .Values.k8sInventory.anchore.password)) }}
     {{- fail "Anchore endpoint and credentials are required. See the chart README for more instructions on configuring Anchore Requisites." }}
 {{- end }}
 {{- end }}
