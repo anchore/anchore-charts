@@ -210,4 +210,4 @@ k8sInventory:
     account: "admin"
     http:
       insecure: true
-      timeoutSeconds: 10
+      timeoutSeconds: 60
