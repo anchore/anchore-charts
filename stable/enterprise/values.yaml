@@ -1288,7 +1288,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.3.0
+  image: docker.io/anchore/enterprise-ui:v5.3.1
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
