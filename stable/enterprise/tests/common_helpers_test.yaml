@@ -438,25 +438,6 @@ tests:
       - notExists:
           path: spec.template.spec.containers[0].securityContext
 
-  - it: should render the rbacAuthContainer
-    templates:
-      - api_deployment.yaml
-      - notifications_deployment.yaml
-      - reports_deployment.yaml
-      - rbacmanager_deployment.yaml
-    documentIndex: 0
-    asserts:
-      - contains:
-          path: spec.template.spec.containers
-          content:
-            args:
-              - /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_authorizer
-            name: rbac-auth
-            ports:
-              - containerPort: 8089
-                name: rbac-auth
-          any: true
-
   - it: should render volumeMounts
     templates: *backend_test_templates
     documentIndex: 0

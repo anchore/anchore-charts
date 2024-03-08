@@ -71,7 +71,6 @@ spec:
         {{- with .Values.api.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
-        {{- include "enterprise.common.rbacAuthContainer" . | nindent 8 }}
 
 ---
 apiVersion: v1

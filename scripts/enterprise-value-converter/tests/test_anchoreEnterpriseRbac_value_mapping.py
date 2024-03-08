@@ -184,14 +184,6 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
                     }
                 ]
             },
-            'rbacAuth': {
-                'extraEnv': [
-                    {
-                        "name": "foo",
-                        "value": "bar"
-                    }
-                ]
-            }
         }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
 
@@ -215,7 +207,6 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
             "anchoreEnterpriseRbac.service.name": "Null",
             "anchoreEnterpriseRbac.service.type": "ClusterIP",
             "anchoreEnterpriseRbac.service.managerPort": 8082,
-            "anchoreEnterpriseRbac.service.authPort": "8089",
             "anchoreEnterpriseRbac.service.annotations.foo": "bar",
             "anchoreEnterpriseRbac.service.annotations.bar": "baz",
             "anchoreEnterpriseRbac.service.annotations.anotherLabel.with.a.dot": "qux",
@@ -227,7 +218,6 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
                     'name': 'Null',
                     'type': 'ClusterIP',
                     'port': 8082,
-                    # 'authPort': '8089', Deprecated
                     'annotations': {
                         'foo': 'bar',
                         'bar': 'baz',
@@ -248,30 +238,6 @@ class TestReplaceKeysWithMappingsCatalog(unittest.TestCase):
         }
         expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},}
 
-        result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
-        self.assertEqual(result[0], expected_result)
-
-    def test_anchoreEnterpriseRbac_authResources_value(self):
-        dot_string_dict = {
-            "anchoreEnterpriseRbac.authResources.limits.cpu": 1,
-            "anchoreEnterpriseRbac.authResources.limits.memory": "1G",
-            "anchoreEnterpriseRbac.authResources.requests.cpu": "100m",
-            "anchoreEnterpriseRbac.authResources.requests.memory": "256M"
-        }
-        expected_result = { 'postgresql': {'auth': {'username': 'anchoreengine'}}, 'anchoreConfig': {'user_authentication': {'hashed_passwords': False}},
-            'rbacAuth': {
-                'resources': {
-                    'limits': {
-                        'cpu': 1,
-                        'memory': '1G'
-                    },
-                    'requests': {
-                        'cpu': '100m',
-                        'memory': '256M'
-                    }
-                }
-            }
-        }
         result = replace_keys_with_mappings(dot_string_dict, self.results_dir)
         self.assertEqual(result[0], expected_result)
 

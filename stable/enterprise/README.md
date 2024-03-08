@@ -1176,12 +1176,6 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `policyEngine.serviceAccountName`    | Service account name for Anchore Policy Engine pods                              | `""`        |
 | `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space | `{}`        |
 
-### Anchore RBAC Authentication Parameters
-
-| Name                 | Description                                                                | Value |
-| -------------------- | -------------------------------------------------------------------------- | ----- |
-| `rbacAuth.extraEnv`  | Set extra environment variables for Anchore RBAC Authentication containers | `[]`  |
-| `rbacAuth.resources` | Resource requests and limits for Anchore RBAC Authentication containers    | `{}`  |
 
 ### Anchore RBAC Manager Parameters
 

@@ -149,9 +149,6 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].name
           value: enterprise-notifications
-      - equal:
-          path: spec.template.spec.containers[1].name
-          value: rbac-auth
 
   - it: should render component entrypoint args
     template: notifications_deployment.yaml

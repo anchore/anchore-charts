@@ -18,7 +18,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.3.0
+image: docker.io/anchore/enterprise-dev:latest
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -1005,25 +1005,6 @@ policyEngine:
   ##
   scratchVolume:
     details: {}
-
-##################################################
-## @section Anchore RBAC Authentication Parameters
-##################################################
-rbacAuth:
-  ## @param rbacAuth.extraEnv Set extra environment variables for Anchore RBAC Authentication containers
-  ##
-  extraEnv: []
-
-  ## @param rbacAuth.resources Resource requests and limits for Anchore RBAC Authentication containers
-  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
-  ##
-  resources: {}
-    # requests:
-    #   cpu: 100m
-    #   memory: 500Mi
-    # limits:
-    #   memory: 500Mi
 
 ###########################################
 ## @section Anchore RBAC Manager Parameters

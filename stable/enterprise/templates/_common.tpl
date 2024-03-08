@@ -208,53 +208,6 @@ tolerations: {{- toYaml . | nindent 2 }}
 
 
 {{/*
-Setup a container for the Anchore Enterprise RBAC Auth for pods that need to authenticate with the API
-*/}}
-{{- define "enterprise.common.rbacAuthContainer" -}}
-- name: rbac-auth
-  image: {{ .Values.image }}
-  imagePullPolicy: {{ .Values.imagePullPolicy }}
-{{- with .Values.containerSecurityContext }}
-  securityContext:
-    {{ toYaml . | nindent 4 }}
-{{- end }}
-  command: ["/bin/sh", "-c"]
-  args:
-    - {{ print (include "enterprise.common.dockerEntrypoint" .) }} rbac_authorizer
-  envFrom: {{- include "enterprise.common.envFrom" . | nindent 4 }}
-  env: {{- include "enterprise.common.environment" (merge (dict "component" "rbacAuth") .) | nindent 4 }}
-  ports:
-    - containerPort: 8089
-      name: rbac-auth
-  volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 4 }}
-  livenessProbe:
-    exec:
-      command:
-        - curl
-        - -f
-        - 'localhost:8089/health'
-    initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
-    timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
-    periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
-    failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
-    successThreshold: {{ .Values.probes.liveness.successThreshold }}
-  readinessProbe:
-    exec:
-      command:
-        - curl
-        - -f
-        - 'localhost:8089/health'
-    timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
-    periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
-    failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
-    successThreshold: {{ .Values.probes.readiness.successThreshold }}
-{{- with .Values.rbacAuth.resources }}
-  resources: {{- toYaml . | nindent 4 }}
-{{- end }}
-{{- end -}}
-
-
-{{/*
 Setup the common readiness probes for all Anchore Enterprise containers
 */}}
 {{- define "enterprise.common.readinessProbe" -}}
