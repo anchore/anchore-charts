@@ -1006,66 +1006,6 @@ policyEngine:
   scratchVolume:
     details: {}
 
-###########################################
-## @section Anchore RBAC Manager Parameters
-###########################################
-rbacManager:
-  ## @param rbacManager.replicaCount Number of replicas for the Anchore RBAC Manager deployment
-  ##
-  replicaCount: 1
-
-  ## @param rbacManager.service.type Service type for Anchore RBAC Manager
-  ## @param rbacManager.service.port Service port for Anchore RBAC Manager
-  ## @param rbacManager.service.annotations Annotations for Anchore RBAC Manager service
-  ## @param rbacManager.service.labels Labels for Anchore RBAC Manager service
-  ## @param rbacManager.service.nodePort nodePort for Anchore RBAC Manager service
-  ##
-  service:
-    type: ClusterIP
-    port: 8229
-    annotations: {}
-    labels: {}
-    nodePort: ""
-
-  ## @param rbacManager.extraEnv Set extra environment variables for Anchore RBAC Manager pods
-  ##
-  extraEnv: []
-
-  ## @param rbacManager.resources Resource requests and limits for Anchore RBAC Manager pods
-  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
-  ##
-  resources: {}
-    # requests:
-    #   cpu: 100m
-    #   memory: 500Mi
-    # limits:
-    #   memory: 500Mi
-
-  ## @param rbacManager.labels Labels for Anchore RBAC Manager pods
-  ##
-  labels: {}
-
-  ## @param rbacManager.annotations Annotation for Anchore RBAC Manager pods
-  ##
-  annotations: {}
-
-  ## @param rbacManager.nodeSelector Node labels for Anchore RBAC Manager pod assignment
-  ##
-  nodeSelector: {}
-
-  ## @param rbacManager.tolerations Tolerations for Anchore RBAC Manager pod assignment
-  ##
-  tolerations: []
-
-  ## @param rbacManager.affinity Affinity for Anchore RBAC Manager pod assignment
-  ##
-  affinity: {}
-
-  ## @param rbacManager.serviceAccountName Service account name for Anchore RBAC Manager pods
-  ##
-  serviceAccountName: ""
-
 ########################################
 ## @section Anchore Reports Parameters
 ########################################

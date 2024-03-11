@@ -265,17 +265,6 @@ should render the configmaps:
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
 
-          rbac_manager:
-            enabled: true
-            require_auth: true
-            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
-            port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-            ssl_enable: ${ANCHORE_SSL_ENABLED}
-            ssl_cert: ${ANCHORE_SSL_CERT}
-            ssl_key: ${ANCHORE_SSL_KEY}
-
           reports:
             enabled: true
             require_auth: true
@@ -522,7 +511,7 @@ should render the configmaps:
   6: |
     apiVersion: v1
     data:
-      config-ui.yaml: "# Anchore UI configuration\nreports_uri: 'http://test-release-enterprise-api:8228/v2'\nnotifications_uri: 'http://test-release-enterprise-api:8228/v2'\nrbac_uri: 'http://test-release-enterprise-api:8228/v2'\nenterprise_uri: 'http://test-release-enterprise-api:8228/v2'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false\n"
+      config-ui.yaml: "# Anchore UI configuration\nreports_uri: 'http://test-release-enterprise-api:8228/v2'\nnotifications_uri: 'http://test-release-enterprise-api:8228/v2'\nenterprise_uri: 'http://test-release-enterprise-api:8228/v2'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false\n"
     kind: ConfigMap
     metadata:
       annotations:

@@ -419,7 +419,7 @@ stringData:
 
 [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) serves as the gateway to expose HTTP and HTTPS routes from outside the Kubernetes cluster to services within it. Routing is governed by rules specified in the Ingress resource. Kubernetes supports a variety of ingress controllers, such as AWS ALB and GCE controllers.
 
-This Helm chart includes a foundational ingress configuration that is customizable. You can expose various Anchore Enterprise external APIs, including the core API, UI, reporting, RBAC, and feeds, by editing the `ingress` section in your values file.
+This Helm chart includes a foundational ingress configuration that is customizable. You can expose various Anchore Enterprise external APIs, including the core API, UI, reporting, and feeds, by editing the `ingress` section in your values file.
 
 Ingress is disabled by default in this Helm chart. To enable it, along with the [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/) for core API and UI routes, set the `ingress.enabled` value to `true`.
 
@@ -582,11 +582,6 @@ spec:
     interval: 30s
     path: /metrics
     scheme: http
-  # RBAC manager
-  - targetPort: 8229
-    interval: 30s
-    path: /metrics
-    scheme: http
 ```
 
 ### Scaling Individual Services
@@ -687,7 +682,6 @@ The Anchore Enterprise Helm chart introduces several changes to the deployment c
   - `<RELEASE_NAME>-anchore-engine-catalog` -> `<RELEASE_NAME>-enterprise-catalog`
   - `<RELEASE_NAME>-anchore-engine-enterprise-feeds` -> `<RELEASE_NAME>-feeds`
   - `<RELEASE_NAME>-anchore-engine-enterprise-notifications` -> `<RELEASE_NAME>-enterprise-notifications`
-  - `<RELEASE_NAME>-anchore-engine-enterprise-rbac` -> `<RELEASE_NAME>-enterprise-rbac-manager`
   - `<RELEASE_NAME>-anchore-engine-enterprise-reports` -> `<RELEASE_NAME>-enterprise-reports`
   - `<RELEASE_NAME>-anchore-engine-enterprise-ui` -> `<RELEASE_NAME>-enterprise-ui`
   - `<RELEASE_NAME>-anchore-engine-policy` -> `<RELEASE_NAME>-enterprise-policy`
@@ -1176,25 +1170,6 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `policyEngine.serviceAccountName`    | Service account name for Anchore Policy Engine pods                              | `""`        |
 | `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space | `{}`        |
 
-
-### Anchore RBAC Manager Parameters
-
-| Name                              | Description                                                   | Value       |
-| --------------------------------- | ------------------------------------------------------------- | ----------- |
-| `rbacManager.replicaCount`        | Number of replicas for the Anchore RBAC Manager deployment    | `1`         |
-| `rbacManager.service.type`        | Service type for Anchore RBAC Manager                         | `ClusterIP` |
-| `rbacManager.service.port`        | Service port for Anchore RBAC Manager                         | `8229`      |
-| `rbacManager.service.annotations` | Annotations for Anchore RBAC Manager service                  | `{}`        |
-| `rbacManager.service.labels`      | Labels for Anchore RBAC Manager service                       | `{}`        |
-| `rbacManager.service.nodePort`    | nodePort for Anchore RBAC Manager service                     | `""`        |
-| `rbacManager.extraEnv`            | Set extra environment variables for Anchore RBAC Manager pods | `[]`        |
-| `rbacManager.resources`           | Resource requests and limits for Anchore RBAC Manager pods    | `{}`        |
-| `rbacManager.labels`              | Labels for Anchore RBAC Manager pods                          | `{}`        |
-| `rbacManager.annotations`         | Annotation for Anchore RBAC Manager pods                      | `{}`        |
-| `rbacManager.nodeSelector`        | Node labels for Anchore RBAC Manager pod assignment           | `{}`        |
-| `rbacManager.tolerations`         | Tolerations for Anchore RBAC Manager pod assignment           | `[]`        |
-| `rbacManager.affinity`            | Affinity for Anchore RBAC Manager pod assignment              | `{}`        |
-| `rbacManager.serviceAccountName`  | Service account name for Anchore RBAC Manager pods            | `""`        |
 
 ### Anchore Reports Parameters
 

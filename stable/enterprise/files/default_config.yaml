@@ -200,17 +200,6 @@ services:
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
 
-  rbac_manager:
-    enabled: true
-    require_auth: true
-    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-    listen: '0.0.0.0'
-    port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
-
   reports:
     enabled: true
     require_auth: true

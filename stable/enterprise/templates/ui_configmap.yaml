@@ -28,7 +28,6 @@ data:
   {{- end }}
     reports_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
     notifications_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
-    rbac_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
     enterprise_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
     # redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable
     # appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable
