@@ -107,6 +107,42 @@ When calling this template, .component can be included in the context for compon
 
 
 {{/*
+Common extraVolumes
+When calling this template, .component can be included in the context for component specific annotations
+{{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.common.extraVolumes" -}}
+{{- $component := .component -}}
+{{- with .Values.extraVolumes }}
+{{ toYaml . }}
+{{- end }}
+{{- if $component }}
+  {{- with (index .Values (print $component)).extraVolumes }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
+Common extraVolumeMounts
+When calling this template, .component can be included in the context for component specific annotations
+{{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.common.extraVolumeMounts" -}}
+{{- $component := .component -}}
+{{- with .Values.extraVolumeMounts }}
+{{ toYaml . }}
+{{- end }}
+{{- if $component }}
+  {{- with (index .Values (print $component)).extraVolumeMounts }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
 Setup the common fix permissions init container for all pods using a scratch volume
 */}}
 {{- define "enterprise.common.fixPermissionsInitContainer" -}}
@@ -242,9 +278,8 @@ emptyDir: {}
 Setup the common anchore volume mounts
 */}}
 {{- define "enterprise.common.volumeMounts" -}}
-{{- with .Values.extraVolumeMounts }}
-{{ toYaml . }}
-{{- end }}
+{{- $component := .component -}}
+{{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) }}
 - name: anchore-license
   mountPath: /home/anchore/license.yaml
   subPath: license.yaml
@@ -265,9 +300,8 @@ Setup the common anchore volume mounts
 Setup the common anchore volumes
 */}}
 {{- define "enterprise.common.volumes" -}}
-{{- with .Values.extraVolumes }}
-{{ toYaml . }}
-{{- end }}
+{{- $component := .component -}}
+{{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
 - name: anchore-license
   secret:
     secretName: {{ .Values.licenseSecretName }}

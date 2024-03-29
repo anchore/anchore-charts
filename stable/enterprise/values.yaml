@@ -752,6 +752,14 @@ api:
   ##
   extraEnv: []
 
+  ## @param api.extraVolumes Define additional volumes for Anchore API pods
+  ##
+  extraVolumes: []
+
+  ## @param api.extraVolumeMounts Define additional volume mounts for Anchore API pods
+  ##
+  extraVolumeMounts: []
+
   ## @param api.resources Resource requests and limits for Anchore API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -811,6 +819,14 @@ catalog:
   ## @param catalog.extraEnv Set extra environment variables for Anchore Catalog pods
   ##
   extraEnv: []
+
+  ## @param catalog.extraVolumes Define additional volumes for Anchore Catalog pods
+  ##
+  extraVolumes: []
+
+  ## @param catalog.extraVolumeMounts Define additional volume mounts for Anchore Catalog pods
+  ##
+  extraVolumeMounts: []
 
   ## @param catalog.resources Resource requests and limits for Anchore Catalog pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -906,6 +922,14 @@ notifications:
   ##
   extraEnv: []
 
+  ## @param notifications.extraVolumes Define additional volumes for Anchore Notifications pods
+  ##
+  extraVolumes: []
+
+  ## @param notifications.extraVolumeMounts Define additional volume mounts for Anchore Notifications pods
+  ##
+  extraVolumeMounts: []
+
   ## @param notifications.resources Resource requests and limits for Anchore Notifications pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -965,6 +989,14 @@ policyEngine:
   ## @param policyEngine.extraEnv Set extra environment variables for Anchore Policy Engine pods
   ##
   extraEnv: []
+
+  ## @param policyEngine.extraVolumes Define additional volumes for Anchore Policy Engine pods
+  ##
+  extraVolumes: []
+
+  ## @param policyEngine.extraVolumeMounts Define additional volume mounts for Anchore Policy Engine pods
+  ##
+  extraVolumeMounts: []
 
   ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1030,6 +1062,14 @@ reports:
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
   extraEnv: []
+
+  ## @param reports.extraVolumes Define additional volumes for Anchore Reports pods
+  ##
+  extraVolumes: []
+
+  ## @param reports.extraVolumeMounts Define additional volume mounts for Anchore Reports pods
+  ##
+  extraVolumeMounts: []
 
   ## @param reports.resources Resource requests and limits for Anchore Reports pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1108,6 +1148,14 @@ reportsWorker:
   ##
   extraEnv: []
 
+  ## @param reportsWorker.extraVolumes Define additional volumes for Anchore Reports Worker pods
+  ##
+  extraVolumes: []
+
+  ## @param reportsWorker.extraVolumeMounts Define additional volume mounts for Anchore Reports Worker pods
+  ##
+  extraVolumeMounts: []
+
   ## @param reportsWorker.resources Resource requests and limits for Anchore Reports Worker pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1167,6 +1215,14 @@ simpleQueue:
   ## @param simpleQueue.extraEnv Set extra environment variables for Anchore Simple Queue pods
   ##
   extraEnv: []
+
+  ## @param simpleQueue.extraVolumes Define additional volumes for Anchore Simple Queue pods
+  ##
+  extraVolumes: []
+
+  ## @param simpleQueue.extraVolumeMounts Define additional volume mounts for Anchore Simple Queue pods
+  ##
+  extraVolumeMounts: []
 
   ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1247,6 +1303,14 @@ ui:
   ## @param ui.extraEnv Set extra environment variables for Anchore UI pods
   ##
   extraEnv: []
+
+  ## @param ui.extraVolumes Define additional volumes for Anchore UI pods
+  ##
+  extraVolumes: []
+
+  ## @param ui.extraVolumeMounts Define additional volume mounts for Anchore UI pods
+  ##
+  extraVolumeMounts: []
 
   ## @param ui.resources Resource requests and limits for Anchore UI pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/

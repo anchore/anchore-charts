@@ -258,6 +258,90 @@ tests:
         count: 1
         any: true
 
+  - it: should render component extraVolumes
+    template: policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      policyEngine.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      policyEngine.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      policyEngine.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      policyEngine.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
+        count: 1
+
   - it: should render component probes
     template: policyengine_deployment.yaml
     documentIndex: 0

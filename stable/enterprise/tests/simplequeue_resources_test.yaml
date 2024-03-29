@@ -266,3 +266,87 @@ tests:
             app.kubernetes.io/name: test-release-enterprise
             app.kubernetes.io/component: simplequeue
         count: 1
+
+  - it: should render component extraVolumes
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
+        count: 1

@@ -64,7 +64,7 @@ tests:
           namespace: test-namespace
         documentIndex: 2
 
-  - it: pre-hook job does not get created when post-upgrade hook is enabled
+  - it: pre-hook job does not get created when pre-upgrade hook is enabled
     templates: *upgrade-resources
     set:
       upgradeJob:
@@ -303,4 +303,88 @@ tests:
           content:
             cpu: 200m
             memory: 256Mi
+        count: 1
+
+  - it: should render component extraVolumes
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
         count: 1

@@ -23,7 +23,7 @@ spec:
         checksum/ui-config: {{ include (print $.Template.BasePath "/ui_configmap.yaml") . | sha256sum }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
-      volumes:
+      volumes: {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
         - name: anchore-license
           secret:
             secretName: {{ .Values.licenseSecretName }}
@@ -80,7 +80,7 @@ spec:
             - containerPort: 3000
               protocol: TCP
               name: {{ $component | lower }}
-          volumeMounts:
+          volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
             - name: anchore-license
               mountPath: /home/anchore/license.yaml
               subPath: license.yaml
