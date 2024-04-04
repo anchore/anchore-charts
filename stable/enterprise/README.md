@@ -1364,6 +1364,13 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### V2.5.x
+
+- Deploys Anchore Enterprise v5.4.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/540/) for more information.
+- Anchore Enterprise v5.4.0 introduces changes to how RBAC is managed. The chart has been updated to reflect these changes, no action is required.
+  - The rbac-manager and rbac-authorizer components are no longer necessary and have been removed from the chart.
+  - The `rbacManager` and `rbacAuthorizer` sections of the values file have been removed.
+
 ### V2.4.x
 
 - Deploys Anchore Enterprise v5.3.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/530/) for more information.
