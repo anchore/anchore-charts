@@ -26,7 +26,7 @@ spec:
       {{- end }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
-      volumes: {{- include "enterprise.common.volumes" . | nindent 8 }}
+      volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}
         - name: anchore-scratch
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
       {{- if .Values.anchoreConfig.policyBundles }}
@@ -57,7 +57,7 @@ spec:
           ports:
             - name: {{ $component | lower }}
               containerPort: {{ .Values.catalog.service.port }}
-          volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
+          volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
             - name: anchore-scratch
               mountPath: {{ .Values.scratchVolume.mountPath }}
         {{- if .Values.anchoreConfig.policyBundles }}

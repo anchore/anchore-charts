@@ -26,7 +26,7 @@ spec:
         checksum/enterprise-config: {{ include (print $.Template.BasePath "/anchore_configmap.yaml") . | sha256sum }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
-      volumes: {{- include "enterprise.common.volumes" . | nindent 8 }}
+      volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}
       {{- if .Values.anchoreConfig.policyBundles }}
         - name: policy-bundle-volume
           configMap:
@@ -58,7 +58,7 @@ spec:
           ports:
             - name: {{ $component | lower }}
               containerPort: {{ .Values.api.service.port }}
-          volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 12 }}
+          volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
         {{- if .Values.anchoreConfig.policyBundles }}
           {{- range $key, $value := .Values.anchoreConfig.policyBundles }}
             - name: policy-bundle-volume
@@ -71,7 +71,6 @@ spec:
         {{- with .Values.api.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
-        {{- include "enterprise.common.rbacAuthContainer" . | nindent 8 }}
 
 ---
 apiVersion: v1

@@ -73,9 +73,6 @@ services:
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     listen: '0.0.0.0'
     port: ${ANCHORE_PORT}
-    authorization_handler: external
-    authorization_handler_config:
-      endpoint: http://localhost:8089
   {{- if .Values.anchoreConfig.apiext.external.enabled }}
     external_tls: {{ .Values.anchoreConfig.apiext.external.useTLS }}
     external_hostname: {{ .Values.anchoreConfig.apiext.external.hostname }}
@@ -203,28 +200,6 @@ services:
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
 
-  rbac_authorizer:
-    enabled: true
-    require_auth: true
-    endpoint_hostname: localhost
-    listen: 127.0.0.1
-    port: 8089
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-
-  rbac_manager:
-    enabled: true
-    require_auth: true
-    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-    listen: '0.0.0.0'
-    port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-    authorization_handler: external
-    authorization_handler_config:
-      endpoint: http://localhost:8089
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
-
   reports:
     enabled: true
     require_auth: true
@@ -233,9 +208,6 @@ services:
     port: ${ANCHORE_PORT}
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
-    authorization_handler: external
-    authorization_handler_config:
-      endpoint: http://localhost:8089
     cycle_timers: {{- toYaml .Values.anchoreConfig.reports.cycle_timers | nindent 6 }}
     max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
     async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
@@ -273,9 +245,6 @@ services:
     listen: '0.0.0.0'
     port: ${ANCHORE_PORT}
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-    authorization_handler: external
-    authorization_handler_config:
-      endpoint: http://localhost:8089
     cycle_timers: {{- toYaml .Values.anchoreConfig.notifications.cycle_timers | nindent 6 }}
     ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
     ssl_enable: ${ANCHORE_SSL_ENABLED}

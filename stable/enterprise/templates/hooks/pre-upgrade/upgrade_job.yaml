@@ -28,10 +28,7 @@ spec:
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       restartPolicy: Never
-      volumes:
-      {{- with .Values.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      volumes: {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
       {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
@@ -99,10 +96,7 @@ spec:
         {{- end }}
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
-          volumeMounts:
-          {{- with .Values.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+          volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
           {{- if .Values.certStoreSecretName }}
             - name: certs
               mountPath: /home/anchore/certs/

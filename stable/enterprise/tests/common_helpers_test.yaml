@@ -5,7 +5,6 @@ templates:
   - catalog_deployment.yaml
   - notifications_deployment.yaml
   - policyengine_deployment.yaml
-  - rbacmanager_deployment.yaml
   - reports_deployment.yaml
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
@@ -29,7 +28,6 @@ backend_test_templates: &backend_test_templates
   - catalog_deployment.yaml
   - notifications_deployment.yaml
   - policyengine_deployment.yaml
-  - rbacmanager_deployment.yaml
   - reports_deployment.yaml
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
@@ -40,7 +38,6 @@ test_templates: &test_templates
   - catalog_deployment.yaml
   - notifications_deployment.yaml
   - policyengine_deployment.yaml
-  - rbacmanager_deployment.yaml
   - reports_deployment.yaml
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
@@ -53,7 +50,6 @@ deployment_templates: &deployment_templates
   - catalog_deployment.yaml
   - notifications_deployment.yaml
   - policyengine_deployment.yaml
-  - rbacmanager_deployment.yaml
   - reports_deployment.yaml
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
@@ -136,7 +132,6 @@ tests:
       - catalog_deployment.yaml
       - notifications_deployment.yaml
       - policyengine_deployment.yaml
-      - rbacmanager_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
       - hooks/pre-upgrade/upgrade_job.yaml
@@ -161,7 +156,6 @@ tests:
       - catalog_deployment.yaml
       - notifications_deployment.yaml
       - policyengine_deployment.yaml
-      - rbacmanager_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
       - hooks/pre-upgrade/upgrade_job.yaml
@@ -187,7 +181,6 @@ tests:
       - catalog_deployment.yaml
       - notifications_deployment.yaml
       - policyengine_deployment.yaml
-      - rbacmanager_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
       - hooks/pre-upgrade/upgrade_job.yaml
@@ -438,25 +431,6 @@ tests:
       - notExists:
           path: spec.template.spec.containers[0].securityContext
 
-  - it: should render the rbacAuthContainer
-    templates:
-      - api_deployment.yaml
-      - notifications_deployment.yaml
-      - reports_deployment.yaml
-      - rbacmanager_deployment.yaml
-    documentIndex: 0
-    asserts:
-      - contains:
-          path: spec.template.spec.containers
-          content:
-            args:
-              - /docker-entrypoint.sh anchore-enterprise-manager service start --no-auto-upgrade rbac_authorizer
-            name: rbac-auth
-            ports:
-              - containerPort: 8089
-                name: rbac-auth
-          any: true
-
   - it: should render volumeMounts
     templates: *backend_test_templates
     documentIndex: 0
@@ -641,7 +615,6 @@ tests:
       - catalog_deployment.yaml
       - notifications_deployment.yaml
       - policyengine_deployment.yaml
-      - rbacmanager_deployment.yaml
       - reports_deployment.yaml
       - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
@@ -660,7 +633,6 @@ tests:
       - catalog_deployment.yaml
       - notifications_deployment.yaml
       - policyengine_deployment.yaml
-      - rbacmanager_deployment.yaml
       - reports_deployment.yaml
       - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
@@ -1039,9 +1011,6 @@ tests:
           pattern: "enterprise_uri: 'http://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "rbac_uri: 'http://test-release-enterprise-api:8228/v2'"
-      - matchRegex:
-          path: data["config-ui.yaml"]
           pattern: "notifications_uri: 'http://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
@@ -1059,9 +1028,6 @@ tests:
           pattern: "enterprise_uri: 'https://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
-          pattern: "rbac_uri: 'https://test-release-enterprise-api:8228/v2'"
-      - matchRegex:
-          path: data["config-ui.yaml"]
           pattern: "notifications_uri: 'https://test-release-enterprise-api:8228/v2'"
       - matchRegex:
           path: data["config-ui.yaml"]
@@ -1073,7 +1039,6 @@ tests:
       catalog.service.nodePort: 9999
       notifications.service.nodePort: 9999
       policyEngine.service.nodePort: 9999
-      rbacManager.service.nodePort: 9999
       reports.service.nodePort: 9999
       reportsWorker.service.nodePort: 9999
       simpleQueue.service.nodePort: 9999
@@ -1083,7 +1048,6 @@ tests:
       - catalog_deployment.yaml
       - notifications_deployment.yaml
       - policyengine_deployment.yaml
-      - rbacmanager_deployment.yaml
       - reports_deployment.yaml
       - reportsworker_deployment.yaml
       - simplequeue_deployment.yaml
@@ -1103,7 +1067,6 @@ tests:
     - catalog_deployment.yaml
     - notifications_deployment.yaml
     - policyengine_deployment.yaml
-    - rbacmanager_deployment.yaml
     - reports_deployment.yaml
     - reportsworker_deployment.yaml
     - simplequeue_deployment.yaml

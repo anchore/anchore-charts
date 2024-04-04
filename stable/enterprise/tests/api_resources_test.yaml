@@ -165,9 +165,6 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].name
           value: enterprise-api
-      - equal:
-          path: spec.template.spec.containers[1].name
-          value: rbac-auth
 
   - it: should render component entrypoint args
     template: api_deployment.yaml
@@ -288,6 +285,90 @@ tests:
             subPath: custom_policy_bundle2.json
         count: 1
         any: true
+
+  - it: should render component extraVolumes
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
+        count: 1
 
   - it: should render component probes
     template: api_deployment.yaml

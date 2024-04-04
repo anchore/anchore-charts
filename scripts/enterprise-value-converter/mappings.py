@@ -110,7 +110,6 @@ LEVEL_TWO_CHANGE_KEY_MAPPING = {
     "anchore-feeds-db.persistence": "feeds.feeds-db.primary.persistence",
 
     "anchoreEnterpriseRbac.managerResources": "rbacManager.resources",
-    "anchoreEnterpriseRbac.authResources": "rbacAuth.resources",
 }
 
 LEVEL_THREE_CHANGE_KEY_MAPPING = {
@@ -217,7 +216,6 @@ ENTERPRISE_ENV_VAR_MAPPING = {
     "anchoreCatalog.imageGCMaxWorkerThreads": "catalog.ANCHORE_CATALOG_IMAGE_GC_WORKERS",
 
     "anchoreEnterpriseNotifications.maxRequestThreads": "notifications.ANCHORE_MAX_REQUEST_THREADS",
-    "anchoreEnterpriseRbac.maxRequestThreads": "rbacAuth.ANCHORE_MAX_REQUEST_THREADS",
     "anchoreEnterpriseReports.maxRequestThreads": "reports.ANCHORE_MAX_REQUEST_THREADS",
 
     "anchoreGlobal.clientConnectTimeout": "ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT",
@@ -322,7 +320,7 @@ POST_PROCESSING = {
     },
     "anchoreEnterpriseRbac.extraEnv": {
         "action": "duplicate",
-        "new_keys": ["rbacAuth.extraEnv", "rbacManager.extraEnv"]
+        "new_keys": ["rbacManager.extraEnv"]
     },
     "anchoreEnterpriseGlobal.imagePullSecretName": {
         "action": "duplicate",

@@ -76,8 +76,8 @@ jobs:
         kubectl --namespace anchore create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username="${DOCKER_USER}" --docker-password="${DOCKER_PASS}"
       env:
         ANCHORE_LICENSE: ${{ secrets.B64_ANCHORE_LICENSE }}
-        DOCKER_USER: ${{ secrets.ANCHORECI_DOCKER_USER }}
-        DOCKER_PASS: ${{ secrets.ANCHORECI_DOCKER_PASS }}
+        DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
+        DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
 
     - name: Check if anchore-engine endpoint is required for admission controller chart
       id: engine_required

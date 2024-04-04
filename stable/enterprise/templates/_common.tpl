@@ -107,6 +107,42 @@ When calling this template, .component can be included in the context for compon
 
 
 {{/*
+Common extraVolumes
+When calling this template, .component can be included in the context for component specific annotations
+{{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.common.extraVolumes" -}}
+{{- $component := .component -}}
+{{- with .Values.extraVolumes }}
+{{ toYaml . }}
+{{- end }}
+{{- if $component }}
+  {{- with (index .Values (print $component)).extraVolumes }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
+Common extraVolumeMounts
+When calling this template, .component can be included in the context for component specific annotations
+{{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.common.extraVolumeMounts" -}}
+{{- $component := .component -}}
+{{- with .Values.extraVolumeMounts }}
+{{ toYaml . }}
+{{- end }}
+{{- if $component }}
+  {{- with (index .Values (print $component)).extraVolumeMounts }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
 Setup the common fix permissions init container for all pods using a scratch volume
 */}}
 {{- define "enterprise.common.fixPermissionsInitContainer" -}}
@@ -208,53 +244,6 @@ tolerations: {{- toYaml . | nindent 2 }}
 
 
 {{/*
-Setup a container for the Anchore Enterprise RBAC Auth for pods that need to authenticate with the API
-*/}}
-{{- define "enterprise.common.rbacAuthContainer" -}}
-- name: rbac-auth
-  image: {{ .Values.image }}
-  imagePullPolicy: {{ .Values.imagePullPolicy }}
-{{- with .Values.containerSecurityContext }}
-  securityContext:
-    {{ toYaml . | nindent 4 }}
-{{- end }}
-  command: ["/bin/sh", "-c"]
-  args:
-    - {{ print (include "enterprise.common.dockerEntrypoint" .) }} rbac_authorizer
-  envFrom: {{- include "enterprise.common.envFrom" . | nindent 4 }}
-  env: {{- include "enterprise.common.environment" (merge (dict "component" "rbacAuth") .) | nindent 4 }}
-  ports:
-    - containerPort: 8089
-      name: rbac-auth
-  volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 4 }}
-  livenessProbe:
-    exec:
-      command:
-        - curl
-        - -f
-        - 'localhost:8089/health'
-    initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
-    timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
-    periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
-    failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
-    successThreshold: {{ .Values.probes.liveness.successThreshold }}
-  readinessProbe:
-    exec:
-      command:
-        - curl
-        - -f
-        - 'localhost:8089/health'
-    timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
-    periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
-    failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
-    successThreshold: {{ .Values.probes.readiness.successThreshold }}
-{{- with .Values.rbacAuth.resources }}
-  resources: {{- toYaml . | nindent 4 }}
-{{- end }}
-{{- end -}}
-
-
-{{/*
 Setup the common readiness probes for all Anchore Enterprise containers
 */}}
 {{- define "enterprise.common.readinessProbe" -}}
@@ -289,9 +278,8 @@ emptyDir: {}
 Setup the common anchore volume mounts
 */}}
 {{- define "enterprise.common.volumeMounts" -}}
-{{- with .Values.extraVolumeMounts }}
-{{ toYaml . }}
-{{- end }}
+{{- $component := .component -}}
+{{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) }}
 - name: anchore-license
   mountPath: /home/anchore/license.yaml
   subPath: license.yaml
@@ -312,9 +300,8 @@ Setup the common anchore volume mounts
 Setup the common anchore volumes
 */}}
 {{- define "enterprise.common.volumes" -}}
-{{- with .Values.extraVolumes }}
-{{ toYaml . }}
-{{- end }}
+{{- $component := .component -}}
+{{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
 - name: anchore-license
   secret:
     secretName: {{ .Values.licenseSecretName }}
