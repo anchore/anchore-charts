@@ -231,13 +231,13 @@ serviceAccountName: {{ include "enterprise.serviceAccountName" (merge (dict "com
 imagePullSecrets:
   - name: {{ . }}
 {{- end }}
-{{- with (index .Values (print $component)).nodeSelector }}
+{{- with (default .Values.nodeSelector (index .Values (print $component)).nodeSelector) }}
 nodeSelector: {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- with (index .Values (print $component)).affinity }}
+{{- with (default .Values.affinity (index .Values (print $component)).affinity) }}
 affinity: {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- with (index .Values (print $component)).tolerations }}
+{{- with (default .Values.tolerations (index .Values (print $component)).tolerations) }}
 tolerations: {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- end -}}

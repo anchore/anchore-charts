@@ -100,6 +100,18 @@ labels: {}
 ##
 annotations: {}
 
+## @param nodeSelector Common nodeSelector set on all Kubernetes pods
+##
+nodeSelector: {}
+
+## @param tolerations Common tolerations set on all Kubernetes pods
+##
+tolerations: []
+
+## @param affinity Common affinity set on all Kubernetes pods
+##
+affinity: {}
+
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
 ## @param scratchVolume.fixerInitContainerImage The image to use for the mode-fixer initContainer
