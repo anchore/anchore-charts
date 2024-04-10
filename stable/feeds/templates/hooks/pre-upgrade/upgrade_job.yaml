@@ -37,13 +37,13 @@ spec:
         - name: {{ . }}
     {{- end }}
       restartPolicy: Never
-    {{- with .Values.feedsUpgradeJob.nodeSelector }}
+    {{- with (default .Values.nodeSelector .Values.feedsUpgradeJob.nodeSelector) }}
       nodeSelector: {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.feedsUpgradeJob.affinity }}
+    {{- with (default .Values.affinity .Values.feedsUpgradeJob.affinity) }}
       affinity: {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.feedsUpgradeJob.tolerations }}
+    {{- with (default .Values.tolerations .Values.feedsUpgradeJob.tolerations) }}
       tolerations: {{- toYaml . | nindent 8 }}
     {{- end }}
     {{- if or .Values.certStoreSecretName .Values.cloudsql.useExistingServiceAcc .Values.extraVolumes }}
