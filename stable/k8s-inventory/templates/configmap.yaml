@@ -34,8 +34,7 @@ data:
       request-batch-size: {{ .Values.k8sInventory.kubernetes.requestBatchSize }}
       worker-pool-size: {{ .Values.k8sInventory.kubernetes.workerPoolSize }}
     ignore-not-running: {{ .Values.k8sInventory.ignoreNotRunning }}
-    missing-registry-override:
-      {{- toYaml .Values.k8sInventory.missingRegistryOverride | nindent 6 }}
+    missing-registry-override: {{ .Values.k8sInventory.missingRegistryOverride}}
     missing-tag-policy:
       {{- toYaml .Values.k8sInventory.missingTagPolicy | nindent 6 }}
     anchore:
