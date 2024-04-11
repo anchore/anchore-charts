@@ -40,9 +40,6 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
-      {{- with .Values.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
@@ -91,9 +88,6 @@ spec:
             - name: certs
               mountPath: /home/anchore/certs/
               readOnly: true
-          {{- end }}
-          {{- with .Values.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
           {{- end }}
           livenessProbe:
             tcpSocket:
