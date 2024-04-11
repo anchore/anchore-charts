@@ -1,0 +1,161 @@
+{{- if and .Values.feedsUpgradeJob.enabled (not .Values.feedsUpgradeJob.usePostUpgradeHook) -}}
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "feeds.upgradeJob.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  {{- if not .Values.feedsUpgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation
+  {{- end }}
+spec:
+{{- if ne (.Values.feedsUpgradeJob.ttlSecondsAfterFinished | quote) (-1 | quote) }}
+  ttlSecondsAfterFinished: {{ .Values.feedsUpgradeJob.ttlSecondsAfterFinished }}
+{{- end }}
+  template:
+    metadata:
+      name: {{ template "feeds.upgradeJob.fullname" . }}
+      labels: {{- include "feeds.common.labels" . | nindent 8 }}
+      annotations: {{- include "feeds.common.annotations" . | nindent 8 }}
+    spec:
+    {{- with .Values.securityContext }}
+      securityContext: {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .Values.feedsUpgradeJob.serviceAccountName }}
+      serviceAccountName: {{ .Values.feedsUpgradeJob.serviceAccountName }}
+    {{- else if .Values.feedsUpgradeJob.rbacCreate }}
+      serviceAccountName: {{ template "feeds.fullname" . }}-upgrade-sa
+    {{- else }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+    {{- end }}
+    {{- with .Values.imagePullSecretName }}
+      imagePullSecrets:
+        - name: {{ . }}
+    {{- end }}
+      restartPolicy: Never
+    {{- with (default .Values.nodeSelector .Values.feedsUpgradeJob.nodeSelector) }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with (default .Values.affinity .Values.feedsUpgradeJob.affinity) }}
+      affinity: {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with (default .Values.tolerations .Values.feedsUpgradeJob.tolerations) }}
+      tolerations: {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if or .Values.certStoreSecretName .Values.cloudsql.useExistingServiceAcc .Values.extraVolumes }}
+      volumes:
+        {{- with .Values.certStoreSecretName }}
+          - name: certs
+            secret:
+              secretName: {{ . }}
+        {{- end }}
+        {{- if .Values.cloudsql.useExistingServiceAcc }}
+          - name: {{ .Values.cloudsql.serviceAccSecretName }}
+            secret:
+              secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+        - name: scale-down-anchore
+          image: {{ .Values.feedsUpgradeJob.kubectlImage }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "feeds.fullname" . }};
+              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "feeds.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+                echo 'waiting for pods to go down...' && sleep 5;
+              done
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.feedsUpgradeJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: wait-for-db
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env: {{- include "feeds.common.environment" . | nindent 12 }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              while true; do
+                CONNSTR=postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}":"${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}"
+                if [[ ${ANCHORE_FEEDS_DB_SSL_MODE} != null ]]; then
+                  CONNSTR=${CONNSTR}?sslmode=${ANCHORE_FEEDS_DB_SSL_MODE}
+                fi
+                if [[ ${ANCHORE_FEEDS_DB_SSL_ROOT_CERT} != null ]]; then
+                  CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_FEEDS_DB_SSL_ROOT_CERT}
+                fi
+                err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+                if [[ !$err ]]; then
+                  echo "Database is ready"
+                  exit 0
+                fi
+                echo "Database is not ready yet, sleeping 10 seconds..."
+                sleep 10
+              done
+          {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.feedsUpgradeJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "feeds.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        - name: upgrade-feeds-db
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-feeds-config-env-vars
+          {{- if not .Values.standalone }}
+            - configMapRef:
+                name: {{ .Release.Name }}-enterprise-config-env-vars
+          {{- end }}
+        {{- if not .Values.injectSecretsViaEnv }}
+          {{- if .Values.useExistingSecrets }}
+            - secretRef:
+                name: {{ .Values.existingSecretName }}
+          {{- else }}
+            - secretRef:
+                name: {{ template "feeds.fullname" . }}
+          {{- end }}
+        {{- end }}
+          env: {{- include "feeds.common.environment" . | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.certStoreSecretName }}
+            - name: certs
+              mountPath: /home/anchore/certs/
+              readOnly: true
+          {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        {{- with .Values.feedsUpgradeJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+          {{- if not .Values.anchoreConfig.database.ssl }}
+            - |
+              {{ print (include "feeds.doSourceFile" .) }} anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}":"${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}" upgrade --dontask;
+          {{- else if eq .Values.anchoreConfig.database.sslMode "require" }}
+            - |
+              {{ print (include "feeds.doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}":"${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreConfig.database.sslMode }} upgrade --dontask;
+          {{- else }}
+            - |
+              {{ print (include "feeds.doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST}":"${ANCHORE_FEEDS_DB_PORT}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreConfig.database.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreConfig.database.sslRootCertFileName }} upgrade --dontask;
+          {{- end }}
+{{- end -}}

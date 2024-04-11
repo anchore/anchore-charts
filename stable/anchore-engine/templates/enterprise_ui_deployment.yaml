@@ -56,7 +56,7 @@ spec:
       {{- with .Values.anchoreEnterpriseUi.annotations }}
         {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreEnterpriseUi.existingSecret) }}
+      {{- if not (or .Values.inject_secrets_via_env .Values.anchoreGlobal.useExistingSecrets) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/enterprise_ui_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/ui-config: {{ include (print $.Template.BasePath "/enterprise_ui_configmap.yaml") . | sha256sum }}
@@ -72,8 +72,17 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
+        {{- if .Values.cloudsql.extraArgs }}
+        {{- range $arg := .Values.cloudsql.extraArgs }}
+        - {{ quote $arg }}
+        {{- end }}
+        {{- end }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
         {{- if .Values.cloudsql.useExistingServiceAcc }}
         - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
@@ -86,11 +95,14 @@ spec:
       - name: "{{ .Chart.Name }}-{{ $component }}"
         image: {{ .Values.anchoreEnterpriseUi.image }}
         imagePullPolicy: {{ .Values.anchoreEnterpriseUi.imagePullPolicy }}
-        env:
-        {{- if and (index .Values "anchoreEnterpriseUi" "existingSecret") (not (index .Values "anchore-ui-redis" "externalEndpoint")) }}
-        - name: ANCHORE_REDIS_URI
-          value: redis://nouser:{{ index .Values "anchore-ui-redis" "password" }}@{{ template "redis.fullname" . }}-master:6379
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
         {{- end }}
+        command: ["/bin/sh", "-c"]
+        args:
+        - {{ print (include "doSourceFile" .) }} /docker-entrypoint.sh node /home/node/aui/build/server.js
+        env:
         {{ if .Values.anchoreGlobal.dbConfig.ssl }}
         - name: PGSSLROOTCERT
           value: /home/anchore/certs/{{ .Values.anchoreGlobal.dbConfig.sslRootCertName }}
@@ -107,14 +119,12 @@ spec:
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreEnterpriseUi.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreEnterpriseUi.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseUi.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.enterprise-ui.fullname" . }}
-        - secretRef:
-            name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
         ports:
@@ -132,6 +142,9 @@ spec:
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
+        {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
         livenessProbe:
           tcpSocket:
@@ -168,6 +181,9 @@ spec:
         secret:
           secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
+      {{- with .Values.anchoreGlobal.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- with .Values.anchoreEnterpriseUi.nodeSelector }}
       nodeSelector:
         {{ toYaml . | nindent 8 }}
@@ -180,15 +196,15 @@ spec:
       tolerations:
         {{ toYaml . | nindent 8 }}
      {{- end }}
-     {{- with .Values.anchoreGlobal.serviceAccountName }}
+     {{- with include "anchore-engine.enterprise-ui.serviceAccountName" . }}
       serviceAccountName: {{ . }}
-      {{- end }}
+     {{- end }}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+  name: {{ include "anchore-engine.enterprise-ui.serviceName" . | quote }}
   labels:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}
@@ -213,6 +229,9 @@ spec:
       port: {{ .Values.anchoreEnterpriseUi.service.port }}
       protocol: TCP
       targetPort: 3000
+      {{- with .Values.anchoreEnterpriseUi.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app: {{ template "anchore-engine.fullname" . }}
     component: {{ $component }}

@@ -8,7 +8,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  .kai.yaml: |
+  config.yaml: |
     kubeconfig:
       path: {{ .Values.kai.kubeconfig.path }}
       cluster: {{ .Values.kai.kubeconfig.cluster }}
@@ -40,3 +40,4 @@ data:
       http:
         insecure: {{ .Values.kai.anchore.http.insecure }}
         timeout-seconds: {{ .Values.kai.anchore.http.timeoutSeconds }}
+    verbose-inventory-reports: {{ .Values.kai.verboseInventoryReports }}

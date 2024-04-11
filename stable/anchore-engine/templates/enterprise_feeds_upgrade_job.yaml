@@ -1,4 +1,5 @@
-{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled .Values.anchoreEnterpriseFeedsUpgradeJob.enabled }}
+{{- template "checkUpgradeCompatibility" . }}
+{{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled .Values.anchoreEnterpriseFeedsUpgradeJob.enabled (not .Values.anchoreGlobal.usePreupgradeHook) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,6 +9,12 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name | quote }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.anchoreGlobal.labels }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-weight": "-3"
@@ -19,6 +26,14 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
         app.kubernetes.io/instance: {{ .Release.Name | quote }}
         helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        app: {{ template "anchore-engine.fullname" . }}
+        component: anchore-enterprise-feeds-upgrade
+        {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.anchoreGlobal.labels }}
+        {{ toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
       {{- with .Values.anchoreGlobal.annotations }}
         {{ toYaml . | nindent 8 }}
@@ -42,8 +57,17 @@ spec:
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         command: ["/cloud_sql_proxy"]
         args:
+        {{- if .Values.cloudsql.extraArgs }}
+        {{- range $arg := .Values.cloudsql.extraArgs }}
+        - {{ quote $arg }}
+        {{- end }}
+        {{- end }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
         {{- if .Values.cloudsql.useExistingServiceAcc }}
         - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
@@ -60,26 +84,34 @@ spec:
         args:
         {{- if not .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
           - |
-            anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}" upgrade --dontask;
+            {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST/:5432}:${ANCHORE_FEEDS_DB_PORT:-5432}"/"${ANCHORE_FEEDS_DB_NAME}" upgrade --dontask; anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST/:5432}:${ANCHORE_FEEDS_DB_PORT:-5432}"/"${ANCHORE_FEEDS_DB_NAME}" pre-upgrade-check;
         {{- else if eq .Values.anchoreEnterpriseFeeds.dbConfig.sslMode "require" }}
           - |
-            anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode }} upgrade --dontask;
+            {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST/:5432}:${ANCHORE_FEEDS_DB_PORT:-5432}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode }} upgrade --dontask; anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST/:5432}:${ANCHORE_FEEDS_DB_PORT:-5432}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode }} pre-upgrade-check;
         {{- else }}
           - |
-            anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }} upgrade --dontask;
+            {{ print (include "doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST/:5432}:${ANCHORE_FEEDS_DB_PORT:-5432}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }} upgrade --dontask; anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_FEEDS_DB_USER}":"${ANCHORE_FEEDS_DB_PASSWORD}"@"${ANCHORE_FEEDS_DB_HOST/:5432}:${ANCHORE_FEEDS_DB_PORT:-5432}"/"${ANCHORE_FEEDS_DB_NAME}"?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }} pre-upgrade-check;
         {{- end }}
         {{- if .Values.cloudsql.enabled }}
-            sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+          -  sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
         securityContext:
+          {{- with .Values.anchoreGlobal.containerSecurityContext }}
+          {{ toYaml . | nindent 10 }}
+          {{- end }}
           capabilities:
             add:
               - SYS_PTRACE
+        {{- else }}
+        {{- with .Values.anchoreGlobal.containerSecurityContext }}
+        securityContext:
+          {{ toYaml . | nindent 10 }}
+        {{- end }}
         {{- end }}
         envFrom:
         {{- if not .Values.inject_secrets_via_env }}
-        {{- if .Values.anchoreEnterpriseFeeds.existingSecret }}
+        {{- if .Values.anchoreGlobal.useExistingSecrets }}
         - secretRef:
-            name: {{ .Values.anchoreEnterpriseFeeds.existingSecret }}
+            name: {{ .Values.anchoreEnterpriseFeeds.existingSecretName }}
         {{- else }}
         - secretRef:
             name: {{ include "anchore-engine.enterprise-feeds.fullname" . }}
@@ -87,8 +119,6 @@ spec:
             name: {{ print (include "anchore-engine.fullname" .) "-admin-pass" }}
         {{- end }}
         {{- end }}
-        - configMapRef:
-            name: {{ template "anchore-engine.enterprise-feeds.fullname" . }}-env
         env:
         {{- with .Values.anchoreGlobal.extraEnv }}
         {{- toYaml . | nindent 8 }}
@@ -96,15 +126,18 @@ spec:
         {{- with .Values.anchoreEnterpriseFeeds.extraEnv }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         volumeMounts:
+        {{- if (.Values.anchoreGlobal.certStoreSecretName) }}
         - name: certs
           mountPath: /home/anchore/certs/
           readOnly: true
         {{- end }}
+        {{- with .Values.anchoreGlobal.extraVolumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         resources:
           {{ toYaml .Values.anchoreEnterpriseFeedsUpgradeJob.resources | nindent 10 }}
-    {{- if or .Values.anchoreGlobal.certStoreSecretName .Values.cloudsql.useExistingServiceAcc }}
+    {{- if or .Values.anchoreGlobal.certStoreSecretName .Values.cloudsql.useExistingServiceAcc .Values.anchoreGlobal.extraVolumes }}
       volumes:
       {{- with .Values.anchoreGlobal.certStoreSecretName }}
       - name: certs
@@ -115,6 +148,9 @@ spec:
       - name: {{ .Values.cloudsql.serviceAccSecretName }}
         secret:
           secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+      {{- with .Values.anchoreGlobal.extraVolumes }}
+      {{- toYaml . | nindent 6 }}
       {{- end }}
     {{- end }}
       {{- with .Values.anchoreEnterpriseFeedsUpgradeJob.nodeSelector }}

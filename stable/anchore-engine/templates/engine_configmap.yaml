@@ -1,5 +1,5 @@
 {{- $anchoreFeedsURL := "https://ancho.re/v1/service/feeds" -}}
-{{- $grypeProviderFeedsExternalURL := "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
+{{- $grypeProviderFeedsExternalURL := "" -}}
 
 {{- if .Values.anchoreEnterpriseFeeds.url -}}
   {{- $urlPathSuffix := (default "" (regexFind "/v1.*$" .Values.anchoreEnterpriseFeeds.url)) -}}
@@ -8,17 +8,17 @@
   {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/databases/grypedb" $anchoreFeedsHost) -}}
 {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
-    {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $anchoreFeedsURL = (printf "https://%s:%s/v1/feeds"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- else -}}
-    {{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $anchoreFeedsURL = (printf "http://%s:%s/v1/feeds" (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/databases/grypedb"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- end -}}
 {{- end -}}
 
-{{- $vulnerabilityProvider := .Values.anchorePolicyEngine.vulnerabilityProvider -}}
-{{- if and .Values.anchoreEnterpriseGlobal.enabled (ne $vulnerabilityProvider "grype") -}}
-    {{ fail "The v2 (grype) vulnerability scanner is the only valid configuration for chart v1.18.0 and higher. Please set the following: `.Values.anchorePolicyEngine.vulnerabilityProvider=grype`." }}
+{{- /* Set the grypeProviderFeedsExternalURL to upstream feeds if still unset or if specifically overridden */}}
+{{- if or (empty $grypeProviderFeedsExternalURL) .Values.anchorePolicyEngine.overrideFeedsToUpstream -}}
+  {{- $grypeProviderFeedsExternalURL = "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
 {{- end -}}
 
 kind: ConfigMap
@@ -67,6 +67,8 @@ data:
     # Defines a maximum compressed image size (MB) to be added for analysis
     # Value < 0 disables feature. Disabled by default
     max_compressed_image_size_mb: {{ default -1 .Values.anchoreGlobal.maxCompressedImageSizeMB }}
+    max_source_import_size_mb: {{ default 100 .Values.anchoreGlobal.maxSourceImportSizeMB }}
+    max_import_content_size_mb: {{ default 100 .Values.anchoreGlobal.maxImportContentSizeMB }}
 
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
@@ -86,24 +88,40 @@ data:
       oauth:
         enabled: {{ .Values.anchoreGlobal.oauthEnabled }}
         default_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthTokenExpirationSeconds }}
+        refresh_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthRefreshTokenExpirationSeconds }}
 
       # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
       # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
       # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
       hashed_passwords: {{ .Values.anchoreGlobal.hashedPasswords }}
 
+      # Set this to True in order to disable the SSO JIT provisioning during authentication. This provides an additional
+      # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+      sso_require_existing_users: {{ .Values.anchoreGlobal.ssoRequireExistingUsers }}
+
     credentials:
       database:
-        {{- if not .Values.anchoreGlobal.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
-        {{- else if eq .Values.anchoreGlobal.dbConfig.sslMode "require" }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}"
-        {{- else }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName -}}"
-        {{- end }}
+      {{- if .Values.anchoreEnterpriseGlobal.enabled }}
+        user: "${ANCHORE_DB_USER}"
+        password: "${ANCHORE_DB_PASSWORD}"
+        host: "${ANCHORE_DB_HOST}"
+        port: "${ANCHORE_DB_PORT}"
+        name: "${ANCHORE_DB_NAME}"
+      {{- else }}
+        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT}/${ANCHORE_DB_NAME}"
+      {{- end }}
+
         db_connect_args:
           timeout: {{ .Values.anchoreGlobal.dbConfig.timeout }}
+        {{- if .Values.anchoreGlobal.dbConfig.ssl }}
+          ssl: true
+          sslmode: {{ .Values.anchoreGlobal.dbConfig.sslMode -}}
+            {{- if not (eq .Values.anchoreGlobal.dbConfig.sslMode "require") }}
+          sslrootcert: /home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName -}}
+            {{- end }}
+        {{- else }}
           ssl: false
+        {{- end }}
         db_pool_size: {{ .Values.anchoreGlobal.dbConfig.connectionPoolSize }}
         db_pool_max_overflow: {{ .Values.anchoreGlobal.dbConfig.connectionPoolMaxOverflow }}
         {{- with .Values.anchoreGlobal.dbConfig.engineArgs }}
@@ -114,7 +132,7 @@ data:
       apiext:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.api.serviceName" . }}
         max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreApi.service.port }}
@@ -162,10 +180,11 @@ data:
         ssl_key: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretKeyName }}"
         {{- end }}
         enable_owned_package_filtering: {{ .Values.anchoreAnalyzer.enableOwnedPackageFiltering }}
+        keep_image_analysis_tmpfiles: {{ default false .Values.anchoreAnalyzer.keepImageAnalysisTmpfiles }}
       catalog:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.catalog.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.catalog.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreCatalog.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreCatalog.maxRequestThreads }}
@@ -192,7 +211,6 @@ data:
           service_watcher: {{ .Values.anchoreCatalog.cycleTimers.service_watcher }}
           # Interval between checks to repo for new tags
           repo_watcher: {{ .Values.anchoreCatalog.cycleTimers.repo_watcher }}
-          k8s_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_watcher }}
           k8s_image_watcher: {{ .Values.anchoreCatalog.cycleTimers.k8s_image_watcher }}
           resource_metrics: {{ .Values.anchoreCatalog.cycleTimers.resource_metrics }}
           events_gc: {{ .Values.anchoreCatalog.cycleTimers.events_gc }}
@@ -215,16 +233,12 @@ data:
         {{- end }}
         runtime_inventory:
           image_ttl_days: {{ .Values.anchoreCatalog.runtimeInventory.imageTTLDays }}
-          kubernetes:
-            report_anchore_cluster:
-              enabled: {{ .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.enabled }}
-              anchore_cluster_name: {{ .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.clusterName }}
-              namespaces:
-                {{- toYaml .Values.anchoreCatalog.runtimeInventory.reportAnchoreCluster.namespaces | nindent 16 }}
+          image_ingest_overwrite: {{ default false .Values.anchoreCatalog.runtimeInventory.imageIngestOverwrite }}
+        down_analyzer_task_requeue: {{ .Values.anchoreCatalog.downAnalyzerTaskRequeue }}
       simplequeue:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.simplequeue.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.simplequeue.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreSimpleQueue.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreSimpleQueue.maxRequestThreads }}
@@ -237,15 +251,17 @@ data:
         enabled: true
         require_auth: true
         max_request_threads: {{ default 50 .Values.anchorePolicyEngine.maxRequestThreads }}
-        endpoint_hostname: {{ template "anchore-engine.policy-engine.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.policy-engine.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchorePolicyEngine.service.port }}
         policy_evaluation_cache_ttl: {{ .Values.anchorePolicyEngine.cacheTTL }}
         cycle_timer_seconds: 1
         cycle_timers:
           {{- toYaml .Values.anchorePolicyEngine.cycleTimers | nindent 10 }}
+        enable_package_db_load: {{ .Values.anchorePolicyEngine.enablePackageDbLoad }}
+        enable_images_by_vulnerability_api: {{ .Values.anchorePolicyEngine.enableImagesByVulnerabilityAPI }}
         vulnerabilities:
-          provider: {{ $vulnerabilityProvider }}
+          provider: grype
           sync:
             enabled: true
             ssl_verify: {{ .Values.anchoreGlobal.internalServicesSsl.verifyCerts }}
@@ -281,15 +297,6 @@ data:
                 enabled: {{ default "false" (.Values.anchoreGlobal.syncPackages | quote) }}
                 {{- end }}
                 url: {{ $anchoreFeedsURL }}
-              {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
-              vulndb:
-                enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | quote) }}
-                url: {{ $anchoreFeedsURL }}
-              {{- else if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreGlobal.syncVulnDB }}
-              vulndb:
-                enabled: true
-                url: {{ $anchoreFeedsURL }}
-              {{- end }}
               {{- if and .Values.anchoreEnterpriseGlobal.enabled .Values.anchoreEnterpriseFeeds.enabled }}
               microsoft:
                 enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled }}

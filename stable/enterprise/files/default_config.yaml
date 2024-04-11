@@ -1,0 +1,252 @@
+service_dir: ${ANCHORE_SERVICE_DIR}
+tmp_dir: ${ANCHORE_TMP_DIR}
+log_level: ${ANCHORE_LOG_LEVEL}
+
+allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
+host_id: "${ANCHORE_HOST_ID}"
+internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
+
+global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
+global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
+server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
+
+license_file: ${ANCHORE_LICENSE_FILE}
+auto_restart_services: false
+
+max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+
+max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+
+metrics:
+  enabled: ${ANCHORE_ENABLE_METRICS}
+  auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
+
+webhooks: {{- toYaml .Values.anchoreConfig.webhooks | nindent 2 }}
+
+default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
+default_admin_email: ${ANCHORE_ADMIN_EMAIL}
+
+keys:
+  secret: "${ANCHORE_SAML_SECRET}"
+  public_key_path: ${ANCHORE_AUTH_PRIVKEY}
+  private_key_path: ${ANCHORE_AUTH_PUBKEY}
+
+user_authentication:
+  oauth:
+    enabled: ${ANCHORE_OAUTH_ENABLED}
+    default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+    refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+  hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
+  sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+  allow_api_keys_for_saml_users: {{ .Values.anchoreConfig.user_authentication.allow_api_keys_for_saml_users }}
+  max_api_key_age_days: {{ .Values.anchoreConfig.user_authentication.max_api_key_age_days }}
+  max_api_keys_per_user: {{ .Values.anchoreConfig.user_authentication.max_api_keys_per_user }}
+  remove_deleted_user_api_keys_older_than_days: {{ .Values.anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days }}
+
+credentials:
+  database:
+    user: "${ANCHORE_DB_USER}"
+    password: "${ANCHORE_DB_PASSWORD}"
+    host: "${ANCHORE_DB_HOST}"
+    port: "${ANCHORE_DB_PORT}"
+    name: "${ANCHORE_DB_NAME}"
+    db_connect_args:
+      timeout: ${ANCHORE_DB_TIMEOUT}
+      ssl: ${ANCHORE_DB_SSL}
+    {{- if .Values.anchoreConfig.database.ssl }}
+      sslmode: ${ANCHORE_DB_SSL_MODE}
+      sslrootcert: ${ANCHORE_DB_SSL_ROOT_CERT}
+    {{- end }}
+    db_pool_size: ${ANCHORE_DB_POOL_SIZE}
+    db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
+  {{- with .Values.anchoreConfig.database.engineArgs }}
+    db_engine_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+
+services:
+  apiext:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+  {{- if .Values.anchoreConfig.apiext.external.enabled }}
+    external_tls: {{ .Values.anchoreConfig.apiext.external.useTLS }}
+    external_hostname: {{ .Values.anchoreConfig.apiext.external.hostname }}
+    external_port: {{ .Values.anchoreConfig.apiext.external.port }}
+  {{- end }}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+
+  analyzer:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    cycle_timer_seconds: 1
+    cycle_timers: {{- toYaml .Values.anchoreConfig.analyzer.cycle_timers | nindent 6 }}
+    analyzer_driver: 'nodocker'
+    layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
+    layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
+    enable_hints: ${ANCHORE_HINTS_ENABLED}
+    enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+    keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+
+  catalog:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    cycle_timer_seconds: 1
+    cycle_timers: {{- toYaml .Values.anchoreConfig.catalog.cycle_timers | nindent 6 }}
+    event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
+    runtime_inventory:
+      inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
+      inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+    image_gc:
+      max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+    runtime_compliance:
+      object_store_bucket: "runtime_compliance_check"
+    down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
+    import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+    analysis_archive: {{- toYaml .Values.anchoreConfig.catalog.analysis_archive | nindent 6 }}
+    object_store: {{- toYaml .Values.anchoreConfig.catalog.object_store | nindent 6 }}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+
+  simplequeue:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+
+  policy_engine:
+    enabled: true
+    require_auth: true
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
+    cycle_timer_seconds: 1
+    cycle_timers: {{- toYaml .Values.anchoreConfig.policy_engine.cycle_timers | nindent 6 }}
+    enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+    vulnerabilities:
+      sync:
+        enabled: true
+        ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
+        connection_timeout_seconds: 3
+        read_timeout_seconds: 60
+        data:
+          grypedb:
+            enabled: true
+            url: {{ template "enterprise.grypeProviderURL" . }}
+          packages:
+            enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
+            url: {{ template "enterprise.feedsURL" . }}
+      matching:
+        default:
+          search:
+            by_cpe:
+              enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+        ecosystem_specific:
+          dotnet:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+          golang:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+          java:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+          javascript:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+          python:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+          ruby:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+          stock:
+            search:
+              by_cpe:
+                # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+
+  reports:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
+    cycle_timers: {{- toYaml .Values.anchoreConfig.reports.cycle_timers | nindent 6 }}
+    max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
+    async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+    use_volume: {{ .Values.anchoreConfig.reports.use_volume }}
+
+  reports_worker:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
+    enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
+    data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
+    data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
+    data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+    cycle_timers: {{- toYaml .Values.anchoreConfig.reports_worker.cycle_timers | nindent 6 }}
+    runtime_report_generation:
+      inventory_images_by_vulnerability: true
+      vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
+      vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
+      vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+
+  notifications:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    cycle_timers: {{- toYaml .Values.anchoreConfig.notifications.cycle_timers | nindent 6 }}
+    ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}

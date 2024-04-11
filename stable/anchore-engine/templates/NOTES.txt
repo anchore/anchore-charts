@@ -1,61 +1,51 @@
-To use Anchore Engine you need the URL, username, and password to access the API.
 
-Anchore Engine can be accessed via port {{ .Values.anchoreApi.service.port }} on the following DNS name from within the cluster:
-{{ template "anchore-engine.api.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+To use Anchore you need the URL, username, and password to access the API and/or the UI.
+Anchore can be accessed via port {{ .Values.anchoreApi.service.port }} on the following DNS name from within the cluster:
 
-Here are the steps to configure the anchore-cli (`pip install anchorecli`). Use these same values for direct API access as well.
+    {{ template "anchore-engine.api.serviceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
 
-To configure your anchore-cli run:
-
-    ANCHORE_CLI_USER=admin
-    ANCHORE_CLI_PASS=$(kubectl get secret --namespace {{ .Release.Namespace }} {{ template "anchore-engine.fullname" . }}-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 --decode; echo)
-{{ if .Values.ingress.enabled }}
-   ANCHORE_CLI_URL={{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}https{{- else }}http{{- end -}}://$(kubectl get ingress --namespace {{ .Release.Namespace }} {{ template "anchore-engine.fullname" . }} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")/v1/
-{{ else }}
-Using the service endpoint from within the cluster you can use:
-    ANCHORE_CLI_URL={{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}https{{- else }}http{{- end -}}://{{ template "anchore-engine.api.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.anchoreApi.service.port}}/v1/
-{{ end }}
-
-To verify the service is up and running, you can run container for the Anchore Engine CLI:
-
-    kubectl run -i --tty anchore-cli --restart=Always --image anchore/engine-cli {{ if and (not .Values.anchoreGlobal.internalServicesSsl.verifyCerts) .Values.anchoreGlobal.internalServicesSsl.enabled -}}--env ANCHORE_CLI_SSL_VERIFY=n{{- end }} --env ANCHORE_CLI_USER=admin --env ANCHORE_CLI_PASS=${ANCHORE_CLI_PASS} --env ANCHORE_CLI_URL=http://{{ template "anchore-engine.api.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.anchoreApi.service.port}}/v1/
-
-from within the container you can use 'anchore-cli' commands.
-
-* NOTE: On first startup of anchore-engine, it performs a CVE data sync which may take several minutes to complete. During this time the system status will report 'partially_down' and any images added for analysis will stay in the 'not_analyzed' state.
+* NOTE: On first startup of Anchore, the policy-engine performs a CVE data sync which may take several minutes to complete.
+During this time the system status will report 'partially_down' and any images added for analysis will stay in the 'not_analyzed' state.
 Once the sync is complete, any queued images will be analyzed and the system status will change to 'all_up'.
 
-Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state. You can check with:
+Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state.
+You can check with:
+
     kubectl get pods -l app={{ template "anchore-engine.fullname" .}},component=api
 
+{{- if and .Release.IsUpgrade (regexMatch "1.22.[0-9]+" .Chart.Version) }}
+{{- $apiDeployment := (lookup "apps/v1" "Deployment" .Release.Namespace (include "anchore-engine.api.fullname" .)) }}
+{{- if not $apiDeployment }}
 
-A quick primer on using the Anchore Engine CLI follows. For more info see: https://github.com/anchore/anchore-engine/wiki/Getting-Started
+**WARNING**
+Anchore Enterprise v4.4.x only supports upgrades from Enterprise v4.2.0 and higher.
+See release notes for more information - https://docs.anchore.com/current/docs/releasenotes/440/
+{{- end }}
+{{- end }}
 
-View system status:
+{{- if not .Values.anchoreEnterpriseGlobal.enabled }}
 
-    anchore-cli system status
+**WARNING**
+As of January 2023, Anchore Engine is no longer maintained.
+There will be no future versions released. Users are advised to use Syft and Grype.
+{{- end }}
 
-Add an image to be analyzed:
+{{- if and .Release.IsUpgrade .Values.anchoreGlobal.useExistingSecrets (regexMatch "1.24.[0-9]+" .Chart.Version) }}
 
-    anchore-cli image add <imageref>
+**WARNING**
+Please update your existing secrets to use separate environment variables for the database hostname and port.
+Add the following variables to your secrets:
+ 
+    ANCHORE_DB_HOST: <HOSTNAME>
+    ANCHORE_DB_PORT: <PORT>
+{{- end }}
 
-List images and see the analysis status (not_analyzed initially):
+{{- if and .Release.IsUpgrade .Values.anchoreEnterpriseGlobal.enabled }}
 
-    anchore-cli image list
+**WARNING**
+The upcoming 5.0 release of Anchore Enterprise will require Postgresql version 13.0 or higher.
+To verify that your Postgresql version is compatible with Anchore Enterprise v5.0 view the log output of the upgrade jobs:
 
-Once the image is analyzed you'll see status change to 'analyzed'. This may take some time on first execution with a new database because
-the system must first do a CVE data sync which can take several minutes. Once complete, the image will transition to 'analyzing' state.
-
-When the image reaches 'analyzed' state, you can view policy evaluation output with:
-
-    anchore-cli evaluate check <imageref>
-
-List CVEs found in the image with:
-
-    anchore-cli image vuln <imageref> os
-
-List OS packages found in the image with:
-    anchore-cli image content <imageref> os
-
-List files found in the image with:
-    anchore-cli image content <imageref> files
+    kubectl logs -l component=anchore-enterprise-upgrade | grep WARN
+    kubectl logs -l component=anchore-enterprise-feeds-upgrade | grep WARN
+{{- end }}

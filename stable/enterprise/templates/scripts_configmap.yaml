@@ -1,0 +1,9 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-enterprise-scripts
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4}}
+data:
+  {{ .Values.scripts | toYaml | nindent 2 }}

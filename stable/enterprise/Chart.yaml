@@ -1,0 +1,50 @@
+apiVersion: v2
+name: enterprise
+version: "2.5.2"
+appVersion: "5.4.0"
+kubeVersion: 1.23.x - 1.28.x || 1.23.x-x - 1.29.x-x
+description: |
+  Anchore Enterprise is a complete container security workflow solution for professional teams. Easily integrating with CI/CD systems,
+  it allows developers to bolster security without compromising velocity and enables security teams to audit and verify compliance in real-time.
+  It is based on Anchore Engine, an open-source image inspection and scanning tool.
+keywords:
+  - analysis
+  - docker
+  - anchore
+  - "anchore-engine"
+  - "anchore-enterprise"
+  - image
+  - security
+  - vulnerability
+  - scanner
+home: https://anchore.com
+sources:
+  - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+maintainers:
+  - name: zhill
+    email: zach@anchore.com
+  - name: btodhunter
+    email: bradyt@anchore.com
+  - name: hnguyen
+    email: hung.nguyen@anchore.com
+icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+dependencies:
+  - name: postgresql
+    version: "~12.5"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    condition: postgresql.chartEnabled
+  - name: redis
+    version: "~17.11"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    condition: ui-redis.chartEnabled
+    alias: ui-redis
+  - name: feeds
+    version: "~2"
+    repository: "@anchore"
+    # repository: file://../feeds
+    condition: feeds.chartEnabled
+    import-values:
+      - child: service
+        parent: feeds.service
+      - child: anchoreConfig.internalServicesSSL
+        parent: feeds.anchoreConfig.internalServicesSSL

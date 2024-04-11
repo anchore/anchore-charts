@@ -1,0 +1,13 @@
+annotations:
+  foo: "bar-annotation"
+  bar: "baz-annotation"
+
+labels:
+  foo: "bar-label"
+  bar: "baz-label"
+
+extraEnv:
+  - name: foo
+    value: bar
+  - name: bar
+    value: baz

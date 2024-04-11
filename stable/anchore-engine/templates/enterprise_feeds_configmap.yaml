@@ -9,9 +9,9 @@
   {{- $grypeProviderFeedsExternalURL = (printf "%s/v1/" $anchoreFeedsHost) -}}
 {{- else -}}
   {{- if .Values.anchoreGlobal.internalServicesSsl.enabled -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "https://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- else -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.fullname" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
+    {{- $grypeProviderFeedsExternalURL = (printf "http://%s:%s/v1/"  (include "anchore-engine.enterprise-feeds.serviceName" .) (.Values.anchoreEnterpriseFeeds.service.port | toString) ) -}}
   {{- end -}}
 {{- end -}}
 
@@ -45,7 +45,7 @@ data:
     license_file: /home/anchore/license.yaml
     metrics:
       enabled: {{ .Values.anchoreGlobal.enableMetrics }}
-      auth_disabled: {{ .Values.anchoreGlobal.metricsAuthDisabled }}
+      auth_disabled: true
 
     # Locations for keys used for signing and encryption. Only one of 'secret' or 'public_key_path'/'private_key_path' needs to be set. If all are set then the keys take precedence over the secret value
     # Secret is for a shared secret and if set, all components in anchore should have the exact same value in their configs.
@@ -65,24 +65,36 @@ data:
       oauth:
         enabled: {{ .Values.anchoreGlobal.oauthEnabled }}
         default_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthTokenExpirationSeconds }}
+        refresh_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthRefreshTokenExpirationSeconds }}
 
       # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
       # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
       # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
       hashed_passwords: {{ .Values.anchoreGlobal.hashedPasswords }}
 
+      # Set this to True in order to disable the SSO JIT provisioning during authentication. This provides an additional
+      # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+      sso_require_existing_users: {{ .Values.anchoreGlobal.ssoRequireExistingUsers }}
+
     credentials:
       database:
-        {{- if not .Values.anchoreEnterpriseFeeds.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
-        {{- else if eq .Values.anchoreEnterpriseFeeds.dbConfig.sslMode "require" }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}"
-        {{- else }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_FEEDS_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName }}"
-        {{- end }}
+        user: "${ANCHORE_FEEDS_DB_USER}"
+        password: "${ANCHORE_FEEDS_DB_PASSWORD}"
+        host: "${ANCHORE_FEEDS_DB_HOST}"
+        port: "${ANCHORE_FEEDS_DB_PORT}"
+        name: "${ANCHORE_FEEDS_DB_NAME}"
+
         db_connect_args:
           timeout: {{ .Values.anchoreEnterpriseFeeds.dbConfig.timeout }}
+        {{- if .Values.anchoreGlobal.dbConfig.ssl }}
+          ssl: true
+          sslmode: {{ .Values.anchoreEnterpriseFeeds.dbConfig.sslMode -}}
+            {{- if not (eq .Values.anchoreEnterpriseFeeds.dbConfig.sslMode "require") }}
+          sslrootcert: /home/anchore/certs/{{- .Values.anchoreEnterpriseFeeds.dbConfig.sslRootCertName -}}
+            {{- end }}
+        {{- else }}
           ssl: false
+        {{- end }}
         db_pool_size: {{ .Values.anchoreEnterpriseFeeds.dbConfig.connectionPoolSize }}
         db_pool_max_overflow: {{ .Values.anchoreEnterpriseFeeds.dbConfig.connectionPoolMaxOverflow }}
         {{- with .Values.anchoreEnterpriseFeeds.dbConfig.engineArgs }}
@@ -93,7 +105,7 @@ data:
       feeds:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-feeds.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseFeeds.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseFeeds.maxRequestThreads }}
@@ -121,13 +133,23 @@ data:
           alpine:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.alpineDriverEnabled | quote) }}
           centos:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.centosDriverEnabled | quote) }}
+            enabled: false
           debian:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.debianDriverEnabled | quote) }}
+          {{- if .Values.anchoreEnterpriseFeeds.debianExtraReleases }}
+            releases:
+            {{- toYaml .Values.anchoreEnterpriseFeeds.debianExtraReleases | nindent 14 }}
+          {{- end }}
           ol:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.olDriverEnabled | quote) }}
           ubuntu:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.ubuntuDriverEnabled | quote) }}
+          {{- if .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases }}
+            releases:
+            {{- toYaml .Values.anchoreEnterpriseFeeds.ubuntuExtraReleases | nindent 14 }}
+          {{- end }}
+            git_url: {{ (.Values.anchoreEnterpriseFeeds.ubuntuDriverGitUrl | quote) }}
+            git_branch: {{ (.Values.anchoreEnterpriseFeeds.ubuntuDriverGitBranch | quote) }}
           rhel:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.rhelDriverEnabled | quote) }}
             concurrency: {{ .Values.anchoreEnterpriseFeeds.rhelDriverConcurrency }}
@@ -141,14 +163,17 @@ data:
             # To enable gem driver comment the enabled property and uncomment the db_connect property.
             enabled: {{ .Values.anchoreEnterpriseFeeds.gemDriverEnabled | quote }}
           {{- if .Values.anchoreEnterpriseFeeds.gemDriverEnabled }}
-            db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}/${ANCHORE_GEM_DB_NAME}"
+            db_connect: "postgresql://${ANCHORE_GEM_DB_USER}:${ANCHORE_GEM_DB_PASSWORD}@${ANCHORE_GEM_DB_HOST}:${ANCHORE_GEM_DB_PORT}/${ANCHORE_GEM_DB_NAME}"
           {{- end }}
           nvdv2:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.nvdv2DriverEnabled | quote) }}
-          vulndb:
-            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.vulndbDriverEnabled | quote) }}
+          {{- if .Values.anchoreEnterpriseFeeds.useNvdDriverApiKey }}
+            api_key: ${ANCHORE_NVD_API_KEY}
+          {{- end }}
           sles:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.slesDriverEnabled | quote) }}
+          mariner:
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.marinerDriverEnabled) }}
           msrc:
             enabled: {{ .Values.anchoreEnterpriseFeeds.msrcDriverEnabled | quote }}
             {{- with .Values.anchoreEnterpriseFeeds.msrcWhitelist }}
@@ -163,6 +188,17 @@ data:
           grypedb:
             enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.grypeDriverEnabled | quote) }}
             external_feeds_url: {{ $grypeProviderFeedsExternalURL }}
+            preload:
+              enabled: {{ default true (.Values.anchoreEnterpriseFeeds.grypedbPreloadEnabled) }}
+              workspace_archive_path: {{ default "/preload/grype-db-workspace.tar.gz" (.Values.anchoreEnterpriseFeeds.grypedbPreloadWorkspaceArchivePath) }}
+            persist_provider_workspaces: {{ default true (.Values.anchoreEnterpriseFeeds.grypedbPersistProviderWorkspaces) }}
+            restore_provider_workspaces: {{ default true (.Values.anchoreEnterpriseFeeds.grypedbRestoreProviderWorkspaces) }}
+          anchore_match_exclusions:
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.anchoreMatchExclusionsEnabled | quote) }}
+          wolfi:
+            enabled: {{ default "true" (.Values.anchoreEnterpriseFeeds.wolfiDriverEnabled | quote) }}
+          chainguard:
+            enabled: {{ default true (.Values.anchoreEnterpriseFeeds.chainguardDriverEnabled) }}
         {{- if .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_enable: {{ .Values.anchoreGlobal.internalServicesSsl.enabled }}
         ssl_cert: "/home/anchore/certs/{{- .Values.anchoreGlobal.internalServicesSsl.certSecretCertName }}"

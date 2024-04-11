@@ -1,4 +1,7 @@
 {{- if .Values.ingress.enabled -}}
+
+{{- template "checkIngressValues" . -}}
+
 {{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
 {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
@@ -40,26 +43,28 @@ spec:
   {{- end }}
   rules:
   {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts .Values.ingress.feedsHosts .Values.ingress.reportsHosts }}
-    {{- range .Values.ingress.apiHosts }}
-    - host: {{ . | quote }}
+    {{- range $apiHostIndex, $apiHostName := .Values.ingress.apiHosts }}
+    - host: {{ $apiHostName | quote }}
       http:
         paths:
-        - path: {{ $.Values.ingress.apiPath }}
+        {{- range $apiPathIndex, $apiPath := $.Values.ingress.apiPaths }}
+        - path: {{ $apiPath | quote }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreApi.service.port }}
-          {{else}}
+          {{- else }}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreApi.service.port }}
           {{- end }}
+        {{- end }}
     {{- end }}
-    {{- range .Values.ingress.uiHosts }}
-    - host: {{ . | quote }}
+    {{- range $uiHostIndex, $uiHostName := .Values.ingress.uiHosts }}
+    - host: {{ $uiHostName | quote }}
       http:
         paths:
         - path: {{ $.Values.ingress.uiPath }}
@@ -67,66 +72,70 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- end }}
     {{- end }}
-    {{- range .Values.ingress.feedsHosts }}
-    - host: {{ . | quote }}
+    {{- range $feedsHostIndex, $feedsHostName := .Values.ingress.feedsHosts }}
+    - host: {{ $feedsHostName | quote }}
       http:
         paths:
-        - path: {{ $.Values.ingress.feedsPath }}
+        {{ range $feedsPathIndex, $feedsPath := $.Values.ingress.feedsPaths }}
+        - path: {{ $feedsPath }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- end }}
+        {{- end }}
     {{- end }}
-    {{- range .Values.ingress.reportsHosts }}
-    - host: {{ . | quote }}
+    {{- range $reportsHostIndex, $reportsHostName := .Values.ingress.reportsHosts }}
+    - host: {{ $reportsHostName | quote }}
       http:
         paths:
-        - path: {{ $.Values.ingress.reportsPath }}
+        {{- range $reportsPathIndex, $reportsPath := $.Values.ingress.reportsPaths }}
+        - path: {{ $reportsPath }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- end }}
+        {{- end }}
     {{- end }}
   {{- else }}
     - http:
         paths:
-        {{- with .Values.ingress.apiPath }}
+        {{- range .Values.ingress.apiPaths }}
         - path: {{ . }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreApi.service.port }}
           {{else}}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreApi.service.port }}
           {{- end }}
         {{- end }}
@@ -136,42 +145,42 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-ui.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-ui.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseUi.service.port }}
           {{- end }}
         {{- end }}
-        {{- with .Values.ingress.feedsPath }}
+        {{- range .Values.ingress.feedsPaths }}
         - path: {{ . }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+              name: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.enterprise-feeds.fullname" $ }}
+            serviceName: {{ template "anchore-engine.enterprise-feeds.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseFeeds.service.port }}
           {{- end }}
         {{- end }}
-        {{- with .Values.ingress.reportsPath }}
+        {{- range .Values.ingress.reportsPaths }}
         - path: {{ . }}
           {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
           pathType: Prefix
           backend:
             service:
-              name: {{ template "anchore-engine.api.fullname" $ }}
+              name: {{ template "anchore-engine.api.serviceName" $ }}
               port:
                 number: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- else}}
           backend:
-            serviceName: {{ template "anchore-engine.api.fullname" $ }}
+            serviceName: {{ template "anchore-engine.api.serviceName" $ }}
             servicePort: {{ $.Values.anchoreEnterpriseReports.service.apiPort }}
           {{- end }}
         {{- end }}

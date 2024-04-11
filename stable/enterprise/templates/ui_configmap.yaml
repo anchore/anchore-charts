@@ -1,0 +1,46 @@
+{{- $component := "ui" -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "enterprise.ui.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+data:
+  config-ui.yaml: |
+    # Anchore UI configuration
+  {{- with .Values.anchoreConfig.ui.custom_links }}
+    custom_links:
+      title: {{ .title }}
+      links:
+    {{- range .links }}
+      {{- with . }}
+        - title: {{ .title }}
+          uri: {{ .uri }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.anchoreConfig.ui.enable_add_repositories }}
+    enable_add_repositories:
+      admin: {{ .admin }}
+      standard: {{ .standard }}
+  {{- end }}
+    reports_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
+    notifications_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
+    enterprise_uri: '{{- include "enterprise.setProtocol" . -}}://{{- template "enterprise.api.fullname" . -}}:{{- .Values.api.service.port -}}/v2'
+    # redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable
+    # appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable
+    license_path: '/home/anchore/'
+    enable_ssl: {{ .Values.anchoreConfig.ui.enable_ssl }}
+    enable_proxy: {{ .Values.anchoreConfig.ui.enable_proxy }}
+    allow_shared_login: {{ .Values.anchoreConfig.ui.enable_shared_login }}
+    redis_flushdb: {{ .Values.anchoreConfig.ui.redis_flushdb }}
+    force_websocket: {{ .Values.anchoreConfig.ui.force_websocket }}
+    authentication_lock:
+      count: {{ .Values.anchoreConfig.ui.authentication_lock.count }}
+      expires: {{ .Values.anchoreConfig.ui.authentication_lock.expires }}
+    appdb_config: {{ toYaml .Values.anchoreConfig.ui.appdb_config | nindent 6}}
+    log_level: {{ .Values.anchoreConfig.ui.log_level | squote }}
+    enrich_inventory_view: {{ .Values.anchoreConfig.ui.enrich_inventory_view  }}
+    enable_prometheus_metrics: {{ .Values.anchoreConfig.metrics.enabled }}

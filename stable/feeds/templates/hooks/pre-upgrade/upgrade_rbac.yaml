@@ -1,0 +1,75 @@
+{{- if and .Values.feedsUpgradeJob.enabled .Values.feedsUpgradeJob.rbacCreate (not .Values.feedsUpgradeJob.usePostUpgradeHook) -}}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "feeds.fullname" . }}-upgrade-sa
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  {{- if not .Values.feedsUpgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+  {{- end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "feeds.fullname" . }}-upgrade-role-binding
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  {{- if not .Values.feedsUpgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "feeds.fullname" . }}-upgrade-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "feeds.fullname" . }}-upgrade-sa
+    namespace: {{ .Release.Namespace }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "feeds.fullname" . }}-upgrade-role
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  {{- if not .Values.feedsUpgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+  {{- end }}
+rules:
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments/scale
+    verbs:
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - watch
+      - list
+      - get
+{{- end -}}

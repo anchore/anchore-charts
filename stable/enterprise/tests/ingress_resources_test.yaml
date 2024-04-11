@@ -1,0 +1,30 @@
+suite: Ingress Resources Tests
+templates:
+  - ingress.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should render classname if annotation is not set
+    set:
+      ingress.enabled: true
+    template: ingress.yaml
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+  
+  - it: should not render classname if annotation is set
+    set:
+      ingress.enabled: true
+      ingress:
+        annotations:
+          "kubernetes.io/ingress.class": "nginx"
+    template: ingress.yaml
+    asserts:
+      - notExists:
+          path: spec.ingressClassName

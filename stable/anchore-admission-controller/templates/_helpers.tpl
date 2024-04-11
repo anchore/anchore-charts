@@ -12,7 +12,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "anchore-admission-controller.fullname" -}}
 {{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- default (printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-") .Values.fullnameOverride -}}
 {{- end -}}
 
 {{/*
@@ -29,6 +29,9 @@ Common labels
 app.kubernetes.io/name: {{ include "anchore-admission-controller.name" . }}
 helm.sh/chart: {{ include "anchore-admission-controller.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- with .Values.extraLabels}}
+{{ toYaml . }}
+{{- end }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}

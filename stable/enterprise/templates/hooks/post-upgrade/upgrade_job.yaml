@@ -1,0 +1,71 @@
+{{- if and .Values.upgradeJob.enabled .Values.upgradeJob.usePostUpgradeHook -}}
+{{- $component := "upgradeJob" -}}
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "enterprise.upgradeJob.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+  {{- if not .Values.upgradeJob.force }}
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "0"
+  {{- end }}
+spec:
+  template:
+    metadata:
+      name: {{ template "enterprise.upgradeJob.fullname" . }}
+      labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+        {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+      {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      restartPolicy: Never
+      volumes: {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+      {{- with .Values.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+      {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - name: {{ .Values.cloudsql.serviceAccSecretName }}
+          secret:
+            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        - name: anchore-upgrade
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{- toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+          {{- if not .Values.anchoreConfig.database.ssl }}
+            - |
+              {{ print (include "enterprise.doSourceFile" .) }} anchore-enterprise-manager db --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" upgrade --dontask;
+          {{- else if eq .Values.anchoreConfig.database.sslMode "require" }}
+            - |
+              {{ print (include "enterprise.doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreConfig.database.sslMode }} upgrade --dontask;
+          {{- else }}
+            - |
+              {{ print (include "enterprise.doSourceFile" .) }} anchore-enterprise-manager db --db-use-ssl --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"?sslmode={{- .Values.anchoreConfig.database.sslMode -}}\&sslrootcert=/home/anchore/certs/{{- .Values.anchoreConfig.database.sslRootCertFileName }} upgrade --dontask;
+          {{- end }}
+          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+          {{- if .Values.certStoreSecretName }}
+            - name: certs
+              mountPath: /home/anchore/certs/
+              readOnly: true
+          {{- end }}
+        {{- with .Values.upgradeJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+{{- end -}}

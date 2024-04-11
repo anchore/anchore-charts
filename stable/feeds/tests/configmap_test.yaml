@@ -1,0 +1,51 @@
+suite: ConfigMap Tests
+templates:
+  - configmap.yaml
+  - envvars_configmap.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+tests:
+  - it: should render the configmaps
+    asserts:
+      - matchSnapshot: {}
+
+  - it: should render grype url correctly if .Values.url is set
+    template: envvars_configmap.yaml
+    set:
+      url: https://something/v2/my-grype/something
+    asserts:
+      - matchRegex:
+          path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
+          pattern: https://something/v2/$
+
+  - it: should render grype url correctly if .Values.url is set to a v1 url
+    template: envvars_configmap.yaml
+    set:
+      url: https://something/v2/my-grype/something
+    asserts:
+      - matchRegex:
+          path: data["ANCHORE_FEEDS_EXTERNAL_URL"]
+          pattern: https://something/v2/$
+
+  - it: should render the default-unset string for the ANCHORE_GITHUB_TOKEN rather than "null"
+    template: envvars_configmap.yaml
+    asserts:
+      - equal:
+          path: data.ANCHORE_GITHUB_TOKEN
+          value: "default-unset"
+
+  - it: should render the default-unset string in envvar even if GH token is set, since that is covered by the secrets
+    template: envvars_configmap.yaml
+    set:
+      feeds.drivers.github.enabled: true
+      feeds.drivers.github.token: foobar
+    asserts:
+      - equal:
+          path: data.ANCHORE_GITHUB_TOKEN
+          value: "default-unset"

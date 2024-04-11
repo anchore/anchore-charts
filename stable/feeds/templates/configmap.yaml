@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "feeds.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Feeds Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ toYaml .Values.configOverride | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/default_config.yaml") . | indent 4 }}
+{{- end }}

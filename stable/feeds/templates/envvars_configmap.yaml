@@ -1,0 +1,94 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-feeds-config-env-vars
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" . | nindent 4 }}
+data:
+  ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "{{ .Values.anchoreConfig.user_authentication.hashed_passwords }}"
+{{- with .Values.anchoreConfig.keys.publicKeyFileName }}
+  ANCHORE_AUTH_PRIVKEY: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_AUTH_PRIVKEY: "null"
+{{- end }}
+{{- with .Values.anchoreConfig.keys.privateKeyFileName }}
+  ANCHORE_AUTH_PUBKEY: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_AUTH_PUBKEY: "null"
+{{- end }}
+  ANCHORE_CLI_URL: "http://localhost:8228"
+  ANCHORE_CLI_USER: "admin"
+  ANCHORECTL_URL: "http://localhost:8228"
+  ANCHORECTL_USERNAME: "admin"
+  ANCHORE_DISABLE_METRICS_AUTH: "{{ .Values.anchoreConfig.metrics.auth_disabled }}"
+  ANCHORE_ENABLE_METRICS: "{{ .Values.anchoreConfig.metrics.enabled }}"
+  ANCHORE_FEEDS_API_ONLY: "false"
+  ANCHORE_FEEDS_DB_POOL_MAX_OVERFLOW: "{{ .Values.anchoreConfig.database.db_pool_max_overflow }}"
+  ANCHORE_FEEDS_DB_POOL_SIZE: "{{ .Values.anchoreConfig.database.db_pool_size }}"
+  ANCHORE_FEEDS_DB_SSL: "{{ .Values.anchoreConfig.database.ssl }}"
+  ANCHORE_FEEDS_DB_SSL_MODE: "{{ .Values.anchoreConfig.database.sslMode }}"
+{{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+  ANCHORE_FEEDS_DB_SSL_ROOT_CERT: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_FEEDS_DB_SSL_ROOT_CERT: "null"
+{{- end }}
+  ANCHORE_FEEDS_DB_TIMEOUT: "{{ .Values.anchoreConfig.database.timeout }}"
+  ANCHORE_FEEDS_DRIVER_ALPINE_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_AMAZON_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_CHAINGUARD_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_DEBIAN_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_GEM_ENABLED: "{{ .Values.anchoreConfig.feeds.drivers.gem.enabled }}"
+  ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "{{ .Values.anchoreConfig.feeds.drivers.github.enabled }}"
+  ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_MARINER_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS: "true"
+  ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "{{ .Values.anchoreConfig.feeds.drivers.msrc.enabled }}"
+  ANCHORE_FEEDS_DRIVER_NPM_ENABLED: "{{ .Values.anchoreConfig.feeds.drivers.npm.enabled }}"
+  ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_OL_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY: "5"
+  ANCHORE_FEEDS_DRIVER_RHEL_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_SLES_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_UBUNTU_URL: "https://git.launchpad.net/ubuntu-cve-tracker"
+  ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH: "master"
+  ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED: "true"
+  ANCHORE_FEEDS_EXTERNAL_URL: "{{ template "feeds.setGrypeProviderURL" . }}"
+  ANCHORE_FEEDS_LOCAL_WORKSPACE: "{{ .Values.persistence.mountPath }}"
+  ANCHORE_FEEDS_GRYPEDB_PRELOAD_ENABLED: "true"
+  ANCHORE_FEEDS_GRYPEDB_PRELOAD_PATH: "/preload/grype-db-workspace.tar.gz"
+  ANCHORE_FEEDS_GRYPEDB_PERSIST_WORKSPACE: "true"
+  ANCHORE_FEEDS_GRYPEDB_RESTORE_WORKSPACE: "true"
+  ANCHORE_FEEDS_PACKAGES_ENABLED: "false"
+  ANCHORE_FEEDS_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
+  ANCHORE_FEEDS_WORKSPACE_PRELOAD: "true"
+  ANCHORE_GITHUB_TOKEN: "default-unset"
+  ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
+  ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
+  ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
+  ANCHORE_INTERNAL_SSL_VERIFY: "{{ .Values.anchoreConfig.internalServicesSSL.verifyCerts }}"
+  ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
+  ANCHORE_LOG_LEVEL: "{{ .Values.anchoreConfig.log_level }}"
+  ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
+  ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
+  ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
+  ANCHORE_MAX_REQUEST_THREADS: "50"
+  ANCHORE_NVD_API_KEY: "null"
+  ANCHORE_OAUTH_ENABLED: "{{ .Values.anchoreConfig.user_authentication.oauth.enabled }}"
+  ANCHORE_OAUTH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}"
+  ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds }}"
+  ANCHORE_SAML_SECRET: "null"
+  ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
+  ANCHORE_SSL_ENABLED: "{{ .Values.anchoreConfig.internalServicesSSL.enabled }}"
+{{- with .Values.anchoreConfig.internalServicesSSL.certSecretCertFileName }}
+  ANCHORE_SSL_CERT: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_SSL_CERT: "null"
+{{- end }}
+{{- with .Values.anchoreConfig.internalServicesSSL.certSecretKeyFileName }}
+  ANCHORE_SSL_KEY: "/home/anchore/certs/{{- . }}"
+{{- else }}
+  ANCHORE_SSL_KEY: "null"
+{{- end }}
+  ANCHORE_SSO_REQUIRES_EXISTING_USERS: "{{ .Values.anchoreConfig.user_authentication.sso_require_existing_users }}"

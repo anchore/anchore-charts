@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ecsInventory.fullname" . }}
+  labels:
+    {{- include "ecsInventory.labels" . | nindent 4 }}
+  annotations:
+  {{- with .Values.deploymentAnnotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ecsInventory.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+      {{- with .Values.annotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .Values.useExistingSecret }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "ecsInventory.labels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecretName }}
+      imagePullSecrets:
+      - name: {{ . }}
+    {{- end }}
+      serviceAccountName: {{ include "ecsInventory.serviceAccountName" . }}
+    {{- with .Values.securityContext }}
+      securityContext: {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          livenessProbe:
+            exec:
+              command:
+                - /anchore-ecs-inventory
+                - version
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+            successThreshold: {{ .Values.probes.liveness.successThreshold }}
+          readinessProbe:
+            exec:
+              command:
+                - /anchore-ecs-inventory
+                - version
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+            successThreshold: {{ .Values.probes.readiness.successThreshold }}
+          {{- with .Values.resources }}
+          resources: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/xdg/anchore-ecs-inventory/config.yaml
+              subPath: config.yaml
+            {{- if .Values.ecsInventory.logFile }}
+            - name: logs
+              mountPath: {{ dir .Values.ecsInventory.logFile }}
+            {{- end }}
+          envFrom:
+            {{- if not .Values.injectSecretsViaEnv }}
+            - secretRef:
+                name: {{ default (include "ecsInventory.fullname" .) .Values.existingSecretName }}
+            {{- end }}
+          env:
+          {{- with .Values.extraEnv }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+
+      volumes:
+        {{- if .Values.ecsInventory.logFile }}
+        - name: logs
+          emptyDir: {}
+        {{- end }}
+        - name: config-volume
+          configMap:
+            name: {{ include "ecsInventory.fullname" . }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

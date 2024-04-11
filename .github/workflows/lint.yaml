@@ -1,0 +1,45 @@
+name: "Lint changed charts using chart-testing tool"
+
+on:
+  pull_request:
+    paths:
+      - 'stable/**'
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
+
+    - name: Fetch history
+      run: git fetch --prune --unshallow
+
+    - name: Shellcheck
+      uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
+
+    - name: Set up chart-testing
+      uses: helm/chart-testing-action@b43128a8b25298e1e7b043b78ea6613844e079b1 # v2.7.0
+
+    - name: Run chart-testing (list-changed)
+      id: list-changed
+      run: |
+        changed=$(ct list-changed --config 'ct-config.yaml' --target-branch ${{ github.event.pull_request.base.ref }})
+        if [[ -n "$changed" ]]; then
+          echo "CHANGED=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run chart-testing (lint)
+      id: lint
+      run: ct lint --config 'ct-config.yaml'
+      if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
+
+    - name: Run chart-testing but skip version check (lint)
+      id: lintskipversion
+      run: ct lint --config 'ct-config.yaml' --check-version-increment=false
+      if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref != 'main'

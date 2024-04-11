@@ -1,3 +1,4 @@
+{{- template "checkAnchoreEnterpriseCompatibility" . }}
 {{- if and .Values.anchoreEnterpriseGlobal.enabled (or .Values.anchoreEnterpriseRbac.enabled .Values.anchoreEnterpriseReports.enabled) -}}
 {{- $component := "enterprise" -}}
 apiVersion: v1
@@ -56,24 +57,36 @@ data:
       oauth:
         enabled: {{ .Values.anchoreGlobal.oauthEnabled }}
         default_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthTokenExpirationSeconds }}
+        refresh_token_expiration_seconds: {{ .Values.anchoreGlobal.oauthRefreshTokenExpirationSeconds }}
 
       # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
       # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
       # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
       hashed_passwords: {{ .Values.anchoreGlobal.hashedPasswords }}
 
+      # Set this to True in order to disable the SSO JIT provisioning during authentication. This provides an additional
+      # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+      sso_require_existing_users: {{ .Values.anchoreGlobal.ssoRequireExistingUsers }}
+
     credentials:
       database:
-        {{- if not .Values.anchoreGlobal.dbConfig.ssl }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}"
-        {{- else if eq .Values.anchoreGlobal.dbConfig.sslMode "require" }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}"
-        {{- else }}
-        db_connect: "postgresql://${ANCHORE_DB_USER}:${ANCHORE_DB_PASSWORD}@${ANCHORE_DB_HOST}/${ANCHORE_DB_NAME}?sslmode={{- .Values.anchoreGlobal.dbConfig.sslMode -}}&sslrootcert=/home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName -}}"
-        {{- end }}
+        user: "${ANCHORE_DB_USER}"
+        password: "${ANCHORE_DB_PASSWORD}"
+        host: "${ANCHORE_DB_HOST}"
+        port: "${ANCHORE_DB_PORT}"
+        name: "${ANCHORE_DB_NAME}"
+
         db_connect_args:
           timeout: {{ .Values.anchoreGlobal.dbConfig.timeout }}
+          {{- if .Values.anchoreGlobal.dbConfig.ssl }}
+          ssl: true
+          sslmode: {{ .Values.anchoreGlobal.dbConfig.sslMode -}}
+            {{- if not (eq .Values.anchoreGlobal.dbConfig.sslMode "require") }}
+          sslrootcert: /home/anchore/certs/{{- .Values.anchoreGlobal.dbConfig.sslRootCertName -}}
+            {{- end }}
+          {{- else }}
           ssl: false
+          {{- end }}
         db_pool_size: {{ .Values.anchoreGlobal.dbConfig.connectionPoolSize }}
         db_pool_max_overflow: {{ .Values.anchoreGlobal.dbConfig.connectionPoolMaxOverflow }}
         {{- with .Values.anchoreGlobal.dbConfig.engineArgs }}
@@ -94,7 +107,7 @@ data:
       rbac_manager:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-rbac.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-rbac.serviceName" . }}
         listen: 0.0.0.0
         port: {{ .Values.anchoreEnterpriseRbac.service.managerPort }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseRbac.maxRequestThreads }}
@@ -111,7 +124,7 @@ data:
       reports:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.api.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.api.serviceName" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.apiPort }}
         max_request_threads: {{ default 50 .Values.anchoreApi.maxRequestThreads }}
@@ -129,7 +142,7 @@ data:
       reports_worker:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-reports.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-reports.serviceName" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseReports.service.workerPort }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseReports.maxRequestThreads }}
@@ -140,6 +153,11 @@ data:
         data_load_max_workers: {{ .Values.anchoreEnterpriseReports.dataLoadMaxWorkers }}
         cycle_timers:
           {{- toYaml .Values.anchoreEnterpriseReports.cycleTimers | nindent 10 }}
+        runtime_report_generation:
+          inventory_images_by_vulnerability: true
+          vulnerabilities_by_k8s_namespace: {{ ne .Values.anchoreEnterpriseReports.vulnerabilitiesByK8sNamespace false }}
+          vulnerabilities_by_k8s_container: {{ ne .Values.anchoreEnterpriseReports.vulnerabilitiesByK8sContainer false }}
+          vulnerabilities_by_ecs_container: {{ ne .Values.anchoreEnterpriseReports.vulnerabilitiesByEcsContainer false }}
         {{- if .Values.anchoreEnterpriseRbac.enabled }}
         authorization_handler: external
         authorization_handler_config:
@@ -155,7 +173,7 @@ data:
       notifications:
         enabled: true
         require_auth: true
-        endpoint_hostname: {{ template "anchore-engine.enterprise-notifications.fullname" . }}
+        endpoint_hostname: {{ template "anchore-engine.enterprise-notifications.serviceName" . }}
         listen: '0.0.0.0'
         port: {{ .Values.anchoreEnterpriseNotifications.service.port }}
         max_request_threads: {{ default 50 .Values.anchoreEnterpriseNotifications.maxRequestThreads }}
@@ -167,7 +185,7 @@ data:
         {{- if .Values.anchoreEnterpriseNotifications.uiUrl }}
         ui_url: "{{ .Values.anchoreEnterpriseNotifications.uiUrl }}"
         {{- else }}
-        ui_url: {{ include "anchore-engine.enterprise-ui.fullname" . | quote }}
+        ui_url: {{ include "anchore-engine.enterprise-ui.serviceName" . | quote }}
         {{- end }}
       {{- end }}
 {{- end -}}

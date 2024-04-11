@@ -1,0 +1,76 @@
+{{- if and .Values.upgradeJob.enabled .Values.upgradeJob.rbacCreate (not .Values.upgradeJob.usePostUpgradeHook) -}}
+{{- $component := "upgradeJob" -}}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "enterprise.fullname" . }}-upgrade-sa
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+  {{- if not .Values.upgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+  {{- end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "enterprise.fullname" . }}-upgrade-role-binding
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+  {{- if not .Values.upgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "enterprise.fullname" . }}-upgrade-role
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "enterprise.fullname" . }}-upgrade-sa
+    namespace: {{ .Release.Namespace }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "enterprise.fullname" . }}-upgrade-role
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+  {{- if not .Values.upgradeJob.force }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+  {{- end }}
+rules:
+  - apiGroups:
+      - extensions
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments/scale
+    verbs:
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - watch
+      - list
+      - get
+{{- end -}}

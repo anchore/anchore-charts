@@ -1,0 +1,314 @@
+suite: Posthook Upgrade Job Tests
+templates:
+  - hooks/post-upgrade/upgrade_job.yaml
+  - anchore_secret.yaml
+values:
+  - values.yaml
+set:
+  upgradeJob.enabled: true
+  upgradeJob.usePostUpgradeHook: true
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+tests:
+  - it: post-upgrade hook job gets created when upgradeJob.usePostUpgradeHook is true
+    template: hooks/post-upgrade/upgrade_job.yaml
+    asserts:
+      - containsDocument:
+          kind: Job
+          apiVersion: batch/v1
+          name: test-release-enterprise-999-upgrade
+          namespace: test-namespace
+
+  - it: post-upgrade hook job does not get created when upgradeJob.usePostUpgradeHook is false
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob:
+        usePostUpgradeHook: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: post-upgrade hook job does not get created when upgradeJob.enabled is false
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render component labels
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.labels:
+        upgradeJob: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            upgradeJob: test
+            test: foobar
+
+  - it: should render component annotations
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.annotations:
+        upgradeJob: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            upgradeJob: test
+            test: foobar
+
+  - it: should render helm hook annotations
+    template: hooks/post-upgrade/upgrade_job.yaml
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": post-upgrade
+            "helm.sh/hook-weight": "0"
+
+  - it: should not render helm hook annotations when upgradeJob.force is true
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.force: true
+    asserts:
+      - isNotSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": post-upgrade
+            "helm.sh/hook-weight": "0"
+
+  - it: should render file checksum/secret annotation
+    template: hooks/post-upgrade/upgrade_job.yaml
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations['checksum/secrets']
+
+  - it: should render component serviceAccountName
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.serviceAccountName: upgradeJob-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: upgradeJob-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      serviceAccountName: global-test
+      upgradeJob.serviceAccountName: upgradeJob-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: upgradeJob-test
+
+  - it: should render component nodeSelector
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.nodeSelector:
+        upgradeJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            upgradeJob: test
+
+  - it: should render component affinity
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.affinity:
+        upgradeJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            upgradeJob: test
+
+  - it: should render component tolerations
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.tolerations:
+        - key: "upgradeJob"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "upgradeJob"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render proper database endpoint on entrypoint
+    template: hooks/post-upgrade/upgrade_job.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-connect postgresql:\/\/\"\$\{ANCHORE_DB_USER\}\":\"\$\{ANCHORE_DB_PASSWORD\}\"@\"\$\{ANCHORE_DB_HOST\}\":\"\$\{ANCHORE_DB_PORT\}\"\/\"\$\{ANCHORE_DB_NAME\}\" upgrade --dontask;
+        count: 1
+
+  - it: should render proper database endpoint on entrypoint when ssl is enabled and mode is require
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      anchoreConfig.database.ssl: true
+      anchoreConfig.database.sslMode: require
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_DB_USER\}\":\"\$\{ANCHORE_DB_PASSWORD\}\"@\"\$\{ANCHORE_DB_HOST\}\":\"\$\{ANCHORE_DB_PORT\}\"\/\"\$\{ANCHORE_DB_NAME\}\"\?sslmode\=require upgrade --dontask;
+        count: 1
+
+  - it: should render proper database endpoint on entrypoint when ssl is enabled and mode is verify-full
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      anchoreConfig.database.ssl: true
+      anchoreConfig.database.sslMode: verify-full
+      anchoreConfig.database.sslRootCertFileName: test-root.crt
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_DB_USER\}\":\"\$\{ANCHORE_DB_PASSWORD\}\"@\"\$\{ANCHORE_DB_HOST\}\":\"\$\{ANCHORE_DB_PORT\}\"\/\"\$\{ANCHORE_DB_NAME\}\"\?sslmode\=verify-full\\&sslrootcert\=\/home\/anchore\/certs\/test-root\.crt upgrade --dontask;
+        count: 1
+
+  - it: should render upgradeJob component environment variables
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.extraEnv:
+        - name: upgradeJob
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: upgradeJob
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render component resource requests & limits
+    template: hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1
+
+  - it: should render component extraVolumes
+    template: hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
+        count: 1

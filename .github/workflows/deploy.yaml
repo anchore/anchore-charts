@@ -4,13 +4,25 @@ on:
   push:
     branches:
       - main
+      - 'release-*'
+    paths:
+      - 'stable/**'
+
+permissions:
+  contents: read
 
 jobs:
   release:
+    permissions:
+      contents: write  # for helm/chart-releaser-action to push chart release and create a release
+    env:
+      REPO: "${{ github.repository }}"
+      REPO_NAME: "${{ github.event.repository.name }}"
+      TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
 
       - name: Fetch history
         run: git fetch --prune --unshallow
@@ -20,8 +32,25 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Add Anchore Helm repo
+        run: |
+          helm repo add anchore https://charts.anchore.io/stable
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+
+      - name: Run chart-releaser not latest
+        if: github.event.pull_request.base.ref != 'main'
+        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
+        with:
+          charts_dir: stable
+          charts_repo_url: https://charts.anchore.io
+          mark_as_latest: false
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_MAKE_RELEASE_LATEST: "false"
+
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.0.0
+        if: github.event.pull_request.base.ref == 'main'
+        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
         with:
           charts_dir: stable
           charts_repo_url: https://charts.anchore.io

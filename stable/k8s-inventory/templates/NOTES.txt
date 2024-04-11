@@ -1,0 +1,6 @@
+K8s Inventory is a tool to gather an inventory of images in use in your cluster and ship them to the Anchore platform.
+K8s Inventory must be able to resolve the Anchore URL and requires API credentials.
+
+For more info see: https://github.com/anchore/k8s-inventory
+
+K8s Inventory is now installed.

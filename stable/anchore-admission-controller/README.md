@@ -16,7 +16,7 @@ to deploy one with:
 helm install --name anchore stable/anchore-engine
 ```
 
-Setup of policies and users is covered in the anchore documentation, for this readme we'll use admin user credentials, but it 
+Setup of policies and users is covered in the anchore documentation, for this readme we'll use admin user credentials, but it
 is *strongly* suggested that you use a non-admin user for the controller credential.
 
 1. Create a secret for the anchore credentials that the controller will use to make api calls to Anchore. This must be done out-of-band of the chart creation and should be in the
@@ -27,7 +27,7 @@ same namespace you will deploy the chart to. The file must be a json file with t
   "users": [
     { "username": "user1", "password": "password"},
     { "uesrname": "user2", "password": "password2"},
-    ...      
+    ...
   ]
 }
 ```
@@ -71,15 +71,17 @@ It will remove kubernetes objects which are not removed by a helm delete. Pass t
 
 | Key | Expected Type | Default Value | Description |
 |---|---|---|---|
-|replicaCount | int | 1 | replicas, should generally only need one 
+|replicaCount | int | 1 | replicas, should generally only need one
 |---|---|---|---|
 |logVerbosity | int | 6 | log verbosity of controller, 1 = error, 2 warn, 3 debug....
 |---|---|---|---|
-|image | str | release tag | Tag including registry and repository for image to use 
+|image | str | release tag | Tag including registry and repository for image to use
 |---|---|---|---|
 |imagePullPolicy | str | IfNotPresent | Standard k8s pull policy setting
 |---|---|---|---|
-|service.name | str | anchoreadmissioncontroller | Name for the svc instance 
+|imagePullSecrets | array | [] | Image pull secrets
+|---|---|---|---|
+|service.name | str | anchoreadmissioncontroller | Name for the svc instance
 |---|---|---|---|
 |service.type | str | ClusterIp | Type to use for k8s service definition
 |---|---|---|---|
@@ -98,6 +100,8 @@ It will remove kubernetes objects which are not removed by a helm delete. Pass t
 |policySelectors | array | default catch-all | Selector rules, see the project github page for detail on format and options.
 |---|---|---|---|
 |requestAnalysis | boolean | true | Ask anchore to analyze an image that isn't already analyzed
+|---|---|---|---|
+|initCa.image | str | cfssl/cfssl:latest | Tag including registry and repository for the initCa image
 |---|---|---|---|
 |initCa.extraEnv | array | [] | Define custom environment variables to pass to init-ca pod |
 |---|---|---|---|

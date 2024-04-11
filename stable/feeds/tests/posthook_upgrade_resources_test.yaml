@@ -1,0 +1,178 @@
+suite: Posthook Upgrade Job Tests
+templates:
+  - hooks/post-upgrade/upgrade_job.yaml
+  - secret.yaml
+values:
+  - values.yaml
+set:
+  feedsUpgradeJob.enabled: true
+  feedsUpgradeJob.usePostUpgradeHook: true
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: post-upgrade hook job gets created when feedsUpgradeJob.usePostUpgradeHook is true
+    template: hooks/post-upgrade/upgrade_job.yaml
+    asserts:
+      - containsDocument:
+          kind: Job
+          apiVersion: batch/v1
+          name: test-release-feeds-999-upgrade
+          namespace: test-namespace
+
+  - it: post-upgrade hook job does not get created when feedsUpgradeJob.usePostUpgradeHook is false
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob:
+        usePostUpgradeHook: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: post-upgrade hook job does not get created when feedsUpgradeJob.enabled is false
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render helm hook annotations
+    template: hooks/post-upgrade/upgrade_job.yaml
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": post-upgrade
+            "helm.sh/hook-weight": "0"
+
+  - it: should not render helm hook annotations when feedsUpgradeJob.force is true
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.force: true
+    asserts:
+      - isNotSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": post-upgrade
+            "helm.sh/hook-weight": "0"
+
+  - it: should render component serviceAccountName
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.serviceAccountName: feedsUpgradeJob-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: feedsUpgradeJob-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      serviceAccountName: global-test
+      feedsUpgradeJob.serviceAccountName: feedsUpgradeJob-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: feedsUpgradeJob-test
+
+  - it: should render component nodeSelector
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.nodeSelector:
+        feedsUpgradeJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            feedsUpgradeJob: test
+
+  - it: should render component affinity
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.affinity:
+        feedsUpgradeJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            feedsUpgradeJob: test
+
+  - it: should render component tolerations
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      feedsUpgradeJob.tolerations:
+        - key: "feedsUpgradeJob"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "feedsUpgradeJob"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render proper database endpoint on entrypoint
+    template: hooks/post-upgrade/upgrade_job.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-connect postgresql:\/\/\"\$\{ANCHORE_FEEDS_DB_USER\}\":\"\$\{ANCHORE_FEEDS_DB_PASSWORD\}\"@\"\$\{ANCHORE_FEEDS_DB_HOST\}\":\"\$\{ANCHORE_FEEDS_DB_PORT\}\"\/\"\$\{ANCHORE_FEEDS_DB_NAME\}\" upgrade --dontask;
+        count: 1
+
+  - it: should render proper database endpoint on entrypoint when ssl is enabled and mode is require
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      anchoreConfig.database.ssl: true
+      anchoreConfig.database.sslMode: require
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_FEEDS_DB_USER\}\":\"\$\{ANCHORE_FEEDS_DB_PASSWORD\}\"@\"\$\{ANCHORE_FEEDS_DB_HOST\}\":\"\$\{ANCHORE_FEEDS_DB_PORT\}\"\/\"\$\{ANCHORE_FEEDS_DB_NAME\}\"\?sslmode\=require upgrade --dontask;
+        count: 1
+
+  - it: should render proper database endpoint on entrypoint when ssl is enabled and mode is verify-full
+    template: hooks/post-upgrade/upgrade_job.yaml
+    set:
+      anchoreConfig.database.ssl: true
+      anchoreConfig.database.sslMode: verify-full
+      anchoreConfig.database.sslRootCertFileName: test-root.crt
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_FEEDS_DB_USER\}\":\"\$\{ANCHORE_FEEDS_DB_PASSWORD\}\"@\"\$\{ANCHORE_FEEDS_DB_HOST\}\":\"\$\{ANCHORE_FEEDS_DB_PORT\}\"\/\"\$\{ANCHORE_FEEDS_DB_NAME\}\"\?sslmode\=verify-full\\&sslrootcert\=\/home\/anchore\/certs\/test-root\.crt upgrade --dontask;
+        count: 1
+
+  - it: should render component resource requests & limits
+    template: hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1

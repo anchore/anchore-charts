@@ -1,4 +1,6 @@
+__pycache__
 examples/
 *.tgz
 charts/
 .idea/
+*.code-workspace

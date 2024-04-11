@@ -3,6 +3,10 @@ kind: Deployment
 metadata:
   name: {{ template "anchore-admission-controller.fullname" . }}
   labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+  annotations:
+  {{- with .Values.annotations }}
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -12,6 +16,10 @@ spec:
   template:
     metadata:
       labels: {{- include "anchore-admission-controller.labels" . | nindent 8 }}
+      annotations:
+      {{- with .Values.annotations }}
+        {{ toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ template "anchore-admission-controller.fullname" . }}
       volumes:
@@ -25,16 +33,22 @@ spec:
       - name: anchore-auth
         secret:
           secretName: {{ if .Values.existingCredentialsSecret }}{{ .Values.existingCredentialsSecret }}{{ else }}{{ template "anchore-admission-controller.fullname" . }}{{ end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         command:
-        - "/anchore-kubernetes-admission-controller"
+        - "/ko-app/kubernetes-admission-controller"
         - "--audit-log-path=-"
         - "--tls-cert-file=/var/serving-cert/tls.crt"
         - "--tls-private-key-file=/var/serving-cert/tls.key"
-        - "--v={{ .Values.logVerbosity }}"
+        - "-v{{ .Values.logVerbosity }}"
         - "--secure-port={{ .Values.service.internalPort }}"
         ports:
         - containerPort: {{ .Values.service.internalPort }}
@@ -57,12 +71,15 @@ spec:
         - name: CREDENTIALS_FILE_PATH
           value: /credentials/credentials.json
         resources: {{- toYaml .Values.resources | nindent 12 }}
-    {{- if .Values.nodeSelector }}
-    nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
-    {{- end }}
-    {{- if .Values.tolerations }}
-    tolerations: {{- toYaml .Values.tolerations | nindent 8 }}
-    {{- end }}
-    {{- if .Values.affinity }}
-    affinity: {{- toYaml .Values.affinity | nindent 8 }}
-    {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      affinity: {{- toYaml .Values.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}

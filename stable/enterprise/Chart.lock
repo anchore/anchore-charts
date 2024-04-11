@@ -1,0 +1,12 @@
+dependencies:
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 12.5.9
+- name: redis
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 17.11.8
+- name: feeds
+  repository: https://charts.anchore.io/stable
+  version: 2.4.1
+digest: sha256:fc8274f1cbd805dc79cecefdcb4bb9cddbb7e4863ed738aee9ccdb60611d939b
+generated: "2024-04-10T17:13:17.54518-04:00"

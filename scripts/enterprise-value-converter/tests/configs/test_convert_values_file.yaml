@@ -1,0 +1,18 @@
+anchoreEnterpriseGlobal:
+  enabled: true
+
+anchoreGlobal:
+  useExistingSecrets: true
+  existingSecretName: global-existing-secrets
+  extraEnv:
+    - name: ANCHORE_MAX_REQUEST_THREADS
+      value: "9876543210"
+
+anchoreEnterpriseUi:
+  existingSecretName: ui-existing-secrets
+
+anchoreEnterpriseFeeds:
+  existingSecretName: feeds-existing-secrets
+
+anchoreApi:
+  maxRequestThreads: 9876543210

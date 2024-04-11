@@ -1,0 +1,33 @@
+To use Anchore you need the URL, username, and password to access the API and/or the UI.
+
+The Anchore API can be accessed via port {{ .Values.api.service.port }} on the following DNS name from within the cluster:
+
+    {{ include "enterprise.api.fullname" . -}}.{{- .Release.Namespace -}}.svc.cluster.local
+
+The Anchore UI can be accessed via localhost:8080 with kubernetes port-forwarding:
+
+    kubectl port-forward svc/{{- template "enterprise.ui.fullname" . }} 8080:{{- .Values.ui.service.port }}
+
+Get the default admin password using the following command:
+
+    kubectl get secret {{ template "enterprise.fullname" . }} -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -D
+
+* NOTE: On first startup of Anchore Enterprise, the policy-engine performs a CVE data sync which may take several minutes to complete.
+During this time the system status will report 'partially_down' and any images added for analysis will stay in the 'not_analyzed' state.
+Once the sync is complete, any queued images will be analyzed and the system status will change to 'all_up'.
+
+Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state.
+You can check with:
+
+    kubectl get pods -l app.kubernetes.io/name={{- template "enterprise.fullname" . -}},app.kubernetes.io/component=api
+
+{{ if and .Values.useExistingSecrets .Release.IsUpgrade (semverCompare "~2.1.0" .Chart.Version) }}
+******************
+
+WARNING: This deployment is utilizing Existing Secrets. Your ANCHORE_REDIS_URI environment variable needs to be updated.
+A username is no longer required, please remove `nouser` from the URI. The UI will not function unless this update is performed.
+
+For more details see the v2.1.0 release notes - https://github.com/anchore/anchore-charts/blob/main/stable/enterprise/README.md#v210
+
+******************
+{{ end }}

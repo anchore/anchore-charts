@@ -1,0 +1,11 @@
+{{- if .Values.standalone }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-feeds-scripts
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "feeds.common.labels" . | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" . | nindent 4 }}
+data:
+  {{ .Values.scripts | toYaml | nindent 2 }}
+{{- end }}

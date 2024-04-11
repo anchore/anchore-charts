@@ -1,0 +1,133 @@
+service_dir: ${ANCHORE_SERVICE_DIR}
+tmp_dir: ${ANCHORE_FEEDS_TMP_DIR}
+log_level: ${ANCHORE_LOG_LEVEL}
+
+host_id: "${ANCHORE_HOST_ID}"
+internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+
+global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
+global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
+server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
+
+license_file: ${ANCHORE_LICENSE_FILE}
+auto_restart_services: false
+
+max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+
+metrics:
+  enabled: ${ANCHORE_ENABLE_METRICS}
+  auth_disabled: true
+
+keys:
+  secret: ${ANCHORE_SAML_SECRET}
+  public_key_path: ${ANCHORE_AUTH_PRIVKEY}
+  private_key_path: ${ANCHORE_AUTH_PUBKEY}
+
+user_authentication:
+  hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
+  sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+  oauth:
+    enabled: ${ANCHORE_OAUTH_ENABLED}
+    default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+    refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+
+credentials:
+  database:
+    user: "${ANCHORE_FEEDS_DB_USER}"
+    password: "${ANCHORE_FEEDS_DB_PASSWORD}"
+    host: "${ANCHORE_FEEDS_DB_HOST}"
+    port: "${ANCHORE_FEEDS_DB_PORT}"
+    name: "${ANCHORE_FEEDS_DB_NAME}"
+    db_connect_args:
+      timeout: ${ANCHORE_FEEDS_DB_TIMEOUT}
+      ssl: ${ANCHORE_FEEDS_DB_SSL}
+    {{- if .Values.anchoreConfig.database.ssl }}
+      sslmode: ${ANCHORE_FEEDS_DB_SSL_MODE}
+      sslrootcert: ${ANCHORE_FEEDS_DB_SSL_ROOT_CERT}
+    {{- end }}
+    db_pool_size: ${ANCHORE_FEEDS_DB_POOL_SIZE}
+    db_pool_max_overflow: ${ANCHORE_FEEDS_DB_POOL_MAX_OVERFLOW}
+  {{- with .Values.anchoreConfig.database.engineArgs }}
+    db_engine_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+
+services:
+  feeds:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
+    cycle_timers: {{- toYaml .Values.anchoreConfig.feeds.cycle_timers | nindent 6 }}
+    local_workspace: ${ANCHORE_FEEDS_LOCAL_WORKSPACE}
+    workspace_preload:
+      enabled: ${ANCHORE_FEEDS_WORKSPACE_PRELOAD}
+      workspace_preload_file: ${ANCHORE_FEEDS_LOCAL_WORKSPACE}/data.tar.gz
+    api_only: ${ANCHORE_FEEDS_API_ONLY}
+    drivers:
+      amzn:
+        enabled: ${ANCHORE_FEEDS_DRIVER_AMAZON_ENABLED}
+      alpine:
+        enabled: ${ANCHORE_FEEDS_DRIVER_ALPINE_ENABLED}
+      centos:
+        enabled: false
+      debian:
+        enabled: ${ANCHORE_FEEDS_DRIVER_DEBIAN_ENABLED}
+      {{- with .Values.anchoreConfig.feeds.drivers.debian.releases }}
+        releases: {{- toYaml . | nindent 10 }}
+      {{- end }}
+      ol:
+        enabled: ${ANCHORE_FEEDS_DRIVER_OL_ENABLED}
+      ubuntu:
+        enabled: ${ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED}
+        git_url: ${ANCHORE_FEEDS_DRIVER_UBUNTU_URL}
+        git_branch: ${ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH}
+      {{- with .Values.anchoreConfig.feeds.drivers.ubuntu.releases }}
+        releases: {{- toYaml . | nindent 10 }}
+      {{- end }}
+      rhel:
+        enabled: ${ANCHORE_FEEDS_DRIVER_RHEL_ENABLED}
+        concurrency: ${ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY}
+      npm:
+        enabled: ${ANCHORE_FEEDS_DRIVER_NPM_ENABLED}
+      gem:
+        enabled: ${ANCHORE_FEEDS_DRIVER_GEM_ENABLED}
+      {{- if .Values.anchoreConfig.feeds.drivers.gem.enabled }}
+        db_connect: {{ .Values.anchoreConfig.feeds.drivers.gem.db_connect }}
+      {{- end }}
+      nvdv2:
+        enabled: ${ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED}
+        api_key: ${ANCHORE_NVD_API_KEY}
+      mariner:
+        enabled: ${ANCHORE_FEEDS_DRIVER_MARINER_ENABLED}
+      msrc:
+        enabled: ${ANCHORE_FEEDS_DRIVER_MSRC_ENABLED}
+      {{- with .Values.anchoreConfig.feeds.drivers.msrc.whitelist }}
+        whitelist:
+          - {{ . }}
+      {{- end }}
+      github:
+        enabled: ${ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED}
+        token: ${ANCHORE_GITHUB_TOKEN}
+      grypedb:
+        enabled: ${ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED}
+        external_feeds_url: ${ANCHORE_FEEDS_EXTERNAL_URL}
+        preload:
+          enabled: ${ANCHORE_FEEDS_GRYPEDB_PRELOAD_ENABLED}
+          workspace_archive_path: ${ANCHORE_FEEDS_GRYPEDB_PRELOAD_PATH}
+        persist_provider_workspaces: ${ANCHORE_FEEDS_GRYPEDB_PERSIST_WORKSPACE}
+        restore_provider_workspaces: ${ANCHORE_FEEDS_GRYPEDB_RESTORE_WORKSPACE}
+      sles:
+        enabled: ${ANCHORE_FEEDS_DRIVER_SLES_ENABLED}
+      anchore_match_exclusions:
+        enabled: ${ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS}
+      wolfi:
+        enabled: ${ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED}
+      chainguard:
+        enabled: ${ANCHORE_FEEDS_DRIVER_CHAINGUARD_ENABLED}

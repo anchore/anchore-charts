@@ -1,0 +1,71 @@
+{{- $component := "reportsWorker" -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "enterprise.reportsWorker.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
+  replicas: {{ .Values.reportsWorker.replicaCount }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+      {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
+      {{- end }}
+        checksum/enterprise-config: {{ tpl (print $.Files.BasePath "/default_config.yaml") . | sha256sum }}
+    spec:
+      {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        - name: "{{ .Chart.Name }}-{{ $component | lower }}"
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext:
+            {{ toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/sh", "-c"]
+          args:
+            -  {{ print (include "enterprise.common.dockerEntrypoint" .) }} reports_worker
+          ports:
+            - containerPort: {{ .Values.reportsWorker.service.port }}
+              name: {{ $component | lower }}
+          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+          livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
+          readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
+        {{- with .Values.reportsWorker.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "enterprise.reportsWorker.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  type: {{ .Values.reportsWorker.service.type }}
+  ports:
+    - name: {{ $component | lower }}
+      port: {{ .Values.reportsWorker.service.port }}
+      targetPort: {{ .Values.reportsWorker.service.port }}
+      protocol: TCP
+      {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
+  selector:
+    app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+    app.kubernetes.io/component: {{ $component | lower }}

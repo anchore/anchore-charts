@@ -1,0 +1,400 @@
+suite: Analyzer Resources Tests
+templates:
+  - analyzer_configmap.yaml
+  - analyzer_deployment.yaml
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should render a valid analyzer config file
+    template: analyzer_configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["analyzer_config.yaml"]
+          pattern: (?m)^(retrieve_files|secret_search|content_search|malware):$
+
+  - it: should set the correct resource names
+    templates:
+      - analyzer_deployment.yaml
+      - analyzer_configmap.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-analyzer
+
+  - it: should render component labels
+    templates:
+      - analyzer_deployment.yaml
+      - analyzer_configmap.yaml
+    set:
+      analyzer.labels:
+        analyzer: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            analyzer: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            analyzer: test
+            test: foobar
+        template: analyzer_deployment.yaml
+
+  - it: should render component annotations
+    templates:
+      - analyzer_deployment.yaml
+      - analyzer_configmap.yaml
+    set:
+      analyzer.annotations:
+        analyzer: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            analyzer: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            analyzer: test
+            test: foobar
+        template: analyzer_deployment.yaml
+
+  - it: should render component matchLabels
+    template: analyzer_deployment.yaml
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: analyzer
+
+  - it: should render component serviceAccountName
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.serviceAccountName: analyzer-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: analyzer-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: analyzer_deployment.yaml
+    set:
+      serviceAccountName: global-test
+      analyzer.serviceAccountName: analyzer-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: analyzer-test
+
+  - it: should render component nodeSelector
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.nodeSelector:
+        analyzer: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            analyzer: test
+
+  - it: should render component affinity
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.affinity:
+        analyzer: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            analyzer: test
+
+  - it: should render component tolerations
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.tolerations:
+        - key: "analyzer"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "analyzer"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render scratch volume details from Analyzer values
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.scratchVolume.details:
+        csi:
+          driver: inline.storage.kubernetes.io
+          volumeAttributes:
+            foo: bar
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            csi:
+              driver: inline.storage.kubernetes.io
+              volumeAttributes:
+                foo: bar
+        count: 1
+
+  - it: should render scratch volume using details from analyzer values, even when global scratchVolume is explicitly set
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.scratchVolume.details:
+        hostPath:
+          path: /tmp
+          type: Directory
+      scratchVolume.details:
+        emptyDir:
+          medium: Memory
+          memoryLimit: 128Mi
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            hostPath:
+              path: /tmp
+              type: Directory
+        count: 1
+
+  - it: should render analyzer-configmap volume
+    template: analyzer_deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: analyzer-config-volume
+            configMap:
+              name: test-release-enterprise-analyzer
+        count: 1
+
+  - it: should render component container name
+    template: analyzer_deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: enterprise-analyzer
+
+  - it: should render component entrypoint args
+    template: analyzer_deployment.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade analyzer$
+        count: 1
+
+  - it: should render component environment variables
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.extraEnv:
+        - name: analyzer
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-analyzer
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_PORT
+            value: "8084"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: analyzer
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render component ports
+    template: analyzer_deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: analyzer
+            containerPort: 8084
+        count: 1
+
+  - it: should render component volumeMounts
+    template: analyzer_deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: analyzer-config-volume
+            mountPath: /anchore_service/analyzer_config.yaml
+            subPath: analyzer_config.yaml
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-scratch
+            mountPath: /analysis_scratch
+        count: 1
+        any: true
+
+  - it: should render component extraVolumes
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component probes
+    template: analyzer_deployment.yaml
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: analyzer
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: analyzer
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+
+  - it: should render component resource requests & limits
+    template: analyzer_deployment.yaml
+    set:
+      analyzer.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1

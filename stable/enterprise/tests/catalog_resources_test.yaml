@@ -1,0 +1,472 @@
+suite: Catalog Resources Tests
+templates:
+  - catalog_deployment.yaml
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+  - policybundle_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should set the correct resource names
+    template: catalog_deployment.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-catalog
+
+  - it: should render component labels
+    template: catalog_deployment.yaml
+    set:
+      catalog.labels:
+        catalog: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            catalog: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            catalog: test
+            test: foobar
+        template: catalog_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component annotations
+    template: catalog_deployment.yaml
+    set:
+      catalog.annotations:
+        catalog: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            catalog: test
+            test: foobar
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            catalog: test
+            test: foobar
+        template: catalog_deployment.yaml
+        documentIndex: 0
+
+  - it: should render component matchLabels
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: catalog
+
+  - it: should render component replica count
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.replicaCount: 2
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 2
+
+  - it: should render component serviceAccountName
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.serviceAccountName: catalog-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: catalog-test
+
+  - it: should render component serviceAccountName even when global serviceAccountName is set
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      serviceAccountName: global-test
+      catalog.serviceAccountName: catalog-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: catalog-test
+
+  - it: should render component nodeSelector
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.nodeSelector:
+        catalog: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            catalog: test
+
+  - it: should render component affinity
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.affinity:
+        catalog: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            catalog: test
+
+  - it: should render component tolerations
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.tolerations:
+        - key: "catalog"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "catalog"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render scratch volume details from catalog values
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.scratchVolume.details:
+        csi:
+          driver: inline.storage.kubernetes.io
+          volumeAttributes:
+            foo: bar
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            csi:
+              driver: inline.storage.kubernetes.io
+              volumeAttributes:
+                foo: bar
+        count: 1
+
+  - it: should render scratch volume using details from catalog values, even when global scratchVolume is explicitly set
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.scratchVolume.details:
+        hostPath:
+          path: /tmp
+          type: Directory
+      scratchVolume.details:
+        emptyDir:
+          medium: Memory
+          memoryLimit: 128Mi
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            hostPath:
+              path: /tmp
+              type: Directory
+        count: 1
+
+  - it: should render policy bundle volume when anchoreConfig.policyBundles is set
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policyBundles:
+        custom_policy_bundle1.json: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: policy-bundle-volume
+            configMap:
+              name: test-release-enterprise-policy-bundles
+        count: 1
+
+  - it: should render component container name
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: enterprise-catalog
+
+  - it: should render component entrypoint args
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade catalog$
+        count: 1
+
+  - it: should render catalog component environment variables
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.extraEnv:
+        - name: catalog
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-catalog
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_PORT
+            value: "8082"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: catalog
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render component ports
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: catalog
+            containerPort: 8082
+        count: 1
+
+  - it: should render component volumeMounts
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-scratch
+            mountPath: /analysis_scratch
+        count: 1
+        any: true
+
+  - it: should render policy bundle volumeMounts when multiple policy bundles are provided
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policyBundles:
+        custom_policy_bundle1.json: {}
+        custom_policy_bundle2.json: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/policies/custom_policy_bundle1.json
+            subPath: custom_policy_bundle1.json
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: policy-bundle-volume
+            mountPath: /anchore_service/policies/custom_policy_bundle2.json
+            subPath: custom_policy_bundle2.json
+        count: 1
+        any: true
+
+  - it: should render component extraVolumes
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component probes
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: catalog
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: catalog
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+
+  - it: should render component resource requests & limits
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1
+
+  - it: should render component service type
+    template: catalog_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+        count: 1
+
+  - it: should render component service ports
+    template: catalog_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: catalog
+            port: 8082
+            targetPort: 8082
+            protocol: TCP
+        count: 1
+
+  - it: should render component service selectors
+    template: catalog_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - isSubset:
+          path: spec.selector
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: catalog
+        count: 1

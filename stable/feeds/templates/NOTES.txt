@@ -1,0 +1,8 @@
+The Feeds API can be accessed via port {{ .Values.service.port }} on the following DNS name from within the cluster:
+
+    {{ include "feeds.fullname" . -}}.{{- .Release.Namespace -}}.svc.cluster.local
+
+Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state.
+You can check with:
+
+    kubectl get pods -l app.kubernetes.io/name={{- template "feeds.fullname" . -}},app.kubernetes.io/component=feeds

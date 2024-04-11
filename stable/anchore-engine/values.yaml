@@ -1,25 +1,33 @@
 # Default values for anchore_engine chart.
 
-# Anchore engine has a dependency on Postgresql, configure here
+fullnameOverride: Null
+# Anchore has a dependency on Postgresql, configure here
 postgresql:
   # To use an external DB or Google CloudSQL in GKE, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
   # enabled: false
   # If enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  # Set to the hostname eg. mypostgres.myserver.io
   externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore
+  postgresPort: 5432
 
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
     resourcePolicy: keep
     size: 20Gi
+    # If running on OpenShift using the RedHat images for PostgreSQL, uncomment this line to ensure the PVC is mounted properly
+    # mountPath: /var/lib/pgsql/data
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
+  # For upgrades from previous deployments on PG9.6, use this
   # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+
+  # For new installs, please use PG v13 instead of 9.6
+  # image: registry.redhat.io/rhel9/postgresql-13
   # imageTag: latest
   # extraEnv:
   # - name: POSTGRESQL_USER
@@ -39,6 +47,11 @@ postgresql:
 cloudsql:
   # To use CloudSQL in GKE set 'enable: true'
   enabled: false
+  # Inject extra arguments into the cloudsql container command, eg:
+  # extraArgs:
+  # - "-ip_address_types=PRIVATE"
+  # - "-enable_iam_login"
+  extraArgs: []
   # set CloudSQL instance: 'project:zone:instancname'
   instance: ""
   # Optional existing service account secret to use.
@@ -51,39 +64,40 @@ cloudsql:
     tag: 1.22.0
     pullPolicy: IfNotPresent
 
-# Create an ingress resource for all external anchore engine services (API & Enterprise UI).
+# Create an ingress resource for all external Anchore services (API & Enterprise UI).
 # By default this chart is setup to use the NGINX ingress controller which needs to be installed & configured on your cluster.
 # To utilize a GCE/ALB ingress controller comment out the nginx annotations below, change ingress.class, edit path configurations as per the comments, & set API/UI services to use NodePort.
 ingress:
   enabled: false
   labels: {}
-  # Use the following paths for GCE/ALB ingress controller
-  # feedsPath: /v1/feeds/*
-  # apiPath: /v1/*
-  # uiPath: /*
   # Exposing the feeds API w/ ingress is for special cases only, uncomment feedsPath if external access to the feeds API is needed
-  # feedsPath: /v1/feeds/
+  feedsPaths:
+    - /v1/feeds/
+    - /v2/feeds/
   # Exposing the report API w/ ingress enables the GraphQL interface at <anchore.url>/v1/reports/graphql
-  # reportsPath: /v1/reports/
-  apiPath: /v1/
+  reportsPaths:
+    - /v1/reports/
+    - /v2/reports/
+  apiPaths:
+    - /v1/
+    - /v2/
+    - /version/
   uiPath: /
-  # uncomment `feedsPath` to add an ingress endpoint for the feeds api
-  # uncomment 'reportsPath' to add an ingress endpoint for the reports api
 
   # Set ingressClassName if kubernetes version is >= 1.18
   # Reference: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
-  # ingressClassName: nginx
+  # ingressClassName: alb
 
   # Uncomment the following lines to bind on specific hostnames
-  # apiHosts:
+  apiHosts: []
   #   - anchore-api.example.com
-  # uiHosts:
+  uiHosts: []
   #   - anchore-ui.example.com
-  # feedsHosts:
+  feedsHosts: []
   #   - anchore-feeds.example.com
-  # reportsHosts:
+  reportsHosts: []
   #   - anchore-api.example.com
-  annotations:
+  annotations: {}
     # kubernetes.io/ingress.class: gce
     # kubernetes.io/ingress.class: nginx
     # nginx.ingress.kubernetes.io/ssl-redirect: "false"
@@ -95,17 +109,17 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# Global configuration shared by all anchore-engine services.
+# Global configuration shared by all Anchore services.
 anchoreGlobal:
-  # Image used for all anchore engine deployments (excluding enterprise components).
+  # Image used for all Anchore deployments (excluding enterprise components).
   image: docker.io/anchore/anchore-engine:v1.1.0
   imagePullPolicy: IfNotPresent
 
-  # Set image pull secret name if using an anchore-engine image from a private registry
+  # Set image pull secret name if using an Anchore image from a private registry
   imagePullSecretName:
 
   # Specify a service account name utilized to run all Anchore pods
-  serviceAccountName: Null
+  # serviceAccountName: Null
 
   # Set this value to true to setup the chart for OpenShift deployment compatibility.
   openShiftDeployment: false
@@ -115,7 +129,7 @@ anchoreGlobal:
     # app.kubernetes.io/managed-by: Helm
     # foo: bar
 
-  # Add common annotations to set on all pods. Useful expecially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
+  # Add common annotations to set on all pods. Useful especially when inject secrets directly into pods as ENV from vault via mutation-webhook-injection method.
   # Ref: https://banzaicloud.com/docs/bank-vaults/mutating-webhook/
   annotations: {}
     # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
@@ -129,12 +143,29 @@ anchoreGlobal:
     # - name: foo
     #   value: bar
 
-  # Specifies an existing secret to be used for admin and db passwords
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  existingSecret: Null
+  # When useExistingSecrets is set to `true` the chart will not create secrets specifying the environment variables used in deployments.
+  # Instead, the chart will use secrets that have already been applied to the namespace that this chart is being deployed to.
+  useExistingSecrets: false
+
+  # Set the name of your existing secret for all Anchore components
+  existingSecretName: anchore-engine-env
+
+  # does `source {{ filePath }}` before starting services
+  doSourceAtEntry:
+    enabled: false
+    filePaths:
+      - "/vault/secrets/config"
+
+  extraVolumes: []
+  # - name: config
+  #   secret:
+  #     secretName: config
+
+  extraVolumeMounts: []
+  # - name: config
+  #   mountPath: "/vault/secrets/config"
+  #   subPath: config
+  #   readOnly: true
 
   # The scratchVolume controls the mounting of an external volume for scratch space for image analysis. Generally speaking
   # you need to provision 3x the size of the largest image (uncompressed) that you want to analyze for this space.
@@ -142,12 +173,13 @@ anchoreGlobal:
     # Some k8s Volumes do not properly respect the fsGroup permissions. These volumes will get mounted as root:root
     # regardless of the security permissions requested. The fixGroupPermissions will create an initContainer that will
     # fixup the permissions.
+    initContainerImage: alpine
     fixGroupPermissions: false
     mountPath: /analysis_scratch
     details: {}
       # Specify volume configuration here
 
-  # A secret must be created in the same namespace as anchore-engine is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
+  # A secret must be created in the same namespace as Anchore is deployed, containing the certificates & public/private keys used for SSL, SAML & custom CAs.
   # Certs and keys should be added using the file name the certificate is stored at. This secret will be mounted to /home/anchore/certs.
   certStoreSecretName: Null
 
@@ -158,8 +190,11 @@ anchoreGlobal:
     runAsGroup: 1000
     fsGroup: 1000
 
+  # Specify your container securityContext here
+  containerSecurityContext: {}
+
   ###
-  # Start of General Anchore Engine Configurations (populates /config/config.yaml)
+  # Start of General Anchore Configurations (populates /config/config.yaml)
   ###
   # Set where default configs are placed at startup. This must be a writable location for the pod.
   serviceDir: /anchore_service
@@ -181,7 +216,7 @@ anchoreGlobal:
   # Disable auth on prometheus metrics
   metricsAuthDisabled: false
 
-  # Sets the password & email address for the default anchore-engine admin user.
+  # Sets the password & email address for the default Anchore admin user.
   defaultAdminPassword:
   defaultAdminEmail: example@email.com
 
@@ -196,13 +231,18 @@ anchoreGlobal:
 
   oauthEnabled: false
   oauthTokenExpirationSeconds: 3600
+  oauthRefreshTokenExpirationSeconds: 86400
+
+  # Set this to true in order to disable the SSO JIT provisioning during authentication. This provides an additional
+  # layer of security and configuration for SSO users to gain access to Anchore.  This is disabled by default.
+  ssoRequireExistingUsers: false
 
   # Set this to True to enable storing user passwords only as secure hashes in the db. This can dramatically increase CPU usage if you
   # don't also use oauth and tokens for internal communications (which requires keys/secret to be configured as well)
   # WARNING: you should not change this after a system has been initialized as it may cause a mismatch in existing passwords
   hashedPasswords: false
 
-  # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
+  # Configure the database connection within Anchore & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
     # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
@@ -219,7 +259,7 @@ anchoreGlobal:
       # pool_recycle: 600
 
   internalServicesSsl:
-    # Enable to force all anchore-engine services to communicate internally using SSL
+    # Enable to force all Anchore services to communicate internally using SSL
     enabled: false
     # specify whether cert is verfied against the local certifacte bundle (allow self-signed certs if set to false)
     verifyCerts: false
@@ -276,6 +316,11 @@ anchoreGlobal:
       failureThreshold: 3
       successThreshold: 1
 
+  # Using the preupgrade hook will use a job annotated with helm's pre-upgrade hook. This job utilizes a service account that will be created to call kubectl to scale down the deployment before running the upgrade job.
+  # The service account is granted deployment, deployment/scale, and pod permissions. See templates/hooks/pre-upgrade/anchore_upgrade_role.yaml for the full list.
+  # This can be useful for deployments using helm upgrade --wait or ArgoCD.
+  usePreupgradeHook: false
+
 # Configuration for the analyzer pods that perform image analysis
 # There may be many of these analyzers but best practice is to not have more than one per node since analysis
 # is very IO intensive. Use of affinity/anti-affinity rules for scheduling the analyzers is future work.
@@ -288,9 +333,12 @@ anchoreAnalyzer:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the analyzer pods
+  # serviceAccountName: Null
+
   # The cycle timer is the interval between checks to the work queue for new jobs
   cycleTimers:
-    image_analyzer: 5
+    image_analyzer: 1
 
   # Controls the concurrency of the analyzer itself. Can be configured to process more than one task at a time, but it IO bound, so may not
   # necessarily be faster depending on hardware. Should test and balance this value vs. number of analyzers for your deployment cluster performance.
@@ -373,7 +421,7 @@ anchoreAnalyzer:
   affinity: {}
 
 
-# Pod configuration for the anchore engine api service.
+# Pod configuration for the Anchore api service.
 anchoreApi:
   replicaCount: 1
 
@@ -384,10 +432,16 @@ anchoreApi:
 
   # kubernetes service configuration for anchore external API
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8228
     annotations: {}
     label: {}
+    nodePort: null
+
+  # Specify the service account name utilized to run the API pods
+  # serviceAccountName: Null
 
   # (Optional) Overrides for constructing API URLs.  All values are optional.
   # external:
@@ -419,6 +473,9 @@ anchoreCatalog:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the catalog pods
+  # serviceAccountName: Null
+
   # Intervals to run specific events on (seconds)
   cycleTimers:
     # Interval to check for an update to a tag
@@ -439,8 +496,6 @@ anchoreCatalog:
     repo_watcher: 60
     # Interval for when the catalog garbage collects images marked for deletion
     image_gc: 60
-    # Interval for the runtime inventory image execution poll
-    k8s_watcher: 300
     k8s_image_watcher: 150
     resource_metrics: 60
     events_gc: 43200  # 12 hours
@@ -555,13 +610,6 @@ anchoreCatalog:
 
   # **NOTE: all runtime inventory configurations only apply to Anchore Enterprise deployments
 
-  # If enabled, the Anchore Helm Chart will create a Service Account with read-only permission to the cluster (pods & namespaces)
-  # This is largely to support the Out-Of-The-Box Runtime Inventory feature currently. See catalog_deployment.yaml for
-  # detailed information on the Service Account, Cluster Role & Binding.
-  # If using an existing service account, set this value to `false` & use anchoreGlobal.serviceAccountName to specify
-  # what service account to use. Existing service account must have adequate permissions to use this feature.
-  createServiceAccount: true
-
   runtimeInventory:
     # This setting tells Anchore how long an image can be missing from an inventory report before it is removed from
     # The working set. Note: The image will still have a historical record in the reports service, subject to data history
@@ -569,27 +617,19 @@ anchoreCatalog:
     # Note: if a runtime inventory image's digest is also in anchore for regular image analysis, it won't be removed.
     imageTTLDays: 1
 
-    # Since Anchore is running in Kubernetes, we can collect runtime inventory data out of the box
-    reportAnchoreCluster:
-      # If set to true, Anchore will use its own service account's permissions
-      # (if anchoreCatalog.createServiceAccount is true, see `catalog_deployment.yaml`) to try and collect runtime
-      # inventory data for all namespaces.
-      #
-      # Note: this feature requires a value for clusterName to populate inventory image context
-      # Note: If anchoreCatalog.createServiceAccount is set to false, and anchoreGlobal.serviceAccountName is unspecified,
-      # then the Anchore Catalog service won't have enough permission to be able to read cluster information
-      # (pods & namespaces) for the embedded runtime inventory.
-      enabled: true
-      clusterName: anchore-k8s
-      namespaces:
-        - all
+  # checks image status and detects that an 'analyzing' state image is being processed by an analyzer that is no
+  # longer in the 'up' state and will revert the state of the image back to 'not_analyzed' to allow fast re-queueing.
+  downAnalyzerTaskRequeue: true
 
   # kubernetes service configuration for anchore catalog api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8082
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -607,7 +647,7 @@ anchoreCatalog:
   tolerations: []
   affinity: {}
 
-# Pod configuration for the anchore engine policy service.
+# Pod configuration for the Anchore policy service.
 anchorePolicyEngine:
   replicaCount: 1
 
@@ -615,6 +655,9 @@ anchorePolicyEngine:
   extraEnv: []
     # - name: foo
     #   value: bar
+
+  # Specify the service account name utilized to run the policy engine pods
+  # serviceAccountName: Null
 
   # Intervals to run specific events on (seconds)
   cycleTimers:
@@ -625,17 +668,24 @@ anchorePolicyEngine:
     # 1 minute between checks to verify local grype-db is up to date
     grypedb_sync: 60
 
-  # After chart v1.18.0 the only valid vulnerabilityProvider setting is `grype`, any other settings will fail
-  vulnerabilityProvider: grype
+  # Controls the load of the Image Package DB Entries and disables the packages.verify gate.
+  # Reduces significant DB load as a result.
+  enablePackageDbLoad: true
+
+  # Reduces load by not requiring a re-scan of every sbom for vulnerabilities after each feed sync
+  enableImagesByVulnerabilityAPI: true
 
   cacheTTL: 3600  # 1 hour
 
   # kubernetes service configuration for anchore policy engine api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8087
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -653,7 +703,7 @@ anchorePolicyEngine:
   tolerations: []
   affinity: {}
 
-# Pod configuration for the anchore engine simplequeue service.
+# Pod configuration for the Anchore simplequeue service.
 anchoreSimpleQueue:
   replicaCount: 1
 
@@ -662,12 +712,18 @@ anchoreSimpleQueue:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the simple queue pods
+  # serviceAccountName: Null
+
   # kubernetes service configuration for anchore simplequeue api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8083
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -701,6 +757,7 @@ anchoreEngineUpgradeJob:
   tolerations: []
   affinity: {}
   annotations: {}
+  labels: {}
 
 # This section is used for configuring anchore enterprise.
 anchoreEnterpriseGlobal:
@@ -709,7 +766,8 @@ anchoreEnterpriseGlobal:
   # Create this secret with the following command - kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>
   licenseSecretName: anchore-enterprise-license
 
-  image: docker.io/anchore/enterprise:v4.0.1
+  image: docker.io/anchore/enterprise:v4.9.5
+
   imagePullPolicy: IfNotPresent
   # Name of the kubernetes secret containing your dockerhub creds with access to the anchore enterprise images.
   # Create this secret with the following command - kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=<USERNAME> --docker-password=<PASSWORD> --docker-email=<EMAIL_ADDRESS>
@@ -719,23 +777,30 @@ anchoreEnterpriseGlobal:
 # Only utilized if anchoreEnterpriseGlobal.enabled: true
 anchore-feeds-db:
   # To use an external DB or Google CloudSQL, uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
   # enabled: false
   # if enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  # Set to the hostname eg. mypostgres.myserver.io
   externalEndpoint: Null
   postgresUser: anchoreengine
   postgresPassword: anchore-postgres,123
   postgresDatabase: anchore-feeds
+  postgresPort: 5432
 
   # Configure size of the persistent volume used with helm managed chart.
   # This should be commented out if using an external endpoint.
   persistence:
     resourcePolicy: keep
     size: 20Gi
+    # If running on OpenShift using the RedHat images for PostgreSQL, uncomment this line to ensure the PVC is mounted properly
+    # mountPath: /var/lib/pgsql/data
 
   # If running on OpenShift - uncomment the image, imageTag & extraEnv values below.
+  # For upgrades from previous deployments on PG9.6, use this
   # image: registry.access.redhat.com/rhscl/postgresql-96-rhel7
+
+  # For new installs, please use PG v13 instead of 9.6
+  # image: registry.redhat.io/rhel9/postgresql-13
   # imageTag: latest
   # extraEnv:
   # - name: POSTGRESQL_USER
@@ -756,14 +821,15 @@ anchore-feeds-db:
 # Database is used for temporarily loading the Ruby gem vulnerability data by the Enterprise Feeds service.
 anchore-feeds-gem-db:
   # To use an external DB uncomment & set 'enabled: false'
-  # externalEndpoint, postgresUser, postgresPassword & postgresDatabase are required values for external postgres
+  # externalEndpoint, postgresUser, postgresPassword, postgresDatabase, & postgresPort are required values for external postgres
   # enabled: false
   # If enabled=false specify an external (already existing) postgres deployment for use.
-  # Set to the host and port. eg. mypostgres.myserver.io:5432
+  # Set to the hostname eg. mypostgres.myserver.io
   externalEndpoint: Null
   postgresUser: postgres
   postgresPassword: anchore-postgres,123
   postgresDatabase: gems
+  postgresPort: 5432
   persistence:
     enabled: false
 
@@ -787,34 +853,51 @@ anchoreEnterpriseFeeds:
   # GitHub advisory feeds require a github developer personal access token with no permission scopes selected.
   githubDriverToken: null
 
+  # The NVD API allows for an API key to reduce rate limiting.  Request one from https://nvd.nist.gov/developers/request-an-api-key
+  useNvdDriverApiKey: false
+  nvdDriverApiKey: null
+
   # Enable microsoft feeds
   msrcDriverEnabled: false
   # Uncomment to add MSRC product IDs for generating their feed data, this extends the pre-defined list of product IDs
   # msrcWhitelist:
   # - 12345
 
+  # Additional Ubuntu feed groups
+  ubuntuExtraReleases: {}
+  #   kinetic: '22.10'
+
+  # Additional Debian feeds groups
+  debianExtraReleases: {}
+  #   trixie: '13'
+
   # The number of concurrent threads used when downloading RHEL feeds
   rhelDriverConcurrency: 5
+
+  # Git Repository settings for the Ubuntu feed driver
+  ubuntuDriverGitUrl: "https://git.launchpad.net/ubuntu-cve-tracker"
+  # Switch to the git protocol endpoint for significantly improved reliability in fetches as this endpoint is not
+  # throttled heavily like the https one; however, the git protocol is not validated or encrypted and runs on a different
+  # port from https
+  # ubuntuDriverGitUrl: "git://git.launchpad.net/ubuntu-cve-tracker"
+  ubuntuDriverGitBranch: "master"
 
   # Set extra environment variables. These will be set on all feeds containers.
   extraEnv: []
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the feeds pods
+  # serviceAccountName: Null
+
   # Time delay in seconds between consecutive driver runs for processing data
   cycleTimers:
     driver_sync: 7200
 
-  # Specifies an existing secret to be used for anchore admin and db passwords
-  # The secret should define the following environment vars:
-  # ANCHORE_ADMIN_PASSWORD
-  # ANCHORE_FEEDS_DB_PASSWORD
-  # ANCHORE_SAML_SECRET (if applicable)
-  # ANCHORE_GITHUB_TOKEN (if applicable)
+  # Set the name of your existing secret for Anchore Enterprise Feeds
+  existingSecretName: anchore-enterprise-feeds-env
 
-  existingSecret: Null
-
-  # Configure the database connection within anchore-engine & enterprise-ui. This may get split into 2 different configurations based on service utilized.
+  # Configure the database connection within Anchore & enterprise-ui. This may get split into 2 different configurations based on service utilized.
   dbConfig:
     timeout: 120
     # Use ssl, but the default postgresql config from the dependent chart does not support server side ssl, so this should only be enabled for external dbs
@@ -833,6 +916,7 @@ anchoreEnterpriseFeeds:
   # persistence controls the mounting of an external volume for feed driver download workspace.
   persistence:
     enabled: true
+    fixGroupPermissions: false
     resourcePolicy: keep  # set resource-policy Helm annotation on PVC. Can be nil or "keep"
 
     ## A manually managed Persistent Volume and Claim
@@ -854,10 +938,13 @@ anchoreEnterpriseFeeds:
 
   # kubernetes service configuration for anchore feeds service api
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8448
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -891,9 +978,10 @@ anchoreEnterpriseFeedsUpgradeJob:
   tolerations: []
   affinity: {}
   annotations: {}
+  labels: {}
 
 # Configure the Anchore Enterprise role based access control component.
-# This component consists of 2 containers that run as side-cars in the anchore engine api pod.
+# This component consists of 2 containers that run as side-cars in the Anchore api pod.
 anchoreEnterpriseRbac:
   enabled: true
 
@@ -905,11 +993,14 @@ anchoreEnterpriseRbac:
   # Kubernetes service config - annotations & serviceType configs must be set in anchoreApi
   # Due to RBAC sharing a service with the general API.
   service:
+    # Override the service name
+    # name: Null
     managerPort: 8229
     authPort: 8089
     type: ClusterIP
     annotations: {}
     labels: {}
+    nodePort: null
 
   # authResources:
   #  limits:
@@ -941,11 +1032,14 @@ anchoreEnterpriseReports:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the reports pods
+  # serviceAccountName: Null
+
   # GraphiQL is a GUI for editing and testing GraphQL queries and mutations.
   # Set enableGraphiql to true and open http://<host>:<port>/v1/reports/graphql in a browser for reports API
   enableGraphiql: true
 
-  # Set enableDataIngress to true for periodically syncing data from anchore engine into the reports service
+  # Set enableDataIngress to true for periodically syncing data from Anchore into the reports service
   enableDataIngress: true
 
   # Set enableDataEgress to true to periodically remove reporting data that has been removed in other parts of system
@@ -971,11 +1065,15 @@ anchoreEnterpriseReports:
     reports_data_egress: 600
 
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     apiPort: 8558
     workerPort: 8778
     annotations: {}
     labels: {}
+    nodePort: null
+    apinodePort: null
 
   # resources:
   #  limits:
@@ -1002,6 +1100,9 @@ anchoreEnterpriseNotifications:
     # - name: foo
     #   value: bar
 
+  # Specify the service account name utilized to run the notification pods
+  # serviceAccountName: Null
+
   cycleTimers:
     notifications: 30
 
@@ -1009,10 +1110,13 @@ anchoreEnterpriseNotifications:
   # uiUrl: "http://<ui_url>"
 
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 8668
     annotations: {}
     labels: {}
+    nodePort: null
 
   # resources:
   #  limits:
@@ -1032,9 +1136,9 @@ anchoreEnterpriseNotifications:
 
 # Configure the Anchore Enterprise UI.
 anchoreEnterpriseUi:
-  # If enabled is set to false, set anchore-ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
+  # If enabled is set to false, set ui-redis.enabled to false to ensure that helm doesn't stand up a unneccessary redis instance.
   enabled: true
-  image: docker.io/anchore/enterprise-ui:v4.0.0
+  image: docker.io/anchore/enterprise-ui:v4.9.1
   imagePullPolicy: IfNotPresent
 
   # Set extra environment variables. These will be set on all UI containers.
@@ -1042,11 +1146,16 @@ anchoreEnterpriseUi:
     # - name: foo
     #   value: bar
 
-  # Specifies an existing secret to be used for db and redis endpoints
-  # This secret should define the following ENV vars
-  # ANCHORE_APPDB_URI
-  # ANCHORE_REDIS_URI
-  existingSecret: Null
+  # Specify the service account name utilized to run the UI pods
+  # serviceAccountName: Null
+
+  # Set the name of your existing secret for the Anchore Enterprise UI
+  existingSecretName: anchore-enterprise-ui-env
+
+  # Specify configurations for database connection user
+  # This should specifically allow overriding and separation of the ui database user
+  # dbUser: anchoreengineui
+  # dbPass: anchore-postgres,123ui
 
   # The (optional) `appdbConfig` key specifies the connection options
   # for the application SQL database.
@@ -1072,6 +1181,26 @@ anchoreEnterpriseUi:
 
   # If using LDAPS with a custom CA certificate, add the certificate to the secret specified at anchoreGlobal.certStoreSecretName and specify the name of the cert here
   ldapsRootCaCertName: Null
+
+  # The (optional) `logLevel` key allows you to set the descriptive detail of the
+  # application log output. The key value must be a string selected from the
+  # following priority-ordered list:
+  #
+  #  - error
+  #  - warn
+  #  - info
+  #  - http
+  #  - debug
+  #
+  # Once set, each level will automatically include the output for any levels
+  # above it—for example, `info` will include the log output for details at the
+  # `warn` and `error` details, whereas `error` will only show error output.
+  #
+  # This value can be overridden by using the `ANCHORE_LOG_LEVEL` environment
+  # variable. When no level is set, either within this configuration file or by the
+  # environment variable, a default level of `http` is used.
+  #
+  logLevel: http
 
   # Specifies whether to trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header).
   enableProxy: false
@@ -1171,11 +1300,25 @@ anchoreEnterpriseUi:
 
   # kubernetes service configuration for anchore UI
   service:
+    # Override the service name
+    # name: Null
     type: ClusterIP
     port: 80
     annotations: {}
     labels: {}
     sessionAffinity: ClientIP
+    nodePort: null
+
+  # The (optional) `enrich_inventory_view` key allows you to set whether the
+  # Kubernetes tab should aggregate and include compliance and vulnerability data
+  # from the reports service.
+  #
+  # Setting this key to be `False` can increase performance on high-scale systems.
+  #
+  # This value can be overridden by using the `ANCHORE_ENRICH_INVENTORY_VIEW`
+  # environment variable. When no flag is set, either within this configuration
+  # file or by the environment variable, a default setting of `True` is used.
+  enrichInventoryView: true
 
   # resources:
   #  limits:
@@ -1193,14 +1336,15 @@ anchoreEnterpriseUi:
   tolerations: []
   affinity: {}
 
-# Anchore Engine Enterprise UI is dependent on redis for storing sessions
+# Anchore Enterprise UI is dependent on redis for storing sessions
 # Only utilized if 'anchoreEnterpriseUi.enabled: true'
-anchore-ui-redis:
-  password: anchore-redis,123
-  cluster:
-    enabled: false
-  persistence:
-    enabled: false
+ui-redis:
+  auth:
+    password: anchore-redis,123
+  architecture: standalone
+  master:
+    persistence:
+      enabled: false
 
   # To use an external redis endpoint, uncomment to set 'enabled: false'
   # enabled: false
@@ -1225,6 +1369,7 @@ anchoreEnterpriseEngineUpgradeJob:
   tolerations: []
   affinity: {}
   annotations: {}
+  labels: {}
 
 # To inject secrets ( credentails data ) via env, rather k8s secrets please set this flag to true.
 # This feature will be useful, especially to inject secrets directly into k8s pods from hashicorp vault

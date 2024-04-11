@@ -1,0 +1,332 @@
+suite: Feeds Resources Tests
+templates:
+  - deployment.yaml
+  - secret.yaml
+  - configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+values:
+  - values.yaml
+
+tests:
+  - it: should render a valid feeds config file
+    template: configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: Anchore Feeds Service Configuration File
+
+  - it: should set the correct resource names
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-feeds
+
+  - it: should render component labels
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            bar: "baz-label"
+            foo: "bar-label"
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            bar: "baz-label"
+            foo: "bar-label"
+
+  - it: should render component annotations
+    templates:
+      - deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            foo: "bar-annotation"
+            bar: "baz-annotation"
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            foo: "bar-annotation"
+            bar: "baz-annotation"
+
+  - it: should render component matchLabels
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: test-release-feeds
+            app.kubernetes.io/component: feeds
+
+  - it: should render component serviceAccountName
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      serviceAccountName: feeds-test
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: feeds-test
+
+  - it: should render component nodeSelector
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      nodeSelector:
+        feeds: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            feeds: test
+
+  - it: should render component affinity
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      affinity:
+        feeds: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            feeds: test
+
+  - it: should render component tolerations
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      tolerations:
+        - key: "feeds"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "feeds"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render scratch volume as emptyDir by default
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+
+  - it: should render scratch volume using details from values
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      scratchVolume.details:
+        hostPath:
+          path: /tmp
+          type: Directory
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            hostPath:
+              path: /tmp
+              type: Directory
+        count: 1
+
+  - it: should render configmap volume
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-feeds
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-license
+            secret:
+              secretName: anchore-enterprise-license
+        count: 1
+
+  - it: should render component container name
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: feeds-feeds
+
+  - it: should render component entrypoint args
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade feeds$
+        count: 1
+
+  - it: should render component environment variables
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      extraEnv:
+        - name: feeds
+          value: test
+        - name: test
+          value: foobar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_PORT
+            value: "8448"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: feeds
+            value: test
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: test
+            value: foobar
+
+  - it: should render component ports
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: feeds-api
+            containerPort: 8448
+        count: 1
+
+  - it: should render component volumeMounts
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config-volume
+            mountPath: /config/config.yaml
+            subPath: config.yaml
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-scratch
+            mountPath: /anchore_scratch
+        count: 1
+        any: true
+
+  - it: should render component probes
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: feeds-api
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: feeds-api
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+
+  - it: should render component resource requests & limits
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1
+
+
+  - it: should not render nodePorts
+    template: deployment.yaml
+    documentIndex: 1
+    asserts:
+      - isNotSubset:
+          path: spec.ports[0]
+          content:
+            nodePort: 9999
+        count: 1
+  - it: should render nodePorts
+    template: deployment.yaml
+    documentIndex: 1
+    set:
+      service.nodePort: 9999
+    asserts:
+      - isSubset:
+          path: spec.ports[0]
+          content:
+            name: feeds-api
+            port: 8448
+            protocol: TCP
+            targetPort: 8448
+            nodePort: 9999
+        count: 1

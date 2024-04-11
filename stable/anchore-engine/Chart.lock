@@ -9,7 +9,7 @@ dependencies:
   repository: file://./deps/postgresql
   version: 1.0.1
 - name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 10.9.0
-digest: sha256:44c16b3d5756edfaa4d86b8e57e6047de3ac0672d932f5cdf9fe1f28220b4fb0
-generated: "2021-09-29T23:16:53.207614-07:00"
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 18.0.2
+digest: sha256:cad30648f26d16150e511a104881369c3840e5fdbc1f38d0a2c05b81c46813a3
+generated: "2023-09-06T12:10:06.713465-07:00"

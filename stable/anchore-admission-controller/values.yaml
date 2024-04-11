@@ -1,17 +1,21 @@
 # Default values for anchore-admission-controller.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
+fullnameOverride: Null
 replicaCount: 1
 logVerbosity: 3
 
-image: "anchore/kubernetes-admission-controller:v0.3.0"
+image: "anchore/kubernetes-admission-controller:v0.5.0"
 imagePullPolicy: IfNotPresent
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# imagePullSecrets:
+# - secretName
 
 service:
   name: anchoreadmissioncontroller
   type: ClusterIP
-  internalPort: 443
+  internalPort: 8443
   externalPort: 443
 
 apiService:
@@ -62,6 +66,10 @@ policySelectors:
 # strict gating or analysis gating are true
 requestAnalysis: true
 
+annotations: {}
+  # vault.security.banzaicloud.io/vault-addr: "https://vault:8200"
+  # vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -72,7 +80,7 @@ resources: {}
   #  memory: 128Mi
   # requests:
   #  cpu: 100m
-#  memory: 128Mi
+  #  memory: 128Mi
 
 ## Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
@@ -85,9 +93,13 @@ tolerations: []
 ## Constrain which nodes your pod is eligible to be scheduled on, based on labels on the node
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
+extraLabels: {}
 
 # define name of existing secret containing anchore credentials
 existingCredentialsSecret: null
+
+# define priority class for anchore admission services
+priorityClassName: null
 
 # or define credentials here to create secrets
 credentials: {}
@@ -95,11 +107,19 @@ credentials: {}
   # - username: user1
   #   password: password1
   # - username: user2
-#   password: password2
+  #   password: password2
 
 # Settings related to init-ca pod
 initCa:
+  image: cfssl/cfssl:latest
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
-    # - name: FOO
-  # value: "bar"
+  # - name: FOO
+  #   value: "bar"
+  resources: {}
+  # requests:
+  #    cpu: 100m
+  #    memory: 128Mi
+  #  limits:
+  #    cpu: 200m
+  #    memory: 256Mi
