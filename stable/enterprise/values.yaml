@@ -11,6 +11,18 @@ global:
   ##
   nameOverride: ""
 
+  ## @param licenseSecretName Name of the Kubernetes secret containing your license.yaml file
+  ## This must be manually created. For example with the following command:
+  ## `kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>`
+  ##
+  licenseSecretName: anchore-enterprise-license
+
+  ## @param imagePullSecretName Name of Docker credentials secret for access to private repos
+  ## Pre-populated with the pull secret name specified in the Anchore docs & quick start instructions
+  ## Secrets must be manually created in the same namespace as release
+  ##
+  imagePullSecretName: anchore-enterprise-pullcreds
+
 ###################################################
 ## @section Common Resource Parameters
 ## Common params used by all Anchore k8s resources
@@ -24,12 +36,6 @@ image: docker.io/anchore/enterprise:v5.4.0
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
 ##
 imagePullPolicy: IfNotPresent
-
-## @param imagePullSecretName Name of Docker credentials secret for access to private repos
-## Pre-populated with the pull secret name specified in the Anchore docs & quick start instructions
-## Secrets must be manually created in the same namespace as release
-##
-imagePullSecretName: anchore-enterprise-pullcreds
 
 ## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema
 ##
@@ -52,12 +58,6 @@ serviceAccountName: ""
 ## Useful for injecting secrets directly into k8s pods from Hashicorp vault
 ##
 injectSecretsViaEnv: false
-
-## @param licenseSecretName Name of the Kubernetes secret containing your license.yaml file
-## This must be manually created. For example with the following command:
-## `kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>`
-##
-licenseSecretName: anchore-enterprise-license
 
 ## @param certStoreSecretName Name of secret containing the certificates & keys used for SSL, SAML & CAs
 ## The chart will mount the secret specified in certStoreSecretName to /home/anchore/certs
