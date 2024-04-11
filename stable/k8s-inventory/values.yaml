@@ -15,7 +15,7 @@ replicaCount: 1
 image:
   pullPolicy: "IfNotPresent"
   repository: "anchore/k8s-inventory"
-  tag: "v1.2.0"
+  tag: "v1.4.0"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
