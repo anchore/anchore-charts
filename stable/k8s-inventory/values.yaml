@@ -193,7 +193,7 @@ k8sInventory:
     tag: UNKNOWN
 
   ## @param k8sInventory.missingRegistryOverride
-  missingRegistryOverride: {}
+  missingRegistryOverride: ""
 
   ## @param k8sInventory.ignoreNotRunning Ignore images out of pods that are not in a Running state
   ##
