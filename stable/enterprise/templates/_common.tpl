@@ -90,7 +90,7 @@ When calling this template, .component can be included in the context for compon
 {{ toYaml . }}
   {{- end }}
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  value: {{ include (printf "enterprise.%s.fullname" $component) . }}
+  value: {{ include (printf "enterprise.%s.fullname" $component) . }}.{{ .Release.Namespace }}.svc.cluster.local
   {{- with (index .Values (print $component)).service }}
 - name: ANCHORE_PORT
   value: {{ .port | quote }}
