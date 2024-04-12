@@ -15,7 +15,7 @@ replicaCount: 1
 image:
   pullPolicy: "IfNotPresent"
   repository: "anchore/k8s-inventory"
-  tag: "v1.2.0"
+  tag: "v1.4.0"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
@@ -191,6 +191,9 @@ k8sInventory:
   missingTagPolicy:
     policy: digest
     tag: UNKNOWN
+
+  ## @param k8sInventory.missingRegistryOverride
+  missingRegistryOverride: ""
 
   ## @param k8sInventory.ignoreNotRunning Ignore images out of pods that are not in a Running state
   ##
