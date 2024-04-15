@@ -313,7 +313,7 @@ anchoreConfig:
 | `url`                                   | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster. | `""`                                  |
 | `fullnameOverride`                      | overrides the fullname set on resources                                                               | `""`                                  |
 | `nameOverride`                          | overrides the name set on resources                                                                   | `""`                                  |
-| `image`                                 | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.4.0` |
+| `image`                                 | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.4.1` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                         | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                    | Name of a service account used to run all Feeds pods                                                  | `""`                                  |
@@ -368,7 +368,6 @@ anchoreConfig:
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                          | `{}`                                  |
 | `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                    | `{}`                                  |
 
-
 ### Anchore Feeds Configuration Parameters
 
 | Name                                                                       | Description                                                                                                                      | Value                                                                                                                                 |
@@ -408,7 +407,6 @@ anchoreConfig:
 | `anchoreConfig.feeds.drivers.github.enabled`                               | Enable GitHub advisory feeds (requires GitHub PAT)                                                                               | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.github.token`                                 | GitHub developer personal access token with zero permission scopes                                                               | `""`                                                                                                                                  |
 
-
 ### Anchore Feeds Database Parameters
 
 | Name                                        | Description                                                                                       | Value                   |
@@ -423,7 +421,6 @@ anchoreConfig:
 | `feeds-db.primary.extraEnvVars`             | An array to add extra environment variables                                                       | `[]`                    |
 | `feeds-db.image.tag`                        | Specifies the image to use for this chart.                                                        | `13.11.0-debian-11-r15` |
 
-
 ### Feeds Gem Database Parameters
 
 | Name                                      | Description                                                                                 | Value                   |
@@ -437,7 +434,6 @@ anchoreConfig:
 | `gem-db.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
 | `gem-db.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `gem-db.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
-
 
 ### Anchore Feeds Upgrade Job Parameters
 
@@ -457,7 +453,6 @@ anchoreConfig:
 | `feedsUpgradeJob.resources`               | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`                   |
 | `feedsUpgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
 
-
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value            |
@@ -469,7 +464,6 @@ anchoreConfig:
 | `ingress.paths`            | The path used for accessing the Anchore Feeds API                  | `["/v2/feeds/"]` |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`             |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`          |
-
 
 ### Google CloudSQL DB Parameters
 
