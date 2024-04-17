@@ -51,7 +51,7 @@ Common environment variables
     fieldRef:
       fieldPath: metadata.name
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  value: {{ template "feeds.fullname" . }}
+  value: {{ template "feeds.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
 - name: ANCHORE_PORT
   value: {{ .Values.service.port | quote }}
 {{- end -}}
