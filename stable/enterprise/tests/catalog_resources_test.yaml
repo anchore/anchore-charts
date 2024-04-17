@@ -231,7 +231,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-catalog
+            value: test-release-enterprise-catalog.test-namespace.svc.cluster.local
         count: 1
       - contains:
           path: spec.template.spec.containers[0].env
