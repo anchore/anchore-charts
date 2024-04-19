@@ -136,13 +136,13 @@ should render proper initContainers:
         - name: bar
           value: baz
         - name: ANCHORE_ENDPOINT_HOSTNAME
-          value: test-release-enterprise-999-upgrade
+          value: test-release-enterprise-999-upgrade.test-namespace.svc.cluster.local
         - name: ANCHORE_PORT
           value: "null"
         - name: ANCHORE_HOST_ID
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-      image: docker.io/anchore/enterprise:v5.4.0
+      image: docker.io/anchore/enterprise:v5.4.1
       imagePullPolicy: IfNotPresent
       name: wait-for-db
