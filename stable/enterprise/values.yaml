@@ -1404,7 +1404,7 @@ upgradeJob:
   ##
   extraVolumes: []
 
-  ## @param upgradeJobextraVolumeMounts Define additional volume mounts for Anchore upgrade job pod
+  ## @param upgradeJob.extraVolumeMounts Define additional volume mounts for Anchore upgrade job pod
   ##
   extraVolumeMounts: []
 

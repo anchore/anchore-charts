@@ -918,6 +918,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
 | `global.nameOverride`     | overrides the name set on resources     | `""`  |
 
+
 ### Common Resource Parameters
 
 | Name                                    | Description                                                                                                                        | Value                                 |
@@ -963,6 +964,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                  |
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                  |
 | `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                  |
+
 
 ### Anchore Configuration Parameters
 
@@ -1070,6 +1072,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `anchoreConfig.ui.dbUser`                                                        | allows overriding and separation of the ui database user.                                                                        | `""`               |
 | `anchoreConfig.ui.dbPassword`                                                    | allows overriding and separation of the ui database user authentication                                                          | `""`               |
 
+
 ### Anchore Analyzer k8s Deployment Parameters
 
 | Name                             | Description                                                                 | Value  |
@@ -1077,6 +1080,8 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `analyzer.replicaCount`          | Number of replicas for the Anchore Analyzer deployment                      | `1`    |
 | `analyzer.service.port`          | The port used for gatherings metrics when .Values.metricsEnabled=true       | `8084` |
 | `analyzer.extraEnv`              | Set extra environment variables for Anchore Analyzer pods                   | `[]`   |
+| `analyzer.extraVolumes`          | Define additional volumes for Anchore Analyzer pods                         | `[]`   |
+| `analyzer.extraVolumeMounts`     | Define additional volume mounts for Anchore Analyzer pods                   | `[]`   |
 | `analyzer.resources`             | Resource requests and limits for Anchore Analyzer pods                      | `{}`   |
 | `analyzer.labels`                | Labels for Anchore Analyzer pods                                            | `{}`   |
 | `analyzer.annotations`           | Annotation for Anchore Analyzer pods                                        | `{}`   |
@@ -1085,6 +1090,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `analyzer.affinity`              | Affinity for Anchore Analyzer pod assignment                                | `{}`   |
 | `analyzer.serviceAccountName`    | Service account name for Anchore API pods                                   | `""`   |
 | `analyzer.scratchVolume.details` | Details for the k8s volume to be created for Anchore Analyzer scratch space | `{}`   |
+
 
 ### Anchore API k8s Deployment Parameters
 
@@ -1106,6 +1112,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `api.tolerations`         | Tolerations for Anchore API pod assignment           | `[]`        |
 | `api.affinity`            | Affinity for Anchore API pod assignment              | `{}`        |
 | `api.serviceAccountName`  | Service account name for Anchore API pods            | `""`        |
+
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -1129,6 +1136,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `catalog.serviceAccountName`    | Service account name for Anchore Catalog pods                              | `""`        |
 | `catalog.scratchVolume.details` | Details for the k8s volume to be created for Anchore Catalog scratch space | `{}`        |
 
+
 ### Anchore Feeds Chart Parameters
 
 | Name                 | Description                                                                                    | Value   |
@@ -1137,6 +1145,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
 | `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
 | `feeds.resources`    | Resource requests and limits for Anchore Feeds pods                                            | `{}`    |
+
 
 ### Anchore Notifications Parameters
 
@@ -1158,6 +1167,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `notifications.tolerations`         | Tolerations for Anchore Notifications pod assignment           | `[]`        |
 | `notifications.affinity`            | Affinity for Anchore Notifications pod assignment              | `{}`        |
 | `notifications.serviceAccountName`  | Service account name for Anchore Notifications pods            | `""`        |
+
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -1181,6 +1191,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `policyEngine.serviceAccountName`    | Service account name for Anchore Policy Engine pods                              | `""`        |
 | `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space | `{}`        |
 
+
 ### Anchore Reports Parameters
 
 | Name                            | Description                                                                | Value       |
@@ -1203,6 +1214,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `reports.serviceAccountName`    | Service account name for Anchore Reports pods                              | `""`        |
 | `reports.scratchVolume.details` | Details for the k8s volume to be created for Anchore Reports scratch space | `{}`        |
 
+
 ### Anchore Reports Worker Parameters
 
 | Name                                | Description                                                     | Value       |
@@ -1223,6 +1235,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `reportsWorker.tolerations`         | Tolerations for Anchore Reports Worker pod assignment           | `[]`        |
 | `reportsWorker.affinity`            | Affinity for Anchore Reports Worker pod assignment              | `{}`        |
 | `reportsWorker.serviceAccountName`  | Service account name for Anchore Reports Worker pods            | `""`        |
+
 
 ### Anchore Simple Queue Parameters
 
@@ -1245,11 +1258,12 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `simpleQueue.affinity`            | Affinity for Anchore Simple Queue pod assignment              | `{}`        |
 | `simpleQueue.serviceAccountName`  | Service account name for Anchore Simple Queue pods            | `""`        |
 
+
 ### Anchore UI Parameters
 
 | Name                         | Description                                                                   | Value                                    |
 | ---------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------- |
-| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v5.4.0` |
+| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v5.4.1` |
 | `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                        | `IfNotPresent`                           |
 | `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints   | `anchore-enterprise-ui-env`              |
 | `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName` | `""`                                     |
@@ -1270,6 +1284,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `ui.affinity`                | Affinity for Anchore ui pod assignment                                        | `{}`                                     |
 | `ui.serviceAccountName`      | Service account name for Anchore UI pods                                      | `""`                                     |
 
+
 ### Anchore Upgrade Job Parameters
 
 | Name                                 | Description                                                                                                                                     | Value                  |
@@ -1280,6 +1295,8 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `upgradeJob.serviceAccountName`      | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                   |
 | `upgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                |
 | `upgradeJob.kubectlImage`            | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.27` |
+| `upgradeJob.extraVolumes`            | Define additional volumes for Anchore upgrade job pod                                                                                           | `[]`                   |
+| `upgradeJob.extraVolumeMounts`       | Define additional volume mounts for Anchore upgrade job pod                                                                                     | `[]`                   |
 | `upgradeJob.nodeSelector`            | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                   |
 | `upgradeJob.tolerations`             | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                   |
 | `upgradeJob.affinity`                | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                   |
@@ -1287,6 +1304,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `upgradeJob.resources`               | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                   |
 | `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`                   |
 | `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
+
 
 ### Ingress Parameters
 
@@ -1304,6 +1322,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                   |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                |
 
+
 ### Google CloudSQL DB Parameters
 
 | Name                             | Description                                                                    | Value                                     |
@@ -1317,6 +1336,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
+
 ### Anchore UI Redis Parameters
 
 | Name                                  | Description                                                                                      | Value               |
@@ -1326,6 +1346,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123` |
 | `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`        |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`             |
+
 
 ### Anchore Database Parameters
 
