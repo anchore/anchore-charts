@@ -223,7 +223,7 @@ anchoreConfig:
   service_dir: /anchore_service
 
   ## @param anchoreConfig.log_level The log level for Anchore services
-  ## options available: FATAL, ERROR, WARN, INFO, DEBUG, SPEW
+  ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
   log_level: INFO
 
