@@ -1,6 +1,12 @@
 service_dir: ${ANCHORE_SERVICE_DIR}
 tmp_dir: ${ANCHORE_FEEDS_TMP_DIR}
-log_level: ${ANCHORE_LOG_LEVEL}
+log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
+
+logging:
+  {{- toYaml .Values.anchoreConfig.logging | nindent 2 }}
+
+server:
+  {{- toYaml .Values.anchoreConfig.server | nindent 2 }}
 
 host_id: "${ANCHORE_HOST_ID}"
 internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}

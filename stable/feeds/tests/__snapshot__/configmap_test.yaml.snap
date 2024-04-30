@@ -7,7 +7,26 @@ should render the configmaps:
         #
         service_dir: ${ANCHORE_SERVICE_DIR}
         tmp_dir: ${ANCHORE_FEEDS_TMP_DIR}
-        log_level: ${ANCHORE_LOG_LEVEL}
+        log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
+
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: INFO
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
+        server:
+          max_connection_backlog: 2048
+          max_wsgi_middleware_worker_count: 50
+          max_wsgi_middleware_worker_queue_size: 100
+          timeout_graceful_shutdown: false
+          timeout_keep_alive: 5
 
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
