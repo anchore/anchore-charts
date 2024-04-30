@@ -313,7 +313,7 @@ anchoreConfig:
 | `url`                                   | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster. | `""`                                  |
 | `fullnameOverride`                      | overrides the fullname set on resources                                                               | `""`                                  |
 | `nameOverride`                          | overrides the name set on resources                                                                   | `""`                                  |
-| `image`                                 | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.4.1` |
+| `image`                                 | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.5.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                             | `IfNotPresent`                        |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                         | `anchore-enterprise-pullcreds`        |
 | `serviceAccountName`                    | Name of a service account used to run all Feeds pods                                                  | `""`                                  |
@@ -501,6 +501,11 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v2.5.x
+
+- Update Anchore Feds image to v5.4.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/550/) for more information.
+- Added support for service specific annotations.
 
 ### v2.4.0
 

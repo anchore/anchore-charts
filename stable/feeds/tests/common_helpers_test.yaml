@@ -44,6 +44,41 @@ tests:
             foo: bar
             bar: baz
 
+  - it: should render service annotations
+    template: deployment.yaml
+    documentIndex: 1
+    set:
+      service:
+        annotations:
+          foo: bar
+          bar: baz
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            foo: bar
+            bar: baz
+
+  - it: should render service annotations and global annotations
+    template: deployment.yaml
+    documentIndex: 1
+    set:
+      service:
+        annotations:
+          foo: bar
+          bar: baz
+      annotations:
+        fizz: buzz
+        boo: blah
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            fizz: buzz
+            boo: blah
+            foo: bar
+            bar: baz
+
   - it: should render file checksum/secret annotation
     template: deployment.yaml
     documentIndex: 0
