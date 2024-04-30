@@ -504,7 +504,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### v2.5.x
 
-- Update Anchore Feds image to v5.4.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/550/) for more information.
+- Update Anchore Feeds image to v5.5.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/550/) for more information.
 - Added support for service specific annotations.
 
 ### v2.4.0
