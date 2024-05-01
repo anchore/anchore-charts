@@ -53,7 +53,7 @@ spec:
         {{- end }}
           command: ["/bin/sh", "-c"]
           args:
-            - {{ print (include "enterprise.doSourceFile" .) }} /docker-entrypoint.sh node /home/node/aui/build/server.js
+            - {{ print (include "enterprise.doSourceFile" .) }} /docker-entrypoint.sh node /home/node/aui/build/server.js {{ print (include "enterprise.ui.featureFlags" .) }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           {{- if .Values.anchoreConfig.database.ssl }}
             - name: PGSSLROOTCERT
@@ -117,7 +117,7 @@ metadata:
   name: {{ template "enterprise.ui.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
-  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.service.annotations" (merge (dict "component" $component) .) | nindent 4 }}
 spec:
   sessionAffinity: {{ .Values.ui.service.sessionAffinity }}
   type: {{ .Values.ui.service.type }}

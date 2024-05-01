@@ -1,0 +1,52 @@
+suite: OSAA ConfigMap Tests
+templates:
+  - templates/osaa_configmap.yaml
+  - templates/anchore_configmap.yaml
+set:
+  osaaMigrationJob:
+    enabled: true
+    analysisArchiveMigration:
+      run: true
+      bucket: "analysis_archive"
+      mode: to_analysis_archive
+      analysis_archive:
+        enabled: true
+        compression:
+          enabled: true
+          min_size_kbytes: 100
+        storage_driver:
+          name: s3
+          config:
+            access_key: itsa
+            secret_key: test
+            url: 'http://myminio.mynamespace.svc.cluster.local:9000'
+            region: null
+            bucket: analysisarchive
+    objectStoreMigration:
+      run: false
+      object_store:
+        verify_content_digests: true
+        compression:
+          enabled: false
+          min_size_kbytes: 100
+        storage_driver:
+          name: s3
+          config:
+            access_key: itsa
+            secret_key: test
+            url: 'http://myminio.mynamespace.svc.cluster.local:9000'
+            region: null
+            bucket: objectstore
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should render the configmaps for osaa migration if enabled
+    asserts:
+      - matchSnapshot: {}

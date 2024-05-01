@@ -19,6 +19,25 @@ When calling this template, .component can be included in the context for compon
 {{- end }}
 {{- end -}}
 
+{{/*
+Service annotations
+{{- include "enterprise.service.annotations" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.service.annotations" -}}
+{{- $component := .component -}}
+{{- if and (not .nil) (not .Values.annotations) (not (index .Values (print $component)).service.annotations) }}
+  {{- print "{}" }}
+{{- else }}
+  {{- with .Values.annotations -}}
+{{ toYaml . }}
+  {{- end }}
+  {{- if $component }}
+    {{- with (index .Values (print $component)).service.annotations }}
+{{ toYaml . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
 
 {{/*
 Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true
@@ -224,7 +243,7 @@ Setup the common pod spec configs
 {{- with .Values.securityContext }}
 securityContext: {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if or .Values.serviceAccountName (index .Values (print $component)).serviceAccountName (eq $component "upgradeJob") }}
+{{- if or .Values.serviceAccountName (index .Values (print $component)).serviceAccountName (eq $component "upgradeJob") (eq $component "osaaMigrationJob") }}
 serviceAccountName: {{ include "enterprise.serviceAccountName" (merge (dict "component" $component) .) }}
 {{- end }}
 {{- with .Values.imagePullSecretName }}
@@ -309,9 +328,15 @@ Setup the common anchore volumes
   configMap:
     name: {{ .Release.Name }}-enterprise-scripts
     defaultMode: 0755
+{{- if .Values.osaaMigrationJob.enabled }}
+- name: config-volume
+  configMap:
+    name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
+{{- else }}
 - name: config-volume
   configMap:
     name: {{ template "enterprise.fullname" . }}
+{{- end }}
 {{- with .Values.certStoreSecretName }}
 - name: certs
   secret:

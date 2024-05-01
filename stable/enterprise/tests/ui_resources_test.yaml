@@ -40,6 +40,7 @@ tests:
 
   - it: should render component annotations
     template: ui_deployment.yaml
+    documentIndex: 0
     set:
       ui.annotations:
         ui: test
@@ -56,7 +57,6 @@ tests:
             ui: test
             test: foobar
         template: ui_deployment.yaml
-        documentIndex: 0
 
   - it: should render component matchLabels
     template: ui_deployment.yaml
@@ -143,6 +143,32 @@ tests:
   - it: should render component entrypoint args
     template: ui_deployment.yaml
     documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh node \/home\/node\/aui\/build\/server.js$
+        count: 1
+
+  - it: should render component entrypoint args with feature flags
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      ui.extraEnv:
+        - name: ANCHORE_FEATURE_FLAG
+          value: "test"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh node \/home\/node\/aui\/build\/server.js -f test$
+        count: 1
+
+  - it: should not render component entrypoint args with feature flags if ANCHORE_FEATURE_FLAG extraEnv isn't set
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      ui.extraEnv:
+        - name: NOT_ANCHORE_FEATURE_FLAG
+          value: "test"
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[0]
@@ -386,3 +412,40 @@ tests:
             mountPath: /mnt/global-extra-vol
             readOnly: false
         count: 1
+
+  - it: should render service annotations
+    template: ui_deployment.yaml
+    documentIndex: 1
+    set:
+      ui:
+        service:
+          annotations:
+            bar: baz
+            foo: bar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            bar: baz
+            foo: bar
+
+  - it: should render service annotations and global annotations
+    template: ui_deployment.yaml
+    documentIndex: 1
+    set:
+      ui:
+        service:
+          annotations:
+            s1: a1
+            s2: a2
+      annotations:
+        g1: v1
+        g2: v2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            g1: v1
+            g2: v2
+            s1: a1
+            s2: a2

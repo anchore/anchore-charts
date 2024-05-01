@@ -1,0 +1,19 @@
+{{- if .Values.osaaMigrationJob.enabled -}}
+{{- $component := "osaaMigrationJob" -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+    {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+
+data:
+  config.yaml: |
+    # Anchore Object Store and Analysis Archive Migration configuration file, mounted from a configmap
+    #
+{{ tpl (.Files.Get "files/osaa_config.yaml") . | indent 4 }}
+{{- end -}}

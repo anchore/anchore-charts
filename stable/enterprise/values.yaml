@@ -5,6 +5,7 @@
 global:
   ## @param global.fullnameOverride overrides the fullname set on resources
   ##
+  ##
   fullnameOverride: ""
 
   ## @param global.nameOverride overrides the name set on resources
@@ -222,10 +223,51 @@ anchoreConfig:
   ##
   service_dir: /anchore_service
 
-  ## @param anchoreConfig.log_level The log level for Anchore services
-  ## options available: FATAL, ERROR, WARN, INFO, DEBUG, SPEW
+  ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
+  ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
   log_level: INFO
+
+  ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
+  ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
+  ## @param anchoreConfig.logging.exception_diagnose_logging Enable detailed exception information in the logs
+  ## @param anchoreConfig.logging.file_rotation_rule Maximum size of a log file before it is rotated
+  ## @param anchoreConfig.logging.file_retention_rule Number of log files to retain before deleting the oldest
+  ## @param anchoreConfig.logging.log_level Log level for the service code
+  ## @param anchoreConfig.logging.server_access_logging Set whether to print server access to logging
+  ## @param anchoreConfig.logging.server_response_debug_logging Log the elapsed time to process the request and the response size (debug log level)
+  ## @param anchoreConfig.logging.server_log_level Log level specifically for the server (uvicorn)
+  ## @param anchoreConfig.logging.structured_logging Enable structured logging output (JSON)
+  ##
+  logging:
+    colored_logging: false
+    exception_backtrace_logging: false
+    exception_diagnose_logging: false
+    file_rotation_rule: "10 MB"
+    file_retention_rule: 10
+    log_level: INFO
+    server_access_logging: true
+    server_response_debug_logging: false
+    server_log_level: "info"
+    structured_logging: false
+
+  ## @param anchoreConfig.server.max_connection_backlog Max connections permitted in the backlog before dropping
+  ## @param anchoreConfig.server.max_wsgi_middleware_worker_queue_size Max number of requests to queue for processing by ASGI2WSGI middleware
+  ## @param anchoreConfig.server.max_wsgi_middleware_worker_count Max number of workers to have in the ASGI2WSGI middleware worker pool
+  ## @param anchoreConfig.server.timeout_graceful_shutdown Seconds to permit for graceful shutdown or false to disable
+  ## @param anchoreConfig.server.timeout_keep_alive Seconds to keep a connection alive before closing
+  ##
+  server:
+    max_connection_backlog: 2048
+    max_wsgi_middleware_worker_queue_size: 100
+    max_wsgi_middleware_worker_count: 50
+    timeout_graceful_shutdown: false
+    timeout_keep_alive: 5
+
+  ## @param anchoreConfig.audit.enabled Enable audit logging
+  ##
+  audit:
+    enabled: true
 
   ## @param anchoreConfig.allow_awsecr_iam_auto Enable AWS IAM instance role for ECR auth
   ## When set, if a registry credential username is set to 'iamauto' for an ecr registry, the engine will
@@ -1595,3 +1637,101 @@ postgresql:
   ##
   image:
     tag: 13.11.0-debian-11-r15
+
+########################################################################################
+## @section Anchore Object Store and Analysis Archive Migration
+## Migration job uses a Helm pre-install-hook to ensure all pods are
+## scaled down before running the migration job
+########################################################################################
+
+osaaMigrationJob:
+
+  ## @param osaaMigrationJob.enabled Enable the Anchore Object Store and Analysis Archive migration job
+  ##
+  enabled: false
+
+  ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
+  ## This is only used in the osaaMigrationJob job.
+  ##
+  kubectlImage: bitnami/kubectl:1.27
+
+  ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
+  ##
+  extraEnv: []
+
+  ## @param osaaMigrationJob.extraVolumes Define additional volumes for Anchore Object Store and Analysis Archive migration job
+  ##
+  extraVolumes: []
+
+  ## @param osaaMigrationJob.extraVolumeMounts Define additional volume mounts for Anchore Object Store and Analysis Archive migration job
+  ##
+  extraVolumeMounts: []
+
+  ## @param osaaMigrationJob.resources Resource requests and limits for Anchore Object Store and Analysis Archive migration job
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ##
+  resources: {}
+    # requests:
+    #   cpu: 1000m
+    #   memory: 2000Mi
+    # limits:
+    #   memory: 2000Mi
+
+  ## @param osaaMigrationJob.labels Labels for Anchore Object Store and Analysis Archive migration job
+  ##
+  labels: {}
+
+  ## @param osaaMigrationJob.annotations Annotation for Anchore Object Store and Analysis Archive migration job
+  ##
+  annotations: {}
+
+  ## @param osaaMigrationJob.nodeSelector Node labels for Anchore Object Store and Analysis Archive migration job pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param osaaMigrationJob.tolerations Tolerations for Anchore Object Store and Analysis Archive migration job pod assignment
+  ##
+  tolerations: []
+
+  ## @param osaaMigrationJob.affinity Affinity for Anchore Object Store and Analysis Archive migration job pod assignment
+  ##
+  affinity: {}
+
+  ## @param osaaMigrationJob.serviceAccountName Service account name for Anchore Object Store and Analysis Archive migration job pods
+  ##
+  serviceAccountName: ""
+
+  ## @param osaaMigrationJob.analysisArchiveMigration.bucket The name of the bucket to migrate
+  ## @param osaaMigrationJob.analysisArchiveMigration.run Run the analysis_archive migration
+  ## @param osaaMigrationJob.analysisArchiveMigration.mode The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'.
+  ## @param osaaMigrationJob.analysisArchiveMigration.analysis_archive The configuration of the catalog.analysis_archive for the dest-config.yaml
+  ## ref: https://docs.anchore.com/current/docs/configuration/storage/object_store/migration/#migrating-analysis-archive-data
+  ##
+  analysisArchiveMigration:
+    run: false
+    bucket: "analysis_archive"
+    mode: "to_analysis_archive"
+    analysis_archive: {}
+    ##  compression:
+    ##    enabled: true
+    ##    min_size_kbytes: 100
+    ##  storage_driver:
+    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    name: db
+    ##    config: {}
+
+  ## @param osaaMigrationJob.objectStoreMigration.run Run the object_store migration
+  ## @param osaaMigrationJob.objectStoreMigration.object_store [object] The configuration of the object_store for the dest-config.yaml
+  ## ref: https://docs.anchore.com/current/docs/configuration/storage/object_store/
+  ##
+  objectStoreMigration:
+    run: false
+    object_store:
+      verify_content_digests: true
+      compression:
+        enabled: true
+        min_size_kbytes: 100
+      storage_driver:
+        name: db
+        config: {}

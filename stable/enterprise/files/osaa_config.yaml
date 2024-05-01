@@ -1,12 +1,6 @@
 service_dir: ${ANCHORE_SERVICE_DIR}
 tmp_dir: ${ANCHORE_TMP_DIR}
-log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
-
-logging:
-  {{- toYaml .Values.anchoreConfig.logging | nindent 2 }}
-
-server:
-  {{- toYaml .Values.anchoreConfig.server | nindent 2 }}
+log_level: ${ANCHORE_LOG_LEVEL}
 
 allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
 host_id: "${ANCHORE_HOST_ID}"
@@ -24,37 +18,6 @@ max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
 max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
 
 max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
-
-audit:
-  enabled: {{ .Values.anchoreConfig.audit.enabled }}
-  mode: log
-  verbs:
-    - post
-    - put
-    - delete
-    - patch
-  resource_uris:
-    - "/accounts"
-    - "/accounts/{account_name}"
-    - "/accounts/{account_name}/state"
-    - "/accounts/{account_name}/users"
-    - "/accounts/{account_name}/users/{username}"
-    - "/accounts/{account_name}/users/{username}/api-keys"
-    - "/accounts/{account_name}/users/{username}/api-keys/{key_name}"
-    - "/accounts/{account_name}/users/{username}/credentials"
-    - "/rbac-manager/roles"
-    - "/rbac-manager/roles/{role_name}/members"
-    - "/rbac-manager/saml/idps"
-    - "/rbac-manager/saml/idps/{name}"
-    - "/rbac-manager/saml/idps/{name}/user-group-mappings"
-    - "/system/user-groups"
-    - "/system/user-groups/{group_uuid}"
-    - "/system/user-groups/{group_uuid}/roles"
-    - "/system/user-groups/{group_uuid}/users"
-    - "/user/api-keys"
-    - "/user/api-keys/{key_name}"
-    - "/user/credentials"
-
 
 metrics:
   enabled: ${ANCHORE_ENABLE_METRICS}
@@ -157,8 +120,16 @@ services:
       object_store_bucket: "runtime_compliance_check"
     down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
     import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+  {{- if and .Values.osaaMigrationJob.enabled .Values.osaaMigrationJob.analysisArchiveMigration.run }}
+    analysis_archive: {{- toYaml .Values.osaaMigrationJob.analysisArchiveMigration.analysis_archive | nindent 6 }}
+  {{- else }}
     analysis_archive: {{- toYaml .Values.anchoreConfig.catalog.analysis_archive | nindent 6 }}
+  {{- end }}
+  {{- if and .Values.osaaMigrationJob.enabled .Values.osaaMigrationJob.objectStoreMigration.run }}
+    object_store: {{- toYaml .Values.osaaMigrationJob.objectStoreMigration.object_store | nindent 6 }}
+  {{- else }}
     object_store: {{- toYaml .Values.anchoreConfig.catalog.object_store | nindent 6 }}
+  {{- end }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
