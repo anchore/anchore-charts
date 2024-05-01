@@ -69,7 +69,7 @@ metadata:
   name: {{ template "enterprise.reports.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
-  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.service.annotations" (merge (dict "component" $component) .) | nindent 4 }}
 spec:
   type: {{ .Values.reports.service.type }}
   ports:

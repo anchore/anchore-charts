@@ -28,6 +28,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Scaling Individual Services](#scaling-individual-services)
   - [Using TLS Internally](#using-tls-internally)
 - [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart)
+- [Object storage migration](#object-storage-migration)
 - [Parameters](#parameters)
 - [Release Notes](#release-notes)
 
@@ -909,6 +910,89 @@ In case of issues during the migration, execute the following rollback steps:
 
 This rollback procedure is designed to revert your environment to its pre-migration state, allowing for a fresh migration attempt.
 
+## Object Storage Migration
+
+To cleanly migrate data from one archive driver to another, Anchore Enterprise includes some tooling that automates the process in the ‘anchore-enterprise-manager’ tool packaged with the system.
+The enterprise helm chart provides a way to run the migration steps listed in the [object store migration docs](https://docs.anchore.com/current/docs/configuration/storage/object_store/migration/#migrating-analysis-archive-data)
+automatically by spinning up a job and crafting the configs required and running the necessary migration commands.
+
+The source's config.yaml uses the `anchoreConfig.catalog.object_store` and `anchoreConfig.catalog.analysis_archive` objects as it's configs. This is currently what your system is deployed with.
+
+The dest-config.yaml uses the `osaaMigrationJob.objectStoreMigration.object_store` and `osaaMigrationJob.analysisArchiveMigration.analysis_archive` respectively to know what it will be migrating to.
+
+To enable the job that runs the migration, update the osaaMigrationJob's values as needed, then run a `helm upgrade`. This will create a job using the pre-upgrade hook to ensure all services are spun down before the migration is ran. It uses the same service account as the upgrade job unless specified otherwise. This service account must have permissions to list and scale down deployments and pods. As the upgrade may take a while, you may want to run your helm upgrade using a longer `--timeout` option to allow the upgrade job to run through without failing due to the timeout.
+
+```yaml
+# example config
+osaaMigrationJob:
+  enabled: true # note that we are enabling the migration job
+  analysisArchiveMigration:
+    run: true # we are specifying to run the analysis_archive migration
+    bucket: "analysis_archive"
+    mode: to_analysis_archive
+    # the deployment will be migrated to use the following configs for catalog.analysis_archive
+    analysis_archive:
+      enabled: true
+      compression:
+        enabled: true
+        min_size_kbytes: 100
+      storage_driver:
+        name: s3
+        config:
+          access_key: my_access_key
+          secret_key: my_secret_key
+          url: 'http://myminio.mynamespace.svc.cluster.local:9000'
+          region: null
+          bucket: analysisarchive
+  objectStoreMigration:
+    run: true
+    # note that since this is the same as anchoreConfig.catalog.object_store, the migration
+    # command for migrating the object store will still run, but it will not do anything as there
+    # is nothing to be done
+    object_store:
+      verify_content_digests: true
+      compression:
+        enabled: false
+        min_size_kbytes: 100
+      storage_driver:
+        name: db
+        config: {}
+
+# the deployment was previously deployed using the following configs
+anchoreConfig:
+  default_admin_password: foobar
+  catalog:
+    analysis_archive:
+      enabled: true
+      compression:
+        enabled: true
+        min_size_kbytes: 100
+      storage_driver:
+        name: db
+        config: {}
+    object_store:
+      verify_content_digests: true
+      compression:
+        enabled: true
+        min_size_kbytes: 100
+      storage_driver:
+        name: db
+        config: {}
+```
+
+After the migration is complete, the deployment of Anchore will use the `osaaMigrationJob`'s `analysis_archive` and `object_store` configs depending on if you specified to `run` the migration for the respective config. Since the migration only needs to be ran once, you should update your values.yaml to replace your old `anchoreConfig.catalog.analysis_archive` and `anchoreConfig.catalog.object_store` sections with what you declared in the `osaaMigrationJob` section. You can then set the `osaaMigrationJob.enabled` value to false as to not spin up the job anymore since it is no longer needed.
+
+### Object Storage Migration Rollback
+
+To restore your deployment to using your previous driver configurations:
+
+1. put your original `catalog.analysis_archive` and `catalog.object_store` configs in the `osaaMigrationJob` configs. Your `catalog.analysis_archive` and `catalog.object_store` should currently be what you tried to migrate to (what was in the `osaaMigrationJob` configs) as per the instructions above saying
+    - """Since the migration only needs to be ran once, you should update your values.yaml to replace your old `anchoreConfig.catalog.analysis_archive` and `anchoreConfig.catalog.object_store` sections with what you declared in the `osaaMigrationJob` section.""""
+2. set to true, `osaaMigrationJob.enable` and (`osaaMigrationJob.objectStoreMigration.run` and/or `osaaMigrationJob.analysisArchiveMigration.run`)
+3. set `osaaMigrationJob.analysisArchiveMigration.mode=from_analysis_archive`
+4. do a `helm upgrade` (remember to increase your timeout based on how much data is being migrated)
+5. Once the migration completes, move your original configs (what is currently in `osaaMigrationJob`) to `anchoreConfig.catalog.analysis_archive` and `anchoreConfig.catalog.object_store`, and update your values file to set `osaaMigrationJob.enabled=false`
+
 ## Parameters
 
 ### Global Resource Parameters
@@ -922,7 +1006,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 | Name                                    | Description                                                                                                                        | Value                                 |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.4.1` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.5.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                        |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`        |
 | `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema                                                    | `false`                               |
@@ -969,7 +1053,23 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | Name                                                                             | Description                                                                                                                      | Value              |
 | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
 | `anchoreConfig.service_dir`                                                      | Path to directory where default Anchore config files are placed at startup                                                       | `/anchore_service` |
-| `anchoreConfig.log_level`                                                        | The log level for Anchore services                                                                                               | `INFO`             |
+| `anchoreConfig.log_level`                                                        | The log level for Anchore services: NOTE: This is deprecated, use logging.log_level                                              | `INFO`             |
+| `anchoreConfig.logging.colored_logging`                                          | Enable colored output in the logs                                                                                                | `false`            |
+| `anchoreConfig.logging.exception_backtrace_logging`                              | Enable stack traces in the logs                                                                                                  | `false`            |
+| `anchoreConfig.logging.exception_diagnose_logging`                               | Enable detailed exception information in the logs                                                                                | `false`            |
+| `anchoreConfig.logging.file_rotation_rule`                                       | Maximum size of a log file before it is rotated                                                                                  | `10 MB`            |
+| `anchoreConfig.logging.file_retention_rule`                                      | Number of log files to retain before deleting the oldest                                                                         | `10`               |
+| `anchoreConfig.logging.log_level`                                                | Log level for the service code                                                                                                   | `INFO`             |
+| `anchoreConfig.logging.server_access_logging`                                    | Set whether to print server access to logging                                                                                    | `true`             |
+| `anchoreConfig.logging.server_response_debug_logging`                            | Log the elapsed time to process the request and the response size (debug log level)                                              | `false`            |
+| `anchoreConfig.logging.server_log_level`                                         | Log level specifically for the server (uvicorn)                                                                                  | `info`             |
+| `anchoreConfig.logging.structured_logging`                                       | Enable structured logging output (JSON)                                                                                          | `false`            |
+| `anchoreConfig.server.max_connection_backlog`                                    | Max connections permitted in the backlog before dropping                                                                         | `2048`             |
+| `anchoreConfig.server.max_wsgi_middleware_worker_queue_size`                     | Max number of requests to queue for processing by ASGI2WSGI middleware                                                           | `100`              |
+| `anchoreConfig.server.max_wsgi_middleware_worker_count`                          | Max number of workers to have in the ASGI2WSGI middleware worker pool                                                            | `50`               |
+| `anchoreConfig.server.timeout_graceful_shutdown`                                 | Seconds to permit for graceful shutdown or false to disable                                                                      | `false`            |
+| `anchoreConfig.server.timeout_keep_alive`                                        | Seconds to keep a connection alive before closing                                                                                | `5`                |
+| `anchoreConfig.audit.enabled`                                                    | Enable audit logging                                                                                                             | `true`             |
 | `anchoreConfig.allow_awsecr_iam_auto`                                            | Enable AWS IAM instance role for ECR auth                                                                                        | `true`             |
 | `anchoreConfig.keys.secret`                                                      | The shared secret used for signing & encryption, auto-generated by Helm if not set.                                              | `""`               |
 | `anchoreConfig.keys.privateKeyFileName`                                          | The file name of the private key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName | `""`               |
@@ -1249,7 +1349,7 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 
 | Name                         | Description                                                                   | Value                                    |
 | ---------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------- |
-| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v5.4.0` |
+| `ui.image`                   | Image used for the Anchore UI container                                       | `docker.io/anchore/enterprise-ui:v5.5.0` |
 | `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                        | `IfNotPresent`                           |
 | `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints   | `anchore-enterprise-ui-env`              |
 | `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName` | `""`                                     |
@@ -1341,6 +1441,29 @@ This rollback procedure is designed to revert your environment to its pre-migrat
 | `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
 
+### Anchore Object Store and Analysis Archive Migration
+
+| Name                                                         | Description                                                                                                      | Value                  |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `osaaMigrationJob.enabled`                                   | Enable the Anchore Object Store and Analysis Archive migration job                                               | `false`                |
+| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnami/kubectl:1.27` |
+| `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                   |
+| `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                   |
+| `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                   |
+| `osaaMigrationJob.resources`                                 | Resource requests and limits for Anchore Object Store and Analysis Archive migration job                         | `{}`                   |
+| `osaaMigrationJob.labels`                                    | Labels for Anchore Object Store and Analysis Archive migration job                                               | `{}`                   |
+| `osaaMigrationJob.annotations`                               | Annotation for Anchore Object Store and Analysis Archive migration job                                           | `{}`                   |
+| `osaaMigrationJob.nodeSelector`                              | Node labels for Anchore Object Store and Analysis Archive migration job pod assignment                           | `{}`                   |
+| `osaaMigrationJob.tolerations`                               | Tolerations for Anchore Object Store and Analysis Archive migration job pod assignment                           | `[]`                   |
+| `osaaMigrationJob.affinity`                                  | Affinity for Anchore Object Store and Analysis Archive migration job pod assignment                              | `{}`                   |
+| `osaaMigrationJob.serviceAccountName`                        | Service account name for Anchore Object Store and Analysis Archive migration job pods                            | `""`                   |
+| `osaaMigrationJob.analysisArchiveMigration.bucket`           | The name of the bucket to migrate                                                                                | `analysis_archive`     |
+| `osaaMigrationJob.analysisArchiveMigration.run`              | Run the analysis_archive migration                                                                               | `false`                |
+| `osaaMigrationJob.analysisArchiveMigration.mode`             | The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'. | `to_analysis_archive`  |
+| `osaaMigrationJob.analysisArchiveMigration.analysis_archive` | The configuration of the catalog.analysis_archive for the dest-config.yaml                                       | `{}`                   |
+| `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                |
+| `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                   |
+
 
 ## Release Notes
 
@@ -1349,6 +1472,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V2.6.x
+
+- Deploys Anchore Enterprise v5.5.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/550/) for more information.
+- Adds support for service specific annotations.
+- Adds a configurable job for object/analysis store backend migration.
 
 ### V2.5.x
 

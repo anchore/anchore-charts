@@ -1,44 +1,5 @@
-should render the configmaps:
+should render the configmaps for osaa migration if enabled:
   1: |
-    apiVersion: v1
-    data:
-      analyzer_config.yaml: |
-        # Anchore analyzer configuration
-        malware:
-          clamav:
-            db_update_enabled: true
-            enabled: false
-        retrieve_files:
-          file_list:
-          - /etc/passwd
-        secret_search:
-          match_params:
-          - MAXFILESIZE=10000
-          - STOREONMATCH=n
-          regexp_match:
-          - AWS_ACCESS_KEY=(?i).*aws_access_key_id( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9]).*
-          - AWS_SECRET_KEY=(?i).*aws_secret_access_key( *=+ *).*(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=]).*
-          - PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+
-          - 'DOCKER_AUTH=(?i).*"auth": *".+"'
-          - API_KEY=(?i).*api(-|_)key( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*
-    kind: ConfigMap
-    metadata:
-      annotations:
-        bar: baz
-        foo: bar
-      labels:
-        app.kubernetes.io/component: analyzer
-        app.kubernetes.io/instance: test-release
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: test-release-enterprise
-        app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 9.9.9
-        bar: baz
-        foo: bar
-        helm.sh/chart: enterprise-9.9.9
-      name: test-release-enterprise-analyzer
-      namespace: test-namespace
-  2: |
     apiVersion: v1
     data:
       config.yaml: |
@@ -392,89 +353,312 @@ should render the configmaps:
         helm.sh/chart: enterprise-9.9.9
       name: test-release-enterprise
       namespace: test-namespace
-  3: |
+  2: |
     apiVersion: v1
     data:
-      ANCHORE_ADMIN_EMAIL: admin@myanchore
-      ANCHORE_ALLOW_ECR_IAM_AUTO: "true"
-      ANCHORE_ANALYZER_TASK_REQUEUE: "true"
-      ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "true"
-      ANCHORE_AUTH_PRIVKEY: "null"
-      ANCHORE_AUTH_PUBKEY: "null"
-      ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
-      ANCHORE_CLI_URL: http://localhost:8228
-      ANCHORE_CLI_USER: admin
-      ANCHORE_DB_POOL_MAX_OVERFLOW: "100"
-      ANCHORE_DB_POOL_SIZE: "30"
-      ANCHORE_DB_SSL: "false"
-      ANCHORE_DB_SSL_MODE: verify-full
-      ANCHORE_DB_SSL_ROOT_CERT: "null"
-      ANCHORE_DB_TIMEOUT: "120"
-      ANCHORE_DISABLE_METRICS_AUTH: "false"
-      ANCHORE_ENABLE_METRICS: "false"
-      ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT: 48h
-      ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: "0"
-      ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "10"
-      ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS: "10"
-      ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS: "false"
-      ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS: "true"
-      ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL: "true"
-      ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS: "1"
-      ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER: "true"
-      ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER: "true"
-      ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE: "true"
-      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "false"
-      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "120"
-      ANCHORE_ENTERPRISE_UI_URL: test-release-enterprise-ui
-      ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "false"
-      ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
-      ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
-      ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED: "false"
-      ANCHORE_FEEDS_SSL_VERIFY: "false"
-      ANCHORE_FEEDS_VULNERABILITIES_ENABLED: "true"
-      ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
-      ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
-      ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
-      ANCHORE_HINTS_ENABLED: "false"
-      ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "3600"
-      ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
-      ANCHORE_INTERNAL_SSL_VERIFY: "false"
-      ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
-      ANCHORE_LAYER_CACHE_ENABLED: "false"
-      ANCHORE_LAYER_CACHE_SIZE_GB: "0"
-      ANCHORE_LICENSE_FILE: /home/anchore/license.yaml
-      ANCHORE_LOG_LEVEL: INFO
-      ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
-      ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
-      ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
-      ANCHORE_MAX_REQUEST_THREADS: "50"
-      ANCHORE_OAUTH_ENABLED: "true"
-      ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "86400"
-      ANCHORE_OAUTH_TOKEN_EXPIRATION: "3600"
-      ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
-      ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD: "true"
-      ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
-      ANCHORE_SAML_SECRET: "null"
-      ANCHORE_SERVICE_DIR: /anchore_service
-      ANCHORE_SSL_CERT: "null"
-      ANCHORE_SSL_ENABLED: "false"
-      ANCHORE_SSL_KEY: "null"
-      ANCHORE_SSO_REQUIRES_EXISTING_USERS: "false"
-      ANCHORE_TMP_DIR: /analysis_scratch
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED: "true"
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED: "true"
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED: "true"
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED: "false"
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED: "true"
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED: "true"
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED: "true"
-      ANCHORECTL_URL: http://localhost:8228
-      ANCHORECTL_USERNAME: admin
+      config.yaml: |
+        # Anchore Object Store and Analysis Archive Migration configuration file, mounted from a configmap
+        #
+        service_dir: ${ANCHORE_SERVICE_DIR}
+        tmp_dir: ${ANCHORE_TMP_DIR}
+        log_level: ${ANCHORE_LOG_LEVEL}
+
+        allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
+        host_id: "${ANCHORE_HOST_ID}"
+        internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+        image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
+
+        global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
+        global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
+        server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
+
+        license_file: ${ANCHORE_LICENSE_FILE}
+        auto_restart_services: false
+
+        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+
+        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+
+        metrics:
+          enabled: ${ANCHORE_ENABLE_METRICS}
+          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
+
+        webhooks:
+          {}
+
+        default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
+        default_admin_email: ${ANCHORE_ADMIN_EMAIL}
+
+        keys:
+          secret: "${ANCHORE_SAML_SECRET}"
+          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
+          private_key_path: ${ANCHORE_AUTH_PUBKEY}
+
+        user_authentication:
+          oauth:
+            enabled: ${ANCHORE_OAUTH_ENABLED}
+            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
+          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+          allow_api_keys_for_saml_users: false
+          max_api_key_age_days: 365
+          max_api_keys_per_user: 100
+          remove_deleted_user_api_keys_older_than_days: 365
+
+        credentials:
+          database:
+            user: "${ANCHORE_DB_USER}"
+            password: "${ANCHORE_DB_PASSWORD}"
+            host: "${ANCHORE_DB_HOST}"
+            port: "${ANCHORE_DB_PORT}"
+            name: "${ANCHORE_DB_NAME}"
+            db_connect_args:
+              timeout: ${ANCHORE_DB_TIMEOUT}
+              ssl: ${ANCHORE_DB_SSL}
+            db_pool_size: ${ANCHORE_DB_POOL_SIZE}
+            db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
+
+        services:
+          apiext:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+
+          analyzer:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            cycle_timer_seconds: 1
+            cycle_timers:
+              image_analyzer: 1
+            analyzer_driver: 'nodocker'
+            layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
+            layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
+            enable_hints: ${ANCHORE_HINTS_ENABLED}
+            enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+
+          catalog:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            cycle_timer_seconds: 1
+            cycle_timers:
+              analyzer_queue: 1
+              archive_tasks: 43200
+              artifact_lifecycle_policy_tasks: 43200
+              events_gc: 43200
+              image_gc: 60
+              image_watcher: 3600
+              k8s_image_watcher: 150
+              notifications: 30
+              policy_bundle_sync: 300
+              policy_eval: 3600
+              repo_watcher: 60
+              resource_metrics: 60
+              service_watcher: 15
+              vulnerability_scan: 14400
+            event_log:
+              max_retention_age_days: 180
+              notification:
+                enabled: false
+                level:
+                - error
+            runtime_inventory:
+              inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
+              inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+            image_gc:
+              max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+            runtime_compliance:
+              object_store_bucket: "runtime_compliance_check"
+            down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
+            import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+            analysis_archive:
+              compression:
+                enabled: true
+                min_size_kbytes: 100
+              enabled: true
+              storage_driver:
+                config:
+                  access_key: itsa
+                  bucket: analysisarchive
+                  region: null
+                  secret_key: test
+                  url: http://myminio.mynamespace.svc.cluster.local:9000
+                name: s3
+            object_store:
+              compression:
+                enabled: true
+                min_size_kbytes: 100
+              storage_driver:
+                config: {}
+                name: db
+              verify_content_digests: true
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+
+          simplequeue:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+
+          policy_engine:
+            enabled: true
+            require_auth: true
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
+            cycle_timer_seconds: 1
+            cycle_timers:
+              feed_sync: 14400
+              feed_sync_checker: 3600
+            enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+            vulnerabilities:
+              sync:
+                enabled: true
+                ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
+                connection_timeout_seconds: 3
+                read_timeout_seconds: 60
+                data:
+                  grypedb:
+                    enabled: true
+                    url: http://test-release-feeds:8448/v2/databases/grypedb
+                  packages:
+                    enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
+                    url: http://test-release-feeds:8448/v2/feeds
+              matching:
+                default:
+                  search:
+                    by_cpe:
+                      enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+                ecosystem_specific:
+                  dotnet:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+                  golang:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+                  java:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+                  javascript:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+                  python:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+                  ruby:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+                  stock:
+                    search:
+                      by_cpe:
+                        # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+
+          reports:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
+            cycle_timers:
+              reports_scheduled_queries: 600
+            max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
+            async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+            use_volume: false
+
+          reports_worker:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
+            enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
+            data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
+            data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
+            data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+            cycle_timers:
+              reports_extended_runtime_vuln_load: 1800
+              reports_image_egress: 600
+              reports_image_load: 600
+              reports_image_refresh: 7200
+              reports_metrics: 3600
+              reports_runtime_inventory_load: 600
+              reports_tag_egress: 600
+              reports_tag_load: 600
+              reports_tag_refresh: 7200
+            runtime_report_generation:
+              inventory_images_by_vulnerability: true
+              vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
+              vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
+              vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
+
+          notifications:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            cycle_timers:
+              notifications: 30
+            ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
     kind: ConfigMap
     metadata:
       annotations:
         bar: baz
         foo: bar
+        helm.sh/hook: pre-upgrade
+        helm.sh/hook-weight: "0"
       labels:
         app.kubernetes.io/instance: test-release
         app.kubernetes.io/managed-by: Helm
@@ -484,98 +668,5 @@ should render the configmaps:
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-9.9.9
-      name: test-release-enterprise-config-env-vars
-      namespace: test-namespace
-  4: |
-    apiVersion: v1
-    data:
-      custom_policy_bundle1.json: |
-        {
-          "id": "custom1",
-          "version": "1_0",
-          "name": "My custom bundle",
-          "comment": "My system's custom bundle",
-          "whitelisted_images": [],
-          "blacklisted_images": [],
-          "mappings": [],
-          "whitelists": [],
-          "policies": []
-        }
-      custom_policy_bundle2.json: |-
-        {
-          "id": "custom2",
-          "version": "1_0",
-          "name": "My Other Bundle",
-          "comment": "My system's other custom bundle",
-          "whitelisted_images": [],
-          "blacklisted_images": ["docker.io/centos:latest"],
-          "mappings": [],
-          "whitelists": [],
-          "policies": []
-        }
-    kind: ConfigMap
-    metadata:
-      annotations:
-        bar: baz
-        foo: bar
-      labels:
-        app.kubernetes.io/component: policyengine
-        app.kubernetes.io/instance: test-release
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: test-release-enterprise
-        app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 9.9.9
-        bar: baz
-        foo: bar
-        helm.sh/chart: enterprise-9.9.9
-      name: test-release-enterprise-policy-bundles
-      namespace: test-namespace
-  5: |
-    apiVersion: v1
-    data:
-      anchore-config: |
-        #!/bin/bash
-        while IFS= read -r line; do
-          while [[ "$line" =~ (\$\{[a-zA-Z_][a-zA-Z_0-9]*\}) ]]; do
-            VAR_NAME=${BASH_REMATCH[1]#*\{}; VAR_NAME=${VAR_NAME%\}};
-            line=${line//${BASH_REMATCH[1]}/${!VAR_NAME}};
-          done;
-          printf '%s\n' "$line";
-        done < /config/config.yaml
-    kind: ConfigMap
-    metadata:
-      annotations:
-        bar: baz
-        foo: bar
-      labels:
-        app.kubernetes.io/instance: test-release
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: test-release-enterprise
-        app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 9.9.9
-        bar: baz
-        foo: bar
-        helm.sh/chart: enterprise-9.9.9
-      name: test-release-enterprise-scripts
-      namespace: test-namespace
-  6: |
-    apiVersion: v1
-    data:
-      config-ui.yaml: "# Anchore UI configuration\nreports_uri: 'http://test-release-enterprise-api:8228/v2'\nnotifications_uri: 'http://test-release-enterprise-api:8228/v2'\nenterprise_uri: 'http://test-release-enterprise-api:8228/v2'\n# redis_uri: overridden in deployment using the `ANCHORE_REDIS_URI` environment variable\n# appdb_uri: overridden in deployment using the `ANCHORE_APPDB_URI` environment variable\nlicense_path: '/home/anchore/'\nenable_ssl: false\nenable_proxy: false\nallow_shared_login: true\nredis_flushdb: true\nforce_websocket: false\nauthentication_lock:\n  count: 5\n  expires: 300\nappdb_config: \n  native: true\n  pool:\n    acquire: 30000\n    idle: 10000\n    max: 10\n    min: 0\nlog_level: 'http'\nenrich_inventory_view: true\nenable_prometheus_metrics: false\n"
-    kind: ConfigMap
-    metadata:
-      annotations:
-        bar: baz
-        foo: bar
-      labels:
-        app.kubernetes.io/component: ui
-        app.kubernetes.io/instance: test-release
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: test-release-enterprise
-        app.kubernetes.io/part-of: anchore
-        app.kubernetes.io/version: 9.9.9
-        bar: baz
-        foo: bar
-        helm.sh/chart: enterprise-9.9.9
-      name: test-release-enterprise-ui
+      name: test-release-enterprise-999-osaa-migration-job
       namespace: test-namespace

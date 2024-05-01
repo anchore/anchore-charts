@@ -40,6 +40,7 @@ tests:
 
   - it: should render component annotations
     template: reports_deployment.yaml
+    documentIndex: 0
     set:
       reports.annotations:
         reports: test
@@ -56,7 +57,6 @@ tests:
             reports: test
             test: foobar
         template: reports_deployment.yaml
-        documentIndex: 0
 
   - it: should render component matchLabels
     template: reports_deployment.yaml
@@ -490,3 +490,40 @@ tests:
             mountPath: /mnt/global-extra-vol
             readOnly: false
         count: 1
+
+  - it: should render service annotations
+    template: reports_deployment.yaml
+    documentIndex: 1
+    set:
+      reports:
+        service:
+          annotations:
+            bar: baz
+            foo: bar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            bar: baz
+            foo: bar
+
+  - it: should render service annotations and global annotations
+    template: reports_deployment.yaml
+    documentIndex: 1
+    set:
+      reports:
+        service:
+          annotations:
+            s1: a1
+            s2: a2
+      annotations:
+        g1: v1
+        g2: v2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            g1: v1
+            g2: v2
+            s1: a1
+            s2: a2

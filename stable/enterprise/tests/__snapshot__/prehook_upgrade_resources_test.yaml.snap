@@ -1,3 +1,481 @@
+migration job should match snapshot:
+  1: |
+    containers:
+      - command:
+          - /bin/bash
+          - -c
+          - |-
+            echo "checking destination config..."
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" check /config/dest-config.yaml
+            echo "migration complete"
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        envFrom:
+          - configMapRef:
+              name: test-release-enterprise-config-env-vars
+          - secretRef:
+              name: test-release-enterprise
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: migrate-analysis-archive
+        volumeMounts:
+          - mountPath: /home/anchore/license.yaml
+            name: anchore-license
+            subPath: license.yaml
+          - mountPath: /config/config.yaml
+            name: config-volume
+            subPath: config.yaml
+          - mountPath: /scripts
+            name: anchore-scripts
+          - mountPath: /config/dest-config.yaml
+            name: dest-config
+            subPath: dest-config.yaml
+    imagePullSecrets:
+      - name: anchore-enterprise-pullcreds
+    initContainers:
+      - args:
+          - |
+            kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;
+            while [[ $(kubectl get pods -l app.kubernetes.io/name=test-release-enterprise --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+              echo 'waiting for pods to go down...' && sleep 5;
+            done
+        command:
+          - /bin/bash
+          - -c
+        image: bitnami/kubectl:1.27
+        name: scale-down-anchore
+      - args:
+          - |
+            while true; do
+              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+              fi
+              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
+              fi
+              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+              if [[ !$err ]]; then
+                echo "Database is ready"
+                exit 0
+              fi
+              echo "Database is not ready yet, sleeping 10 seconds..."
+              sleep 10
+            done
+        command:
+          - /bin/bash
+          - -c
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: wait-for-db
+    restartPolicy: Never
+    securityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    serviceAccountName: test-release-enterprise-upgrade-sa
+    volumes:
+      - name: anchore-license
+        secret:
+          secretName: anchore-enterprise-license
+      - configMap:
+          defaultMode: 493
+          name: test-release-enterprise-scripts
+        name: anchore-scripts
+      - configMap:
+          name: test-release-enterprise
+        name: config-volume
+      - configMap:
+          items:
+            - key: config.yaml
+              path: dest-config.yaml
+          name: test-release-enterprise-999-osaa-migration-job
+        name: dest-config
+migration job should match snapshot analysisArchiveMigration and objectStoreMigration to true:
+  1: |
+    containers:
+      - command:
+          - /bin/bash
+          - -c
+          - |-
+            echo "checking destination config..."
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" check /config/dest-config.yaml
+            echo "running object store migration"
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" migrate /config/config.yaml /config/dest-config.yaml --dontask
+            echo "running analysis archive migration"
+            echo "running in to_analysis_archive mode (migrating source to dest using driver located in dest analysis archive section)"
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" migrate --to-analysis-archive --bucket analysis_archive /config/config.yaml /config/dest-config.yaml --dontask
+            echo "migration complete"
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        envFrom:
+          - configMapRef:
+              name: test-release-enterprise-config-env-vars
+          - secretRef:
+              name: test-release-enterprise
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: migrate-analysis-archive
+        volumeMounts:
+          - mountPath: /home/anchore/license.yaml
+            name: anchore-license
+            subPath: license.yaml
+          - mountPath: /config/config.yaml
+            name: config-volume
+            subPath: config.yaml
+          - mountPath: /scripts
+            name: anchore-scripts
+          - mountPath: /config/dest-config.yaml
+            name: dest-config
+            subPath: dest-config.yaml
+    imagePullSecrets:
+      - name: anchore-enterprise-pullcreds
+    initContainers:
+      - args:
+          - |
+            kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;
+            while [[ $(kubectl get pods -l app.kubernetes.io/name=test-release-enterprise --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+              echo 'waiting for pods to go down...' && sleep 5;
+            done
+        command:
+          - /bin/bash
+          - -c
+        image: bitnami/kubectl:1.27
+        name: scale-down-anchore
+      - args:
+          - |
+            while true; do
+              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+              fi
+              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
+              fi
+              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+              if [[ !$err ]]; then
+                echo "Database is ready"
+                exit 0
+              fi
+              echo "Database is not ready yet, sleeping 10 seconds..."
+              sleep 10
+            done
+        command:
+          - /bin/bash
+          - -c
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: wait-for-db
+    restartPolicy: Never
+    securityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    serviceAccountName: test-release-enterprise-upgrade-sa
+    volumes:
+      - name: anchore-license
+        secret:
+          secretName: anchore-enterprise-license
+      - configMap:
+          defaultMode: 493
+          name: test-release-enterprise-scripts
+        name: anchore-scripts
+      - configMap:
+          name: test-release-enterprise
+        name: config-volume
+      - configMap:
+          items:
+            - key: config.yaml
+              path: dest-config.yaml
+          name: test-release-enterprise-999-osaa-migration-job
+        name: dest-config
+migration job should match snapshot analysisArchiveMigration to true:
+  1: |
+    containers:
+      - command:
+          - /bin/bash
+          - -c
+          - |-
+            echo "checking destination config..."
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" check /config/dest-config.yaml
+            echo "running analysis archive migration"
+            echo "running in to_analysis_archive mode (migrating source to dest using driver located in dest analysis archive section)"
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" migrate --to-analysis-archive --bucket analysis_archive /config/config.yaml /config/dest-config.yaml --dontask
+            echo "migration complete"
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        envFrom:
+          - configMapRef:
+              name: test-release-enterprise-config-env-vars
+          - secretRef:
+              name: test-release-enterprise
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: migrate-analysis-archive
+        volumeMounts:
+          - mountPath: /home/anchore/license.yaml
+            name: anchore-license
+            subPath: license.yaml
+          - mountPath: /config/config.yaml
+            name: config-volume
+            subPath: config.yaml
+          - mountPath: /scripts
+            name: anchore-scripts
+          - mountPath: /config/dest-config.yaml
+            name: dest-config
+            subPath: dest-config.yaml
+    imagePullSecrets:
+      - name: anchore-enterprise-pullcreds
+    initContainers:
+      - args:
+          - |
+            kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;
+            while [[ $(kubectl get pods -l app.kubernetes.io/name=test-release-enterprise --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+              echo 'waiting for pods to go down...' && sleep 5;
+            done
+        command:
+          - /bin/bash
+          - -c
+        image: bitnami/kubectl:1.27
+        name: scale-down-anchore
+      - args:
+          - |
+            while true; do
+              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+              fi
+              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
+              fi
+              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+              if [[ !$err ]]; then
+                echo "Database is ready"
+                exit 0
+              fi
+              echo "Database is not ready yet, sleeping 10 seconds..."
+              sleep 10
+            done
+        command:
+          - /bin/bash
+          - -c
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: wait-for-db
+    restartPolicy: Never
+    securityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    serviceAccountName: test-release-enterprise-upgrade-sa
+    volumes:
+      - name: anchore-license
+        secret:
+          secretName: anchore-enterprise-license
+      - configMap:
+          defaultMode: 493
+          name: test-release-enterprise-scripts
+        name: anchore-scripts
+      - configMap:
+          name: test-release-enterprise
+        name: config-volume
+      - configMap:
+          items:
+            - key: config.yaml
+              path: dest-config.yaml
+          name: test-release-enterprise-999-osaa-migration-job
+        name: dest-config
+migration job should match snapshot objectStoreMigration to true:
+  1: |
+    containers:
+      - command:
+          - /bin/bash
+          - -c
+          - |-
+            echo "checking destination config..."
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" check /config/dest-config.yaml
+            echo "running object store migration"
+             anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" migrate /config/config.yaml /config/dest-config.yaml --dontask
+            echo "migration complete"
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        envFrom:
+          - configMapRef:
+              name: test-release-enterprise-config-env-vars
+          - secretRef:
+              name: test-release-enterprise
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: migrate-analysis-archive
+        volumeMounts:
+          - mountPath: /home/anchore/license.yaml
+            name: anchore-license
+            subPath: license.yaml
+          - mountPath: /config/config.yaml
+            name: config-volume
+            subPath: config.yaml
+          - mountPath: /scripts
+            name: anchore-scripts
+          - mountPath: /config/dest-config.yaml
+            name: dest-config
+            subPath: dest-config.yaml
+    imagePullSecrets:
+      - name: anchore-enterprise-pullcreds
+    initContainers:
+      - args:
+          - |
+            kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;
+            while [[ $(kubectl get pods -l app.kubernetes.io/name=test-release-enterprise --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+              echo 'waiting for pods to go down...' && sleep 5;
+            done
+        command:
+          - /bin/bash
+          - -c
+        image: bitnami/kubectl:1.27
+        name: scale-down-anchore
+      - args:
+          - |
+            while true; do
+              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+              fi
+              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
+              fi
+              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+              if [[ !$err ]]; then
+                echo "Database is ready"
+                exit 0
+              fi
+              echo "Database is not ready yet, sleeping 10 seconds..."
+              sleep 10
+            done
+        command:
+          - /bin/bash
+          - -c
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        image: docker.io/anchore/enterprise:v5.5.0
+        imagePullPolicy: IfNotPresent
+        name: wait-for-db
+    restartPolicy: Never
+    securityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    serviceAccountName: test-release-enterprise-upgrade-sa
+    volumes:
+      - name: anchore-license
+        secret:
+          secretName: anchore-enterprise-license
+      - configMap:
+          defaultMode: 493
+          name: test-release-enterprise-scripts
+        name: anchore-scripts
+      - configMap:
+          name: test-release-enterprise
+        name: config-volume
+      - configMap:
+          items:
+            - key: config.yaml
+              path: dest-config.yaml
+          name: test-release-enterprise-999-osaa-migration-job
+        name: dest-config
 rbac should match snapshot:
   1: |
     apiVersion: v1
@@ -143,6 +621,6 @@ should render proper initContainers:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-      image: docker.io/anchore/enterprise:v5.4.1
+      image: docker.io/anchore/enterprise:v5.5.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db

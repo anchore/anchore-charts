@@ -1,0 +1,140 @@
+{{- if .Values.osaaMigrationJob.enabled -}}
+{{- $component := "osaaMigrationJob" -}}
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1" # we want the migration to run before the upgrade jobs but after the rbac creation (if any)
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
+      labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+        {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
+        {{- end }}
+    spec:
+      {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      restartPolicy: Never
+      volumes:
+      {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+        - name: anchore-license
+          secret:
+            secretName: {{ .Values.licenseSecretName }}
+        - name: anchore-scripts
+          configMap:
+            name: {{ .Release.Name }}-enterprise-scripts
+            defaultMode: 0755
+        - name: config-volume
+          configMap:
+            name: {{ template "enterprise.fullname" . }}
+        - name: dest-config
+          configMap:
+            name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
+            items:
+            - key: "config.yaml"
+              path: "dest-config.yaml"
+        {{- with .Values.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+        {{- end }}
+        {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - name: {{ .Values.cloudsql.serviceAccSecretName }}
+          secret:
+            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+        {{- end }}
+      initContainers:
+        - name: scale-down-anchore
+          image: {{ .Values.osaaMigrationJob.kubectlImage }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "enterprise.fullname" . }};
+              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+                echo 'waiting for pods to go down...' && sleep 5;
+              done
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.osaaMigrationJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+        - name: wait-for-db
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              while true; do
+                CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+                if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                  CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+                fi
+                if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                  CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
+                fi
+                err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+                if [[ !$err ]]; then
+                  echo "Database is ready"
+                  exit 0
+                fi
+                echo "Database is not ready yet, sleeping 10 seconds..."
+                sleep 10
+              done
+          {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.osaaMigrationJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+      containers:
+      {{- if .Values.cloudsql.enabled  }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- end }}
+        - name: migrate-analysis-archive
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          volumeMounts:
+            {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+            - name: dest-config
+              mountPath: /config/dest-config.yaml
+              subPath: dest-config.yaml
+        {{- with .Values.osaaMigrationJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+          command:
+            - "/bin/bash"
+            - "-c"
+            - |
+              echo "checking destination config..."
+            {{- print (include "enterprise.doSourceFile" .) | nindent 14 }} anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" check /config/dest-config.yaml
+          {{- if .Values.osaaMigrationJob.objectStoreMigration.run }}
+              echo "running object store migration"
+            {{- print (include "enterprise.doSourceFile" .) | nindent 14 }} anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" migrate /config/config.yaml /config/dest-config.yaml --dontask
+          {{- end }}
+        {{- if .Values.osaaMigrationJob.analysisArchiveMigration.run }}
+              echo "running analysis archive migration"
+          {{- if eq .Values.osaaMigrationJob.analysisArchiveMigration.mode "to_analysis_archive" }}
+              echo "running in to_analysis_archive mode (migrating source to dest using driver located in dest analysis archive section)"
+            {{- print (include "enterprise.doSourceFile" .) | nindent 14 }} anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" migrate --to-analysis-archive --bucket {{ .Values.osaaMigrationJob.analysisArchiveMigration.bucket }} /config/config.yaml /config/dest-config.yaml --dontask
+          {{- else if eq .Values.osaaMigrationJob.analysisArchiveMigration.mode "from_analysis_archive" }}
+              echo "running in from_analysis_archive mode (migrating source to dest using driver located in source analysis archive section)"
+            {{- print (include "enterprise.doSourceFile" .) | nindent 14 }} anchore-enterprise-manager objectstorage --db-connect postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}" migrate --from-analysis-archive --bucket {{ .Values.osaaMigrationJob.analysisArchiveMigration.bucket }} /config/config.yaml /config/dest-config.yaml --dontask
+          {{- end }}
+        {{- end }}
+              echo "migration complete"
+{{- end -}}
