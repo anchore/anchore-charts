@@ -185,7 +185,7 @@ metadata:
   name: {{ template "feeds.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "feeds.common.labels" . | nindent 4 }}
-  annotations: {{- include "feeds.common.annotations" . | nindent 4 }}
+  annotations: {{- include "feeds.service.annotations" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector: {{- include "feeds.common.matchLabels" . | nindent 4 }}

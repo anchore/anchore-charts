@@ -12,6 +12,22 @@ Common annotations
 {{- end -}}
 
 {{/*
+Service annotations
+*/}}
+{{- define "feeds.service.annotations" -}}
+{{- if and (not .nil) (not .Values.service.annotations) (not .Values.annotations) }}
+  {{- print "{}" }}
+{{- else }}
+  {{- with .Values.service.annotations }}
+{{ toYaml . }}
+  {{- end }}
+  {{- with .Values.annotations }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true
 */}}
 {{- define "feeds.common.cloudsqlContainer" -}}
