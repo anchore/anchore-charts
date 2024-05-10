@@ -78,6 +78,11 @@ credentials:
     host: "${ANCHORE_DB_HOST}"
     port: "${ANCHORE_DB_PORT}"
     name: "${ANCHORE_DB_NAME}"
+    {{- if .Values.anchoreConfig.database.dbConnectArgs }}
+  {{- with .Values.anchoreConfig.database.dbConnectArgs }}
+    db_connect_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+    {{ else }}
     db_connect_args:
       timeout: ${ANCHORE_DB_TIMEOUT}
       ssl: ${ANCHORE_DB_SSL}
@@ -85,6 +90,7 @@ credentials:
       sslmode: ${ANCHORE_DB_SSL_MODE}
       sslrootcert: ${ANCHORE_DB_SSL_ROOT_CERT}
     {{- end }}
+    {{- end }} 
     db_pool_size: ${ANCHORE_DB_POOL_SIZE}
     db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
   {{- with .Values.anchoreConfig.database.engineArgs }}
