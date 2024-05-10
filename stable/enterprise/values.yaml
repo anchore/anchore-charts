@@ -428,6 +428,7 @@ anchoreConfig:
     db_pool_size: 30
     db_pool_max_overflow: 100
     engineArgs: {}
+    dbConnectArgs: {}
 
   ## @param anchoreConfig.internalServicesSSL.enabled Force all Enterprise services to use SSL for internal communication
   ## @param anchoreConfig.internalServicesSSL.verifyCerts Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed
