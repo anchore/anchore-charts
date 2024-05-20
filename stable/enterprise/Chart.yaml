@@ -1,6 +1,6 @@
 apiVersion: v2
 name: enterprise
-version: "2.5.2"
+version: "2.5.2-hotfix-1"
 appVersion: "5.4.0"
 kubeVersion: 1.23.x - 1.28.x || 1.23.x-x - 1.29.x-x
 description: |
@@ -39,9 +39,9 @@ dependencies:
     condition: ui-redis.chartEnabled
     alias: ui-redis
   - name: feeds
-    version: "~2"
-    repository: "@anchore"
-    # repository: file://../feeds
+    version: "~2-0"
+    # repository: "@anchore"
+    repository: file://../feeds
     condition: feeds.chartEnabled
     import-values:
       - child: service
