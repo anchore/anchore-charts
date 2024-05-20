@@ -1,13 +1,13 @@
 {{- if and .Values.feedsUpgradeJob.enabled .Values.feedsUpgradeJob.rbacCreate (not .Values.feedsUpgradeJob.usePostUpgradeHook) -}}
-
+{{- $component := "feedsUpgradeJob" -}}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ template "feeds.fullname" . }}-upgrade-sa
   namespace: {{ .Release.Namespace }}
-  labels: {{- include "feeds.common.labels" . | nindent 4 }}
-  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  labels: {{- include "feeds.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
   {{- if not .Values.feedsUpgradeJob.force }}
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "1"
@@ -19,8 +19,8 @@ kind: RoleBinding
 metadata:
   name: {{ template "feeds.fullname" . }}-upgrade-role-binding
   namespace: {{ .Release.Namespace }}
-  labels: {{- include "feeds.common.labels" . | nindent 4 }}
-  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  labels: {{- include "feeds.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
   {{- if not .Values.feedsUpgradeJob.force }}
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "1"
@@ -40,8 +40,8 @@ kind: Role
 metadata:
   name: {{ template "feeds.fullname" . }}-upgrade-role
   namespace: {{ .Release.Namespace }}
-  labels: {{- include "feeds.common.labels" . | nindent 4 }}
-  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  labels: {{- include "feeds.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
   {{- if not .Values.feedsUpgradeJob.force }}
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "1"

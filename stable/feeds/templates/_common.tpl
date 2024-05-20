@@ -2,11 +2,17 @@
 Common annotations
 */}}
 {{- define "feeds.common.annotations" -}}
-{{- if and (not .nil) (not .Values.annotations) }}
+{{- $component := .component -}}
+{{- if and (not .nil) (not .Values.annotations) (not (index .Values (print $component)).annotations) }}
   {{- print "{}" }}
 {{- else }}
   {{- with .Values.annotations }}
     {{- toYaml . }}
+  {{- end }}
+  {{- if $component }}
+    {{- with (index .Values (print $component)).annotations }}
+{{ toYaml . }}
+    {{- end }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -76,6 +82,7 @@ Common environment variables
 Common labels
 */}}
 {{- define "feeds.common.labels" -}}
+{{- $component := .component -}}
 app.kubernetes.io/name: {{ template "feeds.fullname" . }}
 app.kubernetes.io/component: feeds
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -85,6 +92,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- with .Values.labels }}
 {{ toYaml . }}
+{{- end }}
+{{- if $component }}
+  {{- with (index .Values (print $component)).labels }}
+{{ toYaml . }}
+  {{- end }}
 {{- end }}
 {{- end -}}
 
