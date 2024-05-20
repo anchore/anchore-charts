@@ -63,6 +63,9 @@ spec:
         {{- end }}
       {{- end }}
       initContainers:
+      {{- with .Values.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
         - name: scale-down-anchore
           image: {{ .Values.feedsUpgradeJob.kubectlImage }}
           command: ["/bin/bash", "-c"]

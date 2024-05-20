@@ -30,8 +30,12 @@ spec:
       imagePullSecrets:
         - name: {{ . }}
     {{- end }}
-    {{- if and (or .Values.scratchVolume.fixGroupPermissions .Values.persistence.fixGroupPermissions) .Values.securityContext.fsGroup }}
+    {{- if or .Values.extraInitContainers (and (or .Values.scratchVolume.fixGroupPermissions .Values.persistence.fixGroupPermissions) .Values.securityContext.fsGroup) }}
       initContainers:
+      {{- with .Values.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and (or .Values.scratchVolume.fixGroupPermissions .Values.persistence.fixGroupPermissions) .Values.securityContext.fsGroup }}
         - name: mode-fixer
           image: {{ .Values.scratchVolume.fixerInitContainerImage }}
           securityContext:
@@ -54,6 +58,7 @@ spec:
           {{- if .Values.persistence.fixGroupPermissions }}
             - (chmod 0775 {{ .Values.persistence.mountPath }}; chgrp {{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }} )
           {{- end }}
+      {{- end }}
     {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}

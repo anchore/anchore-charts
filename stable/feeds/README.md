@@ -365,6 +365,7 @@ anchoreConfig:
 | `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                       | `[]`                                  |
 | `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                             | `false`                               |
 | `existingSecretName`                    | Name of the existing secret to be used for Anchore Feeds Service                                      | `anchore-enterprise-feeds-env`        |
+| `extraInitContainers`                   | An array of extra initContainers to be added to the pod                                               | `[]`                                  |
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                          | `{}`                                  |
 | `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                    | `{}`                                  |
 

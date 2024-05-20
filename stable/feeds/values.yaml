@@ -213,6 +213,11 @@ useExistingSecrets: false
 ##
 existingSecretName: anchore-enterprise-feeds-env
 
+## @param extraInitContainers An array of extra initContainers to be added to the pod
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+##
+extraInitContainers: []
+
 ## @param configOverride Allows for overriding the default Anchore configuration file
 ## This value can be used to pass in a custom configuration file for Anchore services
 ## This config file will be templated when it is added to the configmap, so Helm values and functions can be used
