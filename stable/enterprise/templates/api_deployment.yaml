@@ -32,6 +32,10 @@ spec:
           configMap:
             name: {{ template "enterprise.fullname" . }}-policy-bundles
       {{- end }}
+    {{- with .Values.extraInitContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}

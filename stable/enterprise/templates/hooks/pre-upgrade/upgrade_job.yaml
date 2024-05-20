@@ -40,6 +40,9 @@ spec:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
       initContainers:
+      {{- with .Values.extraInitContainers }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
         - name: scale-down-anchore
           image: {{ .Values.upgradeJob.kubectlImage }}
           command: ["/bin/bash", "-c"]
