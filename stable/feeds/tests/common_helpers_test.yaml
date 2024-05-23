@@ -101,6 +101,34 @@ tests:
             foo: upgradeJobAnnotation1
             bar: upgradeJobAnnotation2
 
+  - it: should render component annotations and global annotations on the pods
+    templates:
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        annotations:
+          foo: upgradeJob1
+          bar: upgradeJob2
+      annotations:
+        fizz: global1
+        boo: global2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJob1
+            bar: upgradeJob2
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJob1
+            bar: upgradeJob2
+
   - it: should render component labels and global labels
     templates:
       - templates/hooks/pre-upgrade/upgrade_job.yaml
@@ -117,6 +145,35 @@ tests:
     asserts:
       - isSubset:
           path: metadata.labels
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJoblabel1
+            bar: upgradeJoblabel2
+
+  - it: should render component labels and global labels on the pods
+    templates:
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        labels:
+          foo: upgradeJoblabel1
+          bar: upgradeJoblabel2
+      labels:
+        fizz: global1
+        boo: global2
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJoblabel1
+            bar: upgradeJoblabel2
+
+      - isSubset:
+          path: spec.template.metadata.labels
           content:
             fizz: global1
             boo: global2
@@ -161,6 +218,13 @@ tests:
     asserts:
       - isSubset:
           path: metadata.annotations
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJob1
+            bar: upgradeJob2
+      - isSubset:
+          path: spec.template.metadata.annotations
           content:
             fizz: global1
             boo: global2
