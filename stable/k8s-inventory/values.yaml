@@ -15,7 +15,7 @@ replicaCount: 1
 image:
   pullPolicy: "IfNotPresent"
   repository: "anchore/k8s-inventory"
-  tag: "v1.4.0"
+  tag: "v1.5.1"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
@@ -198,6 +198,15 @@ k8sInventory:
   ## @param k8sInventory.ignoreNotRunning Ignore images out of pods that are not in a Running state
   ##
   ignoreNotRunning: true
+
+  ### k8sInventory.accountRouteByNamespaceLabel Allow routing of Kubernetes namespaces to different Anchore accounts based on a label on the namespace
+  ## @param k8sInventory.accountRouteByNamespaceLabel.key Kubernetes label key to use for determining Anchore account to send to
+  ## @param k8sInventory.accountRouteByNamespaceLabel.defaultAccount Fallback account to send to if Anchore account or label is not found
+  ## @param k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel If true exclude sending inventory of namespaces that are missing the label
+  accountRouteByNamespaceLabel:
+    key: ""
+    defaultAccount: "admin"
+    ignoreNamespaceMissingLabel: false
 
   ## @param k8sInventory.anchore.url the url of the anchore platform
   ## @param k8sInventory.anchore.user the username of the anchore platform. The user specified must be an admin user or have full-control, or read-write RBAC permissions

@@ -37,6 +37,10 @@ data:
     missing-registry-override: {{ .Values.k8sInventory.missingRegistryOverride}}
     missing-tag-policy:
       {{- toYaml .Values.k8sInventory.missingTagPolicy | nindent 6 }}
+    account-route-by-namespace-label:
+      key: {{ .Values.k8sInventory.accountRouteByNamespaceLabel.key }}
+      default-account: {{ .Values.k8sInventory.accountRouteByNamespaceLabel.defaultAccount }}
+      ignore-namespace-missing-label: {{ .Values.k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel }}
     anchore:
       url: {{ .Values.k8sInventory.anchore.url }}
       user: {{ .Values.k8sInventory.anchore.user }}
