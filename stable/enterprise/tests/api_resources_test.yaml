@@ -41,6 +41,7 @@ tests:
 
   - it: should render component annotations
     template: api_deployment.yaml
+    documentIndex: 0
     set:
       api.annotations:
         api: test
@@ -198,7 +199,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-api
+            value: test-release-enterprise-api.test-namespace.svc.cluster.local
         count: 1
       - contains:
           path: spec.template.spec.containers[0].env
@@ -457,3 +458,40 @@ tests:
             app.kubernetes.io/name: test-release-enterprise
             app.kubernetes.io/component: api
         count: 1
+
+  - it: should render service annotations
+    template: api_deployment.yaml
+    documentIndex: 1
+    set:
+      api:
+        service:
+          annotations:
+            bar: baz
+            foo: bar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            bar: baz
+            foo: bar
+
+  - it: should render service annotations and global annotations
+    template: api_deployment.yaml
+    documentIndex: 1
+    set:
+      api:
+        service:
+          annotations:
+            s1: a1
+            s2: a2
+      annotations:
+        g1: v1
+        g2: v2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            g1: v1
+            g2: v2
+            s1: a1
+            s2: a2

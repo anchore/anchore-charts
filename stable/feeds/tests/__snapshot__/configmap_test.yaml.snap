@@ -7,7 +7,26 @@ should render the configmaps:
         #
         service_dir: ${ANCHORE_SERVICE_DIR}
         tmp_dir: ${ANCHORE_FEEDS_TMP_DIR}
-        log_level: ${ANCHORE_LOG_LEVEL}
+        log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
+
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: INFO
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
+        server:
+          max_connection_backlog: 2048
+          max_wsgi_middleware_worker_count: 50
+          max_wsgi_middleware_worker_queue_size: 100
+          timeout_graceful_shutdown: false
+          timeout_keep_alive: 5
 
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -74,21 +93,45 @@ should render the configmaps:
             drivers:
               amzn:
                 enabled: ${ANCHORE_FEEDS_DRIVER_AMAZON_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_AMAZON_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_AMAZON_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_AMAZON_PROVIDER_IMPORT_RESULTS_PATH}"
               alpine:
                 enabled: ${ANCHORE_FEEDS_DRIVER_ALPINE_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_ALPINE_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_ALPINE_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_ALPINE_PROVIDER_IMPORT_RESULTS_PATH}"
               centos:
                 enabled: false
               debian:
                 enabled: ${ANCHORE_FEEDS_DRIVER_DEBIAN_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_DEBIAN_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_DEBIAN_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_DEBIAN_PROVIDER_IMPORT_RESULTS_PATH}"
               ol:
                 enabled: ${ANCHORE_FEEDS_DRIVER_OL_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_ORACLE_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_ORACLE_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_ORACLE_PROVIDER_IMPORT_RESULTS_PATH}"
               ubuntu:
                 enabled: ${ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED}
                 git_url: ${ANCHORE_FEEDS_DRIVER_UBUNTU_URL}
                 git_branch: ${ANCHORE_FEEDS_DRIVER_UBUNTU_BRANCH}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_UBUNTU_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_UBUNTU_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_UBUNTU_PROVIDER_IMPORT_RESULTS_PATH}"
               rhel:
                 enabled: ${ANCHORE_FEEDS_DRIVER_RHEL_ENABLED}
                 concurrency: ${ANCHORE_FEEDS_DRIVER_RHEL_CONCURRENCY}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_RHEL_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_RHEL_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_RHEL_PROVIDER_IMPORT_RESULTS_PATH}"
               npm:
                 enabled: ${ANCHORE_FEEDS_DRIVER_NPM_ENABLED}
               gem:
@@ -96,13 +139,28 @@ should render the configmaps:
               nvdv2:
                 enabled: ${ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED}
                 api_key: ${ANCHORE_NVD_API_KEY}
+                overrides:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_NVD_PROVIDER_OVERRIDES_ENABLED}"
+                  url: "${ANCHORE_ENTERPRISE_FEEDS_NVD_PROVIDER_OVERRIDES_URL}"
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_NVD_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_NVD_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_NVD_PROVIDER_IMPORT_RESULTS_PATH}"
               mariner:
                 enabled: ${ANCHORE_FEEDS_DRIVER_MARINER_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_MARINER_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_MARINER_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_MARINER_PROVIDER_IMPORT_RESULTS_PATH}"
               msrc:
                 enabled: ${ANCHORE_FEEDS_DRIVER_MSRC_ENABLED}
               github:
                 enabled: ${ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED}
                 token: ${ANCHORE_GITHUB_TOKEN}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_GITHUB_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_GITHUB_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_GITHUB_PROVIDER_IMPORT_RESULTS_PATH}"
               grypedb:
                 enabled: ${ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED}
                 external_feeds_url: ${ANCHORE_FEEDS_EXTERNAL_URL}
@@ -113,12 +171,24 @@ should render the configmaps:
                 restore_provider_workspaces: ${ANCHORE_FEEDS_GRYPEDB_RESTORE_WORKSPACE}
               sles:
                 enabled: ${ANCHORE_FEEDS_DRIVER_SLES_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_SLES_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_SLES_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_SLES_PROVIDER_IMPORT_RESULTS_PATH}"
               anchore_match_exclusions:
                 enabled: ${ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS}
               wolfi:
                 enabled: ${ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_WOLFI_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_WOLFI_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_WOLFI_PROVIDER_IMPORT_RESULTS_PATH}"
               chainguard:
                 enabled: ${ANCHORE_FEEDS_DRIVER_CHAINGUARD_ENABLED}
+                import_results:
+                  enabled: "${ANCHORE_ENTERPRISE_FEEDS_CHAINGUARD_PROVIDER_IMPORT_RESULTS_ENABLED}"
+                  host: "${ANCHORE_ENTERPRISE_FEEDS_CHAINGUARD_PROVIDER_IMPORT_RESULTS_HOST}"
+                  path: "${ANCHORE_ENTERPRISE_FEEDS_CHAINGUARD_PROVIDER_IMPORT_RESULTS_PATH}"
     kind: ConfigMap
     metadata:
       annotations:

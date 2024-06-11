@@ -140,9 +140,9 @@ should render proper initContainers:
             fieldRef:
               fieldPath: metadata.name
         - name: ANCHORE_ENDPOINT_HOSTNAME
-          value: test-release-feeds
+          value: test-release-feeds.test-namespace.svc.cluster.local
         - name: ANCHORE_PORT
           value: "8448"
-      image: docker.io/anchore/enterprise:v5.4.0
+      image: docker.io/anchore/enterprise:v5.6.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db

@@ -1,8 +1,8 @@
 apiVersion: v2
 name: feeds
 type: application
-version: "2.4.1"
-appVersion: "5.4.0"
+version: "2.6.0"
+appVersion: "5.6.0"
 kubeVersion: 1.23.x - 1.27.x || 1.23.x-x - 1.29.x-x
 description: Anchore feeds service
 keywords:
@@ -18,7 +18,7 @@ maintainers:
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
 dependencies:
   - name: postgresql
-    version: "12.5"
+    version: "~12.5"
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: feeds-db.chartEnabled
     alias: feeds-db

@@ -15,7 +15,7 @@ replicaCount: 1
 image:
   pullPolicy: "IfNotPresent"
   repository: "anchore/k8s-inventory"
-  tag: "v1.2.0"
+  tag: "v1.6.0"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
@@ -192,9 +192,40 @@ k8sInventory:
     policy: digest
     tag: UNKNOWN
 
+  ## @param k8sInventory.missingRegistryOverride
+  missingRegistryOverride: ""
+
   ## @param k8sInventory.ignoreNotRunning Ignore images out of pods that are not in a Running state
   ##
   ignoreNotRunning: true
+
+  ### k8sInventory.accountRouteByNamespaceLabel Allow routing of Kubernetes namespaces to different Anchore accounts based on a label on the namespace
+  ## @param k8sInventory.accountRouteByNamespaceLabel.key Kubernetes label key to use for determining Anchore account to send to
+  ## @param k8sInventory.accountRouteByNamespaceLabel.defaultAccount Fallback account to send to if Anchore account or label is not found
+  ## @param k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel If true exclude sending inventory of namespaces that are missing the label
+  accountRouteByNamespaceLabel:
+    key: ""
+    defaultAccount: "admin"
+    ignoreNamespaceMissingLabel: false
+
+  ## k8sInventory.metadataCollection Configure/disable metadata collection within a report
+  metadataCollection:
+    nodes:
+      annotations: []  ## List of annotations to include (explicit or regex)
+      labels: []  ## List of labels to include (explicit or regex)
+      disable: false  ## Remove all optional node metadata from the inventory report
+    namespaces:
+      annotations: []  ## List of annotations to include (explicit or regex)
+      labels: []  ## List of labels to include (explicit or regex)
+      disable: false  ## Remove all optional namespace metadata from the inventory report
+    pods:
+      annotations: []  ## List of annotations to include (explicit or regex)
+      labels: []  ## List of labels to include (explicit or regex)
+      disable: false  ## Remove all optional pod metadata from the inventory report
+
+  ## k8sInventory.inventoryReportLimits Specify size limits of individual reports. If report size exceeds limits it will be broken into multiple batches up to the specified size.
+  inventoryReportLimits:
+    namespaces: 0  ## default of 0 means no limit
 
   ## @param k8sInventory.anchore.url the url of the anchore platform
   ## @param k8sInventory.anchore.user the username of the anchore platform. The user specified must be an admin user or have full-control, or read-write RBAC permissions

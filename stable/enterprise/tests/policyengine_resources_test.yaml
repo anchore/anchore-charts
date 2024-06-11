@@ -40,6 +40,7 @@ tests:
 
   - it: should render component annotations
     template: policyengine_deployment.yaml
+    documentIndex: 0
     set:
       policyEngine.annotations:
         policyEngine: test
@@ -56,7 +57,7 @@ tests:
             policyEngine: test
             test: foobar
         template: policyengine_deployment.yaml
-        documentIndex: 0
+
 
   - it: should render component matchLabels
     template: policyengine_deployment.yaml
@@ -215,7 +216,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-policy
+            value: test-release-enterprise-policy.test-namespace.svc.cluster.local
         count: 1
       - contains:
           path: spec.template.spec.containers[0].env
@@ -429,3 +430,40 @@ tests:
             app.kubernetes.io/name: test-release-enterprise
             app.kubernetes.io/component: policyengine
         count: 1
+
+  - it: should render service annotations
+    template: policyengine_deployment.yaml
+    documentIndex: 1
+    set:
+      policyEngine:
+        service:
+          annotations:
+            bar: baz
+            foo: bar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            bar: baz
+            foo: bar
+
+  - it: should render service annotations and global annotations
+    template: policyengine_deployment.yaml
+    documentIndex: 1
+    set:
+      policyEngine:
+        service:
+          annotations:
+            s1: a1
+            s2: a2
+      annotations:
+        g1: v1
+        g2: v2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            g1: v1
+            g2: v2
+            s1: a1
+            s2: a2

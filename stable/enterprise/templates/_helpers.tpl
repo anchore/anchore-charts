@@ -46,6 +46,16 @@ Allows sourcing of a specified file in the entrypoint of all containers when .Va
   {{- end }}
 {{- end }}
 
+{{/*
+Allows passing in a feature flag to the ui application on startup
+*/}}
+{{- define "enterprise.ui.featureFlags" }}
+  {{- range $index, $val := .Values.ui.extraEnv -}}
+    {{- if eq .name "ANCHORE_FEATURE_FLAG" }}
+      {{- printf "-f %v" .value }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 
 {{/*
 Returns the proper URL for the feeds service
@@ -97,7 +107,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- with (index .Values (print $component)).serviceAccountName }}
   {{- print . | trunc 63 | trimSuffix "-" -}}
 {{- else }}
-  {{- if and .Values.upgradeJob.rbacCreate (eq $component "upgradeJob") }}
+  {{- if and .Values.upgradeJob.rbacCreate (or (eq $component "upgradeJob") (eq $component "osaaMigrationJob") ) }}
     {{- printf "%s-%s" (include "enterprise.fullname" .) "upgrade-sa" -}}
   {{- else if .Values.serviceAccountName }}
     {{- print .Values.serviceAccountName | trunc 63 | trimSuffix "-" -}}

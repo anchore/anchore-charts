@@ -1,12 +1,12 @@
 {{- if and .Values.feedsUpgradeJob.enabled .Values.feedsUpgradeJob.usePostUpgradeHook -}}
-
+{{- $component := "feedsUpgradeJob" -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "feeds.upgradeJob.fullname" . }}
   namespace: {{ .Release.Namespace }}
-  labels: {{- include "feeds.common.labels" . | nindent 4 }}
-  annotations: {{- include "feeds.common.annotations" (merge (dict "nil" true) .) | nindent 4 }}
+  labels: {{- include "feeds.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "feeds.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
   {{- if not .Values.feedsUpgradeJob.force }}
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-weight": "0"
@@ -15,8 +15,8 @@ spec:
   template:
     metadata:
       name: {{ template "feeds.upgradeJob.fullname" . }}
-      labels: {{- include "feeds.common.labels" . | nindent 8 }}
-      annotations: {{- include "feeds.common.annotations" . | nindent 8 }}
+      labels: {{- include "feeds.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "feeds.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
     spec:
     {{- with .Values.securityContext }}
       securityContext: {{- toYaml . | nindent 8 }}

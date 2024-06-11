@@ -2,11 +2,33 @@
 Common annotations
 */}}
 {{- define "feeds.common.annotations" -}}
-{{- if and (not .nil) (not .Values.annotations) }}
+{{- $component := .component -}}
+{{- if and (not .nil) (not .Values.annotations) (not (index .Values (print $component)).annotations) }}
   {{- print "{}" }}
 {{- else }}
   {{- with .Values.annotations }}
     {{- toYaml . }}
+  {{- end }}
+  {{- if $component }}
+    {{- with (index .Values (print $component)).annotations }}
+{{ toYaml . }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Service annotations
+*/}}
+{{- define "feeds.service.annotations" -}}
+{{- if and (not .nil) (not .Values.service.annotations) (not .Values.annotations) }}
+  {{- print "{}" }}
+{{- else }}
+  {{- with .Values.service.annotations }}
+{{ toYaml . }}
+  {{- end }}
+  {{- with .Values.annotations }}
+{{ toYaml . }}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -51,7 +73,7 @@ Common environment variables
     fieldRef:
       fieldPath: metadata.name
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  value: {{ template "feeds.fullname" . }}
+  value: {{ template "feeds.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
 - name: ANCHORE_PORT
   value: {{ .Values.service.port | quote }}
 {{- end -}}
@@ -60,6 +82,7 @@ Common environment variables
 Common labels
 */}}
 {{- define "feeds.common.labels" -}}
+{{- $component := .component -}}
 app.kubernetes.io/name: {{ template "feeds.fullname" . }}
 app.kubernetes.io/component: feeds
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -69,6 +92,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- with .Values.labels }}
 {{ toYaml . }}
+{{- end }}
+{{- if $component }}
+  {{- with (index .Values (print $component)).labels }}
+{{ toYaml . }}
+  {{- end }}
 {{- end }}
 {{- end -}}
 

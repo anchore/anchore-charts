@@ -44,6 +44,193 @@ tests:
             foo: bar
             bar: baz
 
+  - it: should render service annotations
+    template: deployment.yaml
+    documentIndex: 1
+    set:
+      service:
+        annotations:
+          foo: bar
+          bar: baz
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            foo: bar
+            bar: baz
+
+  - it: should render service annotations and global annotations
+    template: deployment.yaml
+    documentIndex: 1
+    set:
+      service:
+        annotations:
+          foo: bar
+          bar: baz
+      annotations:
+        fizz: buzz
+        boo: blah
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            fizz: buzz
+            boo: blah
+            foo: bar
+            bar: baz
+
+  - it: should render component annotations and global annotations
+    templates:
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+      - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        annotations:
+          foo: upgradeJobAnnotation1
+          bar: upgradeJobAnnotation2
+      annotations:
+        fizz: globalAnnotation1
+        boo: globalAnnotation2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            fizz: globalAnnotation1
+            boo: globalAnnotation2
+            foo: upgradeJobAnnotation1
+            bar: upgradeJobAnnotation2
+
+  - it: should render component annotations and global annotations on the pods
+    templates:
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        annotations:
+          foo: upgradeJob1
+          bar: upgradeJob2
+      annotations:
+        fizz: global1
+        boo: global2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJob1
+            bar: upgradeJob2
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJob1
+            bar: upgradeJob2
+
+  - it: should render component labels and global labels
+    templates:
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+      - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        labels:
+          foo: upgradeJoblabel1
+          bar: upgradeJoblabel2
+      labels:
+        fizz: global1
+        boo: global2
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJoblabel1
+            bar: upgradeJoblabel2
+
+  - it: should render component labels and global labels on the pods
+    templates:
+      - templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        labels:
+          foo: upgradeJoblabel1
+          bar: upgradeJoblabel2
+      labels:
+        fizz: global1
+        boo: global2
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJoblabel1
+            bar: upgradeJoblabel2
+
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJoblabel1
+            bar: upgradeJoblabel2
+
+  - it: should render component labels and global labels postupgradeJob
+    templates:
+      - templates/hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        usePostUpgradeHook: true
+        labels:
+          foo: upgradeJoblabel1
+          bar: upgradeJoblabel2
+      labels:
+        fizz: global1
+        boo: global2
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJoblabel1
+            bar: upgradeJoblabel2
+
+  - it: should render component annotations and global annotations postupgradeJob
+    templates:
+      - templates/hooks/post-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      feedsUpgradeJob:
+        usePostUpgradeHook: true
+        annotations:
+          foo: upgradeJob1
+          bar: upgradeJob2
+      annotations:
+        fizz: global1
+        boo: global2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJob1
+            bar: upgradeJob2
+      - isSubset:
+          path: spec.template.metadata.annotations
+          content:
+            fizz: global1
+            boo: global2
+            foo: upgradeJob1
+            bar: upgradeJob2
+
   - it: should render file checksum/secret annotation
     template: deployment.yaml
     documentIndex: 0

@@ -3,6 +3,7 @@ templates:
   - templates/hooks/pre-upgrade/upgrade_job.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml
   - anchore_secret.yaml
+  - templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
 values:
   - values.yaml
 release:
@@ -64,7 +65,7 @@ tests:
           namespace: test-namespace
         documentIndex: 2
 
-  - it: pre-hook job does not get created when pre-upgrade hook is enabled
+  - it: pre-hook job does not get created when post-upgrade hook is enabled
     templates: *upgrade-resources
     set:
       upgradeJob:
@@ -388,3 +389,196 @@ tests:
             mountPath: /mnt/global-extra-vol
             readOnly: false
         count: 1
+
+  - it: should render migration job if enabled
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: migration job should match snapshot
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        analysisArchiveMigration:
+          run: false
+        objectStoreMigration:
+          run: false
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec
+
+  - it: migration job should match snapshot analysisArchiveMigration to true
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        analysisArchiveMigration:
+          run: true
+        objectStoreMigration:
+          run: false
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec
+
+  - it: migration job should match snapshot objectStoreMigration to true
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        analysisArchiveMigration:
+          run: false
+        objectStoreMigration:
+          run: true
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec
+
+  - it: migration job should match snapshot analysisArchiveMigration and objectStoreMigration to true
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        analysisArchiveMigration:
+          run: true
+        objectStoreMigration:
+          run: true
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec
+
+  - it: migration job should render proper analysis archive migration command if analysisArchiveMigration.run is true
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        analysisArchiveMigration:
+          run: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: check /config/dest-config.yaml
+        count: 1
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: migrate --to-analysis-archive --bucket analysis_archive /config/config.yaml /config/dest-config.yaml --dontask
+        count: 1
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate /config/config.yaml /config/dest-config.yaml --dontask
+        count: 1
+
+  - it: migration job should render proper analysis archive migration command if objectStoreMigration.run is true
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        objectStoreMigration:
+          run: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: check /config/dest-config.yaml
+        count: 1
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate /config/config.yaml /config/dest-config.yaml --dontask
+        count: 1
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate --to-analysis-archive --bucket analysis_archive /config/config.yaml /config/dest-config.yaml --dontask
+        count: 1
+
+  - it: migration job should render proper analysis archive migration command if both run is true
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        objectStoreMigration:
+          run: true
+        analysisArchiveMigration:
+          run: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: check /config/dest-config.yaml
+        count: 1
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate /config/config.yaml /config/dest-config.yaml --dontask
+        count: 1
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate --to-analysis-archive --bucket analysis_archive /config/config.yaml /config/dest-config.yaml --dontask
+        count: 1
+
+  - it: migration job should render proper analysis archive migration command if options are set
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        analysisArchiveMigration:
+          run: true
+          bucket: custom-bucket
+          mode: from_analysis_archive
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: check /config/dest-config.yaml
+        count: 1
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate --from-analysis-archive --bucket custom-bucket /config/config.yaml /config/dest-config.yaml --dontask
+        count: 1
+
+  - it: migration job should not run analysis archive migration command if invalid mode set
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        analysisArchiveMigration:
+          run: true
+          bucket: custom-bucket
+          mode: yolo
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: check /config/dest-config.yaml
+        count: 1
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate --from-analysis-archive
+        count: 1
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate --to-analysis-archive
+        count: 1
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern:  migrate
+        count: 1
+
+  - it: migration job should use the upgrade job's service account name
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-enterprise-upgrade-sa
+
+  - it: migration job should use the component level service account name if set
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        serviceAccountName: test-service-account
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-service-account

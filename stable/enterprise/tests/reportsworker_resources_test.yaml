@@ -40,6 +40,7 @@ tests:
 
   - it: should render component annotations
     template: reportsworker_deployment.yaml
+    documentIndex: 0
     set:
       reportsWorker.annotations:
         reports: test
@@ -56,7 +57,6 @@ tests:
             reports: test
             test: foobar
         template: reportsworker_deployment.yaml
-        documentIndex: 0
 
   - it: should render component matchLabels
     template: reportsworker_deployment.yaml
@@ -173,7 +173,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-reportsworker
+            value: test-release-enterprise-reportsworker.test-namespace.svc.cluster.local
         count: 1
       - contains:
           path: spec.template.spec.containers[0].env
@@ -375,3 +375,40 @@ tests:
             mountPath: /mnt/global-extra-vol
             readOnly: false
         count: 1
+
+  - it: should render service annotations
+    template: reportsworker_deployment.yaml
+    documentIndex: 1
+    set:
+      reportsWorker:
+        service:
+          annotations:
+            bar: baz
+            foo: bar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            bar: baz
+            foo: bar
+
+  - it: should render service annotations and global annotations
+    template: reportsworker_deployment.yaml
+    documentIndex: 1
+    set:
+      reportsWorker:
+        service:
+          annotations:
+            s1: a1
+            s2: a2
+      annotations:
+        g1: v1
+        g2: v2
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            g1: v1
+            g2: v2
+            s1: a1
+            s2: a2
