@@ -41,6 +41,21 @@ data:
       key: {{ .Values.k8sInventory.accountRouteByNamespaceLabel.key }}
       default-account: {{ .Values.k8sInventory.accountRouteByNamespaceLabel.defaultAccount }}
       ignore-namespace-missing-label: {{ .Values.k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel }}
+    inventory-report-limits:
+      namespaces: {{ .Values.k8sInventory.inventoryReportLimits.namespaces }}
+    metadata-collection:
+      nodes:
+        annotations: {{ .Values.k8sInventory.metadataCollection.nodes.annotations }}
+        labels: {{ .Values.k8sInventory.metadataCollection.nodes.labels }}
+        disable: {{ .Values.k8sInventory.metadataCollection.nodes.disable }}
+      namespaces:
+        annotations: {{ .Values.k8sInventory.metadataCollection.namespaces.annotations }}
+        labels: {{ .Values.k8sInventory.metadataCollection.namespaces.labels }}
+        disable: {{ .Values.k8sInventory.metadataCollection.namespaces.disable }}
+      pods:
+        annotations: {{ .Values.k8sInventory.metadataCollection.pods.annotations }}
+        labels: {{ .Values.k8sInventory.metadataCollection.pods.labels }}
+        disable: {{ .Values.k8sInventory.metadataCollection.pods.disable }}
     anchore:
       url: {{ .Values.k8sInventory.anchore.url }}
       user: {{ .Values.k8sInventory.anchore.user }}
