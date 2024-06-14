@@ -114,6 +114,23 @@ probes:
     failureThreshold: 3
     successThreshold: 1
 
+## @param extraVolumes mounts additional volumes to each pod
+## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+extraVolumes: []
+# - name: mycerts
+#   secret:
+#     secretName: mycerts
+
+## @param extraVolumeMounts mounts additional volumes to each pod
+## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+extraVolumeMounts: []
+# - name: mycerts
+#   mountPath: "/ect/ssl/certs"
+#   subPath: certs
+#   readOnly: true
+
 ## @param useExistingSecret Specify whether to use an existing secret
 ##
 useExistingSecret: false
