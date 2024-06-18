@@ -75,6 +75,9 @@ spec:
             - name: config-volume
               mountPath: /etc/xdg/anchore-k8s-inventory/config.yaml
               subPath: config.yaml
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           envFrom:
             {{- if not .Values.injectSecretsViaEnv }}
             - secretRef:
@@ -84,6 +87,9 @@ spec:
         - name: config-volume
           configMap:
             name: {{ include "k8sInventory.fullname" . }}
+      {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
