@@ -6,11 +6,15 @@ The Anchore API can be accessed via port {{ .Values.api.service.port }} on the f
 
 The Anchore UI can be accessed via localhost:8080 with kubernetes port-forwarding:
 
-    kubectl port-forward svc/{{- template "enterprise.ui.fullname" . }} 8080:{{- .Values.ui.service.port }}
+    kubectl port-forward -n {{ .Release.Namespace }} svc/{{- template "enterprise.ui.fullname" . }} 8080:{{- .Values.ui.service.port }}
 
 Get the default admin password using the following command:
 
-    kubectl get secret {{ template "enterprise.fullname" . }} -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -D
+    # for MacOS
+    kubectl get secret {{ template "enterprise.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -D
+
+    # for Linux
+    kubectl get secret {{ template "enterprise.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -d
 
 * NOTE: On first startup of Anchore Enterprise, the policy-engine performs a CVE data sync which may take several minutes to complete.
 During this time the system status will report 'partially_down' and any images added for analysis will stay in the 'not_analyzed' state.
@@ -19,7 +23,7 @@ Once the sync is complete, any queued images will be analyzed and the system sta
 Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state.
 You can check with:
 
-    kubectl get pods -l app.kubernetes.io/name={{- template "enterprise.fullname" . -}},app.kubernetes.io/component=api
+    kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{- template "enterprise.fullname" . -}},app.kubernetes.io/component=api
 
 {{ if and .Values.useExistingSecrets .Release.IsUpgrade (semverCompare "~2.1.0" .Chart.Version) }}
 ******************

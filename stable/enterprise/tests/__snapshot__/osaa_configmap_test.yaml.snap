@@ -102,7 +102,7 @@ should render the configmaps for osaa migration if enabled:
           max_api_key_age_days: 365
           max_api_keys_per_user: 100
           remove_deleted_user_api_keys_older_than_days: 365
-
+          disallow_native_users: false
         credentials:
           database:
             user: "${ANCHORE_DB_USER}"
@@ -115,6 +115,10 @@ should render the configmaps for osaa migration if enabled:
               ssl: ${ANCHORE_DB_SSL}
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
+
+        account_gc:
+          max_resource_gc_chunk: 4096
+          max_deletion_threads: 4
 
         services:
           apiext:
@@ -224,6 +228,7 @@ should render the configmaps for osaa migration if enabled:
               feed_sync: 14400
               feed_sync_checker: 3600
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+            enable_user_base_image: true
             vulnerabilities:
               sync:
                 enabled: true
@@ -406,6 +411,7 @@ should render the configmaps for osaa migration if enabled:
           max_api_key_age_days: 365
           max_api_keys_per_user: 100
           remove_deleted_user_api_keys_older_than_days: 365
+          disallow_native_users: false
 
         credentials:
           database:
@@ -419,6 +425,10 @@ should render the configmaps for osaa migration if enabled:
               ssl: ${ANCHORE_DB_SSL}
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
+
+        account_gc:
+          max_resource_gc_chunk: 4096
+          max_deletion_threads: 4
 
         services:
           apiext:
@@ -539,6 +549,7 @@ should render the configmaps for osaa migration if enabled:
               feed_sync: 14400
               feed_sync_checker: 3600
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+            enable_user_base_image: true
             vulnerabilities:
               sync:
                 enabled: true
