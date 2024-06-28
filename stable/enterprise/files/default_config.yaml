@@ -81,7 +81,7 @@ user_authentication:
   max_api_key_age_days: {{ .Values.anchoreConfig.user_authentication.max_api_key_age_days }}
   max_api_keys_per_user: {{ .Values.anchoreConfig.user_authentication.max_api_keys_per_user }}
   remove_deleted_user_api_keys_older_than_days: {{ .Values.anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days }}
-
+  disallow_native_users: {{ .Values.anchoreConfig.user_authentication.disallow_native_users }}
 credentials:
   database:
     user: "${ANCHORE_DB_USER}"
@@ -101,6 +101,10 @@ credentials:
   {{- with .Values.anchoreConfig.database.engineArgs }}
     db_engine_args: {{- toYaml . | nindent 6 }}
   {{- end }}
+
+account_gc:
+  max_resource_gc_chunk: 4096
+  max_deletion_threads: 4
 
 services:
   apiext:
@@ -185,6 +189,7 @@ services:
     cycle_timer_seconds: 1
     cycle_timers: {{- toYaml .Values.anchoreConfig.policy_engine.cycle_timers | nindent 6 }}
     enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+    enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
       sync:
         enabled: true

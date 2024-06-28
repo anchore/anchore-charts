@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.6.0
+image: docker.io/anchore/enterprise:v5.7.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -304,6 +304,7 @@ anchoreConfig:
   ##
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
+  ## @param anchoreConfig.user_authentication.disallow_native_users Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.
   ##
   user_authentication:
     oauth:
@@ -316,6 +317,7 @@ anchoreConfig:
     hashed_passwords: true
     sso_require_existing_users: false
     remove_deleted_user_api_keys_older_than_days: 365
+    disallow_native_users: false
 
   ## @param anchoreConfig.metrics.enabled Enable Prometheus metrics for all Anchore services
   ## @param anchoreConfig.metrics.auth_disabled Disable auth on Prometheus metrics for all Anchore services
@@ -567,6 +569,9 @@ anchoreConfig:
     ##
     overrideFeedsToUpstream: false
 
+    ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
+    enable_user_base_image: true
+
   notifications:
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
     ##
@@ -675,6 +680,9 @@ anchoreConfig:
     authentication_lock:
       count: 5
       expires: 300
+
+    ## @param anchoreConfig.ui.sso_auth_only Enable SSO authentication only
+    sso_auth_only: false
 
     ## @param anchoreConfig.ui.custom_links List of up to 10 external links provided
     ## Each link entry must have a title of greater than 0-length and a valid URI. If either item is invalid, the entry will be excluded.
@@ -1319,7 +1327,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.6.0
+  image: docker.io/anchore/enterprise-ui:v5.7.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##

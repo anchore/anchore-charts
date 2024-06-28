@@ -1083,6 +1083,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days` | The number of days elapsed after a user API key is deleted before it is garbage collected (-1 to disable)                        | `365`              |
 | `anchoreConfig.user_authentication.hashed_passwords`                             | Enable storing passwords as secure hashes in the database                                                                        | `true`             |
 | `anchoreConfig.user_authentication.sso_require_existing_users`                   | set to true in order to disable the SSO JIT provisioning during authentication                                                   | `false`            |
+| `anchoreConfig.user_authentication.disallow_native_users`                        | Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.                    | `false`            |
 | `anchoreConfig.metrics.enabled`                                                  | Enable Prometheus metrics for all Anchore services                                                                               | `false`            |
 | `anchoreConfig.metrics.auth_disabled`                                            | Disable auth on Prometheus metrics for all Anchore services                                                                      | `false`            |
 | `anchoreConfig.webhooks`                                                         | Enable Anchore services to provide webhooks for external system updates                                                          | `{}`               |
@@ -1131,6 +1132,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync`                             | Interval to run a feed sync to get latest cve data                                                                               | `14400`            |
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync_checker`                     | Interval between checks to see if there needs to be a task queued                                                                | `3600`             |
 | `anchoreConfig.policy_engine.overrideFeedsToUpstream`                            | Override the Anchore Feeds URL to use the public upstream Anchore Feeds                                                          | `false`            |
+| `anchoreConfig.policy_engine.enable_user_base_image`                             | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`             |
 | `anchoreConfig.notifications.cycle_timers.notifications`                         | Interval that notifications are sent                                                                                             | `30`               |
 | `anchoreConfig.notifications.ui_url`                                             | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`               |
 | `anchoreConfig.reports.enable_graphiql`                                          | Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations                                                     | `true`             |
@@ -1158,6 +1160,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.ui.force_websocket`                                               | Force WebSocket protocol for socket message communications                                                                       | `false`            |
 | `anchoreConfig.ui.authentication_lock.count`                                     | Number of failed authentication attempts allowed before a temporary lock is applied                                              | `5`                |
 | `anchoreConfig.ui.authentication_lock.expires`                                   | Authentication lock duration                                                                                                     | `300`              |
+| `anchoreConfig.ui.sso_auth_only`                                                 | Enable SSO authentication only                                                                                                   | `false`            |
 | `anchoreConfig.ui.custom_links`                                                  | List of up to 10 external links provided                                                                                         | `{}`               |
 | `anchoreConfig.ui.enable_add_repositories`                                       | Specify what users can add image repositories to the Anchore UI                                                                  | `{}`               |
 | `anchoreConfig.ui.log_level`                                                     | Descriptive detail of the application log output                                                                                 | `http`             |
@@ -1472,6 +1475,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V2.8.x
+
+- Deploys Anchore Enterprise v5.7.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/570/) for more information.
 
 ### V2.7.x
 
