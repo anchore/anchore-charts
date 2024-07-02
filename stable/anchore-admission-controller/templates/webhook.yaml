@@ -4,6 +4,9 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
   labels: {{- include "anchore-admission-controller.labels" . | nindent 4 }}
+  {{- with .Values.apiService.webhook.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
 webhooks:
 - name: {{ template "anchore-admission-controller.name" . }}-admission.anchore.io
   clientConfig:
