@@ -22,12 +22,17 @@ data:
       structured: {{ .Values.k8sInventory.log.structured }}
       level: {{ .Values.k8sInventory.log.level }}
       file: {{ .Values.k8sInventory.log.file }}
+    registration:
+      fallback-register-id: {{ .Values.k8sInventory.registration.fallbackRegisterId }}
+      always-use-fallback-register-id: {{ .Values.k8sInventory.registration.alwaysUseFallbackRegisterId }}
+      fallback-register-name: {{ .Values.k8sInventory.registration.fallbackRegisterName }}
     namespaces:
       {{- toYaml .Values.k8sInventory.namespaces | nindent 6 }}
     namespace-selectors:
       {{- toYaml .Values.k8sInventory.namespaceSelectors | nindent 6 }}
     mode: {{ .Values.k8sInventory.mode }}
     polling-interval-seconds: {{ .Values.k8sInventory.pollingIntervalSeconds }}
+    health-report-interval-seconds: {{ .Values.k8sInventory.healthReportIntervalSeconds }}
     kubernetes-request-timeout-seconds: {{ .Values.k8sInventory.kubernetesRequestTimeoutSeconds }}
     kubernetes:
       request-timeout-seconds: {{ .Values.k8sInventory.kubernetes.requestTimeoutSeconds }}

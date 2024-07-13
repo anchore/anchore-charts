@@ -166,6 +166,15 @@ k8sInventory:
     level: "debug"
     file: ""
 
+  ## @param k8sInventory.registration.fallbackRegisterId Id to register the agent as with Enterprise (should be a freshly generated UUIDv4)
+  ## @param k8sInventory.registration.alwaysUseFallbackRegisterId Force registration to be done with fallback id, not just as a fallback
+  ## @param k8sInventory.registration.fallbackRegisterName Name to register the agent as with Enterprise
+  ##
+  registration:
+    fallbackRegisterId: ""
+    alwaysUseFallbackRegisterId: false
+    fallbackRegisterName: anchore_k8s_inventory_agent
+
   ## @param k8sInventory.kubeconfig.path Path should not be changed
   ## @param k8sInventory.kubeconfig.cluster Tells Anchore which cluster this inventory is coming from
   ##
@@ -187,6 +196,9 @@ k8sInventory:
   ## @param k8sInventory.pollingIntervalSeconds Only respected if mode is periodic
   ##
   pollingIntervalSeconds: 60
+
+  ## @param k8sInventory.healthReportIntervalSeconds Only respected if mode is periodic
+  healthReportIntervalSeconds: 60
 
   ### k8sInventory.kubernetes Kubernetes API configuration parameters (should not need tuning)
   ## @param k8sInventory.kubernetes.requestTimeoutSeconds Sets the request timeout for kubernetes API requests
