@@ -15,7 +15,7 @@ replicaCount: 1
 image:
   pullPolicy: "IfNotPresent"
   repository: "anchore/k8s-inventory"
-  tag: "v1.6.0"
+  tag: "v1.6.2"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
@@ -114,6 +114,23 @@ probes:
     failureThreshold: 3
     successThreshold: 1
 
+## @param extraVolumes mounts additional volumes to each pod
+## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+extraVolumes: []
+# - name: mycerts
+#   secret:
+#     secretName: mycerts
+
+## @param extraVolumeMounts mounts additional volumes to each pod
+## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+extraVolumeMounts: []
+# - name: mycerts
+#   mountPath: "/etc/ssl/certs"
+#   subPath: certs
+#   readOnly: true
+
 ## @param useExistingSecret Specify whether to use an existing secret
 ##
 useExistingSecret: false
@@ -209,23 +226,33 @@ k8sInventory:
     ignoreNamespaceMissingLabel: false
 
   ## k8sInventory.metadataCollection Configure/disable metadata collection within a report
+  ## @param k8sInventory.metadataCollection.nodes.annotations List of annotations to include (explicit or regex)
+  ## @param k8sInventory.metadataCollection.nodes.labels List of labels to include (explicit or regex)
+  ## @param k8sInventory.metadataCollection.nodes.disable Remove all optional node metadata from the inventory report
+  ## @param k8sInventory.metadataCollection.namespaces.annotations List of annotations to include (explicit or regex)
+  ## @param k8sInventory.metadataCollection.namespaces.labels List of labels to include (explicit or regex)
+  ## @param k8sInventory.metadataCollection.namespaces.disable Remove all optional namespace metadata from the inventory report
+  ## @param k8sInventory.metadataCollection.pods.annotations List of annotations to include (explicit or regex)
+  ## @param k8sInventory.metadataCollection.pods.labels List of labels to include (explicit or regex)
+  ## @param k8sInventory.metadataCollection.pods.disable Remove all optional pod metadata from the inventory report
   metadataCollection:
     nodes:
-      annotations: []  ## List of annotations to include (explicit or regex)
-      labels: []  ## List of labels to include (explicit or regex)
-      disable: false  ## Remove all optional node metadata from the inventory report
+      annotations: []
+      labels: []
+      disable: false
     namespaces:
-      annotations: []  ## List of annotations to include (explicit or regex)
-      labels: []  ## List of labels to include (explicit or regex)
-      disable: false  ## Remove all optional namespace metadata from the inventory report
+      annotations: []
+      labels: []
+      disable: false
     pods:
-      annotations: []  ## List of annotations to include (explicit or regex)
-      labels: []  ## List of labels to include (explicit or regex)
-      disable: false  ## Remove all optional pod metadata from the inventory report
+      annotations: []
+      labels: []
+      disable: false
 
   ## k8sInventory.inventoryReportLimits Specify size limits of individual reports. If report size exceeds limits it will be broken into multiple batches up to the specified size.
+  ## @param k8sInventory.inventoryReportLimits.namespaces Maximum number of namespaces to include in a single report. Default of 0 means no limit
   inventoryReportLimits:
-    namespaces: 0  ## default of 0 means no limit
+    namespaces: 0
 
   ## @param k8sInventory.anchore.url the url of the anchore platform
   ## @param k8sInventory.anchore.user the username of the anchore platform. The user specified must be an admin user or have full-control, or read-write RBAC permissions
