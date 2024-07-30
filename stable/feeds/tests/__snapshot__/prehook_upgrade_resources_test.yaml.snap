@@ -143,6 +143,6 @@ should render proper initContainers:
           value: test-release-feeds.test-namespace.svc.cluster.local
         - name: ANCHORE_PORT
           value: "8448"
-      image: docker.io/anchore/enterprise:v5.7.0
+      image: docker.io/anchore/enterprise:v5.8.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db

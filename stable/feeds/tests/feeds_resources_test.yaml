@@ -3,6 +3,7 @@ templates:
   - deployment.yaml
   - secret.yaml
   - configmap.yaml
+  - envvars_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace
@@ -21,6 +22,7 @@ tests:
           pattern: Anchore Feeds Service Configuration File
 
   - it: should set the correct resource names
+    template: deployment.yaml
     asserts:
       - equal:
           path: metadata.name
@@ -330,3 +332,42 @@ tests:
             targetPort: 8448
             nodePort: 9999
         count: 1
+
+  - it: should have RollingUpdate as a deployment strategy by default
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: RollingUpdate
+
+  - it: should have Recreate as a deployment strategy for post upgrade hook
+    template: deployment.yaml
+    set:
+      feedsUpgradeJob.usePostUpgradeHook: true
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME as service name without domainSuffix
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-feeds.test-namespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with service.domainSuffix
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      service.domainSuffix: "mynamespace.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-feeds.mynamespace.svc.cluster.local

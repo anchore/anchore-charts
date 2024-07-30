@@ -1,0 +1,14 @@
+securityContext:
+  fsGroup: null
+  runAsGroup: null
+  runAsUser: null
+
+podSecurityContext:
+  runAsGroup: null
+  runAsUser: null
+
+k8sInventory:
+  anchore:
+    url: http://engine-anchore-engine-api:8228
+    user: user1
+    password: password1

@@ -68,12 +68,17 @@ Common environment variables
 {{- with .Values.extraEnv }}
   {{- toYaml . }}
 {{- end }}
+
+# check if the domainSuffix is set on the service level of the component, if it is, use that, else use the global domainSuffix
+{{- $serviceName := (include (printf "feeds.fullname") .) }}
+{{- $domainSuffix := .Values.service.domainSuffix }}
+
 - name: ANCHORE_HOST_ID
   valueFrom:
     fieldRef:
       fieldPath: metadata.name
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  value: {{ template "feeds.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  value: {{ template "feeds.fullname" . }}.{{- if $domainSuffix -}}{{ $domainSuffix }}{{- else -}}{{ .Release.Namespace }}.svc.cluster.local{{- end }}
 - name: ANCHORE_PORT
   value: {{ .Values.service.port | quote }}
 {{- end -}}
@@ -106,4 +111,15 @@ Return anchore default selector match labels
 {{- define "feeds.common.matchLabels" -}}
 app.kubernetes.io/name: {{ template "feeds.fullname" . }}
 app.kubernetes.io/component: feeds
+{{- end -}}
+
+{{/*
+Deployment Strategy Definition. For preupgrade hooks, use RollingUpdate. For postupgrade hooks, use Recreate.
+*/}}
+{{- define "feeds.common.deploymentStrategy" -}}
+{{- if .Values.feedsUpgradeJob.usePostUpgradeHook -}}
+type: Recreate
+{{- else -}}
+type: RollingUpdate
+{{- end -}}
 {{- end -}}

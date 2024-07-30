@@ -62,6 +62,7 @@ spec:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- end }}
+      {{- if eq (include "feeds.appVersionChanged" .) "true" }}
       initContainers:
         - name: scale-down-anchore
           image: {{ .Values.feedsUpgradeJob.kubectlImage }}
@@ -107,6 +108,7 @@ spec:
           {{- with .Values.feedsUpgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "feeds.common.cloudsqlContainer" . | nindent 8 }}

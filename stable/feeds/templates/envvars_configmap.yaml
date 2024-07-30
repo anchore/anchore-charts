@@ -41,6 +41,7 @@ data:
   ANCHORE_FEEDS_DRIVER_GEM_ENABLED: "{{ .Values.anchoreConfig.feeds.drivers.gem.enabled }}"
   ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "{{ .Values.anchoreConfig.feeds.drivers.github.enabled }}"
   ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED: "true"
+  ANCHORE_FEEDS_DRIVER_KEV_ENABLED: "true"
   ANCHORE_FEEDS_DRIVER_MARINER_ENABLED: "true"
   ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS: "true"
   ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "{{ .Values.anchoreConfig.feeds.drivers.msrc.enabled }}"

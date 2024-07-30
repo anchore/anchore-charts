@@ -55,6 +55,9 @@ annotations: {}
 ##
 deploymentAnnotations: {}
 
+## @param containerSecurityContext The securityContext for all Anchore ECS Inventory containers
+containerSecurityContext: {}
+
 ## @param securityContext.runAsUser The securityContext runAsUser for all Anchore ECS Inventory pods
 ## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore ECS Inventory pods
 ## @param securityContext.fsGroup The securityContext fsGroup for all Anchore ECS Inventory pods
