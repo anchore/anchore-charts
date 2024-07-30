@@ -1491,7 +1491,6 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Helm upgrade SLO improvements:**
   - Deployments will only be scaled down when database upgrades are required, as determined by a major/minor version change of the appVersion in Chart.yaml.
   - Deployments will no longer be scaled down for Anchore Enterprise or Kubernetes resource  configuration changes.
-  - Deployments now utilize the RollingUpdate strategy instead of the Recreate strategy when using the pre-upgrade hook. This means that when making Anchore Enterprise or Kubernetes resource configuration changes that require pod replacement, pods will not terminate until the new pods are ready.
 - Adds a domainSuffix to the service name for all services' ANCHORE_ENDPOINT_HOSTNAME. *If using proxies, you will need to update it from the service name to the fqdn. eg. anchore-enterprise-api -> anchore-enterprise-api.mynamespace.svc.cluster.local*
 
 ### V2.8.x

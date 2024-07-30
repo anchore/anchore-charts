@@ -365,9 +365,5 @@ Setup the common anchore volumes
 Deployment Strategy Definition. For preupgrade hooks, use RollingUpdate. For postupgrade hooks, use Recreate.
 */}}
 {{- define "enterprise.common.deploymentStrategy" -}}
-{{- if .Values.upgradeJob.usePostUpgradeHook -}}
 type: Recreate
-{{- else -}}
-type: RollingUpdate
-{{- end -}}
 {{- end -}}

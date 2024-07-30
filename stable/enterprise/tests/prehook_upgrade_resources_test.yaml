@@ -609,10 +609,10 @@ tests:
           path: spec.template.spec.serviceAccountName
           value: test-service-account
 
-  - it: should have RollingUpdate as a deployment strategy
+  - it: should have Recreate as a deployment strategy
     templates: *deployment-resources
     documentIndex: 0
     asserts:
       - equal:
           path: spec.strategy.type
-          value: RollingUpdate
+          value: Recreate
