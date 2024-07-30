@@ -5810,6 +5810,32 @@ entries:
   ecs-inventory:
   - apiVersion: v2
     appVersion: 1.3.1
+    created: "2024-07-30T20:02:59.563829217Z"
+    description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
+      of images in use by Amazon Elastic Container Service (ECS).
+    digest: 5b9ae03a3406b87f1cdd15c3c1d4e32a9dc1ddca33f7d2f3b49b93b0cbece736
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - ecs
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: ecs-inventory
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/ecs-inventory-0.0.8/ecs-inventory-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
+    appVersion: 1.3.1
     created: "2024-07-11T14:07:35.293997302Z"
     description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
       of images in use by Amazon Elastic Container Service (ECS).
@@ -8737,6 +8763,39 @@ entries:
     version: 0.0.1
   feeds:
   - apiVersion: v2
+    appVersion: 5.8.0
+    created: "2024-07-30T20:02:59.695725294Z"
+    dependencies:
+    - alias: feeds-db
+      condition: feeds-db.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: gem-db
+      condition: gem-db.chartEnabled,anchoreConfig.feeds.drivers.gem.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    description: Anchore feeds service
+    digest: e8dee4e911c22d624bf4b78e43d35dda505b0bdfbda9aed24bad3447e95cc449
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - anchore
+    - anchore-feeds
+    kubeVersion: 1.23.x - 1.30.x || 1.23.x-x - 1.30.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: feeds
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/feeds-2.8.0/feeds-2.8.0.tgz
+    version: 2.8.0
+  - apiVersion: v2
     appVersion: 5.7.0
     created: "2024-06-28T20:02:18.203511294Z"
     dependencies:
@@ -9795,6 +9854,31 @@ entries:
   k8s-inventory:
   - apiVersion: v2
     appVersion: 1.6.2
+    created: "2024-07-30T20:02:59.821261647Z"
+    description: A Helm chart for Kubernetes Automated Inventory, which describes
+      which images are in use in a given Kubernetes Cluster
+    digest: 81f8a2a852c8d0f9bb32f45d9b1f232a2e1569fdbab0e2dd62606814aef0d8de
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: k8s-inventory
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/k8s-inventory-0.4.3/k8s-inventory-0.4.3.tgz
+    version: 0.4.3
+  - apiVersion: v2
+    appVersion: 1.6.2
     created: "2024-07-11T14:07:35.410061032Z"
     description: A Helm chart for Kubernetes Automated Inventory, which describes
       which images are in use in a given Kubernetes Cluster
@@ -10438,4 +10522,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2024-07-11T14:07:35.410725627Z"
+generated: "2024-07-30T20:02:59.822415823Z"
