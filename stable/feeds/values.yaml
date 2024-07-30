@@ -92,6 +92,7 @@ affinity: {}
 ## @param service.annotations Annotations for Anchore Feeds service
 ## @param service.labels Labels for Anchore Feeds service
 ## @param service.nodePort nodePort for Anchore Feeds service
+## @param service.domainSuffix Domain suffix for the Anchore Feeds service. If blank, the ANCHORE_ENDPOINT_HOSTNAME will default to service_name.namespace.svc.cluster.local
 ##
 service:
   type: ClusterIP
@@ -99,6 +100,7 @@ service:
   annotations: {}
   labels: {}
   nodePort: ""
+  domainSuffix: ""
 
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space for image analysis
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions

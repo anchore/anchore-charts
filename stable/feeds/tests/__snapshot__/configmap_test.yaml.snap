@@ -189,6 +189,8 @@ should render the configmaps:
                   enabled: "${ANCHORE_ENTERPRISE_FEEDS_CHAINGUARD_PROVIDER_IMPORT_RESULTS_ENABLED}"
                   host: "${ANCHORE_ENTERPRISE_FEEDS_CHAINGUARD_PROVIDER_IMPORT_RESULTS_HOST}"
                   path: "${ANCHORE_ENTERPRISE_FEEDS_CHAINGUARD_PROVIDER_IMPORT_RESULTS_PATH}"
+              kev:
+                enabled: ${ANCHORE_FEEDS_DRIVER_KEV_ENABLED}
     kind: ConfigMap
     metadata:
       annotations:
@@ -230,6 +232,7 @@ should render the configmaps:
       ANCHORE_FEEDS_DRIVER_GEM_ENABLED: "false"
       ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "false"
       ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED: "true"
+      ANCHORE_FEEDS_DRIVER_KEV_ENABLED: "true"
       ANCHORE_FEEDS_DRIVER_MARINER_ENABLED: "true"
       ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS: "true"
       ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
