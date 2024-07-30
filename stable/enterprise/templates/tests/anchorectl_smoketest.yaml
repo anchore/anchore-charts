@@ -1,0 +1,30 @@
+{{- $component := "smokeTest" -}}
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ template "enterprise.smokeTest.fullname" . }}"
+  namespace: "{{ .Release.Namespace }}"
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+    "helm.sh/hook": test
+spec:
+  volumes: {{- include "enterprise.common.volumes" . | nindent 2 }}
+  containers:
+    - name: "anchorectl-smoketest"
+      image: {{ .Values.image }}
+      imagePullPolicy: {{ .Values.imagePullPolicy }}
+    {{- with .Values.containerSecurityContext }}
+      securityContext:
+        {{ toYaml . | nindent 12 }}
+    {{- end }}
+      envFrom: {{- include "enterprise.common.envFrom" . | nindent 6 }}
+      env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 6 }}
+
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          anchorectl system smoke-tests run
+
+      volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 6 }}
+  restartPolicy: Never

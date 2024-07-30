@@ -1,0 +1,19 @@
+securityContext:
+  fsGroup: null
+  runAsGroup: null
+  runAsUser: null
+feeds:
+  chartEnabled: false
+  url: "my-release-feeds"
+postgresql:
+  primary:
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+ui-redis:
+  master:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
