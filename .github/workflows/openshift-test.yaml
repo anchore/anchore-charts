@@ -1,9 +1,12 @@
-name: "Test using kind and chart-testing tool"
+name: "Test using Replicated's Compatibilty Matrix and chart-testing tool"
 
 on:
   pull_request:
     paths:
-      - 'stable/**'
+      - 'stable/enterprise/Chart.yaml'
+      - 'stable/feeds/Chart.yaml'
+      - 'stable/ecs-inventory/Chart.yaml'
+      - 'stable/k8s-inventory/Chart.yaml'
 
 permissions:
   contents: read
@@ -13,8 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetesVersion: ["v1.24.17", "v1.25.16", "v1.26.14", "v1.27.11", "v1.28.7", "v1.29.2", "v1.30.0"]
-    runs-on: ubuntu-latest
+        cluster: [ {distribution: "openshift", version: "4.13.0-okd"}, {distribution: "openshift", version: "4.15.0-okd"}]
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
@@ -55,21 +58,33 @@ jobs:
       run: ct lint --config 'ct-config.yaml' --check-version-increment=false
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref != 'main'
 
-    - name: Install kind
-      if: steps.list-changed.outputs.CHANGED == 'true'
-      uses: helm/kind-action@dda0770415bac9fc20092cacbc54aa298604d140 # v1.8.0
-      with:
-        node_image: "kindest/node:${{ matrix.kubernetesVersion }}"
-        config: kind-config.yaml
-        wait: 600s
-
-    - name: Check kind nodes
-      if: steps.list-changed.outputs.CHANGED == 'true'
-      run: kubectl describe nodes
-
-    - name: Create pullcreds and license secrets
+    - name: Set up oc client and kubectl
       if: steps.list-changed.outputs.CHANGED == 'true'
       run: |
+        wget https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+        sudo tar xzvf oc.tar.gz -C /usr/local/bin
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+    - name: Use Replicated Compatibilty Matrix for cluster creation
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      id: create-cluster
+      uses: replicatedhq/compatibility-actions/create-cluster@v1
+      with:
+        api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
+        cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
+        kubernetes-distribution: ${{ matrix.cluster.distribution }}
+        kubernetes-version: ${{ matrix.cluster.version }}
+        ttl: 20m
+        timeout-minutes: 20
+        kubeconfig-path: ./tmp/kubeconfig
+
+    - name: check the cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      id: check-cluster
+      run: |
+        kubectl get nodes
         kubectl create namespace anchore
         echo "${ANCHORE_LICENSE}" | base64 --decode > /tmp/anchore-license
         kubectl --namespace anchore create secret generic anchore-enterprise-license --from-file=license.yaml=/tmp/anchore-license
@@ -78,6 +93,7 @@ jobs:
         ANCHORE_LICENSE: ${{ secrets.B64_ANCHORE_LICENSE }}
         DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
+        KUBECONFIG: ./tmp/kubeconfig
 
     - name: Check if anchore-engine endpoint is required for admission controller chart
       id: engine_required
@@ -94,9 +110,26 @@ jobs:
     - name: Deploy Engine
       if: steps.engine_required.outputs.changed == 'true'
       run: |
-        helm install engine anchore/anchore-engine --namespace anchore --wait
+        helm install engine anchore/anchore-engine --namespace anchore -f stable/anchore-admission-controller/ci/openshift-test.yaml --wait
         kubectl --namespace anchore get pods
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
-      run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s" --upgrade
+      run: |
+        ls -al
+        echo ${PWD}
+        files_changed="$(git diff --name-only origin/${TARGET_BRANCH} | sort | uniq)"
+        charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
+        for chart in ${charts_dirs_changed}; do
+          echo "creating openshift-test-values.yaml for ${chart}"
+          pushd "${chart}"
+          rm -rvf ci/*-values.yaml
+          mv ci/openshift-test.yaml ci/openshift-test-values.yaml
+          popd
+        done
+        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+        TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
