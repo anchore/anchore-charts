@@ -108,8 +108,20 @@ When calling this template, .component can be included in the context for compon
   {{- with (index .Values (print $component)).extraEnv }}
 {{ toYaml . }}
   {{- end }}
+
+# check if the domainSuffix is set on the service level of the component, if it is, use that, else use the global domainSuffix
+{{- $serviceName := include (printf "enterprise.%s.fullname" $component) . }}
+{{- $domainSuffix := .Values.domainSuffix }}
+
+{{- with (index .Values (print $component)).service }}
+{{- if .domainSuffix }}
+{{- $domainSuffix = .domainSuffix }}
+{{- end }}
+{{- end }}
+
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  value: {{ include (printf "enterprise.%s.fullname" $component) . }}.{{ .Release.Namespace }}.svc.cluster.local
+  value: {{ $serviceName }}.{{- if $domainSuffix -}}{{ $domainSuffix }}{{- else -}}{{ .Release.Namespace }}.svc.cluster.local{{- end }}
+
   {{- with (index .Values (print $component)).service }}
 - name: ANCHORE_PORT
   value: {{ .port | quote }}
@@ -347,4 +359,11 @@ Setup the common anchore volumes
   secret:
     secretName: {{ .Values.cloudsql.serviceAccSecretName }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Deployment Strategy Definition. For preupgrade hooks, use RollingUpdate. For postupgrade hooks, use Recreate.
+*/}}
+{{- define "enterprise.common.deploymentStrategy" -}}
+type: Recreate
 {{- end -}}

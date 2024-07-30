@@ -15,6 +15,7 @@ templates:
   - ui_configmap.yaml
   - anchore_secret.yaml
   - ui_secret.yaml
+  - envvars_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

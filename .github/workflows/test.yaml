@@ -99,4 +99,4 @@ jobs:
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
-      run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s" --upgrade
+      run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"

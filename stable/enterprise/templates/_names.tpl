@@ -71,6 +71,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s-%s-%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "osaa-migration-job" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "enterprise.smokeTest.fullname" -}}
+{{- $name := default .Chart.Name .Values.global.nameOverride -}}
+{{- printf "%s-%s-%s-%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "smoke-test" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "enterprise.feeds.fullname" -}}
 {{- if .Values.feeds.fullnameOverride }}
   {{- .Values.feeds.fullnameOverride | trunc 63 | trimSuffix "-" }}

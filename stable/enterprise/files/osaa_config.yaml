@@ -175,6 +175,9 @@ services:
           packages:
             enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
             url: {{ template "enterprise.feedsURL" . }}
+          vulnerability_annotations:
+            enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
+            url: {{ template "enterprise.feedsURL" . }}
       matching:
         default:
           search:

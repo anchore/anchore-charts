@@ -281,6 +281,9 @@ should render the configmaps:
                   packages:
                     enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
                     url: http://test-release-feeds:8448/v2/feeds
+                  vulnerability_annotations:
+                    enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
+                    url: http://test-release-feeds:8448/v2/feeds
               matching:
                 default:
                   search:
@@ -435,6 +438,7 @@ should render the configmaps:
       ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
       ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
       ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED: "false"
+      ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED: "true"
       ANCHORE_FEEDS_SSL_VERIFY: "false"
       ANCHORE_FEEDS_VULNERABILITIES_ENABLED: "true"
       ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
