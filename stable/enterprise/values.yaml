@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.7.0
+image: docker.io/anchore/enterprise:v5.8.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -211,6 +211,11 @@ scripts:
       done;
       printf '%s\n' "$line";
     done < /config/config.yaml
+
+## @param domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".
+## If set here, the domainSuffix will be appended to the hostname for all Anchore services unless overridden at the service level of each anchore service
+##
+domainSuffix: ""
 
 #####################################################################
 ## @section Anchore Configuration Parameters
@@ -741,9 +746,11 @@ analyzer:
   replicaCount: 1
 
   ## @param analyzer.service.port The port used for gatherings metrics when .Values.metricsEnabled=true
+  ## @param analyzer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     port: 8084
+    domainSuffix: ""
 
   ## @param analyzer.extraEnv Set extra environment variables for Anchore Analyzer pods
   ##
@@ -802,6 +809,7 @@ api:
   ## @param api.service.annotations Annotations for Anchore API service
   ## @param api.service.labels Labels for Anchore API service
   ## @param api.service.nodePort nodePort for Anchore API service
+  ## @param api.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -809,6 +817,7 @@ api:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -870,6 +879,7 @@ catalog:
   ## @param catalog.service.annotations Annotations for Anchore Catalog service
   ## @param catalog.service.labels Labels for Anchore Catalog service
   ## @param catalog.service.nodePort nodePort for Anchore Catalog service
+  ## @param catalog.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -877,6 +887,7 @@ catalog:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param catalog.extraEnv Set extra environment variables for Anchore Catalog pods
   ##
@@ -972,6 +983,7 @@ notifications:
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
   ## @param notifications.service.labels Labels for Anchore Notifications service
   ## @param notifications.service.nodePort nodePort for Anchore Notifications service
+  ## @param notifications.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -979,6 +991,7 @@ notifications:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param notifications.extraEnv Set extra environment variables for Anchore Notifications pods
   ##
@@ -1040,6 +1053,7 @@ policyEngine:
   ## @param policyEngine.service.annotations Annotations for Anchore Policy Engine service
   ## @param policyEngine.service.labels Labels for Anchore Policy Engine service
   ## @param policyEngine.service.nodePort nodePort for Anchore Policy Engine service
+  ## @param policyEngine.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1047,6 +1061,7 @@ policyEngine:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param policyEngine.extraEnv Set extra environment variables for Anchore Policy Engine pods
   ##
@@ -1113,6 +1128,7 @@ reports:
   ## @param reports.service.annotations Annotations for Anchore Reports service
   ## @param reports.service.labels Labels for Anchore Reports service
   ## @param reports.service.nodePort nodePort for Anchore Reports service
+  ## @param reports.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1120,6 +1136,7 @@ reports:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
@@ -1198,6 +1215,7 @@ reportsWorker:
   ## @param reportsWorker.service.annotations Annotations for Anchore Reports Worker service
   ## @param reportsWorker.service.labels Labels for Anchore Reports Worker service
   ## @param reportsWorker.service.nodePort nodePort for Anchore Reports Worker service
+  ## @param reportsWorker.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1205,6 +1223,7 @@ reportsWorker:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param reportsWorker.extraEnv Set extra environment variables for Anchore Reports Worker pods
   ##
@@ -1266,6 +1285,7 @@ simpleQueue:
   ## @param simpleQueue.service.annotations Annotations for Anchore Simple Queue service
   ## @param simpleQueue.service.labels Labels for Anchore Simple Queue service
   ## @param simpleQueue.service.nodePort nodePort for Anchore Simple Queue service
+  ## @param simpleQueue.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1273,6 +1293,7 @@ simpleQueue:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param simpleQueue.extraEnv Set extra environment variables for Anchore Simple Queue pods
   ##
@@ -1327,7 +1348,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.7.0
+  image: docker.io/anchore/enterprise-ui:v5.8.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1351,6 +1372,7 @@ ui:
   ## @param ui.service.labels Labels for Anchore UI service
   ## @param ui.service.sessionAffinity Session Affinity for Ui service
   ## @param ui.service.nodePort nodePort for Anchore UI service
+  ## @param ui.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1360,6 +1382,7 @@ ui:
     labels: {}
     sessionAffinity: ClientIP
     nodePort: ""
+    domainSuffix: ""
 
 
   ## @param ui.extraEnv Set extra environment variables for Anchore UI pods

@@ -4,6 +4,7 @@ templates:
   - anchore_secret.yaml
   - anchore_configmap.yaml
   - policybundle_configmap.yaml
+  - envvars_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace
@@ -508,3 +509,39 @@ tests:
             g2: v2
             s1: a1
             s2: a2
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME as service name without domainSuffix
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-catalog.test-namespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-catalog.mynamespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix specified and overridden
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+      catalog.service.domainSuffix: "myothersuffix.svc.cluster.local"
+      ui.service.domainSuffix: "nope.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-catalog.myothersuffix.svc.cluster.local

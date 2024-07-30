@@ -11,8 +11,7 @@ spec:
   selector:
     matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
   replicas: 1
-  strategy:
-    type: Recreate
+  strategy: {{- include "enterprise.common.deploymentStrategy" . | nindent 4 }}
   template:
     metadata:
       labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}

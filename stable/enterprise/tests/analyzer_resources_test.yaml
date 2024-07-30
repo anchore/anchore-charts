@@ -4,6 +4,7 @@ templates:
   - analyzer_deployment.yaml
   - anchore_secret.yaml
   - anchore_configmap.yaml
+  - envvars_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace
@@ -398,3 +399,39 @@ tests:
             cpu: 200m
             memory: 256Mi
         count: 1
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME as service name without domainSuffix
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-analyzer.test-namespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-analyzer.mynamespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix specified and overridden
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+      analyzer.service.domainSuffix: "myothersuffix.svc.cluster.local"
+      ui.service.domainSuffix: "nope.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-analyzer.myothersuffix.svc.cluster.local

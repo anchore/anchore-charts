@@ -10,8 +10,7 @@ spec:
   selector:
     matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
   replicas: {{ .Values.simpleQueue.replicaCount }}
-  strategy:
-    type: Recreate
+  strategy: {{- include "enterprise.common.deploymentStrategy" . | nindent 4 }}
   template:
     metadata:
       labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
@@ -20,6 +19,7 @@ spec:
         checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/enterprise-config: {{ include (print $.Template.BasePath "/anchore_configmap.yaml") . | sha256sum }}
+        checksum/enterprise-envvar: {{ include (print $.Template.BasePath "/envvars_configmap.yaml") . | sha256sum }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}

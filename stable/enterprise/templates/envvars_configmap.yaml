@@ -64,6 +64,7 @@ data:
   ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: {{ dig "anchoreConfig" "feeds" "drivers" "msrc" "enabled" "false" .Values.feeds | quote }}
   ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
   ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED: "false"
+  ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED: "true"
   ANCHORE_FEEDS_SSL_VERIFY: "{{ .Values.anchoreConfig.internalServicesSSL.verifyCerts }}"
   ANCHORE_FEEDS_VULNERABILITIES_ENABLED: "true"
   ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"

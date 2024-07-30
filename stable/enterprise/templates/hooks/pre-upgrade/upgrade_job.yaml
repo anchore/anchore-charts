@@ -39,6 +39,7 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
+      {{- if eq (include "enterprise.appVersionChanged" .) "true" }}
       initContainers:
         - name: scale-down-anchore
           image: {{ .Values.upgradeJob.kubectlImage }}
@@ -84,6 +85,7 @@ spec:
           {{- with .Values.upgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}

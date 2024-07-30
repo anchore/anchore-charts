@@ -242,6 +242,9 @@ should render the configmaps for osaa migration if enabled:
                   packages:
                     enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
                     url: http://test-release-feeds:8448/v2/feeds
+                  vulnerability_annotations:
+                    enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
+                    url: http://test-release-feeds:8448/v2/feeds
               matching:
                 default:
                   search:
@@ -562,6 +565,9 @@ should render the configmaps for osaa migration if enabled:
                     url: http://test-release-feeds:8448/v2/databases/grypedb
                   packages:
                     enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
+                    url: http://test-release-feeds:8448/v2/feeds
+                  vulnerability_annotations:
+                    enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
                     url: http://test-release-feeds:8448/v2/feeds
               matching:
                 default:

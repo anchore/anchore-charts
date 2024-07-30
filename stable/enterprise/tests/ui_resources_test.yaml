@@ -449,3 +449,39 @@ tests:
             g2: v2
             s1: a1
             s2: a2
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME as service name without domainSuffix
+    template: ui_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-ui.test-namespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-ui.mynamespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix specified and overridden
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+      ui.service.domainSuffix: "myothersuffix.svc.cluster.local"
+      api.service.domainSuffix: "nope.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-ui.myothersuffix.svc.cluster.local
