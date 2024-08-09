@@ -333,13 +333,13 @@ tests:
             nodePort: 9999
         count: 1
 
-  - it: should have RollingUpdate as a deployment strategy by default
+  - it: should have not use RollingUpdate as a deployment strategy by default
     template: deployment.yaml
     documentIndex: 0
     asserts:
       - equal:
           path: spec.strategy.type
-          value: RollingUpdate
+          value: Recreate
 
   - it: should have Recreate as a deployment strategy for post upgrade hook
     template: deployment.yaml

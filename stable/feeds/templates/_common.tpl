@@ -117,9 +117,5 @@ app.kubernetes.io/component: feeds
 Deployment Strategy Definition. For preupgrade hooks, use RollingUpdate. For postupgrade hooks, use Recreate.
 */}}
 {{- define "feeds.common.deploymentStrategy" -}}
-{{- if .Values.feedsUpgradeJob.usePostUpgradeHook -}}
 type: Recreate
-{{- else -}}
-type: RollingUpdate
-{{- end -}}
 {{- end -}}
