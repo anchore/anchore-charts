@@ -228,6 +228,10 @@ anchoreConfig:
     sslMode: require
 ```
 
+#### RDS Postgres Database Configuration
+
+Please note that automatic password rotation using AWS Secrets Manager is enabled by default upon provisioning a new RDS cluster however this feature is not currently supported by Anchore Enterprise.
+
 #### RDS Postgres Database Configuration With TLS
 
 To obtain a comprehensive AWS RDS PostgreSQL certificate bundle, which includes both intermediate and root certificates for all AWS regions, you can download it [here](https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem). An example of creating the certificate secret can be found in [TLS Configuration](#using-tls-internally).
