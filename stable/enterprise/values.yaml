@@ -323,6 +323,7 @@ anchoreConfig:
     sso_require_existing_users: false
     remove_deleted_user_api_keys_older_than_days: 365
     disallow_native_users: false
+    log_saml_assertions: false
 
   ## @param anchoreConfig.metrics.enabled Enable Prometheus metrics for all Anchore services
   ## @param anchoreConfig.metrics.auth_disabled Disable auth on Prometheus metrics for all Anchore services
