@@ -142,6 +142,7 @@ should render the configmaps:
           max_api_keys_per_user: 100
           remove_deleted_user_api_keys_older_than_days: 365
           disallow_native_users: false
+          log_saml_assertions: false
         credentials:
           database:
             user: "${ANCHORE_DB_USER}"

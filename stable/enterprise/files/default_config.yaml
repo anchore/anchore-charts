@@ -82,6 +82,7 @@ user_authentication:
   max_api_keys_per_user: {{ .Values.anchoreConfig.user_authentication.max_api_keys_per_user }}
   remove_deleted_user_api_keys_older_than_days: {{ .Values.anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days }}
   disallow_native_users: {{ .Values.anchoreConfig.user_authentication.disallow_native_users }}
+  log_saml_assertions: {{ .Values.anchoreConfig.user_authentication.log_saml_assertions }}
 credentials:
   database:
     user: "${ANCHORE_DB_USER}"
