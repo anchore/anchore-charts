@@ -434,6 +434,49 @@ entries:
   anchore-engine:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2024-08-27T16:36:56.290038964Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-db
+      condition: anchore-feeds-db.enabled,anchoreEnterpriseGlobal.enabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: anchore-feeds-gem-db
+      condition: anchore-feeds-gem-db.enabled,anchoreEnterpriseFeeds.gemDriverEnabled
+      name: postgresql
+      repository: file://./deps/postgresql
+      version: 1.0.1
+    - alias: ui-redis
+      condition: ui-redis.enabled,anchoreEnterpriseGlobal.enabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~18
+    deprecated: true
+    description: Anchore container analysis and policy evaluation engine service
+    digest: bbc73109fcf1f23544c0d466ff1138a4e6f3bed28090ecfe028bff21d2b818ff
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - image
+    - security
+    - vulnerability
+    - scanner
+    name: anchore-engine
+    sources:
+    - https://github.com/anchore/anchore-engine
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-engine-1.28.8/anchore-engine-1.28.8.tgz
+    version: 1.28.8
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2024-02-02T00:49:20.250171557Z"
     dependencies:
     - condition: postgresql.enabled
@@ -10717,4 +10760,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-14T23:45:53.888616898Z"
+generated: "2024-08-27T16:36:56.290498496Z"
