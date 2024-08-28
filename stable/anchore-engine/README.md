@@ -1,4 +1,7 @@
-# Anchore Helm Chart
+ 
+# **Deprecation warning: This chart is deprecated and is no longer maintained. The [Anchore Engine project](https://github.com/anchore/anchore-engine) is EOL as well. Please refer to Anchore Enterprise and the [enterprise](https://github.com/anchore/anchore-charts/tree/main/stable/enterprise) chart for Anchore deployments.**
+
+# Anchore Engine Helm Chart
 
 This chart deploys the Anchore Enterprise container image analysis system. Anchore requires a PostgreSQL database (>=9.6) which may be handled by the chart or supplied externally, and executes in a service-based architecture utilizing the following Anchore Enterprise services: External API, SimpleQueue, Catalog, Policy Engine, Analyzer, GUI, RBAC, Reporting, Notifications and On-premises Feeds. Enterprise services require a valid Anchore Enterprise license, as well as credentials with access to the private DockerHub repository hosting the images. These are not enabled by default.
 
