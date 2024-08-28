@@ -1,8 +1,9 @@
 apiVersion: v2
 name: anchore-engine
-version: 1.28.7
+version: 1.28.8
 appVersion: 1.1.0
 description: Anchore container analysis and policy evaluation engine service
+deprecated: true
 keywords:
   - analysis
   - docker
@@ -15,11 +16,6 @@ keywords:
 home: https://anchore.com
 sources:
   - https://github.com/anchore/anchore-engine
-maintainers:
-  - name: zhill
-    email: zach@anchore.com
-  - name: btodhunter
-    email: bradyt@anchore.com
 engine: gotpl
 icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
 dependencies:
