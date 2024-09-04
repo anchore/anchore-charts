@@ -9048,6 +9048,39 @@ entries:
     version: 0.0.1
   feeds:
   - apiVersion: v2
+    appVersion: 5.9.0
+    created: "2024-09-04T15:58:00.527992783Z"
+    dependencies:
+    - alias: feeds-db
+      condition: feeds-db.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: gem-db
+      condition: gem-db.chartEnabled,anchoreConfig.feeds.drivers.gem.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    description: Anchore feeds service
+    digest: 6ddd426a7834bea695a2993e0ab190cc10d37bd9a8b204961f6ce68b4834a4ff
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - anchore
+    - anchore-feeds
+    kubeVersion: 1.23.x - 1.30.x || 1.23.x-x - 1.30.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: feeds
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/feeds-2.9.0/feeds-2.9.0.tgz
+    version: 2.9.0
+  - apiVersion: v2
     appVersion: 5.8.1
     created: "2024-08-09T20:59:37.326951811Z"
     dependencies:
@@ -10840,4 +10873,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-28T22:10:07.03746957Z"
+generated: "2024-09-04T15:58:00.528630644Z"
