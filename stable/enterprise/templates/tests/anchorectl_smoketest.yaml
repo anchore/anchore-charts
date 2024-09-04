@@ -10,9 +10,6 @@ metadata:
     "helm.sh/hook": test
 spec:
   volumes: {{- include "enterprise.common.volumes" . | nindent 2 }}
-  {{- with .Values.securityContext }}
-  securityContext: {{- toYaml . | nindent 2 }}
-  {{- end }}
   {{- with .Values.imagePullSecretName }}
   imagePullSecrets:
     - name: {{ . }}
