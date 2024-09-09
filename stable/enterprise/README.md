@@ -18,7 +18,6 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 - [Configuration](#configuration)
   - [External Database Requirements](#external-database-requirements)
   - [Installing on Openshift](#installing-on-openshift)
-  - [Enterprise Feeds Configuration](#enterprise-feeds-configuration)
   - [Analyzer Image Layer Cache Configuration](#analyzer-image-layer-cache-configuration)
   - [Configuring Object Storage](#configuring-object-storage)
   - [Configuring Analysis Archive Storage](#configuring-analysis-archive-storage)
@@ -27,7 +26,6 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Prometheus Metrics](#prometheus-metrics)
   - [Scaling Individual Services](#scaling-individual-services)
   - [Using TLS Internally](#using-tls-internally)
-- [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart)
 - [Object storage migration](#object-storage-migration)
 - [Parameters](#parameters)
 - [Release Notes](#release-notes)
@@ -38,8 +36,6 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 - [Kubernetes](https://kubernetes.io/) >=1.23
 
 ## Installing the Chart
-
-> **Note**: For migration steps from an Anchore Engine Helm chart deployment, refer to the [Migrating to the Anchore Enterprise Helm Chart](#migrating-to-the-anchore-enterprise-helm-chart) section.
 
 This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the default configuration. Refer to the [Configuration](#configuration) section for additional guidance on production deployments.
 
@@ -52,7 +48,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
     kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=${LICENSE_PATH} -n ${NAMESPACE}
     ```
 
-1. **Create a Kubernetes Secret for DockerHub Credentials**: Generate another Kubernetes secret for DockerHub credentials. These credentials should have access to private Anchore Enterprise repositories. We recommend that you create a brand new DockerHub user for these pull credentials. Contact [Anchore Support](https://get.anchore.com/contact/) to obtain access.
+2. **Create a Kubernetes Secret for DockerHub Credentials**: Generate another Kubernetes secret for DockerHub credentials. These credentials should have access to private Anchore Enterprise repositories. We recommend that you create a brand new DockerHub user for these pull credentials. Contact [Anchore Support](https://get.anchore.com/contact/) to obtain access.
 
     ```shell
     export NAMESPACE=anchore
@@ -63,7 +59,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
     kubectl create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username=${DOCKERHUB_USER} --docker-password=${DOCKERHUB_PASSWORD} --docker-email=${DOCKERHUB_EMAIL} -n ${NAMESPACE}
     ```
 
-1. **Add Chart Repository & Deploy Anchore Enterprise**: Create a custom values file, named `anchore_values.yaml`, to override any chart parameters. Refer to the [Parameters](#parameters) section for available options.
+3. **Add Chart Repository & Deploy Anchore Enterprise**: Create a custom values file, named `anchore_values.yaml`, to override any chart parameters. Refer to the [Parameters](#parameters) section for available options.
 
     > :exclamation: **Important**: Default passwords are specified in the chart. It's highly recommended to modify these before deploying.
 
@@ -77,7 +73,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
 
     > **Note**: This command installs Anchore Enterprise with a chart-managed PostgreSQL database, which may not be suitable for production use. See the [External Database](#external-database-requirements) section for details on using an external database.
 
-1. **Post-Installation Steps**: Anchore Enterprise will take some time to initialize. After the bootstrap phase, it will begin a vulnerability feed sync. Image analysis will show zero vulnerabilities until this sync is complete. This can take several hours based on the enabled feeds. Use the following [anchorectl](https://docs.anchore.com/current/docs/deployment/anchorectl/) commands to check the system status:
+4. **Post-Installation Steps**: Anchore Enterprise will take some time to initialize. Use the following [anchorectl](https://docs.anchore.com/current/docs/deployment/anchorectl/) commands to check the system status:
 
     ```shell
     export NAMESPACE=anchore
@@ -93,22 +89,9 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
 
 ### Installing on Openshift
 
-As of August 2, 2023, Helm does not offer native support for passing `null` values to child or dependency charts. For details, refer to this [Helm GitHub issue](https://github.com/helm/helm/issues/9027). Given that the `feeds` chart is a dependency, a workaround is to deploy it as a standalone chart and configure the `enterprise` deployment to point to this separate `feeds` deployment.
-
-Additionally, be aware that you'll need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled` or `feeds-db.chartEnabled`).
+You will need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled`).
 
 For example:
-
-1. **Deploy feeds chart as a standalone deployment:**
-
-    ```shell
-    helm install my-release anchore/feeds \
-      --set securityContext.fsGroup=null \
-      --set securityContext.runAsGroup=null \
-      --set securityContext.runAsUser=null \
-      --set feeds-db.primary.containerSecurityContext.enabled=false \
-      --set feeds-db.primary.podSecurityContext.enabled=false
-    ```
 
 1. **Deploy the enterprise chart with appropriate values:**
 
@@ -117,8 +100,6 @@ For example:
       --set securityContext.fsGroup=null \
       --set securityContext.runAsGroup=null \
       --set securityContext.runAsUser=null \
-      --set feeds.chartEnabled=false \
-      --set feeds.url=my-release-feeds \
       --set postgresql.primary.containerSecurityContext.enabled=false \
       --set postgresql.primary.podSecurityContext.enabled=false \
       --set ui-redis.master.podSecurityContext.enabled=false \
@@ -136,9 +117,6 @@ securityContext:
   fsGroup: null
   runAsGroup: null
   runAsUser: null
-feeds:
-  chartEnabled: false
-  url: my-release-feeds
 postgresql:
   primary:
     containerSecurityContext:
@@ -188,8 +166,6 @@ After deleting the helm release, there are still a few persistent volume claims 
   export RELEASE=my-release
 
   kubectl get pvc -n ${NAMESPACE}
-  kubectl delete pvc ${RELEASE}-feeds -n ${NAMESPACE}
-  kubectl delete pvc ${RELEASE}-feeds-db -n ${NAMESPACE}
   kubectl delete pvc ${RELEASE}-postgresql -n ${NAMESPACE}
   ```
 
@@ -275,47 +251,6 @@ cloudsql:
   serviceAccJsonName: for_cloudsql.json
 ```
 
-### Enterprise Feeds Configuration
-
-The Anchore Enterprise Feeds service is provided as a dependent [Helm chart](https://github.com/anchore/anchore-charts/tree/main/stable/feeds). This service is comprised of different drivers for different vulnerability feeds. The drivers can be configured separately, and some drivers require a token or other credential.
-
-See the [Anchore Enterprise Feeds](https://docs.anchore.com/current/docs/configuration/feeds/) documentation for details.
-
-```yaml
-feeds:
-  anchoreConfig:
-    feeds:
-      drivers:
-        github:
-          enabled: true
-          # The GitHub feeds driver requires a GitHub developer personal access token with no permission scopes selected.
-          # See https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
-          token: your-github-token
-        msrc:
-          enabled: true
-```
-
-#### Enterprise Feeds External Database Configuration
-
-Anchore Enterprise Feeds requires the use of a PostgreSQL-compatible database version 13 or above. This database is distinct from the primary Anchore Enterprise database. For production environments, leveraging managed database services like AWS RDS or Google Cloud SQL is advised. While the Helm chart includes a chart-managed database by default, you can override this setting to use an external database.
-
-See previous [examples](#external-database-requirements) of configuring RDS Postgresql and Google CloudSQL.
-
-```yaml
-feeds:
-  anchoreConfig:
-    database:
-      ssl: true
-      sslMode: require
-
-  feeds-db:
-    enabled: false
-    auth.password: <PASSWORD>
-    auth.username: <USER>
-    auth.database: <DATABASE>
-    externalEndpoint: <HOSTNAME>
-```
-
 ### Analyzer Image Layer Cache Configuration
 
 To improve performance, the Anchore Enterprise Analyzer can be configured to cache image layers. This can be particularly helpful if many images analyzed are built from the same set of base images.
@@ -356,7 +291,6 @@ Configuration of external analysis archive storage is essentially identical to c
 For deployments where version-controlled configurations are essential, it's advised to avoid storing credentials directly in values files. Instead, manually create Kubernetes secrets and reference them as existing secrets within your values files. When using existing secrets, the chart will load environment variables into deployments from the secret names specified by the following values:
 
 - `.Values.existingSecretName` [default: anchore-enterprise-env]
-- `.Values.feeds.existingSecretName` [default: anchore-enterprise-feeds-env]
 - `.Values.ui.existingSecretName` [default: anchore-enterprise-ui-env]
 
 To enable this feature, set the following values to `true` in your values file:
@@ -364,8 +298,6 @@ To enable this feature, set the following values to `true` in your values file:
 ```yaml
 useExistingSecrets: true
 
-feeds:
-  useExistingSecrets: true
 ```
 
 Below are sample Kubernetes secret objects and corresponding guidelines on integrating them into your Anchore Enterprise configuration.
@@ -397,34 +329,13 @@ stringData:
   ANCHORE_APPDB_URI: postgresql://anchoreengine:anchore-postgres,123@anchore-postgresql:5432/anchore
   ANCHORE_REDIS_URI: redis://:anchore-redis,123@anchore-ui-redis-master:6379
 
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: anchore-enterprise-feeds-env
-    app: anchore
-type: Opaque
-stringData:
-  ANCHORE_ADMIN_PASSWORD: foobar1234
-  ANCHORE_FEEDS_DB_NAME: anchore-feeds
-  ANCHORE_FEEDS_DB_USER: anchoreengine
-  ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
-  ANCHORE_FEEDS_DB_HOST: anchore-enterprise-feeds-db
-  ANCHORE_FEEDS_DB_PORT: 5432
-  # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
-  # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
-  # (if applicable) ANCHORE_NVD_API_KEY: foobar,nvd1234
-  # (if applicable) ANCHORE_GEM_DB_NAME: anchore-gems
-  # (if applicable) ANCHORE_GEM_DB_USER: anchoregemsuser
-  # (if applicable) ANCHORE_GEM_DB_PASSWORD: foobar1234
-  # (if applicable) ANCHORE_GEM_DB_HOST: anchorefeeds-gem-db.example.com:5432
 ```
 
 ### Ingress
 
 [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) serves as the gateway to expose HTTP and HTTPS routes from outside the Kubernetes cluster to services within it. Routing is governed by rules specified in the Ingress resource. Kubernetes supports a variety of ingress controllers, such as AWS ALB and GCE controllers.
 
-This Helm chart includes a foundational ingress configuration that is customizable. You can expose various Anchore Enterprise external APIs, including the core API, UI, reporting, and feeds, by editing the `ingress` section in your values file.
+This Helm chart includes a foundational ingress configuration that is customizable. You can expose various Anchore Enterprise external APIs, including the core API, UI, and Reporting by editing the `ingress` section in your values file.
 
 Ingress is disabled by default in this Helm chart. To enable it, along with the [NGINX ingress controller](https://kubernetes.github.io/ingress-nginx/) for core API and UI routes, set the `ingress.enabled` value to `true`.
 
@@ -448,14 +359,8 @@ ingress:
     - anchore-api.example.com
   uiHosts:
     - anchore-ui.example.com
-  feedsHosts:
-    - anchore-feeds.example.com
 
 api:
-  service:
-    type: NodePort
-
-feeds:
   service:
     type: NodePort
 
@@ -476,23 +381,14 @@ ingress:
     - /v1/*
     - /v2/*
     - /version/*
-  feedsPaths:
-    - /v1/feeds/*
-    - /v2/feeds/*
   uiPath: /*
 
   apiHosts:
     - anchore-api.example.com
   uiHosts:
     - anchore-ui.example.com
-  feedsHosts:
-    - anchore-feeds.example.com
 
 api:
-  service:
-    type: NodePort
-
-feeds:
   service:
     type: NodePort
 
@@ -569,11 +465,6 @@ spec:
     scheme: http
   # simple queue
   - targetPort: 8083
-    interval: 30s
-    path: /metrics
-    scheme: http
-  # feeds
-  - targetPort: 8448
     interval: 30s
     path: /metrics
     scheme: http
@@ -655,264 +546,6 @@ ui:
   # Note if using an internal ca cert for internalServicesSSL, combine that into the ldap-combined-ca-cert-bundle.pem
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
-
-## Migrating to the Anchore Enterprise Helm Chart
-
-This guide provides steps for transitioning from an Anchore Engine Helm chart deployment to the updated Anchore Enterprise Helm chart, a necessary step for users planning to upgrade to Anchore Enterprise version v5.0.0 or later.
-
-  > :warning: **Warning**: The values file used by the Anchore Enterprise Helm chart is different from the one used by the Anchore Engine Helm chart. Make sure to convert your existing values file accordingly.
-
-A [migration script](https://github.com/anchore/anchore-charts/tree/main/scripts) is available to automate the conversion of your Anchore Engine values file to the new Enterprise format. A usage example is provided below.
-
-### Migration Prerequisites
-
-- **Anchore Version**: Ensure that your current deployment is running Anchore Enterprise version 4.9.x (but not v5.0.0+). This is required to ensure that the migration script can properly convert your values file.
-
-  > **Note:** Upgrade your [anchore-engine](https://github.com/anchore/anchore-charts/tree/main/stable/anchore-engine) chart deployment to `v1.28.0` or higher to ensure that you're running Anchore Enterprise v4.9.x.
-
-- **PostgreSQL Version**: You need PostgreSQL version 13 or higher. For upgrading your existing PostgreSQL installation, refer to the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html). Database migration help for helm managed PostgreSQL deployments is provided below.
-
-  > **Note:** This chart deploys PostgreSQL 13 by default.
-
-- **Runtime Environment**: Docker or Podman must be installed on the machine where the migration will run.
-
-### Expected Changes to Your Deployment
-
-The Anchore Enterprise Helm chart introduces several changes to the deployment compared to the Anchore Engine chart deployment. These changes are outlined below.
-
-#### Service Names
-
-- All service names have been updated to follow the Enterprise naming convention:
-  - `<RELEASE_NAME>-anchore-engine-api` -> `<RELEASE_NAME>-enterprise-api`
-  - `<RELEASE_NAME>-anchore-engine-catalog` -> `<RELEASE_NAME>-enterprise-catalog`
-  - `<RELEASE_NAME>-anchore-engine-enterprise-feeds` -> `<RELEASE_NAME>-feeds`
-  - `<RELEASE_NAME>-anchore-engine-enterprise-notifications` -> `<RELEASE_NAME>-enterprise-notifications`
-  - `<RELEASE_NAME>-anchore-engine-enterprise-reports` -> `<RELEASE_NAME>-enterprise-reports`
-  - `<RELEASE_NAME>-anchore-engine-enterprise-ui` -> `<RELEASE_NAME>-enterprise-ui`
-  - `<RELEASE_NAME>-anchore-engine-policy` -> `<RELEASE_NAME>-enterprise-policy`
-  - `<RELEASE_NAME>-anchore-engine-simplequeue` -> `<RELEASE_NAME>-enterprise-simplequeue`
-
-#### Labels, Annotations & Selectors
-
-- Standard Kubernetes labels and annotations replace the custom ones used in Anchore Engine:
-  - `component` -> `app.kubernetes.io/component`
-  - `release` -> `app.kubernetes.io/instance`
-  - `app` -> `app.kubernetes.io/name`
-  - `chart` -> `helm.sh/chart`
-
-#### Dependent Services
-
-- The Feeds service is now deployed as a dependent chart, it can be configured using the [Feeds Values](https://github.com/anchore/anchore-charts/blob/main/stable/feeds/values.yaml)
-- The bundled PostgreSQL chart has been replaced with the Bitnami PostgreSQL Chart as a dependency. Configuration options can be found in the [Postgresql Values](https://github.com/bitnami/charts/blob/main/bitnami/postgresql/values.yaml).
-
-#### Upgrade Behavior
-
-- Pre-upgrade Helm hooks, along with a Bitnami/kubectl init container, are used to terminate all pods before running the Anchore upgrade. You can revert to legacy post-upgrade hooks by setting `upgradeJob.usePostUpgradeHook=true`.
-
-#### Application Configuration
-
-- Configuration is now primarily managed through environment variables, specified in the `<RELEASE_NAME>-enterprise-config-env-vars` ConfigMap and set via the values file.
-- Previously, unexposed values for advanced Anchore configurations have been removed. Instead, you can use the `extraEnv` value to set the required environment variables.
-
-### Migration Rollback Strategy
-
-The migration employs a blue/green deployment strategy to minimize risk and facilitate easy rollback. Should you encounter issues during the migration, reverting to the prior state is straightforward: simply scale your Anchore-Engine deployment back up.
-
-For those using an external PostgreSQL database without the benefit of a blue/green deployment strategy, a manual database restoration is necessary. Utilize a pre-migration backup to restore the database to its previous version, and then proceed to scale your Anchore-Engine deployment back up.
-
-See the [Migration Rollback Steps](#migration-rollback-steps) section for more details.
-
-### Step-by-Step Migration Process
-
-1. **Upgrade Existing Anchore Engine Deployment**: Upgrade your existing Anchore Engine deployment to chart version 1.28.0 or higher. This will ensure that your deployment is running Anchore Enterprise v4.9.x.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME> # Existing Engine release name
-    export VALUES_FILE_NAME=my-values-file.yaml  # Existing Engine chart values file
-
-    helm repo update
-    helm upgrade ${ENGINE_RELEASE} -n ${NAMESPACE} anchore/anchore-engine -f ${VALUES_FILE_NAME} --version=^1.28.0
-    ```
-
-1. **Generate a New Enterprise Values File**: Use the migration script to convert your existing Anchore Engine values file to the new Anchore Enterprise format.
-
-    >**Note**: This command mounts a local volume to persistently store the output files, it also mounts the input values file within the container for conversion. It's critical to review both the output logs and the new `output/enterprise.values.yaml` file before moving forward.
-
-    ```shell
-    export VALUES_FILE_NAME=my-values-file.yaml  # Existing Engine chart values file
-
-    docker run -v ${PWD}:/tmp -v ${PWD}/${VALUES_FILE_NAME}:/app/${VALUES_FILE_NAME} docker.io/anchore/enterprise-helm-migrator:latest -e /app/${VALUES_FILE_NAME} -d /tmp/output
-    ```
-
-### If Using an External PostgreSQL Database
-
-1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
-
-    kubectl scale deployment --replicas=0 -l app=${ENGINE_RELEASE}-anchore-engine -n ${NAMESPACE}
-    ```
-
-1. **Perform database backup**: Backup your external database. See the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/backup.html) for guidance. If using a managed cloud database service refer to their documentation.
-
-1. **Perform database upgrade**: Upgrade your external database. See the official [PostgreSQL documentation](https://www.postgresql.org/docs/13/upgrading.html) for guidance. If using a managed cloud database service refer to their documentation.
-
-    > Tip: Leveraging a backup to instantiate a new database instance enables a non-intrusive database upgrade and Enterprise chart migration. This approach preserves the integrity of your original database. By adopting a blue/green deployment strategy for the migration, you gain the advantage of effortless rollbacks in case of migration-related issues.
-
-1. **(Optional) Update Database Hostname**: If you're employing a blue/green deployment strategy for the database upgrade, update the database hostname in your values file and/or existing Kubernetes secrets to point to your newly created database instance. This step is essential for properly configuring the Enterprise chart to use the new database.
-
-1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
-
-    >**Note:** If you are **not using existing secrets**, you will need to uncomment the `ADMIN_PASS` and `SET_ADMIN_PASS` export commands below. This is needed to ensure that your Enterprise deployment stores the correct Anchore admin password in the secret.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
-    export ENTERPRISE_VALUES_FILE=${PWD}/output/enterprise.my-values-file.yaml
-
-    # If you are not using existing secrets, uncomment the following export commands
-    #
-    # export ADMIN_PASS=$(kubectl get secret -n ${NAMESPACE} ${ENGINE_RELEASE}-anchore-engine-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 -d -)
-    # export SET_ADMIN_PASS=("--set" "anchoreConfig.default_admin_password=${ADMIN_PASS}")
-
-    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} ${SET_ADMIN_PASS[@]} -f ${ENTERPRISE_VALUES_FILE} anchore/enterprise --version=^1.0.0
-    ```
-
-1. **Verification and Cleanup**: After confirming that the Anchore Enterprise deployment is functional, you can safely uninstall the old Anchore Engine deployment.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
-
-    helm uninstall ${ENGINE_RELEASE} -n ${NAMESPACE}
-    ```
-
-    You may now have old engine persistent volume claims to delete. Delete these only when you are confident with the state of your new Enterprise Chart deployment.
-
-      ```shell
-      export NAMESPACE=anchore
-      export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
-
-      kubectl get pvc -n ${NAMESPACE}
-      kubectl delete pvc ${ENGINE_RELEASE}-anchore-engine-enterprise-feeds -n ${NAMESPACE}
-
-### If Using the Dependent PostgreSQL Chart
-
-1. **Scale Down Anchore Engine**: To avoid data inconsistency, scale down your existing Anchore Engine deployment to zero replicas.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
-
-    kubectl scale deployment --replicas=0 -l app=${ENGINE_RELEASE}-anchore-engine -n ${NAMESPACE}
-    ```
-
-1. **Deploy Anchore Enterprise**: Use the converted values file to deploy the new Anchore Enterprise Helm chart.
-
-    >**Note:** You will have to migrate data from the old database to the new one after the chart is installed. The enterprise chart contains a helper pod to aid with this. This helper pod is enabled using the `startMigrationPod=true` & `migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine` flags in the following command.
-    >
-    > If you **are using existing secrets**, you should ignore setting the `ADMIN_PASS` and `SET_ADMIN_PASS` environment variables.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
-    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
-    export ENTERPRISE_VALUES_FILE=${PWD}/output/enterprise.my-values-file.yaml  # The converted file
-
-    # If you are using existing secrets, ignore the following export commands
-    #
-    export ADMIN_PASS=$(kubectl get secret -n ${NAMESPACE} ${ENGINE_RELEASE}-anchore-engine-admin-pass -o jsonpath="{.data.ANCHORE_ADMIN_PASSWORD}" | base64 -d -)
-    export SET_ADMIN_PASS=("--set" "anchoreConfig.default_admin_password=${ADMIN_PASS}")
-
-    helm install ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=true --set migrationAnchoreEngineSecretName=${ENGINE_RELEASE}-anchore-engine ${SET_ADMIN_PASS[@]} anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=^1.0.0
-    ```
-
-1. **Scale Down Anchore Enterprise**: Before migrating the database, scale down the new Anchore Enterprise deployment to zero replicas.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
-
-    kubectl scale deployment -n ${NAMESPACE} --replicas=0 -l app.kubernetes.io/instance=${ENTERPRISE_RELEASE}
-    ```
-
-1. **Database Preparation**: Replace the existing Anchore database schema with a new database schema in the PostgreSQL 13 deployment. If you set `startMigrationPod=true` as per the step above, you can exec into the migrator pod using the following commands:
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
-
-    kubectl -n ${NAMESPACE} exec -it ${ENTERPRISE_RELEASE}-enterprise-migrate-db -- /bin/bash -c 'PGPASSWORD=${NEW_DB_PASSWORD} dropdb -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}; PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST}  -U ${NEW_DB_USERNAME} -c "CREATE DATABASE ${NEW_DB_NAME}" postgres'
-    ```
-
-1. **Data Migration**: Migrate data from the old Anchore Engine database to the new Anchore Enterprise database.
-
-    - If you are using the migration helper pod, exec into that pod and perform the database migration using following commands:
-
-        ```shell
-        export NAMESPACE=anchore
-        export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
-
-        kubectl -n ${NAMESPACE} exec -it ${ENTERPRISE_RELEASE}-enterprise-migrate-db -- /bin/bash -c 'PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}'
-        ```
-
-    - If you are using your own pod then follow these steps
-
-         1. Gather old DB parameters from the secret ${OLD_ENGINE_RELEASE}-anchore-engine
-         1. Gather new DB parameters from the new secret ${NEW_ENTERPRISE_RELEASE}-enterprise
-         1. Start a migration pod that has all the psql binaries required e.g. docker.io/postgresql:13
-         1. Export all the required environment variables
-
-        ```shell
-        PGPASSWORD=${OLD_DB_PASSWORD} pg_dump -h ${OLD_DB_HOST} -U ${OLD_DB_USERNAME} -c ${OLD_DB_NAME} | PGPASSWORD=${NEW_DB_PASSWORD} psql -h ${NEW_DB_HOST} -U ${NEW_DB_USERNAME} ${NEW_DB_NAME}
-        ```
-
-1. **Upgrade Anchore Enterprise**: After migrating the data, upgrade the Anchore Enterprise Helm deployment.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENTERPRISE_RELEASE=<YOUR_ENTERPRISE_RELEASE_NAME>
-    export ENTERPRISE_VALUES_FILE=${PWD}/output/enterprise.my-values-file.yaml  # The converted file
-
-    helm upgrade ${ENTERPRISE_RELEASE} -n ${NAMESPACE} --set startMigrationPod=false anchore/enterprise -f ${ENTERPRISE_VALUES_FILE} --version=^1.0.0
-    ```
-
-1. **Final Verification and Cleanup**: After ensuring the new deployment is operational, uninstall the old Anchore Engine deployment.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
-
-    helm uninstall ${ENGINE_RELEASE} -n ${NAMESPACE}
-    ```
-
-    You may now have old engine persistent volume claims to delete. Delete these only when you are confident with the state of your new Enterprise Chart deployment.
-
-    ```shell
-    export NAMESPACE=anchore
-    export ENGINE_RELEASE=<YOUR_ENGINE_RELEASE_NAME>
-
-    kubectl get pvc -n ${NAMESPACE}
-    kubectl delete pvc ${ENGINE_RELEASE}-anchore-engine-enterprise-feeds -n ${NAMESPACE}
-    kubectl delete pvc ${ENGINE_RELEASE}-anchore-feeds-db -n ${NAMESPACE}
-    kubectl delete pvc ${ENGINE_RELEASE}-postgresql -n ${NAMESPACE}
-    ```
-
-### Migration Rollback Steps
-
-In case of issues during the migration, execute the following rollback steps:
-
-1. **Uninstall the Anchore Enterprise Chart**: Remove the Anchore Enterprise deployment from your cluster.
-1. **Remove Migrated Values File**: Delete the `output` directory generated by the migration script.
-1. **Erase Enterprise Database**: Delete the database associated with the Anchore Enterprise deployment.
-1. **(Optional) Restore Anchore-Engine Database**: If necessary, restore the Anchore-Engine database from a backup.
-1. **Reactivate Anchore Engine**: Scale the Anchore Engine deployment back to its original state.
-1. **Retry Migration**: Re-attempt the migration process following the initial steps.
-
-This rollback procedure is designed to revert your environment to its pre-migration state, allowing for a fresh migration attempt.
 
 ## Object Storage Migration
 
@@ -1006,8 +639,10 @@ To restore your deployment to using your previous driver configurations:
 | `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
 | `global.nameOverride`     | overrides the name set on resources     | `""`  |
 
+
 ### Common Resource Parameters
 
+<<<<<<< HEAD
 | Name                                    | Description                                                                                                                        | Value                                 |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
 | `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.9.0` |
@@ -1052,6 +687,60 @@ To restore your deployment to using your previous driver configurations:
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                  |
 | `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                  |
 | `domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".        | `""`                                  |
+=======
+| Name                                    | Description                                                                                                                        | Value                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.10.0` |
+| `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
+| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
+| `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `false`                                |
+| `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                   |
+| `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
+| `imageCredentials.password`             | The password for the image pull secret                                                                                             | `""`                                   |
+| `imageCredentials.email`                | The email for the image pull secret                                                                                                | `""`                                   |
+| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema                                                    | `false`                                |
+| `migrationPodImage`                     | The image reference to the migration pod                                                                                           | `docker.io/postgres:13-bookworm`       |
+| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                                                              | `my-engine-anchore-engine`             |
+| `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                                                             | `""`                                   |
+| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                                              | `false`                                |
+| `license`                               | License for Anchore Enterprise                                                                                                     | `{}`                                   |
+| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                                                                    | `anchore-enterprise-license`           |
+| `useExistingLicenseSecret`              | forgoes license secret creation and uses the secret defined in licenseSecretName                                                   | `false`                                |
+| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs                                                         | `""`                                   |
+| `extraEnv`                              | Common environment variables set on all containers                                                                                 | `[]`                                   |
+| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                                                          | `false`                                |
+| `existingSecretName`                    | Name of an existing secret to be used for Anchore core services, excluding Anchore UI                                              | `anchore-enterprise-env`               |
+| `labels`                                | Common labels set on all Kubernetes resources                                                                                      | `{}`                                   |
+| `annotations`                           | Common annotations set on all Kubernetes resources                                                                                 | `{}`                                   |
+| `nodeSelector`                          | Common nodeSelector set on all Kubernetes pods                                                                                     | `{}`                                   |
+| `tolerations`                           | Common tolerations set on all Kubernetes pods                                                                                      | `[]`                                   |
+| `affinity`                              | Common affinity set on all Kubernetes pods                                                                                         | `{}`                                   |
+| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports | `/analysis_scratch`                    |
+| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions on all scratch volumes                                               | `false`                                |
+| `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                                                                  | `alpine`                               |
+| `scratchVolume.details`                 | Details for the k8s volume to be created (defaults to default emptyDir)                                                            | `{}`                                   |
+| `extraVolumes`                          | mounts additional volumes to each pod                                                                                              | `[]`                                   |
+| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                              | `[]`                                   |
+| `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                                                                 | `1000`                                 |
+| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                                                                | `1000`                                 |
+| `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                                                                   | `1000`                                 |
+| `containerSecurityContext`              | The securityContext for all containers                                                                                             | `{}`                                   |
+| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                                                                           | `120`                                  |
+| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                                                                 | `10`                                   |
+| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                                                                  | `10`                                   |
+| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                                                               | `6`                                    |
+| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                                                               | `1`                                    |
+| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                                                                            | `10`                                   |
+| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                                             | `10`                                   |
+| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                          | `3`                                    |
+| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                          | `1`                                    |
+| `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services                                                          | `false`                                |
+| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                   |
+| `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                   |
+| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                   |
+| `domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".        | `""`                                   |
+
+>>>>>>> e993fd3 (feat: chart for enterprise v5.10.0)
 
 ### Anchore Configuration Parameters
 
@@ -1137,7 +826,8 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.catalog.down_analyzer_task_requeue`                               | Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state                      | `true`             |
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync`                             | Interval to run a feed sync to get latest cve data                                                                               | `14400`            |
 | `anchoreConfig.policy_engine.cycle_timers.feed_sync_checker`                     | Interval between checks to see if there needs to be a task queued                                                                | `3600`             |
-| `anchoreConfig.policy_engine.overrideFeedsToUpstream`                            | Override the Anchore Feeds URL to use the public upstream Anchore Feeds                                                          | `false`            |
+| `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`         | List of providers to exclude from matching                                                                                       | `[]`               |
+| `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`     | List of package types to exclude from matching                                                                                   | `[]`               |
 | `anchoreConfig.policy_engine.enable_user_base_image`                             | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`             |
 | `anchoreConfig.notifications.cycle_timers.notifications`                         | Interval that notifications are sent                                                                                             | `30`               |
 | `anchoreConfig.notifications.ui_url`                                             | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`               |
@@ -1179,6 +869,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.ui.dbUser`                                                        | allows overriding and separation of the ui database user.                                                                        | `""`               |
 | `anchoreConfig.ui.dbPassword`                                                    | allows overriding and separation of the ui database user authentication                                                          | `""`               |
 
+
 ### Anchore Analyzer k8s Deployment Parameters
 
 | Name                             | Description                                                                                                                                                                  | Value  |
@@ -1195,6 +886,7 @@ To restore your deployment to using your previous driver configurations:
 | `analyzer.affinity`              | Affinity for Anchore Analyzer pod assignment                                                                                                                                 | `{}`   |
 | `analyzer.serviceAccountName`    | Service account name for Anchore API pods                                                                                                                                    | `""`   |
 | `analyzer.scratchVolume.details` | Details for the k8s volume to be created for Anchore Analyzer scratch space                                                                                                  | `{}`   |
+
 
 ### Anchore API k8s Deployment Parameters
 
@@ -1217,6 +909,7 @@ To restore your deployment to using your previous driver configurations:
 | `api.tolerations`          | Tolerations for Anchore API pod assignment                                                                                                                                   | `[]`        |
 | `api.affinity`             | Affinity for Anchore API pod assignment                                                                                                                                      | `{}`        |
 | `api.serviceAccountName`   | Service account name for Anchore API pods                                                                                                                                    | `""`        |
+
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -1241,14 +934,30 @@ To restore your deployment to using your previous driver configurations:
 | `catalog.serviceAccountName`    | Service account name for Anchore Catalog pods                                                                                                                                | `""`        |
 | `catalog.scratchVolume.details` | Details for the k8s volume to be created for Anchore Catalog scratch space                                                                                                   | `{}`        |
 
-### Anchore Feeds Chart Parameters
 
-| Name                 | Description                                                                                    | Value   |
-| -------------------- | ---------------------------------------------------------------------------------------------- | ------- |
-| `feeds.chartEnabled` | Enable the Anchore Feeds chart                                                                 | `true`  |
-| `feeds.standalone`   | Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise. | `false` |
-| `feeds.url`          | Set the URL for a standalone Feeds service. Use when chartEnabled=false.                       | `""`    |
-| `feeds.resources`    | Resource requests and limits for Anchore Feeds pods                                            | `{}`    |
+### Anchore DataSyncer k8s Deployment Parameters
+
+| Name                               | Description                                                                                                                                                                  | Value       |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `dataSyncer.replicaCount`          | Number of replicas for the Anchore DataSyncer deployment                                                                                                                     | `1`         |
+| `dataSyncer.service.type`          | Service type for Anchore DataSyncer                                                                                                                                          | `ClusterIP` |
+| `dataSyncer.service.port`          | Service port for Anchore DataSyncer                                                                                                                                          | `8778`      |
+| `dataSyncer.service.annotations`   | Annotations for Anchore DataSyncer service                                                                                                                                   | `{}`        |
+| `dataSyncer.service.labels`        | Labels for Anchore DataSyncer service                                                                                                                                        | `{}`        |
+| `dataSyncer.service.nodePort`      | nodePort for Anchore DataSyncer service                                                                                                                                      | `""`        |
+| `dataSyncer.service.domainSuffix`  | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `dataSyncer.extraEnv`              | Set extra environment variables for Anchore DataSyncer pods                                                                                                                  | `[]`        |
+| `dataSyncer.extraVolumes`          | Define additional volumes for Anchore DataSyncer pods                                                                                                                        | `[]`        |
+| `dataSyncer.extraVolumeMounts`     | Define additional volume mounts for Anchore DataSyncer pods                                                                                                                  | `[]`        |
+| `dataSyncer.resources`             | Resource requests and limits for Anchore DataSyncer pods                                                                                                                     | `{}`        |
+| `dataSyncer.labels`                | Labels for Anchore DataSyncer pods                                                                                                                                           | `{}`        |
+| `dataSyncer.annotations`           | Annotation for Anchore DataSyncer pods                                                                                                                                       | `{}`        |
+| `dataSyncer.nodeSelector`          | Node labels for Anchore DataSyncer pod assignment                                                                                                                            | `{}`        |
+| `dataSyncer.tolerations`           | Tolerations for Anchore DataSyncer pod assignment                                                                                                                            | `[]`        |
+| `dataSyncer.affinity`              | Affinity for Anchore DataSyncer pod assignment                                                                                                                               | `{}`        |
+| `dataSyncer.serviceAccountName`    | Service account name for Anchore DataSyncer pods                                                                                                                             | `""`        |
+| `dataSyncer.scratchVolume.details` | Details for the k8s volume to be created for Anchore DataSyncer scratch space                                                                                                | `{}`        |
+
 
 ### Anchore Notifications Parameters
 
@@ -1271,6 +980,7 @@ To restore your deployment to using your previous driver configurations:
 | `notifications.tolerations`          | Tolerations for Anchore Notifications pod assignment                                                                                                                         | `[]`        |
 | `notifications.affinity`             | Affinity for Anchore Notifications pod assignment                                                                                                                            | `{}`        |
 | `notifications.serviceAccountName`   | Service account name for Anchore Notifications pods                                                                                                                          | `""`        |
+
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -1295,6 +1005,7 @@ To restore your deployment to using your previous driver configurations:
 | `policyEngine.serviceAccountName`    | Service account name for Anchore Policy Engine pods                                                                                                                          | `""`        |
 | `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space                                                                                             | `{}`        |
 
+
 ### Anchore Reports Parameters
 
 | Name                            | Description                                                                                                                                                                  | Value       |
@@ -1318,6 +1029,7 @@ To restore your deployment to using your previous driver configurations:
 | `reports.serviceAccountName`    | Service account name for Anchore Reports pods                                                                                                                                | `""`        |
 | `reports.scratchVolume.details` | Details for the k8s volume to be created for Anchore Reports scratch space                                                                                                   | `{}`        |
 
+
 ### Anchore Reports Worker Parameters
 
 | Name                                 | Description                                                                                                                                                                  | Value       |
@@ -1339,6 +1051,7 @@ To restore your deployment to using your previous driver configurations:
 | `reportsWorker.tolerations`          | Tolerations for Anchore Reports Worker pod assignment                                                                                                                        | `[]`        |
 | `reportsWorker.affinity`             | Affinity for Anchore Reports Worker pod assignment                                                                                                                           | `{}`        |
 | `reportsWorker.serviceAccountName`   | Service account name for Anchore Reports Worker pods                                                                                                                         | `""`        |
+
 
 ### Anchore Simple Queue Parameters
 
@@ -1362,8 +1075,10 @@ To restore your deployment to using your previous driver configurations:
 | `simpleQueue.affinity`             | Affinity for Anchore Simple Queue pod assignment                                                                                                                             | `{}`        |
 | `simpleQueue.serviceAccountName`   | Service account name for Anchore Simple Queue pods                                                                                                                           | `""`        |
 
+
 ### Anchore UI Parameters
 
+<<<<<<< HEAD
 | Name                         | Description                                                                                                                                                                  | Value                                    |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | `ui.image`                   | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.9.0` |
@@ -1387,6 +1102,32 @@ To restore your deployment to using your previous driver configurations:
 | `ui.tolerations`             | Tolerations for Anchore UI pod assignment                                                                                                                                    | `[]`                                     |
 | `ui.affinity`                | Affinity for Anchore ui pod assignment                                                                                                                                       | `{}`                                     |
 | `ui.serviceAccountName`      | Service account name for Anchore UI pods                                                                                                                                     | `""`                                     |
+=======
+| Name                         | Description                                                                                                                                                                  | Value                                     |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `ui.image`                   | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.10.0` |
+| `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
+| `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
+| `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
+| `ui.service.type`            | Service type for Anchore UI                                                                                                                                                  | `ClusterIP`                               |
+| `ui.service.port`            | Service port for Anchore UI                                                                                                                                                  | `80`                                      |
+| `ui.service.annotations`     | Annotations for Anchore UI service                                                                                                                                           | `{}`                                      |
+| `ui.service.labels`          | Labels for Anchore UI service                                                                                                                                                | `{}`                                      |
+| `ui.service.sessionAffinity` | Session Affinity for Ui service                                                                                                                                              | `ClientIP`                                |
+| `ui.service.nodePort`        | nodePort for Anchore UI service                                                                                                                                              | `""`                                      |
+| `ui.service.domainSuffix`    | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`                                      |
+| `ui.extraEnv`                | Set extra environment variables for Anchore UI pods                                                                                                                          | `[]`                                      |
+| `ui.extraVolumes`            | Define additional volumes for Anchore UI pods                                                                                                                                | `[]`                                      |
+| `ui.extraVolumeMounts`       | Define additional volume mounts for Anchore UI pods                                                                                                                          | `[]`                                      |
+| `ui.resources`               | Resource requests and limits for Anchore UI pods                                                                                                                             | `{}`                                      |
+| `ui.labels`                  | Labels for Anchore UI pods                                                                                                                                                   | `{}`                                      |
+| `ui.annotations`             | Annotation for Anchore UI pods                                                                                                                                               | `{}`                                      |
+| `ui.nodeSelector`            | Node labels for Anchore UI pod assignment                                                                                                                                    | `{}`                                      |
+| `ui.tolerations`             | Tolerations for Anchore UI pod assignment                                                                                                                                    | `[]`                                      |
+| `ui.affinity`                | Affinity for Anchore ui pod assignment                                                                                                                                       | `{}`                                      |
+| `ui.serviceAccountName`      | Service account name for Anchore UI pods                                                                                                                                     | `""`                                      |
+
+>>>>>>> e993fd3 (feat: chart for enterprise v5.10.0)
 
 ### Anchore Upgrade Job Parameters
 
@@ -1406,6 +1147,7 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`                   |
 | `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
 
+
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value                  |
@@ -1417,10 +1159,9 @@ To restore your deployment to using your previous driver configurations:
 | `ingress.apiPaths`         | The path used for accessing the Anchore API                        | `["/v2/","/version/"]` |
 | `ingress.uiHosts`          | List of custom hostnames for the Anchore UI                        | `[]`                   |
 | `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`                    |
-| `ingress.feedsHosts`       | List of custom hostnames for the Anchore Feeds API                 | `[]`                   |
-| `ingress.feedsPaths`       | The path used for accessing the Anchore Feeds API                  | `["/v2/feeds/"]`       |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                   |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                |
+
 
 ### Google CloudSQL DB Parameters
 
@@ -1435,6 +1176,7 @@ To restore your deployment to using your previous driver configurations:
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
+
 ### Anchore UI Redis Parameters
 
 | Name                                  | Description                                                                                      | Value               |
@@ -1444,6 +1186,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123` |
 | `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`        |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`             |
+
 
 ### Anchore Database Parameters
 
@@ -1458,6 +1201,7 @@ To restore your deployment to using your previous driver configurations:
 | `postgresql.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
 | `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
+
 
 ### Anchore Object Store and Analysis Archive Migration
 
@@ -1495,6 +1239,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - Deploys Anchore Enterprise v5.9.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/590/) for more information.
 
 ### V2.9.x
+
 - Deploys Anchore Enterprise v5.8.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/580/) for more information.
 - **Helm upgrade SLO improvements:**
   - Deployments will only be scaled down when database upgrades are required, as determined by a major/minor version change of the appVersion in Chart.yaml.

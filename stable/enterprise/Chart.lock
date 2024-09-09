@@ -5,8 +5,5 @@ dependencies:
 - name: redis
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 17.11.8
-- name: feeds
-  repository: https://charts.anchore.io/stable
-  version: 2.9.0
-digest: sha256:794234e4be51cccf563f5efc4b205fef8042f1ddd3113c2578f839eb4b6e10dd
-generated: "2024-09-04T11:58:57.913094-04:00"
+digest: sha256:0ecd9810e416973f8bc4caa4641764b10ff5224edaecb1a5b66d3b1f82948537
+generated: "2024-08-15T22:30:42.63806-07:00"

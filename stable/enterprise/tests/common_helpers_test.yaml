@@ -22,6 +22,9 @@ release:
 chart:
   version: 9.9.9
   appVersion: 9.9.9
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
 backend_test_templates: &backend_test_templates
   - analyzer_deployment.yaml
@@ -400,11 +403,12 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.imagePullSecrets[0].name
-          value: anchore-enterprise-pullcreds
+          value: test-release-enterprise-pullcreds
 
   - it: should render set imagePullSecretName
     set:
       imagePullSecretName: mysecret
+      useExistingPullCredSecret: true
     templates: *test_templates
     documentIndex: 0
     asserts:
@@ -839,112 +843,6 @@ tests:
           path: stringData["ANCHORE_ADMIN_PASSWORD"]
           pattern: ^[a-zA-Z0-9]{32}$
 
-  - it: should render anchoreFeedsURL with feeds.url set
-    set:
-      feeds:
-        url: my-feeds-url
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/feeds"
-
-  - it: should render v2 anchoreFeedsURL with feeds.url set
-    set:
-      feeds:
-        url: my-feeds-url
-        service:
-          apiVersion: v2
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/feeds"
-
-  - it: should render anchoreFeedsURL with feeds.chartEnabled
-    set:
-      feeds:
-        chartEnabled: true
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/feeds"
-
-  - it: should render grypeProviderURL with anchoreConfig.policy_engine.overrideFeedsToUpstream
-    set:
-      anchoreConfig.policy_engine:
-        overrideFeedsToUpstream: true
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://toolbox-data.anchore.io/grype/databases/listing.json"
-
-  - it: should render grypeProviderURL without feeds.url defined and feeds.chartEnabled as false
-    set:
-      feeds:
-        url: ""
-        chartEnabled: false
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://toolbox-data.anchore.io/grype/databases/listing.json"
-
-  - it: should set the correct protocol with feeds.anchoreConfig.internalServicesSSL.enabled to true for anchore_configmap.yaml
-    set:
-      feeds.anchoreConfig.internalServicesSSL.enabled: true
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/feeds"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/feeds"
-
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
     set:
       anchoreConfig.internalServicesSSL.enabled: true
@@ -960,29 +858,6 @@ tests:
           path: spec.template.spec.containers[0].livenessProbe.httpGet
           content:
             scheme: HTTPS
-
-  - it: should set the correct protocol with feeds.anchoreConfig.internalServicesSSL.enabled to false for anchore_configmap.yaml
-    set:
-      anchoreConfig.internalServicesSSL.enabled: false
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/feeds"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
     set:

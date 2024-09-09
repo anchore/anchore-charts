@@ -239,14 +239,10 @@ should render the configmaps for osaa migration if enabled:
                 data:
                   grypedb:
                     enabled: true
-                    url: http://test-release-feeds:8448/v2/databases/grypedb
-                  packages:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-                    url: http://test-release-feeds:8448/v2/feeds
-                  vulnerability_annotations:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
-                    url: http://test-release-feeds:8448/v2/feeds
               matching:
+                exclude:
+                  providers: []
+                  package_types: []
                 default:
                   search:
                     by_cpe:
@@ -346,6 +342,22 @@ should render the configmaps for osaa migration if enabled:
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
+
+          data_syncer:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: 0.0.0.0
+            port: ${ANCHORE_PORT}
+            auto_sync_enabled: true
+            upload_dir: /analysis_scratch
+            datasets:
+              vulnerability_db:
+                versions: ["5"]
+              clamav_db:
+                versions: ["1"]
+              kev_db:
+                versions: ["1"]
     kind: ConfigMap
     metadata:
       annotations:
@@ -563,14 +575,10 @@ should render the configmaps for osaa migration if enabled:
                 data:
                   grypedb:
                     enabled: true
-                    url: http://test-release-feeds:8448/v2/databases/grypedb
-                  packages:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-                    url: http://test-release-feeds:8448/v2/feeds
-                  vulnerability_annotations:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
-                    url: http://test-release-feeds:8448/v2/feeds
               matching:
+                exclude:
+                  providers: []
+                  package_types: []
                 default:
                   search:
                     by_cpe:

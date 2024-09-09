@@ -258,9 +258,14 @@ securityContext: {{- toYaml . | nindent 2 }}
 {{- if or .Values.serviceAccountName (index .Values (print $component)).serviceAccountName (eq $component "upgradeJob") (eq $component "osaaMigrationJob") }}
 serviceAccountName: {{ include "enterprise.serviceAccountName" (merge (dict "component" $component) .) }}
 {{- end }}
+{{- if .Values.useExistingPullCredSecret }}
 {{- with .Values.imagePullSecretName }}
 imagePullSecrets:
   - name: {{ . }}
+{{- end }}
+{{- else }}
+imagePullSecrets:
+  - name: {{ template "enterprise.fullname" . }}-pullcreds
 {{- end }}
 {{- with (default .Values.nodeSelector (index .Values (print $component)).nodeSelector) }}
 nodeSelector: {{- toYaml . | nindent 2 }}

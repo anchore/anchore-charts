@@ -10,6 +10,9 @@ release:
 chart:
   version: 9.9.9
   appVersion: 9.9.9
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
 tests:
   - it: should set the correct resource names

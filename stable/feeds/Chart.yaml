@@ -1,20 +1,13 @@
 apiVersion: v2
 name: feeds
 type: application
-version: "2.9.0"
-appVersion: "5.9.0"
+version: "3.0.0"
+appVersion: "5.10.0"
 kubeVersion: 1.23.x - 1.30.x || 1.23.x-x - 1.30.x-x
 description: Anchore feeds service
 keywords:
   - "anchore"
   - "anchore-feeds"
-maintainers:
-  - name: zhill
-    email: zach@anchore.com
-  - name: btodhunter
-    email: bradyt@anchore.com
-  - name: hnguyen
-    email: hung.nguyen@anchore.com
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
 dependencies:
   - name: postgresql
@@ -27,3 +20,4 @@ dependencies:
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: gem-db.chartEnabled,anchoreConfig.feeds.drivers.gem.enabled
     alias: gem-db
+deprecated: true

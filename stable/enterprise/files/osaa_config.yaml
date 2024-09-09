@@ -171,14 +171,10 @@ services:
         data:
           grypedb:
             enabled: true
-            url: {{ template "enterprise.grypeProviderURL" . }}
-          packages:
-            enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
-          vulnerability_annotations:
-            enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
       matching:
+        exclude:
+          providers: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
+          package_types: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
         default:
           search:
             by_cpe:

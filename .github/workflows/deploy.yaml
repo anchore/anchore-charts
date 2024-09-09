@@ -7,6 +7,7 @@ on:
       - 'release-*'
     paths:
       - 'stable/**'
+      - '!stable/feeds/**'
 
 permissions:
   contents: read

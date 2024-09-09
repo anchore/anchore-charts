@@ -7,3 +7,4 @@ chart-repos:
   - bitnami=https://charts.bitnami.com/bitnami
 namespace: anchore
 release-label: anchore
+exclude-deprecated: true
