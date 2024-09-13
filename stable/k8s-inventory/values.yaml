@@ -186,7 +186,7 @@ k8sInventory:
 
   ## @param k8sInventory.pollingIntervalSeconds Only respected if mode is periodic
   ##
-  pollingIntervalSeconds: 60
+  pollingIntervalSeconds: 3600
 
   ### k8sInventory.kubernetes Kubernetes API configuration parameters (should not need tuning)
   ## @param k8sInventory.kubernetes.requestTimeoutSeconds Sets the request timeout for kubernetes API requests
