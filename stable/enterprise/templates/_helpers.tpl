@@ -145,39 +145,3 @@ Constructs a proper dockerconfig json string for use in the image pull secret th
 {{- define "enterprise.imagePullSecret" }}
 {{- printf "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\",\"auth\":\"%s\"}}}" .Values.imageCredentials.registry .Values.imageCredentials.username .Values.imageCredentials.password .Values.imageCredentials.email (printf "%s:%s" .Values.imageCredentials.username .Values.imageCredentials.password | b64enc) | b64enc }}
 {{- end }}
-
-{{/*
-{{- $providerDict := dict
-"ANCHORE_FEEDS_DRIVER_KEV_ENABLED" "kev"
-"ANCHORE_FEEDS_DRIVER_CHAINGUARD_ENABLED" "chainguard"
-"ANCHORE_FEEDS_DRIVER_WOLFI_ENABLED" "wolfi"
-"ANCHORE_FEEDS_DRIVER_MATCH_EXCLUSIONS" "exclusions"
-"ANCHORE_FEEDS_DRIVER_SLES_ENABLED" "sles"
-"ANCHORE_FEEDS_DRIVER_GRYPEDB_ENABLED" "grypedb"
-"ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED" "github"
-"ANCHORE_FEEDS_DRIVER_MSRC_ENABLED" "msrc"
-"ANCHORE_FEEDS_DRIVER_MARINER_ENABLED" "mariner"
-"ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED" "nvd"
-"ANCHORE_FEEDS_DRIVER_GEM_ENABLED" "gem"
-"ANCHORE_FEEDS_DRIVER_NPM_ENABLED" "npm"
-"ANCHORE_FEEDS_DRIVER_RHEL_ENABLED" "rhel"
-"ANCHORE_FEEDS_DRIVER_UBUNTU_ENABLED" "ubuntu"
-"ANCHORE_FEEDS_DRIVER_OL_ENABLED" "oracle"
-"ANCHORE_FEEDS_DRIVER_DEBIAN_ENABLED" "debian"
-"ANCHORE_FEEDS_DRIVER_ALPINE_ENABLED" "alpine"
-"ANCHORE_FEEDS_DRIVER_AMAZON_ENABLED" "amzn"
--}}
-
-{{- define "enterprise.feeds.providerExclusions" -}}
-{{- if and .Release.IsUpgrade (semverCompare .Chart.AppVersion ">= 5.10.0 < 5.11.0") }}
-  {{- if .Values.feeds.chartEnabled }}
-    {{- include "" }}
-  {{- else }}
-    {{- fail "" }}
-  {{- end }}
-{{- else }}
-{{- print .Values.anchoreConfig.policy_engine.matching.exclude.providers }}
-{{- end }}
-
-{{- end -}}
-*/}}

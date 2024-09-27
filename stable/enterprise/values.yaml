@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise-dev:nightly
+image: docker.io/anchore/enterprise:v5.10.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -333,6 +333,7 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
   ## @param anchoreConfig.user_authentication.disallow_native_users Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.
+  ## @param anchoreConfig.user_authentication.log_saml_assertions Log SAML assertions to the Anchore log
   ##
   user_authentication:
     oauth:
@@ -1422,7 +1423,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/anchore-on-prem-ui-dev:nightly
+  image: docker.io/anchore/enterprise-ui:v5.10.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##

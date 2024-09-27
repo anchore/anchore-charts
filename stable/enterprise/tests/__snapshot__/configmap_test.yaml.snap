@@ -425,7 +425,6 @@ should render the configmaps:
       ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
       ANCHORE_CLI_URL: http://localhost:8228
       ANCHORE_CLI_USER: admin
-      ANCHORE_DATA_API_URL: https://data.anchore-enterprise.com/testing/
       ANCHORE_DB_POOL_MAX_OVERFLOW: "100"
       ANCHORE_DB_POOL_SIZE: "30"
       ANCHORE_DB_SSL: "false"
