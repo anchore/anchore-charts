@@ -16,6 +16,7 @@ templates:
   - anchore_secret.yaml
   - ui_secret.yaml
   - envvars_configmap.yaml
+  - datasyncer_deployment.yaml
 release:
   name: test-release
   namespace: test-namespace
@@ -35,6 +36,7 @@ backend_test_templates: &backend_test_templates
   - reports_deployment.yaml
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
+  - datasyncer_deployment.yaml
 
 test_templates: &test_templates
   - analyzer_deployment.yaml
@@ -47,6 +49,7 @@ test_templates: &test_templates
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
   - hooks/pre-upgrade/upgrade_job.yaml
+  - datasyncer_deployment.yaml
 
 deployment_templates: &deployment_templates
   - analyzer_deployment.yaml
@@ -58,6 +61,7 @@ deployment_templates: &deployment_templates
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
+  - datasyncer_deployment.yaml
 
 tests:
   - it: should render global annotations
