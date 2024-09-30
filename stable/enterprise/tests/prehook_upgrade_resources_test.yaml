@@ -38,7 +38,9 @@ release:
 chart:
   version: 9.9.9
   appVersion: 9.9.9
-
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 upgrade-resource: &upgrade-resources
   - templates/hooks/pre-upgrade/upgrade_job.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml

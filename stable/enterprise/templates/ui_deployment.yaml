@@ -25,7 +25,7 @@ spec:
       volumes: {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
         - name: anchore-license
           secret:
-            secretName: {{ .Values.licenseSecretName }}
+            {{- include "enterprise.licenseSecret" . | nindent 12 }}
         - name: anchore-ui-config
           configMap:
             name: {{ template "enterprise.ui.fullname" . }}

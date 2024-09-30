@@ -641,57 +641,57 @@ To restore your deployment to using your previous driver configurations:
 
 ### Common Resource Parameters
 
-| Name                                    | Description                                                                                                                        | Value                                      |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise-dev:nightly` |
-| `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                             |
-| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`             |
-| `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `false`                                    |
-| `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                       |
-| `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                       |
-| `imageCredentials.password`             | The password for the image pull secret                                                                                             | `""`                                       |
-| `imageCredentials.email`                | The email for the image pull secret                                                                                                | `""`                                       |
-| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema                                                    | `false`                                    |
-| `migrationPodImage`                     | The image reference to the migration pod                                                                                           | `docker.io/postgres:13-bookworm`           |
-| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                                                              | `my-engine-anchore-engine`                 |
-| `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                                                             | `""`                                       |
-| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                                              | `false`                                    |
-| `license`                               | License for Anchore Enterprise                                                                                                     | `{}`                                       |
-| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                                                                    | `anchore-enterprise-license`               |
-| `useExistingLicenseSecret`              | forgoes license secret creation and uses the secret defined in licenseSecretName                                                   | `false`                                    |
-| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs                                                         | `""`                                       |
-| `extraEnv`                              | Common environment variables set on all containers                                                                                 | `[]`                                       |
-| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                                                          | `false`                                    |
-| `existingSecretName`                    | Name of an existing secret to be used for Anchore core services, excluding Anchore UI                                              | `anchore-enterprise-env`                   |
-| `labels`                                | Common labels set on all Kubernetes resources                                                                                      | `{}`                                       |
-| `annotations`                           | Common annotations set on all Kubernetes resources                                                                                 | `{}`                                       |
-| `nodeSelector`                          | Common nodeSelector set on all Kubernetes pods                                                                                     | `{}`                                       |
-| `tolerations`                           | Common tolerations set on all Kubernetes pods                                                                                      | `[]`                                       |
-| `affinity`                              | Common affinity set on all Kubernetes pods                                                                                         | `{}`                                       |
-| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports | `/analysis_scratch`                        |
-| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions on all scratch volumes                                               | `false`                                    |
-| `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                                                                  | `alpine`                                   |
-| `scratchVolume.details`                 | Details for the k8s volume to be created (defaults to default emptyDir)                                                            | `{}`                                       |
-| `extraVolumes`                          | mounts additional volumes to each pod                                                                                              | `[]`                                       |
-| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                              | `[]`                                       |
-| `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                                                                 | `1000`                                     |
-| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                                                                | `1000`                                     |
-| `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                                                                   | `1000`                                     |
-| `containerSecurityContext`              | The securityContext for all containers                                                                                             | `{}`                                       |
-| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                                                                           | `120`                                      |
-| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                                                                 | `10`                                       |
-| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                                                                  | `10`                                       |
-| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                                                               | `6`                                        |
-| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                                                               | `1`                                        |
-| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                                                                            | `10`                                       |
-| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                                             | `10`                                       |
-| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                          | `3`                                        |
-| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                          | `1`                                        |
-| `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services                                                          | `false`                                    |
-| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                       |
-| `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                       |
-| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                       |
-| `domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".        | `""`                                       |
+| Name                                    | Description                                                                                                                        | Value                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.10.0` |
+| `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
+| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
+| `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
+| `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                   |
+| `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
+| `imageCredentials.password`             | The password for the image pull secret                                                                                             | `""`                                   |
+| `imageCredentials.email`                | The email for the image pull secret                                                                                                | `""`                                   |
+| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema                                                    | `false`                                |
+| `migrationPodImage`                     | The image reference to the migration pod                                                                                           | `docker.io/postgres:13-bookworm`       |
+| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                                                              | `my-engine-anchore-engine`             |
+| `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                                                             | `""`                                   |
+| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                                              | `false`                                |
+| `license`                               | License for Anchore Enterprise                                                                                                     | `{}`                                   |
+| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                                                                    | `anchore-enterprise-license`           |
+| `useExistingLicenseSecret`              | forgoes license secret creation and uses the secret defined in licenseSecretName                                                   | `true`                                 |
+| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs                                                         | `""`                                   |
+| `extraEnv`                              | Common environment variables set on all containers                                                                                 | `[]`                                   |
+| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                                                          | `false`                                |
+| `existingSecretName`                    | Name of an existing secret to be used for Anchore core services, excluding Anchore UI                                              | `anchore-enterprise-env`               |
+| `labels`                                | Common labels set on all Kubernetes resources                                                                                      | `{}`                                   |
+| `annotations`                           | Common annotations set on all Kubernetes resources                                                                                 | `{}`                                   |
+| `nodeSelector`                          | Common nodeSelector set on all Kubernetes pods                                                                                     | `{}`                                   |
+| `tolerations`                           | Common tolerations set on all Kubernetes pods                                                                                      | `[]`                                   |
+| `affinity`                              | Common affinity set on all Kubernetes pods                                                                                         | `{}`                                   |
+| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports | `/analysis_scratch`                    |
+| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions on all scratch volumes                                               | `false`                                |
+| `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                                                                  | `alpine`                               |
+| `scratchVolume.details`                 | Details for the k8s volume to be created (defaults to default emptyDir)                                                            | `{}`                                   |
+| `extraVolumes`                          | mounts additional volumes to each pod                                                                                              | `[]`                                   |
+| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                              | `[]`                                   |
+| `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                                                                 | `1000`                                 |
+| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                                                                | `1000`                                 |
+| `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                                                                   | `1000`                                 |
+| `containerSecurityContext`              | The securityContext for all containers                                                                                             | `{}`                                   |
+| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                                                                           | `120`                                  |
+| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                                                                 | `10`                                   |
+| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                                                                  | `10`                                   |
+| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                                                               | `6`                                    |
+| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                                                               | `1`                                    |
+| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                                                                            | `10`                                   |
+| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                                             | `10`                                   |
+| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                          | `3`                                    |
+| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                          | `1`                                    |
+| `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services                                                          | `false`                                |
+| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                   |
+| `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                   |
+| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                   |
+| `domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".        | `""`                                   |
 
 ### Anchore Configuration Parameters
 
@@ -729,7 +729,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.user_authentication.hashed_passwords`                             | Enable storing passwords as secure hashes in the database                                                                        | `true`             |
 | `anchoreConfig.user_authentication.sso_require_existing_users`                   | set to true in order to disable the SSO JIT provisioning during authentication                                                   | `false`            |
 | `anchoreConfig.user_authentication.disallow_native_users`                        | Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.                    | `false`            |
-| `anchoreConfig.user_authentication.log_saml_assertions`                          | Log SAML assertions to the Anchore log                                                                                           | `false`            |
+| `anchoreConfig.user_authentication.log_saml_assertions`                          | Enable logging of received SAML assertions at INFO level for SSO debugging in API container.                                     | `false`            |
 | `anchoreConfig.metrics.enabled`                                                  | Enable Prometheus metrics for all Anchore services                                                                               | `false`            |
 | `anchoreConfig.metrics.auth_disabled`                                            | Disable auth on Prometheus metrics for all Anchore services                                                                      | `false`            |
 | `anchoreConfig.webhooks`                                                         | Enable Anchore services to provide webhooks for external system updates                                                          | `{}`               |
@@ -1019,29 +1019,29 @@ To restore your deployment to using your previous driver configurations:
 
 ### Anchore UI Parameters
 
-| Name                         | Description                                                                                                                                                                  | Value                                              |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `ui.image`                   | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/anchore-on-prem-ui-dev:nightly` |
-| `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                                     |
-| `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`                        |
-| `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                               |
-| `ui.service.type`            | Service type for Anchore UI                                                                                                                                                  | `ClusterIP`                                        |
-| `ui.service.port`            | Service port for Anchore UI                                                                                                                                                  | `80`                                               |
-| `ui.service.annotations`     | Annotations for Anchore UI service                                                                                                                                           | `{}`                                               |
-| `ui.service.labels`          | Labels for Anchore UI service                                                                                                                                                | `{}`                                               |
-| `ui.service.sessionAffinity` | Session Affinity for Ui service                                                                                                                                              | `ClientIP`                                         |
-| `ui.service.nodePort`        | nodePort for Anchore UI service                                                                                                                                              | `""`                                               |
-| `ui.service.domainSuffix`    | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`                                               |
-| `ui.extraEnv`                | Set extra environment variables for Anchore UI pods                                                                                                                          | `[]`                                               |
-| `ui.extraVolumes`            | Define additional volumes for Anchore UI pods                                                                                                                                | `[]`                                               |
-| `ui.extraVolumeMounts`       | Define additional volume mounts for Anchore UI pods                                                                                                                          | `[]`                                               |
-| `ui.resources`               | Resource requests and limits for Anchore UI pods                                                                                                                             | `{}`                                               |
-| `ui.labels`                  | Labels for Anchore UI pods                                                                                                                                                   | `{}`                                               |
-| `ui.annotations`             | Annotation for Anchore UI pods                                                                                                                                               | `{}`                                               |
-| `ui.nodeSelector`            | Node labels for Anchore UI pod assignment                                                                                                                                    | `{}`                                               |
-| `ui.tolerations`             | Tolerations for Anchore UI pod assignment                                                                                                                                    | `[]`                                               |
-| `ui.affinity`                | Affinity for Anchore ui pod assignment                                                                                                                                       | `{}`                                               |
-| `ui.serviceAccountName`      | Service account name for Anchore UI pods                                                                                                                                     | `""`                                               |
+| Name                         | Description                                                                                                                                                                  | Value                                     |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `ui.image`                   | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.10.0` |
+| `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
+| `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
+| `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
+| `ui.service.type`            | Service type for Anchore UI                                                                                                                                                  | `ClusterIP`                               |
+| `ui.service.port`            | Service port for Anchore UI                                                                                                                                                  | `80`                                      |
+| `ui.service.annotations`     | Annotations for Anchore UI service                                                                                                                                           | `{}`                                      |
+| `ui.service.labels`          | Labels for Anchore UI service                                                                                                                                                | `{}`                                      |
+| `ui.service.sessionAffinity` | Session Affinity for Ui service                                                                                                                                              | `ClientIP`                                |
+| `ui.service.nodePort`        | nodePort for Anchore UI service                                                                                                                                              | `""`                                      |
+| `ui.service.domainSuffix`    | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`                                      |
+| `ui.extraEnv`                | Set extra environment variables for Anchore UI pods                                                                                                                          | `[]`                                      |
+| `ui.extraVolumes`            | Define additional volumes for Anchore UI pods                                                                                                                                | `[]`                                      |
+| `ui.extraVolumeMounts`       | Define additional volume mounts for Anchore UI pods                                                                                                                          | `[]`                                      |
+| `ui.resources`               | Resource requests and limits for Anchore UI pods                                                                                                                             | `{}`                                      |
+| `ui.labels`                  | Labels for Anchore UI pods                                                                                                                                                   | `{}`                                      |
+| `ui.annotations`             | Annotation for Anchore UI pods                                                                                                                                               | `{}`                                      |
+| `ui.nodeSelector`            | Node labels for Anchore UI pod assignment                                                                                                                                    | `{}`                                      |
+| `ui.tolerations`             | Tolerations for Anchore UI pod assignment                                                                                                                                    | `[]`                                      |
+| `ui.affinity`                | Affinity for Anchore ui pod assignment                                                                                                                                       | `{}`                                      |
+| `ui.serviceAccountName`      | Service account name for Anchore UI pods                                                                                                                                     | `""`                                      |
 
 ### Anchore Upgrade Job Parameters
 
@@ -1144,7 +1144,43 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### V3.0.x
+
+- Deploys Anchore Enterprise v5.10.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5100/) for more information.
+- Feeds service has been removed as a dependency to the enterprise chart. Instead, Anchore will use Anchore's hosted Data Service.
+  - If you had any ingress pointing to the feeds service api, that is no longer necessary as it doesn't exist anymore.
+  - A new anchore component (deployment/service) called `datasyncer` has been added to sync with the Anchore hosted Data Service.
+- :warning: **WARNING:** Values file changes necessary:
+  - **The following values will have to be set manually in your values file**:
+    - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`
+    - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`
+  - If you don't want to exclude any providers or package types, you can set them to an empty list. eg:
+    ```
+      anchoreConfig:
+        policy_engine:
+          vulnerabilities:
+            matching:
+              exclude:
+                providers: []
+                package_types: []
+    ```
+  - If you had any drivers disabled in your feeds deployment, you will have to exclude them. eg:
+    ```
+      anchoreConfig:
+        policy_engine:
+          vulnerabilities:
+            matching:
+              exclude:
+                providers: ['nvd', 'github']
+                package_types: ['rpm']
+    ```
+    Refer to the [Anchore docs](https://docs.anchore.com/current/docs/configuration/feeds/feed_configuration/) for the available providers and package_types.
+- The following values were added to the values file to handle the creation or reuse of pull creds and Anchore license secrets:
+  - `useExistingLicenseSecret`: defaults to `true` to be backwards compatible with existing deployments. If you are doing a new deployment, you can either set the `license` field for the secret to be created for you or you can create the secret out of band from helm.
+  - `useExistingPullCredSecret`: defaults to `true` to be backwards compatible with existing deployments. If you are doing a new deployment, you can either set the `imageCredentials` fields for a secret to be created for you or create the secret out of band from helm.
+
 ### V2.10.x
+
 - Deploys Anchore Enterprise v5.9.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/590/) for more information.
 
 ### V2.9.x

@@ -340,7 +340,7 @@ Setup the common anchore volumes
 {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
 - name: anchore-license
   secret:
-    secretName: {{ .Values.licenseSecretName }}
+    {{- include "enterprise.licenseSecret" . | nindent 4 }}
 - name: anchore-scripts
   configMap:
     name: {{ .Release.Name }}-enterprise-scripts

@@ -34,7 +34,7 @@ imagePullSecretName: anchore-enterprise-pullcreds
 
 ## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
 ##
-useExistingPullCredSecret: false
+useExistingPullCredSecret: true
 
 ## @param imageCredentials.registry The registry URL for the image pull secret
 ## @param imageCredentials.username The username for the image pull secret
@@ -81,7 +81,7 @@ licenseSecretName: anchore-enterprise-license
 
 ## @param useExistingLicenseSecret forgoes license secret creation and uses the secret defined in licenseSecretName
 ##
-useExistingLicenseSecret: false
+useExistingLicenseSecret: true
 
 ## @param certStoreSecretName Name of secret containing the certificates & keys used for SSL, SAML & CAs
 ## The chart will mount the secret specified in certStoreSecretName to /home/anchore/certs
@@ -333,7 +333,7 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
   ## @param anchoreConfig.user_authentication.disallow_native_users Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.
-  ## @param anchoreConfig.user_authentication.log_saml_assertions Log SAML assertions to the Anchore log
+  ## @param anchoreConfig.user_authentication.log_saml_assertions Enable logging of received SAML assertions at INFO level for SSO debugging in API container.
   ##
   user_authentication:
     oauth:

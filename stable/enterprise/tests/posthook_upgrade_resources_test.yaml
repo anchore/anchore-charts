@@ -33,6 +33,8 @@ values:
 set:
   upgradeJob.enabled: true
   upgradeJob.usePostUpgradeHook: true
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 release:
   name: test-release
   namespace: test-namespace

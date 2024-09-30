@@ -145,3 +145,13 @@ Constructs a proper dockerconfig json string for use in the image pull secret th
 {{- define "enterprise.imagePullSecret" }}
 {{- printf "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\",\"auth\":\"%s\"}}}" .Values.imageCredentials.registry .Values.imageCredentials.username .Values.imageCredentials.password .Values.imageCredentials.email (printf "%s:%s" .Values.imageCredentials.username .Values.imageCredentials.password | b64enc) | b64enc }}
 {{- end }}
+
+{{- define "enterprise.licenseSecret" -}}
+{{- if .Values.useExistingLicenseSecret }}
+{{- with .Values.licenseSecretName }}
+secretName: {{ . }}
+{{- end }}
+{{- else }}
+secretName: {{ template "enterprise.fullname" . }}-license
+{{- end }}
+{{- end -}}

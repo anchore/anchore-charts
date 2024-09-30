@@ -401,7 +401,29 @@ tests:
       - notExists:
           path: spec.template.spec.serviceAccountName
 
-  - it: should render imagePullSecretName
+  - it: should render imagePullSecretName with useExistingPullCredSecret
+    templates: *test_templates
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: anchore-enterprise-pullcreds
+
+  - it: should render imagePullSecretName with useExistingPullCredSecret set
+    set:
+      useExistingPullCredSecret: true
+      imagePullSecretName: blah-release-enterprise-pullcreds
+    templates: *test_templates
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: blah-release-enterprise-pullcreds
+
+  - it: should render imagePullSecretName without useExistingPullCredSecret
+    set:
+      useExistingPullCredSecret: false
+      imagePullSecretName: blah-release-enterprise-pullcreds
     templates: *test_templates
     documentIndex: 0
     asserts:
@@ -607,6 +629,34 @@ tests:
               name: test-release-enterprise
         count: 1
         any: true
+
+  - it: should render global volumes anchore-license with useExistingLicenseSecret set to false
+    set:
+      useExistingLicenseSecret: false
+      licenseSecretName: my-license-secret
+    templates: *backend_test_templates
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-license
+            secret:
+              secretName: test-release-enterprise-license
+
+  - it: should render global volumes anchore-license with useExistingLicenseSecret set to true and different secret name
+    set:
+      useExistingLicenseSecret: true
+      licenseSecretName: my-license-secret
+    templates: *backend_test_templates
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-license
+            secret:
+              secretName: my-license-secret
 
   - it: should render enterprise.fullname
     templates: *test_templates
