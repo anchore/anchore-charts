@@ -55,7 +55,6 @@ audit:
     - "/user/api-keys/{key_name}"
     - "/user/credentials"
 
-
 metrics:
   enabled: ${ANCHORE_ENABLE_METRICS}
   auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
@@ -200,14 +199,10 @@ services:
         data:
           grypedb:
             enabled: true
-            url: {{ template "enterprise.grypeProviderURL" . }}
-          packages:
-            enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
-          vulnerability_annotations:
-            enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
       matching:
+        exclude:
+          providers: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
+          package_types: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
         default:
           search:
             by_cpe:
@@ -296,3 +291,19 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+
+  data_syncer:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: 0.0.0.0
+    port: ${ANCHORE_PORT}
+    auto_sync_enabled: true
+    upload_dir: {{ .Values.scratchVolume.mountPath }}
+    datasets:
+      vulnerability_db:
+        versions: ["5"]
+      clamav_db:
+        versions: ["1"]
+      kev_db:
+        versions: ["1"]

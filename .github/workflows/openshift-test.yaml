@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - 'stable/enterprise/Chart.yaml'
-      - 'stable/feeds/Chart.yaml'
       - 'stable/ecs-inventory/Chart.yaml'
       - 'stable/k8s-inventory/Chart.yaml'
 
@@ -129,7 +128,7 @@ jobs:
           mv ci/openshift-test.yaml ci/openshift-test-values.yaml
           popd
         done
-        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s" --helm-extra-set-args "--set=useExistingPullCredSecret=true--set=useExistingLicenseSecret=true --set=anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers=[] --set=anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types=[]"
       env:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"

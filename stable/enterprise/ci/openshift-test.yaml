@@ -2,9 +2,6 @@ securityContext:
   fsGroup: null
   runAsGroup: null
   runAsUser: null
-feeds:
-  chartEnabled: false
-  url: "my-release-feeds"
 postgresql:
   primary:
     containerSecurityContext:

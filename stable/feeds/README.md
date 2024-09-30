@@ -1,5 +1,7 @@
 # Anchore Enterprise Feeds Helm Chart
 
+> :exclamation: **WARNING:** This chart has been deprecated and replaced with an Anchore hosted feeds service.
+
 > :exclamation: **Important:** View the **[Chart Release Notes](#release-notes)** for the latest changes prior to installation or upgrading.
 
 This Helm chart deploys the Anchore Enterprise Feeds service on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
@@ -227,15 +229,16 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: anchore-enterprise-feeds-env
+  labels:
     app: anchore
 type: Opaque
 stringData:
-  ANCHORE_ADMIN_PASSWORD: foobar1234
-  ANCHORE_FEEDS_DB_NAME: anchore-feeds
-  ANCHORE_FEEDS_DB_USER: anchoreengine
-  ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
-  ANCHORE_FEEDS_DB_HOST: anchore-enterprise-feeds-db
-  ANCHORE_FEEDS_DB_PORT: 5432
+  ANCHORE_ADMIN_PASSWORD: "foobar1234"
+  ANCHORE_FEEDS_DB_NAME: "anchore-feeds"
+  ANCHORE_FEEDS_DB_USER: "anchoreengine"
+  ANCHORE_FEEDS_DB_PASSWORD: "anchore-postgres,123"
+  ANCHORE_FEEDS_DB_HOST: "anchore-enterprise-feeds-db"
+  ANCHORE_FEEDS_DB_PORT: "5432"
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
   # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
   # (if applicable) ANCHORE_NVD_API_KEY: foobar,nvd1234

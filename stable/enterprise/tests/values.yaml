@@ -13,6 +13,12 @@ extraEnv:
     value: baz
 
 anchoreConfig:
+  policy_engine:
+    vulnerabilities:
+      matching:
+        exclude:
+          package_types: []
+          providers: []
   policyBundles:
     custom_policy_bundle1.json: |
       {

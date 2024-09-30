@@ -1,7 +1,7 @@
 apiVersion: v2
 name: enterprise
-version: "2.10.0"
-appVersion: "5.9.0"
+version: "3.0.0"
+appVersion: "5.10.0"
 kubeVersion: 1.23.x - 1.30.x || 1.23.x-x - 1.30.x-x
 description: |
   Anchore Enterprise is a complete container security workflow solution for professional teams. Easily integrating with CI/CD systems,
@@ -38,13 +38,3 @@ dependencies:
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: ui-redis.chartEnabled
     alias: ui-redis
-  - name: feeds
-    version: "~2"
-    repository: "@anchore"
-    # repository: file://../feeds
-    condition: feeds.chartEnabled
-    import-values:
-      - child: service
-        parent: feeds.service
-      - child: anchoreConfig.internalServicesSSL
-        parent: feeds.anchoreConfig.internalServicesSSL

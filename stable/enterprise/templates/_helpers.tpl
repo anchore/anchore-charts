@@ -57,46 +57,6 @@ Allows passing in a feature flag to the ui application on startup
   {{- end }}
 {{- end }}
 
-{{/*
-Returns the proper URL for the feeds service
-*/}}
-{{- define "enterprise.feedsURL" }}
-{{- $anchoreFeedsURL := "" }}
-  {{- if .Values.feeds.url }}
-    {{- /* remove everything from the URL after /v2 to get the hostname, then use that to construct the proper URL */}}
-    {{- $regexSearchPattern := (printf "/v2.*$" | toString) }}
-    {{- $urlPathSuffix := (default "" (regexFind $regexSearchPattern .Values.feeds.url) ) }}
-    {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
-    {{- $anchoreFeedsURL = (printf "%s/v2/feeds" $anchoreFeedsHost) -}}
-  {{- else if .Values.feeds.chartEnabled }}
-    {{- $anchoreFeedsURL = (printf "%s://%s:%s/v2/feeds" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
-  {{- end }}
-    {{- print $anchoreFeedsURL -}}
-{{- end -}}
-
-
-{{/*
-Returns the proper URL for the grype provider
-*/}}
-{{- define "enterprise.grypeProviderURL" }}
-{{- $grypeProviderFeedsExternalURL := "" -}}
-{{- $regexSearchPattern := (printf "/v2.*$" | toString) }}
-  {{- if .Values.feeds.url }}
-    {{- /* remove everything from the URL after /v2 to get the hostname, then use that to construct the proper URL */}}
-    {{- $urlPathSuffix := (default "" ( regexFind $regexSearchPattern .Values.feeds.url )) -}}
-    {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s/v2/databases/grypedb" $anchoreFeedsHost) -}}
-  {{- else if .Values.feeds.chartEnabled }}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/v2/databases/grypedb" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
-  {{- end }}
-
-  {{- /* Set the grypeProviderFeedsExternalURL to upstream feeds if still unset or if specifically overridden */}}
-  {{- if or (empty $grypeProviderFeedsExternalURL) .Values.anchoreConfig.policy_engine.overrideFeedsToUpstream -}}
-    {{- $grypeProviderFeedsExternalURL = "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
-  {{- end }}
-    {{- print $grypeProviderFeedsExternalURL -}}
-{{- end -}}
-
 
 {{/*
 Set the appropriate kubernetes service account name.
@@ -121,18 +81,6 @@ Return the proper protocol when Anchore internal SSL is enabled
 */}}
 {{- define "enterprise.setProtocol" -}}
   {{- if .Values.anchoreConfig.internalServicesSSL.enabled }}
-{{- print "https" -}}
-  {{- else -}}
-{{- print "http" -}}
-  {{- end }}
-{{- end -}}
-
-
-{{/*
-Return the proper protocol when Anchore internal SSL is enabled
-*/}}
-{{- define "enterprise.feeds.setProtocol" -}}
-  {{- if .Values.feeds.anchoreConfig.internalServicesSSL.enabled }}
 {{- print "https" -}}
   {{- else -}}
 {{- print "http" -}}
@@ -189,4 +137,21 @@ Checks if the appVersion.minor has increased, which is indicitive of requiring a
   {{- print "true" -}}
 {{- end -}}
 
+{{- end -}}
+
+{{/*
+Constructs a proper dockerconfig json string for use in the image pull secret that is managed by the chart
+*/}}
+{{- define "enterprise.imagePullSecret" }}
+{{- printf "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\",\"auth\":\"%s\"}}}" .Values.imageCredentials.registry .Values.imageCredentials.username .Values.imageCredentials.password .Values.imageCredentials.email (printf "%s:%s" .Values.imageCredentials.username .Values.imageCredentials.password | b64enc) | b64enc }}
+{{- end }}
+
+{{- define "enterprise.licenseSecret" -}}
+{{- if .Values.useExistingLicenseSecret }}
+{{- with .Values.licenseSecretName }}
+secretName: {{ . }}
+{{- end }}
+{{- else }}
+secretName: {{ template "enterprise.fullname" . }}-license
+{{- end }}
 {{- end -}}

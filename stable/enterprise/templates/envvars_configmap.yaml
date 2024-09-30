@@ -60,13 +60,6 @@ data:
 {{- else }}
   ANCHORE_ENTERPRISE_UI_URL: {{ include "enterprise.ui.fullname" . | quote }}
 {{- end }}
-  ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: {{ dig "anchoreConfig" "feeds" "drivers" "github" "enabled" "false" .Values.feeds | quote }}
-  ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: {{ dig "anchoreConfig" "feeds" "drivers" "msrc" "enabled" "false" .Values.feeds | quote }}
-  ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
-  ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED: "false"
-  ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED: "true"
-  ANCHORE_FEEDS_SSL_VERIFY: "{{ .Values.anchoreConfig.internalServicesSSL.verifyCerts }}"
-  ANCHORE_FEEDS_VULNERABILITIES_ENABLED: "true"
   ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
   ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
   ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"

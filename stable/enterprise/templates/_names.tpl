@@ -27,6 +27,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s-%s" .Release.Name $name "catalog"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "enterprise.dataSyncer.fullname" -}}
+{{- $name := default .Chart.Name .Values.global.nameOverride -}}
+{{- printf "%s-%s-%s" .Release.Name $name "datasyncer"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "enterprise.notifications.fullname" -}}
 {{- $name := default .Chart.Name .Values.global.nameOverride -}}
 {{- printf "%s-%s-%s" .Release.Name $name "notifications"| trunc 63 | trimSuffix "-" -}}
@@ -74,15 +79,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "enterprise.smokeTest.fullname" -}}
 {{- $name := default .Chart.Name .Values.global.nameOverride -}}
 {{- printf "%s-%s-%s-%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "smoke-test" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "enterprise.feeds.fullname" -}}
-{{- if .Values.feeds.fullnameOverride }}
-  {{- .Values.feeds.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-  {{- $name := default "feeds" .Values.feeds.nameOverride -}}
-  {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
 {{- end -}}
 
 {{- define "postgres.fullname" -}}

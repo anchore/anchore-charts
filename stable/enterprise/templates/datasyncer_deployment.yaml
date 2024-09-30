@@ -1,24 +1,25 @@
-{{- $component := "policyEngine" -}}
+{{- $component := "dataSyncer" -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "enterprise.policyEngine.fullname" . }}
+  name: {{ template "enterprise.dataSyncer.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
 spec:
   selector:
     matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
-  replicas: {{ .Values.policyEngine.replicaCount }}
+  replicas: {{ .Values.dataSyncer.replicaCount }}
   strategy: {{- include "enterprise.common.deploymentStrategy" . | nindent 4 }}
   template:
     metadata:
       labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
       annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+        checksum/enterprise-config: {{ include (print $.Template.BasePath "/anchore_configmap.yaml") . | sha256sum }}
       {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
       {{- end }}
-        checksum/enterprise-config: {{ include (print $.Template.BasePath "/anchore_configmap.yaml") . | sha256sum }}
         checksum/enterprise-envvar: {{ include (print $.Template.BasePath "/envvars_configmap.yaml") . | sha256sum }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
@@ -42,18 +43,18 @@ spec:
         {{- end }}
           command: ["/bin/sh", "-c"]
           args:
-            - {{ print (include "enterprise.common.dockerEntrypoint" .) }} policy_engine
+            - {{ print (include "enterprise.common.dockerEntrypoint" .) }} data_syncer
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           ports:
             - name: {{ $component | lower }}
-              containerPort: {{ .Values.policyEngine.service.port }}
+              containerPort: {{ .Values.dataSyncer.service.port }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
-            - name: "anchore-scratch"
+            - name: anchore-scratch
               mountPath: {{ .Values.scratchVolume.mountPath }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
           readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
-        {{- with .Values.policyEngine.resources }}
+        {{- with .Values.dataSyncer.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
 
@@ -61,16 +62,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "enterprise.policyEngine.fullname" . }}
+  name: {{ template "enterprise.dataSyncer.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.service.annotations" (merge (dict "component" $component) .) | nindent 4 }}
 spec:
-  type: {{ .Values.policyEngine.service.type }}
+  type: {{ .Values.dataSyncer.service.type }}
   ports:
     - name: {{ $component | lower }}
-      port: {{ .Values.policyEngine.service.port }}
-      targetPort: {{ .Values.policyEngine.service.port }}
+      port: {{ .Values.dataSyncer.service.port }}
+      targetPort: {{ .Values.dataSyncer.service.port }}
       protocol: TCP
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
