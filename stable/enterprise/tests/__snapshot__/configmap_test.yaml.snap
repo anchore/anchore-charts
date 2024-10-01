@@ -114,7 +114,6 @@ should render the configmaps:
             - "/user/api-keys/{key_name}"
             - "/user/credentials"
 
-
         metrics:
           enabled: ${ANCHORE_ENABLE_METRICS}
           auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
@@ -142,6 +141,7 @@ should render the configmaps:
           max_api_keys_per_user: 100
           remove_deleted_user_api_keys_older_than_days: 365
           disallow_native_users: false
+          log_saml_assertions: false
         credentials:
           database:
             user: "${ANCHORE_DB_USER}"
@@ -277,14 +277,10 @@ should render the configmaps:
                 data:
                   grypedb:
                     enabled: true
-                    url: http://test-release-feeds:8448/v2/databases/grypedb
-                  packages:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-                    url: http://test-release-feeds:8448/v2/feeds
-                  vulnerability_annotations:
-                    enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
-                    url: http://test-release-feeds:8448/v2/feeds
               matching:
+                exclude:
+                  providers: []
+                  package_types: []
                 default:
                   search:
                     by_cpe:
@@ -384,6 +380,22 @@ should render the configmaps:
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
+
+          data_syncer:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: 0.0.0.0
+            port: ${ANCHORE_PORT}
+            auto_sync_enabled: true
+            upload_dir: /analysis_scratch
+            datasets:
+              vulnerability_db:
+                versions: ["5"]
+              clamav_db:
+                versions: ["1"]
+              kev_db:
+                versions: ["1"]
     kind: ConfigMap
     metadata:
       annotations:
@@ -434,13 +446,6 @@ should render the configmaps:
       ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "false"
       ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "120"
       ANCHORE_ENTERPRISE_UI_URL: test-release-enterprise-ui
-      ANCHORE_FEEDS_DRIVER_GITHUB_ENABLED: "false"
-      ANCHORE_FEEDS_DRIVER_MSRC_ENABLED: "false"
-      ANCHORE_FEEDS_DRIVER_NVDV2_ENABLED: "true"
-      ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED: "false"
-      ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED: "true"
-      ANCHORE_FEEDS_SSL_VERIFY: "false"
-      ANCHORE_FEEDS_VULNERABILITIES_ENABLED: "true"
       ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
       ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
       ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"

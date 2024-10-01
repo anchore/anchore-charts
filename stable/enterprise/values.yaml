@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.9.0
+image: docker.io/anchore/enterprise:v5.10.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -31,6 +31,21 @@ imagePullPolicy: IfNotPresent
 ## Secrets must be manually created in the same namespace as release
 ##
 imagePullSecretName: anchore-enterprise-pullcreds
+
+## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
+##
+useExistingPullCredSecret: true
+
+## @param imageCredentials.registry The registry URL for the image pull secret
+## @param imageCredentials.username The username for the image pull secret
+## @param imageCredentials.password The password for the image pull secret
+## @param imageCredentials.email The email for the image pull secret
+##
+imageCredentials:
+  registry: ""
+  username: ""
+  password: ""
+  email: ""
 
 ## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema
 ##
@@ -54,11 +69,19 @@ serviceAccountName: ""
 ##
 injectSecretsViaEnv: false
 
+## @param license License for Anchore Enterprise
+##
+license: {}
+
 ## @param licenseSecretName Name of the Kubernetes secret containing your license.yaml file
 ## This must be manually created. For example with the following command:
 ## `kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>`
 ##
 licenseSecretName: anchore-enterprise-license
+
+## @param useExistingLicenseSecret forgoes license secret creation and uses the secret defined in licenseSecretName
+##
+useExistingLicenseSecret: true
 
 ## @param certStoreSecretName Name of secret containing the certificates & keys used for SSL, SAML & CAs
 ## The chart will mount the secret specified in certStoreSecretName to /home/anchore/certs
@@ -310,6 +333,7 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
   ## @param anchoreConfig.user_authentication.disallow_native_users Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.
+  ## @param anchoreConfig.user_authentication.log_saml_assertions Enable logging of received SAML assertions at INFO level for SSO debugging in API container.
   ##
   user_authentication:
     oauth:
@@ -323,6 +347,7 @@ anchoreConfig:
     sso_require_existing_users: false
     remove_deleted_user_api_keys_older_than_days: 365
     disallow_native_users: false
+    log_saml_assertions: false
 
   ## @param anchoreConfig.metrics.enabled Enable Prometheus metrics for all Anchore services
   ## @param anchoreConfig.metrics.auth_disabled Disable auth on Prometheus metrics for all Anchore services
@@ -570,9 +595,13 @@ anchoreConfig:
       feed_sync: 14400
       feed_sync_checker: 3600
 
-    ## @param anchoreConfig.policy_engine.overrideFeedsToUpstream Override the Anchore Feeds URL to use the public upstream Anchore Feeds
-    ##
-    overrideFeedsToUpstream: false
+    ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
+    ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
+    vulnerabilities:
+      matching:
+        exclude:
+          providers: null
+          package_types: null
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
@@ -941,34 +970,80 @@ catalog:
   scratchVolume:
     details: {}
 
-##########################################
-## @section Anchore Feeds Chart Parameters
-##########################################
-feeds:
-  ## @param feeds.chartEnabled Enable the Anchore Feeds chart
+#########################################################
+## @section Anchore DataSyncer k8s Deployment Parameters
+#########################################################
+dataSyncer:
+  ## @param dataSyncer.replicaCount Number of replicas for the Anchore DataSyncer deployment
   ##
-  chartEnabled: true
+  replicaCount: 1
 
-  ## @param feeds.standalone Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise.
-  ## This should never be set to true when chartEnabled=true.
+  ## @param dataSyncer.service.type Service type for Anchore DataSyncer
+  ## @param dataSyncer.service.port Service port for Anchore DataSyncer
+  ## @param dataSyncer.service.annotations Annotations for Anchore DataSyncer service
+  ## @param dataSyncer.service.labels Labels for Anchore DataSyncer service
+  ## @param dataSyncer.service.nodePort nodePort for Anchore DataSyncer service
+  ## @param dataSyncer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
-  standalone: false
+  service:
+    type: ClusterIP
+    port: 8778
+    annotations: {}
+    labels: {}
+    nodePort: ""
+    domainSuffix: ""
 
-  ## @param feeds.url Set the URL for a standalone Feeds service. Use when chartEnabled=false.
+  ## @param dataSyncer.extraEnv Set extra environment variables for Anchore DataSyncer pods
   ##
-  url: ""
+  extraEnv: []
 
-  ## @param feeds.resources Resource requests and limits for Anchore Feeds pods
+  ## @param dataSyncer.extraVolumes Define additional volumes for Anchore DataSyncer pods
+  ##
+  extraVolumes: []
+
+  ## @param dataSyncer.extraVolumeMounts Define additional volume mounts for Anchore DataSyncer pods
+  ##
+  extraVolumeMounts: []
+
+  ## @param dataSyncer.resources Resource requests and limits for Anchore DataSyncer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
   ##
   resources: {}
     # requests:
-    #   cpu: 2500m
-    #   memory: 10Gi
+    #   cpu: 1000m
+    #   memory: 8000Mi
     # limits:
-    #   memory: 10Gi
+    #   memory: 8000Mi
 
+  ## @param dataSyncer.labels Labels for Anchore DataSyncer pods
+  ##
+  labels: {}
+
+  ## @param dataSyncer.annotations Annotation for Anchore DataSyncer pods
+  ##
+  annotations: {}
+
+  ## @param dataSyncer.nodeSelector Node labels for Anchore DataSyncer pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param dataSyncer.tolerations Tolerations for Anchore DataSyncer pod assignment
+  ##
+  tolerations: []
+
+  ## @param dataSyncer.affinity Affinity for Anchore DataSyncer pod assignment
+  ##
+  affinity: {}
+
+  ## @param dataSyncer.serviceAccountName Service account name for Anchore DataSyncer pods
+  ##
+  serviceAccountName: ""
+
+  ## @param dataSyncer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore DataSyncer scratch space
+  ##
+  scratchVolume:
+    details: {}
 
 ############################################
 ## @section Anchore Notifications Parameters
@@ -1348,7 +1423,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.9.0
+  image: docker.io/anchore/enterprise-ui:v5.10.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1533,16 +1608,6 @@ ingress:
   ## @param ingress.uiPath The path used for accessing the Anchore UI
   ##
   uiPath: /
-
-  ## @param ingress.feedsHosts List of custom hostnames for the Anchore Feeds API
-  ##
-  feedsHosts: []
-
-  ## @param ingress.feedsPaths The path used for accessing the Anchore Feeds API
-  ## Exposing the feeds API is for special cases only, use /v2/feeds for ingress.feedsPath
-  ##
-  feedsPaths:
-    - /v2/feeds/
 
   ## @param ingress.tls Configure tls for the ingress resource
   ## Secrets must be manually created in the release namespace

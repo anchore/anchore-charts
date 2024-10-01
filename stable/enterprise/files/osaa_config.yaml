@@ -1,6 +1,12 @@
 service_dir: ${ANCHORE_SERVICE_DIR}
 tmp_dir: ${ANCHORE_TMP_DIR}
-log_level: ${ANCHORE_LOG_LEVEL}
+log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
+
+logging:
+  {{- toYaml .Values.anchoreConfig.logging | nindent 2 }}
+
+server:
+  {{- toYaml .Values.anchoreConfig.server | nindent 2 }}
 
 allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
 host_id: "${ANCHORE_HOST_ID}"
@@ -18,6 +24,36 @@ max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
 max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
 
 max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+
+audit:
+  enabled: {{ .Values.anchoreConfig.audit.enabled }}
+  mode: log
+  verbs:
+    - post
+    - put
+    - delete
+    - patch
+  resource_uris:
+    - "/accounts"
+    - "/accounts/{account_name}"
+    - "/accounts/{account_name}/state"
+    - "/accounts/{account_name}/users"
+    - "/accounts/{account_name}/users/{username}"
+    - "/accounts/{account_name}/users/{username}/api-keys"
+    - "/accounts/{account_name}/users/{username}/api-keys/{key_name}"
+    - "/accounts/{account_name}/users/{username}/credentials"
+    - "/rbac-manager/roles"
+    - "/rbac-manager/roles/{role_name}/members"
+    - "/rbac-manager/saml/idps"
+    - "/rbac-manager/saml/idps/{name}"
+    - "/rbac-manager/saml/idps/{name}/user-group-mappings"
+    - "/system/user-groups"
+    - "/system/user-groups/{group_uuid}"
+    - "/system/user-groups/{group_uuid}/roles"
+    - "/system/user-groups/{group_uuid}/users"
+    - "/user/api-keys"
+    - "/user/api-keys/{key_name}"
+    - "/user/credentials"
 
 metrics:
   enabled: ${ANCHORE_ENABLE_METRICS}
@@ -45,7 +81,7 @@ user_authentication:
   max_api_keys_per_user: {{ .Values.anchoreConfig.user_authentication.max_api_keys_per_user }}
   remove_deleted_user_api_keys_older_than_days: {{ .Values.anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days }}
   disallow_native_users: {{ .Values.anchoreConfig.user_authentication.disallow_native_users }}
-
+  log_saml_assertions: {{ .Values.anchoreConfig.user_authentication.log_saml_assertions }}
 credentials:
   database:
     user: "${ANCHORE_DB_USER}"
@@ -171,14 +207,10 @@ services:
         data:
           grypedb:
             enabled: true
-            url: {{ template "enterprise.grypeProviderURL" . }}
-          packages:
-            enabled: ${ANCHORE_FEEDS_DRIVER_PACKAGES_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
-          vulnerability_annotations:
-            enabled: ${ANCHORE_FEEDS_DRIVER_VULN_ANNOTATIONS_ENABLED}
-            url: {{ template "enterprise.feedsURL" . }}
       matching:
+        exclude:
+          providers: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
+          package_types: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
         default:
           search:
             by_cpe:
@@ -267,3 +299,19 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+
+  data_syncer:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: 0.0.0.0
+    port: ${ANCHORE_PORT}
+    auto_sync_enabled: true
+    upload_dir: {{ .Values.scratchVolume.mountPath }}
+    datasets:
+      vulnerability_db:
+        versions: ["5"]
+      clamav_db:
+        versions: ["1"]
+      kev_db:
+        versions: ["1"]
