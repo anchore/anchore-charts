@@ -600,8 +600,8 @@ anchoreConfig:
     vulnerabilities:
       matching:
         exclude:
-          providers: null
-          package_types: null
+          providers: []
+          package_types: []
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
