@@ -155,3 +155,90 @@ secretName: {{ . }}
 secretName: {{ template "enterprise.fullname" . }}-license
 {{- end }}
 {{- end -}}
+
+{{- define "checkDriverEnabled" -}}
+  {{- $drivers := .drivers -}}
+  {{- $driverName := .driverName -}}
+  {{- $driver := index $drivers $driverName -}}
+  {{- if $driver }}
+    {{- $driverEnabled := index $driver "enabled" -}}
+    {{- if not $driverEnabled }}
+      # we only ever update notify to true, we should never override a true value to false
+      {{- $notify := .notify -}}
+      {{- $_ := set . "notify" true -}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- define "enterprise.exclusionCheck" -}}
+
+{{ $notify := false }}
+
+{{ $feeds := index .Values "feeds" }}
+{{- if $feeds -}}
+  {{ $feedsChartEnabled := index .Values "feeds" "chartEnabled" }}
+  {{- if (not $feedsChartEnabled) -}}
+    {{ $notify = true }}
+  {{- end -}}
+  # check extraEnvs to see if it contains a key with "DRIVER" in its name. If so, notify so manual action is taken
+  {{- if not $notify -}}
+    {{ $feedsExtraEnvs := index .Values "feeds" "extraEnv" }}
+    {{- if $feedsExtraEnvs -}}
+      {{- range $index, $val := $feedsExtraEnvs -}}
+        {{- if contains "ANCHORE_FEEDS_DRIVER" .name -}}
+          {{ $notify = true }}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if not $notify -}}
+    {{- $anchoreConfig := index $feeds "anchoreConfig" }}
+    {{- if $anchoreConfig }}
+      {{- $anchoreFeeds := index $anchoreConfig "feeds" }}
+      {{- if $anchoreFeeds }}
+        {{- $drivers := index $anchoreFeeds "drivers" }}
+        {{- if $drivers }}
+
+
+
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "gem" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "github" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "msrc" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "npm" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+
+
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+
+{{- end -}}
+
+# check extraEnvs to see if it contains a key with "DRIVER" in its name. If so, notify so manual action is taken
+{{- if not $notify -}}
+  {{- range $index, $val := .Values.extraEnv -}}
+    {{- if contains "ANCHORE_FEEDS_DRIVER" .name -}}
+      {{ $notify = true }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{ if $notify }}
+    {{- $exclude_providers := required "anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers is required" .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers -}}
+    {{- $exclude_package := required "anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types is required" .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types -}}
+{{- end -}}
+
+{{- end -}}

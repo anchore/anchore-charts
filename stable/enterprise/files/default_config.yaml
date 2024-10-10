@@ -201,8 +201,16 @@ services:
             enabled: true
       matching:
         exclude:
+          {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
           providers: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
+          {{- else }}
+          providers: []
+          {{- end }}
+          {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
           package_types: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
+          {{- else }}
+          package_types: []
+          {{- end }}
         default:
           search:
             by_cpe:
