@@ -199,8 +199,6 @@ secretName: {{ template "enterprise.fullname" . }}-license
         {{- $drivers := index $anchoreFeeds "drivers" }}
         {{- if $drivers }}
 
-
-
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "gem" }}
           {{- include "checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
@@ -216,8 +214,6 @@ secretName: {{ template "enterprise.fullname" . }}-license
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "npm" }}
           {{- include "checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
-
-
         {{- end -}}
       {{- end -}}
     {{- end -}}
@@ -226,7 +222,6 @@ secretName: {{ template "enterprise.fullname" . }}-license
 
 {{- end -}}
 
-# check extraEnvs to see if it contains a key with "DRIVER" in its name. If so, notify so manual action is taken
 {{- if not $notify -}}
   {{- range $index, $val := .Values.extraEnv -}}
     {{- if contains "ANCHORE_FEEDS_DRIVER" .name -}}
