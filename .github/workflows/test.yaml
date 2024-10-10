@@ -99,4 +99,4 @@ jobs:
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
-      run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s" --helm-extra-set-args "--set=useExistingPullCredSecret=true --set=useExistingLicenseSecret=true --set=anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers=[] --set=anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types=[]"
+      run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"

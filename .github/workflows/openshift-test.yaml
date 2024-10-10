@@ -128,7 +128,7 @@ jobs:
           mv ci/openshift-test.yaml ci/openshift-test-values.yaml
           popd
         done
-        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s" --helm-extra-set-args "--set=useExistingPullCredSecret=true--set=useExistingLicenseSecret=true --set=anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers=[] --set=anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types=[]"
+        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
       env:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
