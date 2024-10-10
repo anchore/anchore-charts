@@ -210,12 +210,12 @@ services:
       matching:
         exclude:
           {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
-          providers: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
+          providers: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers | toJson }}
           {{- else }}
           providers: []
           {{- end }}
           {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
-          package_types: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
+          package_types: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types | toJson }}
           {{- else }}
           package_types: []
           {{- end }}

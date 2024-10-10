@@ -163,7 +163,6 @@ secretName: {{ template "enterprise.fullname" . }}-license
   {{- if $driver }}
     {{- $driverEnabled := index $driver "enabled" -}}
     {{- if not $driverEnabled }}
-      # we only ever update notify to true, we should never override a true value to false
       {{- $notify := .notify -}}
       {{- $_ := set . "notify" true -}}
     {{- end }}
@@ -180,7 +179,7 @@ secretName: {{ template "enterprise.fullname" . }}-license
   {{- if (not $feedsChartEnabled) -}}
     {{ $notify = true }}
   {{- end -}}
-  # check extraEnvs to see if it contains a key with "DRIVER" in its name. If so, notify so manual action is taken
+
   {{- if not $notify -}}
     {{ $feedsExtraEnvs := index .Values "feeds" "extraEnv" }}
     {{- if $feedsExtraEnvs -}}
