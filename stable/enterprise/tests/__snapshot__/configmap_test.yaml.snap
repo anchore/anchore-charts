@@ -387,7 +387,7 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: 0.0.0.0
             port: ${ANCHORE_PORT}
-            auto_sync_enabled: true
+            auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
             upload_dir: /analysis_scratch
             datasets:
               vulnerability_db:
@@ -424,6 +424,7 @@ should render the configmaps:
       ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
       ANCHORE_CLI_URL: http://localhost:8228
       ANCHORE_CLI_USER: admin
+      ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED: "true"
       ANCHORE_DB_POOL_MAX_OVERFLOW: "100"
       ANCHORE_DB_POOL_SIZE: "30"
       ANCHORE_DB_SSL: "false"
