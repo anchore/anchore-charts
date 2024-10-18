@@ -156,6 +156,10 @@ secretName: {{ template "enterprise.fullname" . }}-license
 {{- end }}
 {{- end -}}
 
+
+{{/*
+Takes in a map of drivers and checks if the driver is enabled. If not, update the map to sets the notify flag to true
+*/}}
 {{- define "checkDriverEnabled" -}}
   {{- $drivers := .drivers -}}
   {{- $driverName := .driverName -}}
@@ -169,10 +173,14 @@ secretName: {{ template "enterprise.fullname" . }}-license
   {{- end }}
 {{- end }}
 
+{{/*
+Checks if the feeds chart was previously disabled or if any of the drivers were disabled. If so and required values aren't set, fail the upgrade.
+*/}}
 {{- define "enterprise.exclusionCheck" -}}
 
 {{ $notify := false }}
 
+{{/* checks if theres a feeds key, and if so, require values if feeds.chartEnabled is false or feeds.extraEnvs contain ANCHORE_FEEDS_DRIVER or drivers are disabled via values */}}
 {{ $feeds := index .Values "feeds" }}
 {{- if $feeds -}}
   {{ $feedsChartEnabled := index .Values "feeds" "chartEnabled" }}
@@ -197,8 +205,8 @@ secretName: {{ template "enterprise.fullname" . }}-license
       {{- $anchoreFeeds := index $anchoreConfig "feeds" }}
       {{- if $anchoreFeeds }}
         {{- $drivers := index $anchoreFeeds "drivers" }}
+        {{/* calling function to check if driver is enabled, if driver is disabled, set notify to true if its not already true */}}
         {{- if $drivers }}
-
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "gem" }}
           {{- include "checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
@@ -218,10 +226,9 @@ secretName: {{ template "enterprise.fullname" . }}-license
       {{- end -}}
     {{- end -}}
   {{- end -}}
-
-
 {{- end -}}
 
+{{/* if we haven't needed a notification yet, check if top level extraEnvs have ANCHORE_FEEDS_DRIVER */}}
 {{- if not $notify -}}
   {{- range $index, $val := .Values.extraEnv -}}
     {{- if contains "ANCHORE_FEEDS_DRIVER" .name -}}
