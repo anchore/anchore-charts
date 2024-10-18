@@ -323,3 +323,6 @@ services:
         versions: ["1"]
       kev_db:
         versions: ["1"]
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
