@@ -684,6 +684,9 @@ anchoreConfig:
       reports_image_egress: 600
       reports_tag_egress: 600
 
+    runtime_report_generation:
+      use_legacy_loaders_and_queries: false
+
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
     ##
