@@ -243,3 +243,53 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 {{- end -}}
 
 {{- end -}}
+
+{{/*
+Checks if the Postgres mountpoint aligns with PGDATA if the chart is enabled, mountPoint is set and PGDATA is overridden as an env var
+*/}}
+{{- define "enterprise.postgresMountpointCheck" -}}
+
+{{ $notify := false }}
+
+{{/* checks if postgresqlDataDir setting or PGDATA environment variable startswith POSTGRESQL_VOLUME_DIR to ensure data is written to a PV and not ephemeral storage */}}
+{{- $postgresql := index .Values "postgresql" -}}
+{{- if $postgresql -}}
+  {{- $postgresqlChartEnabled := index .Values "postgresql" "chartEnabled" -}}
+  {{- if $postgresqlChartEnabled -}}
+    {{- $postgresMountPath := .Values.postgresql.primary.persistence.mountPath -}}
+    {{- $postgresData := .Values.postgresql.postgresqlDataDir -}}
+    {{- if (not (hasPrefix $postgresMountPath $postgresData)) -}}
+      {{- $notify = true -}}
+    {{- end -}}
+
+    {{- $postgresqlExtraEnvs := index .Values "postgresql" "primary" "extraEnvVars" -}}
+    {{- if and (not $notify) ($postgresqlExtraEnvs) -}}
+      {{- range $index, $val := $postgresqlExtraEnvs -}}
+        {{- if and (eq "PGDATA" .name) (not (hasPrefix $postgresMountPath .value)) -}}
+          {{- $notify = true -}}
+          {{- $postgresData = .value -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{/* if we haven't needed a notification yet, check if top level extraEnv have PGDATA */}}
+    {{- if not $notify -}}
+      {{- $extraEnv := .Values.extraEnv -}}
+      {{- if $extraEnv -}}
+        {{- range $index, $val := $extraEnv -}}
+          {{- if and (eq "PGDATA" .name) (not (hasPrefix $postgresMountPath .value)) -}}
+            {{- $notify = true -}}
+            {{- $postgresData = .value -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- if $notify -}}
+        {{- fail (cat "Postgres data directory (postgresqlDataDir/PGDATA:" $postgresData ") is not within the mountPath:" $postgresMountPath "!") -}}
+    {{- end -}}
+
+  {{- end -}}
+{{- end -}}
+
+{{- end -}}

@@ -47,15 +47,15 @@ imageCredentials:
   password: ""
   email: ""
 
-## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema
+## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema (for upgrading from Anchore 4.x only)
 ##
 startMigrationPod: false
 
-## @param migrationPodImage The image reference to the migration pod
+## @param migrationPodImage The image reference to the migration pod (for upgrading from Anchore 4.x only)
 ##
 migrationPodImage: docker.io/postgres:13-bookworm
 
-## @param migrationAnchoreEngineSecretName The name of the secret that has anchore-engine values
+## @param migrationAnchoreEngineSecretName The name of the secret that has anchore-engine values (for upgrading from Anchore 4.x only)
 ##
 migrationAnchoreEngineSecretName: my-engine-anchore-engine
 
@@ -1007,7 +1007,6 @@ dataSyncer:
 
   ## @param dataSyncer.resources Resource requests and limits for Anchore DataSyncer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
   ##
   resources: {}
     # requests:
@@ -1452,7 +1451,6 @@ ui:
   service:
     type: ClusterIP
     port: 80
-    ## TODO - add service specific annotations & labels to ALL services
     annotations: {}
     labels: {}
     sessionAffinity: ClientIP
