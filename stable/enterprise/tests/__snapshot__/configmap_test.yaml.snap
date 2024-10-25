@@ -359,6 +359,7 @@ should render the configmaps:
               reports_tag_load: 600
               reports_tag_refresh: 7200
             runtime_report_generation:
+              use_legacy_loaders_and_queries: false
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
