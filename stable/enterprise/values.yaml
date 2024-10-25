@@ -684,6 +684,8 @@ anchoreConfig:
       reports_image_egress: 600
       reports_tag_egress: 600
 
+    ## @param anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries Use legacy loaders and queries for runtime report generation
+    ##
     runtime_report_generation:
       use_legacy_loaders_and_queries: false
 
