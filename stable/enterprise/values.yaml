@@ -583,6 +583,11 @@ anchoreConfig:
       inventory_ttl_days: 120
       inventory_ingest_overwrite: false
 
+    ## @param anchoreConfig.catalog.integrations.integration_health_report_ttl_days TTL for integration health reports.
+    ##
+    integrations:
+      integration_health_report_ttl_days: 2
+
     ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
     ##
     down_analyzer_task_requeue: true
