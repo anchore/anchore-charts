@@ -184,6 +184,8 @@ should render the configmaps for osaa migration if enabled:
             runtime_inventory:
               inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
               inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+            integrations:
+              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
             image_gc:
               max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
@@ -320,6 +322,7 @@ should render the configmaps for osaa migration if enabled:
               reports_tag_load: 600
               reports_tag_refresh: 7200
             runtime_report_generation:
+              use_legacy_loaders_and_queries: false
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
@@ -561,6 +564,8 @@ should render the configmaps for osaa migration if enabled:
             runtime_inventory:
               inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
               inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+            integrations:
+              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
             image_gc:
               max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
@@ -708,6 +713,7 @@ should render the configmaps for osaa migration if enabled:
               reports_tag_load: 600
               reports_tag_refresh: 7200
             runtime_report_generation:
+              use_legacy_loaders_and_queries: false
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}

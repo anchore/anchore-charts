@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.10.0
+image: docker.io/anchore/enterprise:v5.11.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -583,6 +583,11 @@ anchoreConfig:
       inventory_ttl_days: 120
       inventory_ingest_overwrite: false
 
+    ## @param anchoreConfig.catalog.integrations.integration_health_report_ttl_days TTL for integration health reports.
+    ##
+    integrations:
+      integration_health_report_ttl_days: 2
+
     ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
     ##
     down_analyzer_task_requeue: true
@@ -683,6 +688,11 @@ anchoreConfig:
       reports_metrics: 3600
       reports_image_egress: 600
       reports_tag_egress: 600
+
+    ## @param anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries Use legacy loaders and queries for runtime report generation
+    ##
+    runtime_report_generation:
+      use_legacy_loaders_and_queries: false
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
@@ -1423,7 +1433,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.10.0
+  image: docker.io/anchore/enterprise-ui:v5.11.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##

@@ -223,6 +223,8 @@ should render the configmaps:
             runtime_inventory:
               inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
               inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+            integrations:
+              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
             image_gc:
               max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
@@ -359,6 +361,7 @@ should render the configmaps:
               reports_tag_load: 600
               reports_tag_refresh: 7200
             runtime_report_generation:
+              use_legacy_loaders_and_queries: false
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
@@ -436,6 +439,7 @@ should render the configmaps:
       ANCHORE_DB_TIMEOUT: "120"
       ANCHORE_DISABLE_METRICS_AUTH: "false"
       ANCHORE_ENABLE_METRICS: "false"
+      ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS: "2"
       ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT: 48h
       ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: "0"
       ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "10"
