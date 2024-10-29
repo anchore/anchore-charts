@@ -83,6 +83,11 @@ spec:
             - secretRef:
                 name: {{ default (include "k8sInventory.fullname" .) .Values.existingSecretName }}
             {{- end }}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
       volumes:
         - name: config-volume
           configMap:
