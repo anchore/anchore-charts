@@ -15,12 +15,17 @@ templates:
   - ui_configmap.yaml
   - anchore_secret.yaml
   - ui_secret.yaml
+  - envvars_configmap.yaml
+  - datasyncer_deployment.yaml
 release:
   name: test-release
   namespace: test-namespace
 chart:
   version: 9.9.9
   appVersion: 9.9.9
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
 backend_test_templates: &backend_test_templates
   - analyzer_deployment.yaml
@@ -31,6 +36,7 @@ backend_test_templates: &backend_test_templates
   - reports_deployment.yaml
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
+  - datasyncer_deployment.yaml
 
 test_templates: &test_templates
   - analyzer_deployment.yaml
@@ -43,6 +49,7 @@ test_templates: &test_templates
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
   - hooks/pre-upgrade/upgrade_job.yaml
+  - datasyncer_deployment.yaml
 
 deployment_templates: &deployment_templates
   - analyzer_deployment.yaml
@@ -54,6 +61,7 @@ deployment_templates: &deployment_templates
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
+  - datasyncer_deployment.yaml
 
 tests:
   - it: should render global annotations
@@ -393,7 +401,7 @@ tests:
       - notExists:
           path: spec.template.spec.serviceAccountName
 
-  - it: should render imagePullSecretName
+  - it: should render imagePullSecretName with useExistingPullCredSecret
     templates: *test_templates
     documentIndex: 0
     asserts:
@@ -401,9 +409,32 @@ tests:
           path: spec.template.spec.imagePullSecrets[0].name
           value: anchore-enterprise-pullcreds
 
+  - it: should render imagePullSecretName with useExistingPullCredSecret set
+    set:
+      useExistingPullCredSecret: true
+      imagePullSecretName: blah-release-enterprise-pullcreds
+    templates: *test_templates
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: blah-release-enterprise-pullcreds
+
+  - it: should render imagePullSecretName without useExistingPullCredSecret
+    set:
+      useExistingPullCredSecret: false
+      imagePullSecretName: blah-release-enterprise-pullcreds
+    templates: *test_templates
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: test-release-enterprise-pullcreds
+
   - it: should render set imagePullSecretName
     set:
       imagePullSecretName: mysecret
+      useExistingPullCredSecret: true
     templates: *test_templates
     documentIndex: 0
     asserts:
@@ -598,6 +629,34 @@ tests:
               name: test-release-enterprise
         count: 1
         any: true
+
+  - it: should render global volumes anchore-license with useExistingLicenseSecret set to false
+    set:
+      useExistingLicenseSecret: false
+      licenseSecretName: my-license-secret
+    templates: *backend_test_templates
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-license
+            secret:
+              secretName: test-release-enterprise-license
+
+  - it: should render global volumes anchore-license with useExistingLicenseSecret set to true and different secret name
+    set:
+      useExistingLicenseSecret: true
+      licenseSecretName: my-license-secret
+    templates: *backend_test_templates
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-license
+            secret:
+              secretName: my-license-secret
 
   - it: should render enterprise.fullname
     templates: *test_templates
@@ -838,112 +897,6 @@ tests:
           path: stringData["ANCHORE_ADMIN_PASSWORD"]
           pattern: ^[a-zA-Z0-9]{32}$
 
-  - it: should render anchoreFeedsURL with feeds.url set
-    set:
-      feeds:
-        url: my-feeds-url
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/feeds"
-
-  - it: should render v2 anchoreFeedsURL with feeds.url set
-    set:
-      feeds:
-        url: my-feeds-url
-        service:
-          apiVersion: v2
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: my-feeds-url/v2/feeds"
-
-  - it: should render anchoreFeedsURL with feeds.chartEnabled
-    set:
-      feeds:
-        chartEnabled: true
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/feeds"
-
-  - it: should render grypeProviderURL with anchoreConfig.policy_engine.overrideFeedsToUpstream
-    set:
-      anchoreConfig.policy_engine:
-        overrideFeedsToUpstream: true
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://toolbox-data.anchore.io/grype/databases/listing.json"
-
-  - it: should render grypeProviderURL without feeds.url defined and feeds.chartEnabled as false
-    set:
-      feeds:
-        url: ""
-        chartEnabled: false
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://toolbox-data.anchore.io/grype/databases/listing.json"
-
-  - it: should set the correct protocol with feeds.anchoreConfig.internalServicesSSL.enabled to true for anchore_configmap.yaml
-    set:
-      feeds.anchoreConfig.internalServicesSSL.enabled: true
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/feeds"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/feeds"
-
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
     set:
       anchoreConfig.internalServicesSSL.enabled: true
@@ -959,29 +912,6 @@ tests:
           path: spec.template.spec.containers[0].livenessProbe.httpGet
           content:
             scheme: HTTPS
-
-  - it: should set the correct protocol with feeds.anchoreConfig.internalServicesSSL.enabled to false for anchore_configmap.yaml
-    set:
-      anchoreConfig.internalServicesSSL.enabled: false
-    templates:
-      - anchore_configmap.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/databases/grypedb"
-
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "url: http://test-release-feeds:8448/v2/feeds"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/databases/grypedb"
-
-      - notMatchRegex:
-          path: data["config.yaml"]
-          pattern: "url: https://test-release-feeds:8448/v2/feeds"
 
   - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
     set:

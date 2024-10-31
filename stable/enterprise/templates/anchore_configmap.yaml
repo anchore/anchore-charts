@@ -1,3 +1,4 @@
+{{- include "enterprise.exclusionCheck" . -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:

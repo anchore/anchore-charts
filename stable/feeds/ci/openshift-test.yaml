@@ -1,0 +1,11 @@
+securityContext:
+  fsGroup: null
+  runAsGroup: null
+  runAsUser: null
+
+feeds-db:
+  primary:
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false

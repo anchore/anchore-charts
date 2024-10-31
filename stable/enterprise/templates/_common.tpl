@@ -108,8 +108,20 @@ When calling this template, .component can be included in the context for compon
   {{- with (index .Values (print $component)).extraEnv }}
 {{ toYaml . }}
   {{- end }}
+
+# check if the domainSuffix is set on the service level of the component, if it is, use that, else use the global domainSuffix
+{{- $serviceName := include (printf "enterprise.%s.fullname" $component) . }}
+{{- $domainSuffix := .Values.domainSuffix }}
+
+{{- with (index .Values (print $component)).service }}
+{{- if .domainSuffix }}
+{{- $domainSuffix = .domainSuffix }}
+{{- end }}
+{{- end }}
+
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  value: {{ include (printf "enterprise.%s.fullname" $component) . }}.{{ .Release.Namespace }}.svc.cluster.local
+  value: {{ $serviceName }}.{{- if $domainSuffix -}}{{ $domainSuffix }}{{- else -}}{{ .Release.Namespace }}.svc.cluster.local{{- end }}
+
   {{- with (index .Values (print $component)).service }}
 - name: ANCHORE_PORT
   value: {{ .port | quote }}
@@ -246,9 +258,14 @@ securityContext: {{- toYaml . | nindent 2 }}
 {{- if or .Values.serviceAccountName (index .Values (print $component)).serviceAccountName (eq $component "upgradeJob") (eq $component "osaaMigrationJob") }}
 serviceAccountName: {{ include "enterprise.serviceAccountName" (merge (dict "component" $component) .) }}
 {{- end }}
+{{- if .Values.useExistingPullCredSecret }}
 {{- with .Values.imagePullSecretName }}
 imagePullSecrets:
   - name: {{ . }}
+{{- end }}
+{{- else }}
+imagePullSecrets:
+  - name: {{ template "enterprise.fullname" . }}-pullcreds
 {{- end }}
 {{- with (default .Values.nodeSelector (index .Values (print $component)).nodeSelector) }}
 nodeSelector: {{- toYaml . | nindent 2 }}
@@ -323,7 +340,7 @@ Setup the common anchore volumes
 {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) }}
 - name: anchore-license
   secret:
-    secretName: {{ .Values.licenseSecretName }}
+    {{- include "enterprise.licenseSecret" . | nindent 4 }}
 - name: anchore-scripts
   configMap:
     name: {{ .Release.Name }}-enterprise-scripts
@@ -347,4 +364,11 @@ Setup the common anchore volumes
   secret:
     secretName: {{ .Values.cloudsql.serviceAccSecretName }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Deployment Strategy Definition. For preupgrade hooks, use RollingUpdate. For postupgrade hooks, use Recreate.
+*/}}
+{{- define "enterprise.common.deploymentStrategy" -}}
+type: Recreate
 {{- end -}}

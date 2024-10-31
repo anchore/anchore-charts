@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.7.0
+image: docker.io/anchore/enterprise:v5.11.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -31,6 +31,21 @@ imagePullPolicy: IfNotPresent
 ## Secrets must be manually created in the same namespace as release
 ##
 imagePullSecretName: anchore-enterprise-pullcreds
+
+## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
+##
+useExistingPullCredSecret: true
+
+## @param imageCredentials.registry The registry URL for the image pull secret
+## @param imageCredentials.username The username for the image pull secret
+## @param imageCredentials.password The password for the image pull secret
+## @param imageCredentials.email The email for the image pull secret
+##
+imageCredentials:
+  registry: ""
+  username: ""
+  password: ""
+  email: ""
 
 ## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema
 ##
@@ -54,11 +69,19 @@ serviceAccountName: ""
 ##
 injectSecretsViaEnv: false
 
+## @param license License for Anchore Enterprise
+##
+license: {}
+
 ## @param licenseSecretName Name of the Kubernetes secret containing your license.yaml file
 ## This must be manually created. For example with the following command:
 ## `kubectl create secret generic anchore-enterprise-license --from-file=license.yaml=<PATH TO LICENSE.YAML>`
 ##
 licenseSecretName: anchore-enterprise-license
+
+## @param useExistingLicenseSecret forgoes license secret creation and uses the secret defined in licenseSecretName
+##
+useExistingLicenseSecret: true
 
 ## @param certStoreSecretName Name of secret containing the certificates & keys used for SSL, SAML & CAs
 ## The chart will mount the secret specified in certStoreSecretName to /home/anchore/certs
@@ -212,6 +235,11 @@ scripts:
       printf '%s\n' "$line";
     done < /config/config.yaml
 
+## @param domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".
+## If set here, the domainSuffix will be appended to the hostname for all Anchore services unless overridden at the service level of each anchore service
+##
+domainSuffix: ""
+
 #####################################################################
 ## @section Anchore Configuration Parameters
 ## Params used for all Anchore Enterprise service configuration files
@@ -305,6 +333,7 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
   ## @param anchoreConfig.user_authentication.disallow_native_users Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.
+  ## @param anchoreConfig.user_authentication.log_saml_assertions Enable logging of received SAML assertions at INFO level for SSO debugging in API container.
   ##
   user_authentication:
     oauth:
@@ -318,6 +347,7 @@ anchoreConfig:
     sso_require_existing_users: false
     remove_deleted_user_api_keys_older_than_days: 365
     disallow_native_users: false
+    log_saml_assertions: false
 
   ## @param anchoreConfig.metrics.enabled Enable Prometheus metrics for all Anchore services
   ## @param anchoreConfig.metrics.auth_disabled Disable auth on Prometheus metrics for all Anchore services
@@ -553,6 +583,11 @@ anchoreConfig:
       inventory_ttl_days: 120
       inventory_ingest_overwrite: false
 
+    ## @param anchoreConfig.catalog.integrations.integration_health_report_ttl_days TTL for integration health reports.
+    ##
+    integrations:
+      integration_health_report_ttl_days: 2
+
     ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
     ##
     down_analyzer_task_requeue: true
@@ -565,9 +600,13 @@ anchoreConfig:
       feed_sync: 14400
       feed_sync_checker: 3600
 
-    ## @param anchoreConfig.policy_engine.overrideFeedsToUpstream Override the Anchore Feeds URL to use the public upstream Anchore Feeds
-    ##
-    overrideFeedsToUpstream: false
+    ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
+    ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
+    vulnerabilities:
+      matching:
+        exclude:
+          providers: null
+          package_types: null
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
@@ -649,6 +688,11 @@ anchoreConfig:
       reports_metrics: 3600
       reports_image_egress: 600
       reports_tag_egress: 600
+
+    ## @param anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries Use legacy loaders and queries for runtime report generation
+    ##
+    runtime_report_generation:
+      use_legacy_loaders_and_queries: false
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
@@ -741,9 +785,11 @@ analyzer:
   replicaCount: 1
 
   ## @param analyzer.service.port The port used for gatherings metrics when .Values.metricsEnabled=true
+  ## @param analyzer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     port: 8084
+    domainSuffix: ""
 
   ## @param analyzer.extraEnv Set extra environment variables for Anchore Analyzer pods
   ##
@@ -810,6 +856,7 @@ api:
   ## @param api.service.annotations Annotations for Anchore API service
   ## @param api.service.labels Labels for Anchore API service
   ## @param api.service.nodePort nodePort for Anchore API service
+  ## @param api.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -817,6 +864,7 @@ api:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -878,6 +926,7 @@ catalog:
   ## @param catalog.service.annotations Annotations for Anchore Catalog service
   ## @param catalog.service.labels Labels for Anchore Catalog service
   ## @param catalog.service.nodePort nodePort for Anchore Catalog service
+  ## @param catalog.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -885,6 +934,7 @@ catalog:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param catalog.extraEnv Set extra environment variables for Anchore Catalog pods
   ##
@@ -938,34 +988,80 @@ catalog:
   scratchVolume:
     details: {}
 
-##########################################
-## @section Anchore Feeds Chart Parameters
-##########################################
-feeds:
-  ## @param feeds.chartEnabled Enable the Anchore Feeds chart
+#########################################################
+## @section Anchore DataSyncer k8s Deployment Parameters
+#########################################################
+dataSyncer:
+  ## @param dataSyncer.replicaCount Number of replicas for the Anchore DataSyncer deployment
   ##
-  chartEnabled: true
+  replicaCount: 1
 
-  ## @param feeds.standalone Sets the Anchore Feeds chart to run into non-standalone mode, for use with Anchore Enterprise.
-  ## This should never be set to true when chartEnabled=true.
+  ## @param dataSyncer.service.type Service type for Anchore DataSyncer
+  ## @param dataSyncer.service.port Service port for Anchore DataSyncer
+  ## @param dataSyncer.service.annotations Annotations for Anchore DataSyncer service
+  ## @param dataSyncer.service.labels Labels for Anchore DataSyncer service
+  ## @param dataSyncer.service.nodePort nodePort for Anchore DataSyncer service
+  ## @param dataSyncer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
-  standalone: false
+  service:
+    type: ClusterIP
+    port: 8778
+    annotations: {}
+    labels: {}
+    nodePort: ""
+    domainSuffix: ""
 
-  ## @param feeds.url Set the URL for a standalone Feeds service. Use when chartEnabled=false.
+  ## @param dataSyncer.extraEnv Set extra environment variables for Anchore DataSyncer pods
   ##
-  url: ""
+  extraEnv: []
 
-  ## @param feeds.resources Resource requests and limits for Anchore Feeds pods
+  ## @param dataSyncer.extraVolumes Define additional volumes for Anchore DataSyncer pods
+  ##
+  extraVolumes: []
+
+  ## @param dataSyncer.extraVolumeMounts Define additional volume mounts for Anchore DataSyncer pods
+  ##
+  extraVolumeMounts: []
+
+  ## @param dataSyncer.resources Resource requests and limits for Anchore DataSyncer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
   ##
   resources: {}
     # requests:
-    #   cpu: 2500m
-    #   memory: 10Gi
+    #   cpu: 1000m
+    #   memory: 8000Mi
     # limits:
-    #   memory: 10Gi
+    #   memory: 8000Mi
 
+  ## @param dataSyncer.labels Labels for Anchore DataSyncer pods
+  ##
+  labels: {}
+
+  ## @param dataSyncer.annotations Annotation for Anchore DataSyncer pods
+  ##
+  annotations: {}
+
+  ## @param dataSyncer.nodeSelector Node labels for Anchore DataSyncer pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param dataSyncer.tolerations Tolerations for Anchore DataSyncer pod assignment
+  ##
+  tolerations: []
+
+  ## @param dataSyncer.affinity Affinity for Anchore DataSyncer pod assignment
+  ##
+  affinity: {}
+
+  ## @param dataSyncer.serviceAccountName Service account name for Anchore DataSyncer pods
+  ##
+  serviceAccountName: ""
+
+  ## @param dataSyncer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore DataSyncer scratch space
+  ##
+  scratchVolume:
+    details: {}
 
 ############################################
 ## @section Anchore Notifications Parameters
@@ -980,6 +1076,7 @@ notifications:
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
   ## @param notifications.service.labels Labels for Anchore Notifications service
   ## @param notifications.service.nodePort nodePort for Anchore Notifications service
+  ## @param notifications.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -987,6 +1084,7 @@ notifications:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param notifications.extraEnv Set extra environment variables for Anchore Notifications pods
   ##
@@ -1048,6 +1146,7 @@ policyEngine:
   ## @param policyEngine.service.annotations Annotations for Anchore Policy Engine service
   ## @param policyEngine.service.labels Labels for Anchore Policy Engine service
   ## @param policyEngine.service.nodePort nodePort for Anchore Policy Engine service
+  ## @param policyEngine.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1055,6 +1154,7 @@ policyEngine:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param policyEngine.extraEnv Set extra environment variables for Anchore Policy Engine pods
   ##
@@ -1121,6 +1221,7 @@ reports:
   ## @param reports.service.annotations Annotations for Anchore Reports service
   ## @param reports.service.labels Labels for Anchore Reports service
   ## @param reports.service.nodePort nodePort for Anchore Reports service
+  ## @param reports.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1128,6 +1229,7 @@ reports:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
@@ -1206,6 +1308,7 @@ reportsWorker:
   ## @param reportsWorker.service.annotations Annotations for Anchore Reports Worker service
   ## @param reportsWorker.service.labels Labels for Anchore Reports Worker service
   ## @param reportsWorker.service.nodePort nodePort for Anchore Reports Worker service
+  ## @param reportsWorker.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1213,6 +1316,7 @@ reportsWorker:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param reportsWorker.extraEnv Set extra environment variables for Anchore Reports Worker pods
   ##
@@ -1274,6 +1378,7 @@ simpleQueue:
   ## @param simpleQueue.service.annotations Annotations for Anchore Simple Queue service
   ## @param simpleQueue.service.labels Labels for Anchore Simple Queue service
   ## @param simpleQueue.service.nodePort nodePort for Anchore Simple Queue service
+  ## @param simpleQueue.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1281,6 +1386,7 @@ simpleQueue:
     annotations: {}
     labels: {}
     nodePort: ""
+    domainSuffix: ""
 
   ## @param simpleQueue.extraEnv Set extra environment variables for Anchore Simple Queue pods
   ##
@@ -1335,7 +1441,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.7.0
+  image: docker.io/anchore/enterprise-ui:v5.11.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1359,6 +1465,7 @@ ui:
   ## @param ui.service.labels Labels for Anchore UI service
   ## @param ui.service.sessionAffinity Session Affinity for Ui service
   ## @param ui.service.nodePort nodePort for Anchore UI service
+  ## @param ui.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
   service:
     type: ClusterIP
@@ -1368,6 +1475,7 @@ ui:
     labels: {}
     sessionAffinity: ClientIP
     nodePort: ""
+    domainSuffix: ""
 
 
   ## @param ui.extraEnv Set extra environment variables for Anchore UI pods
@@ -1526,16 +1634,6 @@ ingress:
   ## @param ingress.uiPath The path used for accessing the Anchore UI
   ##
   uiPath: /
-
-  ## @param ingress.feedsHosts List of custom hostnames for the Anchore Feeds API
-  ##
-  feedsHosts: []
-
-  ## @param ingress.feedsPaths The path used for accessing the Anchore Feeds API
-  ## Exposing the feeds API is for special cases only, use /v2/feeds for ingress.feedsPath
-  ##
-  feedsPaths:
-    - /v2/feeds/
 
   ## @param ingress.tls Configure tls for the ingress resource
   ## Secrets must be manually created in the release namespace

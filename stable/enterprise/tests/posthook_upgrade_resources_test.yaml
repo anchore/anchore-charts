@@ -2,11 +2,39 @@ suite: Posthook Upgrade Job Tests
 templates:
   - hooks/post-upgrade/upgrade_job.yaml
   - anchore_secret.yaml
+  - analyzer_deployment.yaml
+  - api_deployment.yaml
+  - catalog_deployment.yaml
+  - notifications_deployment.yaml
+  - policyengine_deployment.yaml
+  - reports_deployment.yaml
+  - reportsworker_deployment.yaml
+  - simplequeue_deployment.yaml
+  - ui_deployment.yaml
+  - anchore_configmap.yaml
+  - envvars_configmap.yaml
+  - ui_configmap.yaml
+  - ui_secret.yaml
+  - policybundle_configmap.yaml
+  - analyzer_configmap.yaml
+
+deployment-resources: &deployment-resources
+  - templates/api_deployment.yaml
+  - templates/analyzer_deployment.yaml
+  - templates/catalog_deployment.yaml
+  - templates/notifications_deployment.yaml
+  - templates/policyengine_deployment.yaml
+  - templates/reports_deployment.yaml
+  - templates/reportsworker_deployment.yaml
+  - templates/simplequeue_deployment.yaml
+  - templates/ui_deployment.yaml
 values:
   - values.yaml
 set:
   upgradeJob.enabled: true
   upgradeJob.usePostUpgradeHook: true
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 release:
   name: test-release
   namespace: test-namespace
@@ -312,3 +340,11 @@ tests:
             mountPath: /mnt/global-extra-vol
             readOnly: false
         count: 1
+
+  - it: should have Recreate as a deployment strategy
+    templates: *deployment-resources
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: Recreate

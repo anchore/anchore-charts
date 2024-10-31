@@ -1,0 +1,390 @@
+suite: Datasyncer Resources Tests
+templates:
+  - datasyncer_deployment.yaml
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+  - envvars_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
+
+tests:
+  # Document 0 - Deployment
+
+  - it: should render correct apiVersion and kind for document[0] Service
+    templates:
+      - datasyncer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: apiVersion
+          value: apps/v1
+      - equal:
+          path: kind
+          value: Deployment
+
+  - it: should render components for metadata
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      dataSyncer.labels:
+        dataSyncer: test
+        test: foobar
+      dataSyncer.annotations:
+        dataSyncer: test
+        test: foobar
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-datasyncer
+      - equal:
+          path: metadata.namespace
+          value: test-namespace
+      - isSubset:
+          path: metadata.labels
+          content:
+            dataSyncer: test
+            test: foobar
+        template: datasyncer_deployment.yaml
+        documentIndex: 0
+      - isSubset:
+          path: metadata.annotations
+          content:
+            dataSyncer: test
+            test: foobar
+
+  - it: should render component spec.selector.matchLabels
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: datasyncer
+
+  - it: should render component spec.replicas count
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      dataSyncer.replicaCount: 99
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 99
+
+  - it: should render the correct deployment spec.strategy
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.strategy
+          content:
+            type: Recreate
+
+  - it: should render component spec.template.metadata.labels
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      dataSyncer.spec.templates.metadata.labels:
+        dataSyncer: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: spec.template.metadata.labels
+          content:
+            app.kubernetes.io/component: datasyncer
+            app.kubernetes.io/instance: test-release
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/part-of: anchore
+            app.kubernetes.io/version: 9.9.9
+            helm.sh/chart: enterprise-9.9.9
+
+  - it: should render component spec.template.metadata.annotations
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      dataSyncer.labels:
+        dataSyncer: test
+        test: foobar
+      injectSecretsViaEnv: false
+      useExistingSecrets: false
+    asserts:
+    - matchRegex:
+        path: spec.template.metadata.annotations.checksum/enterprise-config
+        pattern: '^[a-zA-Z0-9]+$'
+    - matchRegex:
+        path: spec.template.metadata.annotations.checksum/enterprise-envvar
+        pattern: '^[a-zA-Z0-9]+$'
+    - matchRegex:
+        path: spec.template.metadata.annotations.checksum/secrets
+        pattern: '^[a-zA-Z0-9]+$'
+
+  - it: should not render component spec.template.metadata.annotations when injectSecretsViaEnv and useExistingSecrets are true
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      injectSecretsViaEnv: true
+      useExistingSecrets: true
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations.checksum/secrets
+
+  - it: should render component spec.template.spec volume
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      dataSyncer.serviceAccountName: dataSyncer-test
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+
+  - it: should render fixPermissionsInitContainer
+    templates:
+      - datasyncer_deployment.yaml
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 1001
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 1001 /analysis_scratch ) ]
+            image: alpine
+            name: mode-fixer
+            securityContext:
+              runAsUser: 0
+          count: 1
+          any: true
+
+  - it: should include cloudsqlContainer when cloudsql.enabled is true
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: cloudsql-proxy
+
+  - it: should exclude cloudsqlContainer when cloudsql.enabled is false
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      cloudsql.enabled: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers
+          content:
+            name: cloudsql
+  
+  - it: should render dataSyncer spec.template.spec.containers
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      image: "test-image:latest"
+      imagePullPolicy: "Always"
+      containerSecurityContext:
+        runAsUser: 9997
+        runAsGroup: 9998
+        fsGroup: 9999
+      dataSyncer.volumeMounts:
+        - name: test-volume
+          mountPath: /mnt/test
+          readOnly: true
+
+
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: "enterprise-datasyncer"
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "test-image:latest"
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: "Always"
+      - isSubset:
+          path : spec.template.spec.containers[0].securityContext
+          content:
+            runAsUser: 9997
+            runAsGroup: 9998
+            fsGroup: 9999
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - "/bin/sh"
+            - "-c"
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: ^/docker-entrypoint\.sh anchore-enterprise-manager service start --no-auto-upgrade data_syncer
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            configMapRef:
+              name: test-release-enterprise-config-env-vars
+      - isSubset:
+          path: spec.template.spec.containers[0].env[0]
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-datasyncer.test-namespace.svc.cluster.local
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].env[1]
+          content:
+            name: ANCHORE_PORT
+            value: "8778"
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: datasyncer
+            containerPort: 8778
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-scratch
+            emptyDir: {}
+        count: 1
+
+  - it: should render component spec.template.spec.containers.livenessProbe
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      dataSyncer.resources:
+        requests:
+          cpu: 99m
+          memory: 99Mi
+        limits:
+          cpu: 999m
+          memory: 999Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: datasyncer
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: datasyncer
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources
+          content:
+            requests:
+              cpu: 99m
+              memory: 99Mi
+            limits:
+              cpu: 999m
+              memory: 999Mi
+
+  # Document 1 - Service
+
+  - it: should render document[1] apiVersion and kind
+    templates:
+      - datasyncer_deployment.yaml
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: apiVersion
+          value: v1
+      - equal:
+          path: kind
+          value: Service
+
+  - it: should render document[1] metadata
+    template: datasyncer_deployment.yaml
+    documentIndex: 1  # Reference to Service
+    set:
+      dataSyncer:
+        service:
+          annotations:
+            bar: baz
+            foo: bar
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-datasyncer
+      - equal:
+          path: metadata.namespace
+          value: test-namespace
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/component: datasyncer
+            app.kubernetes.io/instance: test-release
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/part-of: anchore
+            app.kubernetes.io/version: 9.9.9
+            helm.sh/chart: enterprise-9.9.9
+      - isSubset:
+          path: metadata.annotations
+          content:
+            bar: baz
+            foo: bar
+
+  - it: should render document[1] component spec.type
+    template: datasyncer_deployment.yaml
+    documentIndex: 1  # Reference to Service
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+        count: 1
+
+  - it: should render document[1] component spec.ports
+    template: datasyncer_deployment.yaml
+    documentIndex: 1  # Reference to Service
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: datasyncer
+            port: 8778
+            targetPort: 8778
+            protocol: TCP
+        count: 1
+
+  - it: should render document[1] component spec.selectors
+    template: datasyncer_deployment.yaml
+    documentIndex: 1  # Reference to Service
+    asserts:
+      - isSubset:
+          path: spec.selector
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: datasyncer
+        count: 1

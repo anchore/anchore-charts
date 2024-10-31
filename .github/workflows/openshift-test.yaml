@@ -1,0 +1,134 @@
+name: "Test using Replicated's Compatibilty Matrix and chart-testing tool"
+
+on:
+  pull_request:
+    paths:
+      - 'stable/enterprise/Chart.yaml'
+      - 'stable/ecs-inventory/Chart.yaml'
+      - 'stable/k8s-inventory/Chart.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        cluster: [ {distribution: "openshift", version: "4.13.0-okd"}, {distribution: "openshift", version: "4.15.0-okd"}]
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
+
+    - name: Fetch history
+      run: git fetch --prune --unshallow
+
+    - name: Shellcheck
+      uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
+
+    - uses: actions/setup-python@e9aba2c848f5ebd159c070c61ea2c4e2b122355e # v2.3.4
+      with:
+        python-version: 3.7
+
+    - name: Set up Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+      with:
+        version: v3.8.0
+
+    - name: Set up chart-testing
+      uses: helm/chart-testing-action@b43128a8b25298e1e7b043b78ea6613844e079b1 # v2.7.0
+
+    - name: Run chart-testing (list-changed)
+      id: list-changed
+      run: |
+        changed=$(ct list-changed --config 'ct-config.yaml' --target-branch ${{ github.event.pull_request.base.ref }})
+        if [[ -n "$changed" ]]; then
+          echo "CHANGED=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run chart-testing (lint)
+      id: lint
+      run: ct lint --config 'ct-config.yaml'
+      if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
+
+    - name: Run chart-testing but skip version check (lint)
+      id: lintskipversion
+      run: ct lint --config 'ct-config.yaml' --check-version-increment=false
+      if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref != 'main'
+
+    - name: Set up oc client and kubectl
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        wget https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+        sudo tar xzvf oc.tar.gz -C /usr/local/bin
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+    - name: Use Replicated Compatibilty Matrix for cluster creation
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      id: create-cluster
+      uses: replicatedhq/compatibility-actions/create-cluster@v1
+      with:
+        api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
+        cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
+        kubernetes-distribution: ${{ matrix.cluster.distribution }}
+        kubernetes-version: ${{ matrix.cluster.version }}
+        ttl: 20m
+        timeout-minutes: 20
+        kubeconfig-path: ./tmp/kubeconfig
+
+    - name: check the cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      id: check-cluster
+      run: |
+        kubectl get nodes
+        kubectl create namespace anchore
+        echo "${ANCHORE_LICENSE}" | base64 --decode > /tmp/anchore-license
+        kubectl --namespace anchore create secret generic anchore-enterprise-license --from-file=license.yaml=/tmp/anchore-license
+        kubectl --namespace anchore create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username="${DOCKER_USER}" --docker-password="${DOCKER_PASS}"
+      env:
+        ANCHORE_LICENSE: ${{ secrets.B64_ANCHORE_LICENSE }}
+        DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
+        DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
+        KUBECONFIG: ./tmp/kubeconfig
+
+    - name: Check if anchore-engine endpoint is required for admission controller chart
+      id: engine_required
+      run: |
+        if [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'anchore-admission-controller') ]]; then
+          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an engine deployment"
+          echo "::set-output name=changed::true"
+        else
+          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping engine deployment"
+          echo "::set-output name=changed::false"
+        fi
+      shell: bash
+
+    - name: Deploy Engine
+      if: steps.engine_required.outputs.changed == 'true'
+      run: |
+        helm install engine anchore/anchore-engine --namespace anchore -f stable/anchore-admission-controller/ci/openshift-test.yaml --wait
+        kubectl --namespace anchore get pods
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+
+    - name: Run chart-testing
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        ls -al
+        echo ${PWD}
+        files_changed="$(git diff --name-only origin/${TARGET_BRANCH} | sort | uniq)"
+        charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
+        for chart in ${charts_dirs_changed}; do
+          echo "creating openshift-test-values.yaml for ${chart}"
+          pushd "${chart}"
+          rm -rvf ci/*-values.yaml
+          mv ci/openshift-test.yaml ci/openshift-test-values.yaml
+          popd
+        done
+        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+        TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"

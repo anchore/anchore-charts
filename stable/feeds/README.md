@@ -1,5 +1,7 @@
 # Anchore Enterprise Feeds Helm Chart
 
+> :exclamation: **WARNING:** This chart has been deprecated and replaced with an Anchore hosted feeds service.
+
 > :exclamation: **Important:** View the **[Chart Release Notes](#release-notes)** for the latest changes prior to installation or upgrading.
 
 This Helm chart deploys the Anchore Enterprise Feeds service on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
@@ -227,15 +229,16 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: anchore-enterprise-feeds-env
+  labels:
     app: anchore
 type: Opaque
 stringData:
-  ANCHORE_ADMIN_PASSWORD: foobar1234
-  ANCHORE_FEEDS_DB_NAME: anchore-feeds
-  ANCHORE_FEEDS_DB_USER: anchoreengine
-  ANCHORE_FEEDS_DB_PASSWORD: anchore-postgres,123
-  ANCHORE_FEEDS_DB_HOST: anchore-enterprise-feeds-db
-  ANCHORE_FEEDS_DB_PORT: 5432
+  ANCHORE_ADMIN_PASSWORD: "foobar1234"
+  ANCHORE_FEEDS_DB_NAME: "anchore-feeds"
+  ANCHORE_FEEDS_DB_USER: "anchoreengine"
+  ANCHORE_FEEDS_DB_PASSWORD: "anchore-postgres,123"
+  ANCHORE_FEEDS_DB_HOST: "anchore-enterprise-feeds-db"
+  ANCHORE_FEEDS_DB_PORT: "5432"
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
   # (if applicable) ANCHORE_GITHUB_TOKEN: foobar,github1234
   # (if applicable) ANCHORE_NVD_API_KEY: foobar,nvd1234
@@ -310,66 +313,68 @@ anchoreConfig:
 
 ### Common Resource Parameters
 
-| Name                                    | Description                                                                                           | Value                                 |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `standalone`                            | Enable running the Anchore Feeds service in standalone mode                                           | `true`                                |
-| `url`                                   | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster. | `""`                                  |
-| `fullnameOverride`                      | overrides the fullname set on resources                                                               | `""`                                  |
-| `nameOverride`                          | overrides the name set on resources                                                                   | `""`                                  |
-| `image`                                 | Image used for feeds deployment                                                                       | `docker.io/anchore/enterprise:v5.7.0` |
-| `imagePullPolicy`                       | Image pull policy used by all deployments                                                             | `IfNotPresent`                        |
-| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                         | `anchore-enterprise-pullcreds`        |
-| `serviceAccountName`                    | Name of a service account used to run all Feeds pods                                                  | `""`                                  |
-| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                 | `false`                               |
-| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                                       | `anchore-enterprise-license`          |
-| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs                            | `""`                                  |
-| `extraEnv`                              | Common environment variables set on all containers                                                    | `[]`                                  |
-| `labels`                                | Common labels set on all Kubernetes resources                                                         | `{}`                                  |
-| `annotations`                           | Common annotations set on all Kubernetes resources                                                    | `{}`                                  |
-| `resources`                             | Resource requests and limits for Anchore Feeds pods                                                   | `{}`                                  |
-| `nodeSelector`                          | Node labels for Anchore Feeds pod assignment                                                          | `{}`                                  |
-| `tolerations`                           | Tolerations for Anchore Feeds pod assignment                                                          | `[]`                                  |
-| `affinity`                              | Affinity for Anchore Feeds pod assignment                                                             | `{}`                                  |
-| `service.type`                          | Service type for Anchore Feeds                                                                        | `ClusterIP`                           |
-| `service.port`                          | Service port for Anchore Feeds                                                                        | `8448`                                |
-| `service.annotations`                   | Annotations for Anchore Feeds service                                                                 | `{}`                                  |
-| `service.labels`                        | Labels for Anchore Feeds service                                                                      | `{}`                                  |
-| `service.nodePort`                      | nodePort for Anchore Feeds service                                                                    | `""`                                  |
-| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space for image analysis                             | `/anchore_scratch`                    |
-| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions                                         | `false`                               |
-| `scratchVolume.fixerInitContainerImage` | Set the container image for the permissions fixer init container                                      | `alpine`                              |
-| `scratchVolume.details`                 | Details for the k8s volume to be created                                                              | `{}`                                  |
-| `persistence.enabled`                   | Enable mounting an external volume for feeds driver workspace                                         | `true`                                |
-| `persistence.fixGroupPermissions`       | Enable an initContainer that will fix the fsGroup permissions                                         | `false`                               |
-| `persistence.resourcePolicy`            | Resource policy Helm annotation on PVC. Can be nil or "keep"                                          | `keep`                                |
-| `persistence.existingClaim`             | Specify an existing volume claim                                                                      | `""`                                  |
-| `persistence.storageClass`              | Persistent volume storage class                                                                       | `""`                                  |
-| `persistence.accessMode`                | Access Mode for persistent volume                                                                     | `ReadWriteOnce`                       |
-| `persistence.size`                      | Size of persistent volume                                                                             | `40Gi`                                |
-| `persistence.mountPath`                 | Mount path on Anchore Feeds container for persistent volume                                           | `/workspace`                          |
-| `persistence.subPath`                   | Directory name used for persistent volume storage                                                     | `feeds-workspace`                     |
-| `persistence.annotations`               | Annotations for PVC                                                                                   | `{}`                                  |
-| `extraVolumes`                          | mounts additional volumes to each pod                                                                 | `[]`                                  |
-| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                 | `[]`                                  |
-| `securityContext.runAsUser`             | The securityContext runAsUser for all Feeds pods                                                      | `1000`                                |
-| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Feeds pods                                                     | `1000`                                |
-| `securityContext.fsGroup`               | The securityContext fsGroup for all Feeds pods                                                        | `1000`                                |
-| `containerSecurityContext`              | The securityContext for all Feeds containers                                                          | `{}`                                  |
-| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                                              | `120`                                 |
-| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                                    | `10`                                  |
-| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                                     | `10`                                  |
-| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                                  | `6`                                   |
-| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                                  | `1`                                   |
-| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                                               | `10`                                  |
-| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                | `10`                                  |
-| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                             | `3`                                   |
-| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                             | `1`                                   |
-| `doSourceAtEntry.enabled`               | Does a `source` of the file paths defined before starting Anchore services                            | `false`                               |
-| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                       | `[]`                                  |
-| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                             | `false`                               |
-| `existingSecretName`                    | Name of the existing secret to be used for Anchore Feeds Service                                      | `anchore-enterprise-feeds-env`        |
-| `configOverride`                        | Allows for overriding the default Anchore configuration file                                          | `{}`                                  |
-| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                    | `{}`                                  |
+| Name                                    | Description                                                                                                                                   | Value                                 |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `standalone`                            | Enable running the Anchore Feeds service in standalone mode                                                                                   | `true`                                |
+| `url`                                   | Set a custom feeds URL. Useful when using a feeds service endpoint that is external from the cluster.                                         | `""`                                  |
+| `fullnameOverride`                      | overrides the fullname set on resources                                                                                                       | `""`                                  |
+| `nameOverride`                          | overrides the name set on resources                                                                                                           | `""`                                  |
+| `image`                                 | Image used for feeds deployment                                                                                                               | `docker.io/anchore/enterprise:v5.9.0` |
+| `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                                     | `IfNotPresent`                        |
+| `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                                 | `anchore-enterprise-pullcreds`        |
+| `serviceAccountName`                    | Name of a service account used to run all Feeds pods                                                                                          | `""`                                  |
+| `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                                                         | `false`                               |
+| `licenseSecretName`                     | Name of the Kubernetes secret containing your license.yaml file                                                                               | `anchore-enterprise-license`          |
+| `certStoreSecretName`                   | Name of secret containing the certificates & keys used for SSL, SAML & CAs                                                                    | `""`                                  |
+| `extraEnv`                              | Common environment variables set on all containers                                                                                            | `[]`                                  |
+| `labels`                                | Common labels set on all Kubernetes resources                                                                                                 | `{}`                                  |
+| `annotations`                           | Common annotations set on all Kubernetes resources                                                                                            | `{}`                                  |
+| `resources`                             | Resource requests and limits for Anchore Feeds pods                                                                                           | `{}`                                  |
+| `nodeSelector`                          | Node labels for Anchore Feeds pod assignment                                                                                                  | `{}`                                  |
+| `tolerations`                           | Tolerations for Anchore Feeds pod assignment                                                                                                  | `[]`                                  |
+| `affinity`                              | Affinity for Anchore Feeds pod assignment                                                                                                     | `{}`                                  |
+| `service.type`                          | Service type for Anchore Feeds                                                                                                                | `ClusterIP`                           |
+| `service.port`                          | Service port for Anchore Feeds                                                                                                                | `8448`                                |
+| `service.annotations`                   | Annotations for Anchore Feeds service                                                                                                         | `{}`                                  |
+| `service.labels`                        | Labels for Anchore Feeds service                                                                                                              | `{}`                                  |
+| `service.nodePort`                      | nodePort for Anchore Feeds service                                                                                                            | `""`                                  |
+| `service.domainSuffix`                  | Domain suffix for the Anchore Feeds service. If blank, the ANCHORE_ENDPOINT_HOSTNAME will default to service_name.namespace.svc.cluster.local | `""`                                  |
+| `scratchVolume.mountPath`               | The mount path of an external volume for scratch space for image analysis                                                                     | `/anchore_scratch`                    |
+| `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions                                                                                 | `false`                               |
+| `scratchVolume.fixerInitContainerImage` | Set the container image for the permissions fixer init container                                                                              | `alpine`                              |
+| `scratchVolume.details`                 | Details for the k8s volume to be created                                                                                                      | `{}`                                  |
+| `persistence.enabled`                   | Enable mounting an external volume for feeds driver workspace                                                                                 | `true`                                |
+| `persistence.fixGroupPermissions`       | Enable an initContainer that will fix the fsGroup permissions                                                                                 | `false`                               |
+| `persistence.resourcePolicy`            | Resource policy Helm annotation on PVC. Can be nil or "keep"                                                                                  | `keep`                                |
+| `persistence.existingClaim`             | Specify an existing volume claim                                                                                                              | `""`                                  |
+| `persistence.storageClass`              | Persistent volume storage class                                                                                                               | `""`                                  |
+| `persistence.accessMode`                | Access Mode for persistent volume                                                                                                             | `ReadWriteOnce`                       |
+| `persistence.size`                      | Size of persistent volume                                                                                                                     | `40Gi`                                |
+| `persistence.mountPath`                 | Mount path on Anchore Feeds container for persistent volume                                                                                   | `/workspace`                          |
+| `persistence.subPath`                   | Directory name used for persistent volume storage                                                                                             | `feeds-workspace`                     |
+| `persistence.annotations`               | Annotations for PVC                                                                                                                           | `{}`                                  |
+| `extraVolumes`                          | mounts additional volumes to each pod                                                                                                         | `[]`                                  |
+| `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                                         | `[]`                                  |
+| `securityContext.runAsUser`             | The securityContext runAsUser for all Feeds pods                                                                                              | `1000`                                |
+| `securityContext.runAsGroup`            | The securityContext runAsGroup for all Feeds pods                                                                                             | `1000`                                |
+| `securityContext.fsGroup`               | The securityContext fsGroup for all Feeds pods                                                                                                | `1000`                                |
+| `containerSecurityContext`              | The securityContext for all Feeds containers                                                                                                  | `{}`                                  |
+| `probes.liveness.initialDelaySeconds`   | Initial delay seconds for liveness probe                                                                                                      | `120`                                 |
+| `probes.liveness.timeoutSeconds`        | Timeout seconds for liveness probe                                                                                                            | `10`                                  |
+| `probes.liveness.periodSeconds`         | Period seconds for liveness probe                                                                                                             | `10`                                  |
+| `probes.liveness.failureThreshold`      | Failure threshold for liveness probe                                                                                                          | `6`                                   |
+| `probes.liveness.successThreshold`      | Success threshold for liveness probe                                                                                                          | `1`                                   |
+| `probes.readiness.timeoutSeconds`       | Timeout seconds for the readiness probe                                                                                                       | `10`                                  |
+| `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                                                        | `10`                                  |
+| `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                                     | `3`                                   |
+| `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                                     | `1`                                   |
+| `doSourceAtEntry.enabled`               | Does a `source` of the file paths defined before starting Anchore services                                                                    | `false`                               |
+| `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                               | `[]`                                  |
+| `useExistingSecrets`                    | forgoes secret creation and uses the secret defined in existingSecretName                                                                     | `false`                               |
+| `existingSecretName`                    | Name of the existing secret to be used for Anchore Feeds Service                                                                              | `anchore-enterprise-feeds-env`        |
+| `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                                  | `{}`                                  |
+| `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                            | `{}`                                  |
+
 
 ### Anchore Feeds Configuration Parameters
 
@@ -425,6 +430,7 @@ anchoreConfig:
 | `anchoreConfig.feeds.drivers.github.enabled`                               | Enable GitHub advisory feeds (requires GitHub PAT)                                                                               | `false`                                                                                                                               |
 | `anchoreConfig.feeds.drivers.github.token`                                 | GitHub developer personal access token with zero permission scopes                                                               | `""`                                                                                                                                  |
 
+
 ### Anchore Feeds Database Parameters
 
 | Name                                        | Description                                                                                       | Value                   |
@@ -439,6 +445,7 @@ anchoreConfig:
 | `feeds-db.primary.extraEnvVars`             | An array to add extra environment variables                                                       | `[]`                    |
 | `feeds-db.image.tag`                        | Specifies the image to use for this chart.                                                        | `13.11.0-debian-11-r15` |
 
+
 ### Feeds Gem Database Parameters
 
 | Name                                      | Description                                                                                 | Value                   |
@@ -452,6 +459,7 @@ anchoreConfig:
 | `gem-db.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
 | `gem-db.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
 | `gem-db.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
+
 
 ### Anchore Feeds Upgrade Job Parameters
 
@@ -471,6 +479,7 @@ anchoreConfig:
 | `feedsUpgradeJob.resources`               | Resources for the Anchore Feeds upgrade job                                                                                                     | `{}`                   |
 | `feedsUpgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
 
+
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value            |
@@ -482,6 +491,7 @@ anchoreConfig:
 | `ingress.paths`            | The path used for accessing the Anchore Feeds API                  | `["/v2/feeds/"]` |
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`             |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`          |
+
 
 ### Google CloudSQL DB Parameters
 
@@ -504,6 +514,20 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v2.9.x
+
+- Update Anchore Feeds image to v5.9.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/590/) for more information.
+
+### v2.8.x
+
+- Update Anchore Feeds image to v5.8.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/580/) for more information.
+- **Helm upgrade SLO improvements:**
+  - Deployments will only be scaled down when database upgrades are required, as determined by a major/minor version change of the appVersion in Chart.yaml.
+  - Deployments will no longer be scaled down for Anchore Enterprise or Kubernetes resource configuration changes.
+  - Deployments now utilize the RollingUpdate strategy instead of the Recreate strategy when using the pre-upgrade hook. This means that when making Anchore Enterprise or Kubernetes resource configuration changes that require pod replacement, pods will not terminate until the new pods are ready.
+  - - as of v2.8.1, the strategy has been changed back to Recreate
+- Adds a domainSuffix to the service name for all services' ANCHORE_ENDPOINT_HOSTNAME. *If using proxies, you will need to update it from the service name to the fqdn. eg. anchore-feeds -> anchore-feeds.mynamespace.svc.cluster.local*
 
 ### v2.7.x
 

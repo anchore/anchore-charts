@@ -29,7 +29,7 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts .Values.ingress.feedsHosts }}
+  {{- if or .Values.ingress.apiHosts .Values.ingress.uiHosts }}
     {{- range $apiHostIndex, $apiHostName := .Values.ingress.apiHosts }}
     - host: {{ $apiHostName | quote }}
       http:
@@ -68,26 +68,6 @@ spec:
               servicePort: {{ $.Values.ui.service.port }}
           {{- end }}
     {{- end }}
-    {{- range $feedsHostIndex, $feedsHostName := .Values.ingress.feedsHosts }}
-    - host: {{ $feedsHostName | quote }}
-      http:
-        paths:
-        {{- range $feedsPathIndex, $feedsPath := $.Values.ingress.feedsPaths }}
-          - path: {{ $feedsPath }}
-            {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ template "enterprise.feeds.fullname" $ }}
-                port:
-                  number: {{ $.Values.feeds.service.port }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.feeds.fullname" $ }}
-              servicePort: {{ $.Values.feeds.service.port }}
-          {{- end }}
-        {{- end }}
-    {{- end }}
   {{- else }}
     - http:
         paths:
@@ -119,21 +99,6 @@ spec:
             backend:
               serviceName: {{ template "enterprise.ui.fullname" $ }}
               servicePort: {{ $.Values.ui.service.port }}
-          {{- end }}
-        {{- end }}
-        {{- range .Values.ingress.feedsPaths }}
-          - path: {{ . }}
-          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ template "enterprise.feeds.fullname" $ }}
-                port:
-                  number: {{ $.Values.feeds.service.port }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.feeds.fullname" $ }}
-              servicePort: {{ $.Values.feeds.service.port }}
           {{- end }}
         {{- end }}
   {{- end }}

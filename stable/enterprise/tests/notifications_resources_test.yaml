@@ -3,12 +3,16 @@ templates:
   - notifications_deployment.yaml
   - anchore_secret.yaml
   - anchore_configmap.yaml
+  - envvars_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace
 chart:
   version: 9.9.9
   appVersion: 9.9.9
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
 tests:
   - it: should set the correct resource names
@@ -413,3 +417,39 @@ tests:
             g2: v2
             s1: a1
             s2: a2
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME as service name without domainSuffix
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-notifications.test-namespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-notifications.mynamespace.svc.cluster.local
+
+  - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix specified and overridden
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      domainSuffix: "mynamespace.svc.cluster.local"
+      notifications.service.domainSuffix: "myothersuffix.svc.cluster.local"
+      ui.service.domainSuffix: "nope.svc.cluster.local"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-notifications.myothersuffix.svc.cluster.local

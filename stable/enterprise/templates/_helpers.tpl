@@ -57,46 +57,6 @@ Allows passing in a feature flag to the ui application on startup
   {{- end }}
 {{- end }}
 
-{{/*
-Returns the proper URL for the feeds service
-*/}}
-{{- define "enterprise.feedsURL" }}
-{{- $anchoreFeedsURL := "" }}
-  {{- if .Values.feeds.url }}
-    {{- /* remove everything from the URL after /v2 to get the hostname, then use that to construct the proper URL */}}
-    {{- $regexSearchPattern := (printf "/v2.*$" | toString) }}
-    {{- $urlPathSuffix := (default "" (regexFind $regexSearchPattern .Values.feeds.url) ) }}
-    {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
-    {{- $anchoreFeedsURL = (printf "%s/v2/feeds" $anchoreFeedsHost) -}}
-  {{- else if .Values.feeds.chartEnabled }}
-    {{- $anchoreFeedsURL = (printf "%s://%s:%s/v2/feeds" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
-  {{- end }}
-    {{- print $anchoreFeedsURL -}}
-{{- end -}}
-
-
-{{/*
-Returns the proper URL for the grype provider
-*/}}
-{{- define "enterprise.grypeProviderURL" }}
-{{- $grypeProviderFeedsExternalURL := "" -}}
-{{- $regexSearchPattern := (printf "/v2.*$" | toString) }}
-  {{- if .Values.feeds.url }}
-    {{- /* remove everything from the URL after /v2 to get the hostname, then use that to construct the proper URL */}}
-    {{- $urlPathSuffix := (default "" ( regexFind $regexSearchPattern .Values.feeds.url )) -}}
-    {{- $anchoreFeedsHost := (trimSuffix $urlPathSuffix .Values.feeds.url) -}}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s/v2/databases/grypedb" $anchoreFeedsHost) -}}
-  {{- else if .Values.feeds.chartEnabled }}
-    {{- $grypeProviderFeedsExternalURL = (printf "%s://%s:%s/v2/databases/grypedb" (include "enterprise.feeds.setProtocol" .) (include "enterprise.feeds.fullname" .) (.Values.feeds.service.port | toString)) -}}
-  {{- end }}
-
-  {{- /* Set the grypeProviderFeedsExternalURL to upstream feeds if still unset or if specifically overridden */}}
-  {{- if or (empty $grypeProviderFeedsExternalURL) .Values.anchoreConfig.policy_engine.overrideFeedsToUpstream -}}
-    {{- $grypeProviderFeedsExternalURL = "https://toolbox-data.anchore.io/grype/databases/listing.json" -}}
-  {{- end }}
-    {{- print $grypeProviderFeedsExternalURL -}}
-{{- end -}}
-
 
 {{/*
 Set the appropriate kubernetes service account name.
@@ -129,18 +89,6 @@ Return the proper protocol when Anchore internal SSL is enabled
 
 
 {{/*
-Return the proper protocol when Anchore internal SSL is enabled
-*/}}
-{{- define "enterprise.feeds.setProtocol" -}}
-  {{- if .Values.feeds.anchoreConfig.internalServicesSSL.enabled }}
-{{- print "https" -}}
-  {{- else -}}
-{{- print "http" -}}
-  {{- end }}
-{{- end -}}
-
-
-{{/*
 Return the database password for the Anchore Enterprise UI config
 */}}
 {{- define "enterprise.ui.dbPassword" -}}
@@ -163,4 +111,135 @@ Set the nodePort for services if its defined
 {{- if (index .Values (print $component)).service.nodePort -}}
 nodePort: {{ (index .Values (print $component)).service.nodePort }}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Checks if the appVersion.minor has increased, which is indicitive of requiring a db upgrade/service scaling down
+*/}}
+{{- define "enterprise.appVersionChanged" -}}
+
+{{- $configMapName := include "enterprise.fullname" . -}}
+{{- $configMap := (lookup "v1" "ConfigMap" .Release.Namespace $configMapName) -}}
+{{- if $configMap -}}
+  {{- $currentAppVersion := .Chart.AppVersion -}}
+  {{- $currentAppVersionSplit := splitList "." $currentAppVersion -}}
+  {{- $currentAppVersionMajorMinor := ($currentAppVersionSplit | initial | join ".") -}}
+  {{- $labelVersionKey := "app.kubernetes.io/version" -}}
+  {{- $configMapAppVersion := index $configMap.metadata.labels $labelVersionKey -}}
+  {{- $configMapAppVersionSplit := splitList "." $configMapAppVersion -}}
+  {{- $configMapAppVersionMajorMinor := ($configMapAppVersionSplit | initial | join ".") -}}
+  {{- if ne $currentAppVersionMajorMinor $configMapAppVersionMajorMinor -}}
+    {{- print "true" -}}
+  {{- else -}}
+    {{- print "false" -}}
+  {{- end -}}
+{{- else -}}
+  {{- print "true" -}}
+{{- end -}}
+
+{{- end -}}
+
+{{/*
+Constructs a proper dockerconfig json string for use in the image pull secret that is managed by the chart
+*/}}
+{{- define "enterprise.imagePullSecret" }}
+{{- printf "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\",\"auth\":\"%s\"}}}" .Values.imageCredentials.registry .Values.imageCredentials.username .Values.imageCredentials.password .Values.imageCredentials.email (printf "%s:%s" .Values.imageCredentials.username .Values.imageCredentials.password | b64enc) | b64enc }}
+{{- end }}
+
+{{- define "enterprise.licenseSecret" -}}
+{{- if .Values.useExistingLicenseSecret }}
+{{- with .Values.licenseSecretName }}
+secretName: {{ . }}
+{{- end }}
+{{- else }}
+secretName: {{ template "enterprise.fullname" . }}-license
+{{- end }}
+{{- end -}}
+
+
+{{/*
+Takes in a map of drivers and checks if the driver is enabled. If not, update the map to sets the notify flag to true
+*/}}
+{{- define "checkDriverEnabled" -}}
+  {{- $drivers := .drivers -}}
+  {{- $driverName := .driverName -}}
+  {{- $driver := index $drivers $driverName -}}
+  {{- if $driver }}
+    {{- $driverEnabled := index $driver "enabled" -}}
+    {{- if not $driverEnabled }}
+      {{- $notify := .notify -}}
+      {{- $_ := set . "notify" true -}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{/*
+Checks if the feeds chart was previously disabled or if any of the drivers were disabled. If so and required values aren't set, fail the upgrade.
+*/}}
+{{- define "enterprise.exclusionCheck" -}}
+
+{{ $notify := false }}
+
+{{/* checks if theres a feeds key, and if so, require values if feeds.chartEnabled is false or feeds.extraEnvs contain ANCHORE_FEEDS_DRIVER or drivers are disabled via values */}}
+{{ $feeds := index .Values "feeds" }}
+{{- if $feeds -}}
+  {{ $feedsChartEnabled := index .Values "feeds" "chartEnabled" }}
+  {{- if (not $feedsChartEnabled) -}}
+    {{ $notify = true }}
+  {{- end -}}
+
+  {{- if not $notify -}}
+    {{ $feedsExtraEnvs := index .Values "feeds" "extraEnv" }}
+    {{- if $feedsExtraEnvs -}}
+      {{- range $index, $val := $feedsExtraEnvs -}}
+        {{- if contains "ANCHORE_FEEDS_DRIVER" .name -}}
+          {{ $notify = true }}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if not $notify -}}
+    {{- $anchoreConfig := index $feeds "anchoreConfig" }}
+    {{- if $anchoreConfig }}
+      {{- $anchoreFeeds := index $anchoreConfig "feeds" }}
+      {{- if $anchoreFeeds }}
+        {{- $drivers := index $anchoreFeeds "drivers" }}
+        {{/* calling function to check if driver is enabled, if driver is disabled, set notify to true if its not already true */}}
+        {{- if $drivers }}
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "gem" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "github" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "msrc" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+
+          {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "npm" }}
+          {{- include "checkDriverEnabled" $context }}
+          {{- $notify = $context.notify }}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* if we haven't needed a notification yet, check if top level extraEnvs have ANCHORE_FEEDS_DRIVER */}}
+{{- if not $notify -}}
+  {{- range $index, $val := .Values.extraEnv -}}
+    {{- if contains "ANCHORE_FEEDS_DRIVER" .name -}}
+      {{ $notify = true }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{ if $notify }}
+    {{- $exclude_providers := required "anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers is required" .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers -}}
+    {{- $exclude_package := required "anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types is required" .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types -}}
+{{- end -}}
+
 {{- end -}}

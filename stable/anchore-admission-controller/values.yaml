@@ -93,6 +93,11 @@ tolerations: []
 ## Constrain which nodes your pod is eligible to be scheduled on, based on labels on the node
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
+
+## Controls how Pods are spread across your cluster among failure-domains such as regions, zones, nodes, and other user-defined topology domains.
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+topologySpreadConstraints: []
+
 extraLabels: {}
 
 # define name of existing secret containing anchore credentials

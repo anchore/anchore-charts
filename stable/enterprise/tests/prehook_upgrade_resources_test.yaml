@@ -4,6 +4,32 @@ templates:
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml
   - anchore_secret.yaml
   - templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+  - analyzer_deployment.yaml
+  - api_deployment.yaml
+  - catalog_deployment.yaml
+  - notifications_deployment.yaml
+  - policyengine_deployment.yaml
+  - reports_deployment.yaml
+  - reportsworker_deployment.yaml
+  - simplequeue_deployment.yaml
+  - ui_deployment.yaml
+  - anchore_configmap.yaml
+  - envvars_configmap.yaml
+  - ui_configmap.yaml
+  - ui_secret.yaml
+  - policybundle_configmap.yaml
+  - analyzer_configmap.yaml
+
+deployment-resources: &deployment-resources
+  - templates/api_deployment.yaml
+  - templates/analyzer_deployment.yaml
+  - templates/catalog_deployment.yaml
+  - templates/notifications_deployment.yaml
+  - templates/policyengine_deployment.yaml
+  - templates/reports_deployment.yaml
+  - templates/reportsworker_deployment.yaml
+  - templates/simplequeue_deployment.yaml
+  - templates/ui_deployment.yaml
 values:
   - values.yaml
 release:
@@ -12,7 +38,9 @@ release:
 chart:
   version: 9.9.9
   appVersion: 9.9.9
-
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 upgrade-resource: &upgrade-resources
   - templates/hooks/pre-upgrade/upgrade_job.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml
@@ -582,3 +610,11 @@ tests:
       - equal:
           path: spec.template.spec.serviceAccountName
           value: test-service-account
+
+  - it: should have Recreate as a deployment strategy
+    templates: *deployment-resources
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
