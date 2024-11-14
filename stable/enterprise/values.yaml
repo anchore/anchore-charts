@@ -1701,6 +1701,11 @@ ui-redis:
     persistence:
       enabled: false
 
+  #image:
+    #registry: docker.io
+    #repository: bitnami/redis
+    #tag: 7.0.12-debian-11-r0
+
 #######################################
 ## @section Anchore Database Parameters
 #######################################
@@ -1724,6 +1729,18 @@ postgresql:
     database: anchore
 
   primary:
+      ## PostgreSQL Primary resource requests and limits
+      ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+      ## @param primary.resources.limits The resources limits for the PostgreSQL Primary containers
+      ## @param primary.resources.requests.memory The requested memory for the PostgreSQL Primary containers
+      ## @param primary.resources.requests.cpu The requested cpu for the PostgreSQL Primary containers
+      ##
+      #resources:
+      #  limits: {}
+      #  requests:
+      #    memory: 256Mi
+      #    cpu: 250m
+
     ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
     ##
     service:
@@ -1734,6 +1751,7 @@ postgresql:
     ##
     persistence:
       size: 20Gi
+      #storageClass: ""
 
     ## @param postgresql.primary.extraEnvVars An array to add extra environment variables
     ##
@@ -1742,6 +1760,9 @@ postgresql:
   ## @param postgresql.image.tag Specifies the image to use for this chart.
   ##
   image:
+    # repository & registry allow using a image at an alternate location besides the default public location
+    #repository: docker.io
+    #registry: bitnami/postgresql
     tag: 13.11.0-debian-11-r15
 
 ########################################################################################
