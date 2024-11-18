@@ -254,7 +254,7 @@ anchoreConfig:
   ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
   ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
-  log_level: "!ALLOW_API_CONFIGURATION!"  # INFOINFO
+  log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
   ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
   ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
@@ -273,7 +273,7 @@ anchoreConfig:
     exception_diagnose_logging: false
     file_rotation_rule: "10 MB"
     file_retention_rule: 10
-    log_level: "!ALLOW_API_CONFIGURATION!"  # INFO
+    log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
     server_access_logging: true
     server_response_debug_logging: false
     server_log_level: "info"
@@ -501,7 +501,7 @@ anchoreConfig:
         ## Malware scanning occurs only at analysis time when the image content itself is available
       malware:
         clamav:
-          enabled: "!ALLOW_API_CONFIGURATION!"  # false
+          enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
 
   catalog:
