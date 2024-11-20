@@ -66,7 +66,6 @@ default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
 configuration: 
   api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
-  strict_mode: true
 
 keys:
   secret: "${ANCHORE_SAML_SECRET}"
