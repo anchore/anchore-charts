@@ -1054,7 +1054,7 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.rbacCreate`              | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                 |
 | `upgradeJob.serviceAccountName`      | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                   |
 | `upgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                |
-| `upgradeJob.kubectlImage`            | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.27` |
+| `upgradeJob.kubectlImage`            | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.30` |
 | `upgradeJob.nodeSelector`            | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                   |
 | `upgradeJob.tolerations`             | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                   |
 | `upgradeJob.affinity`                | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                   |
@@ -1119,7 +1119,7 @@ To restore your deployment to using your previous driver configurations:
 | Name                                                         | Description                                                                                                      | Value                  |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------- |
 | `osaaMigrationJob.enabled`                                   | Enable the Anchore Object Store and Analysis Archive migration job                                               | `false`                |
-| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnami/kubectl:1.27` |
+| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnami/kubectl:1.30` |
 | `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                   |
 | `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                   |
 | `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                   |
