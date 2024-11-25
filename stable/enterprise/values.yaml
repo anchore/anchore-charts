@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.11.1
+image: docker.io/anchore/enterprise:v5.12.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -1433,7 +1433,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.11.0
+  image: docker.io/anchore/enterprise-ui:v5.12.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1548,7 +1548,7 @@ upgradeJob:
   ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
   ## This is only used in the preupgrade job.
   ##
-  kubectlImage: bitnami/kubectl:1.27
+  kubectlImage: bitnami/kubectl:1.30
 
   ## @param upgradeJob.nodeSelector Node labels for the Anchore upgrade job pod assignment
   ##

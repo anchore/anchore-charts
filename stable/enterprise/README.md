@@ -643,7 +643,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.11.1` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.12.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
@@ -1023,7 +1023,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                         | Description                                                                                                                                                                  | Value                                     |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                   | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.11.0` |
+| `ui.image`                   | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.12.0` |
 | `ui.imagePullPolicy`         | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`      | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`     | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1054,7 +1054,7 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.rbacCreate`              | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                 |
 | `upgradeJob.serviceAccountName`      | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                   |
 | `upgradeJob.usePostUpgradeHook`      | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                |
-| `upgradeJob.kubectlImage`            | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.27` |
+| `upgradeJob.kubectlImage`            | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.30` |
 | `upgradeJob.nodeSelector`            | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                   |
 | `upgradeJob.tolerations`             | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                   |
 | `upgradeJob.affinity`                | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                   |
@@ -1145,6 +1145,14 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.2.x
+
+- Deploys Anchore Enterprise v5.12.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5120/) for more information.
+- Updates the bitnami/kubectl image to 1.30 to address critical vulnerabilities present in bitnami/kubectl:1.27
+- Updates the values of the following to "<ALLOW_API_CONFIGURATION>" to allow updating their respective configurations through the UI in the future. Any changes to these values will still be respected (ie. if you changed it previously or going forward). If a value was never set, it will still default to the previous default value, but the default value is now handled in the application itself.
+  - `anchoreConfig.log_level`
+  - `anchoreConfig.analyzer.configFile.malware.clamav.enabled`
 
 ### V3.1.x
 
