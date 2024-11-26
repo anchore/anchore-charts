@@ -64,6 +64,9 @@ webhooks: {{- toYaml .Values.anchoreConfig.webhooks | nindent 2 }}
 default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
 default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
+configuration: 
+  api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
+
 keys:
   secret: "${ANCHORE_SAML_SECRET}"
   public_key_path: ${ANCHORE_AUTH_PRIVKEY}

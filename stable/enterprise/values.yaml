@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.11.1
+image: docker.io/anchore/enterprise:v5.12.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -254,7 +254,7 @@ anchoreConfig:
   ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
   ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
-  log_level: INFO
+  log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
   ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
   ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
@@ -273,7 +273,7 @@ anchoreConfig:
     exception_diagnose_logging: false
     file_rotation_rule: "10 MB"
     file_retention_rule: 10
-    log_level: INFO
+    log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
     server_access_logging: true
     server_response_debug_logging: false
     server_log_level: "info"
@@ -501,7 +501,7 @@ anchoreConfig:
         ## Malware scanning occurs only at analysis time when the image content itself is available
       malware:
         clamav:
-          enabled: false
+          enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
 
   catalog:
@@ -1433,7 +1433,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.11.0
+  image: docker.io/anchore/enterprise-ui:v5.12.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1548,7 +1548,7 @@ upgradeJob:
   ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
   ## This is only used in the preupgrade job.
   ##
-  kubectlImage: bitnami/kubectl:1.27
+  kubectlImage: bitnami/kubectl:1.30
 
   ## @param upgradeJob.nodeSelector Node labels for the Anchore upgrade job pod assignment
   ##
