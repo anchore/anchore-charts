@@ -1,3 +1,0 @@
-image: docker.io/anchore/enterprise-dev:rc
-ui:
-  image: docker.io/anchore/anchore-on-prem-ui-dev:rc
