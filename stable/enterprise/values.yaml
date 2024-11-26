@@ -1759,7 +1759,7 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
   ## This is only used in the osaaMigrationJob job.
   ##
-  kubectlImage: bitnami/kubectl:1.27
+  kubectlImage: bitnami/kubectl:1.30
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
