@@ -801,7 +801,7 @@ analyzer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1
+    #   cpu: 2
     #   memory: 8G
     # limits:
     #   memory: 8G
@@ -877,9 +877,9 @@ api:
   resources: {}
     # requests:
     #   cpu: 1
-    #   memory: 2GB
+    #   memory: 4G
     # limits:
-    #   memory: 2GB
+    #   memory: 4G
 
   ## @param api.labels Labels for Anchore API pods
   ##
@@ -1021,10 +1021,10 @@ dataSyncer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param dataSyncer.labels Labels for Anchore DataSyncer pods
   ##
@@ -1328,10 +1328,10 @@ reportsWorker:
   ##
   resources: {}
     # requests:
-    #   memory: 1000Mi
-    #   cpu: 2000m
+    #   memory: 4G
+    #   cpu: 2
     # limits:
-    #   memory: 1000Mi
+    #   memory: 4G
 
   ## @param reportsWorker.labels Labels for Anchore Reports Worker pods
   ##
@@ -1780,9 +1780,9 @@ osaaMigrationJob:
   resources: {}
     # requests:
     #   cpu: 1
-    #   memory: 2G
+    #   memory: 8G
     # limits:
-    #   memory: 2G
+    #   memory: 8G
 
   ## @param osaaMigrationJob.labels Labels for Anchore Object Store and Analysis Archive migration job
   ##
