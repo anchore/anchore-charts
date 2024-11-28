@@ -801,7 +801,7 @@ analyzer:
   ##
   resources: {}
     # requests:
-    #   cpu: 2
+    #   cpu: 1
     #   memory: 8G
     # limits:
     #   memory: 8G
@@ -1779,10 +1779,10 @@ osaaMigrationJob:
   ##
   resources: {}
     # requests:
-    #   cpu: 1
-    #   memory: 8G
+    #   cpu: 1000m
+    #   memory: 2000Mi
     # limits:
-    #   memory: 8G
+    #   memory: 2000Mi
 
   ## @param osaaMigrationJob.labels Labels for Anchore Object Store and Analysis Archive migration job
   ##
