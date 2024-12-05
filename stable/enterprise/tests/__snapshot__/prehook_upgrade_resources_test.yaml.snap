@@ -53,7 +53,7 @@ migration job should match snapshot:
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.27
+        image: bitnami/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
@@ -175,7 +175,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.27
+        image: bitnami/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
@@ -295,7 +295,7 @@ migration job should match snapshot analysisArchiveMigration to true:
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.27
+        image: bitnami/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
@@ -414,7 +414,7 @@ migration job should match snapshot objectStoreMigration to true:
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.27
+        image: bitnami/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
