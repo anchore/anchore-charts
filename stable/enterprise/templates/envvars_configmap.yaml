@@ -8,6 +8,7 @@ metadata:
 
 data:
   ANCHORE_ADMIN_EMAIL: "{{ .Values.anchoreConfig.default_admin_email }}"
+  ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED: "true"
   ANCHORE_ALLOW_ECR_IAM_AUTO: "{{ .Values.anchoreConfig.allow_awsecr_iam_auto }}"
   ANCHORE_ANALYZER_TASK_REQUEUE: "true"
   ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "{{ .Values.anchoreConfig.user_authentication.hashed_passwords }}"
@@ -56,6 +57,7 @@ data:
   ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days }}"
   ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite }}"
 {{- end }}
+  ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.integrations.integration_health_report_ttl_days }}"
 {{- with .Values.anchoreConfig.notifications.ui_url }}
   ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
 {{- else }}

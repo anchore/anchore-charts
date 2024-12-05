@@ -22,12 +22,19 @@ data:
       structured: {{ .Values.k8sInventory.log.structured }}
       level: {{ .Values.k8sInventory.log.level }}
       file: {{ .Values.k8sInventory.log.file }}
+    anchore-registration:
+      registration-id: {{ .Values.k8sInventory.anchoreRegistration.RegistrationId }}
+      integration-name: {{ .Values.k8sInventory.anchoreRegistration.IntegrationName }}
+      integration-description: {{ .Values.k8sInventory.anchoreRegistration.IntegrationDescription }}
     namespaces:
       {{- toYaml .Values.k8sInventory.namespaces | nindent 6 }}
     namespace-selectors:
       {{- toYaml .Values.k8sInventory.namespaceSelectors | nindent 6 }}
+    account-routes:
+      {{- toYaml .Values.k8sInventory.accountRoutes | nindent 6}}
     mode: {{ .Values.k8sInventory.mode }}
     polling-interval-seconds: {{ .Values.k8sInventory.pollingIntervalSeconds }}
+    health-report-interval-seconds: {{ .Values.k8sInventory.healthReportIntervalSeconds }}
     kubernetes-request-timeout-seconds: {{ .Values.k8sInventory.kubernetesRequestTimeoutSeconds }}
     kubernetes:
       request-timeout-seconds: {{ .Values.k8sInventory.kubernetes.requestTimeoutSeconds }}

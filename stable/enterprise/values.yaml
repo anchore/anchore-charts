@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.10.0
+image: docker.io/anchore/enterprise:v5.12.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -254,7 +254,7 @@ anchoreConfig:
   ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
   ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
-  log_level: INFO
+  log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
   ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
   ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
@@ -273,7 +273,7 @@ anchoreConfig:
     exception_diagnose_logging: false
     file_rotation_rule: "10 MB"
     file_retention_rule: 10
-    log_level: INFO
+    log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
     server_access_logging: true
     server_response_debug_logging: false
     server_log_level: "info"
@@ -501,7 +501,7 @@ anchoreConfig:
         ## Malware scanning occurs only at analysis time when the image content itself is available
       malware:
         clamav:
-          enabled: false
+          enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
 
   catalog:
@@ -582,6 +582,11 @@ anchoreConfig:
     runtime_inventory:
       inventory_ttl_days: 120
       inventory_ingest_overwrite: false
+
+    ## @param anchoreConfig.catalog.integrations.integration_health_report_ttl_days TTL for integration health reports.
+    ##
+    integrations:
+      integration_health_report_ttl_days: 2
 
     ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
     ##
@@ -683,6 +688,11 @@ anchoreConfig:
       reports_metrics: 3600
       reports_image_egress: 600
       reports_tag_egress: 600
+
+    ## @param anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries Use legacy loaders and queries for runtime report generation
+    ##
+    runtime_report_generation:
+      use_legacy_loaders_and_queries: false
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
@@ -791,10 +801,10 @@ analyzer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param analyzer.labels Labels for Anchore Analyzer pods
   ##
@@ -866,10 +876,10 @@ api:
   ##
   resources: {}
     # requests:
-    #   cpu: 500m
-    #   memory: 1000Mi
+    #   cpu: 1
+    #   memory: 4G
     # limits:
-    #   memory: 1000Mi
+    #   memory: 4G
 
   ## @param api.labels Labels for Anchore API pods
   ##
@@ -936,10 +946,10 @@ catalog:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 2
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param catalog.labels Labels for Anchore Catalog pods
   ##
@@ -1010,10 +1020,10 @@ dataSyncer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param dataSyncer.labels Labels for Anchore DataSyncer pods
   ##
@@ -1085,10 +1095,10 @@ notifications:
   ##
   resources: {}
     # requests:
-    #   cpu: 100m
-    #   memory: 500Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 500Mi
+    #   memory: 8G
 
   ## @param notifications.labels Labels for Anchore Notifications pods
   ##
@@ -1155,10 +1165,10 @@ policyEngine:
   ##
   resources: {}
     # requests:
-    #   cpu: 2000m
-    #   memory: 8000Mi
+    #   cpu: 2
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param policyEngine.labels Labels for Anchore Policy Engine pods
   ##
@@ -1232,10 +1242,10 @@ reports:
   ##
   resources: {}
     # requests:
-    #   memory: 2000Mi
-    #   cpu: 2000m
+    #   memory: 8G
+    #   cpu: 1
     # limits:
-    #   memory: 2000Mi
+    #   memory: 8G
 
   ## @param reports.labels Labels for Anchore Reports pods
   ##
@@ -1317,10 +1327,10 @@ reportsWorker:
   ##
   resources: {}
     # requests:
-    #   memory: 1000Mi
-    #   cpu: 2000m
+    #   memory: 8G
+    #   cpu: 2
     # limits:
-    #   memory: 1000Mi
+    #   memory: 8G
 
   ## @param reportsWorker.labels Labels for Anchore Reports Worker pods
   ##
@@ -1387,10 +1397,10 @@ simpleQueue:
   ##
   resources: {}
     # requests:
-    #   cpu: 250m
-    #   memory: 1000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 1000Mi
+    #   memory: 8G
 
   ## @param simpleQueue.labels Labels for Anchore Simple Queue pods
   ##
@@ -1422,7 +1432,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.10.0
+  image: docker.io/anchore/enterprise-ui:v5.12.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1476,10 +1486,10 @@ ui:
   ##
   resources: {}
     # requests:
-    #   cpu: 100m
-    #   memory: 5000Mi
+    #   cpu: 1
+    #   memory: 4G
     # limits:
-    #   memory: 5000Mi
+    #   memory: 4G
 
   ## @param ui.labels Labels for Anchore UI pods
   ##
@@ -1536,7 +1546,7 @@ upgradeJob:
   ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
   ## This is only used in the preupgrade job.
   ##
-  kubectlImage: bitnami/kubectl:1.27
+  kubectlImage: bitnami/kubectl:1.30
 
   ## @param upgradeJob.nodeSelector Node labels for the Anchore upgrade job pod assignment
   ##
@@ -1689,6 +1699,15 @@ ui-redis:
     persistence:
       enabled: false
 
+  ## @param ui-redis.image.registry Specifies the image registry to use for this chart.
+  ## @param ui-redis.image.repository Specifies the image repository to use for this chart.
+  ## @param ui-redis.image.tag Specifies the image to use for this chart.
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: 7.0.12-debian-11-r0
+
 #######################################
 ## @section Anchore Database Parameters
 #######################################
@@ -1712,24 +1731,40 @@ postgresql:
     database: anchore
 
   primary:
+    ## PostgreSQL Primary resource requests and limits
+    ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    ## @param postgresql.primary.resources The resource limits & requests for the PostgreSQL Primary containers
+    ##
+    resources: {}
+      # limits: {}
+      # requests:
+      #   memory: 512Mi
+      #   cpu: 2
+
     ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
     ##
     service:
       ports:
         postgresql: 5432
 
-    ## @param postgresql.primary.persistence.size Configure size of the persistent volume used with helm managed chart
+    ## @param postgresql.primary.persistence.size Configure size of the persistent volume for PostgreSQL Primary data volume
+    ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
     ##
     persistence:
       size: 20Gi
+      storageClass: ""
 
     ## @param postgresql.primary.extraEnvVars An array to add extra environment variables
     ##
     extraEnvVars: []
 
+  ## @param postgresql.image.repository Specifies the image repository to use for this chart.
+  ## @param postgresql.image.registry Specifies the image registry to use for this chart.
   ## @param postgresql.image.tag Specifies the image to use for this chart.
   ##
   image:
+    repository: bitnami/postgresql
+    registry: docker.io
     tag: 13.11.0-debian-11-r15
 
 ########################################################################################
@@ -1747,7 +1782,7 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
   ## This is only used in the osaaMigrationJob job.
   ##
-  kubectlImage: bitnami/kubectl:1.27
+  kubectlImage: bitnami/kubectl:1.30
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
