@@ -1701,10 +1701,14 @@ ui-redis:
     persistence:
       enabled: false
 
-  #image:
-    #registry: docker.io
-    #repository: bitnami/redis
-    #tag: 7.0.12-debian-11-r0
+  ## @param ui-redis.image.registry Specifies the image registry to use for this chart.
+  ## @param ui-redis.image.repository Specifies the image repository to use for this chart.
+  ## @param ui-redis.image.tag Specifies the image to use for this chart.
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: 7.0.12-debian-11-r0
 
 #######################################
 ## @section Anchore Database Parameters
@@ -1729,17 +1733,15 @@ postgresql:
     database: anchore
 
   primary:
-      ## PostgreSQL Primary resource requests and limits
-      ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-      ## @param primary.resources.limits The resources limits for the PostgreSQL Primary containers
-      ## @param primary.resources.requests.memory The requested memory for the PostgreSQL Primary containers
-      ## @param primary.resources.requests.cpu The requested cpu for the PostgreSQL Primary containers
-      ##
-      #resources:
-      #  limits: {}
-      #  requests:
-      #    memory: 256Mi
-      #    cpu: 250m
+    ## PostgreSQL Primary resource requests and limits
+    ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    ## @param postgresql.primary.resources The resource limits & requests for the PostgreSQL Primary containers
+    ##
+    resources: {}
+      # limits: {}
+      # requests:
+      #   memory: 512Mi
+      #   cpu: 2
 
     ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
     ##
@@ -1747,22 +1749,24 @@ postgresql:
       ports:
         postgresql: 5432
 
-    ## @param postgresql.primary.persistence.size Configure size of the persistent volume used with helm managed chart
+    ## @param postgresql.primary.persistence.size Configure size of the persistent volume for PostgreSQL Primary data volume
+    ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
     ##
     persistence:
       size: 20Gi
-      #storageClass: ""
+      storageClass: ""
 
     ## @param postgresql.primary.extraEnvVars An array to add extra environment variables
     ##
     extraEnvVars: []
 
+  ## @param postgresql.image.repository Specifies the image repository to use for this chart.
+  ## @param postgresql.image.registry Specifies the image registry to use for this chart.
   ## @param postgresql.image.tag Specifies the image to use for this chart.
   ##
   image:
-    # repository & registry allow using a image at an alternate location besides the default public location
-    #repository: docker.io
-    #registry: bitnami/postgresql
+    repository: docker.io
+    registry: bitnami/postgresql
     tag: 13.11.0-debian-11-r15
 
 ########################################################################################
