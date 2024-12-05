@@ -1765,8 +1765,8 @@ postgresql:
   ## @param postgresql.image.tag Specifies the image to use for this chart.
   ##
   image:
-    repository: docker.io
-    registry: bitnami/postgresql
+    repository: bitnami/postgresql
+    registry: docker.io
     tag: 13.11.0-debian-11-r15
 
 ########################################################################################

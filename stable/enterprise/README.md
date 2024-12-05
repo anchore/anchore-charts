@@ -1134,8 +1134,8 @@ To restore your deployment to using your previous driver configurations:
 | `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                  |
 | `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                    |
 | `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
-| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `docker.io`             |
-| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `bitnami/postgresql`    |
+| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`    |
+| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`             |
 | `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
 
 
