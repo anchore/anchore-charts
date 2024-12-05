@@ -639,6 +639,7 @@ To restore your deployment to using your previous driver configurations:
 | `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
 | `global.nameOverride`     | overrides the name set on resources     | `""`  |
 
+
 ### Common Resource Parameters
 
 | Name                                    | Description                                                                                                                        | Value                                  |
@@ -692,6 +693,7 @@ To restore your deployment to using your previous driver configurations:
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                   |
 | `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                   |
 | `domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".        | `""`                                   |
+
 
 ### Anchore Configuration Parameters
 
@@ -822,6 +824,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.ui.dbUser`                                                               | allows overriding and separation of the ui database user.                                                                        | `""`                        |
 | `anchoreConfig.ui.dbPassword`                                                           | allows overriding and separation of the ui database user authentication                                                          | `""`                        |
 
+
 ### Anchore Analyzer k8s Deployment Parameters
 
 | Name                             | Description                                                                                                                                                                  | Value  |
@@ -838,6 +841,7 @@ To restore your deployment to using your previous driver configurations:
 | `analyzer.affinity`              | Affinity for Anchore Analyzer pod assignment                                                                                                                                 | `{}`   |
 | `analyzer.serviceAccountName`    | Service account name for Anchore API pods                                                                                                                                    | `""`   |
 | `analyzer.scratchVolume.details` | Details for the k8s volume to be created for Anchore Analyzer scratch space                                                                                                  | `{}`   |
+
 
 ### Anchore API k8s Deployment Parameters
 
@@ -860,6 +864,7 @@ To restore your deployment to using your previous driver configurations:
 | `api.tolerations`          | Tolerations for Anchore API pod assignment                                                                                                                                   | `[]`        |
 | `api.affinity`             | Affinity for Anchore API pod assignment                                                                                                                                      | `{}`        |
 | `api.serviceAccountName`   | Service account name for Anchore API pods                                                                                                                                    | `""`        |
+
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -884,6 +889,7 @@ To restore your deployment to using your previous driver configurations:
 | `catalog.serviceAccountName`    | Service account name for Anchore Catalog pods                                                                                                                                | `""`        |
 | `catalog.scratchVolume.details` | Details for the k8s volume to be created for Anchore Catalog scratch space                                                                                                   | `{}`        |
 
+
 ### Anchore DataSyncer k8s Deployment Parameters
 
 | Name                               | Description                                                                                                                                                                  | Value       |
@@ -907,6 +913,7 @@ To restore your deployment to using your previous driver configurations:
 | `dataSyncer.serviceAccountName`    | Service account name for Anchore DataSyncer pods                                                                                                                             | `""`        |
 | `dataSyncer.scratchVolume.details` | Details for the k8s volume to be created for Anchore DataSyncer scratch space                                                                                                | `{}`        |
 
+
 ### Anchore Notifications Parameters
 
 | Name                                 | Description                                                                                                                                                                  | Value       |
@@ -928,6 +935,7 @@ To restore your deployment to using your previous driver configurations:
 | `notifications.tolerations`          | Tolerations for Anchore Notifications pod assignment                                                                                                                         | `[]`        |
 | `notifications.affinity`             | Affinity for Anchore Notifications pod assignment                                                                                                                            | `{}`        |
 | `notifications.serviceAccountName`   | Service account name for Anchore Notifications pods                                                                                                                          | `""`        |
+
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -952,6 +960,7 @@ To restore your deployment to using your previous driver configurations:
 | `policyEngine.serviceAccountName`    | Service account name for Anchore Policy Engine pods                                                                                                                          | `""`        |
 | `policyEngine.scratchVolume.details` | Details for the k8s volume to be created for Anchore Policy Engine scratch space                                                                                             | `{}`        |
 
+
 ### Anchore Reports Parameters
 
 | Name                            | Description                                                                                                                                                                  | Value       |
@@ -975,6 +984,7 @@ To restore your deployment to using your previous driver configurations:
 | `reports.serviceAccountName`    | Service account name for Anchore Reports pods                                                                                                                                | `""`        |
 | `reports.scratchVolume.details` | Details for the k8s volume to be created for Anchore Reports scratch space                                                                                                   | `{}`        |
 
+
 ### Anchore Reports Worker Parameters
 
 | Name                                 | Description                                                                                                                                                                  | Value       |
@@ -997,6 +1007,7 @@ To restore your deployment to using your previous driver configurations:
 | `reportsWorker.affinity`             | Affinity for Anchore Reports Worker pod assignment                                                                                                                           | `{}`        |
 | `reportsWorker.serviceAccountName`   | Service account name for Anchore Reports Worker pods                                                                                                                         | `""`        |
 
+
 ### Anchore Simple Queue Parameters
 
 | Name                               | Description                                                                                                                                                                  | Value       |
@@ -1018,6 +1029,7 @@ To restore your deployment to using your previous driver configurations:
 | `simpleQueue.tolerations`          | Tolerations for Anchore Simple Queue pod assignment                                                                                                                          | `[]`        |
 | `simpleQueue.affinity`             | Affinity for Anchore Simple Queue pod assignment                                                                                                                             | `{}`        |
 | `simpleQueue.serviceAccountName`   | Service account name for Anchore Simple Queue pods                                                                                                                           | `""`        |
+
 
 ### Anchore UI Parameters
 
@@ -1045,6 +1057,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui.affinity`                | Affinity for Anchore ui pod assignment                                                                                                                                       | `{}`                                      |
 | `ui.serviceAccountName`      | Service account name for Anchore UI pods                                                                                                                                     | `""`                                      |
 
+
 ### Anchore Upgrade Job Parameters
 
 | Name                                 | Description                                                                                                                                     | Value                  |
@@ -1063,6 +1076,7 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.labels`                  | Labels for the Anchore upgrade job                                                                                                              | `{}`                   |
 | `upgradeJob.ttlSecondsAfterFinished` | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
 
+
 ### Ingress Parameters
 
 | Name                       | Description                                                        | Value                  |
@@ -1077,6 +1091,7 @@ To restore your deployment to using your previous driver configurations:
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                   |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                |
 
+
 ### Google CloudSQL DB Parameters
 
 | Name                             | Description                                                                    | Value                                     |
@@ -1090,15 +1105,20 @@ To restore your deployment to using your previous driver configurations:
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
 | `cloudsql.extraArgs`             | a list of extra arguments to be passed into the cloudsql container command. eg | `[]`                                      |
 
+
 ### Anchore UI Redis Parameters
 
-| Name                                  | Description                                                                                      | Value               |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------- |
-| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`              |
-| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                |
-| `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123` |
-| `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`        |
-| `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`             |
+| Name                                  | Description                                                                                      | Value                 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------- |
+| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`                |
+| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                  |
+| `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123`   |
+| `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`          |
+| `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`               |
+| `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`           |
+| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnami/redis`       |
+| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0` |
+
 
 ### Anchore Database Parameters
 
@@ -1109,17 +1129,22 @@ To restore your deployment to using your previous driver configurations:
 | `postgresql.auth.username`                    | Username used to connect to postgresql                                                      | `anchore`               |
 | `postgresql.auth.password`                    | Password used to connect to postgresql                                                      | `anchore-postgres,123`  |
 | `postgresql.auth.database`                    | Database name used when connecting to postgresql                                            | `anchore`               |
+| `postgresql.primary.resources`                | The resource limits & requests for the PostgreSQL Primary containers                        | `{}`                    |
 | `postgresql.primary.service.ports.postgresql` | Port used to connect to Postgresql                                                          | `5432`                  |
-| `postgresql.primary.persistence.size`         | Configure size of the persistent volume used with helm managed chart                        | `20Gi`                  |
+| `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                  |
+| `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                    |
 | `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
+| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`    |
+| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`             |
 | `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
+
 
 ### Anchore Object Store and Analysis Archive Migration
 
 | Name                                                         | Description                                                                                                      | Value                  |
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------- |
 | `osaaMigrationJob.enabled`                                   | Enable the Anchore Object Store and Analysis Archive migration job                                               | `false`                |
-| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnami/kubectl:1.27` |
+| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnami/kubectl:1.30` |
 | `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                   |
 | `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                   |
 | `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                   |
