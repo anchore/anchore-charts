@@ -801,10 +801,10 @@ analyzer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param analyzer.labels Labels for Anchore Analyzer pods
   ##
@@ -876,10 +876,10 @@ api:
   ##
   resources: {}
     # requests:
-    #   cpu: 500m
-    #   memory: 1000Mi
+    #   cpu: 1
+    #   memory: 4G
     # limits:
-    #   memory: 1000Mi
+    #   memory: 4G
 
   ## @param api.labels Labels for Anchore API pods
   ##
@@ -946,10 +946,10 @@ catalog:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 2
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param catalog.labels Labels for Anchore Catalog pods
   ##
@@ -1021,10 +1021,10 @@ dataSyncer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param dataSyncer.labels Labels for Anchore DataSyncer pods
   ##
@@ -1096,10 +1096,10 @@ notifications:
   ##
   resources: {}
     # requests:
-    #   cpu: 100m
-    #   memory: 500Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 500Mi
+    #   memory: 8G
 
   ## @param notifications.labels Labels for Anchore Notifications pods
   ##
@@ -1166,10 +1166,10 @@ policyEngine:
   ##
   resources: {}
     # requests:
-    #   cpu: 2000m
-    #   memory: 8000Mi
+    #   cpu: 2
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param policyEngine.labels Labels for Anchore Policy Engine pods
   ##
@@ -1243,10 +1243,10 @@ reports:
   ##
   resources: {}
     # requests:
-    #   memory: 2000Mi
-    #   cpu: 2000m
+    #   memory: 8G
+    #   cpu: 1
     # limits:
-    #   memory: 2000Mi
+    #   memory: 8G
 
   ## @param reports.labels Labels for Anchore Reports pods
   ##
@@ -1328,10 +1328,10 @@ reportsWorker:
   ##
   resources: {}
     # requests:
-    #   memory: 1000Mi
-    #   cpu: 2000m
+    #   memory: 8G
+    #   cpu: 2
     # limits:
-    #   memory: 1000Mi
+    #   memory: 8G
 
   ## @param reportsWorker.labels Labels for Anchore Reports Worker pods
   ##
@@ -1398,10 +1398,10 @@ simpleQueue:
   ##
   resources: {}
     # requests:
-    #   cpu: 250m
-    #   memory: 1000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 1000Mi
+    #   memory: 8G
 
   ## @param simpleQueue.labels Labels for Anchore Simple Queue pods
   ##
@@ -1488,10 +1488,10 @@ ui:
   ##
   resources: {}
     # requests:
-    #   cpu: 100m
-    #   memory: 5000Mi
+    #   cpu: 1
+    #   memory: 4G
     # limits:
-    #   memory: 5000Mi
+    #   memory: 4G
 
   ## @param ui.labels Labels for Anchore UI pods
   ##
