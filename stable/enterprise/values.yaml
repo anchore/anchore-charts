@@ -503,6 +503,8 @@ anchoreConfig:
         clamav:
           enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
+          # Maximum time in milliseconds that a ClamAV scan is allowed to run
+          max_scan_time: 600000
 
   catalog:
     ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
