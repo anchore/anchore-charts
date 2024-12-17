@@ -98,7 +98,7 @@ jobs:
         kubectl --namespace anchore get pods
 
     - name: Update to rc image if needed
-      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }}
+      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x'  }}
       run: |
         echo "Branch: ${{ github.event.pull_request.head.ref }}"
         echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
