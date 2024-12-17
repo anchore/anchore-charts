@@ -6131,6 +6131,51 @@ entries:
     version: 0.0.1
   enterprise:
   - apiVersion: v2
+    appVersion: 5.13.0
+    created: "2024-12-17T21:42:25.666388984Z"
+    dependencies:
+    - condition: postgresql.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: ui-redis
+      condition: ui-redis.chartEnabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~17.11
+    description: 'Anchore Enterprise is a complete container security workflow solution
+      for professional teams. Easily integrating with CI/CD systems, it allows developers
+      to bolster security without compromising velocity and enables security teams
+      to audit and verify compliance in real-time. It is based on Anchore Engine,
+      an open-source image inspection and scanning tool. '
+    digest: a353fc82a03d6bbbaa4d343af38cd07f8bdaef66eba4362e0c368c10c8912914
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - anchore-enterprise
+    - image
+    - security
+    - vulnerability
+    - scanner
+    kubeVersion: 1.23.x - 1.31.x || 1.23.x-x - 1.31.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hnguyen
+    name: enterprise
+    sources:
+    - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/enterprise-3.3.0/enterprise-3.3.0.tgz
+    version: 3.3.0
+  - apiVersion: v2
     appVersion: 5.12.0
     created: "2024-12-05T20:18:51.574394074Z"
     dependencies:
@@ -11428,4 +11473,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2024-12-05T20:18:51.574815064Z"
+generated: "2024-12-17T21:42:25.666890106Z"
