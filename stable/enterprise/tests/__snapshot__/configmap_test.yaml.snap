@@ -8,6 +8,7 @@ should render the configmaps:
           clamav:
             db_update_enabled: true
             enabled: <ALLOW_API_CONFIGURATION>
+            max_scan_time: 180000
         retrieve_files:
           file_list:
           - /etc/passwd

@@ -114,6 +114,15 @@ jobs:
       env:
         KUBECONFIG: ./tmp/kubeconfig
 
+    - name: Update to rc image if needed
+      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }}
+      run: |
+        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
+        echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
+        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
+        echo "Appended to stable/enterprise/ci/openshift-test.yaml"
+
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
       run: |

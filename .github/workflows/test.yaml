@@ -97,6 +97,15 @@ jobs:
         helm install engine anchore/anchore-engine --namespace anchore --wait
         kubectl --namespace anchore get pods
 
+    - name: Update to rc image if needed
+      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x'  }}
+      run: |
+        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
+        echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
+        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
+        echo "Appended to stable/enterprise/ci/rc-values.yaml"
+
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
       run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"

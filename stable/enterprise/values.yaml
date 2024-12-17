@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.12.0
+image: docker.io/anchore/enterprise:v5.13.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -503,6 +503,8 @@ anchoreConfig:
         clamav:
           enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
+          # Maximum time in milliseconds that a ClamAV scan is allowed to run
+          max_scan_time: 180000
 
   catalog:
     ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
@@ -1433,7 +1435,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.12.0
+  image: docker.io/anchore/enterprise-ui:v5.13.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
