@@ -89,7 +89,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
 
 ### Installing on Openshift
 
-You will need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled`).
+You will need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled`). Also, by default, Anchore Enterprise creates a user that normally runs the application with a uid/gid/group of 1000. If your deployment uses any other user as openshift usually does, you will need to update the HOME environment variable to a directory where the analyzer service can write to.
 
 For example:
 
@@ -103,7 +103,9 @@ For example:
       --set postgresql.primary.containerSecurityContext.enabled=false \
       --set postgresql.primary.podSecurityContext.enabled=false \
       --set ui-redis.master.podSecurityContext.enabled=false \
-      --set ui-redis.master.containerSecurityContext.enabled=false
+      --set ui-redis.master.containerSecurityContext.enabled=false \
+      --set analyzer.extraEnv[0].name=HOME \
+      --set analyzer.extraEnv[0].value=/tmp
     ```
 
     > **Note:** disabling the containerSecurityContext and podSecurityContext may not be suitable for production. See [Redhat's documentation](https://docs.openshift.com/container-platform/4.13/authentication/managing-security-context-constraints.html#managing-pod-security-policies) on what may be suitable for production. For more information on the openshift.io/sa.scc.uid-range annotation, see the [openshift docs](https://docs.openshift.com/dedicated/authentication/managing-security-context-constraints.html#security-context-constraints-pre-allocated-values_configuring-internal-oauth)
@@ -129,6 +131,10 @@ ui-redis:
       enabled: false
     containerSecurityContext:
       enabled: false
+analyzer:
+  extraEnv:
+    - name: HOME
+      value: /tmp
 ```
 
 ## Upgrading the Chart
