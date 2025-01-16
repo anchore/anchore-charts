@@ -21,6 +21,11 @@ data:
       {{- end }}
     {{- end }}
   {{- end }}
+  {{- with .Values.anchoreConfig.ui.custom_message }}
+    custom_message:
+      title: {{ .title }}
+      message: {{ .message }}
+  {{- end }}
   {{- with .Values.anchoreConfig.ui.enable_add_repositories }}
     enable_add_repositories:
       admin: {{ .admin }}
