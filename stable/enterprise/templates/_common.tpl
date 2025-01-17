@@ -273,6 +273,9 @@ nodeSelector: {{- toYaml . | nindent 2 }}
 {{- with (default .Values.affinity (index .Values (print $component)).affinity) }}
 affinity: {{- toYaml . | nindent 2 }}
 {{- end }}
+{{- with (default .Values.topologySpreadConstraints (index .Values (print $component)).topologySpreadConstraints) }}
+topologySpreadConstraints: {{- toYaml . | nindent 2 }}
+{{- end }}
 {{- with (default .Values.tolerations (index .Values (print $component)).tolerations) }}
 tolerations: {{- toYaml . | nindent 2 }}
 {{- end }}

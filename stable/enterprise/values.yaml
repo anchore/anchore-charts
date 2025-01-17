@@ -136,6 +136,12 @@ tolerations: []
 ##
 affinity: {}
 
+## @param topologySpreadConstraints Common topologySpreadConstraints set on all Kubernetes pods.
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-aware-scheduling/
+## Service level topologySpreadConstraints will override these ones
+##
+topologySpreadConstraints: []
+
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
 ## @param scratchVolume.fixerInitContainerImage The image to use for the mode-fixer initContainer
@@ -835,6 +841,10 @@ analyzer:
   ##
   affinity: {}
 
+  ## @param analyzer.topologySpreadConstraints Topology spread constraints for Anchore Analyzer pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param analyzer.serviceAccountName Service account name for Anchore API pods
   ##
   serviceAccountName: ""
@@ -910,6 +920,9 @@ api:
   ##
   affinity: {}
 
+  ## @param api.topologySpreadConstraints Topology spread constraints for Anchore API pod assignment
+  topologySpreadConstraints: []
+
   ## @param api.serviceAccountName Service account name for Anchore API pods
   ##
   serviceAccountName: ""
@@ -979,6 +992,10 @@ catalog:
   ## @param catalog.affinity Affinity for Anchore Catalog pod assignment
   ##
   affinity: {}
+
+  ## @param catalog.topologySpreadConstraints Topology spread constraints for Anchore Catalog pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param catalog.serviceAccountName Service account name for Anchore Catalog pods
   ##
@@ -1055,6 +1072,10 @@ dataSyncer:
   ##
   affinity: {}
 
+  ## @param dataSyncer.topologySpreadConstraints Topology spread constraints for Anchore DataSyncer pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param dataSyncer.serviceAccountName Service account name for Anchore DataSyncer pods
   ##
   serviceAccountName: ""
@@ -1130,6 +1151,10 @@ notifications:
   ##
   affinity: {}
 
+  ## @param notifications.topologySpreadConstraints Topology spread constraints for Anchore Notifications pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param notifications.serviceAccountName Service account name for Anchore Notifications pods
   ##
   serviceAccountName: ""
@@ -1199,6 +1224,10 @@ policyEngine:
   ## @param policyEngine.affinity Affinity for Anchore Policy Engine pod assignment
   ##
   affinity: {}
+
+  ## @param policyEngine.topologySpreadConstraints Topology spread constraints for Anchore Policy Engine pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param policyEngine.serviceAccountName Service account name for Anchore Policy Engine pods
   ##
@@ -1276,6 +1305,10 @@ reports:
   ## @param reports.affinity Affinity for Anchore Reports pod assignment
   ##
   affinity: {}
+
+  ## @param reports.topologySpreadConstraints Topology spread constraints for Anchore Reports pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param reports.serviceAccountName Service account name for Anchore Reports pods
   ##
@@ -1362,6 +1395,10 @@ reportsWorker:
   ##
   affinity: {}
 
+  ## @param reportsWorker.topologySpreadConstraints Topology spread constraints for Anchore Reports Worker pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param reportsWorker.serviceAccountName Service account name for Anchore Reports Worker pods
   ##
   serviceAccountName: ""
@@ -1431,6 +1468,10 @@ simpleQueue:
   ## @param simpleQueue.affinity Affinity for Anchore Simple Queue pod assignment
   ##
   affinity: {}
+
+  ## @param simpleQueue.topologySpreadConstraints Topology spread constraints for Anchore Simple Queue pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param simpleQueue.serviceAccountName Service account name for Anchore Simple Queue pods
   ##
@@ -1522,6 +1563,10 @@ ui:
   ##
   affinity: {}
 
+  ## @param ui.topologySpreadConstraints Topology spread constraints for Anchore UI pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param ui.serviceAccountName Service account name for Anchore UI pods
   ##
   serviceAccountName: ""
@@ -1570,6 +1615,10 @@ upgradeJob:
   ## @param upgradeJob.affinity Affinity for the Anchore upgrade job pod assignment
   ##
   affinity: {}
+
+  ## @param upgradeJob.topologySpreadConstraints Topology spread constraints for the Anchore upgrade job pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param upgradeJob.annotations Annotations for the Anchore upgrade job
   ##
@@ -1838,6 +1887,10 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.affinity Affinity for Anchore Object Store and Analysis Archive migration job pod assignment
   ##
   affinity: {}
+
+  ## @param osaaMigrationJob.topologySpreadConstraints Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param osaaMigrationJob.serviceAccountName Service account name for Anchore Object Store and Analysis Archive migration job pods
   ##
