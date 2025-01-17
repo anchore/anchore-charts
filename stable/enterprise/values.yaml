@@ -745,6 +745,13 @@ anchoreConfig:
       # admin: True
       # standard: True
 
+    ## @param anchoreConfig.ui.custom_message.title A title key, whose string value provides a title for the message
+    ## @param anchoreConfig.ui.custom_message.message A message key, whose string value is the message itself
+    ##
+    custom_message: {}
+      # title: "Title goes here..."
+      # message: "Message goes here..."
+
     ## @param anchoreConfig.ui.log_level Descriptive detail of the application log output
     ## valid values are error, warn, info, http, debug
     ##
@@ -1753,6 +1760,7 @@ postgresql:
 
     ## @param postgresql.primary.persistence.size Configure size of the persistent volume for PostgreSQL Primary data volume
     ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+    ## NOTE: If your storage class does not allow dynamic resizing then be sure to set the size appropriately!!
     ##
     persistence:
       size: 20Gi
