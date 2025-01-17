@@ -1008,3 +1008,30 @@ tests:
           content:
             nodePort: 9999
         count: 1
+
+  - it: should render global topologySpreadConstraints
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: foo
+          matchLabelKeys:
+            - pod-template-hash
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            topologySpreadConstraints:
+            - labelSelector:
+                matchLabels:
+                  app: foo
+              matchLabelKeys:
+                - pod-template-hash
+              maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule

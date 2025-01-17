@@ -453,3 +453,40 @@ tests:
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
             value: test-release-enterprise-notifications.myothersuffix.svc.cluster.local
+
+  - it: should render component topologySpreadConstraints
+    documentIndex: 0
+    template: notifications_deployment.yaml
+    set:
+      notifications:
+        topologySpreadConstraints:
+          - maxSkew: 2
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app: foobar
+            matchLabelKeys:
+              - pod-template-hash
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: foo
+          matchLabelKeys:
+            - pod-template-hash
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            topologySpreadConstraints:
+              - maxSkew: 2
+                topologyKey: kubernetes.io/hostname
+                whenUnsatisfiable: DoNotSchedule
+                labelSelector:
+                  matchLabels:
+                    app: foobar
+                matchLabelKeys:
+                  - pod-template-hash
