@@ -753,6 +753,7 @@ anchoreConfig:
 
     ## @param anchoreConfig.ui.custom_message.title A title key, whose string value provides a title for the message
     ## @param anchoreConfig.ui.custom_message.message A message key, whose string value is the message itself
+    ## NOTE: You may need to HTML encode the title and/or message if there are any non-alphanumeric characters present.
     ##
     custom_message: {}
       # title: "Title goes here..."
