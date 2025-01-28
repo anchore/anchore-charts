@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.13.1
+image: docker.io/anchore/enterprise:v5.14.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -751,8 +751,9 @@ anchoreConfig:
       # admin: True
       # standard: True
 
-    ## @param anchoreConfig.ui.custom_message.title A title key, whose string value provides a title for the message
-    ## @param anchoreConfig.ui.custom_message.message A message key, whose string value is the message itself
+    ## @param anchoreConfig.ui.custom_message Custom message to display on the login page
+    ## anchoreConfig.ui.custom_message.title A title key, whose string value provides a title for the message
+    ## anchoreConfig.ui.custom_message.message A message key, whose string value is the message itself
     ## NOTE: You may need to HTML encode the title and/or message if there are any non-alphanumeric characters present.
     ##
     custom_message: {}
@@ -1484,7 +1485,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.13.0
+  image: docker.io/anchore/enterprise-ui:v5.14.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
