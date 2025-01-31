@@ -1,7 +1,7 @@
 apiVersion: v2
 name: enterprise
-version: "3.3.4"
-appVersion: "5.13.1"
+version: "3.4.0"
+appVersion: "5.14.0"
 kubeVersion: 1.23.x - 1.31.x || 1.23.x-x - 1.31.x-x
 description: |
   Anchore Enterprise is a complete container security workflow solution for professional teams. Easily integrating with CI/CD systems,
@@ -25,8 +25,10 @@ maintainers:
     email: zach@anchore.com
   - name: btodhunter
     email: bradyt@anchore.com
-  - name: hnguyen
+  - name: hn23
     email: hung.nguyen@anchore.com
+  - name: infrainnovator
+    email: jesse.tamburino@anchore.com
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
 dependencies:
   - name: postgresql
