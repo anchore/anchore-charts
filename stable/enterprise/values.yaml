@@ -459,7 +459,7 @@ anchoreConfig:
       image_analyzer: 1
 
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
-    ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.scratchVolume
+    ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
     ## When setting .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes, ensure the scratch volume has sufficient storage space
     ## ref: https://docs.anchore.com/current/docs/installation/storage/layer_caching/
     ##
@@ -852,6 +852,7 @@ analyzer:
   serviceAccountName: ""
 
   ## @param analyzer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Analyzer scratch space
+  ## Used for analysis of the images scanned by the Anchore Analyzer
   ##
   scratchVolume:
     details: {}
@@ -1004,6 +1005,7 @@ catalog:
   serviceAccountName: ""
 
   ## @param catalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Catalog scratch space
+  ## Used for the Anchore Catalog service archival process, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
   ##
   scratchVolume:
     details: {}
@@ -1083,6 +1085,7 @@ dataSyncer:
   serviceAccountName: ""
 
   ## @param dataSyncer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore DataSyncer scratch space
+  ## Used for the Anchore DataSyncer service to download and sync the feeds data
   ##
   scratchVolume:
     details: {}
@@ -1236,6 +1239,7 @@ policyEngine:
   serviceAccountName: ""
 
   ## @param policyEngine.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Policy Engine scratch space
+  ## policy_engine uses the scratch space for locally synced copy of the feeds data
   ##
   scratchVolume:
     details: {}
@@ -1317,6 +1321,7 @@ reports:
   serviceAccountName: ""
 
   ## @param reports.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Reports scratch space
+  ## Used for the Anchore Reports service to buffer report generation to disk instead of in memory. Off by default, only used if `anchoreConfig.reports.use_volume=true`
   ## ref: https://kubernetes.io/docs/concepts/storage/volumes/
   ##
   scratchVolume:
