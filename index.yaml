@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   anchore-admission-controller:
   - apiVersion: v1
+    appVersion: 0.6.3
+    created: "2025-02-03T16:09:55.069314787Z"
+    description: A kubernetes admission controller for validating and mutating webhooks
+      that operates against Anchore Engine to make access decisions and annotations
+    digest: 0ea2cbb550abc58e760c02bfd87b3bb3522b02e31d2387725394a3f52ef87542
+    home: https://github.com/anchore/kubernetes-admission-controller
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    kubeVersion: ^1.19.0-0
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    name: anchore-admission-controller
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/anchore-admission-controller-0.6.4/anchore-admission-controller-0.6.4.tgz
+    version: 0.6.4
+  - apiVersion: v1
     appVersion: 0.6.2
     created: "2024-10-09T14:39:03.855037025Z"
     description: A kubernetes admission controller for validating and mutating webhooks
@@ -11725,4 +11743,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2025-01-31T22:51:52.222438199Z"
+generated: "2025-02-03T16:09:55.070008285Z"
