@@ -752,8 +752,8 @@ anchoreConfig:
       # standard: True
 
     ## @param anchoreConfig.ui.custom_message Custom message to display on the login page
-    ## anchoreConfig.ui.custom_message.title A title key, whose string value provides a title for the message
-    ## anchoreConfig.ui.custom_message.message A message key, whose string value is the message itself
+    ## anchoreConfig.ui.custom_message.title A title key, whose string value provides a title for the message (limited to 250 characters)
+    ## anchoreConfig.ui.custom_message.message A message key, whose string value is the message itself (limited to 10,000 characters and supporting Markdown)
     ## NOTE: You may need to HTML encode the title and/or message if there are any non-alphanumeric characters present.
     ##
     custom_message: {}
