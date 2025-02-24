@@ -29,7 +29,7 @@ jobs:
 
     - uses: actions/setup-python@e9aba2c848f5ebd159c070c61ea2c4e2b122355e # v2.3.4
       with:
-        python-version: 3.7
+        python-version: '3.10'
 
     - name: Set up Helm
       uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
@@ -113,6 +113,24 @@ jobs:
         kubectl --namespace anchore get pods
       env:
         KUBECONFIG: ./tmp/kubeconfig
+
+    - name: Update to rc image if needed
+      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }}
+      run: |
+        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
+        echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
+        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
+        echo "Appended to stable/enterprise/ci/openshift-test.yaml"
+
+    - name: Update to nightly image if needed
+      if: ${{ github.event.pull_request.base.ref == 'nightly' || github.ref_name == 'nightly' }}
+      run: |
+        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
+        echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
+        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
+        echo "Appended to stable/enterprise/ci/openshift-test.yaml"
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'

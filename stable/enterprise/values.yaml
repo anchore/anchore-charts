@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.11.0
+image: docker.io/anchore/enterprise:v5.14.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -135,6 +135,12 @@ tolerations: []
 ## @param affinity Common affinity set on all Kubernetes pods
 ##
 affinity: {}
+
+## @param topologySpreadConstraints Common topologySpreadConstraints set on all Kubernetes pods.
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-aware-scheduling/
+## Service level topologySpreadConstraints will override these ones
+##
+topologySpreadConstraints: []
 
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
@@ -254,7 +260,7 @@ anchoreConfig:
   ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
   ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
-  log_level: INFO
+  log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
   ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
   ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
@@ -273,7 +279,7 @@ anchoreConfig:
     exception_diagnose_logging: false
     file_rotation_rule: "10 MB"
     file_retention_rule: 10
-    log_level: INFO
+    log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
     server_access_logging: true
     server_response_debug_logging: false
     server_log_level: "info"
@@ -453,7 +459,7 @@ anchoreConfig:
       image_analyzer: 1
 
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
-    ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.scratchVolume
+    ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
     ## When setting .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes, ensure the scratch volume has sufficient storage space
     ## ref: https://docs.anchore.com/current/docs/installation/storage/layer_caching/
     ##
@@ -501,8 +507,10 @@ anchoreConfig:
         ## Malware scanning occurs only at analysis time when the image content itself is available
       malware:
         clamav:
-          enabled: false
+          enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
+          # Maximum time in milliseconds that a ClamAV scan is allowed to run
+          max_scan_time: 180000
 
   catalog:
     ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
@@ -743,6 +751,15 @@ anchoreConfig:
       # admin: True
       # standard: True
 
+    ## @param anchoreConfig.ui.custom_message Custom message to display on the login page
+    ## anchoreConfig.ui.custom_message.title A title key, whose string value provides a title for the message (limited to 250 characters)
+    ## anchoreConfig.ui.custom_message.message A message key, whose string value is the message itself (limited to 10,000 characters and supporting Markdown)
+    ## NOTE: You may need to HTML encode the title and/or message if there are any non-alphanumeric characters present.
+    ##
+    custom_message: {}
+      # title: "Title goes here..."
+      # message: "Message goes here..."
+
     ## @param anchoreConfig.ui.log_level Descriptive detail of the application log output
     ## valid values are error, warn, info, http, debug
     ##
@@ -809,10 +826,10 @@ analyzer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param analyzer.labels Labels for Anchore Analyzer pods
   ##
@@ -834,11 +851,16 @@ analyzer:
   ##
   affinity: {}
 
+  ## @param analyzer.topologySpreadConstraints Topology spread constraints for Anchore Analyzer pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param analyzer.serviceAccountName Service account name for Anchore API pods
   ##
   serviceAccountName: ""
 
   ## @param analyzer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Analyzer scratch space
+  ## Used for analysis of the images scanned by the Anchore Analyzer
   ##
   scratchVolume:
     details: {}
@@ -884,10 +906,10 @@ api:
   ##
   resources: {}
     # requests:
-    #   cpu: 500m
-    #   memory: 1000Mi
+    #   cpu: 1
+    #   memory: 4G
     # limits:
-    #   memory: 1000Mi
+    #   memory: 4G
 
   ## @param api.labels Labels for Anchore API pods
   ##
@@ -908,6 +930,9 @@ api:
   ## @param api.affinity Affinity for Anchore API pod assignment
   ##
   affinity: {}
+
+  ## @param api.topologySpreadConstraints Topology spread constraints for Anchore API pod assignment
+  topologySpreadConstraints: []
 
   ## @param api.serviceAccountName Service account name for Anchore API pods
   ##
@@ -954,10 +979,10 @@ catalog:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 2
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param catalog.labels Labels for Anchore Catalog pods
   ##
@@ -979,11 +1004,16 @@ catalog:
   ##
   affinity: {}
 
+  ## @param catalog.topologySpreadConstraints Topology spread constraints for Anchore Catalog pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param catalog.serviceAccountName Service account name for Anchore Catalog pods
   ##
   serviceAccountName: ""
 
   ## @param catalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Catalog scratch space
+  ## Used for the Anchore Catalog service archival process, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
   ##
   scratchVolume:
     details: {}
@@ -1029,10 +1059,10 @@ dataSyncer:
   ##
   resources: {}
     # requests:
-    #   cpu: 1000m
-    #   memory: 8000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param dataSyncer.labels Labels for Anchore DataSyncer pods
   ##
@@ -1054,11 +1084,16 @@ dataSyncer:
   ##
   affinity: {}
 
+  ## @param dataSyncer.topologySpreadConstraints Topology spread constraints for Anchore DataSyncer pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param dataSyncer.serviceAccountName Service account name for Anchore DataSyncer pods
   ##
   serviceAccountName: ""
 
   ## @param dataSyncer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore DataSyncer scratch space
+  ## Used for the Anchore DataSyncer service to download and sync the feeds data
   ##
   scratchVolume:
     details: {}
@@ -1104,10 +1139,10 @@ notifications:
   ##
   resources: {}
     # requests:
-    #   cpu: 100m
-    #   memory: 500Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 500Mi
+    #   memory: 8G
 
   ## @param notifications.labels Labels for Anchore Notifications pods
   ##
@@ -1128,6 +1163,10 @@ notifications:
   ## @param notifications.affinity Affinity for Anchore Notifications pod assignment
   ##
   affinity: {}
+
+  ## @param notifications.topologySpreadConstraints Topology spread constraints for Anchore Notifications pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param notifications.serviceAccountName Service account name for Anchore Notifications pods
   ##
@@ -1174,10 +1213,10 @@ policyEngine:
   ##
   resources: {}
     # requests:
-    #   cpu: 2000m
-    #   memory: 8000Mi
+    #   cpu: 2
+    #   memory: 8G
     # limits:
-    #   memory: 8000Mi
+    #   memory: 8G
 
   ## @param policyEngine.labels Labels for Anchore Policy Engine pods
   ##
@@ -1199,11 +1238,16 @@ policyEngine:
   ##
   affinity: {}
 
+  ## @param policyEngine.topologySpreadConstraints Topology spread constraints for Anchore Policy Engine pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param policyEngine.serviceAccountName Service account name for Anchore Policy Engine pods
   ##
   serviceAccountName: ""
 
   ## @param policyEngine.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Policy Engine scratch space
+  ## policy_engine uses the scratch space for locally synced copy of the feeds data
   ##
   scratchVolume:
     details: {}
@@ -1251,10 +1295,10 @@ reports:
   ##
   resources: {}
     # requests:
-    #   memory: 2000Mi
-    #   cpu: 2000m
+    #   memory: 8G
+    #   cpu: 1
     # limits:
-    #   memory: 2000Mi
+    #   memory: 8G
 
   ## @param reports.labels Labels for Anchore Reports pods
   ##
@@ -1276,11 +1320,16 @@ reports:
   ##
   affinity: {}
 
+  ## @param reports.topologySpreadConstraints Topology spread constraints for Anchore Reports pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param reports.serviceAccountName Service account name for Anchore Reports pods
   ##
   serviceAccountName: ""
 
   ## @param reports.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Reports scratch space
+  ## Used for the Anchore Reports service to buffer report generation to disk instead of in memory. Off by default, only used if `anchoreConfig.reports.use_volume=true`
   ## ref: https://kubernetes.io/docs/concepts/storage/volumes/
   ##
   scratchVolume:
@@ -1336,10 +1385,10 @@ reportsWorker:
   ##
   resources: {}
     # requests:
-    #   memory: 1000Mi
-    #   cpu: 2000m
+    #   memory: 8G
+    #   cpu: 2
     # limits:
-    #   memory: 1000Mi
+    #   memory: 8G
 
   ## @param reportsWorker.labels Labels for Anchore Reports Worker pods
   ##
@@ -1360,6 +1409,10 @@ reportsWorker:
   ## @param reportsWorker.affinity Affinity for Anchore Reports Worker pod assignment
   ##
   affinity: {}
+
+  ## @param reportsWorker.topologySpreadConstraints Topology spread constraints for Anchore Reports Worker pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param reportsWorker.serviceAccountName Service account name for Anchore Reports Worker pods
   ##
@@ -1406,10 +1459,10 @@ simpleQueue:
   ##
   resources: {}
     # requests:
-    #   cpu: 250m
-    #   memory: 1000Mi
+    #   cpu: 1
+    #   memory: 8G
     # limits:
-    #   memory: 1000Mi
+    #   memory: 8G
 
   ## @param simpleQueue.labels Labels for Anchore Simple Queue pods
   ##
@@ -1431,6 +1484,10 @@ simpleQueue:
   ##
   affinity: {}
 
+  ## @param simpleQueue.topologySpreadConstraints Topology spread constraints for Anchore Simple Queue pod assignment
+  ##
+  topologySpreadConstraints: []
+
   ## @param simpleQueue.serviceAccountName Service account name for Anchore Simple Queue pods
   ##
   serviceAccountName: ""
@@ -1441,7 +1498,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.11.0
+  image: docker.io/anchore/enterprise-ui:v5.14.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1496,10 +1553,10 @@ ui:
   ##
   resources: {}
     # requests:
-    #   cpu: 100m
-    #   memory: 5000Mi
+    #   cpu: 1
+    #   memory: 4G
     # limits:
-    #   memory: 5000Mi
+    #   memory: 4G
 
   ## @param ui.labels Labels for Anchore UI pods
   ##
@@ -1520,6 +1577,10 @@ ui:
   ## @param ui.affinity Affinity for Anchore ui pod assignment
   ##
   affinity: {}
+
+  ## @param ui.topologySpreadConstraints Topology spread constraints for Anchore UI pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param ui.serviceAccountName Service account name for Anchore UI pods
   ##
@@ -1556,7 +1617,7 @@ upgradeJob:
   ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
   ## This is only used in the preupgrade job.
   ##
-  kubectlImage: bitnami/kubectl:1.27
+  kubectlImage: bitnami/kubectl:1.30
 
   ## @param upgradeJob.extraVolumes Define additional volumes for Anchore upgrade job pod
   ##
@@ -1577,6 +1638,10 @@ upgradeJob:
   ## @param upgradeJob.affinity Affinity for the Anchore upgrade job pod assignment
   ##
   affinity: {}
+
+  ## @param upgradeJob.topologySpreadConstraints Topology spread constraints for the Anchore upgrade job pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param upgradeJob.annotations Annotations for the Anchore upgrade job
   ##
@@ -1717,6 +1782,15 @@ ui-redis:
     persistence:
       enabled: false
 
+  ## @param ui-redis.image.registry Specifies the image registry to use for this chart.
+  ## @param ui-redis.image.repository Specifies the image repository to use for this chart.
+  ## @param ui-redis.image.tag Specifies the image to use for this chart.
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: 7.0.12-debian-11-r0
+
 #######################################
 ## @section Anchore Database Parameters
 #######################################
@@ -1740,24 +1814,41 @@ postgresql:
     database: anchore
 
   primary:
+    ## PostgreSQL Primary resource requests and limits
+    ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    ## @param postgresql.primary.resources The resource limits & requests for the PostgreSQL Primary containers
+    ##
+    resources: {}
+      # limits: {}
+      # requests:
+      #   memory: 512Mi
+      #   cpu: 2
+
     ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
     ##
     service:
       ports:
         postgresql: 5432
 
-    ## @param postgresql.primary.persistence.size Configure size of the persistent volume used with helm managed chart
+    ## @param postgresql.primary.persistence.size Configure size of the persistent volume for PostgreSQL Primary data volume
+    ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+    ## NOTE: If your storage class does not allow dynamic resizing then be sure to set the size appropriately!!
     ##
     persistence:
       size: 20Gi
+      storageClass: ""
 
     ## @param postgresql.primary.extraEnvVars An array to add extra environment variables
     ##
     extraEnvVars: []
 
+  ## @param postgresql.image.repository Specifies the image repository to use for this chart.
+  ## @param postgresql.image.registry Specifies the image registry to use for this chart.
   ## @param postgresql.image.tag Specifies the image to use for this chart.
   ##
   image:
+    repository: bitnami/postgresql
+    registry: docker.io
     tag: 13.11.0-debian-11-r15
 
 ########################################################################################
@@ -1775,7 +1866,7 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
   ## This is only used in the osaaMigrationJob job.
   ##
-  kubectlImage: bitnami/kubectl:1.27
+  kubectlImage: bitnami/kubectl:1.30
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
@@ -1819,6 +1910,10 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.affinity Affinity for Anchore Object Store and Analysis Archive migration job pod assignment
   ##
   affinity: {}
+
+  ## @param osaaMigrationJob.topologySpreadConstraints Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment
+  ##
+  topologySpreadConstraints: []
 
   ## @param osaaMigrationJob.serviceAccountName Service account name for Anchore Object Store and Analysis Archive migration job pods
   ##
