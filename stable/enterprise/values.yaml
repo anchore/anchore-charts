@@ -545,7 +545,7 @@ anchoreConfig:
       artifact_lifecycle_policy_tasks: 43200
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
-    ## ref: https://docs.anchore.com/current/docs/using/cli_usage/event/#sending-events-as-webhook-notifications
+    ## ref: https://docs.anchore.com/current/docs/monitoring/events/#sending-events-as-webhook-notifications
     ##
     event_log:
       max_retention_age_days: 180
@@ -823,7 +823,6 @@ analyzer:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   cpu: 2
     #   memory: 8G
 
   ## @param analyzer.labels Labels for Anchore Analyzer pods
@@ -905,7 +904,6 @@ api:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   cpu: 4
     #   memory: 8G
 
   ## @param api.labels Labels for Anchore API pods
@@ -980,7 +978,6 @@ catalog:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   cpu: 4
     #   memory: 12G
 
   ## @param catalog.labels Labels for Anchore Catalog pods
@@ -1062,7 +1059,6 @@ dataSyncer:
     #   cpu: 1
     #   memory: 8G
     # limits:
-    #   cpu: 2
     #   memory: 8G
 
   ## @param dataSyncer.labels Labels for Anchore DataSyncer pods
@@ -1145,7 +1141,6 @@ notifications:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   cpu: 4
     #   memory: 8G
 
   ## @param notifications.labels Labels for Anchore Notifications pods
@@ -1221,7 +1216,6 @@ policyEngine:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   cpu: 4
     #   memory: 12G
 
   ## @param policyEngine.labels Labels for Anchore Policy Engine pods
@@ -1305,7 +1299,6 @@ reports:
     #   memory: 8G
     #   cpu: 2
     # limits:
-    #   cpu: 2
     #   memory: 8G
 
   ## @param reports.labels Labels for Anchore Reports pods
@@ -1397,7 +1390,6 @@ reportsWorker:
     #   memory: 8G
     #   cpu: 2
     # limits:
-    #   cpu: 2
     #   memory: 8G
 
   ## @param reportsWorker.labels Labels for Anchore Reports Worker pods
@@ -1473,7 +1465,6 @@ simpleQueue:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   cpu: 4
     #   memory: 8G
 
   ## @param simpleQueue.labels Labels for Anchore Simple Queue pods
@@ -1569,7 +1560,6 @@ ui:
     #   cpu: 2
     #   memory: 4G
     # limits:
-    #   cpu: 4
     #   memory: 8G
 
   ## @param ui.labels Labels for Anchore UI pods
@@ -1825,12 +1815,11 @@ postgresql:
     ## @param postgresql.primary.resources The resource limits & requests for the PostgreSQL Primary containers
     ##
     resources: {}
-      # limits:
-      #   memory: 16G
-      #   cpu: 4
       # requests:
       #   memory: 16G
       #   cpu: 4
+      # limits:
+      #   memory: 16G
 
     ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
     ##
