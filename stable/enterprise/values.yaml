@@ -600,14 +600,6 @@ anchoreConfig:
     ##
     down_analyzer_task_requeue: true
 
-  policy_engine:
-    ## @param anchoreConfig.policy_engine.cycle_timers.feed_sync Interval to run a feed sync to get latest cve data
-    ## @param anchoreConfig.policy_engine.cycle_timers.feed_sync_checker Interval between checks to see if there needs to be a task queued
-    ##
-    cycle_timers:
-      feed_sync: 14400
-      feed_sync_checker: 3600
-
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
     vulnerabilities:
