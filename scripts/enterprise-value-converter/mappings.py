@@ -287,6 +287,7 @@ DEPRECATED_KEYS = {
     "anchoreGlobal.syncGrypeDB": "true",
     "anchoreGlobal.webhooksEnabled": "deprecated",
     "postgresql.persistence.resourcePolicy": "deprecated",
+    "anchorePolicyEngine.cycleTimers": "deprecated",
     "anchoreGlobal.saml.useExistingSecret": "deprecated",
     "anchoreEnterpriseReports.service.workerPort": "deprecated",
     "anchoreAnalyzer.concurrentTasksPerWorker": "deprecated",
