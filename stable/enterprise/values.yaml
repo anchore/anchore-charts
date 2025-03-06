@@ -600,6 +600,7 @@ anchoreConfig:
     ##
     down_analyzer_task_requeue: true
 
+  policy_engine:
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
     vulnerabilities:
