@@ -70,20 +70,14 @@ LEVEL_TWO_CHANGE_KEY_MAPPING = {
     "anchoreEnterpriseFeeds.cycleTimers": "feeds.anchoreConfig.feeds.cycle_timers",
     "anchoreEnterpriseFeeds.dbConfig": "feeds.anchoreConfig.dbConfig",
     "anchoreEnterpriseFeeds.debianExtraReleases": "feeds.anchoreConfig.feeds.drivers.debian.releases",
-
     "anchoreEnterpriseFeeds.gemDriverEnabled": "feeds.anchoreConfig.feeds.drivers.gem.enabled",
     "anchoreEnterpriseFeeds.githubDriverEnabled": "feeds.anchoreConfig.feeds.drivers.github.enabled",
     "anchoreEnterpriseFeeds.githubDriverToken": "feeds.anchoreConfig.feeds.drivers.github.token",
-
     "anchoreEnterpriseFeeds.msrcWhitelist": "feeds.anchoreConfig.feeds.drivers.msrc.whitelist",
     "anchoreEnterpriseFeeds.msrcDriverEnabled": "feeds.anchoreConfig.feeds.drivers.msrc.enabled",
-
     "anchoreEnterpriseFeeds.npmDriverEnabled": "feeds.anchoreConfig.feeds.drivers.npm.enabled",
-
-
     "anchoreEnterpriseFeeds.persistence": "feeds.persistence",
     "anchoreEnterpriseFeeds.ubuntuExtraReleases": "feeds.anchoreConfig.feeds.drivers.ubuntu.releases",
-
     "anchoreEnterpriseFeedsUpgradeJob.enabled": "feeds.feedsUpgradeJob.enabled",
     "anchoreEnterpriseNotifications.cycleTimers": "anchoreConfig.notifications.cycle_timers",
     "anchoreEnterpriseReports.cycleTimers": "anchoreConfig.reports_worker.cycle_timers",
@@ -97,18 +91,14 @@ LEVEL_TWO_CHANGE_KEY_MAPPING = {
     "anchoreGlobal.internalServicesSsl": "anchoreConfig.internalServicesSSL",
     "anchoreGlobal.policyBundles": "anchoreConfig.policyBundles",
     "anchoreGlobal.webhooks": "anchoreConfig.webhooks",
-
     "anchorePolicyEngine.overrideFeedsToUpstream": "anchoreConfig.policy_engine.overrideFeedsToUpstream",
-
     "postgresql.externalEndpoint": "postgresql.externalEndpoint",
     "postgresql.persistence": "postgresql.primary.persistence",
     "postgresql.extraEnv": "postgresql.primary.extraEnvVars",
     "anchore-feeds-db.extraEnv": "feeds.feeds-db.primary.extraEnvVars",
     "anchore-feeds-gem-db.extraEnv": "feeds.gem-db.primary.extraEnvVars",
-
     "anchore-feeds-gem-db.persistence": "feeds.gem-db.primary.persistence",
     "anchore-feeds-db.persistence": "feeds.feeds-db.primary.persistence",
-
     "anchoreEnterpriseRbac.managerResources": "rbacManager.resources",
 }
 
