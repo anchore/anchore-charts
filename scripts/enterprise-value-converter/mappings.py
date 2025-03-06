@@ -97,7 +97,7 @@ LEVEL_TWO_CHANGE_KEY_MAPPING = {
     "anchoreGlobal.internalServicesSsl": "anchoreConfig.internalServicesSSL",
     "anchoreGlobal.policyBundles": "anchoreConfig.policyBundles",
     "anchoreGlobal.webhooks": "anchoreConfig.webhooks",
-    "anchorePolicyEngine.cycleTimers": "anchoreConfig.policy_engine.cycle_timers",
+
     "anchorePolicyEngine.overrideFeedsToUpstream": "anchoreConfig.policy_engine.overrideFeedsToUpstream",
 
     "postgresql.externalEndpoint": "postgresql.externalEndpoint",
