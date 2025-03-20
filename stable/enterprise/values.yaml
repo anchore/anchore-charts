@@ -21,7 +21,7 @@ global:
 ##
 image: docker.io/anchore/enterprise:v5.17.1
 
-## @oaram imageSpec ImageSpec used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI 
+## @oaram imageSpec ImageSpec used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
 ## (only one of image or imageSpec should be set)
 ##
 imageSpec: {}
