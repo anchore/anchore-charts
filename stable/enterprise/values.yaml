@@ -21,6 +21,14 @@ global:
 ##
 image: docker.io/anchore/enterprise:v5.17.1
 
+## @oaram imageSpec ImageSpec used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI 
+## (only one of image or imageSpec should be set)
+##
+imageSpec: {}
+  # registry: docker.io
+  # repository: anchore/enterprise
+  # tag: v5.15.0
+
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
 ##
@@ -1488,6 +1496,14 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
   image: docker.io/anchore/enterprise-ui:v5.17.0
+
+  ## @param ui.imageSpec imageSpec used for the Anchore UI container
+  ## (only one of image or imageSpec should be set)
+  ##
+  imageSpec: {}
+    # registry: docker.io
+    # repository: anchore/enterprise-ui
+    # tag: v5.15.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
