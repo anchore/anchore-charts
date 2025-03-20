@@ -47,7 +47,7 @@ spec:
           image: {{- if and .Values.ui.imageSpec.registry .Values.ui.imageSpec.repository .Values.ui.imageSpec.tag -}}
                     {{ printf "%s/%s:%s" .Values.ui.imageSpec.registry .Values.ui.imageSpec.repository .Values.ui.imageSpec.tag | trim | indent 1}}
                   {{- else -}}
-                    {{ .Values.image | trim | indent 1}}
+                    {{ .Values.ui.image | trim | indent 1}}
                   {{- end }}  
           imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
         {{- with .Values.containerSecurityContext }}
