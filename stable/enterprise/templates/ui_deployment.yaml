@@ -44,11 +44,7 @@ spec:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
-          image: {{- if and .Values.ui.imageSpec.registry .Values.ui.imageSpec.repository .Values.ui.imageSpec.tag -}}
-                    {{ printf "%s/%s:%s" .Values.ui.imageSpec.registry .Values.ui.imageSpec.repository .Values.ui.imageSpec.tag | trim | indent 1}}
-                  {{- else -}}
-                    {{ .Values.ui.image | trim | indent 1}}
-                  {{- end }}  
+          image: {{ include "enterprise.ui.imageOverride" . | trim }}
           imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
         {{- with .Values.containerSecurityContext }}
           securityContext:
