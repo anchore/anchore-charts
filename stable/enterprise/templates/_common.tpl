@@ -248,6 +248,53 @@ app.kubernetes.io/component: {{ $component | lower }}
 
 
 {{/*
+Create an image specification template that can override the default image
+based on global settings
+*/}}
+{{- define "enterprise.common.imageOverride" -}}
+{{- $imageOverride := .Values.imageOverride -}}
+{{- if and $imageOverride.registry $imageOverride.repository $imageOverride.tag -}}
+  {{ printf "%s/%s:%s" $imageOverride.registry $imageOverride.repository $imageOverride.tag | quote }}
+{{- else if and $imageOverride.registry $imageOverride.repository $imageOverride.digest -}}
+  {{ printf "%s/%s@%s" $imageOverride.registry $imageOverride.repository $imageOverride.digest | quote }}
+{{- else -}}
+  {{ .Values.image | quote }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create an image specification template for the UI that can override the default image
+based on component-specific or global settings
+*/}}
+{{- define "enterprise.ui.imageOverride" -}}
+{{- $imageOverride := .Values.ui.imageOverride -}}
+{{- if and $imageOverride.registry $imageOverride.repository $imageOverride.tag -}}
+  {{ printf "%s/%s:%s" $imageOverride.registry $imageOverride.repository $imageOverride.tag | quote }}
+{{- else if and $imageOverride.registry $imageOverride.repository $imageOverride.digest -}}
+  {{ printf "%s/%s@%s" $imageOverride.registry $imageOverride.repository $imageOverride.digest | quote }}
+{{- else -}}
+  {{ .Values.ui.image | quote }}
+{{- end }}
+{{- end }}
+
+
+{{/*
+Create an image specification template for the UI that can override the default image
+based on component-specific or global settings
+*/}}
+{{- define "enterprise.kubectl.imageOverride" -}}
+{{- $imageOverride := .Values.kubectlImageOverride -}}
+{{- if and $imageOverride.registry $imageOverride.repository $imageOverride.tag -}}
+  {{ printf "%s/%s:%s" $imageOverride.registry $imageOverride.repository $imageOverride.tag | quote }}
+{{- else if and $imageOverride.registry $imageOverride.repository $imageOverride.digest -}}
+  {{ printf "%s/%s@%s" $imageOverride.registry $imageOverride.repository $imageOverride.digest | quote }}
+{{- else -}}
+  {{ .Values.kubectlImage | quote }}
+{{- end }}
+{{- end }}
+
+
+{{/*
 Setup the common pod spec configs
 */}}
 {{- define "enterprise.common.podSpec" -}}

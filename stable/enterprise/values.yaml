@@ -21,13 +21,16 @@ global:
 ##
 image: docker.io/anchore/enterprise:v5.17.1
 
-## @oaram imageSpec ImageSpec used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
-## (only one of image or imageSpec should be set)
+## @param imageOverride imageOverride used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
+## (only one of image or imageOverride should be set)
+## Only one of digest or tag should be used if using imageOverride, if both are specified it will default to using tag
+## Ensure tag value is quoted so it's interpreted as a string
 ##
-imageSpec: {}
+imageOverride: {}
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: v5.15.0
+  # tag: "v5.15.0" 
+  # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -39,6 +42,22 @@ imagePullPolicy: IfNotPresent
 ## Secrets must be manually created in the same namespace as release
 ##
 imagePullSecretName: anchore-enterprise-pullcreds
+
+## @param kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade
+## This is only used in the osaaMigration and upgrade jobs.
+##
+kubectlImage: bitnami/kubectl:1.30
+
+## @param kubectlImageOverride The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade
+## This is only used in the osaaMigration and upgrade jobs.
+## Ensure tag value is quoted so it's interpreted as a string
+##
+kubectlImageOverride: {}
+  # registry: docker.io
+  # repository: bitnami/kubectl
+  # tag: "1.30" 
+  # digest: sha256:abcdef123456
+
 
 ## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
 ##
@@ -1499,11 +1518,13 @@ ui:
 
   ## @param ui.imageSpec imageSpec used for the Anchore UI container
   ## (only one of image or imageSpec should be set)
+  ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  imageSpec: {}
+  imageOverride: {}
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: v5.15.0
+    # tag: "v5.15.0" 
+    # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1618,11 +1639,6 @@ upgradeJob:
   ## Uses the same mechanism for upgrades as the legacy anchore-engine chart. Not compatible with `helm upgrade --wait` or ArgoCD.
   ##
   usePostUpgradeHook: false
-
-  ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
-  ## This is only used in the preupgrade job.
-  ##
-  kubectlImage: bitnami/kubectl:1.30
 
   ## @param upgradeJob.nodeSelector Node labels for the Anchore upgrade job pod assignment
   ##
@@ -1865,11 +1881,6 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.enabled Enable the Anchore Object Store and Analysis Archive migration job
   ##
   enabled: false
-
-  ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
-  ## This is only used in the osaaMigrationJob job.
-  ##
-  kubectlImage: bitnami/kubectl:1.30
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
