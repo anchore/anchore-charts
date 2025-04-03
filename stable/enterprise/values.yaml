@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.15.0
+image: docker.io/anchore/enterprise:v5.15.1
 
 ## @param imageOverride imageOverride used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
 ## (only one of image or imageOverride should be set)
