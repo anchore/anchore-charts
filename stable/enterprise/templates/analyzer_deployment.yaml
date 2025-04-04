@@ -30,14 +30,15 @@ spec:
         - name: analyzer-config-volume
           configMap:
             name: {{ template "enterprise.analyzer.fullname" . }}
-    {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
+    {{- if or (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup) (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar)) }}
       initContainers:
+        {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
+        {{- end -}}
+        {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
     {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
-      {{- end }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
