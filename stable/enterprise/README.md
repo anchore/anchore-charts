@@ -238,6 +238,8 @@ anchoreConfig:
 
 #### Google CloudSQL Database Configuration
 
+Please note that using the cloudsql proxy requires Kubernetes v1.29+ (or v1.28 with the sidecar feature flag enabled).
+
 ```yaml
 ## anchore_values.yaml
 postgresql:
