@@ -32,10 +32,12 @@ spec:
           configMap:
             name: {{ template "enterprise.fullname" . }}-policy-bundles
       {{- end }}
-      containers:
-      {{- if .Values.cloudsql.enabled  }}
-        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+      {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
+      initContainers:
+        {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
       {{- end }}
+      containers:
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}

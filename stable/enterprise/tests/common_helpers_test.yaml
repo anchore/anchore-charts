@@ -236,6 +236,7 @@ tests:
     documentIndex: 0
     set:
       cloudsql.enabled: true
+      cloudsql.useSideCar: false
     asserts:
       - contains:
           path: spec.template.spec.containers
@@ -253,6 +254,7 @@ tests:
     documentIndex: 0
     set:
       cloudsql.enabled: true
+      cloudsql.useSideCar: false
       cloudsql.extraArgs:
         - myExtraArg
         - myOtherExtraArg
@@ -278,6 +280,7 @@ tests:
     documentIndex: 0
     set:
       cloudsql.enabled: true
+      cloudsql.useSideCar: false
       cloudsql.extraArgs:
         - myExtraArg
         - myOtherExtraArg

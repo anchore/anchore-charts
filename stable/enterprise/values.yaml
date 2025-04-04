@@ -1782,6 +1782,11 @@ cloudsql:
   ##
   instance: ""
 
+  ## @param cloudsql.useSideCar Run cloudsql proxy as a sidecar
+  ## If set to true (default) cloudsql proxy will run as a sidecar - this requires Kubernetes v1.29+.
+  ## Set to false if using cloudsql & kubernetes < 1.29.
+  useSideCar: true
+
   ## @param cloudsql.useExistingServiceAcc Use existing service account
   ## If using an existing Service Account, you must create a secret which includes the JSON token from Google's IAM
   ## ref: https://cloud.google.com/sql/docs/postgres/authentication
