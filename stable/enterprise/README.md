@@ -238,6 +238,8 @@ anchoreConfig:
 
 #### Google CloudSQL Database Configuration
 
+Please note that using the cloudsql proxy requires Kubernetes v1.29+ (or v1.28 with the sidecar feature flag enabled).
+
 ```yaml
 ## anchore_values.yaml
 postgresql:
@@ -245,6 +247,8 @@ postgresql:
   auth.password: <CLOUDSQL-PASSWORD>
   auth.username: <CLOUDSQL-USER>
   auth.database: <CLOUDSQL-DATABASE>
+  # If you have dual-stack IPv4 & IPv6 enabled then set externalEndpoint to 127.0.0.1 instead of localhost
+  externalEndpoint: "127.0.0.1"
 
 cloudsql:
   enabled: true

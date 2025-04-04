@@ -35,10 +35,14 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
-      containers:
-      {{- if .Values.cloudsql.enabled  }}
+      {{- if and (.Values.cloudsql.enabled) (eq (.Values.cloudsql.useSideCar) "true") }}
+      initContainers:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
+      containers:
+        {{- if and (.Values.cloudsql.enabled) (eq (.Values.cloudsql.useSideCar) "false") }}
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+        {{- end }}
         - name: anchore-upgrade
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
