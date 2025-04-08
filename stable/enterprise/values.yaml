@@ -17,19 +17,15 @@ global:
 ## Common params used by all Anchore k8s resources
 ###################################################
 
-## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
-##
-image: docker.io/anchore/enterprise:v5.17.1
-
 ## @param imageOverride imageOverride used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
 ## (only one of image or imageOverride should be set)
 ## Only one of digest or tag should be used if using imageOverride, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-imageOverride: {}
+image: docker.io/anchore/enterprise:v5.17.1
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.15.0"
+  # tag: "v5.17.1"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -47,17 +43,10 @@ imagePullSecretName: anchore-enterprise-pullcreds
 ## This is only used in the osaaMigration and upgrade jobs.
 ##
 kubectlImage: bitnami/kubectl:1.30
-
-## @param kubectlImageOverride The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade
-## This is only used in the osaaMigration and upgrade jobs.
-## Ensure tag value is quoted so it's interpreted as a string
-##
-kubectlImageOverride: {}
   # registry: docker.io
   # repository: bitnami/kubectl
   # tag: "1.30"
   # digest: sha256:abcdef123456
-
 
 ## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
 ##
@@ -1512,18 +1501,13 @@ simpleQueue:
 ## @section Anchore UI Parameters
 #################################
 ui:
-  ## @param ui.image Image used for the Anchore UI container
-  ##
-  image: docker.io/anchore/enterprise-ui:v5.17.0
-
-  ## @param ui.imageSpec imageSpec used for the Anchore UI container
-  ## (only one of image or imageSpec should be set)
+  ## @param ui.image image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  imageOverride: {}
+  image: docker.io/anchore/enterprise-ui:v5.17.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.15.0"
+    # tag: "v5.17.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image

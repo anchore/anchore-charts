@@ -251,46 +251,43 @@ app.kubernetes.io/component: {{ $component | lower }}
 Create an image specification template that can override the default image
 based on global settings
 */}}
-{{- define "enterprise.common.imageOverride" -}}
-{{- $imageOverride := .Values.imageOverride -}}
-{{- if and $imageOverride.registry $imageOverride.repository $imageOverride.tag -}}
-  {{ printf "%s/%s:%s" $imageOverride.registry $imageOverride.repository $imageOverride.tag | quote }}
-{{- else if and $imageOverride.registry $imageOverride.repository $imageOverride.digest -}}
-  {{ printf "%s/%s@%s" $imageOverride.registry $imageOverride.repository $imageOverride.digest | quote }}
+{{- define "enterprise.common.image" -}}
+{{- if eq (printf "%T" .Values.image) "string" }}
+  {{- .Values.image | trim -}}
+{{- else if and .Values.image.digest -}}
+  {{- printf "%s/%s@%s" .Values.image.registry .Values.image.repository .Values.image.digest | trim -}}
 {{- else -}}
-  {{ .Values.image | quote }}
-{{- end }}
+  {{- printf "%s/%s:%s" .Values.image.registry .Values.image.repository .Values.image.tag | trim -}}
+{{- end -}}
 {{- end }}
 
 {{/*
 Create an image specification template for the UI that can override the default image
 based on component-specific or global settings
 */}}
-{{- define "enterprise.ui.imageOverride" -}}
-{{- $imageOverride := .Values.ui.imageOverride -}}
-{{- if and $imageOverride.registry $imageOverride.repository $imageOverride.tag -}}
-  {{ printf "%s/%s:%s" $imageOverride.registry $imageOverride.repository $imageOverride.tag | quote }}
-{{- else if and $imageOverride.registry $imageOverride.repository $imageOverride.digest -}}
-  {{ printf "%s/%s@%s" $imageOverride.registry $imageOverride.repository $imageOverride.digest | quote }}
+{{- define "enterprise.ui.image" -}}
+{{- if eq (printf "%T" .Values.ui.image) "string" }}
+  {{- .Values.ui.image | trim -}}
+{{- else if and .Values.ui.image.digest -}}
+  {{- printf "%s/%s@%s" .Values.ui.image.registry .Values.ui.image.repository .Values.ui.image.digest | trim -}}
 {{- else -}}
-  {{ .Values.ui.image | quote }}
-{{- end }}
+  {{- printf "%s/%s:%s" .Values.ui.image.registry .Values.ui.image.repository .Values.ui.image.tag | trim -}}
+{{- end -}}
 {{- end }}
 
 
 {{/*
-Create an image specification template for the UI that can override the default image
+Create an image specification template for kubectl that can override the default image
 based on component-specific or global settings
 */}}
-{{- define "enterprise.kubectl.imageOverride" -}}
-{{- $imageOverride := .Values.kubectlImageOverride -}}
-{{- if and $imageOverride.registry $imageOverride.repository $imageOverride.tag -}}
-  {{ printf "%s/%s:%s" $imageOverride.registry $imageOverride.repository $imageOverride.tag | quote }}
-{{- else if and $imageOverride.registry $imageOverride.repository $imageOverride.digest -}}
-  {{ printf "%s/%s@%s" $imageOverride.registry $imageOverride.repository $imageOverride.digest | quote }}
+{{- define "enterprise.kubectl.image" -}}
+{{- if eq (printf "%T" .Values.kubectlImage) "string" }}
+  {{- .Values.kubectlImage | trim -}}
+{{- else if and .Values.kubectl.image.digest -}}
+  {{- printf "%s/%s@%s" .Values.kubectlImage.registry .Values.kubectlImage.repository .Values.kubectlImage.digest | trim -}}
 {{- else -}}
-  {{ .Values.kubectlImage | quote }}
-{{- end }}
+  {{- printf "%s/%s:%s" .Values.kubectlImage.registry .Values.kubectlImage.repository .Values.kubectlImage.tag | trim -}}
+{{- end -}}
 {{- end }}
 
 
