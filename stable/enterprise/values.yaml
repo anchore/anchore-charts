@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.15.1
+image: docker.io/anchore/enterprise:v5.16.0
 
 ## @param imageOverride imageOverride used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
 ## (only one of image or imageOverride should be set)
@@ -1510,7 +1510,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.15.0
+  image: docker.io/anchore/enterprise-ui:v5.16.0
 
   ## @param ui.imageSpec imageSpec used for the Anchore UI container
   ## (only one of image or imageSpec should be set)
