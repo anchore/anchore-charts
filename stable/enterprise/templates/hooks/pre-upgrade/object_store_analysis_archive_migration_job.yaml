@@ -101,7 +101,7 @@ spec:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
         - name: migrate-analysis-archive
-          image: {{ include "enterprise.common.imageOverride" . | trim }}
+          image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- with .Values.containerSecurityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
