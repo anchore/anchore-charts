@@ -44,7 +44,7 @@ spec:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
-          image: {{ include "enterprise.ui.imageOverride" . | trim }}
+          image: {{ include "enterprise.ui.image" . | trim }}
           imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
         {{- with .Values.containerSecurityContext }}
           securityContext:
