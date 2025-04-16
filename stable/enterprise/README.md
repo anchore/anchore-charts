@@ -1165,7 +1165,6 @@ To restore your deployment to using your previous driver configurations:
 | `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                |
 | `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                   |
 
-
 ## Release Notes
 
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
@@ -1177,6 +1176,16 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### V3.8.x
 
 - Changes ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD configmap envvar from True to False for new installations of Anchore. If updating from an existing installation, the value will come from the existing configmap value. This value was changed because if set to True, Anchore will load file digest info for every installed package into a database table which can have an impact on the system performance. Most users will not need this by default.
+- Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration).
+  - .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+
+  ```
+    kubectlImage:
+      registry: docker.io
+      repository: bitnami/kubectl
+      tag: "1.30"
+      digest:
+  ```
 
 ### V3.7.x
 
@@ -1222,6 +1231,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`
     - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`
   - If you don't want to exclude any providers or package types, you can set them to an empty list. eg:
+
     ```
       anchoreConfig:
         policy_engine:
@@ -1231,7 +1241,9 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
                 providers: []
                 package_types: []
     ```
+
   - If you had any drivers disabled in your feeds deployment, you will have to exclude them. eg:
+
     ```
       anchoreConfig:
         policy_engine:
@@ -1241,6 +1253,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
                 providers: ['nvd', 'github']
                 package_types: ['rpm']
     ```
+
     Refer to the [Anchore docs](https://docs.anchore.com/current/docs/configuration/feeds/feed_configuration/) for the available providers and package_types.
 - The following values were added to the values file to handle the creation or reuse of pull creds and Anchore license secrets:
   - `useExistingLicenseSecret`: defaults to `true` to be backwards compatible with existing deployments. If you are doing a new deployment, you can either set the `license` field for the secret to be created for you or you can create the secret out of band from helm.
