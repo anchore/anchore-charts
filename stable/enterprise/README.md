@@ -1112,7 +1112,7 @@ To restore your deployment to using your previous driver configurations:
 | Name                                  | Description                                                                                      | Value                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------- |
 | `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`                |
-| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                  |
+| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:{password}@hostname:6379) | `""`                  |
 | `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123`   |
 | `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`          |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`               |
@@ -1176,7 +1176,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration).
   - .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
 
-  ```
+  ```yaml
     kubectlImage:
       registry: docker.io
       repository: bitnami/kubectl
@@ -1227,7 +1227,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`
   - If you don't want to exclude any providers or package types, you can set them to an empty list. eg:
 
-    ```
+    ```yaml
       anchoreConfig:
         policy_engine:
           vulnerabilities:
@@ -1239,7 +1239,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
   - If you had any drivers disabled in your feeds deployment, you will have to exclude them. eg:
 
-    ```
+    ```yaml
       anchoreConfig:
         policy_engine:
           vulnerabilities:

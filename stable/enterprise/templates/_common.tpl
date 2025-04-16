@@ -251,7 +251,6 @@ Generic image rendering helper.
 Reusable image specification template for Anchore Enterprise
 Accepts:
 - dict "image" <image value>
-
 Handles:
 - string values
 - dicts with tag or digest
@@ -259,16 +258,12 @@ Handles:
 */}}
 {{- define "enterprise.renderImage" -}}
 {{- $image := .image }}
-
 {{- if eq (printf "%T" $image) "string" }}
   {{ $image | trim }}
-
 {{- else if and $image.digest $image.registry $image.repository }}
   {{ printf "%s/%s@%s" $image.registry $image.repository $image.digest | trim }}
-
 {{- else if and $image.tag $image.registry $image.repository }}
   {{ printf "%s/%s:%s" $image.registry $image.repository $image.tag | trim }}
-
 {{- else }}
   {{ fail (printf "Invalid image: must include registry, repository, and either tag or digest. Got: %#v" $image) }}
 {{- end }}
@@ -299,7 +294,6 @@ based on component-specific or global settings
 {{- $kubectlImage := .Values.kubectlImage }}
 {{- $legacyOsaa := .Values.osaaMigrationJob.kubectlImage }}
 {{- $legacyUpgrade := .Values.upgradeJob.kubectlImage }}
-
 {{- if $kubectlImage }}
   {{ include "enterprise.renderImage" (dict "image" $kubectlImage) }}
 {{- else if and $legacyOsaa (eq (printf "%T" $legacyOsaa) "string") }}
