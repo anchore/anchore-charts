@@ -1869,7 +1869,7 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
   extraEnv: []
-   
+  
   ## @param osaaMigrationJob.extraVolumes Define additional volumes for Anchore Object Store and Analysis Archive migration job
   ##
   extraVolumes: []
