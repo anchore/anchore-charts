@@ -35,3 +35,5 @@ For more details see the v2.1.0 release notes - https://github.com/anchore/ancho
 
 ******************
 {{ end }}
+
+{{ include "enterprise.kubectl.deprecationWarnings" . }}
