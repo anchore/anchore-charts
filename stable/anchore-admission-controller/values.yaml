@@ -127,7 +127,7 @@ credentials: {}
 
 # Settings related to init-ca pod
 initCa:
-  image: cfssl/cfssl:latest
+  image: cfssl/cfssl:v1.6.5
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
   # - name: FOO
