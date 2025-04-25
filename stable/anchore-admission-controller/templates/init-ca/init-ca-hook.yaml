@@ -16,6 +16,9 @@ spec:
         component: admission-server
     spec:
       serviceAccountName: {{ template "anchore-admission-controller.fullname" . }}-init-ca
+    {{- with .Values.securityContext }}
+      securityContext: {{- toYaml . | nindent 8 }}
+    {{- end }}
       restartPolicy: OnFailure
       volumes:
       - name: init-ca-script
@@ -30,6 +33,9 @@ spec:
       containers:
       - name: create-ca
         image:  "{{ .Values.initCa.image }}"
+      {{- with .Values.containerSecurityContext }}
+        securityContext: {{- toYaml . | nindent 10 }}
+      {{- end }}
         command:
         - bash
         - -xe

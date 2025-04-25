@@ -6,6 +6,7 @@ on:
       - 'stable/enterprise/Chart.yaml'
       - 'stable/ecs-inventory/Chart.yaml'
       - 'stable/k8s-inventory/Chart.yaml'
+      - 'stable/anchore-admission-controller/Chart.yaml'
 
 permissions:
   contents: read
