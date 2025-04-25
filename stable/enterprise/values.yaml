@@ -19,7 +19,7 @@ global:
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ##
-image: docker.io/anchore/enterprise:v5.15.0
+image: docker.io/anchore/enterprise:v5.16.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -601,13 +601,6 @@ anchoreConfig:
     down_analyzer_task_requeue: true
 
   policy_engine:
-    ## @param anchoreConfig.policy_engine.cycle_timers.feed_sync Interval to run a feed sync to get latest cve data
-    ## @param anchoreConfig.policy_engine.cycle_timers.feed_sync_checker Interval between checks to see if there needs to be a task queued
-    ##
-    cycle_timers:
-      feed_sync: 14400
-      feed_sync_checker: 3600
-
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
     vulnerabilities:
@@ -1501,7 +1494,7 @@ simpleQueue:
 ui:
   ## @param ui.image Image used for the Anchore UI container
   ##
-  image: docker.io/anchore/enterprise-ui:v5.15.0
+  image: docker.io/anchore/enterprise-ui:v5.16.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##

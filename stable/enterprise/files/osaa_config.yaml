@@ -199,8 +199,6 @@ services:
     listen: '0.0.0.0'
     port: ${ANCHORE_PORT}
     policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
-    cycle_timer_seconds: 1
-    cycle_timers: {{- toYaml .Values.anchoreConfig.policy_engine.cycle_timers | nindent 6 }}
     enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
