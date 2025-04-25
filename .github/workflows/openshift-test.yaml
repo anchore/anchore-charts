@@ -95,22 +95,22 @@ jobs:
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
         KUBECONFIG: ./tmp/kubeconfig
 
-    - name: Check if anchore-engine endpoint is required for admission controller chart
-      id: engine_required
+    - name: Check if anchore-enterprise endpoint is required for admission controller chart
+      id: enterprise_required
       run: |
         if [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'anchore-admission-controller') ]]; then
-          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an engine deployment"
+          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
-          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping engine deployment"
+          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping enterprise deployment"
           echo "::set-output name=changed::false"
         fi
       shell: bash
 
-    - name: Deploy Engine
-      if: steps.engine_required.outputs.changed == 'true'
+    - name: Deploy enterprise
+      if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-        helm install engine anchore/anchore-engine --namespace anchore -f stable/anchore-admission-controller/ci/openshift-test.yaml --wait
+        helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
         kubectl --namespace anchore get pods
       env:
         KUBECONFIG: ./tmp/kubeconfig

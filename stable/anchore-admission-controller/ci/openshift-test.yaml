@@ -1,10 +1,11 @@
+imagePullSecrets:
+- anchore-enterprise-pullcreds
+
 securityContext:
   fsGroup: null
   runAsGroup: null
   runAsUser: null
-podSecurityContext:
-  runAsGroup: null
-  runAsUser: null
+
 containerSecurityContext:
   runAsUser: null
   runAsNonRoot: true
@@ -14,11 +15,8 @@ containerSecurityContext:
     - "ALL"
   seccompProfile:
     type: "RuntimeDefault"
-defaultAdminPassword: "foobar"
 
-imagePullSecrets:
-- anchore-enterprise-pullcreds
-anchoreEndpoint: "http://engine-anchore-engine-api:8228"
+anchoreEndpoint: "http://enterprise-enterprise-api:8228"
 credentials:
   users:
   - username: admin
