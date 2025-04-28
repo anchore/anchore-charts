@@ -72,7 +72,7 @@ jobs:
       uses: replicatedhq/compatibility-actions/create-cluster@v1
       with:
         api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
-        cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
+        cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ github.run_id }}
         kubernetes-distribution: ${{ matrix.cluster.distribution }}
         kubernetes-version: ${{ matrix.cluster.version }}
         ttl: 20m
@@ -150,3 +150,12 @@ jobs:
       env:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
+
+    - name: Remove Cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      id: remove-cluster
+      uses: replicatedhq/replicated-actions/remove-cluster@v1
+      continue-on-error: true # It could be that the cluster is already removed
+      with:
+        api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
+        cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
