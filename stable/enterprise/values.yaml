@@ -513,6 +513,10 @@ anchoreConfig:
           max_scan_time: 180000
 
   catalog:
+    ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
+    ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
+    account_prometheus_metrics: false
+
     ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
     ## @param anchoreConfig.catalog.cycle_timers.policy_eval Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated
     ## @param anchoreConfig.catalog.cycle_timers.vulnerability_scan Interval to run a vulnerability scan on images with vuln_update subscription activated
