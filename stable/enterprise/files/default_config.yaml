@@ -152,6 +152,7 @@ services:
     listen: '0.0.0.0'
     port: ${ANCHORE_PORT}
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    account_prometheus_metrics: {{ .Values.anchoreConfig.catalog.account_prometheus_metrics }}
     cycle_timer_seconds: 1
     cycle_timers: {{- toYaml .Values.anchoreConfig.catalog.cycle_timers | nindent 6 }}
     event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
