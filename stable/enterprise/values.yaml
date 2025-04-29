@@ -545,7 +545,7 @@ anchoreConfig:
       artifact_lifecycle_policy_tasks: 43200
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
-    ## ref: https://docs.anchore.com/current/docs/using/cli_usage/event/#sending-events-as-webhook-notifications
+    ## ref: https://docs.anchore.com/current/docs/monitoring/events/#sending-events-as-webhook-notifications
     ##
     event_log:
       max_retention_age_days: 180
@@ -791,6 +791,7 @@ anchoreConfig:
 ######################################################
 analyzer:
   ## @param analyzer.replicaCount Number of replicas for the Anchore Analyzer deployment
+  ## Please note that Anchore licensing may dictate the permitted number of analyzers.
   ##
   replicaCount: 1
 
@@ -808,10 +809,11 @@ analyzer:
   ## @param analyzer.resources Resource requests and limits for Anchore Analyzer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
-    #   cpu: 1
+    #   cpu: 2
     #   memory: 8G
     # limits:
     #   memory: 8G
@@ -888,13 +890,14 @@ api:
   ## @param api.resources Resource requests and limits for Anchore API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
-    #   cpu: 1
-    #   memory: 4G
+    #   cpu: 2
+    #   memory: 8G
     # limits:
-    #   memory: 4G
+    #   memory: 8G
 
   ## @param api.labels Labels for Anchore API pods
   ##
@@ -961,13 +964,14 @@ catalog:
   ## @param catalog.resources Resource requests and limits for Anchore Catalog pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   memory: 8G
+    #   memory: 12G
 
   ## @param catalog.labels Labels for Anchore Catalog pods
   ##
@@ -1008,6 +1012,7 @@ catalog:
 #########################################################
 dataSyncer:
   ## @param dataSyncer.replicaCount Number of replicas for the Anchore DataSyncer deployment
+  ## Please note that we do not suggest more than 1 instance of dataSyncer.
   ##
   replicaCount: 1
 
@@ -1088,6 +1093,7 @@ dataSyncer:
 ############################################
 notifications:
   ## @param notifications.replicaCount Number of replicas for the Anchore Notifications deployment
+  ## Please note that at this time only 1 instance of notifications can be active therefore we do not suggest more than 2.
   ##
   replicaCount: 1
 
@@ -1121,10 +1127,11 @@ notifications:
   ## @param notifications.resources Resource requests and limits for Anchore Notifications pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
-    #   cpu: 1
+    #   cpu: 2
     #   memory: 8G
     # limits:
     #   memory: 8G
@@ -1195,13 +1202,14 @@ policyEngine:
   ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
     #   cpu: 2
     #   memory: 8G
     # limits:
-    #   memory: 8G
+    #   memory: 12G
 
   ## @param policyEngine.labels Labels for Anchore Policy Engine pods
   ##
@@ -1275,13 +1283,14 @@ reports:
   ## @param reports.resources Resource requests and limits for Anchore Reports pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations
+  ## Please note that we do not suggest setting CPU limits.
   ## NOTE: the commented resources below are assuming the use of a scratch volume with `anchoreConfig.reports.use_volume=true`
   ## If not using a scratch volume, the memory resources may need to be increased.
   ##
   resources: {}
     # requests:
     #   memory: 8G
-    #   cpu: 1
+    #   cpu: 2
     # limits:
     #   memory: 8G
 
@@ -1367,6 +1376,7 @@ reportsWorker:
   ## @param reportsWorker.resources Resource requests and limits for Anchore Reports Worker pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
@@ -1441,10 +1451,11 @@ simpleQueue:
   ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
-    #   cpu: 1
+    #   cpu: 2
     #   memory: 8G
     # limits:
     #   memory: 8G
@@ -1535,13 +1546,14 @@ ui:
   ## @param ui.resources Resource requests and limits for Anchore UI pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
+  ## Please note that we do not suggest setting CPU limits.
   ##
   resources: {}
     # requests:
-    #   cpu: 1
+    #   cpu: 2
     #   memory: 4G
     # limits:
-    #   memory: 4G
+    #   memory: 8G
 
   ## @param ui.labels Labels for Anchore UI pods
   ##
@@ -1796,10 +1808,11 @@ postgresql:
     ## @param postgresql.primary.resources The resource limits & requests for the PostgreSQL Primary containers
     ##
     resources: {}
-      # limits: {}
       # requests:
-      #   memory: 512Mi
-      #   cpu: 2
+      #   memory: 16G
+      #   cpu: 4
+      # limits:
+      #   memory: 16G
 
     ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
     ##
