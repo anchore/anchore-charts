@@ -21,6 +21,9 @@ spec:
         {{ toYaml . | nindent 8 }}
       {{- end }}
     spec:
+    {{- with .Values.securityContext }}
+      securityContext: {{- toYaml . | nindent 8 }}
+    {{- end }}
       serviceAccountName: {{ template "anchore-admission-controller.fullname" . }}
       volumes:
       - name: serving-cert
@@ -43,6 +46,9 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+      {{- with .Values.containerSecurityContext }}
+        securityContext: {{- toYaml . | nindent 10 }}
+      {{- end }}
         command:
         - "/ko-app/kubernetes-admission-controller"
         - "--audit-log-path=-"
