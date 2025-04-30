@@ -649,7 +649,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.16.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.17.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
@@ -762,6 +762,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.analyzer.layer_cache_max_gigabytes`                                      | Specify a cache size > 0GB to enable image layer caching                                                                         | `0`                         |
 | `anchoreConfig.analyzer.enable_hints`                                                   | Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis                      | `false`                     |
 | `anchoreConfig.analyzer.configFile`                                                     | Custom Anchore Analyzer configuration file contents in YAML                                                                      | `{}`                        |
+| `anchoreConfig.catalog.account_prometheus_metrics`                                      | Enable per-account image status prometheus metrics.                                                                              | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.catalog.cycle_timers.image_watcher`                                      | Interval (seconds) to check for an update to a tag                                                                               | `3600`                      |
 | `anchoreConfig.catalog.cycle_timers.policy_eval`                                        | Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated                                  | `3600`                      |
 | `anchoreConfig.catalog.cycle_timers.vulnerability_scan`                                 | Interval to run a vulnerability scan on images with vuln_update subscription activated                                           | `14400`                     |
@@ -1038,7 +1039,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.16.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.17.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1170,6 +1171,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.7.x
+
+- Deploys Anchore Enterprise v5.17.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5170/) for more information.
 
 ### V3.6.x
 
