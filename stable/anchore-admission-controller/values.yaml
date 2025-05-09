@@ -48,6 +48,7 @@ apiService:
       - key: exclude.admission.anchore.io
         operator: NotIn
         values: ["true"]
+  annotations: {}
 
 anchoreEndpoint: ""
 policySelectors:
