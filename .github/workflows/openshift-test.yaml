@@ -157,11 +157,11 @@ jobs:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
 
-    - name: Remove Cluster
-      if: steps.list-changed.outputs.CHANGED == 'true'
-      id: remove-cluster
-      uses: replicatedhq/replicated-actions/remove-cluster@v1
-      continue-on-error: true # It could be that the cluster is already removed
-      with:
-        api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
-        cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
+    # - name: Remove Cluster
+    #   if: steps.list-changed.outputs.CHANGED == 'true'
+    #   id: remove-cluster
+    #   uses: replicatedhq/replicated-actions/remove-cluster@v1
+    #   continue-on-error: true # It could be that the cluster is already removed
+    #   with:
+    #     api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
+    #     cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
