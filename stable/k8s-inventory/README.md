@@ -1,4 +1,7 @@
 # K8s Inventory Helm Chart
+
+> **Note: this integration requires a valid license or subscription entitlement from Anchore**
+
 K8s Inventory is the foundation of Anchore Enterprise's Runtime Inventory feature. Running K8s Inventory via Helm is a great way to retrieve your Kubernetes Image inventory without providing Cluster Credentials to Anchore. The minimum version of the Anchore Enterprise platform required for K8s Inventory is 4.7.
 
 K8s Inventory runs as a read-only service account in the cluster it's deployed to.
