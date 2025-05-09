@@ -1,4 +1,7 @@
 # Anchore ECS Inventory Helm Chart
+
+> **Note: this integration requires a valid license or subscription entitlement from Anchore**
+
 ## Anchore ECS Inventory: Anchore ECS Inventory
 Anchore ECS Inventory is a tool to gather an inventory of images in use by Amazon Elastic Container Service (ECS) and ship them to the Anchore platform. Anchore ECS Inventory must be able to resolve the Anchore URL and requires API credentials. The minimum version of the Anchore Enterprise platform required for K8s Inventory is 4.7.
 
