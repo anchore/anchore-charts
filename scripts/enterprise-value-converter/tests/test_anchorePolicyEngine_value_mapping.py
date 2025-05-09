@@ -292,7 +292,7 @@ class TestReplaceKeysWithMappingsPolicyEngine(unittest.TestCase):
                 'extraEnv': [
                     {
                         'name': 'ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD',
-                        'value': True
+                        'value': False
                     }
                 ]
             }
