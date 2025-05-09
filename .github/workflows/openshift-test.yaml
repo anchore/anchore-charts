@@ -146,11 +146,14 @@ jobs:
         files_changed="$(git diff --name-only origin/${TARGET_BRANCH} | sort | uniq)"
         charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
         for chart in ${charts_dirs_changed}; do
-          echo "creating openshift-test-values.yaml for ${chart}"
-          pushd "${chart}"
-          rm -rvf ci/*-values.yaml
-          mv ci/openshift-test.yaml ci/openshift-test-values.yaml
-          popd
+          # if ${{ matrix.cluster.distribution }} is openshift, then echo openshift-test.yaml
+          if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+            echo "creating openshift-test-values.yaml for ${chart}"
+            pushd "${chart}"
+            rm -rvf ci/*-values.yaml
+            mv ci/openshift-test.yaml ci/openshift-test-values.yaml
+            popd
+          fi
         done
         ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
       env:
