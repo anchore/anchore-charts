@@ -90,7 +90,7 @@ jobs:
           echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
-          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping Enterprise deployment"
+          echo "No files in 'stable/anchore-admission-controller' or 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
           echo "::set-output name=changed::false"
         fi
       shell: bash
@@ -99,7 +99,7 @@ jobs:
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
 
-        if ! helm repo list | awk '{print $1}' | grep -q "^${REPO_NAME}$"; then
+        if ! helm repo list | awk '{print $1}' | grep -q "^anchore$"; then
           helm repo add anchore https://charts.anchore.io
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update

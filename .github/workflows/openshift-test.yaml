@@ -111,7 +111,7 @@ jobs:
           echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
-          echo "No files in 'stable/anchore-admission-controller' of 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
+          echo "No files in 'stable/anchore-admission-controller' or 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
           echo "::set-output name=changed::false"
         fi
       shell: bash
@@ -119,7 +119,7 @@ jobs:
     - name: Deploy enterprise
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-        if ! helm repo list | awk '{print $1}' | grep -q "^${REPO_NAME}$"; then
+        if ! helm repo list | awk '{print $1}' | grep -q "^anchore$"; then
           helm repo add anchore https://charts.anchore.io
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
@@ -176,11 +176,11 @@ jobs:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
 
-    # - name: Remove Cluster
-    #   if: steps.list-changed.outputs.CHANGED == 'true'
-    #   id: remove-cluster
-    #   uses: replicatedhq/replicated-actions/remove-cluster@v1
-    #   continue-on-error: true # It could be that the cluster is already removed
-    #   with:
-    #     api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
-    #     cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
+    - name: Remove Cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      id: remove-cluster
+      uses: replicatedhq/replicated-actions/remove-cluster@v1
+      continue-on-error: true # It could be that the cluster is already removed
+      with:
+        api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
+        cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
