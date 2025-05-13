@@ -119,8 +119,12 @@ jobs:
     - name: Deploy enterprise
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-        helm repo add anchore https://charts.anchore.io
-        helm repo update
+        if ! helm repo list | awk '{print $1}' | grep -q "^${REPO_NAME}$"; then
+          helm repo add anchore https://charts.anchore.io
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+        fi
+
         if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
           echo "Installing enterprise on openshift"
           helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait
