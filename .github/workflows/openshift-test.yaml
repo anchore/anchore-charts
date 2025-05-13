@@ -106,8 +106,12 @@ jobs:
         if [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'anchore-admission-controller') ]]; then
           echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
+        elif [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'k8s-inventory') ]]; then
+          echo "Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
+          echo "::set-output name=changed::true"
         else
-          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping enterprise deployment"
+          echo "No files in 'stable/anchore-admission-controller' of 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
           echo "::set-output name=changed::false"
         fi
       shell: bash
@@ -115,7 +119,15 @@ jobs:
     - name: Deploy enterprise
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-        helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
+        helm repo add anchore https://charts.anchore.io
+        helm repo update
+        if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+          echo "Installing enterprise on openshift"
+          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait
+        else
+          echo "Installing enterprise"
+          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
+        fi
         kubectl --namespace anchore get pods
       env:
         KUBECONFIG: ./tmp/kubeconfig
