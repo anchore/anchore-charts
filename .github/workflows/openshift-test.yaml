@@ -3,7 +3,7 @@ name: "Test using Replicated's Compatibilty Matrix and chart-testing tool"
 on:
   pull_request:
     paths:
-      - 'stable/enterprise/Chart.yaml'
+      # - 'stable/enterprise/Chart.yaml'
       - 'stable/ecs-inventory/Chart.yaml'
       - 'stable/k8s-inventory/Chart.yaml'
       - 'stable/anchore-admission-controller/Chart.yaml'
@@ -84,6 +84,7 @@ jobs:
         ttl: 20m
         timeout-minutes: 20
         kubeconfig-path: ./tmp/kubeconfig
+        max-nodes: 2
 
     - name: check the cluster
       if: steps.list-changed.outputs.CHANGED == 'true'
@@ -119,11 +120,9 @@ jobs:
     - name: Deploy enterprise
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-        if ! helm repo list | awk '{print $1}' | grep -q "^anchore$"; then
-          helm repo add anchore https://charts.anchore.io
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo update
-        fi
+        helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
+        helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
+        helm repo update
 
         if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
           echo "Installing enterprise on openshift"

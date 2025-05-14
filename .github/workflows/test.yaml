@@ -99,11 +99,9 @@ jobs:
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
 
-        if ! helm repo list | awk '{print $1}' | grep -q "^anchore$"; then
-          helm repo add anchore https://charts.anchore.io
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo update
-        fi
+        helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
+        helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
+        helm repo update
         helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
         kubectl --namespace anchore get pods
 
