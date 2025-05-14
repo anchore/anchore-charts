@@ -84,7 +84,7 @@ jobs:
         ttl: 20m
         timeout-minutes: 20
         kubeconfig-path: ./tmp/kubeconfig
-        max-nodes: 2
+        nodes: 2
 
     - name: check the cluster
       if: steps.list-changed.outputs.CHANGED == 'true'
