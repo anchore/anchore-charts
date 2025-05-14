@@ -79,22 +79,30 @@ jobs:
         DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
 
-    - name: Check if anchore-engine endpoint is required for admission controller chart
-      id: engine_required
+    - name: Check if anchore-enterprise endpoint is required for admission controller chart
+      id: enterprise_required
       run: |
         if [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'anchore-admission-controller') ]]; then
-          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an engine deployment"
+          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an Enterprise deployment"
+          echo "::set-output name=changed::true"
+        elif [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'k8s-inventory') ]]; then
+          echo "Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
-          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping engine deployment"
+          echo "No files in 'stable/anchore-admission-controller' or 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
           echo "::set-output name=changed::false"
         fi
       shell: bash
 
-    - name: Deploy Engine
-      if: steps.engine_required.outputs.changed == 'true'
+    - name: Deploy enterprise
+      if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-        helm install engine anchore/anchore-engine --namespace anchore --wait
+
+        helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
+        helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
+        helm repo update
+        helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
         kubectl --namespace anchore get pods
 
     - name: Update to rc image if needed
