@@ -75,7 +75,7 @@ jobs:
     - name: Use Replicated Compatibilty Matrix for cluster creation
       if: steps.list-changed.outputs.CHANGED == 'true'
       id: create-cluster
-      uses: replicatedhq/compatibility-actions/create-cluster@v1
+      uses: replicatedhq/compatibility-actions/create-cluster@77121785951d05387334b773644c356885191f14
       with:
         api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
         cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ github.run_id }}
@@ -108,7 +108,7 @@ jobs:
           echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         elif [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'k8s-inventory') ]]; then
-          echo "Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Branch: '${{ github.event.pull_request.head.ref }}'"
           echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
@@ -138,7 +138,7 @@ jobs:
     - name: Update to rc image if needed
       if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }}
       run: |
-        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo "Branch: '${{ github.event.pull_request.head.ref }}'"
         echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
         echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
         echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
@@ -147,7 +147,7 @@ jobs:
     - name: Update to nightly image if needed
       if: ${{ github.event.pull_request.base.ref == 'nightly' || github.ref_name == 'nightly' }}
       run: |
-        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo "Branch: '${{ github.event.pull_request.head.ref }}'"
         echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
         echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
         echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
@@ -178,7 +178,7 @@ jobs:
     - name: Remove Cluster
       if: steps.list-changed.outputs.CHANGED == 'true'
       id: remove-cluster
-      uses: replicatedhq/replicated-actions/remove-cluster@v1
+      uses: replicatedhq/replicated-actions/remove-cluster@77121785951d05387334b773644c356885191f14
       continue-on-error: true # It could be that the cluster is already removed
       with:
         api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
