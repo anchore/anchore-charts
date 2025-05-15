@@ -86,7 +86,7 @@ jobs:
           echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an Enterprise deployment"
           echo "::set-output name=changed::true"
         elif [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'k8s-inventory') ]]; then
-          echo "Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Branch: '${{ github.event.pull_request.head.ref }}'"
           echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
@@ -108,7 +108,7 @@ jobs:
     - name: Update to rc image if needed
       if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x'  }}
       run: |
-        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo "Branch: '${{ github.event.pull_request.head.ref }}'"
         echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
         echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
         echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
@@ -117,7 +117,7 @@ jobs:
     - name: Update to nightly image if needed
       if: ${{ github.event.pull_request.base.ref == 'nightly' || github.ref_name == 'nightly' }}
       run: |
-        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo "Branch: '${{ github.event.pull_request.head.ref }}'"
         echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
         echo 'ui:' >> stable/enterprise/ci/nightly-values.yaml
         echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
