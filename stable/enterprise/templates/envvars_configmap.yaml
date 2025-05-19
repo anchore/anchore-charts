@@ -2,7 +2,7 @@
 {{- if .Release.IsUpgrade -}}
     {{- $envvarConfigmap := (lookup "v1" "ConfigMap" .Release.Namespace ((printf "%s-enterprise-config-env-vars" .Release.Name) )) -}}
   {{- if $envvarConfigmap -}}
-    {{- $anchorePolicyEngineEnablePackageDBLoad = (index $envvarConfigmap.data "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" | b64dec) | quote -}}
+    {{- $anchorePolicyEngineEnablePackageDBLoad = (index $envvarConfigmap.data "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD") | quote -}}
   {{- end -}}
 {{- end -}}
 
