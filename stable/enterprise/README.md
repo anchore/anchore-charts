@@ -649,7 +649,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.17.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.17.1` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
@@ -1110,34 +1110,36 @@ To restore your deployment to using your previous driver configurations:
 
 ### Anchore UI Redis Parameters
 
-| Name                                  | Description                                                                                      | Value                 |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------- |
-| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`                |
-| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                  |
-| `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123`   |
-| `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`          |
-| `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`               |
-| `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`           |
-| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnami/redis`       |
-| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0` |
+| Name                                  | Description                                                                                      | Value                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`                             |
+| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                               |
+| `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123`                |
+| `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`                       |
+| `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`                            |
+| `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`                        |
+| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnami/redis`                    |
+| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0`              |
+| `ui-redis.image.pullSecrets`          | Specifies the image pull secrets to use for this chart.                                          | `["anchore-enterprise-pullcreds"]` |
 
 ### Anchore Database Parameters
 
-| Name                                          | Description                                                                                 | Value                   |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------- |
-| `postgresql.chartEnabled`                     | Use the dependent chart for Postgresql deployment                                           | `true`                  |
-| `postgresql.externalEndpoint`                 | External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io) | `""`                    |
-| `postgresql.auth.username`                    | Username used to connect to postgresql                                                      | `anchore`               |
-| `postgresql.auth.password`                    | Password used to connect to postgresql                                                      | `anchore-postgres,123`  |
-| `postgresql.auth.database`                    | Database name used when connecting to postgresql                                            | `anchore`               |
-| `postgresql.primary.resources`                | The resource limits & requests for the PostgreSQL Primary containers                        | `{}`                    |
-| `postgresql.primary.service.ports.postgresql` | Port used to connect to Postgresql                                                          | `5432`                  |
-| `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                  |
-| `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                    |
-| `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
-| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`    |
-| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`             |
-| `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
+| Name                                          | Description                                                                                 | Value                              |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `postgresql.chartEnabled`                     | Use the dependent chart for Postgresql deployment                                           | `true`                             |
+| `postgresql.externalEndpoint`                 | External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io) | `""`                               |
+| `postgresql.auth.username`                    | Username used to connect to postgresql                                                      | `anchore`                          |
+| `postgresql.auth.password`                    | Password used to connect to postgresql                                                      | `anchore-postgres,123`             |
+| `postgresql.auth.database`                    | Database name used when connecting to postgresql                                            | `anchore`                          |
+| `postgresql.primary.resources`                | The resource limits & requests for the PostgreSQL Primary containers                        | `{}`                               |
+| `postgresql.primary.service.ports.postgresql` | Port used to connect to Postgresql                                                          | `5432`                             |
+| `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                             |
+| `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                               |
+| `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                               |
+| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`               |
+| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`                        |
+| `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15`            |
+| `postgresql.image.pullSecrets`                | Specifies the image pull secrets to use for this chart.                                     | `["anchore-enterprise-pullcreds"]` |
 
 ### Anchore Object Store and Analysis Archive Migration
 
@@ -1171,6 +1173,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.8.x
+
+- Changes ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD configmap envvar from True to False for new installations of Anchore. If updating from an existing installation, the value will come from the existing configmap value. This value was changed because if set to True, Anchore will load file digest info for every installed package into a database table which can have an impact on the system performance. Most users will not need this by default.
 
 ### V3.7.x
 
