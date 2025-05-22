@@ -64,6 +64,8 @@ migrationAnchoreEngineSecretName: my-engine-anchore-engine
 ##
 serviceAccountName: ""
 
+serviceAccountAnnotations: ""
+
 ## @param injectSecretsViaEnv Enable secret injection into pod via environment variables instead of via k8s secrets
 ## Useful for injecting secrets directly into k8s pods from Hashicorp vault
 ##
