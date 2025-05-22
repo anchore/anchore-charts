@@ -1,3 +1,11 @@
+{{- $anchorePolicyEngineEnablePackageDBLoad := (false | quote) -}}
+{{- if .Release.IsUpgrade -}}
+    {{- $envvarConfigmap := (lookup "v1" "ConfigMap" .Release.Namespace ((printf "%s-enterprise-config-env-vars" .Release.Name) )) -}}
+  {{- if $envvarConfigmap -}}
+    {{- $anchorePolicyEngineEnablePackageDBLoad = (index $envvarConfigmap.data "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD") | quote -}}
+  {{- end -}}
+{{- end -}}
+
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -83,7 +91,7 @@ data:
   ANCHORE_OAUTH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}"
   ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds }}"
   ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
-  ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD: "true"
+  ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD: {{ $anchorePolicyEngineEnablePackageDBLoad }}
   ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
   ANCHORE_SAML_SECRET: "null"
   ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
