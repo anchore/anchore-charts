@@ -17,9 +17,8 @@ global:
 ## Common params used by all Anchore k8s resources
 ###################################################
 
-## @param imageOverride imageOverride used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
-## (only one of image or imageOverride should be set)
-## Only one of digest or tag should be used if using imageOverride, if both are specified it will default to using tag
+## @param image image used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
+## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
 image: docker.io/anchore/enterprise:v5.17.1

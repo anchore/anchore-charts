@@ -1173,11 +1173,31 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-### V3.8.x
+### V3.9.x
 
-- Changes ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD configmap envvar from True to False for new installations of Anchore. If updating from an existing installation, the value will come from the existing configmap value. This value was changed because if set to True, Anchore will load file digest info for every installed package into a database table which can have an impact on the system performance. Most users will not need this by default.
-- Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration).
-  - .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+- Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration) and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+  - enterprise image:
+
+    ```yaml
+      image: docker.io/anchore/enterprise:v5.17.1
+        # registry: docker.io
+        # repository: anchore/enterprise
+        # tag: "v5.17.1"
+        # digest: sha256:abcdef123456
+    ```
+
+  - ui image:
+
+    ```yaml
+      ui:
+        image: docker.io/anchore/enterprise-ui:v5.17.0
+          # registry: docker.io
+          # repository: anchore/enterprise-ui
+          # tag: "v5.17.0"
+          # digest: sha256:abcdef123456
+    ```
+
+- .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
 
   ```yaml
     kubectlImage:
@@ -1186,6 +1206,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
       tag: "1.30"
       digest:
   ```
+
+### V3.8.x
+
+- Changes ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD configmap envvar from True to False for new installations of Anchore. If updating from an existing installation, the value will come from the existing configmap value. This value was changed because if set to True, Anchore will load file digest info for every installed package into a database table which can have an impact on the system performance. Most users will not need this by default.
 
 ### V3.7.x
 
