@@ -1165,7 +1165,6 @@ To restore your deployment to using your previous driver configurations:
 | `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                |
 | `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                   |
 
-
 ## Release Notes
 
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
@@ -1173,6 +1172,40 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.9.x
+
+- Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration) and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+  - enterprise image:
+
+    ```yaml
+      image: docker.io/anchore/enterprise:v5.17.1
+        # registry: docker.io
+        # repository: anchore/enterprise
+        # tag: "v5.17.1"
+        # digest: sha256:abcdef123456
+    ```
+
+  - ui image:
+
+    ```yaml
+      ui:
+        image: docker.io/anchore/enterprise-ui:v5.17.0
+          # registry: docker.io
+          # repository: anchore/enterprise-ui
+          # tag: "v5.17.0"
+          # digest: sha256:abcdef123456
+    ```
+
+- .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+
+  ```yaml
+    kubectlImage:
+      registry: docker.io
+      repository: bitnami/kubectl
+      tag: "1.30"
+      digest:
+  ```
 
 ### V3.8.x
 
@@ -1222,7 +1255,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`
     - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`
   - If you don't want to exclude any providers or package types, you can set them to an empty list. eg:
-    ```
+
+    ```yaml
       anchoreConfig:
         policy_engine:
           vulnerabilities:
@@ -1231,8 +1265,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
                 providers: []
                 package_types: []
     ```
+
   - If you had any drivers disabled in your feeds deployment, you will have to exclude them. eg:
-    ```
+
+    ```yaml
       anchoreConfig:
         policy_engine:
           vulnerabilities:
@@ -1241,6 +1277,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
                 providers: ['nvd', 'github']
                 package_types: ['rpm']
     ```
+
     Refer to the [Anchore docs](https://docs.anchore.com/current/docs/configuration/feeds/feed_configuration/) for the available providers and package_types.
 - The following values were added to the values file to handle the creation or reuse of pull creds and Anchore license secrets:
   - `useExistingLicenseSecret`: defaults to `true` to be backwards compatible with existing deployments. If you are doing a new deployment, you can either set the `license` field for the secret to be created for you or you can create the secret out of band from helm.
