@@ -17,14 +17,14 @@ global:
 ## Common params used by all Anchore k8s resources
 ###################################################
 
-## @param image image used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
+## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.17.1
+image: docker.io/anchore/enterprise:v5.18.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.17.1"
+  # tag: "v5.18.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -469,7 +469,7 @@ anchoreConfig:
 
     ## @param anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return Remove license content from SBOM downloads
     image_content:
-      remove_license_content_from_sbom_return: "<ALLOW_API_CONFIGURATION>" # false
+      remove_license_content_from_sbom_return: "<ALLOW_API_CONFIGURATION>"  # false
 
   analyzer:
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
@@ -1512,13 +1512,13 @@ simpleQueue:
 ## @section Anchore UI Parameters
 #################################
 ui:
-  ## @param ui.image image used for the Anchore UI container
+  ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.17.0
+  image: docker.io/anchore/enterprise-ui:v5.18.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.17.0"
+    # tag: "v5.18.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image

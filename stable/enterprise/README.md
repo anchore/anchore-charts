@@ -649,9 +649,10 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.17.1` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.18.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
+| `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
 | `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                   |
 | `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
@@ -758,11 +759,15 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.apiext.external.useTLS`                                                  | Enable TLS for external API access                                                                                               | `true`                      |
 | `anchoreConfig.apiext.external.hostname`                                                | Hostname for the external Anchore API                                                                                            | `""`                        |
 | `anchoreConfig.apiext.external.port`                                                    | Port configured for external Anchore API                                                                                         | `8443`                      |
+| `anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return`            | Remove license content from SBOM downloads                                                                                       | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.analyzer.cycle_timers.image_analyzer`                                    | The interval between checks of the work queue for new analysis jobs                                                              | `1`                         |
 | `anchoreConfig.analyzer.layer_cache_max_gigabytes`                                      | Specify a cache size > 0GB to enable image layer caching                                                                         | `0`                         |
 | `anchoreConfig.analyzer.enable_hints`                                                   | Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis                      | `false`                     |
 | `anchoreConfig.analyzer.configFile`                                                     | Custom Anchore Analyzer configuration file contents in YAML                                                                      | `{}`                        |
 | `anchoreConfig.catalog.account_prometheus_metrics`                                      | Enable per-account image status prometheus metrics.                                                                              | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.catalog.sbom_vuln_scan.auto_scale`                                       | Automatically scale batch_size and pool_size. Disable to configure manually.                                                     | `true`                      |
+| `anchoreConfig.catalog.sbom_vuln_scan.batch_size`                                       | The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled                                       | `1`                         |
+| `anchoreConfig.catalog.sbom_vuln_scan.pool_size`                                        | The number of concurrent vulnerability scans to dispatch from each catalog instance                                              | `1`                         |
 | `anchoreConfig.catalog.cycle_timers.image_watcher`                                      | Interval (seconds) to check for an update to a tag                                                                               | `3600`                      |
 | `anchoreConfig.catalog.cycle_timers.policy_eval`                                        | Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated                                  | `3600`                      |
 | `anchoreConfig.catalog.cycle_timers.vulnerability_scan`                                 | Interval to run a vulnerability scan on images with vuln_update subscription activated                                           | `14400`                     |
@@ -1039,7 +1044,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.17.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.18.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1172,6 +1177,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.10.x
+
+- Deploys Anchore Enterprise v5.18.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5180/) for more information.
 
 ### V3.9.x
 
