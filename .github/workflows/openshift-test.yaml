@@ -135,14 +135,23 @@ jobs:
       env:
         KUBECONFIG: ./tmp/kubeconfig
 
-    - name: Update to rc image if needed
-      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }}
+    - name: Update to rc image if needed for openshift
+      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }} && (matrix.cluster.distribution == 'openshift')
       run: |
         echo "Branch: ${{ github.event.pull_request.head.ref }}"
         echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
         echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
         echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
         echo "Appended to stable/enterprise/ci/openshift-test.yaml"
+
+    - name: Update to rc image if needed for gke and aks
+      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }} && (matrix.cluster.distribution == 'gke' || matrix.cluster.distribution == 'aks')
+      run: |
+        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
+        echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
+        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
+        echo "Appended to stable/enterprise/ci/rc-values.yaml"
 
     - name: Update to nightly image if needed
       if: ${{ github.event.pull_request.base.ref == 'nightly' || github.ref_name == 'nightly' }}

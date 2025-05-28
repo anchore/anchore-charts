@@ -17,14 +17,14 @@ global:
 ## Common params used by all Anchore k8s resources
 ###################################################
 
-## @param image image used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI
+## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.17.1
+image: docker.io/anchore/enterprise:v5.18.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.17.1"
+  # tag: "v5.18.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -467,6 +467,10 @@ anchoreConfig:
       hostname: ""
       port: 8443
 
+    ## @param anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return Remove license content from SBOM downloads
+    image_content:
+      remove_license_content_from_sbom_return: "<ALLOW_API_CONFIGURATION>"  # false
+
   analyzer:
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ##
@@ -531,6 +535,14 @@ anchoreConfig:
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
     account_prometheus_metrics: "<ALLOW_API_CONFIGURATION>"  # false
+
+    ## @param anchoreConfig.catalog.sbom_vuln_scan.auto_scale Automatically scale batch_size and pool_size. Disable to configure manually.
+    ## @param anchoreConfig.catalog.sbom_vuln_scan.batch_size The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled
+    ## @param anchoreConfig.catalog.sbom_vuln_scan.pool_size The number of concurrent vulnerability scans to dispatch from each catalog instance
+    sbom_vuln_scan:
+      auto_scale: true
+      batch_size: 1
+      pool_size: 1
 
     ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
     ## @param anchoreConfig.catalog.cycle_timers.policy_eval Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated
@@ -1500,13 +1512,13 @@ simpleQueue:
 ## @section Anchore UI Parameters
 #################################
 ui:
-  ## @param ui.image image used for the Anchore UI container
+  ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.17.0
+  image: docker.io/anchore/enterprise-ui:v5.18.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.17.0"
+    # tag: "v5.18.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
