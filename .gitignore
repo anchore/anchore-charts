@@ -6,3 +6,4 @@ charts/
 *.code-workspace
 .DS_Store
 .vscode/
+MyValues*.yaml

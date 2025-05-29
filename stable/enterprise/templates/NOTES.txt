@@ -36,4 +36,6 @@ For more details see the v2.1.0 release notes - https://github.com/anchore/ancho
 ******************
 {{ end }}
 
-{{ include "enterprise.kubectl.deprecationWarnings" . }}
+** Deprecation Warning **
+- 'osaaMigrationJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead.
+- 'upgradeJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead.

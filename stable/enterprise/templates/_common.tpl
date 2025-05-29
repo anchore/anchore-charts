@@ -305,17 +305,6 @@ based on component-specific or global settings
 {{- end }}
 {{- end }}
 
-{{/*
-Display deprecation warnings if legacy kubectlImage values are set
-*/}}
-{{- define "enterprise.kubectl.deprecationWarnings" -}}
-{{- if .Values.osaaMigrationJob.kubectlImage }}
-{{ printf "NOTICE: 'osaaMigrationJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
-{{- if .Values.upgradeJob.kubectlImage }}
-{{ printf "NOTICE: 'upgradeJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
-{{- end }}
 
 {{/*
 Setup the common pod spec configs
