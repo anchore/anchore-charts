@@ -1,6 +1,6 @@
 apiVersion: v2
 name: enterprise
-version: "3.10.0"
+version: "3.10.1"
 appVersion: "5.18.0"
 kubeVersion: 1.23.x - 1.32.x || 1.23.x-x - 1.32.x-x
 description: |
@@ -32,11 +32,11 @@ maintainers:
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
 dependencies:
   - name: postgresql
-    version: "~12.5"
+    version: "~16.7"
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: postgresql.chartEnabled
   - name: redis
-    version: "~17.11"
+    version: "~21.1"
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: ui-redis.chartEnabled
     alias: ui-redis
