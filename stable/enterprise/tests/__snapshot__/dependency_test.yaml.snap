@@ -13,6 +13,7 @@ should render defaults:
                   app.kubernetes.io/name: postgresql
               topologyKey: kubernetes.io/hostname
             weight: 1
+    automountServiceAccountToken: false
     containers:
       - env:
           - name: BITNAMI_DEBUG
@@ -25,17 +26,11 @@ should render defaults:
             value: /bitnami/postgresql/data
           - name: POSTGRES_USER
             value: anchore
-          - name: POSTGRES_POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: postgres-password
-                name: test-release-postgresql
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: test-release-postgresql
-          - name: POSTGRES_DB
+          - name: POSTGRES_PASSWORD_FILE
+            value: /opt/bitnami/postgresql/secrets/password
+          - name: POSTGRES_POSTGRES_PASSWORD_FILE
+            value: /opt/bitnami/postgresql/secrets/postgres-password
+          - name: POSTGRES_DATABASE
             value: anchore
           - name: POSTGRESQL_ENABLE_LDAP
             value: "no"
@@ -53,7 +48,7 @@ should render defaults:
             value: error
           - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
             value: pgaudit
-        image: docker.io/bitnami/postgresql:13.11.0-debian-11-r15
+        image: docker.io/bitnami/postgresql:13.18.0-debian-12-r2
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
@@ -85,13 +80,39 @@ should render defaults:
           successThreshold: 1
           timeoutSeconds: 5
         resources:
-          limits: {}
+          limits:
+            cpu: 150m
+            ephemeral-storage: 2Gi
+            memory: 192Mi
           requests:
-            cpu: 250m
-            memory: 256Mi
+            cpu: 100m
+            ephemeral-storage: 50Mi
+            memory: 128Mi
         securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 1001
+          runAsNonRoot: true
           runAsUser: 1001
+          seLinuxOptions: {}
+          seccompProfile:
+            type: RuntimeDefault
         volumeMounts:
+          - mountPath: /tmp
+            name: empty-dir
+            subPath: tmp-dir
+          - mountPath: /opt/bitnami/postgresql/conf
+            name: empty-dir
+            subPath: app-conf-dir
+          - mountPath: /opt/bitnami/postgresql/tmp
+            name: empty-dir
+            subPath: app-tmp-dir
+          - mountPath: /opt/bitnami/postgresql/secrets/
+            name: postgresql-password
           - mountPath: /dev/shm
             name: dshm
           - mountPath: /bitnami/postgresql
@@ -102,8 +123,16 @@ should render defaults:
       - name: anchore-enterprise-pullcreds
     securityContext:
       fsGroup: 1001
-    serviceAccountName: default
+      fsGroupChangePolicy: Always
+      supplementalGroups: []
+      sysctls: []
+    serviceAccountName: test-release-postgresql
     volumes:
+      - emptyDir: {}
+        name: empty-dir
+      - name: postgresql-password
+        secret:
+          secretName: test-release-postgresql
       - emptyDir:
           medium: Memory
         name: dshm
@@ -121,10 +150,10 @@ should render defaults:
                   app.kubernetes.io/name: ui-redis
               topologyKey: kubernetes.io/hostname
             weight: 1
-    automountServiceAccountToken: true
+    automountServiceAccountToken: false
     containers:
       - args:
-          - -c
+          - -ec
           - /opt/bitnami/scripts/start-scripts/start-master.sh
         command:
           - /bin/bash
@@ -135,22 +164,19 @@ should render defaults:
             value: master
           - name: ALLOW_EMPTY_PASSWORD
             value: "no"
-          - name: REDIS_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: redis-password
-                name: test-release-ui-redis
+          - name: REDIS_PASSWORD_FILE
+            value: /opt/bitnami/redis/secrets/redis-password
           - name: REDIS_TLS_ENABLED
             value: "no"
           - name: REDIS_PORT
             value: "6379"
-        image: docker.io/bitnami/redis:7.0.12-debian-11-r0
+        image: docker.io/bitnami/redis:8.0.2-debian-12-r2
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
             command:
-              - sh
-              - -c
+              - /bin/bash
+              - -ec
               - /health/ping_liveness_local.sh 5
           failureThreshold: 5
           initialDelaySeconds: 20
@@ -164,8 +190,8 @@ should render defaults:
         readinessProbe:
           exec:
             command:
-              - sh
-              - -c
+              - /bin/bash
+              - -ec
               - /health/ping_readiness_local.sh 1
           failureThreshold: 5
           initialDelaySeconds: 20
@@ -173,28 +199,52 @@ should render defaults:
           successThreshold: 1
           timeoutSeconds: 2
         resources:
-          limits: {}
-          requests: {}
+          limits:
+            cpu: 150m
+            ephemeral-storage: 2Gi
+            memory: 192Mi
+          requests:
+            cpu: 100m
+            ephemeral-storage: 50Mi
+            memory: 128Mi
         securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1001
+          runAsNonRoot: true
           runAsUser: 1001
+          seLinuxOptions: {}
+          seccompProfile:
+            type: RuntimeDefault
         volumeMounts:
           - mountPath: /opt/bitnami/scripts/start-scripts
             name: start-scripts
           - mountPath: /health
             name: health
+          - mountPath: /opt/bitnami/redis/secrets/
+            name: redis-password
           - mountPath: /data
             name: redis-data
           - mountPath: /opt/bitnami/redis/mounted-etc
             name: config
           - mountPath: /opt/bitnami/redis/etc/
-            name: redis-tmp-conf
+            name: empty-dir
+            subPath: app-conf-dir
           - mountPath: /tmp
-            name: tmp
+            name: empty-dir
+            subPath: tmp-dir
+    enableServiceLinks: true
     imagePullSecrets:
       - name: anchore-enterprise-pullcreds
     securityContext:
       fsGroup: 1001
-    serviceAccountName: test-release-ui-redis
+      fsGroupChangePolicy: Always
+      supplementalGroups: []
+      sysctls: []
+    serviceAccountName: test-release-ui-redis-master
     terminationGracePeriodSeconds: 30
     volumes:
       - configMap:
@@ -205,12 +255,16 @@ should render defaults:
           defaultMode: 493
           name: test-release-ui-redis-health
         name: health
+      - name: redis-password
+        secret:
+          items:
+            - key: redis-password
+              path: redis-password
+          secretName: test-release-ui-redis
       - configMap:
           name: test-release-ui-redis-configuration
         name: config
       - emptyDir: {}
-        name: redis-tmp-conf
-      - emptyDir: {}
-        name: tmp
+        name: empty-dir
       - emptyDir: {}
         name: redis-data
