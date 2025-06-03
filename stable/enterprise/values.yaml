@@ -784,6 +784,28 @@ anchoreConfig:
       # title: "Title goes here..."
       # message: "Message goes here..."
 
+    ## @param anchoreConfig.ui.banners Provide messages that will be displayed as a banner at the top and/or bottom of the application or only the login page.
+    ## anchoreConfig.ui.banners.top
+    ## anchoreConfig.ui.banners.bottom
+    ## You can set either or both banners. Each banner is defined by a key that contains an object with the following properties:
+    ## - `text` (string): The message to be displayed in the banner. This can be up to `2000` characters long.
+    ## - `text_color` (string): The color of the text in the banner.
+    ## - `background_color` (string): The background color of the banner.
+    ## - `display` (string): The display condition for the banner. This can be set to `always` or `login-only`. If not specified, the default is `always`. The `login-only` option will only display the banner on the login page.
+    ## NOTE: You may need to HTML encode the text if there are any non-alphanumeric characters present.
+    ##
+    banners: {}
+      # top:
+      #   text: "Custom message for the top banner..."
+      #   text_color: ""
+      #   background_color: ""
+      #   display: "always"
+      # bottom:
+      #   text: "Custom message for the bottom banner..."
+      #   text_color: ""
+      #   background_color: ""
+      #   display: "login-only"
+
     ## @param anchoreConfig.ui.log_level Descriptive detail of the application log output
     ## valid values are error, warn, info, http, debug
     ##
