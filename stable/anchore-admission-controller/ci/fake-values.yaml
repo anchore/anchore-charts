@@ -1,7 +1,7 @@
+imagePullSecrets:
+- anchore-enterprise-pullcreds
 credentials:
   users:
-  - username: user1
-    password: password1
-  - username: user2
-    password: password2
-anchoreEndpoint: http://engine-anchore-engine-api:8228
+  - username: admin
+    password: foobar
+anchoreEndpoint: "http://enterprise-enterprise-api:8228"

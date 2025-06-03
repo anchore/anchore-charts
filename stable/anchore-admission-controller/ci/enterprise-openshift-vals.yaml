@@ -1,0 +1,23 @@
+securityContext:
+  fsGroup: null
+  runAsGroup: null
+  runAsUser: null
+postgresql:
+  primary:
+    containerSecurityContext:
+      enabled: false
+    podSecurityContext:
+      enabled: false
+ui-redis:
+  master:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+analyzer:
+  extraEnv:
+    - name: HOME
+      value: /tmp
+
+anchoreConfig:
+  default_admin_password: foobar

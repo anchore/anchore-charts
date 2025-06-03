@@ -18,8 +18,14 @@ global:
 ###################################################
 
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
+## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
+## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.17.0
+image: docker.io/anchore/enterprise:v5.18.0
+  # registry: docker.io
+  # repository: anchore/enterprise
+  # tag: "v5.18.0"
+  # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -31,6 +37,15 @@ imagePullPolicy: IfNotPresent
 ## Secrets must be manually created in the same namespace as release
 ##
 imagePullSecretName: anchore-enterprise-pullcreds
+
+## @param kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade
+## This is only used in the osaaMigration and upgrade jobs.
+##
+kubectlImage: bitnami/kubectl:1.30
+  # registry: docker.io
+  # repository: bitnami/kubectl
+  # tag: "1.30"
+  # digest: sha256:abcdef123456
 
 ## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
 ##
@@ -452,6 +467,10 @@ anchoreConfig:
       hostname: ""
       port: 8443
 
+    ## @param anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return Remove license content from SBOM downloads
+    image_content:
+      remove_license_content_from_sbom_return: "<ALLOW_API_CONFIGURATION>"  # false
+
   analyzer:
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ##
@@ -516,6 +535,14 @@ anchoreConfig:
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
     account_prometheus_metrics: "<ALLOW_API_CONFIGURATION>"  # false
+
+    ## @param anchoreConfig.catalog.sbom_vuln_scan.auto_scale Automatically scale batch_size and pool_size. Disable to configure manually.
+    ## @param anchoreConfig.catalog.sbom_vuln_scan.batch_size The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled
+    ## @param anchoreConfig.catalog.sbom_vuln_scan.pool_size The number of concurrent vulnerability scans to dispatch from each catalog instance
+    sbom_vuln_scan:
+      auto_scale: true
+      batch_size: 1
+      pool_size: 1
 
     ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
     ## @param anchoreConfig.catalog.cycle_timers.policy_eval Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated
@@ -1486,8 +1513,13 @@ simpleQueue:
 #################################
 ui:
   ## @param ui.image Image used for the Anchore UI container
+  ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.17.0
+  image: docker.io/anchore/enterprise-ui:v5.18.0
+    # registry: docker.io
+    # repository: anchore/enterprise-ui
+    # tag: "v5.18.0"
+    # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1604,7 +1636,7 @@ upgradeJob:
   usePostUpgradeHook: false
 
   ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
-  ## This is only used in the preupgrade job.
+  ## This is only used in the preupgrade job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
   ##
   kubectlImage: bitnami/kubectl:1.30
 
@@ -1771,11 +1803,14 @@ ui-redis:
   ## @param ui-redis.image.registry Specifies the image registry to use for this chart.
   ## @param ui-redis.image.repository Specifies the image repository to use for this chart.
   ## @param ui-redis.image.tag Specifies the image to use for this chart.
+  ## @param ui-redis.image.pullSecrets Specifies the image pull secrets to use for this chart.
   ##
   image:
     registry: docker.io
     repository: bitnami/redis
     tag: 7.0.12-debian-11-r0
+    pullSecrets:
+      - anchore-enterprise-pullcreds
 
 #######################################
 ## @section Anchore Database Parameters
@@ -1831,11 +1866,14 @@ postgresql:
   ## @param postgresql.image.repository Specifies the image repository to use for this chart.
   ## @param postgresql.image.registry Specifies the image registry to use for this chart.
   ## @param postgresql.image.tag Specifies the image to use for this chart.
+  ## @param postgresql.image.pullSecrets Specifies the image pull secrets to use for this chart.
   ##
   image:
     repository: bitnami/postgresql
     registry: docker.io
     tag: 13.11.0-debian-11-r15
+    pullSecrets:
+      - anchore-enterprise-pullcreds
 
 ########################################################################################
 ## @section Anchore Object Store and Analysis Archive Migration
@@ -1850,7 +1888,7 @@ osaaMigrationJob:
   enabled: false
 
   ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
-  ## This is only used in the osaaMigrationJob job.
+  ## This is only used in the osaaMigrationJob job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
   ##
   kubectlImage: bitnami/kubectl:1.30
 

@@ -1,0 +1,51 @@
+suite: Dependency Resource Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should render defaults
+    documentIndex: 0
+    templates:
+      - charts/postgresql/templates/primary/statefulset.yaml
+      - charts/ui-redis/templates/master/application.yaml
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec
+
+  - it: should render the pullcreds by default
+    templates:
+      - charts/postgresql/templates/primary/statefulset.yaml
+      - charts/ui-redis/templates/master/application.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: anchore-enterprise-pullcreds
+
+  - it: should render the pullcreds when specified for postgresql
+    templates:
+      - charts/postgresql/templates/primary/statefulset.yaml
+    set:
+      postgresql.image.pullSecrets:
+        - myCustomPullcreds
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: myCustomPullcreds
+
+  - it: should render the pullcreds when specified for ui-redis
+    templates:
+      - charts/ui-redis/templates/master/application.yaml
+    set:
+      ui-redis.image.pullSecrets:
+        - myCustomPullcreds
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets[0].name
+          value: myCustomPullcreds

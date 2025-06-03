@@ -112,6 +112,8 @@ account_gc:
 services:
   apiext:
     enabled: true
+    image_content:
+      remove_license_content_from_sbom_return: {{ .Values.anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return }}
     require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
@@ -167,6 +169,10 @@ services:
       object_store_bucket: "runtime_compliance_check"
     down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
     import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+    sbom_vuln_scan:
+      auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
+      batch_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.batch_size }}
+      pool_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.pool_size }}
     analysis_archive: {{- toYaml .Values.anchoreConfig.catalog.analysis_archive | nindent 6 }}
     object_store: {{- toYaml .Values.anchoreConfig.catalog.object_store | nindent 6 }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}

@@ -9,6 +9,6 @@ podSecurityContext:
 
 k8sInventory:
   anchore:
-    url: http://engine-anchore-engine-api:8228
-    user: user1
-    password: password1
+    url: http://enterprise-enterprise-api:8228
+    user: admin
+    password: foobar
