@@ -168,7 +168,7 @@ jobs:
         else
           echo "updating nightly-values.yaml with nightly image"
           echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
-          echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
+          echo 'ui:' >> stable/enterprise/ci/nightly-values.yaml
           echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
           echo "Appended to stable/enterprise/ci/nightly-values.yaml"
         fi
