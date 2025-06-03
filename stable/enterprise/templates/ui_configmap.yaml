@@ -28,8 +28,8 @@ data:
   {{- end }}
   {{- with .Values.anchoreConfig.ui.banners }}
     banners:
-      top: '{{ .top }}'
-      bottom: '{{ .bottom }}'
+      top: {{ .top | toYaml | nindent 8 }}
+      bottom: {{ .bottom | toYaml | nindent 8 }}
   {{- end }}
   {{- with .Values.anchoreConfig.ui.enable_add_repositories }}
     enable_add_repositories:
