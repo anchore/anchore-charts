@@ -18,9 +18,9 @@ jobs:
       matrix:
         cluster: [
           {distribution: "openshift", version: "4.13.0-okd"},
-          # {distribution: "openshift", version: "4.15.0-okd"},
-          # {distribution: "gke", version: "1.30"},
-          # {distribution: aks, version: "1.30"},
+          {distribution: "openshift", version: "4.15.0-okd"},
+          {distribution: "gke", version: "1.30"},
+          {distribution: aks, version: "1.30"},
         ]
     runs-on: ubuntu-22.04
     steps:

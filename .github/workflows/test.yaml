@@ -13,8 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # kubernetesVersion: ["v1.28.7", "v1.29.2", "v1.30.0", "v1.31.0", "v1.32.2"]
-        kubernetesVersion: ["v1.32.2"]
+        kubernetesVersion: ["v1.28.7", "v1.29.2", "v1.30.0", "v1.31.0", "v1.32.2"]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
