@@ -37,7 +37,7 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-          anchorectl system smoke-tests run || true
+          anchorectl system smoke-tests run
 
       volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 6 }}
   restartPolicy: Never
