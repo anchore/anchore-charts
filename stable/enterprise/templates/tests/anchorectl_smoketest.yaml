@@ -33,11 +33,13 @@ spec:
     {{- end }}
       envFrom: {{- include "enterprise.common.envFrom" . | nindent 6 }}
       env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 6 }}
+      - name: ANCHORECTL_URL
+        value: "http://{{ .Release.Name }}-enterprise-api:8228"
 
       command: ["/bin/bash", "-c"]
       args:
         - |
-          anchorectl system smoke-tests run || true
+          anchorectl system smoke-tests run
 
       volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 6 }}
   restartPolicy: Never
