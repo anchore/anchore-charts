@@ -11,11 +11,14 @@ data:
   init-ca.sh: |-
     #!/bin/bash -xe
     # Adapted from https://github.com/openshift/kubernetes-namespace-reservation/blob/master/hack/install-kube.sh
-    apt-get update && apt-get install -y jq
+    mkdir /tmp/.bin
+    export PATH=$PATH:/tmp/.bin
+    cd /tmp/.bin
 
+    curl -L -o jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
+    chmod +x jq
     curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
     chmod +x ./kubectl
-    mv ./kubectl /usr/bin
 
     # creates a client CA, args are sudo, dest-dir, ca-id, purpose
     # purpose is dropped in after "key encipherment", you usually want

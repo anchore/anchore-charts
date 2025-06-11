@@ -40,7 +40,7 @@ spec:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
         - name: anchore-upgrade
-          image: {{ .Values.image }}
+          image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- with .Values.containerSecurityContext }}
           securityContext: {{- toYaml . | nindent 12 }}

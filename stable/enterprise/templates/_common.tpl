@@ -246,6 +246,76 @@ app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
 app.kubernetes.io/component: {{ $component | lower }}
 {{- end -}}
 
+{{/*
+Generic image rendering helper.
+Reusable image specification template for Anchore Enterprise
+Accepts:
+- dict "image" <image value>
+Handles:
+- string values
+- dicts with tag or digest
+- fails if incomplete
+*/}}
+{{- define "enterprise.renderImage" -}}
+{{- $image := .image }}
+{{- if eq (printf "%T" $image) "string" }}
+  {{ $image | trim }}
+{{- else if and $image.digest $image.registry $image.repository }}
+  {{ printf "%s/%s@%s" $image.registry $image.repository $image.digest | trim }}
+{{- else if and $image.tag $image.registry $image.repository }}
+  {{ printf "%s/%s:%s" $image.registry $image.repository $image.tag | trim }}
+{{- else }}
+  {{ fail (printf "Invalid image: must include registry, repository, and either tag or digest. Got: %#v" $image) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create an image specification template that can override the default image
+based on global settings
+*/}}
+{{- define "enterprise.common.image" -}}
+{{ include "enterprise.renderImage" (dict "image" .Values.image) }}
+{{- end }}
+
+{{/*
+Create an image specification template for the UI that can override the default image
+based on component-specific or global settings
+*/}}
+{{- define "enterprise.ui.image" -}}
+{{ include "enterprise.renderImage" (dict "image" .Values.ui.image) }}
+{{- end }}
+
+
+{{/*
+Create an image specification template for kubectl that can override the default image
+based on component-specific or global settings
+*/}}
+{{- define "enterprise.kubectl.image" -}}
+{{- $kubectlImage := .Values.kubectlImage }}
+{{- $legacyOsaa := .Values.osaaMigrationJob.kubectlImage }}
+{{- $legacyUpgrade := .Values.upgradeJob.kubectlImage }}
+{{- if $kubectlImage }}
+  {{ include "enterprise.renderImage" (dict "image" $kubectlImage) }}
+{{- else if and $legacyOsaa (eq (printf "%T" $legacyOsaa) "string") }}
+  {{ $legacyOsaa | trim }}
+{{- else if and $legacyUpgrade (eq (printf "%T" $legacyUpgrade) "string") }}
+  {{ $legacyUpgrade | trim }}
+{{- else }}
+  {{ fail "No valid kubectlImage found in Values." }}
+{{- end }}
+{{- end }}
+
+{{/*
+Display deprecation warnings if legacy kubectlImage values are set
+*/}}
+{{- define "enterprise.kubectl.deprecationWarnings" -}}
+{{- if .Values.osaaMigrationJob.kubectlImage }}
+{{ printf "NOTICE: 'osaaMigrationJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
+{{- end }}
+{{- if .Values.upgradeJob.kubectlImage }}
+{{ printf "NOTICE: 'upgradeJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
+{{- end }}
+{{- end }}
 
 {{/*
 Setup the common pod spec configs

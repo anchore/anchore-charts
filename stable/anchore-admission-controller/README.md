@@ -1,5 +1,7 @@
 # Anchore Admission Controller
 
+> **Note: this integration requires a valid license or subscription entitlement from Anchore**
+
 This chart deploys an admission controller for kubernetes that makes admission decisions based on policy-based evaluation of image content.
 
 The controller's code is at: https://github.com/anchore/kubernetes-admission-controller , with more details on the implementation and config there.

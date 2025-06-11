@@ -15,7 +15,7 @@ replicaCount: 1
 image:
   pullPolicy: "IfNotPresent"
   repository: "anchore/k8s-inventory"
-  tag: "v1.7.4"
+  tag: "v1.7.6"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
@@ -273,7 +273,7 @@ k8sInventory:
     namespaces: 0
 
   ## @param k8sInventory.anchore.url the url of the anchore platform
-  ## @param k8sInventory.anchore.user the username of the anchore platform. The user specified must be an admin user or have full-control, or read-write RBAC permissions
+  ## @param k8sInventory.anchore.user the username of the anchore platform. The user specified should have the inventory-agent RBAC permissions but could also be admin full-control, or read-write
   ## @param k8sInventory.anchore.password the password of the anchore platform
   ## @param k8sInventory.anchore.account the account to send data to
   ## @param k8sInventory.anchore.http.insecure whether or not anchore is using ssl/tls

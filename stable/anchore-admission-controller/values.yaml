@@ -5,7 +5,7 @@ fullnameOverride: Null
 replicaCount: 1
 logVerbosity: 3
 
-image: "anchore/kubernetes-admission-controller:v0.6.3"
+image: "anchore/kubernetes-admission-controller:v0.7.0"
 imagePullPolicy: IfNotPresent
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -98,6 +98,17 @@ affinity: {}
 ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
 topologySpreadConstraints: []
 
+
+## @param securityContext The securityContext for all pods
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+##
+securityContext: {}
+
+## @param containerSecurityContext The securityContext for all containers
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+##
+containerSecurityContext: {}
+
 extraLabels: {}
 
 # define name of existing secret containing anchore credentials
@@ -116,7 +127,7 @@ credentials: {}
 
 # Settings related to init-ca pod
 initCa:
-  image: cfssl/cfssl:latest
+  image: cfssl/cfssl:v1.6.5
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
   # - name: FOO

@@ -1,0 +1,216 @@
+should render defaults:
+  1: |
+    affinity:
+      nodeAffinity: null
+      podAffinity: null
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: primary
+                  app.kubernetes.io/instance: test-release
+                  app.kubernetes.io/name: postgresql
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+    containers:
+      - env:
+          - name: BITNAMI_DEBUG
+            value: "false"
+          - name: POSTGRESQL_PORT_NUMBER
+            value: "5432"
+          - name: POSTGRESQL_VOLUME_DIR
+            value: /bitnami/postgresql
+          - name: PGDATA
+            value: /bitnami/postgresql/data
+          - name: POSTGRES_USER
+            value: anchore
+          - name: POSTGRES_POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: postgres-password
+                name: test-release-postgresql
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: test-release-postgresql
+          - name: POSTGRES_DB
+            value: anchore
+          - name: POSTGRESQL_ENABLE_LDAP
+            value: "no"
+          - name: POSTGRESQL_ENABLE_TLS
+            value: "no"
+          - name: POSTGRESQL_LOG_HOSTNAME
+            value: "false"
+          - name: POSTGRESQL_LOG_CONNECTIONS
+            value: "false"
+          - name: POSTGRESQL_LOG_DISCONNECTIONS
+            value: "false"
+          - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+            value: "off"
+          - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+            value: error
+          - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+            value: pgaudit
+        image: docker.io/bitnami/postgresql:13.11.0-debian-11-r15
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - exec pg_isready -U "anchore" -d "dbname=anchore" -h 127.0.0.1 -p 5432
+          failureThreshold: 6
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: postgresql
+        ports:
+          - containerPort: 5432
+            name: tcp-postgresql
+        readinessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - -e
+              - |
+                exec pg_isready -U "anchore" -d "dbname=anchore" -h 127.0.0.1 -p 5432
+                [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
+          failureThreshold: 6
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits: {}
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        securityContext:
+          runAsUser: 1001
+        volumeMounts:
+          - mountPath: /dev/shm
+            name: dshm
+          - mountPath: /bitnami/postgresql
+            name: data
+    hostIPC: false
+    hostNetwork: false
+    imagePullSecrets:
+      - name: anchore-enterprise-pullcreds
+    securityContext:
+      fsGroup: 1001
+    serviceAccountName: default
+    volumes:
+      - emptyDir:
+          medium: Memory
+        name: dshm
+  2: |
+    affinity:
+      nodeAffinity: null
+      podAffinity: null
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: master
+                  app.kubernetes.io/instance: test-release
+                  app.kubernetes.io/name: ui-redis
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+    automountServiceAccountToken: true
+    containers:
+      - args:
+          - -c
+          - /opt/bitnami/scripts/start-scripts/start-master.sh
+        command:
+          - /bin/bash
+        env:
+          - name: BITNAMI_DEBUG
+            value: "false"
+          - name: REDIS_REPLICATION_MODE
+            value: master
+          - name: ALLOW_EMPTY_PASSWORD
+            value: "no"
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: redis-password
+                name: test-release-ui-redis
+          - name: REDIS_TLS_ENABLED
+            value: "no"
+          - name: REDIS_PORT
+            value: "6379"
+        image: docker.io/bitnami/redis:7.0.12-debian-11-r0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - /health/ping_liveness_local.sh 5
+          failureThreshold: 5
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 6
+        name: redis
+        ports:
+          - containerPort: 6379
+            name: redis
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - /health/ping_readiness_local.sh 1
+          failureThreshold: 5
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources:
+          limits: {}
+          requests: {}
+        securityContext:
+          runAsUser: 1001
+        volumeMounts:
+          - mountPath: /opt/bitnami/scripts/start-scripts
+            name: start-scripts
+          - mountPath: /health
+            name: health
+          - mountPath: /data
+            name: redis-data
+          - mountPath: /opt/bitnami/redis/mounted-etc
+            name: config
+          - mountPath: /opt/bitnami/redis/etc/
+            name: redis-tmp-conf
+          - mountPath: /tmp
+            name: tmp
+    imagePullSecrets:
+      - name: anchore-enterprise-pullcreds
+    securityContext:
+      fsGroup: 1001
+    serviceAccountName: test-release-ui-redis
+    terminationGracePeriodSeconds: 30
+    volumes:
+      - configMap:
+          defaultMode: 493
+          name: test-release-ui-redis-scripts
+        name: start-scripts
+      - configMap:
+          defaultMode: 493
+          name: test-release-ui-redis-health
+        name: health
+      - configMap:
+          name: test-release-ui-redis-configuration
+        name: config
+      - emptyDir: {}
+        name: redis-tmp-conf
+      - emptyDir: {}
+        name: tmp
+      - emptyDir: {}
+        name: redis-data

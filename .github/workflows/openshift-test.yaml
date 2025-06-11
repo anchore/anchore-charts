@@ -6,6 +6,7 @@ on:
       - 'stable/enterprise/Chart.yaml'
       - 'stable/ecs-inventory/Chart.yaml'
       - 'stable/k8s-inventory/Chart.yaml'
+      - 'stable/anchore-admission-controller/Chart.yaml'
 
 permissions:
   contents: read
@@ -15,7 +16,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cluster: [ {distribution: "openshift", version: "4.13.0-okd"}, {distribution: "openshift", version: "4.15.0-okd"}]
+        cluster: [
+          {distribution: "openshift", version: "4.13.0-okd"},
+          {distribution: "openshift", version: "4.15.0-okd"},
+          {distribution: "gke", version: "1.30"},
+          {distribution: aks, version: "1.30"},
+        ]
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout
@@ -72,12 +78,13 @@ jobs:
       uses: replicatedhq/compatibility-actions/create-cluster@v1
       with:
         api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
-        cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
+        cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ github.run_id }}
         kubernetes-distribution: ${{ matrix.cluster.distribution }}
         kubernetes-version: ${{ matrix.cluster.version }}
         ttl: 20m
         timeout-minutes: 20
         kubeconfig-path: ./tmp/kubeconfig
+        nodes: 2
 
     - name: check the cluster
       if: steps.list-changed.outputs.CHANGED == 'true'
@@ -94,22 +101,36 @@ jobs:
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
         KUBECONFIG: ./tmp/kubeconfig
 
-    - name: Check if anchore-engine endpoint is required for admission controller chart
-      id: engine_required
+    - name: Check if anchore-enterprise endpoint is required for admission controller chart
+      id: enterprise_required
       run: |
         if [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'anchore-admission-controller') ]]; then
-          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an engine deployment"
+          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an enterprise deployment"
+          echo "::set-output name=changed::true"
+        elif [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'k8s-inventory') ]]; then
+          echo "Branch: ${{ github.event.pull_request.head.ref }}"
+          echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
-          echo "No files in 'stable/anchore-admission-controller' directory were changed. Skipping engine deployment"
+          echo "No files in 'stable/anchore-admission-controller' or 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
           echo "::set-output name=changed::false"
         fi
       shell: bash
 
-    - name: Deploy Engine
-      if: steps.engine_required.outputs.changed == 'true'
+    - name: Deploy enterprise
+      if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-        helm install engine anchore/anchore-engine --namespace anchore -f stable/anchore-admission-controller/ci/openshift-test.yaml --wait
+        helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
+        helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
+        helm repo update
+
+        if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+          echo "Installing enterprise on openshift"
+          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait
+        else
+          echo "Installing enterprise"
+          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
+        fi
         kubectl --namespace anchore get pods
       env:
         KUBECONFIG: ./tmp/kubeconfig
@@ -118,19 +139,39 @@ jobs:
       if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }}
       run: |
         echo "Branch: ${{ github.event.pull_request.head.ref }}"
-        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
-        echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
-        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
-        echo "Appended to stable/enterprise/ci/openshift-test.yaml"
+        echo "Distribution: ${{ matrix.cluster.distribution }}"
+
+        if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+          echo "updating openshift-test.yaml with rc image"
+          echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
+          echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
+          echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/openshift-test.yaml
+          echo "Appended to stable/enterprise/ci/openshift-test.yaml"
+        else
+          echo "updating rc-values.yaml with rc image"
+          echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
+          echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
+          echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
+          echo "Appended to stable/enterprise/ci/rc-values.yaml"
+        fi
 
     - name: Update to nightly image if needed
       if: ${{ github.event.pull_request.base.ref == 'nightly' || github.ref_name == 'nightly' }}
       run: |
-        echo "Branch: ${{ github.event.pull_request.head.ref }}"
-        echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
-        echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
-        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
-        echo "Appended to stable/enterprise/ci/openshift-test.yaml"
+
+        if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+          echo "updating openshift-test.yaml with nightly image"
+          echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
+          echo 'ui:' >> stable/enterprise/ci/openshift-test.yaml
+          echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/openshift-test.yaml
+          echo "Appended to stable/enterprise/ci/openshift-test.yaml"
+        else
+          echo "updating nightly-values.yaml with nightly image"
+          echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
+          echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
+          echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
+          echo "Appended to stable/enterprise/ci/nightly-values.yaml"
+        fi
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
@@ -140,13 +181,25 @@ jobs:
         files_changed="$(git diff --name-only origin/${TARGET_BRANCH} | sort | uniq)"
         charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
         for chart in ${charts_dirs_changed}; do
-          echo "creating openshift-test-values.yaml for ${chart}"
-          pushd "${chart}"
-          rm -rvf ci/*-values.yaml
-          mv ci/openshift-test.yaml ci/openshift-test-values.yaml
-          popd
+          # if ${{ matrix.cluster.distribution }} is openshift, then echo openshift-test.yaml
+          if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+            echo "creating openshift-test-values.yaml for ${chart}"
+            pushd "${chart}"
+            rm -rvf ci/*-values.yaml
+            mv ci/openshift-test.yaml ci/openshift-test-values.yaml
+            popd
+          fi
         done
         ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
       env:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
+
+    - name: Remove Cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      id: remove-cluster
+      uses: replicatedhq/replicated-actions/remove-cluster@v1
+      continue-on-error: true # It could be that the cluster is already removed
+      with:
+        api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
+        cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}

@@ -53,7 +53,7 @@ spec:
         {{- end }}
       initContainers:
         - name: scale-down-anchore
-          image: {{ .Values.osaaMigrationJob.kubectlImage }}
+          image: {{ include "enterprise.kubectl.image" . | trim }}
           command: ["/bin/bash", "-c"]
           args:
             - |
@@ -68,7 +68,7 @@ spec:
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
         - name: wait-for-db
-          image: {{ .Values.image }}
+          image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           command: ["/bin/bash", "-c"]
@@ -101,7 +101,7 @@ spec:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
         - name: migrate-analysis-archive
-          image: {{ .Values.image }}
+          image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- with .Values.containerSecurityContext }}
           securityContext: {{ toYaml . | nindent 12 }}

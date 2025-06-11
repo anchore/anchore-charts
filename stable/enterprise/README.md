@@ -414,7 +414,7 @@ anchoreConfig:
     auth_disabled: true
 ```
 
-For those using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md), a ServiceMonitor can be deployed within the same namespace as your Anchore Enterprise release. Once deployed, the Prometheus operator will automatically begin scraping the pre-configured endpoints for metrics.
+For those using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/developer/getting-started.md), a ServiceMonitor can be deployed within the same namespace as your Anchore Enterprise release. Once deployed, the Prometheus operator will automatically begin scraping the pre-configured endpoints for metrics.
 
 #### Example ServiceMonitor Configuration
 
@@ -649,9 +649,10 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.14.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.18.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
+| `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
 | `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                   |
 | `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
@@ -758,10 +759,15 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.apiext.external.useTLS`                                                  | Enable TLS for external API access                                                                                               | `true`                      |
 | `anchoreConfig.apiext.external.hostname`                                                | Hostname for the external Anchore API                                                                                            | `""`                        |
 | `anchoreConfig.apiext.external.port`                                                    | Port configured for external Anchore API                                                                                         | `8443`                      |
+| `anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return`            | Remove license content from SBOM downloads                                                                                       | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.analyzer.cycle_timers.image_analyzer`                                    | The interval between checks of the work queue for new analysis jobs                                                              | `1`                         |
 | `anchoreConfig.analyzer.layer_cache_max_gigabytes`                                      | Specify a cache size > 0GB to enable image layer caching                                                                         | `0`                         |
 | `anchoreConfig.analyzer.enable_hints`                                                   | Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis                      | `false`                     |
 | `anchoreConfig.analyzer.configFile`                                                     | Custom Anchore Analyzer configuration file contents in YAML                                                                      | `{}`                        |
+| `anchoreConfig.catalog.account_prometheus_metrics`                                      | Enable per-account image status prometheus metrics.                                                                              | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.catalog.sbom_vuln_scan.auto_scale`                                       | Automatically scale batch_size and pool_size. Disable to configure manually.                                                     | `true`                      |
+| `anchoreConfig.catalog.sbom_vuln_scan.batch_size`                                       | The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled                                       | `1`                         |
+| `anchoreConfig.catalog.sbom_vuln_scan.pool_size`                                        | The number of concurrent vulnerability scans to dispatch from each catalog instance                                              | `1`                         |
 | `anchoreConfig.catalog.cycle_timers.image_watcher`                                      | Interval (seconds) to check for an update to a tag                                                                               | `3600`                      |
 | `anchoreConfig.catalog.cycle_timers.policy_eval`                                        | Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated                                  | `3600`                      |
 | `anchoreConfig.catalog.cycle_timers.vulnerability_scan`                                 | Interval to run a vulnerability scan on images with vuln_update subscription activated                                           | `14400`                     |
@@ -783,8 +789,6 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite`                    | force runtime inventory to be overwritten upon every update for that reported context.                                           | `false`                     |
 | `anchoreConfig.catalog.integrations.integration_health_report_ttl_days`                 | TTL for integration health reports.                                                                                              | `2`                         |
 | `anchoreConfig.catalog.down_analyzer_task_requeue`                                      | Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state                      | `true`                      |
-| `anchoreConfig.policy_engine.cycle_timers.feed_sync`                                    | Interval to run a feed sync to get latest cve data                                                                               | `14400`                     |
-| `anchoreConfig.policy_engine.cycle_timers.feed_sync_checker`                            | Interval between checks to see if there needs to be a task queued                                                                | `3600`                      |
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`                | List of providers to exclude from matching                                                                                       | `nil`                       |
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`            | List of package types to exclude from matching                                                                                   | `nil`                       |
 | `anchoreConfig.policy_engine.enable_user_base_image`                                    | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`                      |
@@ -1040,7 +1044,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.14.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.18.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1111,34 +1115,36 @@ To restore your deployment to using your previous driver configurations:
 
 ### Anchore UI Redis Parameters
 
-| Name                                  | Description                                                                                      | Value                 |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------- |
-| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`                |
-| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                  |
-| `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123`   |
-| `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`          |
-| `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`               |
-| `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`           |
-| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnami/redis`       |
-| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0` |
+| Name                                  | Description                                                                                      | Value                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| `ui-redis.chartEnabled`               | Use the dependent chart for the UI Redis deployment                                              | `true`                             |
+| `ui-redis.externalEndpoint`           | External Redis endpoint when not using Helm managed chart (eg redis://:<password>@hostname:6379) | `""`                               |
+| `ui-redis.auth.password`              | Password used for connecting to Redis                                                            | `anchore-redis,123`                |
+| `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`                       |
+| `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`                            |
+| `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`                        |
+| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnami/redis`                    |
+| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0`              |
+| `ui-redis.image.pullSecrets`          | Specifies the image pull secrets to use for this chart.                                          | `["anchore-enterprise-pullcreds"]` |
 
 ### Anchore Database Parameters
 
-| Name                                          | Description                                                                                 | Value                   |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------- |
-| `postgresql.chartEnabled`                     | Use the dependent chart for Postgresql deployment                                           | `true`                  |
-| `postgresql.externalEndpoint`                 | External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io) | `""`                    |
-| `postgresql.auth.username`                    | Username used to connect to postgresql                                                      | `anchore`               |
-| `postgresql.auth.password`                    | Password used to connect to postgresql                                                      | `anchore-postgres,123`  |
-| `postgresql.auth.database`                    | Database name used when connecting to postgresql                                            | `anchore`               |
-| `postgresql.primary.resources`                | The resource limits & requests for the PostgreSQL Primary containers                        | `{}`                    |
-| `postgresql.primary.service.ports.postgresql` | Port used to connect to Postgresql                                                          | `5432`                  |
-| `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                  |
-| `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                    |
-| `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                    |
-| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`    |
-| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`             |
-| `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15` |
+| Name                                          | Description                                                                                 | Value                              |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `postgresql.chartEnabled`                     | Use the dependent chart for Postgresql deployment                                           | `true`                             |
+| `postgresql.externalEndpoint`                 | External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io) | `""`                               |
+| `postgresql.auth.username`                    | Username used to connect to postgresql                                                      | `anchore`                          |
+| `postgresql.auth.password`                    | Password used to connect to postgresql                                                      | `anchore-postgres,123`             |
+| `postgresql.auth.database`                    | Database name used when connecting to postgresql                                            | `anchore`                          |
+| `postgresql.primary.resources`                | The resource limits & requests for the PostgreSQL Primary containers                        | `{}`                               |
+| `postgresql.primary.service.ports.postgresql` | Port used to connect to Postgresql                                                          | `5432`                             |
+| `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                             |
+| `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                               |
+| `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                               |
+| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`               |
+| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`                        |
+| `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15`            |
+| `postgresql.image.pullSecrets`                | Specifies the image pull secrets to use for this chart.                                     | `["anchore-enterprise-pullcreds"]` |
 
 ### Anchore Object Store and Analysis Archive Migration
 
@@ -1164,7 +1170,6 @@ To restore your deployment to using your previous driver configurations:
 | `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                |
 | `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                   |
 
-
 ## Release Notes
 
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
@@ -1172,6 +1177,60 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.10.x
+
+- Deploys Anchore Enterprise v5.18.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5180/) for more information.
+
+### V3.9.x
+
+- Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration) and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+  - enterprise image:
+
+    ```yaml
+      image: docker.io/anchore/enterprise:v5.17.1
+        # registry: docker.io
+        # repository: anchore/enterprise
+        # tag: "v5.17.1"
+        # digest: sha256:abcdef123456
+    ```
+
+  - ui image:
+
+    ```yaml
+      ui:
+        image: docker.io/anchore/enterprise-ui:v5.17.0
+          # registry: docker.io
+          # repository: anchore/enterprise-ui
+          # tag: "v5.17.0"
+          # digest: sha256:abcdef123456
+    ```
+
+- .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+
+  ```yaml
+    kubectlImage:
+      registry: docker.io
+      repository: bitnami/kubectl
+      tag: "1.30"
+      digest:
+  ```
+
+### V3.8.x
+
+- Changes ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD configmap envvar from True to False for new installations of Anchore. If updating from an existing installation, the value will come from the existing configmap value. This value was changed because if set to True, Anchore will load file digest info for every installed package into a database table which can have an impact on the system performance. Most users will not need this by default.
+
+### V3.7.x
+
+- Deploys Anchore Enterprise v5.17.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5170/) for more information.
+
+### V3.6.x
+
+- Deploys Anchore Enterprise v5.16.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5160/) for more information.
+
+### V3.5.x
+
+- Deploys Anchore Enterprise v5.15.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5150/) for more information.
 
 ### V3.4.x
 
@@ -1205,7 +1264,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`
     - `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`
   - If you don't want to exclude any providers or package types, you can set them to an empty list. eg:
-    ```
+
+    ```yaml
       anchoreConfig:
         policy_engine:
           vulnerabilities:
@@ -1214,8 +1274,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
                 providers: []
                 package_types: []
     ```
+
   - If you had any drivers disabled in your feeds deployment, you will have to exclude them. eg:
-    ```
+
+    ```yaml
       anchoreConfig:
         policy_engine:
           vulnerabilities:
@@ -1224,6 +1286,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
                 providers: ['nvd', 'github']
                 package_types: ['rpm']
     ```
+
     Refer to the [Anchore docs](https://docs.anchore.com/current/docs/configuration/feeds/feed_configuration/) for the available providers and package_types.
 - The following values were added to the values file to handle the creation or reuse of pull creds and Anchore license secrets:
   - `useExistingLicenseSecret`: defaults to `true` to be backwards compatible with existing deployments. If you are doing a new deployment, you can either set the `license` field for the secret to be created for you or you can create the secret out of band from helm.

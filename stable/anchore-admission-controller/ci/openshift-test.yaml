@@ -1,0 +1,35 @@
+imagePullSecrets:
+- anchore-enterprise-pullcreds
+
+securityContext:
+  fsGroup: null
+  runAsGroup: null
+  runAsUser: null
+
+containerSecurityContext:
+  runAsUser: null
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop :
+    - "ALL"
+  seccompProfile:
+    type: "RuntimeDefault"
+
+anchoreEndpoint: "http://enterprise-enterprise-api:8228"
+credentials:
+  users:
+  - username: admin
+    password: foobar
+
+policySelectors:
+  - Selector:
+      ResourceType: "image"
+      SelectorKeyRegex: ".*"
+      SelectorValueRegex: ".*"
+    PolicyReference:
+      Username: "admin"
+      # This is the default bundle id in anchore engine
+      PolicyBundleId: "2c53a13c-1765-11e8-82ef-23527761d060"
+    # Mode is one of: "policy", "analysis", or "breakglass". policy=>require policy pass, analysis=>require image analyzed, breakglass=>do nothing
+    Mode: analysis
