@@ -1993,3 +1993,13 @@ osaaMigrationJob:
       storage_driver:
         name: db
         config: {}
+
+extraManifests: []
+  # - |
+  #   apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #   labels:
+  #     name: prometheus-extra
+  #   data:
+  #     extra-data: "value"
