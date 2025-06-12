@@ -14,7 +14,7 @@ migration job should match snapshot:
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -82,7 +82,7 @@ migration job should match snapshot:
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -136,7 +136,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -204,7 +204,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -256,7 +256,7 @@ migration job should match snapshot analysisArchiveMigration to true:
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -324,7 +324,7 @@ migration job should match snapshot analysisArchiveMigration to true:
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -375,7 +375,7 @@ migration job should match snapshot objectStoreMigration to true:
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -443,7 +443,7 @@ migration job should match snapshot objectStoreMigration to true:
           - name: bar
             value: baz
           - name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local
+            value: test-release-enterprise-999-osaa-migration-job.test-namespace.svc.cluster.local.
           - name: ANCHORE_PORT
             value: "null"
           - name: ANCHORE_HOST_ID
@@ -614,7 +614,7 @@ should render proper initContainers:
         - name: bar
           value: baz
         - name: ANCHORE_ENDPOINT_HOSTNAME
-          value: test-release-enterprise-999-upgrade.test-namespace.svc.cluster.local
+          value: test-release-enterprise-999-upgrade.test-namespace.svc.cluster.local.
         - name: ANCHORE_PORT
           value: "null"
         - name: ANCHORE_HOST_ID

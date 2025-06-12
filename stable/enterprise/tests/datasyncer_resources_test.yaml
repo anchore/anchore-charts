@@ -242,7 +242,7 @@ tests:
           path: spec.template.spec.containers[0].env[0]
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-datasyncer.test-namespace.svc.cluster.local
+            value: test-release-enterprise-datasyncer.test-namespace.svc.cluster.local.
         count: 1
       - isSubset:
           path: spec.template.spec.containers[0].env[1]
