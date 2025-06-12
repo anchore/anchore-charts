@@ -236,7 +236,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-catalog.test-namespace.svc.cluster.local
+            value: test-release-enterprise-catalog.test-namespace.svc.cluster.local.
         count: 1
       - contains:
           path: spec.template.spec.containers[0].env
@@ -521,7 +521,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: ANCHORE_ENDPOINT_HOSTNAME
-            value: test-release-enterprise-catalog.test-namespace.svc.cluster.local
+            value: test-release-enterprise-catalog.test-namespace.svc.cluster.local.
 
   - it: should render ANCHORE_ENDPOINT_HOSTNAME with toplevel domainSuffix
     template: catalog_deployment.yaml
