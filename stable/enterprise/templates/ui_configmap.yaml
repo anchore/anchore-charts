@@ -62,7 +62,7 @@ data:
     authentication_lock:
       count: {{ .Values.anchoreConfig.ui.authentication_lock.count }}
       expires: {{ .Values.anchoreConfig.ui.authentication_lock.expires }}
-    appdb_config: {{ toYaml .Values.anchoreConfig.ui.appdb_config | nindent 6}}
+    appdb_config: {{- toYaml .Values.anchoreConfig.ui.appdb_config | nindent 6}}
     log_level: {{ .Values.anchoreConfig.ui.log_level | squote }}
     enrich_inventory_view: {{ .Values.anchoreConfig.ui.enrich_inventory_view  }}
     enable_prometheus_metrics: {{ .Values.anchoreConfig.metrics.enabled }}
