@@ -167,7 +167,7 @@ should render the configmaps:
           apiext:
             enabled: true
             image_content:
-              remove_license_content_from_sbom_return: false
+              remove_license_content_from_sbom_return: <ALLOW_API_CONFIGURATION>
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
