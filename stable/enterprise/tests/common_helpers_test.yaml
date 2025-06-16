@@ -1035,3 +1035,51 @@ tests:
               maxSkew: 1
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: DoNotSchedule
+
+  - it: should render enterprise image when passed in as a string
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      image: "anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore/enterprise:9.9.9"
+
+
+  - it: should render enterprise image when passed in as a string
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      image: "anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore/enterprise:9.9.9"
+
+  - it: should render enterprise image when passed in as a dict
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      image:
+        registry: "anchore.com"
+        repository: "anchore/enterprise"
+        tag: "9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore.com/anchore/enterprise:9.9.9"
+
+  - it: should render enterprise ui image when passed in as a dict
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      ui:
+        image:
+          registry: "anchore.com"
+          repository: "anchore/enterprise-ui"
+          tag: "9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore.com/anchore/enterprise-ui:9.9.9"
