@@ -196,8 +196,8 @@ should render the configmaps for osaa migration if enabled:
               max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
             import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+            analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
               auto_scale: true
               batch_size: 1
@@ -317,6 +317,7 @@ should render the configmaps for osaa migration if enabled:
             data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
             data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
             data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+            ingress_images_max_workers: 50
             cycle_timers:
               reports_extended_runtime_vuln_load: 1800
               reports_image_egress: 600
@@ -582,8 +583,8 @@ should render the configmaps for osaa migration if enabled:
               max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
             import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+            analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
               auto_scale: true
               batch_size: 1
@@ -714,6 +715,7 @@ should render the configmaps for osaa migration if enabled:
             data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
             data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
             data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+            ingress_images_max_workers: 50
             cycle_timers:
               reports_extended_runtime_vuln_load: 1800
               reports_image_egress: 600
