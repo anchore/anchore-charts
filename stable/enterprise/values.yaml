@@ -633,10 +633,6 @@ anchoreConfig:
     integrations:
       integration_health_report_ttl_days: 2
 
-    ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
-    ##
-    down_analyzer_task_requeue: true
-
   policy_engine:
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
@@ -2005,6 +2001,8 @@ osaaMigrationJob:
         name: db
         config: {}
 
+## @param extraManifests List of additional manifests to be included in the chart
+##
 extraManifests: []
   # - |
   #   apiVersion: v1

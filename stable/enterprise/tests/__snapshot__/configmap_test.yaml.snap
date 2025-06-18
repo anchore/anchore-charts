@@ -236,7 +236,6 @@ should render the configmaps:
               max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
             import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
@@ -432,7 +431,6 @@ should render the configmaps:
     data:
       ANCHORE_ADMIN_EMAIL: admin@myanchore
       ANCHORE_ALLOW_ECR_IAM_AUTO: "true"
-      ANCHORE_ANALYZER_TASK_REQUEUE: "true"
       ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED: "true"
       ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "true"
       ANCHORE_AUTH_PRIVKEY: "null"
