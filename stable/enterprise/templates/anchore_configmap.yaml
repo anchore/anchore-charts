@@ -2,17 +2,161 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ template "enterprise.fullname" . }}
+  name: {{ template "enterprise.fullname" . }}-api
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" . | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
-
 data:
   config.yaml: |
-    # Anchore Service Configuration File, mounted from a configmap
+    # Anchore API Service Configuration File, mounted from a configmap
     #
 {{- if .Values.configOverride }}
 {{ tpl .Values.configOverride . | indent 4 }}
 {{- else }}
-{{ tpl (.Files.Get "files/default_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/anchore_common.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/api_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-catalog
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Catalog Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }} 
+{{- else }}
+{{ tpl (.Files.Get "files/catalog_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-datasyncer
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Datasyncer Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/datasyncer_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-notifications
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Notifications Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/notifications_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-osaa
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore OSAA Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/osaa_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-policyengine
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Policy Engine Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/policyengine_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-reports
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Reports Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/reports_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-reportsworker
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Reports Worker Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/reportsworker_config.yaml") . | indent 4 }}
+{{- end }}
+---
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}-simplequeue
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore Simple Queue Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/simplequeue_config.yaml") . | indent 4 }}
 {{- end }}
