@@ -536,6 +536,12 @@ anchoreConfig:
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
     account_prometheus_metrics: "<ALLOW_API_CONFIGURATION>"  # false
 
+    ## @param anchoreConfig.catalog.analysis_queue_priority Allow prioritization of new analysis jobs based on the ingress method.
+    ## Valid values are: 'fair', 'api'
+    ## 'fair' will function as first in first out
+    ## 'api' will prioritize API requested image/source adds or imports over subscription based jobs such as repo watcher, tag watcher, or runtime inventory watcher.
+    analysis_queue_priority: "<ALLOW_API_CONFIGURATION>"  # fair
+
     ## @param anchoreConfig.catalog.sbom_vuln_scan.auto_scale Automatically scale batch_size and pool_size. Disable to configure manually.
     ## @param anchoreConfig.catalog.sbom_vuln_scan.batch_size The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled
     ## @param anchoreConfig.catalog.sbom_vuln_scan.pool_size The number of concurrent vulnerability scans to dispatch from each catalog instance
@@ -679,6 +685,11 @@ anchoreConfig:
     use_volume: false
 
   reports_worker:
+
+    ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
+    ##
+    ingress_images_max_workers: 50
+
     ## @param anchoreConfig.reports_worker.enable_data_ingress Enable periodically syncing data into the Anchore Reports Service
     ##
     enable_data_ingress: true

@@ -169,6 +169,7 @@ services:
       object_store_bucket: "runtime_compliance_check"
     down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
     import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+    analysis_queue_priority: {{ .Values.anchoreConfig.catalog.analysis_queue_priority }}
     sbom_vuln_scan:
       auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
       batch_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.batch_size }}
@@ -295,6 +296,7 @@ services:
     data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
     data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
     data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+    ingress_images_max_workers: {{ .Values.anchoreConfig.reports_worker.ingress_images_max_workers }}
     cycle_timers: {{- toYaml .Values.anchoreConfig.reports_worker.cycle_timers | nindent 6 }}
     runtime_report_generation:
       use_legacy_loaders_and_queries: {{ .Values.anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries }}
