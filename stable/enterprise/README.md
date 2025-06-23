@@ -1178,6 +1178,29 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### V3.10.1
+
+- Include a trailing dot in .Values.domainSuffix by default to reduce the number of DNS lookups required for service to service communication. Please note that if using NO_PROXY/no_proxy you will want to include the trailing dot for service hostnames. It is a good idea to include the hostname with and without the trailing dot. Ex:
+
+```yaml
+extraEnv:
+  # Assuming your namespace is "anchore"
+  - name: "NO_PROXY"
+    value: "localhost, localhost.localdomain, 127.0.0.1, anchore.svc.cluster.local., anchore.svc.cluster.local"
+  - name: "no_proxy"
+    value: "localhost, localhost.localdomain, 127.0.0.1, anchore.svc.cluster.local., anchore.svc.cluster.local"
+```
+
+Please note that if using an S3-compatible object store that hostname should be included without the trailing dot. Ex:
+
+```yaml
+extraEnv:
+  - name: "NO_PROXY"
+    value: "localhost, localhost.localdomain, 127.0.0.1, anchore.svc.cluster.local., anchore.svc.cluster.local, myobjectstore.com"
+  - name: "no_proxy"
+    value: "localhost, localhost.localdomain, 127.0.0.1, anchore.svc.cluster.local., anchore.svc.cluster.local, myobjectstore.com"
+```
+
 ### V3.10.x
 
 - Deploys Anchore Enterprise v5.18.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5180/) for more information.
