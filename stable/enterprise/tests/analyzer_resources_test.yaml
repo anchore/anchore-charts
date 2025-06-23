@@ -1,9 +1,9 @@
 suite: Analyzer Resources Tests
 templates:
-  - analyzer_configmap.yaml
+  - configmaps/analyzer_configmap.yaml
+  - configmaps/anchore_common_configmap.yaml
   - analyzer_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
 release:
   name: test-release
@@ -17,7 +17,7 @@ set:
 
 tests:
   - it: should render a valid analyzer config file
-    template: analyzer_configmap.yaml
+    template: configmaps/analyzer_configmap.yaml
     asserts:
       - matchRegex:
           path: data["analyzer_config.yaml"]
@@ -26,7 +26,7 @@ tests:
   - it: should set the correct resource names
     templates:
       - analyzer_deployment.yaml
-      - analyzer_configmap.yaml
+      - configmaps/analyzer_configmap.yaml
     asserts:
       - equal:
           path: metadata.name
@@ -35,7 +35,7 @@ tests:
   - it: should render component labels
     templates:
       - analyzer_deployment.yaml
-      - analyzer_configmap.yaml
+      - configmaps/analyzer_configmap.yaml
     set:
       analyzer.labels:
         analyzer: test
@@ -56,7 +56,7 @@ tests:
   - it: should render component annotations
     templates:
       - analyzer_deployment.yaml
-      - analyzer_configmap.yaml
+      - configmaps/analyzer_configmap.yaml
     set:
       analyzer.annotations:
         analyzer: test

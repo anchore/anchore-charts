@@ -2,8 +2,8 @@ suite: Notifications Resources Tests
 templates:
   - notifications_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
+  - configmaps/notifications_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

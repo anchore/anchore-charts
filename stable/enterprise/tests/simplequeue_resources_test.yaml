@@ -2,8 +2,8 @@ suite: SimpleQueue Resources Tests
 templates:
   - simplequeue_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
+  - configmaps/simplequeue_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

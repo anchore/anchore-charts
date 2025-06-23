@@ -13,12 +13,20 @@ templates:
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
   - ui_configmap.yaml
   - ui_secret.yaml
   - policybundle_configmap.yaml
-  - analyzer_configmap.yaml
+  - configmaps/analyzer_configmap.yaml
+  - configmaps/anchore_common_configmap.yaml
+  - configmaps/api_configmap.yaml
+  - configmaps/catalog_configmap.yaml
+  - configmaps/datasyncer_configmap.yaml
+  - configmaps/notifications_configmap.yaml
+  - configmaps/policyengine_configmap.yaml
+  - configmaps/reports_configmap.yaml
+  - configmaps/reportsworker_configmap.yaml
+  - configmaps/simplequeue_configmap.yaml
 
 deployment-resources: &deployment-resources
   - templates/api_deployment.yaml
