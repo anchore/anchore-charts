@@ -10,13 +10,22 @@ templates:
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
   - hooks/pre-upgrade/upgrade_job.yaml
-  - analyzer_configmap.yaml
-  - anchore_configmap.yaml
   - ui_configmap.yaml
   - anchore_secret.yaml
   - ui_secret.yaml
   - envvars_configmap.yaml
   - datasyncer_deployment.yaml
+  - configmaps/analyzer_configmap.yaml
+  - configmaps/anchore_common_configmap.yaml
+  - configmaps/simplequeue_configmap.yaml
+  - configmaps/catalog_configmap.yaml
+  - configmaps/notifications_configmap.yaml
+  - configmaps/policyengine_configmap.yaml
+  - configmaps/reports_configmap.yaml
+  - configmaps/reportsworker_configmap.yaml
+  - configmaps/datasyncer_configmap.yaml
+  - configmaps/api_configmap.yaml
+
 release:
   name: test-release
   namespace: test-namespace
@@ -609,7 +618,7 @@ tests:
         count: 1
         any: true
 
-  - it: should render global volumes anchore-license, and config-volume
+  - it: should render global volume anchore-license
     templates: *backend_test_templates
     documentIndex: 0
     asserts:
@@ -621,12 +630,128 @@ tests:
               secretName: anchore-enterprise-license
         count: 1
         any: true
+
+  - it: should render correct volume for config-volume for analyzer deployment
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    asserts:
       - contains:
           path: spec.template.spec.volumes
           content:
             name: config-volume
             configMap:
-              name: test-release-enterprise
+              name: test-release-enterprise-common
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: analyzer-config-volume
+            configMap:
+              name: test-release-enterprise-analyzer
+        count: 1
+        any: true
+
+  - it: should render correct volume for config-volume for api deployment
+    template: api_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-api
+        count: 1
+        any: true
+  
+  - it: should render correct volume for config-volume for catalog deployment
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-catalog
+        count: 1
+        any: true
+
+  - it: should render correct volume for config-volume for notifications deployment
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-notifications
+        count: 1
+        any: true
+
+  - it: should render correct volume for config-volume for policyengine deployment
+    template: policyengine_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-policyengine
+        count: 1
+        any: true
+
+  - it: should render correct volume for config-volume for reports deployment
+    template: reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-reports
+        count: 1
+        any: true
+
+
+  - it: should render correct volume for config-volume for reportsworker deployment
+    template: reportsworker_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-reportsworker
+        count: 1
+        any: true
+
+  - it: should render correct volume for config-volume for simplequeue deployment
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-simplequeue
+        count: 1
+        any: true
+
+  - it: should render correct volume for config-volume for datasyncer deployment
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-datasyncer
         count: 1
         any: true
 

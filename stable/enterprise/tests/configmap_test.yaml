@@ -1,11 +1,20 @@
 suite: ConfigMap Tests
 templates:
-  - templates/analyzer_configmap.yaml
-  - templates/anchore_configmap.yaml
   - templates/envvars_configmap.yaml
   - templates/policybundle_configmap.yaml
   - templates/scripts_configmap.yaml
   - templates/ui_configmap.yaml
+  - templates/configmaps/datasyncer_configmap.yaml
+  - templates/configmaps/api_configmap.yaml
+  - templates/configmaps/catalog_configmap.yaml
+  - templates/configmaps/notifications_configmap.yaml
+  - templates/configmaps/policyengine_configmap.yaml
+  - templates/configmaps/reports_configmap.yaml
+  - templates/configmaps/reportsworker_configmap.yaml
+  - templates/configmaps/simplequeue_configmap.yaml
+  - templates/configmaps/anchore_common_configmap.yaml
+  - templates/configmaps/analyzer_configmap.yaml
+
 values:
   - values.yaml
 release:
@@ -20,7 +29,15 @@ tests:
       - matchSnapshot: {}
 
   - it: should render a custom config when configOverride is set
-    template: templates/anchore_configmap.yaml
+    templates:
+      - templates/configmaps/api_configmap.yaml
+      - templates/configmaps/catalog_configmap.yaml
+      - templates/configmaps/datasyncer_configmap.yaml
+      - templates/configmaps/notifications_configmap.yaml
+      - templates/configmaps/policyengine_configmap.yaml
+      - templates/configmaps/reports_configmap.yaml
+      - templates/configmaps/reportsworker_configmap.yaml
+      - templates/configmaps/simplequeue_configmap.yaml
     set:
       configOverride: |
         service_dir: /foobar
@@ -31,7 +48,6 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: |
-            # Anchore Service Configuration File, mounted from a configmap
             #
             service_dir: /foobar
             tmp_dir: /test
