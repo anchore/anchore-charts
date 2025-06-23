@@ -9,10 +9,10 @@ metadata:
 
 data:
   config.yaml: |
-    # Anchore Service Configuration File, mounted from a configmap 
+    # Anchore Service Configuration File, mounted from a configmap
     #
 {{- if .Values.configOverride }}
 {{ tpl .Values.configOverride . | indent 4 }}
 {{- else }}
-{{ tpl (.Files.Get "files/anchore_common.yaml") . | indent 4 }}
+{{- tpl (.Files.Get "files/anchore_common.yaml") . | indent 4 }}
 {{- end }}

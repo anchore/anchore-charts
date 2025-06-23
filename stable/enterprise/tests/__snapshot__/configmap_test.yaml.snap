@@ -42,7 +42,113 @@ should render the configmaps:
   2: |
     apiVersion: v1
     data:
-      config.yaml: "# Anchore Service Configuration File, mounted from a configmap \n#\nservice_dir: ${ANCHORE_SERVICE_DIR}\ntmp_dir: ${ANCHORE_TMP_DIR}\nlog_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level\n\nserver:\n  max_connection_backlog: 2048\n  max_wsgi_middleware_worker_count: 50\n  max_wsgi_middleware_worker_queue_size: 100\n  timeout_graceful_shutdown: false\n  timeout_keep_alive: 5\n\nallow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}\nhost_id: \"${ANCHORE_HOST_ID}\"\ninternal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}\nimage_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}\n\nglobal_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}\nglobal_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}\nserver_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}\n\nlicense_file: ${ANCHORE_LICENSE_FILE}\nauto_restart_services: false\n\nmax_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}\nmax_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}\n\nmax_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}\n\naudit:\n  enabled: true\n  mode: log\n  verbs:\n    - post\n    - put\n    - delete\n    - patch\n  resource_uris:\n    - \"/accounts\"\n    - \"/accounts/{account_name}\"\n    - \"/accounts/{account_name}/state\"\n    - \"/accounts/{account_name}/users\"\n    - \"/accounts/{account_name}/users/{username}\"\n    - \"/accounts/{account_name}/users/{username}/api-keys\"\n    - \"/accounts/{account_name}/users/{username}/api-keys/{key_name}\"\n    - \"/accounts/{account_name}/users/{username}/credentials\"\n    - \"/rbac-manager/roles\"\n    - \"/rbac-manager/roles/{role_name}/members\"\n    - \"/rbac-manager/saml/idps\"\n    - \"/rbac-manager/saml/idps/{name}\"\n    - \"/rbac-manager/saml/idps/{name}/user-group-mappings\"\n    - \"/system/user-groups\"\n    - \"/system/user-groups/{group_uuid}\"\n    - \"/system/user-groups/{group_uuid}/roles\"\n    - \"/system/user-groups/{group_uuid}/users\"\n    - \"/user/api-keys\"\n    - \"/user/api-keys/{key_name}\"\n    - \"/user/credentials\"\n\nmetrics:\n  enabled: ${ANCHORE_ENABLE_METRICS}\n  auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}\n\nwebhooks:\n  {}\n\ndefault_admin_password: \"${ANCHORE_ADMIN_PASSWORD}\"\ndefault_admin_email: ${ANCHORE_ADMIN_EMAIL}\n\nconfiguration:\n  api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}\n\nkeys:\n  secret: \"${ANCHORE_SAML_SECRET}\"\n  public_key_path: ${ANCHORE_AUTH_PRIVKEY}\n  private_key_path: ${ANCHORE_AUTH_PUBKEY}\n\nuser_authentication:\n  oauth:\n    enabled: ${ANCHORE_OAUTH_ENABLED}\n    default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}\n    refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}\n  hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}\n  sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}\n  allow_api_keys_for_saml_users: false\n  max_api_key_age_days: 365\n  max_api_keys_per_user: 100\n  remove_deleted_user_api_keys_older_than_days: 365\n  disallow_native_users: false\n  log_saml_assertions: false\ncredentials:\n  database:\n    user: \"${ANCHORE_DB_USER}\"\n    password: \"${ANCHORE_DB_PASSWORD}\"\n    host: \"${ANCHORE_DB_HOST}\"\n    port: \"${ANCHORE_DB_PORT}\"\n    name: \"${ANCHORE_DB_NAME}\"\n    db_connect_args:\n      timeout: ${ANCHORE_DB_TIMEOUT}\n      ssl: ${ANCHORE_DB_SSL}\n    db_pool_size: ${ANCHORE_DB_POOL_SIZE}\n    db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}\n\naccount_gc:\n  max_resource_gc_chunk: 4096\n  max_deletion_threads: 4\n"
+      config.yaml: |
+        # Anchore Service Configuration File, mounted from a configmap
+        #    service_dir: ${ANCHORE_SERVICE_DIR}
+        tmp_dir: ${ANCHORE_TMP_DIR}
+        log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
+
+        server:
+          max_connection_backlog: 2048
+          max_wsgi_middleware_worker_count: 50
+          max_wsgi_middleware_worker_queue_size: 100
+          timeout_graceful_shutdown: false
+          timeout_keep_alive: 5
+
+        allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
+        host_id: "${ANCHORE_HOST_ID}"
+        internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+        image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
+
+        global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
+        global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
+        server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
+
+        license_file: ${ANCHORE_LICENSE_FILE}
+        auto_restart_services: false
+
+        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+
+        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+
+        audit:
+          enabled: true
+          mode: log
+          verbs:
+            - post
+            - put
+            - delete
+            - patch
+          resource_uris:
+            - "/accounts"
+            - "/accounts/{account_name}"
+            - "/accounts/{account_name}/state"
+            - "/accounts/{account_name}/users"
+            - "/accounts/{account_name}/users/{username}"
+            - "/accounts/{account_name}/users/{username}/api-keys"
+            - "/accounts/{account_name}/users/{username}/api-keys/{key_name}"
+            - "/accounts/{account_name}/users/{username}/credentials"
+            - "/rbac-manager/roles"
+            - "/rbac-manager/roles/{role_name}/members"
+            - "/rbac-manager/saml/idps"
+            - "/rbac-manager/saml/idps/{name}"
+            - "/rbac-manager/saml/idps/{name}/user-group-mappings"
+            - "/system/user-groups"
+            - "/system/user-groups/{group_uuid}"
+            - "/system/user-groups/{group_uuid}/roles"
+            - "/system/user-groups/{group_uuid}/users"
+            - "/user/api-keys"
+            - "/user/api-keys/{key_name}"
+            - "/user/credentials"
+
+        metrics:
+          enabled: ${ANCHORE_ENABLE_METRICS}
+          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
+
+        webhooks:
+          {}
+
+        default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
+        default_admin_email: ${ANCHORE_ADMIN_EMAIL}
+
+        configuration:
+          api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
+
+        keys:
+          secret: "${ANCHORE_SAML_SECRET}"
+          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
+          private_key_path: ${ANCHORE_AUTH_PUBKEY}
+
+        user_authentication:
+          oauth:
+            enabled: ${ANCHORE_OAUTH_ENABLED}
+            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
+          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+          allow_api_keys_for_saml_users: false
+          max_api_key_age_days: 365
+          max_api_keys_per_user: 100
+          remove_deleted_user_api_keys_older_than_days: 365
+          disallow_native_users: false
+          log_saml_assertions: false
+        credentials:
+          database:
+            user: "${ANCHORE_DB_USER}"
+            password: "${ANCHORE_DB_PASSWORD}"
+            host: "${ANCHORE_DB_HOST}"
+            port: "${ANCHORE_DB_PORT}"
+            name: "${ANCHORE_DB_NAME}"
+            db_connect_args:
+              timeout: ${ANCHORE_DB_TIMEOUT}
+              ssl: ${ANCHORE_DB_SSL}
+            db_pool_size: ${ANCHORE_DB_POOL_SIZE}
+            db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
+
+        account_gc:
+          max_resource_gc_chunk: 4096
+          max_deletion_threads: 4
     kind: ConfigMap
     metadata:
       annotations:
