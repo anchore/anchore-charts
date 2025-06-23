@@ -2,9 +2,6 @@ service_dir: ${ANCHORE_SERVICE_DIR}
 tmp_dir: ${ANCHORE_TMP_DIR}
 log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
 
-logging:
-  {{- toYaml .Values.anchoreConfig.logging | nindent 2 }}
-
 server:
   {{- toYaml .Values.anchoreConfig.server | nindent 2 }}
 
