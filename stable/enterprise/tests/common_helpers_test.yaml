@@ -16,7 +16,7 @@ templates:
   - envvars_configmap.yaml
   - datasyncer_deployment.yaml
   - configmaps/analyzer_configmap.yaml
-  - configmaps/anchore_common_configmap.yaml
+  - configmaps/analyzer_config_configmap.yaml
   - configmaps/simplequeue_configmap.yaml
   - configmaps/catalog_configmap.yaml
   - configmaps/notifications_configmap.yaml
@@ -640,13 +640,13 @@ tests:
           content:
             name: config-volume
             configMap:
-              name: test-release-enterprise-common
+              name: test-release-enterprise-analyzer
       - contains:
           path: spec.template.spec.volumes
           content:
             name: analyzer-config-volume
             configMap:
-              name: test-release-enterprise-analyzer
+              name: test-release-enterprise-analyzer-config
         count: 1
         any: true
 

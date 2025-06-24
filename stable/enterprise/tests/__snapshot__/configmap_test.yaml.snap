@@ -37,14 +37,15 @@ should render the configmaps:
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-9.9.9
-      name: test-release-enterprise-analyzer
+      name: test-release-enterprise-analyzer-config
       namespace: test-namespace
   2: |
     apiVersion: v1
     data:
       config.yaml: |
-        # Anchore Service Configuration File, mounted from a configmap
-        #    service_dir: ${ANCHORE_SERVICE_DIR}
+        # Anchore Analyzer Service Configuration File, mounted from a configmap
+        #
+        service_dir: ${ANCHORE_SERVICE_DIR}
         tmp_dir: ${ANCHORE_TMP_DIR}
         log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
 
@@ -149,12 +150,46 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
+
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
+        services:
+          analyzer:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            cycle_timer_seconds: 1
+            cycle_timers:
+              image_analyzer: 1
+            analyzer_driver: 'nodocker'
+            layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
+            layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
+            enable_hints: ${ANCHORE_HINTS_ENABLED}
+            enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
     kind: ConfigMap
     metadata:
       annotations:
         bar: baz
         foo: bar
       labels:
+        app.kubernetes.io/component: analyzer
         app.kubernetes.io/instance: test-release
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: test-release-enterprise
@@ -163,7 +198,7 @@ should render the configmaps:
         bar: baz
         foo: bar
         helm.sh/chart: enterprise-9.9.9
-      name: test-release-enterprise-common
+      name: test-release-enterprise-analyzer
       namespace: test-namespace
   3: |
     apiVersion: v1
@@ -630,6 +665,38 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
+
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
+        services:
+          data_syncer:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: 0.0.0.0
+            port: ${ANCHORE_PORT}
+            auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
+            upload_dir: /analysis_scratch
+            datasets:
+              vulnerability_db:
+                versions: ["5"]
+              clamav_db:
+                versions: ["1"]
+              kev_db:
+                versions: ["1"]
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
     kind: ConfigMap
     metadata:
       annotations:
@@ -913,6 +980,80 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
+
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
+        services:
+          policy_engine:
+            enabled: true
+            require_auth: true
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
+            enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+            enable_user_base_image: true
+            vulnerabilities:
+              sync:
+                enabled: true
+                ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
+                connection_timeout_seconds: 3
+                read_timeout_seconds: 60
+                data:
+                  grypedb:
+                    enabled: true
+              matching:
+                exclude:
+                  providers: []
+                  package_types: []
+                default:
+                  search:
+                    by_cpe:
+                      enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+                ecosystem_specific:
+                  dotnet:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+                  golang:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+                  java:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+                  javascript:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+                  python:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+                  ruby:
+                    search:
+                      by_cpe:
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+                  stock:
+                    search:
+                      by_cpe:
+                        # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
+                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
     kind: ConfigMap
     metadata:
       annotations:
@@ -1199,6 +1340,51 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
+
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
+        services:
+          reports_worker:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
+            enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
+            data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
+            data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
+            data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+            cycle_timers:
+              reports_extended_runtime_vuln_load: 1800
+              reports_image_egress: 600
+              reports_image_load: 600
+              reports_image_refresh: 7200
+              reports_metrics: 3600
+              reports_runtime_inventory_load: 600
+              reports_tag_egress: 600
+              reports_tag_load: 600
+              reports_tag_refresh: 7200
+            runtime_report_generation:
+              use_legacy_loaders_and_queries: false
+              inventory_images_by_vulnerability: true
+              vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
+              vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
+              vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
     kind: ConfigMap
     metadata:
       annotations:
@@ -1327,6 +1513,30 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
+
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
+        services:
+          simplequeue:
+            enabled: true
+            require_auth: true
+            endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+            listen: '0.0.0.0'
+            port: ${ANCHORE_PORT}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            ssl_enable: ${ANCHORE_SSL_ENABLED}
+            ssl_cert: ${ANCHORE_SSL_CERT}
+            ssl_key: ${ANCHORE_SSL_KEY}
     kind: ConfigMap
     metadata:
       annotations:

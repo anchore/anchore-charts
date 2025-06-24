@@ -12,7 +12,7 @@ templates:
   - templates/configmaps/reports_configmap.yaml
   - templates/configmaps/reportsworker_configmap.yaml
   - templates/configmaps/simplequeue_configmap.yaml
-  - templates/configmaps/anchore_common_configmap.yaml
+  - templates/configmaps/analyzer_config_configmap.yaml
   - templates/configmaps/analyzer_configmap.yaml
 
 values:

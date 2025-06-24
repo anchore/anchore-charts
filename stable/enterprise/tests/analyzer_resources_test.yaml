@@ -1,7 +1,7 @@
 suite: Analyzer Resources Tests
 templates:
   - configmaps/analyzer_configmap.yaml
-  - configmaps/anchore_common_configmap.yaml
+  - configmaps/analyzer_config_configmap.yaml
   - analyzer_deployment.yaml
   - anchore_secret.yaml
   - envvars_configmap.yaml
@@ -17,7 +17,7 @@ set:
 
 tests:
   - it: should render a valid analyzer config file
-    template: configmaps/analyzer_configmap.yaml
+    template: configmaps/analyzer_config_configmap.yaml
     asserts:
       - matchRegex:
           path: data["analyzer_config.yaml"]
@@ -189,6 +189,13 @@ tests:
           path: spec.template.spec.volumes
           content:
             name: analyzer-config-volume
+            configMap:
+              name: test-release-enterprise-analyzer-config
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
             configMap:
               name: test-release-enterprise-analyzer
         count: 1
