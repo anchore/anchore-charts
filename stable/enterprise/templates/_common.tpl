@@ -422,10 +422,6 @@ Setup the common anchore volumes
 - name: config-volume
   configMap:
     name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
-{{- else if eq $component "analyzer" }}  # analyzer is a special case where it reads 2 configs, anchore_common is expected at /config/config.yaml
-- name: config-volume
-  configMap:
-    name: {{ template "enterprise.fullname" . }}-common
 {{- else }}
 - name: config-volume
   configMap:

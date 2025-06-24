@@ -35,7 +35,7 @@ data:
 {{ tpl (include "enterprise.configOverride" (merge (dict "component" $component) .)) . | indent 4 }}
 {{- else }}
 {{ tpl (.Files.Get "files/anchore_common.yaml") . | indent 4 }}
-{{ tpl (.Files.Get (printf "files/%s_config.yaml" $component)) . | indent 4 }}
+{{ tpl (.Files.Get (printf "files/%s_config.yaml" ($component | lower))) . | indent 4 }}
 {{- end }}
 {{- end -}}
 
