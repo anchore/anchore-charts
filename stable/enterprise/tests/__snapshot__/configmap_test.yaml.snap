@@ -56,6 +56,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -150,18 +162,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           analyzer:
@@ -217,6 +217,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -311,18 +323,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           apiext:
@@ -371,6 +371,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -465,18 +477,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           catalog:
@@ -571,6 +571,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -665,18 +677,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           data_syncer:
@@ -731,6 +731,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -825,18 +837,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           notifications:
@@ -886,6 +886,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -980,18 +992,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           policy_engine:
@@ -1088,6 +1088,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -1182,18 +1194,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           reports:
@@ -1246,6 +1246,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -1340,18 +1352,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           reports_worker:
@@ -1419,6 +1419,18 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
+        logging:
+          colored_logging: false
+          exception_backtrace_logging: false
+          exception_diagnose_logging: false
+          file_retention_rule: 10
+          file_rotation_rule: 10 MB
+          log_level: <ALLOW_API_CONFIGURATION>
+          server_access_logging: true
+          server_log_level: info
+          server_response_debug_logging: false
+          structured_logging: false
+
         allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
@@ -1513,18 +1525,6 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
-
-        logging:
-          colored_logging: false
-          exception_backtrace_logging: false
-          exception_diagnose_logging: false
-          file_retention_rule: 10
-          file_rotation_rule: 10 MB
-          log_level: <ALLOW_API_CONFIGURATION>
-          server_access_logging: true
-          server_log_level: info
-          server_response_debug_logging: false
-          structured_logging: false
 
         services:
           simplequeue:

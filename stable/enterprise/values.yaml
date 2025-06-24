@@ -854,6 +854,10 @@ analyzer:
   ##
   replicaCount: 1
 
+  ## @param analyzer.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
+
   ## @param analyzer.service.port The port used for gatherings metrics when .Values.metricsEnabled=true
   ## @param analyzer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
