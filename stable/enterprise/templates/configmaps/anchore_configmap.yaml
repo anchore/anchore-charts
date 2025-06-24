@@ -1,0 +1,27 @@
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+
+data:
+  config.yaml: |
+    # Anchore Service Configuration File, mounted from a configmap
+    #
+{{- if .Values.configOverride }}
+{{ tpl .Values.configOverride . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/anchore_common.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/analyzer_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/api_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/catalog_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/datasyncer_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/notifications_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/policyengine_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/reports_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/reportsworker_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get "files/simplequeue_config.yaml") . | indent 4 }}
+{{- end }}
