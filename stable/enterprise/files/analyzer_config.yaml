@@ -1,0 +1,20 @@
+services:
+  analyzer:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    cycle_timer_seconds: 1
+    cycle_timers:
+      image_analyzer: 1
+    analyzer_driver: 'nodocker'
+    layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
+    layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
+    enable_hints: ${ANCHORE_HINTS_ENABLED}
+    enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+    keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}

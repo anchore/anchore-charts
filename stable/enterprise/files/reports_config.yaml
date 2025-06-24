@@ -1,6 +1,3 @@
-logging:
-  {{- toYaml .Values.anchoreConfig.logging | nindent 2 }}
-
 services:
   reports:
     enabled: true
