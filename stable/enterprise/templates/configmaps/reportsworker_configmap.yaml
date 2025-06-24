@@ -1,0 +1,3 @@
+{{- $component := "reportsWorker" -}}
+
+{{- include "enterprise.configMap" (merge (dict "component" $component) .) -}}

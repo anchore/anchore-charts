@@ -2,8 +2,8 @@ suite: Reports Resources Tests
 templates:
   - reports_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
+  - configmaps/reports_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

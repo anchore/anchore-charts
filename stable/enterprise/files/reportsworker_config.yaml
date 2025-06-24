@@ -1,0 +1,23 @@
+services:
+  reports_worker:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
+    enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
+    data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
+    data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
+    data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+    cycle_timers: {{- toYaml .Values.anchoreConfig.reports_worker.cycle_timers | nindent 6 }}
+    runtime_report_generation:
+      use_legacy_loaders_and_queries: {{ .Values.anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries }}
+      inventory_images_by_vulnerability: true
+      vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
+      vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
+      vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}

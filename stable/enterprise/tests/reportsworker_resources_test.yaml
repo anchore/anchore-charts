@@ -1,9 +1,9 @@
-suite: Reports Resources Tests
+suite: Reports Worker Resources Tests
 templates:
   - reportsworker_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
+  - configmaps/reportsworker_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

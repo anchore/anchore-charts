@@ -2,8 +2,8 @@ suite: Datasyncer Resources Tests
 templates:
   - datasyncer_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
+  - configmaps/datasyncer_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

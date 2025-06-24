@@ -2,9 +2,9 @@ suite: API Resources Tests
 templates:
   - api_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - policybundle_configmap.yaml
   - envvars_configmap.yaml
+  - configmaps/api_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

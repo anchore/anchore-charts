@@ -854,6 +854,10 @@ analyzer:
   ##
   replicaCount: 1
 
+  ## @param analyzer.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
+
   ## @param analyzer.service.port The port used for gatherings metrics when .Values.metricsEnabled=true
   ## @param analyzer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
@@ -914,6 +918,10 @@ analyzer:
 ## @section Anchore API k8s Deployment Parameters
 #################################################
 api:
+  ## @param api.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
+
   ## @param api.replicaCount Number of replicas for Anchore API deployment
   ##
   replicaCount: 1
@@ -990,6 +998,10 @@ catalog:
   ## @param catalog.replicaCount Number of replicas for the Anchore Catalog deployment
   ##
   replicaCount: 1
+
+  ## @param catalog.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
 
   ## @param catalog.service.type Service type for Anchore Catalog
   ## @param catalog.service.port Service port for Anchore Catalog
@@ -1071,6 +1083,10 @@ dataSyncer:
   ##
   replicaCount: 1
 
+  ## @param dataSyncer.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
+
   ## @param dataSyncer.service.type Service type for Anchore DataSyncer
   ## @param dataSyncer.service.port Service port for Anchore DataSyncer
   ## @param dataSyncer.service.annotations Annotations for Anchore DataSyncer service
@@ -1151,6 +1167,10 @@ notifications:
   ##
   replicaCount: 1
 
+  ## @param notifications.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
+
   ## @param notifications.service.type Service type for Anchore Notifications
   ## @param notifications.service.port Service port for Anchore Notifications
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
@@ -1224,6 +1244,10 @@ policyEngine:
   ## @param policyEngine.replicaCount Number of replicas for the Anchore Policy Engine deployment
   ##
   replicaCount: 1
+
+  ## @param policyEngine.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
 
   ## @param policyEngine.service.type Service type for Anchore Policy Engine
   ## @param policyEngine.service.port Service port for Anchore Policy Engine
@@ -1304,6 +1328,10 @@ reports:
   ## @param reports.replicaCount Number of replicas for the Anchore Reports deployment
   ##
   replicaCount: 1
+
+  ## @param reports.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
 
   ## @param reports.service.type Service type for Anchore Reports
   ## @param reports.service.port Service port for Anchore Reports
@@ -1397,6 +1425,10 @@ reportsWorker:
   ##
   replicaCount: 1
 
+  ## @param reportsWorker.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
+
   ## @param reportsWorker.service.type Service type for Anchore Reports Worker
   ## @param reportsWorker.service.port Service port for Anchore Reports Worker
   ## @param reportsWorker.service.annotations Annotations for Anchore Reports Worker service
@@ -1470,6 +1502,10 @@ simpleQueue:
   ## @param simpleQueue.replicaCount Number of replicas for the Anchore Simple Queue deployment
   ##
   replicaCount: 1
+
+  ## @param simpleQueue.configOverride Allows for overriding the default Anchore configuration file
+  ## todo: move this under anchoreConfig ?
+  configOverride: ""
 
   ## @param simpleQueue.service.type Service type for Anchore Simple Queue
   ## @param simpleQueue.service.port Service port for Anchore Simple Queue

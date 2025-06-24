@@ -1,0 +1,3 @@
+{{- $component := "notifications" -}}
+
+{{- include "enterprise.configMap" (merge (dict "component" $component) .) -}}

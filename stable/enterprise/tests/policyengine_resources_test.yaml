@@ -1,9 +1,9 @@
-suite: Catalog Resources Tests
+suite: Policy Resources Tests
 templates:
   - policyengine_deployment.yaml
   - anchore_secret.yaml
-  - anchore_configmap.yaml
   - envvars_configmap.yaml
+  - configmaps/policyengine_configmap.yaml
 release:
   name: test-release
   namespace: test-namespace

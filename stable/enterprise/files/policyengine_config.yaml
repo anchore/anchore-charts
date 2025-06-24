@@ -1,0 +1,69 @@
+services:
+  policy_engine:
+    enabled: true
+    require_auth: true
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
+    enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+    enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
+    vulnerabilities:
+      sync:
+        enabled: true
+        ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
+        connection_timeout_seconds: 3
+        read_timeout_seconds: 60
+        data:
+          grypedb:
+            enabled: true
+      matching:
+        exclude:
+          {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
+          providers: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers | toJson }}
+          {{- else }}
+          providers: []
+          {{- end }}
+          {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types }}
+          package_types: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types | toJson }}
+          {{- else }}
+          package_types: []
+          {{- end }}
+        default:
+          search:
+            by_cpe:
+              enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+        ecosystem_specific:
+          dotnet:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+          golang:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+          java:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+          javascript:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+          python:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+          ruby:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+          stock:
+            search:
+              by_cpe:
+                # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}

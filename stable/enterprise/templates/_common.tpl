@@ -425,7 +425,7 @@ Setup the common anchore volumes
 {{- else }}
 - name: config-volume
   configMap:
-    name: {{ template "enterprise.fullname" . }}
+    name: {{ template "enterprise.fullname" . }}{{- if $component -}}-{{ $component | lower }}{{- end }}
 {{- end }}
 {{- with .Values.certStoreSecretName }}
 - name: certs

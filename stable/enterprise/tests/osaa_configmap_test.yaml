@@ -1,7 +1,6 @@
 suite: OSAA ConfigMap Tests
 templates:
   - templates/osaa_configmap.yaml
-  - templates/anchore_configmap.yaml
 set:
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []

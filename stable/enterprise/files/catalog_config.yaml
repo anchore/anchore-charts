@@ -1,0 +1,32 @@
+services:
+  catalog:
+    enabled: true
+    require_auth: true
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    listen: '0.0.0.0'
+    port: ${ANCHORE_PORT}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    account_prometheus_metrics: {{ .Values.anchoreConfig.catalog.account_prometheus_metrics }}
+    cycle_timer_seconds: 1
+    cycle_timers: {{- toYaml .Values.anchoreConfig.catalog.cycle_timers | nindent 6 }}
+    event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
+    runtime_inventory:
+      inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
+      inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+    integrations:
+      integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
+    image_gc:
+      max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+    runtime_compliance:
+      object_store_bucket: "runtime_compliance_check"
+    down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
+    import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+    sbom_vuln_scan:
+      auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
+      batch_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.batch_size }}
+      pool_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.pool_size }}
+    analysis_archive: {{- toYaml .Values.anchoreConfig.catalog.analysis_archive | nindent 6 }}
+    object_store: {{- toYaml .Values.anchoreConfig.catalog.object_store | nindent 6 }}
+    ssl_enable: ${ANCHORE_SSL_ENABLED}
+    ssl_cert: ${ANCHORE_SSL_CERT}
+    ssl_key: ${ANCHORE_SSL_KEY}
