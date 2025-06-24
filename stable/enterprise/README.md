@@ -1201,6 +1201,8 @@ extraEnv:
     value: "localhost, localhost.localdomain, 127.0.0.1, anchore.svc.cluster.local., anchore.svc.cluster.local, myobjectstore.com"
 ```
 
+Lastly, you may override the default using the domainSuffix setting in the Helm chart.
+
 ### V3.10.x
 
 - Deploys Anchore Enterprise v5.18.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5180/) for more information.
