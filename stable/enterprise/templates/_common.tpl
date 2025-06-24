@@ -120,7 +120,7 @@ When calling this template, .component can be included in the context for compon
 {{- end }}
 
 - name: ANCHORE_ENDPOINT_HOSTNAME
-  value: {{ $serviceName }}.{{- if $domainSuffix -}}{{ $domainSuffix }}{{- else -}}{{ .Release.Namespace }}.svc.cluster.local{{- end }}
+  value: {{ $serviceName }}.{{- if $domainSuffix -}}{{ $domainSuffix }}{{- else -}}{{ .Release.Namespace }}.svc.cluster.local.{{- end }}
 
   {{- with (index .Values (print $component)).service }}
 - name: ANCHORE_PORT
