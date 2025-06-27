@@ -357,7 +357,7 @@ should render the configmaps:
             data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
             data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
             data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
-            ingress_images_max_workers: 50
+            ingress_images_max_workers: 10
             cycle_timers:
               reports_extended_runtime_vuln_load: 1800
               reports_image_egress: 600
