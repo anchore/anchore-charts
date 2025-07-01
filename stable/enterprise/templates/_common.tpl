@@ -40,10 +40,10 @@ Service annotations
 {{- end -}}
 
 {{/*
-Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true
+Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true and .Values.cloudsql.useSideCar false
 */}}
 {{- define "enterprise.common.cloudsqlContainer" -}}
-{{- if and (.Values.cloudsql.enabled) (not .Values.cloudsql.useSideCar) }}
+{{- if and (.Values.cloudsql.enabled) (not .Values.cloudsql.useSideCar) -}}
 - name: cloudsql-proxy
   image: {{ .Values.cloudsql.image }}
   imagePullPolicy: {{ .Values.cloudsql.imagePullPolicy }}
@@ -71,10 +71,10 @@ Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsq
 
 
 {{/*
-Setup a sidecar container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true
+Setup a sidecar container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true and .Values.cloudsql.useSideCar
 */}}
 {{- define "enterprise.common.cloudsqlInitContainer" -}}
-{{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
+{{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) -}}
 - name: cloudsql-proxy
   image: {{ .Values.cloudsql.image }}
   imagePullPolicy: {{ .Values.cloudsql.imagePullPolicy }}

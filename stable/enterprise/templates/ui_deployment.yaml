@@ -44,7 +44,9 @@ spec:
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
       {{- end }}
       containers:
+        {{- if .Values.cloudsql.enabled }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+        {{- end }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.ui.image" . | trim }}
           imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
