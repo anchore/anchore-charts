@@ -1185,6 +1185,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### V3.11.1
+
+- Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
+
 ### V3.11.x
 
 - Deploys Anchore Enterprise v5.19.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5190/) for more information.
