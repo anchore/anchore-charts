@@ -400,15 +400,27 @@ tests:
           count: 1
           any: true
 
-  - it: should not render fixPermissionsInitContainer if use_volume isn't enabled
+  - it: should not render fixPermissionsInitContainer if use_volume isn't enabled but cloudsql sidecar is enabled
     set:
       scratchVolume.fixGroupPermissions: true
       securityContext.fsGroup: 9999
+      #anchoreConfig.reports.use_volume: true
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
     templates:
       - reports_deployment.yaml
+    documentIndex: 0
     asserts:
-      - notExists:
+      - notContains:
           path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
 
   - it: should render component extraVolumes
     template: reports_deployment.yaml
