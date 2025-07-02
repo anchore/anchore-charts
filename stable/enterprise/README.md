@@ -649,7 +649,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.18.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
@@ -765,6 +765,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.analyzer.enable_hints`                                                   | Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis                      | `false`                     |
 | `anchoreConfig.analyzer.configFile`                                                     | Custom Anchore Analyzer configuration file contents in YAML                                                                      | `{}`                        |
 | `anchoreConfig.catalog.account_prometheus_metrics`                                      | Enable per-account image status prometheus metrics.                                                                              | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.catalog.analysis_queue_priority`                                         | Allow prioritization of new analysis jobs based on the ingress method.                                                           | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.catalog.sbom_vuln_scan.auto_scale`                                       | Automatically scale batch_size and pool_size. Disable to configure manually.                                                     | `true`                      |
 | `anchoreConfig.catalog.sbom_vuln_scan.batch_size`                                       | The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled                                       | `1`                         |
 | `anchoreConfig.catalog.sbom_vuln_scan.pool_size`                                        | The number of concurrent vulnerability scans to dispatch from each catalog instance                                              | `1`                         |
@@ -788,7 +789,6 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days`                            | TTL for runtime inventory.                                                                                                       | `120`                       |
 | `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite`                    | force runtime inventory to be overwritten upon every update for that reported context.                                           | `false`                     |
 | `anchoreConfig.catalog.integrations.integration_health_report_ttl_days`                 | TTL for integration health reports.                                                                                              | `2`                         |
-| `anchoreConfig.catalog.down_analyzer_task_requeue`                                      | Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state                      | `true`                      |
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`                | List of providers to exclude from matching                                                                                       | `nil`                       |
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`            | List of package types to exclude from matching                                                                                   | `nil`                       |
 | `anchoreConfig.policy_engine.enable_user_base_image`                                    | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`                      |
@@ -798,6 +798,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.reports.async_execution_timeout`                                         | Configure how long a scheduled query must be running for before it is considered timed out                                       | `48h`                       |
 | `anchoreConfig.reports.cycle_timers.reports_scheduled_queries`                          | Interval  in seconds to check for scheduled queries that need to be run                                                          | `600`                       |
 | `anchoreConfig.reports.use_volume`                                                      | Configure the reports service to buffer report generation to disk instead of in memory                                           | `false`                     |
+| `anchoreConfig.reports_worker.ingress_images_max_workers`                               | The maximum number of concurrent threads to ingress images                                                                       | `10`                        |
 | `anchoreConfig.reports_worker.enable_data_ingress`                                      | Enable periodically syncing data into the Anchore Reports Service                                                                | `true`                      |
 | `anchoreConfig.reports_worker.enable_data_egress`                                       | Periodically remove reporting data that has been removed in other parts of system                                                | `false`                     |
 | `anchoreConfig.reports_worker.data_egress_window`                                       | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `0`                         |
@@ -824,6 +825,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.ui.custom_links`                                                         | List of up to 10 external links provided                                                                                         | `{}`                        |
 | `anchoreConfig.ui.enable_add_repositories`                                              | Specify what users can add image repositories to the Anchore UI                                                                  | `{}`                        |
 | `anchoreConfig.ui.custom_message`                                                       | Custom message to display on the login page                                                                                      | `{}`                        |
+| `anchoreConfig.ui.banners`                                                              | Provide messages that will be displayed as a banner at the top and/or bottom of the application or only the login page.          | `{}`                        |
 | `anchoreConfig.ui.log_level`                                                            | Descriptive detail of the application log output                                                                                 | `http`                      |
 | `anchoreConfig.ui.enrich_inventory_view`                                                | aggregate and include compliance and vulnerability data from the reports service.                                                | `true`                      |
 | `anchoreConfig.ui.appdb_config.native`                                                  | toggle the postgreSQL drivers used to connect to the database between the native and the NodeJS drivers.                         | `true`                      |
@@ -1044,7 +1046,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.18.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.19.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1169,6 +1171,7 @@ To restore your deployment to using your previous driver configurations:
 | `osaaMigrationJob.analysisArchiveMigration.analysis_archive` | The configuration of the catalog.analysis_archive for the dest-config.yaml                                       | `{}`                   |
 | `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                |
 | `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                   |
+| `extraManifests`                                             | List of additional manifests to be included in the chart                                                         | `[]`                   |
 
 ## Release Notes
 
@@ -1177,6 +1180,11 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.11.x
+
+- Deploys Anchore Enterprise v5.19.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5190/) for more information.
+- Adds a mechanism for adding arbitrary manifests to the helm chart so users can include all resources for the deployment within their helm values file
 
 ### V3.10.x
 

@@ -1,8 +1,8 @@
 apiVersion: v2
 name: enterprise
-version: "3.10.0"
-appVersion: "5.18.0"
-kubeVersion: 1.23.x - 1.32.x || 1.23.x-x - 1.32.x-x
+version: "3.11.0"
+appVersion: "5.19.0"
+kubeVersion: 1.23.x - 1.33.x || 1.23.x-x - 1.33.x-x
 description: |
   Anchore Enterprise is a complete container security workflow solution for professional teams. Easily integrating with CI/CD systems,
   it allows developers to bolster security without compromising velocity and enables security teams to audit and verify compliance in real-time.

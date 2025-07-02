@@ -26,6 +26,23 @@ data:
       title: '{{ .title }}'
       message: '{{ .message }}'
   {{- end }}
+  {{- with .Values.anchoreConfig.ui.banners }}
+    banners:
+      {{- with .top }}
+      top:
+        text: {{ default "" .text | quote }}
+        text_color: {{ default "" .text_color | quote}}
+        background_color: {{ default "" .background_color | quote }}
+        display: {{ default "always" .display | quote }}
+      {{- end }}
+      {{- with .bottom }}
+      bottom:
+        text: {{ default "" .text | quote }}
+        text_color: {{ default "" .text_color | quote}}
+        background_color: {{ default "" .background_color | quote }}
+        display: {{ default "always" .display | quote }}
+      {{- end }}
+  {{- end }}
   {{- with .Values.anchoreConfig.ui.enable_add_repositories }}
     enable_add_repositories:
       admin: {{ .admin }}
@@ -45,7 +62,7 @@ data:
     authentication_lock:
       count: {{ .Values.anchoreConfig.ui.authentication_lock.count }}
       expires: {{ .Values.anchoreConfig.ui.authentication_lock.expires }}
-    appdb_config: {{ toYaml .Values.anchoreConfig.ui.appdb_config | nindent 6}}
+    appdb_config: {{- toYaml .Values.anchoreConfig.ui.appdb_config | nindent 6}}
     log_level: {{ .Values.anchoreConfig.ui.log_level | squote }}
     enrich_inventory_view: {{ .Values.anchoreConfig.ui.enrich_inventory_view  }}
     enable_prometheus_metrics: {{ .Values.anchoreConfig.metrics.enabled }}
