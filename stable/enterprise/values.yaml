@@ -684,7 +684,7 @@ anchoreConfig:
 
     ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
     ##
-    ingress_images_max_workers: 50
+    ingress_images_max_workers: 10
 
     ## @param anchoreConfig.reports_worker.enable_data_ingress Enable periodically syncing data into the Anchore Reports Service
     ##
