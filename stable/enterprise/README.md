@@ -649,7 +649,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.1` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
