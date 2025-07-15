@@ -1182,6 +1182,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### V3.12.x
+
+- Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
+- Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
+- Increased analysis & malware scanning timeout configuration.
+
 ### V3.11.x
 
 - Deploys Anchore Enterprise v5.19.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5190/) for more information.
