@@ -700,6 +700,7 @@ To restore your deployment to using your previous driver configurations:
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                   |
 | `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                   |
 | `domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".        | `""`                                   |
+| `dnsConfig.ndots`                       | ndots value for the DNS config                                                                                                     | `2`                                    |
 
 ### Anchore Configuration Parameters
 

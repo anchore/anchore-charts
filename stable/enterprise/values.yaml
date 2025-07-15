@@ -261,6 +261,12 @@ scripts:
 ##
 domainSuffix: ""
 
+## @param dnsConfig.ndots ndots value for the DNS config
+## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-config
+##
+dnsConfig:
+  ndots: 2
+
 #####################################################################
 ## @section Anchore Configuration Parameters
 ## Params used for all Anchore Enterprise service configuration files
