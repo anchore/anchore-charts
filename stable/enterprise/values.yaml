@@ -535,7 +535,7 @@ anchoreConfig:
           enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
           # Maximum time in milliseconds that a ClamAV scan is allowed to run
-          max_scan_time: 180000
+          max_scan_time: 1800000
 
   catalog:
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
