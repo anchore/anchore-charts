@@ -352,7 +352,7 @@ tolerations: {{- toYaml . | nindent 2 }}
 dnsConfig:
   options:
     - name: ndots
-      value: {{- .Values.dnsConfig.ndots | quote }}
+      value: {{ .Values.dnsConfig.ndots | quote }}
 {{- end -}}
 
 
