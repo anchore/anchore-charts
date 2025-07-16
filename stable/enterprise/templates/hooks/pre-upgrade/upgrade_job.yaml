@@ -39,8 +39,9 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
-      {{- if eq (include "enterprise.appVersionChanged" .) "true" }}
+      {{- if or (eq (include "enterprise.appVersionChanged" .) "true") (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar)) }}
       initContainers:
+      {{- if eq (include "enterprise.appVersionChanged" .) "true" }}
         - name: scale-down-anchore
           image: {{ include "enterprise.kubectl.image" . | trim }}
           command: ["/bin/bash", "-c"]
@@ -85,11 +86,11 @@ spec:
           {{- with .Values.upgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- end }}
+          {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
       {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
-      {{- end }}
         - name: upgrade-enterprise-db
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
