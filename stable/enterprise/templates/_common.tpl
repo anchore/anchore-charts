@@ -349,6 +349,10 @@ topologySpreadConstraints: {{- toYaml . | nindent 2 }}
 {{- with (default .Values.tolerations (index .Values (print $component)).tolerations) }}
 tolerations: {{- toYaml . | nindent 2 }}
 {{- end }}
+dnsConfig:
+  options:
+    - name: ndots
+      value: {{ .Values.dnsConfig.ndots | quote }}
 {{- end -}}
 
 

@@ -649,7 +649,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.1` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
@@ -700,6 +700,7 @@ To restore your deployment to using your previous driver configurations:
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                   |
 | `scripts`                               | Collection of helper scripts usable in all anchore enterprise pods                                                                 | `{}`                                   |
 | `domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local".        | `""`                                   |
+| `dnsConfig.ndots`                       | ndots value for the DNS config                                                                                                     | `2`                                    |
 
 ### Anchore Configuration Parameters
 
@@ -1180,6 +1181,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.12.x
+
+- Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
+- Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
+- Increased analysis & malware scanning timeout configuration.
 
 ### V3.11.x
 

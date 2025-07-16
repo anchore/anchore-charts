@@ -8,7 +8,7 @@ should render the configmaps:
           clamav:
             db_update_enabled: true
             enabled: <ALLOW_API_CONFIGURATION>
-            max_scan_time: 180000
+            max_scan_time: 1800000
         retrieve_files:
           file_list:
           - /etc/passwd
@@ -466,7 +466,7 @@ should render the configmaps:
       ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
       ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
       ANCHORE_HINTS_ENABLED: "false"
-      ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "3600"
+      ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "36000"
       ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
       ANCHORE_INTERNAL_SSL_VERIFY: "false"
       ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"

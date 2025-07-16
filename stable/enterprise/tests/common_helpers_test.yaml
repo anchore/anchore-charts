@@ -442,6 +442,20 @@ tests:
           path: spec.template.spec.imagePullSecrets[0].name
           value: mysecret
 
+  - it: should render proper dnsConfig when ndots is set
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      dnsConfig:
+        ndots: 5
+    asserts:
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].name
+          value: ndots
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].value
+          value: "5"
+
   - it: should render container security contexts
     set:
       containerSecurityContext.runAsUser: 9999
