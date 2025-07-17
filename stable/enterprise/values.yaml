@@ -1766,7 +1766,7 @@ cloudsql:
 
   ## @param cloudsql.image Image to use for GCE CloudSQL Proxy
   ##
-  image: gcr.io/cloudsql-docker/gce-proxy:1.25.0
+  image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
 
   ## @param cloudsql.imagePullPolicy Image Pull Policy to use for CloudSQL image
   ##
