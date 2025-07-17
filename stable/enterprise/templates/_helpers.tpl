@@ -2,10 +2,10 @@
 Create database hostname string from supplied values file. Used for setting the ANCHORE_DB_HOST env var in the UI & Engine secret.
 */}}
 {{- define "enterprise.dbHostname" }}
-  {{- if and (index .Values "postgresql" "externalEndpoint") (not (index .Values "postgresql" "enabled")) }}
+  {{- if (index .Values "postgresql" "externalEndpoint") }}
     {{- print ( index .Values "postgresql" "externalEndpoint" ) }}
-  {{- else if and (index .Values "cloudsql" "enabled") (not (index .Values "postgresql" "enabled")) }}
-    {{- print "localhost" }}
+  {{- else if and (index .Values "cloudsql" "enabled") }}
+    {{- print "127.0.0.1" }}
   {{- else }}
     {{- $db_host := include "postgres.fullname" . }}
     {{- printf "%s" $db_host -}}
