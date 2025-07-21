@@ -247,8 +247,6 @@ postgresql:
   auth.password: <CLOUDSQL-PASSWORD>
   auth.username: <CLOUDSQL-USER>
   auth.database: <CLOUDSQL-DATABASE>
-  # If you have dual-stack IPv4 & IPv6 enabled then set externalEndpoint to 127.0.0.1 instead of localhost
-  externalEndpoint: "127.0.0.1"
 
 cloudsql:
   enabled: true
