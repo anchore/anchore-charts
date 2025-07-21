@@ -404,8 +404,10 @@ tests:
     set:
       scratchVolume.fixGroupPermissions: true
       securityContext.fsGroup: 9999
+      anchoreConfig.reports.use_volume: false
     templates:
       - reports_deployment.yaml
+    documentIndex: 0
     asserts:
       - notExists:
           path: spec.template.spec.initContainers
@@ -603,3 +605,216 @@ tests:
                     app: foobar
                 matchLabelKeys:
                   - pod-template-hash
+
+  - it: should not render fixPermissionsInitContainer if use_volume isn't enabled but should still render the init container if cloudsql sidecar is enabled
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+      anchoreConfig.reports.use_volume: false
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+    templates:
+      - reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
+      - exists:
+          path: spec.template.spec.initContainers
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+
+  - it: should render init container but not fix permissions when cloudsql sidecar is enabled but fixGroupPermissions and use_volume are disabled
+    set:
+      scratchVolume.fixGroupPermissions: false
+      anchoreConfig.reports.use_volume: false
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+    templates:
+      - reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
+      - exists:
+          path: spec.template.spec.initContainers
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+
+  - it: should render init container but not fix permissions when cloudsql sidecar and fixGroupPermissions are enabled but use_volume is disabled
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+      anchoreConfig.reports.use_volume: false
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+    templates:
+      - reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
+      - exists:
+          path: spec.template.spec.initContainers
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+
+  - it: should render init container and fix permissions when cloudsql sidecar, fixGroupPermissions, and use_volume are all enabled
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+      anchoreConfig.reports.use_volume: true
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+    templates:
+      - reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
+      - exists:
+          path: spec.template.spec.initContainers
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+
+  - it: should render fixPermissionsInitContainer when cloudsql sidecar is disabled but fixGroupPermissions and use_volume are enabled
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+      anchoreConfig.reports.use_volume: true
+      cloudsql.enabled: false
+      cloudsql.useSideCar: false
+    templates:
+      - reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
+      - exists:
+          path: spec.template.spec.initContainers
+      - notContains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+
+  - it: should not render init container when cloudsql sidecar and use_volume are disabled but fixGroupPermissions is enabled
+    set:
+      scratchVolume.fixGroupPermissions: true
+      securityContext.fsGroup: 9999
+      anchoreConfig.reports.use_volume: false
+      cloudsql.enabled: false
+      cloudsql.useSideCar: false
+    templates:
+      - reports_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers

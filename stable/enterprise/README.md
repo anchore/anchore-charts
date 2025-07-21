@@ -249,6 +249,8 @@ postgresql:
 cloudsql:
   enabled: true
   instance: "project:zone:instancename"
+  # If using Kubernetes v1.29+ (i.e. sidecar support in your cluster) set useSideCar true
+  useSideCar: true
   # Optional existing service account secret to use. See https://cloud.google.com/sql/docs/postgres/authentication
   useExistingServiceAcc: true
   # If using an existing Service Account, you must create a secret (named my_service_acc in the example below)
@@ -1181,6 +1183,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.12.1
+
+- Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
 
 ### V3.12.x
 
