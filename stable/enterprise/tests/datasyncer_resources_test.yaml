@@ -177,7 +177,6 @@ tests:
     documentIndex: 0
     set:
       cloudsql.enabled: true
-      cloudsql.useSideCar: false
     asserts:
       - equal:
           path: spec.template.spec.containers[0].name
