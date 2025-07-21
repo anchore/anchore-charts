@@ -249,6 +249,32 @@ tests:
           count: 1
           any: true
 
+  - it: should render clouddsql init container for all deployments and default upgrade job
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+          count: 1
+          any: true
+
   - it: should render clouddsql container and extraArgs for all deployments and default upgrade job
     templates: *test_templates
     documentIndex: 0
@@ -274,6 +300,35 @@ tests:
             - "myExtraArg"
             - "myOtherExtraArg"
           count: 1
+
+  - it: should render clouddsql init container and extraArgs for all deployments and default upgrade job
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+      cloudsql.extraArgs:
+        - myExtraArg
+        - myOtherExtraArg
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+              - myExtraArg
+              - myOtherExtraArg
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
 
   - it: should render clouddsql container, additional arg, and volumeMount when useExistingServiceAcc is true for all deployments and default upgrade job
     templates: *test_templates
@@ -307,6 +362,70 @@ tests:
             name: "cloudsqlServiceAccSecretName"
             readOnly: true
           count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: "cloudsqlServiceAccSecretName"
+            secret:
+              secretName: "cloudsqlServiceAccSecretName"
+          count: 1
+
+
+  - it: should render clouddsql init container, additional arg, and volumeMount when useExistingServiceAcc is true for all deployments and default upgrade job
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+      cloudsql.extraArgs:
+        - myExtraArg
+        - myOtherExtraArg
+      cloudsql.useExistingServiceAcc: true
+      cloudsql.serviceAccSecretName: cloudsqlServiceAccSecretName
+      cloudsql.serviceAccJsonName: cloudsqlServiceAccJsonName
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+              - myExtraArg
+              - myOtherExtraArg
+              - -credential_file=/var/cloudsqlServiceAccSecretName/cloudsqlServiceAccJsonName
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            livenessProbe:
+              failureThreshold: 6
+              httpGet:
+                path: /liveness
+                port: cloudsql-proxy
+                scheme: HTTP
+              initialDelaySeconds: 120
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+            startupProbe:
+              failureThreshold: 3
+              httpGet:
+                path: /startup
+                port: cloudsql-proxy
+                scheme: HTTP
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10
+            volumeMounts:
+              - mountPath: /var/cloudsqlServiceAccSecretName
+                name: cloudsqlServiceAccSecretName
+                readOnly: true
       - contains:
           path: spec.template.spec.volumes
           content:
