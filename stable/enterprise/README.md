@@ -651,7 +651,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.1` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.2` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
@@ -1110,9 +1110,10 @@ To restore your deployment to using your previous driver configurations:
 | Name                             | Description                                                                    | Value                                     |
 | -------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------- |
 | `cloudsql.enabled`               | Use CloudSQL proxy container for GCP database access                           | `false`                                   |
-| `cloudsql.image`                 | Image to use for GCE CloudSQL Proxy                                            | `gcr.io/cloudsql-docker/gce-proxy:1.25.0` |
+| `cloudsql.image`                 | Image to use for GCE CloudSQL Proxy                                            | `gcr.io/cloudsql-docker/gce-proxy:1.37.8` |
 | `cloudsql.imagePullPolicy`       | Image Pull Policy to use for CloudSQL image                                    | `IfNotPresent`                            |
 | `cloudsql.instance`              | CloudSQL instance, eg: 'project:zone:instancename'                             | `""`                                      |
+| `cloudsql.useSideCar`            | Run cloudsql proxy as a sidecar                                                | `false`                                   |
 | `cloudsql.useExistingServiceAcc` | Use existing service account                                                   | `false`                                   |
 | `cloudsql.serviceAccSecretName`  |                                                                                | `""`                                      |
 | `cloudsql.serviceAccJsonName`    |                                                                                | `""`                                      |
@@ -1184,19 +1185,23 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-### V3.12.1
-
-- Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
-
 ### V3.12.x
 
-- Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
-- Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
-- Increased analysis & malware scanning timeout configuration.
+- Deploys Anchore Enterprise v5.19.x.
+  #### V3.12.2
+  - Deploys Anchore Enterprise v5.19.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5192/) for more information.
+
+  #### V3.12.1
+  - Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
+
+  #### V3.12.0
+  - Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
+  - Increased analysis & malware scanning timeout configuration.
+  - Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
 
 ### V3.11.x
 
-- Deploys Anchore Enterprise v5.19.x. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5190/) for more information.
+- Deploys Anchore Enterprise v5.19.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5190/) for more information.
 - Adds a mechanism for adding arbitrary manifests to the helm chart so users can include all resources for the deployment within their helm values file
 
 ### V3.10.x
