@@ -1200,3 +1200,33 @@ tests:
       - equal:
           path: spec.template.spec.dnsConfig.options[0].value
           value: "5"
+  - it: should render the service level server config if set (enterprise.anchoreConfig.anchoreService.server)
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        policy_engine:
+          server:
+            process_worker_count: 453
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "server:\\s*\\n\\s*process_worker_count: 453"
+          # this matches:
+          # server:
+          #   process_worker_count: 453
+
+  - it: should render the service level server config as {} if not set (enterprise.anchoreConfig.anchoreService.server)
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    # default value is {}, so this is equivalent to
+    # set:
+    #   anchoreConfig:
+    #     policy_engine:
+    #       server: {}
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "server: {}"
+          # this matches:
+          # server: {}
