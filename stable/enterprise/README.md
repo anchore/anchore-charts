@@ -795,6 +795,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`                | List of providers to exclude from matching                                                                                       | `nil`                       |
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`            | List of package types to exclude from matching                                                                                   | `nil`                       |
 | `anchoreConfig.policy_engine.enable_user_base_image`                                    | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`                      |
+| `anchoreConfig.policy_engine.server`                                                    | Configuration for the policy engine server                                                                                       | `{}`                        |
 | `anchoreConfig.notifications.cycle_timers.notifications`                                | Interval that notifications are sent                                                                                             | `30`                        |
 | `anchoreConfig.notifications.ui_url`                                                    | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`                        |
 | `anchoreConfig.reports.enable_graphiql`                                                 | Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations                                                     | `true`                      |
@@ -1184,6 +1185,15 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.14.x (tentative)
+  #### V3.14.0
+  - Deploys Anchore Enterprise v5.21.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5210/) for more information.
+  - Add anchoreConfig.policy_engine.server for server config of policy engine.
+
+### V3.13.x (tentative)
+  #### V3.13.0
+  - Deploys Anchore Enterprise v5.20.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5200/) for more information.
 
 ### V3.12.x
 

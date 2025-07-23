@@ -651,6 +651,9 @@ anchoreConfig:
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
 
+    ## @param anchoreConfig.policy_engine.server [object] Configuration for the policy engine server
+    server: {}
+
   notifications:
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
     ##
