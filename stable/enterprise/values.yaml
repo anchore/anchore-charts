@@ -656,6 +656,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
     nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
+    ## @param anchoreConfig.policy_engine.server [object] Configuration for the policy engine server
+    server: {}
 
   notifications:
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
