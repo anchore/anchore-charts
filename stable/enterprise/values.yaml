@@ -1738,10 +1738,12 @@ ingress:
   apiHosts: []
 
   ## @param ingress.apiPaths The path used for accessing the Anchore API
+  ## the /exp/ route is required for Anchore STIG features
   ##
   apiPaths:
     - /v2/
     - /version/
+    - /exp/
 
   ## @param ingress.uiHosts List of custom hostnames for the Anchore UI
   ##
