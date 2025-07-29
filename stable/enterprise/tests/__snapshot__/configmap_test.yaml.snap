@@ -401,13 +401,6 @@ should render the configmaps:
             port: ${ANCHORE_PORT}
             auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
             upload_dir: /analysis_scratch
-            datasets:
-              vulnerability_db:
-                versions: ["5"]
-              clamav_db:
-                versions: ["1"]
-              kev_db:
-                versions: ["1"]
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
