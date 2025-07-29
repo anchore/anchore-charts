@@ -21,10 +21,10 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.19.2
+image: docker.io/anchore/enterprise:v5.20.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.19.0"
+  # tag: "v5.20.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -650,6 +650,9 @@ anchoreConfig:
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
+
+    ## @param anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
+    nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
 
   notifications:
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
@@ -1550,10 +1553,10 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.19.0
+  image: docker.io/anchore/enterprise-ui:v5.20.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.19.0"
+    # tag: "v5.20.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image

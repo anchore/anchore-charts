@@ -263,6 +263,7 @@ services:
               by_cpe:
                 # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                 enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+    nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
