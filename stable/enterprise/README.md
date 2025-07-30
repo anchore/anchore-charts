@@ -651,7 +651,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.19.2` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
@@ -795,6 +795,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers`                | List of providers to exclude from matching                                                                                       | `nil`                       |
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`            | List of package types to exclude from matching                                                                                   | `nil`                       |
 | `anchoreConfig.policy_engine.enable_user_base_image`                                    | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`                      |
+| `anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss`                            | Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable                         | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.notifications.cycle_timers.notifications`                                | Interval that notifications are sent                                                                                             | `30`                        |
 | `anchoreConfig.notifications.ui_url`                                                    | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`                        |
 | `anchoreConfig.reports.enable_graphiql`                                                 | Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations                                                     | `true`                      |
@@ -1049,7 +1050,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.19.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.20.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1184,6 +1185,32 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.13.x
+
+- Deploys Anchore Enterprise v5.20.x.
+  #### V3.13.0
+  - Deploys Anchore Enterprise v5.20.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5200/) for more information.
+- :warning: **WARNING:** Upcoming values file changes necessary:
+  - **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the dependent helm chart for postgres and redis. The following values will need to be changed to use their legacy image repo if you are using the dependent postgres and redis charts - which will not receive any further updates post August 28th, 2025**:
+    - `postgresql.image.repository`
+    - `ui-redis.image.repository`
+    ```yaml
+    postgresql:
+      image:
+        repository: bitnamilegacy/postgresql
+        registry: docker.io
+        tag: 13.11.0-debian-11-r15
+        pullSecrets:
+          - anchore-enterprise-pullcreds
+    ui-redis:
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/redis
+        tag: 7.0.12-debian-11-r0
+        pullSecrets:
+          - anchore-enterprise-pullcreds
+    ```
 
 ### V3.12.x
 
