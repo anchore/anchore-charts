@@ -15,7 +15,7 @@ replicaCount: 1
 image:
   pullPolicy: "IfNotPresent"
   repository: "anchore/k8s-inventory"
-  tag: "v1.7.6"
+  tag: "v1.7.7"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
@@ -269,8 +269,10 @@ k8sInventory:
 
   ## k8sInventory.inventoryReportLimits Specify size limits of individual reports. If report size exceeds limits it will be broken into multiple batches up to the specified size.
   ## @param k8sInventory.inventoryReportLimits.namespaces Maximum number of namespaces to include in a single report. Default of 0 means no limit
+  ## @param k8sInventory.inventoryReportLimits.payload-threshold-bytes default of 0 means no limit per report
   inventoryReportLimits:
     namespaces: 0
+    payloadThresholdBytes: 0
 
   ## @param k8sInventory.anchore.url the url of the anchore platform
   ## @param k8sInventory.anchore.user the username of the anchore platform. The user specified should have the inventory-agent RBAC permissions but could also be admin full-control, or read-write
