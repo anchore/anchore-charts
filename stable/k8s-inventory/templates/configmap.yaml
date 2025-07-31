@@ -50,6 +50,7 @@ data:
       ignore-namespace-missing-label: {{ .Values.k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel }}
     inventory-report-limits:
       namespaces: {{ .Values.k8sInventory.inventoryReportLimits.namespaces }}
+      payload-threshold-bytes: {{ .Values.k8sInventory.inventoryReportLimits.payloadThresholdBytes }}
     metadata-collection:
       nodes:
         annotations: {{ .Values.k8sInventory.metadataCollection.nodes.annotations }}
