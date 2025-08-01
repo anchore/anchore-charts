@@ -1211,6 +1211,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
         pullSecrets:
           - anchore-enterprise-pullcreds
     ```
+    - This is a temporary workaround while we review options on how to proceed with these dependencies
 
 ### V3.12.x
 
