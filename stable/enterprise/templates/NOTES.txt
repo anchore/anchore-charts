@@ -46,5 +46,6 @@ The following values changes will be needed to use their legacy image repo if yo
   postgresql.image.repository=bitnamilegacy/postgresql
   ui-redis.image.repository=bitnamilegacy/redis
 
+This is a temporary workaround while we review options on how to proceed with these dependencies
 ******************
 {{ end }}
