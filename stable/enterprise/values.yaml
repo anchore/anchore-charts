@@ -1550,7 +1550,7 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.19.0
+  image: docker.io/anchore/enterprise-ui:v5.19.1
     # registry: docker.io
     # repository: anchore/enterprise-ui
     # tag: "v5.19.0"
