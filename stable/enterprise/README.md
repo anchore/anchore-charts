@@ -1049,7 +1049,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.19.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.19.1` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1188,6 +1188,9 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### V3.12.x
 
 - Deploys Anchore Enterprise v5.19.x.
+  #### V3.12.3
+  - Deploys Anchore Enterprise UI v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5191/) for more information.
+
   #### V3.12.2
   - Deploys Anchore Enterprise v5.19.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5192/) for more information.
 
