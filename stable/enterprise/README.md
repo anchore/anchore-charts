@@ -651,7 +651,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.1` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
@@ -1094,17 +1094,17 @@ To restore your deployment to using your previous driver configurations:
 
 ### Ingress Parameters
 
-| Name                       | Description                                                        | Value                  |
-| -------------------------- | ------------------------------------------------------------------ | ---------------------- |
-| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`                |
-| `ingress.labels`           | Labels for the ingress resource                                    | `{}`                   |
-| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`                   |
-| `ingress.apiHosts`         | List of custom hostnames for the Anchore API                       | `[]`                   |
-| `ingress.apiPaths`         | The path used for accessing the Anchore API                        | `["/v2/","/version/"]` |
-| `ingress.uiHosts`          | List of custom hostnames for the Anchore UI                        | `[]`                   |
-| `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`                    |
-| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                   |
-| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                |
+| Name                       | Description                                                        | Value                          |
+| -------------------------- | ------------------------------------------------------------------ | ------------------------------ |
+| `ingress.enabled`          | Create an ingress resource for external Anchore service APIs       | `false`                        |
+| `ingress.labels`           | Labels for the ingress resource                                    | `{}`                           |
+| `ingress.annotations`      | Annotations for the ingress resource                               | `{}`                           |
+| `ingress.apiHosts`         | List of custom hostnames for the Anchore API                       | `[]`                           |
+| `ingress.apiPaths`         | The path used for accessing the Anchore API                        | `["/v2/","/version/","/exp/"]` |
+| `ingress.uiHosts`          | List of custom hostnames for the Anchore UI                        | `[]`                           |
+| `ingress.uiPath`           | The path used for accessing the Anchore UI                         | `/`                            |
+| `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                           |
+| `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                        |
 
 ### Google CloudSQL DB Parameters
 
