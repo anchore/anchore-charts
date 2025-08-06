@@ -1190,11 +1190,15 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 - Deploys Anchore Enterprise v5.20.x.
   #### V3.13.0
-  - Deploys Anchore Enterprise v5.20.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5200/) for more information.
+  - Deploys Anchore Enterprise v5.20.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5201/) for more information.
 - :warning: **WARNING:** Upcoming values file changes necessary:
-  - **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the dependent helm chart for postgres and redis. The following values will need to be changed to use their legacy image repo if you are using the dependent postgres and redis charts - which will not receive any further updates post August 28th, 2025**:
+  - **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025**:
     - `postgresql.image.repository`
     - `ui-redis.image.repository`
+    - `kubectlImage`
+    - `upgradeJob.kubectlImage`
+    - `osaaMigrationJob.kubectlImage`
+
     ```yaml
     postgresql:
       image:
@@ -1210,6 +1214,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
         tag: 7.0.12-debian-11-r0
         pullSecrets:
           - anchore-enterprise-pullcreds
+    kubectlImage: bitnamilegacy/kubectl:1.30
+    upgradeJob:
+      kubectlImage: bitnamilegacy/kubectl:1.30
+    osaaMigrationJob:
+      kubectlImage: bitnamilegacy/kubectl:1.30
+    
     ```
     - This is a temporary workaround while we review options on how to proceed with these dependencies
 
