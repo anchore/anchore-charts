@@ -26,7 +26,7 @@ migration job should match snapshot:
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -93,7 +93,7 @@ migration job should match snapshot:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -152,7 +152,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -219,7 +219,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -276,7 +276,7 @@ migration job should match snapshot analysisArchiveMigration to true:
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -343,7 +343,7 @@ migration job should match snapshot analysisArchiveMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -399,7 +399,7 @@ migration job should match snapshot objectStoreMigration to true:
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -466,7 +466,7 @@ migration job should match snapshot objectStoreMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.19.2
+        image: docker.io/anchore/enterprise:v5.20.1
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -637,6 +637,6 @@ should render proper initContainers:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-      image: docker.io/anchore/enterprise:v5.19.2
+      image: docker.io/anchore/enterprise:v5.20.1
       imagePullPolicy: IfNotPresent
       name: wait-for-db
