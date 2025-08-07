@@ -324,7 +324,7 @@ anchoreConfig:
   ##
   audit:
     enabled: true
-    additionalResourceURIs: {}
+    additionalResourceURIs: []
       # - "/images"
 
   ## @param anchoreConfig.allow_awsecr_iam_auto Enable AWS IAM instance role for ECR auth
