@@ -12,6 +12,30 @@ Create database hostname string from supplied values file. Used for setting the 
   {{- end }}
 {{- end }}
 
+{{/* enterprise.defaultAuditResourceURIs */}}
+{{- define "enterprise.defaultAuditResourceURIs" -}}
+- "/accounts"
+- "/accounts/{account_name}"
+- "/accounts/{account_name}/state"
+- "/accounts/{account_name}/users"
+- "/accounts/{account_name}/users/{username}"
+- "/accounts/{account_name}/users/{username}/api-keys"
+- "/accounts/{account_name}/users/{username}/api-keys/{key_name}"
+- "/accounts/{account_name}/users/{username}/credentials"
+- "/rbac-manager/roles"
+- "/rbac-manager/roles/{role_name}/members"
+- "/rbac-manager/saml/idps"
+- "/rbac-manager/saml/idps/{name}"
+- "/rbac-manager/saml/idps/{name}/user-group-mappings"
+- "/system/user-groups"
+- "/system/user-groups/{group_uuid}"
+- "/system/user-groups/{group_uuid}/roles"
+- "/system/user-groups/{group_uuid}/users"
+- "/user/api-keys"
+- "/user/api-keys/{key_name}"
+- "/user/credentials"
+{{- end }}
+
 
 {{/*
 Return Anchore default admin password

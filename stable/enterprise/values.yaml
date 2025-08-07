@@ -320,9 +320,12 @@ anchoreConfig:
     timeout_keep_alive: 5
 
   ## @param anchoreConfig.audit.enabled Enable audit logging
+  ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
   ##
   audit:
     enabled: true
+    additionalResourceURIs: {}
+      # - "/images"
 
   ## @param anchoreConfig.allow_awsecr_iam_auto Enable AWS IAM instance role for ECR auth
   ## When set, if a registry credential username is set to 'iamauto' for an ecr registry, the engine will
