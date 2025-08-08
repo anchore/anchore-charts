@@ -8,9 +8,9 @@
 replicaCount: 1
 
 ## @param image Image used for all Ecs Inventory deployment deployments
-## use docker.io/anchore/ecs-inventory:v1.3.3-fips-amd64 if you want an image built for fips use
+## use docker.io/anchore/ecs-inventory:v1.3.4-fips-amd64 if you want an image built for fips use
 ##
-image: "docker.io/anchore/ecs-inventory:v1.3.3"
+image: "docker.io/anchore/ecs-inventory:v1.3.4"
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
