@@ -1192,7 +1192,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   #### V3.13.0
   - Deploys Anchore Enterprise v5.20.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5201/) for more information.
 - :warning: **WARNING:** Upcoming values file changes necessary:
-  - **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025**:
+  - **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025. This is a temporary workaround while we review options on how to proceed with these dependencies:**
     - `postgresql.image.repository`
     - `ui-redis.image.repository`
     - `kubectlImage`
@@ -1221,7 +1221,6 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
       kubectlImage: bitnamilegacy/kubectl:1.30
     
     ```
-    - This is a temporary workaround while we review options on how to proceed with these dependencies
 
 ### V3.12.x
 
