@@ -418,6 +418,32 @@ anchoreConfig:
 
 For those using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/developer/getting-started.md), a ServiceMonitor can be deployed within the same namespace as your Anchore Enterprise release. Once deployed, the Prometheus operator will automatically begin scraping the pre-configured endpoints for metrics.
 
+#### Built-in Prometheus (optional)
+
+This chart can optionally deploy the community Prometheus chart and setup a ConfigMap containing a working prometheus.yml with a scalable scrape config for Anchore Enterprise and common Kubernetes targets.
+
+- Toggle with `prometheus.chartEnabled` (default: `false`).
+- The ConfigMap name defaults to `<release-name>-enterprise-prometheus-config` and can be overridden with `prometheus.server.configMapOverrideName`.
+- To have Prometheus use that ConfigMap, set `serverFiles` via the subchart or set `prometheus.server.configMapOverrideName` to the same name used by the generated ConfigMap.
+- You must enable the Anchore metrics endpoint as shown above for services to export metrics.
+
+Minimal example to enable metrics and the bundled Prometheus:
+
+```yaml
+anchoreConfig:
+  metrics:
+    enabled: true
+    auth_disabled: true
+
+prometheus:
+  chartEnabled: true
+```
+
+Notes:
+
+- The generated prometheus.yml autodiscovers Anchore Enterprise pods and maps each component to its metrics port, and sets `__metrics_path__` to `/metrics`.
+- If you set a custom `configMapOverrideName`, ensure it matches both the generated ConfigMap and the Prometheus subchart setting so the server picks it up.
+
 #### Example ServiceMonitor Configuration
 
 The `targetPort` values in this example use the default Anchore Enterprise service ports.

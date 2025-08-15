@@ -1916,6 +1916,102 @@ postgresql:
       - anchore-enterprise-pullcreds
 
 ########################################################################################
+################################################################################
+## @section Optional Prometheus Monitoring for Anchore Enterprise
+## Built-in Prometheus monitoring with defaults for Anchore Enterprise
+################################################################################
+
+## @param prometheus.chartEnabled Enable Prometheus monitoring for Anchore Enterprise
+## @param prometheus.alertmanager.enabled Enable Alertmanager for alert management
+## @param prometheus.server.retention Data retention period for Prometheus
+## @param prometheus.server.retentionSize Maximum storage size for Prometheus data
+## @param prometheus.server.service.type Kubernetes service type for Prometheus
+## @param prometheus.server.persistentVolume.enabled Enable persistent storage for Prometheus
+## @param prometheus.server.persistentVolume.size Storage size for Prometheus persistent volume
+## @param prometheus.prometheus-node-exporter.enabled Enable node-exporter for node metrics
+## @param prometheus.kube-state-metrics.enabled Enable kube-state-metrics for cluster metrics
+## @param prometheus.prometheus-pushgateway.enabled Enable pushgateway for custom metrics
+prometheus:
+  chartEnabled: false
+
+  # Disable alertmanager by default
+  alertmanager:
+    enabled: false
+
+  # Server configuration defaults for Anchore monitoring
+  server:
+    # Config map override
+    configMapOverrideName: "anchore-enterprise-prometheus-config"
+
+    # Storage and retention settings
+    retention: "14d"
+    retentionSize: "8GB"
+
+    # Service configuration - internal only by default
+    service:
+      type: ClusterIP
+
+    # Persistent storage configuration  
+    persistentVolume:
+      enabled: true
+      size: 10Gi
+      
+  # The chart includes defaults for Anchore services with ports and intervals set
+
+  # Enable supporting components - users can disable if not needed
+  prometheus-node-exporter:
+    enabled: true
+
+  # Enable cluster monitoring
+  kube-state-metrics:
+    enabled: true
+
+  # Enable pushgateway for custom metrics
+  prometheus-pushgateway:
+    enabled: true
+    persistence:
+      ## @param server.persistence.enabled Enable persistence using Persistent Volume Claims. If you have multiple instances (server.repicacount > 1), please considere using an external storage service like Thanos or Grafana Mimir
+      ##
+      enabled: false
+      ## @param server.persistence.mountPath Path to mount the volume at.
+      ##
+      mountPath: /bitnami/prometheus/data
+      ## @param server.persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+      ##
+      subPath: ""
+      ## @param server.persistence.storageClass Storage class of backing PVC
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      storageClass: ""
+      ## @param server.persistence.annotations Persistent Volume Claim annotations
+      ##
+      annotations: {}
+      ## @param server.persistence.accessModes Persistent Volume Access Modes
+      ##
+      accessModes:
+        - ReadWriteOnce
+      ## @param server.persistence.size Size of data volume
+      ##
+      size: 10Gi
+      ## @param server.persistence.existingClaim The name of an existing PVC to use for persistence
+      ##
+      existingClaim: ""
+      ## @param server.persistence.selector Selector to match an existing Persistent Volume for Prometheus data PVC
+      ## If set, the PVC can't have a PV dynamically provisioned for it
+      ## E.g.
+      ## selector:
+      ##   matchLabels:
+      ##     app: my-app
+      ##
+      selector: {}
+      ## @param server.persistence.dataSource Custom PVC data source
+      ##
+      dataSource: {}
+########################################################################################
 ## @section Anchore Object Store and Analysis Archive Migration
 ## Migration job uses a Helm pre-install-hook to ensure all pods are
 ## scaled down before running the migration job

@@ -1,0 +1,212 @@
+---
+suite: Prometheus Config Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+values:
+  - values.yaml
+
+tests:
+  - it: does not render when prometheus is disabled
+    set:
+      prometheus.chartEnabled: false
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a ConfigMap when prometheus is enabled
+    set:
+      prometheus.chartEnabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: test-release-anchore-enterprise-prometheus-config
+      - equal:
+          path: metadata.namespace
+          value: test-namespace
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: prometheus-config
+      - exists:
+          path: data["prometheus.yml"]
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +prometheus'
+
+  - it: uses override name when provided
+    set:
+      prometheus.chartEnabled: true
+      prometheus.server.configMapOverrideName: custom-cm-name
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-release-custom-cm-name
+
+  - it: contains anchore-enterprise scrape job and port mappings
+    set:
+      prometheus.chartEnabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +anchore-enterprise'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'regex: +test-release-enterprise'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8228'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8082'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8084'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:3000'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +/metrics'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'regex: +.*anchore-scripts'
+
+  - it: includes node-exporter and kube-state-metrics jobs when enabled
+    set:
+      prometheus.chartEnabled: true
+      prometheus.prometheus-node-exporter.enabled: true
+      prometheus.kube-state-metrics.enabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +node-exporter'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +kube-state-metrics'
+
+  - it: omits node-exporter and kube-state-metrics when disabled
+    set:
+      prometheus.chartEnabled: true
+      prometheus.prometheus-node-exporter.enabled: false
+      prometheus.kube-state-metrics.enabled: false
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - notMatchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +node-exporter'
+      - notMatchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +kube-state-metrics'
+
+  - it: renders base Kubernetes jobs
+    set:
+      prometheus.chartEnabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +kubernetes-apiservers'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +kubernetes-nodes'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +kubernetes-pods'
+
+  - it: respects global.fullnameOverride in name and relabel keep regex
+    set:
+      prometheus.chartEnabled: true
+      global.fullnameOverride: my-fullname-override
+      prometheus.server.configMapOverrideName: ""
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-fullname-override-prometheus-config
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'regex: +my-fullname-override'
+
+  - it: contains all Anchore service port mappings
+    set:
+      prometheus.chartEnabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8083'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8087'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8668'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8558'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8559'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +.*:8778'
+
+  - it: drops non-metrics containers in Anchore pods
+    set:
+      prometheus.chartEnabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'regex: +.*upgrade-enterprise-db'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'regex: +.*anchore-scripts'
+
+  - it: sets extra target labels for Anchore targets
+    set:
+      prometheus.chartEnabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'target_label: +anchore_service'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'target_label: +kubernetes_namespace'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'target_label: +kubernetes_pod_name'
+
+  - it: renders annotations on the ConfigMap
+    set:
+      prometheus.chartEnabled: true
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - exists:
+          path: metadata.annotations
