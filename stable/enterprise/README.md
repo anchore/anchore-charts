@@ -423,7 +423,7 @@ For those using the [Prometheus operator](https://github.com/prometheus-operator
 This chart can optionally deploy the community Prometheus chart and setup a ConfigMap containing a working prometheus.yml with a scalable scrape config for Anchore Enterprise and common Kubernetes targets.
 
 - Toggle with `prometheus.chartEnabled` (default: `false`).
-- The ConfigMap name defaults to `<release-name>-enterprise-prometheus-config` and can be overridden with `prometheus.server.configMapOverrideName`.
+- By default, this chart renders a ConfigMap named `<release-name>-anchore-enterprise-prometheus-config` (via `prometheus.server.configMapOverrideName`). You can override the suffix by setting `prometheus.server.configMapOverrideName`.
 - To have Prometheus use that ConfigMap, set `serverFiles` via the subchart or set `prometheus.server.configMapOverrideName` to the same name used by the generated ConfigMap.
 - You must enable the Anchore metrics endpoint as shown above for services to export metrics.
 
@@ -680,7 +680,7 @@ To restore your deployment to using your previous driver configurations:
 | `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.1` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
-| `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
+| `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
 | `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                   |
 | `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
@@ -1101,22 +1101,22 @@ To restore your deployment to using your previous driver configurations:
 
 ### Anchore Upgrade Job Parameters
 
-| Name                                   | Description                                                                                                                                     | Value                  |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `upgradeJob.enabled`                   | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`                 |
-| `upgradeJob.force`                     | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false`                |
-| `upgradeJob.rbacCreate`                | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                 |
-| `upgradeJob.serviceAccountName`        | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                   |
-| `upgradeJob.usePostUpgradeHook`        | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                |
-| `upgradeJob.kubectlImage`              | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.30` |
-| `upgradeJob.nodeSelector`              | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                   |
-| `upgradeJob.tolerations`               | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                   |
-| `upgradeJob.affinity`                  | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                   |
-| `upgradeJob.topologySpreadConstraints` | Topology spread constraints for the Anchore upgrade job pod assignment                                                                          | `[]`                   |
-| `upgradeJob.annotations`               | Annotations for the Anchore upgrade job                                                                                                         | `{}`                   |
-| `upgradeJob.resources`                 | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                   |
-| `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                   |
-| `upgradeJob.ttlSecondsAfterFinished`   | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
+| Name                                   | Description                                                                                                                                     | Value                        |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `upgradeJob.enabled`                   | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`                       |
+| `upgradeJob.force`                     | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false`                      |
+| `upgradeJob.rbacCreate`                | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                       |
+| `upgradeJob.serviceAccountName`        | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                         |
+| `upgradeJob.usePostUpgradeHook`        | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                      |
+| `upgradeJob.kubectlImage`              | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnamilegacy/kubectl:1.30` |
+| `upgradeJob.nodeSelector`              | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                         |
+| `upgradeJob.tolerations`               | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                         |
+| `upgradeJob.affinity`                  | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                         |
+| `upgradeJob.topologySpreadConstraints` | Topology spread constraints for the Anchore upgrade job pod assignment                                                                          | `[]`                         |
+| `upgradeJob.annotations`               | Annotations for the Anchore upgrade job                                                                                                         | `{}`                         |
+| `upgradeJob.resources`                 | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                         |
+| `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                         |
+| `upgradeJob.ttlSecondsAfterFinished`   | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                         |
 
 ### Ingress Parameters
 
@@ -1156,7 +1156,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`                       |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`                            |
 | `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`                        |
-| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnami/redis`                    |
+| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnamilegacy/redis`              |
 | `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0`              |
 | `ui-redis.image.pullSecrets`          | Specifies the image pull secrets to use for this chart.                                          | `["anchore-enterprise-pullcreds"]` |
 
@@ -1174,35 +1174,61 @@ To restore your deployment to using your previous driver configurations:
 | `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                             |
 | `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                               |
 | `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                               |
-| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`               |
+| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnamilegacy/postgresql`         |
 | `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`                        |
 | `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15`            |
 | `postgresql.image.pullSecrets`                | Specifies the image pull secrets to use for this chart.                                     | `["anchore-enterprise-pullcreds"]` |
 
+### Optional Prometheus Monitoring for Anchore Enterprise
+
+| Name                                                          | Description                                                                                                                                                                                | Value                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| `prometheus.chartEnabled`                                     | Enable Prometheus monitoring for Anchore Enterprise                                                                                                                                        | `false`                                |
+| `prometheus.alertmanager.enabled`                             | Enable Alertmanager for alert management                                                                                                                                                   | `false`                                |
+| `prometheus.server.retention`                                 | Data retention period for Prometheus                                                                                                                                                       | `14d`                                  |
+| `prometheus.server.retentionSize`                             | Maximum storage size for Prometheus data                                                                                                                                                   | `8GB`                                  |
+| `prometheus.server.service.type`                              | Kubernetes service type for Prometheus                                                                                                                                                     | `ClusterIP`                            |
+| `prometheus.server.persistentVolume.enabled`                  | Enable persistent storage for Prometheus                                                                                                                                                   | `true`                                 |
+| `prometheus.server.persistentVolume.size`                     | Storage size for Prometheus persistent volume                                                                                                                                              | `10Gi`                                 |
+| `prometheus.prometheus-node-exporter.enabled`                 | Enable node-exporter for node metrics                                                                                                                                                      | `true`                                 |
+| `prometheus.kube-state-metrics.enabled`                       | Enable kube-state-metrics for cluster metrics                                                                                                                                              | `true`                                 |
+| `prometheus.prometheus-pushgateway.enabled`                   | Enable pushgateway for custom metrics                                                                                                                                                      | `false`                                |
+| `prometheus.server.configMapOverrideName`                     | Name of an existing ConfigMap to override the default Prometheus server configuration                                                                                                      | `anchore-enterprise-prometheus-config` |
+| `prometheus.prometheus-pushgateway.persistence.enabled`       | Enable persistence using Persistent Volume Claims. If you have multiple instances (server.repicacount > 1), please consider using an external storage service like Thanos or Grafana Mimir | `false`                                |
+| `prometheus.prometheus-pushgateway.persistence.mountPath`     | Path to mount the volume at.                                                                                                                                                               | `/bitnami/prometheus/data`             |
+| `prometheus.prometheus-pushgateway.persistence.subPath`       | The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services                                                                                    | `""`                                   |
+| `prometheus.prometheus-pushgateway.persistence.storageClass`  | Storage class of backing PVC                                                                                                                                                               | `""`                                   |
+| `prometheus.prometheus-pushgateway.persistence.annotations`   | Persistent Volume Claim annotations                                                                                                                                                        | `{}`                                   |
+| `prometheus.prometheus-pushgateway.persistence.accessModes`   | Persistent Volume Access Modes                                                                                                                                                             | `["ReadWriteOnce"]`                    |
+| `prometheus.prometheus-pushgateway.persistence.size`          | Size of data volume                                                                                                                                                                        | `10Gi`                                 |
+| `prometheus.prometheus-pushgateway.persistence.existingClaim` | The name of an existing PVC to use for persistence                                                                                                                                         | `""`                                   |
+| `prometheus.prometheus-pushgateway.persistence.selector`      | Selector to match an existing Persistent Volume for Prometheus data PVC                                                                                                                    | `{}`                                   |
+| `prometheus.prometheus-pushgateway.persistence.dataSource`    | Custom PVC data source                                                                                                                                                                     | `{}`                                   |
+
 ### Anchore Object Store and Analysis Archive Migration
 
-| Name                                                         | Description                                                                                                      | Value                  |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `osaaMigrationJob.enabled`                                   | Enable the Anchore Object Store and Analysis Archive migration job                                               | `false`                |
-| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnami/kubectl:1.30` |
-| `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                   |
-| `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                   |
-| `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                   |
-| `osaaMigrationJob.resources`                                 | Resource requests and limits for Anchore Object Store and Analysis Archive migration job                         | `{}`                   |
-| `osaaMigrationJob.labels`                                    | Labels for Anchore Object Store and Analysis Archive migration job                                               | `{}`                   |
-| `osaaMigrationJob.annotations`                               | Annotation for Anchore Object Store and Analysis Archive migration job                                           | `{}`                   |
-| `osaaMigrationJob.nodeSelector`                              | Node labels for Anchore Object Store and Analysis Archive migration job pod assignment                           | `{}`                   |
-| `osaaMigrationJob.tolerations`                               | Tolerations for Anchore Object Store and Analysis Archive migration job pod assignment                           | `[]`                   |
-| `osaaMigrationJob.affinity`                                  | Affinity for Anchore Object Store and Analysis Archive migration job pod assignment                              | `{}`                   |
-| `osaaMigrationJob.topologySpreadConstraints`                 | Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment           | `[]`                   |
-| `osaaMigrationJob.serviceAccountName`                        | Service account name for Anchore Object Store and Analysis Archive migration job pods                            | `""`                   |
-| `osaaMigrationJob.analysisArchiveMigration.bucket`           | The name of the bucket to migrate                                                                                | `analysis_archive`     |
-| `osaaMigrationJob.analysisArchiveMigration.run`              | Run the analysis_archive migration                                                                               | `false`                |
-| `osaaMigrationJob.analysisArchiveMigration.mode`             | The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'. | `to_analysis_archive`  |
-| `osaaMigrationJob.analysisArchiveMigration.analysis_archive` | The configuration of the catalog.analysis_archive for the dest-config.yaml                                       | `{}`                   |
-| `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                |
-| `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                   |
-| `extraManifests`                                             | List of additional manifests to be included in the chart                                                         | `[]`                   |
+| Name                                                         | Description                                                                                                      | Value                        |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `osaaMigrationJob.enabled`                                   | Enable the Anchore Object Store and Analysis Archive migration job                                               | `false`                      |
+| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnamilegacy/kubectl:1.30` |
+| `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                         |
+| `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                         |
+| `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                         |
+| `osaaMigrationJob.resources`                                 | Resource requests and limits for Anchore Object Store and Analysis Archive migration job                         | `{}`                         |
+| `osaaMigrationJob.labels`                                    | Labels for Anchore Object Store and Analysis Archive migration job                                               | `{}`                         |
+| `osaaMigrationJob.annotations`                               | Annotation for Anchore Object Store and Analysis Archive migration job                                           | `{}`                         |
+| `osaaMigrationJob.nodeSelector`                              | Node labels for Anchore Object Store and Analysis Archive migration job pod assignment                           | `{}`                         |
+| `osaaMigrationJob.tolerations`                               | Tolerations for Anchore Object Store and Analysis Archive migration job pod assignment                           | `[]`                         |
+| `osaaMigrationJob.affinity`                                  | Affinity for Anchore Object Store and Analysis Archive migration job pod assignment                              | `{}`                         |
+| `osaaMigrationJob.topologySpreadConstraints`                 | Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment           | `[]`                         |
+| `osaaMigrationJob.serviceAccountName`                        | Service account name for Anchore Object Store and Analysis Archive migration job pods                            | `""`                         |
+| `osaaMigrationJob.analysisArchiveMigration.bucket`           | The name of the bucket to migrate                                                                                | `analysis_archive`           |
+| `osaaMigrationJob.analysisArchiveMigration.run`              | Run the analysis_archive migration                                                                               | `false`                      |
+| `osaaMigrationJob.analysisArchiveMigration.mode`             | The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'. | `to_analysis_archive`        |
+| `osaaMigrationJob.analysisArchiveMigration.analysis_archive` | The configuration of the catalog.analysis_archive for the dest-config.yaml                                       | `{}`                         |
+| `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                      |
+| `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                         |
+| `extraManifests`                                             | List of additional manifests to be included in the chart                                                         | `[]`                         |
 
 ## Release Notes
 

@@ -1940,7 +1940,8 @@ prometheus:
 
   # Server configuration defaults for Anchore monitoring
   server:
-    # Config map override
+  ## @param prometheus.server.configMapOverrideName Name of an existing ConfigMap to override the default Prometheus server configuration
+  # Config map override
     configMapOverrideName: "anchore-enterprise-prometheus-config"
 
     # Storage and retention settings
@@ -1955,7 +1956,7 @@ prometheus:
     persistentVolume:
       enabled: true
       size: 10Gi
-      
+
   # The chart includes defaults for Anchore services with ports and intervals set
 
   # Enable supporting components - users can disable if not needed
@@ -1968,18 +1969,18 @@ prometheus:
 
   # Enable pushgateway for custom metrics
   prometheus-pushgateway:
-    enabled: true
+    enabled: false
     persistence:
-      ## @param server.persistence.enabled Enable persistence using Persistent Volume Claims. If you have multiple instances (server.repicacount > 1), please considere using an external storage service like Thanos or Grafana Mimir
+  ## @param prometheus.prometheus-pushgateway.persistence.enabled Enable persistence using Persistent Volume Claims. If you have multiple instances (server.repicacount > 1), please consider using an external storage service like Thanos or Grafana Mimir
       ##
       enabled: false
-      ## @param server.persistence.mountPath Path to mount the volume at.
+  ## @param prometheus.prometheus-pushgateway.persistence.mountPath Path to mount the volume at.
       ##
       mountPath: /bitnami/prometheus/data
-      ## @param server.persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ## @param prometheus.prometheus-pushgateway.persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
       ##
       subPath: ""
-      ## @param server.persistence.storageClass Storage class of backing PVC
+  ## @param prometheus.prometheus-pushgateway.persistence.storageClass Storage class of backing PVC
       ## If defined, storageClassName: <storageClass>
       ## If set to "-", storageClassName: "", which disables dynamic provisioning
       ## If undefined (the default) or set to null, no storageClassName spec is
@@ -1987,20 +1988,20 @@ prometheus:
       ##   GKE, AWS & OpenStack)
       ##
       storageClass: ""
-      ## @param server.persistence.annotations Persistent Volume Claim annotations
+  ## @param prometheus.prometheus-pushgateway.persistence.annotations Persistent Volume Claim annotations
       ##
       annotations: {}
-      ## @param server.persistence.accessModes Persistent Volume Access Modes
+  ## @param prometheus.prometheus-pushgateway.persistence.accessModes Persistent Volume Access Modes
       ##
       accessModes:
         - ReadWriteOnce
-      ## @param server.persistence.size Size of data volume
+  ## @param prometheus.prometheus-pushgateway.persistence.size Size of data volume
       ##
       size: 10Gi
-      ## @param server.persistence.existingClaim The name of an existing PVC to use for persistence
+  ## @param prometheus.prometheus-pushgateway.persistence.existingClaim The name of an existing PVC to use for persistence
       ##
       existingClaim: ""
-      ## @param server.persistence.selector Selector to match an existing Persistent Volume for Prometheus data PVC
+  ## @param prometheus.prometheus-pushgateway.persistence.selector Selector to match an existing Persistent Volume for Prometheus data PVC
       ## If set, the PVC can't have a PV dynamically provisioned for it
       ## E.g.
       ## selector:
@@ -2008,9 +2009,10 @@ prometheus:
       ##     app: my-app
       ##
       selector: {}
-      ## @param server.persistence.dataSource Custom PVC data source
+  ## @param prometheus.prometheus-pushgateway.persistence.dataSource Custom PVC data source
       ##
       dataSource: {}
+
 ########################################################################################
 ## @section Anchore Object Store and Analysis Archive Migration
 ## Migration job uses a Helm pre-install-hook to ensure all pods are
