@@ -649,9 +649,10 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.17.1` |
+| `image`                                 | image used for all Anchore Enterprise deployments by separating out registry/repo:tag, excluding Anchore UI                        | `docker.io/anchore/enterprise:v5.17.2` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
+| `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
 | `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                   |
 | `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
@@ -1039,7 +1040,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.17.0` |
+| `ui.image`                     | image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.17.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1174,38 +1175,41 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
 ### V3.9.x
+#### V3.9.1
+  - Deploys Anchore Enterprise UI v5.17.2. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5172/) for more information.
 
-- Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration) and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
-  - enterprise image:
+#### V3.9.0
+  - Updates image specification for Enterprise, Enterprise UI, and subsequent jobs (upgrade / osaa migration) and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+    - enterprise image:
 
-    ```yaml
-      image: docker.io/anchore/enterprise:v5.17.1
-        # registry: docker.io
-        # repository: anchore/enterprise
-        # tag: "v5.17.1"
-        # digest: sha256:abcdef123456
-    ```
-
-  - ui image:
-
-    ```yaml
-      ui:
-        image: docker.io/anchore/enterprise-ui:v5.17.0
+      ```yaml
+        image: docker.io/anchore/enterprise:v5.17.1
           # registry: docker.io
-          # repository: anchore/enterprise-ui
-          # tag: "v5.17.0"
+          # repository: anchore/enterprise
+          # tag: "v5.17.1"
           # digest: sha256:abcdef123456
-    ```
+      ```
 
-- .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+    - ui image:
 
-  ```yaml
-    kubectlImage:
-      registry: docker.io
-      repository: bitnami/kubectl
-      tag: "1.30"
-      digest:
-  ```
+      ```yaml
+        ui:
+          image: docker.io/anchore/enterprise-ui:v5.17.0
+            # registry: docker.io
+            # repository: anchore/enterprise-ui
+            # tag: "v5.17.0"
+            # digest: sha256:abcdef123456
+      ```
+
+    - .Values.osaaMigrationJob.kubectlImage should now be specified under .Values.common.kubectlImage and accepts a full pullstring (default), or the following dict (only one of tag or digest should be used, will default to digest if both are specified):
+
+      ```yaml
+        kubectlImage:
+          registry: docker.io
+          repository: bitnami/kubectl
+          tag: "1.30"
+          digest:
+      ```
 
 ### V3.8.x
 
