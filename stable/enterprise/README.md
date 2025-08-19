@@ -651,10 +651,10 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.1` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.2` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
-| `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnami/kubectl:1.30`                 |
+| `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
 | `useExistingPullCredSecret`             | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                | `true`                                 |
 | `imageCredentials.registry`             | The registry URL for the image pull secret                                                                                         | `""`                                   |
 | `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
@@ -1075,22 +1075,22 @@ To restore your deployment to using your previous driver configurations:
 
 ### Anchore Upgrade Job Parameters
 
-| Name                                   | Description                                                                                                                                     | Value                  |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `upgradeJob.enabled`                   | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`                 |
-| `upgradeJob.force`                     | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false`                |
-| `upgradeJob.rbacCreate`                | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                 |
-| `upgradeJob.serviceAccountName`        | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                   |
-| `upgradeJob.usePostUpgradeHook`        | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                |
-| `upgradeJob.kubectlImage`              | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnami/kubectl:1.30` |
-| `upgradeJob.nodeSelector`              | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                   |
-| `upgradeJob.tolerations`               | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                   |
-| `upgradeJob.affinity`                  | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                   |
-| `upgradeJob.topologySpreadConstraints` | Topology spread constraints for the Anchore upgrade job pod assignment                                                                          | `[]`                   |
-| `upgradeJob.annotations`               | Annotations for the Anchore upgrade job                                                                                                         | `{}`                   |
-| `upgradeJob.resources`                 | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                   |
-| `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                   |
-| `upgradeJob.ttlSecondsAfterFinished`   | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                   |
+| Name                                   | Description                                                                                                                                     | Value                        |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `upgradeJob.enabled`                   | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`                       |
+| `upgradeJob.force`                     | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false`                      |
+| `upgradeJob.rbacCreate`                | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                       |
+| `upgradeJob.serviceAccountName`        | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                         |
+| `upgradeJob.usePostUpgradeHook`        | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                      |
+| `upgradeJob.kubectlImage`              | The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade                             | `bitnamilegacy/kubectl:1.30` |
+| `upgradeJob.nodeSelector`              | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`                         |
+| `upgradeJob.tolerations`               | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                         |
+| `upgradeJob.affinity`                  | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                         |
+| `upgradeJob.topologySpreadConstraints` | Topology spread constraints for the Anchore upgrade job pod assignment                                                                          | `[]`                         |
+| `upgradeJob.annotations`               | Annotations for the Anchore upgrade job                                                                                                         | `{}`                         |
+| `upgradeJob.resources`                 | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                         |
+| `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                         |
+| `upgradeJob.ttlSecondsAfterFinished`   | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                         |
 
 ### Ingress Parameters
 
@@ -1130,7 +1130,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`                       |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`                            |
 | `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`                        |
-| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnami/redis`                    |
+| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnamilegacy/redis`              |
 | `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0`              |
 | `ui-redis.image.pullSecrets`          | Specifies the image pull secrets to use for this chart.                                          | `["anchore-enterprise-pullcreds"]` |
 
@@ -1148,35 +1148,35 @@ To restore your deployment to using your previous driver configurations:
 | `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                             |
 | `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                               |
 | `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                               |
-| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnami/postgresql`               |
+| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnamilegacy/postgresql`         |
 | `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`                        |
 | `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15`            |
 | `postgresql.image.pullSecrets`                | Specifies the image pull secrets to use for this chart.                                     | `["anchore-enterprise-pullcreds"]` |
 
 ### Anchore Object Store and Analysis Archive Migration
 
-| Name                                                         | Description                                                                                                      | Value                  |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `osaaMigrationJob.enabled`                                   | Enable the Anchore Object Store and Analysis Archive migration job                                               | `false`                |
-| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnami/kubectl:1.30` |
-| `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                   |
-| `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                   |
-| `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                   |
-| `osaaMigrationJob.resources`                                 | Resource requests and limits for Anchore Object Store and Analysis Archive migration job                         | `{}`                   |
-| `osaaMigrationJob.labels`                                    | Labels for Anchore Object Store and Analysis Archive migration job                                               | `{}`                   |
-| `osaaMigrationJob.annotations`                               | Annotation for Anchore Object Store and Analysis Archive migration job                                           | `{}`                   |
-| `osaaMigrationJob.nodeSelector`                              | Node labels for Anchore Object Store and Analysis Archive migration job pod assignment                           | `{}`                   |
-| `osaaMigrationJob.tolerations`                               | Tolerations for Anchore Object Store and Analysis Archive migration job pod assignment                           | `[]`                   |
-| `osaaMigrationJob.affinity`                                  | Affinity for Anchore Object Store and Analysis Archive migration job pod assignment                              | `{}`                   |
-| `osaaMigrationJob.topologySpreadConstraints`                 | Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment           | `[]`                   |
-| `osaaMigrationJob.serviceAccountName`                        | Service account name for Anchore Object Store and Analysis Archive migration job pods                            | `""`                   |
-| `osaaMigrationJob.analysisArchiveMigration.bucket`           | The name of the bucket to migrate                                                                                | `analysis_archive`     |
-| `osaaMigrationJob.analysisArchiveMigration.run`              | Run the analysis_archive migration                                                                               | `false`                |
-| `osaaMigrationJob.analysisArchiveMigration.mode`             | The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'. | `to_analysis_archive`  |
-| `osaaMigrationJob.analysisArchiveMigration.analysis_archive` | The configuration of the catalog.analysis_archive for the dest-config.yaml                                       | `{}`                   |
-| `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                |
-| `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                   |
-| `extraManifests`                                             | List of additional manifests to be included in the chart                                                         | `[]`                   |
+| Name                                                         | Description                                                                                                      | Value                        |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `osaaMigrationJob.enabled`                                   | Enable the Anchore Object Store and Analysis Archive migration job                                               | `false`                      |
+| `osaaMigrationJob.kubectlImage`                              | The image to use for the job's init container that uses kubectl to scale down deployments for the migration      | `bitnamilegacy/kubectl:1.30` |
+| `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                         |
+| `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                         |
+| `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                         |
+| `osaaMigrationJob.resources`                                 | Resource requests and limits for Anchore Object Store and Analysis Archive migration job                         | `{}`                         |
+| `osaaMigrationJob.labels`                                    | Labels for Anchore Object Store and Analysis Archive migration job                                               | `{}`                         |
+| `osaaMigrationJob.annotations`                               | Annotation for Anchore Object Store and Analysis Archive migration job                                           | `{}`                         |
+| `osaaMigrationJob.nodeSelector`                              | Node labels for Anchore Object Store and Analysis Archive migration job pod assignment                           | `{}`                         |
+| `osaaMigrationJob.tolerations`                               | Tolerations for Anchore Object Store and Analysis Archive migration job pod assignment                           | `[]`                         |
+| `osaaMigrationJob.affinity`                                  | Affinity for Anchore Object Store and Analysis Archive migration job pod assignment                              | `{}`                         |
+| `osaaMigrationJob.topologySpreadConstraints`                 | Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment           | `[]`                         |
+| `osaaMigrationJob.serviceAccountName`                        | Service account name for Anchore Object Store and Analysis Archive migration job pods                            | `""`                         |
+| `osaaMigrationJob.analysisArchiveMigration.bucket`           | The name of the bucket to migrate                                                                                | `analysis_archive`           |
+| `osaaMigrationJob.analysisArchiveMigration.run`              | Run the analysis_archive migration                                                                               | `false`                      |
+| `osaaMigrationJob.analysisArchiveMigration.mode`             | The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'. | `to_analysis_archive`        |
+| `osaaMigrationJob.analysisArchiveMigration.analysis_archive` | The configuration of the catalog.analysis_archive for the dest-config.yaml                                       | `{}`                         |
+| `osaaMigrationJob.objectStoreMigration.run`                  | Run the object_store migration                                                                                   | `false`                      |
+| `osaaMigrationJob.objectStoreMigration.object_store`         | The configuration of the object_store for the dest-config.yaml                                                   | `{}`                         |
+| `extraManifests`                                             | List of additional manifests to be included in the chart                                                         | `[]`                         |
 
 ## Release Notes
 
@@ -1188,64 +1188,65 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### V3.14.x
 
-  #### V3.14.0
-  - Changes the following images from using the bitnami repo to bitnamilegacy:
-    - postgresql
-    - redis
-    - kubectl
+#### V3.14.0
+- Changes the following images from using the bitnami repo to bitnamilegacy:
+  - postgresql
+  - redis
+  - kubectl
+#### V3.14.1
+- Deploys Anchore Enterprise v5.20.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5202/) for more information.
 
 ### V3.13.x
 
 - Deploys Anchore Enterprise v5.20.x.
-  #### V3.13.0
-  - Deploys Anchore Enterprise v5.20.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5201/) for more information.
+#### V3.13.0
+- Deploys Anchore Enterprise v5.20.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5201/) for more information.
 - :warning: **WARNING:** Upcoming values file changes necessary:
-  - **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025. This is a temporary workaround while we review options on how to proceed with these dependencies:**
-    - `postgresql.image.repository`
-    - `ui-redis.image.repository`
-    - `kubectlImage`
-    - `upgradeJob.kubectlImage`
-    - `osaaMigrationJob.kubectlImage`
+- **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025. This is a temporary workaround while we review options on how to proceed with these dependencies:**
+  - `postgresql.image.repository`
+  - `ui-redis.image.repository`
+  - `kubectlImage`
+  - `upgradeJob.kubectlImage`
+  - `osaaMigrationJob.kubectlImage`
 
-    ```yaml
-    postgresql:
-      image:
-        repository: bitnamilegacy/postgresql
-        registry: docker.io
-        tag: 13.11.0-debian-11-r15
-        pullSecrets:
-          - anchore-enterprise-pullcreds
-    ui-redis:
-      image:
-        registry: docker.io
-        repository: bitnamilegacy/redis
-        tag: 7.0.12-debian-11-r0
-        pullSecrets:
-          - anchore-enterprise-pullcreds
+  ```yaml
+  postgresql:
+    image:
+      repository: bitnamilegacy/postgresql
+      registry: docker.io
+      tag: 13.11.0-debian-11-r15
+      pullSecrets:
+        - anchore-enterprise-pullcreds
+  ui-redis:
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/redis
+      tag: 7.0.12-debian-11-r0
+      pullSecrets:
+        - anchore-enterprise-pullcreds
+  kubectlImage: bitnamilegacy/kubectl:1.30
+  upgradeJob:
     kubectlImage: bitnamilegacy/kubectl:1.30
-    upgradeJob:
-      kubectlImage: bitnamilegacy/kubectl:1.30
-    osaaMigrationJob:
-      kubectlImage: bitnamilegacy/kubectl:1.30
-    
-    ```
+  osaaMigrationJob:
+    kubectlImage: bitnamilegacy/kubectl:1.30
+  ```
 
 ### V3.12.x
 
 - Deploys Anchore Enterprise v5.19.x.
-  #### V3.12.3
-  - Deploys Anchore Enterprise UI v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5191/) for more information.
+#### V3.12.3
+- Deploys Anchore Enterprise UI v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5191/) for more information.
 
-  #### V3.12.2
-  - Deploys Anchore Enterprise v5.19.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5192/) for more information.
+#### V3.12.2
+- Deploys Anchore Enterprise v5.19.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5192/) for more information.
 
-  #### V3.12.1
-  - Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
+#### V3.12.1
+- Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
 
-  #### V3.12.0
-  - Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
-  - Increased analysis & malware scanning timeout configuration.
-  - Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
+#### V3.12.0
+- Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
+- Increased analysis & malware scanning timeout configuration.
+- Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
 
 ### V3.11.x
 
