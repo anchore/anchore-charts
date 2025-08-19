@@ -21,7 +21,7 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.20.1
+image: docker.io/anchore/enterprise:v5.20.2
   # registry: docker.io
   # repository: anchore/enterprise
   # tag: "v5.20.1"
