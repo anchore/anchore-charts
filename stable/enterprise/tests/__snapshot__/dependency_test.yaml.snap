@@ -53,7 +53,7 @@ should render defaults:
             value: error
           - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
             value: pgaudit
-        image: docker.io/bitnami/postgresql:13.11.0-debian-11-r15
+        image: docker.io/bitnamilegacy/postgresql:13.11.0-debian-11-r15
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
@@ -78,7 +78,6 @@ should render defaults:
               - -e
               - |
                 exec pg_isready -U "anchore" -d "dbname=anchore" -h 127.0.0.1 -p 5432
-                [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
           failureThreshold: 6
           initialDelaySeconds: 5
           periodSeconds: 10
@@ -144,7 +143,7 @@ should render defaults:
             value: "no"
           - name: REDIS_PORT
             value: "6379"
-        image: docker.io/bitnami/redis:7.0.12-debian-11-r0
+        image: docker.io/bitnamilegacy/redis:7.0.12-debian-11-r0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           exec:
