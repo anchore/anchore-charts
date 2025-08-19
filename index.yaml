@@ -6675,6 +6675,53 @@ entries:
     - https://github.com/anchore/anchore-charts/releases/download/enterprise-3.10.0/enterprise-3.10.0.tgz
     version: 3.10.0
   - apiVersion: v2
+    appVersion: 5.17.2
+    created: "2025-08-19T13:57:09.737419984Z"
+    dependencies:
+    - condition: postgresql.chartEnabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~12.5
+    - alias: ui-redis
+      condition: ui-redis.chartEnabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~17.11
+    description: 'Anchore Enterprise is a complete container security workflow solution
+      for professional teams. Easily integrating with CI/CD systems, it allows developers
+      to bolster security without compromising velocity and enables security teams
+      to audit and verify compliance in real-time. It is based on Anchore Engine,
+      an open-source image inspection and scanning tool. '
+    digest: 91808a14ca881db17f8a4a5432e776bd7a5230dbcbe0ea5f981f2630f201e0bf
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - anchore-enterprise
+    - image
+    - security
+    - vulnerability
+    - scanner
+    kubeVersion: 1.23.x - 1.32.x || 1.23.x-x - 1.32.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    - email: jesse.tamburino@anchore.com
+      name: infrainnovator
+    name: enterprise
+    sources:
+    - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/enterprise-3.9.1/enterprise-3.9.1.tgz
+    version: 3.9.1
+  - apiVersion: v2
     appVersion: 5.17.0
     created: "2025-05-27T20:44:22.226286402Z"
     dependencies:
@@ -13077,4 +13124,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-18T18:23:56.835554745Z"
+generated: "2025-08-19T13:57:09.738003392Z"
