@@ -37,3 +37,11 @@ tests:
             tmp_dir: /test
 
             log_level: DEBUG
+  - it: should render additional audit uris when additionalResourceURIs is set
+    template: templates/anchore_configmap.yaml
+    set:
+      anchoreConfig.audit.additionalResourceURIs:
+        - "/images"
+        - "/containers"
+    asserts:
+      - matchSnapshot: {}
