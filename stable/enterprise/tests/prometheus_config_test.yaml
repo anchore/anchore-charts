@@ -173,6 +173,33 @@ tests:
           path: data["prometheus.yml"]
           pattern: 'replacement: +.*:8778'
 
+  - it: self-monitoring target uses configured server servicePort (9098)
+    set:
+      prometheus.chartEnabled: true
+      prometheus.server.service.type: ClusterIP
+      prometheus.server.service.servicePort: 9098
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'targets:\n\s*- localhost:9098'
+
+  - it: node-exporter scrape respects custom service port (9099)
+    set:
+      prometheus.chartEnabled: true
+      prometheus.prometheus-node-exporter.enabled: true
+      prometheus.prometheus-node-exporter.service.port: 9099
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +node-exporter'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +\$\{1\}:9099'
+
   - it: drops non-metrics containers in Anchore pods
     set:
       prometheus.chartEnabled: true
