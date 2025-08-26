@@ -677,7 +677,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.1` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.20.2` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
@@ -1249,64 +1249,65 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### V3.14.x
 
-  #### V3.14.0
-  - Changes the following images from using the bitnami repo to bitnamilegacy:
-    - postgresql
-    - redis
-    - kubectl
+#### V3.14.0
+- Changes the following images from using the bitnami repo to bitnamilegacy:
+  - postgresql
+  - redis
+  - kubectl
+#### V3.14.1
+- Deploys Anchore Enterprise v5.20.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5202/) for more information.
 
 ### V3.13.x
 
 - Deploys Anchore Enterprise v5.20.x.
-  #### V3.13.0
-  - Deploys Anchore Enterprise v5.20.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5201/) for more information.
+#### V3.13.0
+- Deploys Anchore Enterprise v5.20.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5201/) for more information.
 - :warning: **WARNING:** Upcoming values file changes necessary:
-  - **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025. This is a temporary workaround while we review options on how to proceed with these dependencies:**
-    - `postgresql.image.repository`
-    - `ui-redis.image.repository`
-    - `kubectlImage`
-    - `upgradeJob.kubectlImage`
-    - `osaaMigrationJob.kubectlImage`
+- **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025. This is a temporary workaround while we review options on how to proceed with these dependencies:**
+  - `postgresql.image.repository`
+  - `ui-redis.image.repository`
+  - `kubectlImage`
+  - `upgradeJob.kubectlImage`
+  - `osaaMigrationJob.kubectlImage`
 
-    ```yaml
-    postgresql:
-      image:
-        repository: bitnamilegacy/postgresql
-        registry: docker.io
-        tag: 13.11.0-debian-11-r15
-        pullSecrets:
-          - anchore-enterprise-pullcreds
-    ui-redis:
-      image:
-        registry: docker.io
-        repository: bitnamilegacy/redis
-        tag: 7.0.12-debian-11-r0
-        pullSecrets:
-          - anchore-enterprise-pullcreds
+  ```yaml
+  postgresql:
+    image:
+      repository: bitnamilegacy/postgresql
+      registry: docker.io
+      tag: 13.11.0-debian-11-r15
+      pullSecrets:
+        - anchore-enterprise-pullcreds
+  ui-redis:
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/redis
+      tag: 7.0.12-debian-11-r0
+      pullSecrets:
+        - anchore-enterprise-pullcreds
+  kubectlImage: bitnamilegacy/kubectl:1.30
+  upgradeJob:
     kubectlImage: bitnamilegacy/kubectl:1.30
-    upgradeJob:
-      kubectlImage: bitnamilegacy/kubectl:1.30
-    osaaMigrationJob:
-      kubectlImage: bitnamilegacy/kubectl:1.30
-    
-    ```
+  osaaMigrationJob:
+    kubectlImage: bitnamilegacy/kubectl:1.30
+  ```
 
 ### V3.12.x
 
 - Deploys Anchore Enterprise v5.19.x.
-  #### V3.12.3
-  - Deploys Anchore Enterprise UI v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5191/) for more information.
+#### V3.12.3
+- Deploys Anchore Enterprise UI v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5191/) for more information.
 
-  #### V3.12.2
-  - Deploys Anchore Enterprise v5.19.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5192/) for more information.
+#### V3.12.2
+- Deploys Anchore Enterprise v5.19.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5192/) for more information.
 
-  #### V3.12.1
-  - Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
+#### V3.12.1
+- Add cloudsql.useSideCar true/false (false by default) which allows running cloudsql proxy as a sidecar. When not run as a sidecar upgrade/migration jobs continue running indefinitely since the cloudsql proxy never exists. If using cloudsql (cloudsql.enabled true) and Kubernetes v1.29 or later it is suggested to set cloudsql.useSideCar true.
 
-  #### V3.12.0
-  - Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
-  - Increased analysis & malware scanning timeout configuration.
-  - Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
+#### V3.12.0
+- Allows for manual configuration of pod DNS numdots to reduce the frequency of DNS queries in cluster. Defaults to 2.
+- Increased analysis & malware scanning timeout configuration.
+- Deploys Anchore Enterprise v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5191/) for more information.
 
 ### V3.11.x
 
