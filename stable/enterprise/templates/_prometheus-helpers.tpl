@@ -18,14 +18,14 @@ rule_files:
 - /etc/config/alerts
 scrape_configs:
 # Self-monitoring
+{{- $serverPort := 9098 -}}
+{{- if and .Values.prometheus (index .Values.prometheus "server") (index .Values.prometheus "server" "service") (index .Values.prometheus "server" "service" "servicePort") -}}
+{{- $serverPort = (index .Values.prometheus "server" "service" "servicePort") -}}
+{{- end }}
 - job_name: prometheus
   static_configs:
-  - targets:
-  {{- $serverPort := 9098 -}}
-  {{- if and .Values.prometheus (index .Values.prometheus "server") (index .Values.prometheus "server" "service") (index .Values.prometheus "server" "service" "servicePort") -}}
-  {{- $serverPort = (index .Values.prometheus "server" "service" "servicePort") -}}
-  {{- end }}
-  - localhost:{{ $serverPort }}
+    - targets:
+      - localhost:{{ $serverPort }}
     
 # Kubernetes API server monitoring
 - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -54,7 +54,7 @@ scrape_configs:
   - replacement: kubernetes.default.svc:443
     target_label: __address__
   - regex: (.+)
-    replacement: /api/v1/nodes/${1}/proxy/metrics
+    replacement: /api/v1/nodes/$1/proxy/metrics
     source_labels:
     - __meta_kubernetes_node_name
     target_label: __metrics_path__
@@ -111,61 +111,61 @@ scrape_configs:
     - __meta_kubernetes_pod_container_name
   # Map each Anchore component to its specific metrics port
   - regex: api;(.+)
-    replacement: ${1}:8228
+    replacement: $1:8228
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: catalog;(.+)
-    replacement: ${1}:8082
+    replacement: $1:8082
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: analyzer;(.+)
-    replacement: ${1}:8084
+    replacement: $1:8084
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: policyengine;(.+)
-    replacement: ${1}:8087
+    replacement: $1:8087
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: simplequeue;(.+)
-    replacement: ${1}:8083
+    replacement: $1:8083
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: notifications;(.+)
-    replacement: ${1}:8668
+    replacement: $1:8668
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: reports;(.+)
-    replacement: ${1}:8558
+    replacement: $1:8558
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: reportsworker;(.+)
-    replacement: ${1}:8559
+    replacement: $1:8559
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: datasyncer;(.+)
-    replacement: ${1}:8778
+    replacement: $1:8778
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
     target_label: __address__
   - regex: ui;(.+)
-    replacement: ${1}:3000
+    replacement: $1:3000
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_component
     - __meta_kubernetes_pod_ip
