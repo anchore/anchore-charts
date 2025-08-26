@@ -217,6 +217,10 @@ services:
         data:
           grypedb:
             enabled: true
+      extended_support:
+        rhel:
+          enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled }}
+          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions }}
       matching:
         exclude:
           {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}

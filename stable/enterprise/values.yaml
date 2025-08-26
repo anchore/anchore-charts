@@ -21,7 +21,7 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.20.2
+image: docker.io/anchore/enterprise:v5.21.0
   # registry: docker.io
   # repository: anchore/enterprise
   # tag: "v5.20.1"
@@ -482,9 +482,11 @@ anchoreConfig:
 
   analyzer:
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
+    ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
     ##
     cycle_timers:
       image_analyzer: 1
+      sync_clamav_db: 60
 
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
     ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
@@ -573,6 +575,7 @@ anchoreConfig:
     ## @param anchoreConfig.catalog.cycle_timers.resource_metrics Interval (seconds) for computing metrics from the DB
     ## @param anchoreConfig.catalog.cycle_timers.events_gc Interval (seconds) for cleaning up events in the system based on timestamp
     ## @param anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks Interval (seconds) for running artifact lifecycle policy tasks
+    ## @param anchoreConfig.catalog.cycle_timers.syft_sbom_metadata_annotations Time in seconds between syft SBOM metadata annotations
     ##
     cycle_timers:
       image_watcher: 3600
@@ -589,6 +592,7 @@ anchoreConfig:
       resource_metrics: 60
       events_gc: 43200
       artifact_lifecycle_policy_tasks: 43200
+      syft_sbom_metadata_annotations: 150
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
     ## ref: https://docs.anchore.com/current/docs/using/cli_usage/event/#sending-events-as-webhook-notifications
@@ -645,7 +649,14 @@ anchoreConfig:
   policy_engine:
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
+    ## @param anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled Account for RHEL Extended Update Support (EUS) releases when matching vulnerabilities
+    ## @param anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions RHEL versions for which to apply Extended Update Support (EUS) releases when matching
+    ##
     vulnerabilities:
+      extended_support:
+        rhel:
+          enabled: <ALLOW_API_CONFIGURATION>  # auto
+          versions: <ALLOW_API_CONFIGURATION>  # '>=8'
       matching:
         exclude:
           providers: null
@@ -656,8 +667,11 @@ anchoreConfig:
 
     ## @param anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
     nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
-    ## @param anchoreConfig.policy_engine.server [object] Configuration for the policy engine server
+
+    ## @param anchoreConfig.policy_engine.server [object] Server configuration for the service
     server: {}
+    ## server:
+    ##   process_worker_count: 1
 
   notifications:
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
@@ -1558,7 +1572,7 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.20.0
+  image: docker.io/anchore/enterprise-ui:v5.21.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
     # tag: "v5.20.0"

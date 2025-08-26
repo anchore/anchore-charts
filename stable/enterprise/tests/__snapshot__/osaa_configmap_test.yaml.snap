@@ -147,6 +147,7 @@ should render the configmaps for osaa migration if enabled:
             cycle_timer_seconds: 1
             cycle_timers:
               image_analyzer: 1
+              sync_clamav_db: 60
             analyzer_driver: 'nodocker'
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
@@ -180,6 +181,7 @@ should render the configmaps for osaa migration if enabled:
               repo_watcher: 60
               resource_metrics: 60
               service_watcher: 15
+              syft_sbom_metadata_annotations: 150
               vulnerability_scan: 14400
             event_log:
               max_retention_age_days: 180
@@ -246,6 +248,10 @@ should render the configmaps for osaa migration if enabled:
                 data:
                   grypedb:
                     enabled: true
+              extended_support:
+                rhel:
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  versions: <ALLOW_API_CONFIGURATION>
               matching:
                 exclude:
                   providers: []
@@ -529,6 +535,7 @@ should render the configmaps for osaa migration if enabled:
             cycle_timer_seconds: 1
             cycle_timers:
               image_analyzer: 1
+              sync_clamav_db: 60
             analyzer_driver: 'nodocker'
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
@@ -562,6 +569,7 @@ should render the configmaps for osaa migration if enabled:
               repo_watcher: 60
               resource_metrics: 60
               service_watcher: 15
+              syft_sbom_metadata_annotations: 150
               vulnerability_scan: 14400
             event_log:
               max_retention_age_days: 180
@@ -639,6 +647,10 @@ should render the configmaps for osaa migration if enabled:
                 data:
                   grypedb:
                     enabled: true
+              extended_support:
+                rhel:
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  versions: <ALLOW_API_CONFIGURATION>
               matching:
                 exclude:
                   providers: []
