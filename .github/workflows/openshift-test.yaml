@@ -122,6 +122,7 @@ jobs:
       run: |
         helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
         helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || echo "prometheus-community repo already added"
         helm repo update
 
         if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
