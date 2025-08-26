@@ -21,7 +21,7 @@ scrape_configs:
 - job_name: prometheus
   static_configs:
   - targets:
-  {{- $serverPort := 9090 -}}
+  {{- $serverPort := 9098 -}}
   {{- if and .Values.prometheus (index .Values.prometheus "server") (index .Values.prometheus "server" "service") (index .Values.prometheus "server" "service" "servicePort") -}}
   {{- $serverPort = (index .Values.prometheus "server" "service" "servicePort") -}}
   {{- end }}
