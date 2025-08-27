@@ -18,10 +18,8 @@ rule_files:
 - /etc/config/alerts
 scrape_configs:
 # Self-monitoring
-{{- $serverPort := 9098 -}}
-{{- if and .Values.prometheus (index .Values.prometheus "server") (index .Values.prometheus "server" "service") (index .Values.prometheus "server" "service" "servicePort") -}}
-{{- $serverPort = (index .Values.prometheus "server" "service" "servicePort") -}}
-{{- end }}
+{{/* Prometheus listens on 9090 inside the container by default */}}
+{{- $serverPort := 9090 }}
 - job_name: prometheus
   static_configs:
     - targets:
@@ -194,12 +192,12 @@ scrape_configs:
   - role: pod
   relabel_configs:
   - action: keep
-  regex: ^prometheus-node-exporter$
+    regex: ^prometheus-node-exporter$
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_name
   - action: replace
-  regex: ^(.+)$
-  replacement: ${1}:{{ $nePort }}
+    regex: ^(.+)$
+    replacement: ${1}:{{ $nePort }}
     source_labels:
     - __meta_kubernetes_pod_ip
     target_label: __address__

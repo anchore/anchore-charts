@@ -1960,16 +1960,6 @@ prometheus:
     # Service configuration - internal only by default
     service:
       type: ClusterIP
-      ## @param prometheus.server.service.servicePort Service port for the Prometheus server Service
-      servicePort: 9098
-      ## @param prometheus.server.service.targetPort Target port on the Prometheus server pod the Service forwards to
-      targetPort: 9098
-
-    # Server container will listen on 9098 to avoid conflicts if
-    # a user brings their own Prometheus on 9090
-    ## @param prometheus.server.extraFlags Extra flags to pass to the Prometheus server container
-    extraFlags:
-      - web.listen-address=:9098
 
     # Persistent storage configuration
     persistentVolume:

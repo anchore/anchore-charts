@@ -173,17 +173,17 @@ tests:
           path: data["prometheus.yml"]
           pattern: 'replacement: +.*:8778'
 
-  - it: self-monitoring target uses configured server servicePort (9098)
+  - it: self-monitoring target uses configured server servicePort (9090)
     set:
       prometheus.chartEnabled: true
       prometheus.server.service.type: ClusterIP
-      prometheus.server.service.servicePort: 9098
+      prometheus.server.service.servicePort: 9090
     templates:
       - templates/prometheus-config.yaml
     asserts:
       - matchRegex:
           path: data["prometheus.yml"]
-          pattern: 'targets:\n\s*- localhost:9098'
+          pattern: 'targets:\n\s*- localhost:9090'
 
   - it: node-exporter scrape respects custom service port (9099)
     set:
