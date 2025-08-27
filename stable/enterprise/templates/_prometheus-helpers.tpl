@@ -209,9 +209,9 @@ scrape_configs:
   kubernetes_sd_configs:
   - role: pod
   relabel_configs:
-    - action: keep
-      regex: kube-state-metrics
-      source_labels:
-      - __meta_kubernetes_pod_label_app_kubernetes_io_name
+  - action: keep
+    regex: kube-state-metrics
+    source_labels:
+    - __meta_kubernetes_pod_label_app_kubernetes_io_name
 {{- end }}
 {{- end }}
