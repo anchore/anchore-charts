@@ -1968,10 +1968,10 @@ prometheus:
     # Server container will listen on 9098 to avoid conflicts if
     # a user brings their own Prometheus on 9090
     ## @param prometheus.server.extraFlags Extra flags to pass to the Prometheus server container
-    # extraFlags:
-    #   - --web.listen-address=:9098
+    extraFlags:
+      - web.listen-address=:9098
 
-    # Persistent storage configuration  
+    # Persistent storage configuration
     persistentVolume:
       enabled: true
       size: 10Gi
