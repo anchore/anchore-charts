@@ -1937,9 +1937,6 @@ postgresql:
 prometheus:
   chartEnabled: false
 
-  containerPort: 9098
-  containerPortName: metrics
-
   # Disable alertmanager by default
   alertmanager:
     enabled: false
