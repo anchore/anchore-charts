@@ -202,7 +202,6 @@ scrape_configs:
     - __meta_kubernetes_pod_ip
     target_label: __address__
 {{- end }}
-    
 {{- if index .Values.prometheus "kube-state-metrics" "enabled" }}
 # Kube-state-metrics for cluster state
 - job_name: kube-state-metrics
