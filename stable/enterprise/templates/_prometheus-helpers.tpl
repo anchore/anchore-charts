@@ -183,24 +183,30 @@ scrape_configs:
     target_label: kubernetes_pod_name
 {{- if index .Values.prometheus "prometheus-node-exporter" "enabled" }}
 # Determine node-exporter port from values (default 9099)
-{{- $ne := index .Values.prometheus "prometheus-node-exporter" -}}
+{{- $ne := (index .Values "prometheus" "prometheus-node-exporter") | default (dict) -}}
 {{- $nePort := 9099 -}}
-{{- if and $ne $ne.port }}{{- $nePort = $ne.port -}}{{- else if and $ne $ne.service $ne.service.port }}{{- $nePort = $ne.service.port -}}{{- end }}
+{{- if hasKey $ne "port" -}}
+{{-   $nePort = get $ne "port" -}}
+{{- else if and (hasKey $ne "service") (hasKey (get $ne "service") "port") -}}
+{{-   $nePort = get (get $ne "service") "port" -}}
+{{- end -}}
 # Node exporter for system metrics
 - job_name: node-exporter
   kubernetes_sd_configs:
   - role: pod
   relabel_configs:
-  - action: keep
-    regex: "^prometheus-node-exporter$"
-    source_labels:
-    - __meta_kubernetes_pod_label_app_kubernetes_io_name
-  - action: replace
-    regex: "^(.+)$"
-    replacement: $1:{{ $nePort }}
-    source_labels:
-    - __meta_kubernetes_pod_ip
-    target_label: __address__
+    - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+      action: keep
+      regex: "^prometheus-node-exporter$"
+    # Ensure we only scrape the node-exporter deployed by this release
+    - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_instance]
+      action: keep
+      regex: "^{{ .Release.Name }}$"
+    - source_labels: [__meta_kubernetes_pod_ip]
+      action: replace
+      regex: "^(.+)$"
+      replacement: ${1}:{{ $nePort }}
+      target_label: __address__
 {{- end }}
 {{- if index .Values.prometheus "kube-state-metrics" "enabled" }}
 # Kube-state-metrics for cluster state
