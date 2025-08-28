@@ -101,6 +101,9 @@ tests:
       - matchRegex:
           path: data["prometheus.yml"]
           pattern: 'job_name: +kube-state-metrics'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: '__meta_kubernetes_pod_label_app_kubernetes_io_instance'
 
   - it: omits node-exporter and kube-state-metrics when disabled
     set:
@@ -199,6 +202,21 @@ tests:
       - matchRegex:
           path: data["prometheus.yml"]
           pattern: 'replacement: +\$\{1\}:9099'
+
+  - it: node-exporter scrape respects direct port override (9100)
+    set:
+      prometheus.chartEnabled: true
+      prometheus.prometheus-node-exporter.enabled: true
+      prometheus.prometheus-node-exporter.port: 9100
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'job_name: +node-exporter'
+      - matchRegex:
+          path: data["prometheus.yml"]
+          pattern: 'replacement: +\$\{1\}:9100'
 
   - it: drops non-metrics containers in Anchore pods
     set:
