@@ -192,12 +192,12 @@ scrape_configs:
   - role: pod
   relabel_configs:
   - action: keep
-    regex: ^prometheus-node-exporter$
+    regex: "^prometheus-node-exporter$"
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_name
   - action: replace
-    regex: ^(.+)$
-    replacement: ${1}:{{ $nePort }}
+    regex: "^(.+)$"
+    replacement: $1:{{ $nePort }}
     source_labels:
     - __meta_kubernetes_pod_ip
     target_label: __address__
