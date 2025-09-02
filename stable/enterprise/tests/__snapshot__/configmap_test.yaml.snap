@@ -149,6 +149,7 @@ should render additional audit uris when additionalResourceURIs is set:
             cycle_timer_seconds: 1
             cycle_timers:
               image_analyzer: 1
+              sync_clamav_db: 60
             analyzer_driver: 'nodocker'
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
@@ -182,6 +183,7 @@ should render additional audit uris when additionalResourceURIs is set:
               repo_watcher: 60
               resource_metrics: 60
               service_watcher: 15
+              syft_sbom_metadata_annotations: 150
               vulnerability_scan: 14400
             event_log:
               max_retention_age_days: 180
@@ -248,6 +250,10 @@ should render additional audit uris when additionalResourceURIs is set:
                 data:
                   grypedb:
                     enabled: true
+              extended_support:
+                rhel:
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  versions: <ALLOW_API_CONFIGURATION>
               matching:
                 exclude:
                   providers: []
@@ -287,6 +293,7 @@ should render additional audit uris when additionalResourceURIs is set:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                         enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
             nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
+            server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -571,6 +578,7 @@ should render the configmaps:
             cycle_timer_seconds: 1
             cycle_timers:
               image_analyzer: 1
+              sync_clamav_db: 60
             analyzer_driver: 'nodocker'
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
@@ -604,6 +612,7 @@ should render the configmaps:
               repo_watcher: 60
               resource_metrics: 60
               service_watcher: 15
+              syft_sbom_metadata_annotations: 150
               vulnerability_scan: 14400
             event_log:
               max_retention_age_days: 180
@@ -670,6 +679,10 @@ should render the configmaps:
                 data:
                   grypedb:
                     enabled: true
+              extended_support:
+                rhel:
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  versions: <ALLOW_API_CONFIGURATION>
               matching:
                 exclude:
                   providers: []
