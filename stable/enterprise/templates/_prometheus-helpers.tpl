@@ -189,10 +189,12 @@ scrape_configs:
 {{ if hasKey $ne "nameOverride" }}
 {{   $neName = get $ne "nameOverride" }}
 {{ end }}
-{{ if hasKey $ne "port" }}
-{{   $nePort = get $ne "port" }}
+{{ if and (hasKey $ne "service") (hasKey (get $ne "service") "targetPort") }}
+{{   $nePort = get (get $ne "service") "targetPort" }}
 {{ else if and (hasKey $ne "service") (hasKey (get $ne "service") "port") }}
 {{   $nePort = get (get $ne "service") "port" }}
+{{ else if hasKey $ne "port" }}
+{{   $nePort = get $ne "port" }}
 {{ end }}
 # Node exporter for system metrics
 - job_name: node-exporter
