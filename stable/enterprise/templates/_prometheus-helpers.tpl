@@ -182,19 +182,19 @@ scrape_configs:
     - __meta_kubernetes_pod_name
     target_label: kubernetes_pod_name
 {{- if index .Values.prometheus "prometheus-node-exporter" "enabled" }}
-# Determine node-exporter port from values (default 9099)
+# Determine node-exporter port from values (default 9120)
 {{ $ne := (index .Values "prometheus" "prometheus-node-exporter") | default (dict) }}
-{{ $nePort := 9099 }}
+{{ $nePort := 9120 }}
 {{ $neName := "prometheus-node-exporter" }}
 {{ if hasKey $ne "nameOverride" }}
 {{   $neName = get $ne "nameOverride" }}
 {{ end }}
-{{ if and (hasKey $ne "service") (hasKey (get $ne "service") "targetPort") }}
+{{ if hasKey $ne "port" }}
+{{   $nePort = get $ne "port" }}
+{{ else if and (hasKey $ne "service") (hasKey (get $ne "service") "targetPort") }}
 {{   $nePort = get (get $ne "service") "targetPort" }}
 {{ else if and (hasKey $ne "service") (hasKey (get $ne "service") "port") }}
 {{   $nePort = get (get $ne "service") "port" }}
-{{ else if hasKey $ne "port" }}
-{{   $nePort = get $ne "port" }}
 {{ end }}
 # Node exporter for system metrics
 - job_name: node-exporter
