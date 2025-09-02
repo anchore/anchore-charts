@@ -1972,16 +1972,16 @@ prometheus:
   # <release>-enterprise-prometheus-node-exporter-xxxxx
     ## @param prometheus.prometheus-node-exporter.nameOverride Base name override for node-exporter resources
     nameOverride: enterprise-prometheus-node-exporter
-  # Listen and expose metrics on port 9099 to avoid conflicts if a user brings their own Prometheus
+  # Listen and expose metrics on port 9120 to avoid conflicts if a user brings their own Prometheus
     ## @param prometheus.prometheus-node-exporter.port Container port where node-exporter exposes metrics
-    port: 9099
+    port: 9120
     service:
       ## @param prometheus.prometheus-node-exporter.service.name Service name for node-exporter
       name: enterprise-prometheus-node-exporter
       ## @param prometheus.prometheus-node-exporter.service.port Service port for node-exporter
-      port: 9099
+      port: 9120
       ## @param prometheus.prometheus-node-exporter.service.targetPort Target port on the node-exporter pod the Service forwards to
-      targetPort: 9099
+      targetPort: 9120
 
   # Enable cluster monitoring
   kube-state-metrics:

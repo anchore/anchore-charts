@@ -188,11 +188,11 @@ tests:
           path: data["prometheus.yml"]
           pattern: 'targets:\n\s*- localhost:9090'
 
-  - it: node-exporter scrape respects custom service port (9099)
+  - it: node-exporter scrape respects custom service port (9120)
     set:
       prometheus.chartEnabled: true
       prometheus.prometheus-node-exporter.enabled: true
-      prometheus.prometheus-node-exporter.service.port: 9099
+      prometheus.prometheus-node-exporter.service.port: 9120
     templates:
       - templates/prometheus-config.yaml
     asserts:
@@ -201,7 +201,7 @@ tests:
           pattern: 'job_name: +node-exporter'
       - matchRegex:
           path: data["prometheus.yml"]
-          pattern: 'replacement: +\$\{1\}:9099'
+          pattern: 'replacement: +\$\{1\}:9120'
 
   - it: node-exporter scrape respects direct port override (9100)
     set:
