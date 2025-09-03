@@ -26,7 +26,7 @@ migration job should match snapshot:
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -41,6 +41,10 @@ migration job should match snapshot:
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "2"
     imagePullSecrets:
       - name: anchore-enterprise-pullcreds
     initContainers:
@@ -53,7 +57,7 @@ migration job should match snapshot:
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.30
+        image: bitnamilegacy/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
@@ -89,7 +93,7 @@ migration job should match snapshot:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -148,7 +152,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -163,6 +167,10 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "2"
     imagePullSecrets:
       - name: anchore-enterprise-pullcreds
     initContainers:
@@ -175,7 +183,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.30
+        image: bitnamilegacy/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
@@ -211,7 +219,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -268,7 +276,7 @@ migration job should match snapshot analysisArchiveMigration to true:
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -283,6 +291,10 @@ migration job should match snapshot analysisArchiveMigration to true:
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "2"
     imagePullSecrets:
       - name: anchore-enterprise-pullcreds
     initContainers:
@@ -295,7 +307,7 @@ migration job should match snapshot analysisArchiveMigration to true:
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.30
+        image: bitnamilegacy/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
@@ -331,7 +343,7 @@ migration job should match snapshot analysisArchiveMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -387,7 +399,7 @@ migration job should match snapshot objectStoreMigration to true:
               name: test-release-enterprise-config-env-vars
           - secretRef:
               name: test-release-enterprise
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
         volumeMounts:
@@ -402,6 +414,10 @@ migration job should match snapshot objectStoreMigration to true:
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "2"
     imagePullSecrets:
       - name: anchore-enterprise-pullcreds
     initContainers:
@@ -414,7 +430,7 @@ migration job should match snapshot objectStoreMigration to true:
         command:
           - /bin/bash
           - -c
-        image: bitnami/kubectl:1.30
+        image: bitnamilegacy/kubectl:1.30
         name: scale-down-anchore
       - args:
           - |
@@ -450,7 +466,7 @@ migration job should match snapshot objectStoreMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-        image: docker.io/anchore/enterprise:v5.18.0
+        image: docker.io/anchore/enterprise:v5.20.2
         imagePullPolicy: IfNotPresent
         name: wait-for-db
     restartPolicy: Never
@@ -585,7 +601,7 @@ should render proper initContainers:
       command:
         - /bin/bash
         - -c
-      image: bitnami/kubectl:1.30
+      image: bitnamilegacy/kubectl:1.30
       name: scale-down-anchore
     - args:
         - |
@@ -621,6 +637,6 @@ should render proper initContainers:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-      image: docker.io/anchore/enterprise:v5.18.0
+      image: docker.io/anchore/enterprise:v5.20.2
       imagePullPolicy: IfNotPresent
       name: wait-for-db

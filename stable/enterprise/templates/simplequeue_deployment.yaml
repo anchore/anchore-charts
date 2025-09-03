@@ -23,6 +23,10 @@ spec:
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}
+      {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
+      initContainers:
+        {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}

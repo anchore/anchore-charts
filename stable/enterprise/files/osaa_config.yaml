@@ -64,7 +64,7 @@ webhooks: {{- toYaml .Values.anchoreConfig.webhooks | nindent 2 }}
 default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
 default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
-configuration: 
+configuration:
   api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
 
 keys:
@@ -167,8 +167,8 @@ services:
       max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
     runtime_compliance:
       object_store_bucket: "runtime_compliance_check"
-    down_analyzer_task_requeue: ${ANCHORE_ANALYZER_TASK_REQUEUE}
     import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+    analysis_queue_priority: {{ .Values.anchoreConfig.catalog.analysis_queue_priority }}
     sbom_vuln_scan:
       auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
       batch_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.batch_size }}
@@ -263,6 +263,7 @@ services:
               by_cpe:
                 # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                 enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+    nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
@@ -295,6 +296,7 @@ services:
     data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
     data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
     data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+    ingress_images_max_workers: {{ .Values.anchoreConfig.reports_worker.ingress_images_max_workers }}
     cycle_timers: {{- toYaml .Values.anchoreConfig.reports_worker.cycle_timers | nindent 6 }}
     runtime_report_generation:
       use_legacy_loaders_and_queries: {{ .Values.anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries }}
@@ -327,13 +329,6 @@ services:
     port: ${ANCHORE_PORT}
     auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
     upload_dir: {{ .Values.scratchVolume.mountPath }}
-    datasets:
-      vulnerability_db:
-        versions: ["5"]
-      clamav_db:
-        versions: ["1"]
-      kev_db:
-        versions: ["1"]
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}

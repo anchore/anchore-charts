@@ -37,3 +37,15 @@ For more details see the v2.1.0 release notes - https://github.com/anchore/ancho
 {{ end }}
 
 {{ include "enterprise.kubectl.deprecationWarnings" . }}
+
+{{ if or (.Values.postgresql.chartEnabled) (index .Values "ui-redis" "chartEnabled") }}
+******************
+
+WARNING: Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the dependent helm chart for postgres and redis.
+The following values changes will be needed to use their legacy image repo if you are using the dependent postgres and redis charts which will not receive any further updates post August 28th, 2025.
+  postgresql.image.repository=bitnamilegacy/postgresql
+  ui-redis.image.repository=bitnamilegacy/redis
+
+This is a temporary workaround while we review options on how to proceed with these dependencies
+******************
+{{ end }}

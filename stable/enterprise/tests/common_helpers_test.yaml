@@ -236,6 +236,7 @@ tests:
     documentIndex: 0
     set:
       cloudsql.enabled: true
+      cloudsql.useSideCar: false
     asserts:
       - contains:
           path: spec.template.spec.containers
@@ -248,11 +249,38 @@ tests:
           count: 1
           any: true
 
+  - it: should render clouddsql init container for all deployments and default upgrade job
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+          count: 1
+          any: true
+
   - it: should render clouddsql container and extraArgs for all deployments and default upgrade job
     templates: *test_templates
     documentIndex: 0
     set:
       cloudsql.enabled: true
+      cloudsql.useSideCar: false
       cloudsql.extraArgs:
         - myExtraArg
         - myOtherExtraArg
@@ -273,11 +301,41 @@ tests:
             - "myOtherExtraArg"
           count: 1
 
+  - it: should render clouddsql init container and extraArgs for all deployments and default upgrade job
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+      cloudsql.extraArgs:
+        - myExtraArg
+        - myOtherExtraArg
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+              - myExtraArg
+              - myOtherExtraArg
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+
   - it: should render clouddsql container, additional arg, and volumeMount when useExistingServiceAcc is true for all deployments and default upgrade job
     templates: *test_templates
     documentIndex: 0
     set:
       cloudsql.enabled: true
+      cloudsql.useSideCar: false
       cloudsql.extraArgs:
         - myExtraArg
         - myOtherExtraArg
@@ -304,6 +362,70 @@ tests:
             name: "cloudsqlServiceAccSecretName"
             readOnly: true
           count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: "cloudsqlServiceAccSecretName"
+            secret:
+              secretName: "cloudsqlServiceAccSecretName"
+          count: 1
+
+
+  - it: should render clouddsql init container, additional arg, and volumeMount when useExistingServiceAcc is true for all deployments and default upgrade job
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+      cloudsql.extraArgs:
+        - myExtraArg
+        - myOtherExtraArg
+      cloudsql.useExistingServiceAcc: true
+      cloudsql.serviceAccSecretName: cloudsqlServiceAccSecretName
+      cloudsql.serviceAccJsonName: cloudsqlServiceAccJsonName
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            args:
+              - -instances==tcp:5432
+              - -use_http_health_check
+              - myExtraArg
+              - myOtherExtraArg
+              - -credential_file=/var/cloudsqlServiceAccSecretName/cloudsqlServiceAccJsonName
+            command:
+              - /cloud_sql_proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+            imagePullPolicy: IfNotPresent
+            livenessProbe:
+              failureThreshold: 6
+              httpGet:
+                path: /liveness
+                port: cloudsql-proxy
+                scheme: HTTP
+              initialDelaySeconds: 120
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10
+            name: cloudsql-proxy
+            ports:
+              - containerPort: 8090
+                name: cloudsql-proxy
+                protocol: TCP
+            restartPolicy: Always
+            startupProbe:
+              failureThreshold: 3
+              httpGet:
+                path: /startup
+                port: cloudsql-proxy
+                scheme: HTTP
+              periodSeconds: 10
+              successThreshold: 1
+              timeoutSeconds: 10
+            volumeMounts:
+              - mountPath: /var/cloudsqlServiceAccSecretName
+                name: cloudsqlServiceAccSecretName
+                readOnly: true
       - contains:
           path: spec.template.spec.volumes
           content:
@@ -714,34 +836,13 @@ tests:
         count: 1
         any: true
 
-  # since postgresql is enabled, should still use the chart postgresql service name
-  - it: should render dbHostname with externalEndpoint defined and postgresql enabled
+  # if they set an endpoint, use that.
+  - it: should render dbHostname with externalEndpoint defined
     set:
       postgresql:
         externalEndpoint: my-endpoint
-        enabled: true
         cloudsql:
           enabled: true
-    templates:
-      - anchore_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_DB_HOST: test-release-postgresql
-        count: 1
-        any: true
-      - isNotSubset:
-          path: stringData
-          content:
-            ANCHORE_DB_HOST: localhost
-
-  - it: should render dbHostname with externalEndpoint defined and postgresql disabled
-    set:
-      postgresql:
-        externalEndpoint: my-endpoint
-        enabled: false
     templates:
       - anchore_secret.yaml
     documentIndex: 0
@@ -752,11 +853,13 @@ tests:
             ANCHORE_DB_HOST: my-endpoint
         count: 1
         any: true
+      - isNotSubset:
+          path: stringData
+          content:
+            ANCHORE_DB_HOST: localhost
 
-  - it: should render dbHostname with cloudsql enabled and postgresql disabled
+  - it: should render dbHostname with cloudsql enabled
     set:
-      postgresql:
-        enabled: false
       cloudsql:
         enabled: true
     templates:
@@ -766,7 +869,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_DB_HOST: localhost
+            ANCHORE_DB_HOST: "127.0.0.1"
         count: 1
         any: true
 
@@ -804,7 +907,7 @@ tests:
     set:
       postgresql:
         externalEndpoint: my-endpoint
-        enabled: true
+        chartEnabled: true
         cloudsql:
           enabled: true
     templates:
@@ -814,7 +917,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@test-release-postgresql/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@my-endpoint/anchore
         count: 1
         any: true
       - isNotSubset:
@@ -826,7 +929,7 @@ tests:
     set:
       postgresql:
         externalEndpoint: my-endpoint
-        enabled: false
+
     templates:
       - ui_secret.yaml
     documentIndex: 0
@@ -841,7 +944,7 @@ tests:
   - it: should render dbHostname with cloudsql enabled and postgresql disabled for ui_secret.yaml
     set:
       postgresql:
-        enabled: false
+        chartEnabled: false
       cloudsql:
         enabled: true
     templates:
@@ -851,7 +954,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@localhost/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@127.0.0.1/anchore
         count: 1
         any: true
 
@@ -1035,3 +1138,65 @@ tests:
               maxSkew: 1
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: DoNotSchedule
+
+  - it: should render enterprise image when passed in as a string
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      image: "anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore/enterprise:9.9.9"
+
+
+  - it: should render enterprise image when passed in as a string
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      image: "anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore/enterprise:9.9.9"
+
+  - it: should render enterprise image when passed in as a dict
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      image:
+        registry: "anchore.com"
+        repository: "anchore/enterprise"
+        tag: "9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore.com/anchore/enterprise:9.9.9"
+
+  - it: should render enterprise ui image when passed in as a dict
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      ui:
+        image:
+          registry: "anchore.com"
+          repository: "anchore/enterprise-ui"
+          tag: "9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore.com/anchore/enterprise-ui:9.9.9"
+
+  - it: should render proper dnsConfig when ndots is set
+    templates: *test_templates
+    documentIndex: 0
+    set:
+      dnsConfig:
+        ndots: 5
+    asserts:
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].name
+          value: ndots
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].value
+          value: "5"

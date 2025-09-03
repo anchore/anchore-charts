@@ -21,10 +21,10 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.18.0
+image: docker.io/anchore/enterprise:v5.20.2
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.18.0"
+  # tag: "v5.20.1"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -41,9 +41,9 @@ imagePullSecretName: anchore-enterprise-pullcreds
 ## @param kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade
 ## This is only used in the osaaMigration and upgrade jobs.
 ##
-kubectlImage: bitnami/kubectl:1.30
+kubectlImage: bitnamilegacy/kubectl:1.30
   # registry: docker.io
-  # repository: bitnami/kubectl
+  # repository: bitnamilegacy/kubectl
   # tag: "1.30"
   # digest: sha256:abcdef123456
 
@@ -261,6 +261,12 @@ scripts:
 ##
 domainSuffix: ""
 
+## @param dnsConfig.ndots ndots value for the DNS config
+## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-config
+##
+dnsConfig:
+  ndots: 2
+
 #####################################################################
 ## @section Anchore Configuration Parameters
 ## Params used for all Anchore Enterprise service configuration files
@@ -314,9 +320,12 @@ anchoreConfig:
     timeout_keep_alive: 5
 
   ## @param anchoreConfig.audit.enabled Enable audit logging
+  ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
   ##
   audit:
     enabled: true
+    additionalResourceURIs: []
+      # - "/images"
 
   ## @param anchoreConfig.allow_awsecr_iam_auto Enable AWS IAM instance role for ECR auth
   ## When set, if a registry credential username is set to 'iamauto' for an ecr registry, the engine will
@@ -529,12 +538,18 @@ anchoreConfig:
           enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
           # Maximum time in milliseconds that a ClamAV scan is allowed to run
-          max_scan_time: 180000
+          max_scan_time: 1800000
 
   catalog:
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
     account_prometheus_metrics: "<ALLOW_API_CONFIGURATION>"  # false
+
+    ## @param anchoreConfig.catalog.analysis_queue_priority Allow prioritization of new analysis jobs based on the ingress method.
+    ## Valid values are: 'fair', 'api'
+    ## 'fair' will function as first in first out
+    ## 'api' will prioritize API requested image/source adds or imports over subscription based jobs such as repo watcher, tag watcher, or runtime inventory watcher.
+    analysis_queue_priority: "<ALLOW_API_CONFIGURATION>"  # fair
 
     ## @param anchoreConfig.catalog.sbom_vuln_scan.auto_scale Automatically scale batch_size and pool_size. Disable to configure manually.
     ## @param anchoreConfig.catalog.sbom_vuln_scan.batch_size The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled
@@ -627,10 +642,6 @@ anchoreConfig:
     integrations:
       integration_health_report_ttl_days: 2
 
-    ## @param anchoreConfig.catalog.down_analyzer_task_requeue Allows fast re-queueing when image status is 'analyzing' on an analyzer that is no longer in the 'up' state
-    ##
-    down_analyzer_task_requeue: true
-
   policy_engine:
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
@@ -642,6 +653,9 @@ anchoreConfig:
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
+
+    ## @param anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
+    nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
 
   notifications:
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
@@ -679,6 +693,11 @@ anchoreConfig:
     use_volume: false
 
   reports_worker:
+
+    ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
+    ##
+    ingress_images_max_workers: 10
+
     ## @param anchoreConfig.reports_worker.enable_data_ingress Enable periodically syncing data into the Anchore Reports Service
     ##
     enable_data_ingress: true
@@ -783,6 +802,28 @@ anchoreConfig:
     custom_message: {}
       # title: "Title goes here..."
       # message: "Message goes here..."
+
+    ## @param anchoreConfig.ui.banners Provide messages that will be displayed as a banner at the top and/or bottom of the application or only the login page.
+    ## anchoreConfig.ui.banners.top
+    ## anchoreConfig.ui.banners.bottom
+    ## You can set either or both banners. Each banner is defined by a key that contains an object with the following properties:
+    ## - `text` (string): The message to be displayed in the banner. This can be up to `2000` characters long.
+    ## - `text_color` (string): The color of the text in the banner.
+    ## - `background_color` (string): The background color of the banner.
+    ## - `display` (string): The display condition for the banner. This can be set to `always` or `login-only`. If not specified, the default is `always`. The `login-only` option will only display the banner on the login page.
+    ## NOTE: You may need to HTML encode the text if there are any non-alphanumeric characters present.
+    ##
+    banners: {}
+      # top:
+      #   text: "Custom message for the top banner..."
+      #   text_color: ""
+      #   background_color: ""
+      #   display: "always"
+      # bottom:
+      #   text: "Custom message for the bottom banner..."
+      #   text_color: ""
+      #   background_color: ""
+      #   display: "login-only"
 
     ## @param anchoreConfig.ui.log_level Descriptive detail of the application log output
     ## valid values are error, warn, info, http, debug
@@ -1523,10 +1564,10 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.18.0
+  image: docker.io/anchore/enterprise-ui:v5.20.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.18.0"
+    # tag: "v5.20.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
@@ -1646,7 +1687,7 @@ upgradeJob:
   ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
   ## This is only used in the preupgrade job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
   ##
-  kubectlImage: bitnami/kubectl:1.30
+  kubectlImage: bitnamilegacy/kubectl:1.30
 
   ## @param upgradeJob.extraVolumes Define additional volumes for Anchore upgrade job pod
   ##
@@ -1716,10 +1757,12 @@ ingress:
   apiHosts: []
 
   ## @param ingress.apiPaths The path used for accessing the Anchore API
+  ## the /exp/ route is required for Anchore STIG features
   ##
   apiPaths:
     - /v2/
     - /version/
+    - /exp/
 
   ## @param ingress.uiHosts List of custom hostnames for the Anchore UI
   ##
@@ -1753,7 +1796,7 @@ cloudsql:
 
   ## @param cloudsql.image Image to use for GCE CloudSQL Proxy
   ##
-  image: gcr.io/cloudsql-docker/gce-proxy:1.25.0
+  image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
 
   ## @param cloudsql.imagePullPolicy Image Pull Policy to use for CloudSQL image
   ##
@@ -1762,6 +1805,11 @@ cloudsql:
   ## @param cloudsql.instance CloudSQL instance, eg: 'project:zone:instancename'
   ##
   instance: ""
+
+  ## @param cloudsql.useSideCar Run cloudsql proxy as a sidecar
+  ## If set to true (default) cloudsql proxy will run as a sidecar - this requires Kubernetes v1.29+.
+  ## Set to false if using cloudsql & kubernetes < 1.29
+  useSideCar: false
 
   ## @param cloudsql.useExistingServiceAcc Use existing service account
   ## If using an existing Service Account, you must create a secret which includes the JSON token from Google's IAM
@@ -1818,7 +1866,7 @@ ui-redis:
   ##
   image:
     registry: docker.io
-    repository: bitnami/redis
+    repository: bitnamilegacy/redis
     tag: 7.0.12-debian-11-r0
     pullSecrets:
       - anchore-enterprise-pullcreds
@@ -1880,7 +1928,7 @@ postgresql:
   ## @param postgresql.image.pullSecrets Specifies the image pull secrets to use for this chart.
   ##
   image:
-    repository: bitnami/postgresql
+    repository: bitnamilegacy/postgresql
     registry: docker.io
     tag: 13.11.0-debian-11-r15
     pullSecrets:
@@ -1901,7 +1949,7 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
   ## This is only used in the osaaMigrationJob job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
   ##
-  kubectlImage: bitnami/kubectl:1.30
+  kubectlImage: bitnamilegacy/kubectl:1.30
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
@@ -1987,3 +2035,15 @@ osaaMigrationJob:
       storage_driver:
         name: db
         config: {}
+
+## @param extraManifests List of additional manifests to be included in the chart
+##
+extraManifests: []
+  # - |
+  #   apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #   labels:
+  #     name: prometheus-extra
+  #   data:
+  #     extra-data: "value"
