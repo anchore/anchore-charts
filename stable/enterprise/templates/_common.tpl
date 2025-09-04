@@ -506,3 +506,23 @@ Deployment Strategy Definition. For preupgrade hooks, use RollingUpdate. For pos
 {{- define "enterprise.common.deploymentStrategy" -}}
 type: Recreate
 {{- end -}}
+
+{{/*
+Render sidecar containers for a specific component
+Usage: {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
+*/}}
+{{- define "enterprise.common.sidecars" -}}
+{{- $component := .component -}}
+
+{{/* First add any global sidecars */}}
+{{- with .Values.sidecars }}
+{{ toYaml . }}
+{{- end }}
+
+{{/* Then add component-specific sidecars */}}
+{{- if $component }}
+  {{- with (index .Values (print $component)).sidecars }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+{{- end -}}

@@ -32,6 +32,7 @@ spec:
       {{- if and (.Values.cloudsql.enabled) (not .Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
+      {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
