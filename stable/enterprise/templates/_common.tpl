@@ -40,9 +40,10 @@ Service annotations
 {{- end -}}
 
 {{/*
-Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true
+Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true and .Values.cloudsql.useSideCar false
 */}}
 {{- define "enterprise.common.cloudsqlContainer" -}}
+{{- if and (.Values.cloudsql.enabled) (not .Values.cloudsql.useSideCar) -}}
 - name: cloudsql-proxy
   image: {{ .Values.cloudsql.image }}
   imagePullPolicy: {{ .Values.cloudsql.imagePullPolicy }}
@@ -65,8 +66,64 @@ Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsq
       name: {{ .Values.cloudsql.serviceAccSecretName }}
       readOnly: true
 {{- end }}
+{{- end }}
 {{- end -}}
 
+
+{{/*
+Setup a sidecar container for the cloudsql proxy to run in all pods when .Values.cloudsql.enabled = true and .Values.cloudsql.useSideCar
+*/}}
+{{- define "enterprise.common.cloudsqlInitContainer" -}}
+{{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) -}}
+- name: cloudsql-proxy
+  image: {{ .Values.cloudsql.image }}
+  imagePullPolicy: {{ .Values.cloudsql.imagePullPolicy }}
+  restartPolicy: Always
+  ports:
+    - name: cloudsql-proxy
+      containerPort: 8090
+      protocol: TCP
+{{- with .Values.containerSecurityContext }}
+  securityContext:
+    {{ toYaml . | nindent 4 }}
+{{- end }}
+  command: ["/cloud_sql_proxy"]
+  args:
+    - "-instances={{ .Values.cloudsql.instance }}=tcp:5432"
+    - "-use_http_health_check"
+  {{- if .Values.cloudsql.extraArgs }}
+    {{- range $arg := .Values.cloudsql.extraArgs }}
+    - {{ quote $arg }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.cloudsql.useExistingServiceAcc }}
+    - "-credential_file=/var/{{ .Values.cloudsql.serviceAccSecretName }}/{{ .Values.cloudsql.serviceAccJsonName }}"
+  volumeMounts:
+    - mountPath: "/var/{{ .Values.cloudsql.serviceAccSecretName }}"
+      name: {{ .Values.cloudsql.serviceAccSecretName }}
+      readOnly: true
+  livenessProbe:
+    httpGet:
+      path: /liveness
+      port: cloudsql-proxy
+      scheme: HTTP
+    initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+    timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+    periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+    failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+    successThreshold: {{ .Values.probes.liveness.successThreshold }}
+  startupProbe:
+    httpGet:
+      path: /startup
+      port: cloudsql-proxy
+      scheme: HTTP
+    timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+    periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+    failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+    successThreshold: {{ .Values.probes.readiness.successThreshold }}
+{{- end }}
+{{- end }}
+{{- end -}}
 
 {{/*
 Setup the common docker-entrypoint command for all Anchore Enterprise containers
@@ -349,6 +406,10 @@ topologySpreadConstraints: {{- toYaml . | nindent 2 }}
 {{- with (default .Values.tolerations (index .Values (print $component)).tolerations) }}
 tolerations: {{- toYaml . | nindent 2 }}
 {{- end }}
+dnsConfig:
+  options:
+    - name: ndots
+      value: {{ .Values.dnsConfig.ndots | quote }}
 {{- end -}}
 
 
