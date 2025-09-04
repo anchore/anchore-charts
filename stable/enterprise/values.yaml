@@ -188,6 +188,14 @@ extraVolumeMounts: []
 #   subPath: config
 #   readOnly: true
 
+## @param sidecars List of sidecar containers to add to all deployments
+## Each sidecar should be a complete container definition
+##
+sidecars: []
+# - name: global-sidecar
+#   image: example/sidecar:latest
+#   imagePullPolicy: IfNotPresent
+
 ## @param securityContext.runAsUser The securityContext runAsUser for all Anchore pods
 ## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore pods
 ## @param securityContext.fsGroup The securityContext fsGroup for all Anchore pods
@@ -924,6 +932,13 @@ analyzer:
   ##
   serviceAccountName: ""
 
+  ## @param analyzer.sidecars List of sidecar containers to add to the Analyzer deployment
+  ##
+  sidecars: []
+  # - name: analyzer-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
   ## @param analyzer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Analyzer scratch space
   ## Used for analysis of the images scanned by the Anchore Analyzer
   ##
@@ -1003,6 +1018,13 @@ api:
   ##
   serviceAccountName: ""
 
+  ## @param api.sidecars List of sidecar containers to add to the API deployment
+  ##
+  sidecars: []
+  # - name: api-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
 #####################################################
 ## @section Anchore Catalog k8s Deployment Parameters
 #####################################################
@@ -1076,6 +1098,13 @@ catalog:
   ## @param catalog.serviceAccountName Service account name for Anchore Catalog pods
   ##
   serviceAccountName: ""
+
+  ## @param catalog.sidecars List of sidecar containers to add to the Catalog deployment
+  ##
+  sidecars: []
+  # - name: catalog-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
 
   ## @param catalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Catalog scratch space
   ## Used for the Anchore Catalog service archival process, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
@@ -1157,6 +1186,13 @@ dataSyncer:
   ##
   serviceAccountName: ""
 
+  ## @param dataSyncer.sidecars List of sidecar containers to add to the DataSyncer deployment
+  ##
+  sidecars: []
+  # - name: datasyncer-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
   ## @param dataSyncer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore DataSyncer scratch space
   ## Used for the Anchore DataSyncer service to download and sync the feeds data
   ##
@@ -1236,6 +1272,13 @@ notifications:
   ## @param notifications.serviceAccountName Service account name for Anchore Notifications pods
   ##
   serviceAccountName: ""
+
+  ## @param notifications.sidecars List of sidecar containers to add to the Notifications deployment
+  ##
+  sidecars: []
+  # - name: notifications-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
 
 ###########################################################
 ## @section Anchore Policy Engine k8s Deployment Parameters

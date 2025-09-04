@@ -38,6 +38,7 @@ spec:
       {{- end }}
       containers:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+        {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
