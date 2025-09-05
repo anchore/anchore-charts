@@ -24,7 +24,7 @@ global:
 image: docker.io/anchore/enterprise:v5.21.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.20.1"
+  # tag: "v5.21.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -1575,7 +1575,7 @@ ui:
   image: docker.io/anchore/enterprise-ui:v5.21.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.20.0"
+    # tag: "v5.21.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
