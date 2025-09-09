@@ -526,3 +526,17 @@ Usage: {{- include "enterprise.common.sidecars" (merge (dict "component" $compon
   {{- end }}
 {{- end }}
 {{- end -}}
+
+Common server blocks
+When calling this template, .anchoreService can be included in the context for anchoreService specific server blocks
+{{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.server" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server }}
+{{- if $server }}
+{{- toYaml $server | nindent 6 }}
+{{- else -}}
+{}{{- end }}
+{{- end }}
+
