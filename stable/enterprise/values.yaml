@@ -1984,11 +1984,9 @@ prometheus:
   # Enable supporting components - users can disable if not needed
   prometheus-node-exporter:
     enabled: true
-  # Set resource name base so DaemonSet/pods appear as
-  # <release>-enterprise-prometheus-node-exporter-xxxxx
-    ## @param prometheus.prometheus-node-exporter.nameOverride Base name override for node-exporter resources
+    ## @param prometheus.prometheus-node-exporter.nameOverride Base name for node-exporter resources (will be prefixed by release name)
     nameOverride: enterprise-prometheus-node-exporter
-  # Listen and expose metrics on port 9120 to avoid conflicts if a user brings their own Prometheus
+    # Listen and expose metrics on port 9120 to avoid conflicts if a user has an existing Prometheus setup
     ## @param prometheus.prometheus-node-exporter.port Container port where node-exporter exposes metrics
     port: 9120
     service:
