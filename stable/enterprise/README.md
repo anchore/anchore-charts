@@ -418,6 +418,32 @@ anchoreConfig:
 
 For those using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/developer/getting-started.md), a ServiceMonitor can be deployed within the same namespace as your Anchore Enterprise release. Once deployed, the Prometheus operator will automatically begin scraping the pre-configured endpoints for metrics.
 
+#### Built-in Prometheus (optional)
+
+This chart can optionally deploy the community Prometheus chart and setup a ConfigMap containing a working prometheus.yml with a scalable scrape config for Anchore Enterprise and common Kubernetes targets.
+
+- Toggle with `prometheus.chartEnabled` (default: `false`).
+- By default, this chart renders a ConfigMap named `<release-name>-anchore-enterprise-prometheus-config` (via `prometheus.server.configMapOverrideName`). You can override the suffix by setting `prometheus.server.configMapOverrideName`.
+- To have Prometheus use that ConfigMap, set `serverFiles` via the subchart or set `prometheus.server.configMapOverrideName` to the same name used by the generated ConfigMap.
+- You must enable the Anchore metrics endpoint as shown above for services to export metrics.
+
+Minimal example to enable metrics and the bundled Prometheus:
+
+```yaml
+anchoreConfig:
+  metrics:
+    enabled: true
+    auth_disabled: true
+
+prometheus:
+  chartEnabled: true
+```
+
+Notes:
+
+- The generated prometheus.yml autodiscovers Anchore Enterprise pods and maps each component to its metrics port, and sets `__metrics_path__` to `/metrics`.
+- If you set a custom `configMapOverrideName`, ensure it matches both the generated ConfigMap and the Prometheus subchart setting so the server picks it up.
+
 #### Example ServiceMonitor Configuration
 
 The `targetPort` values in this example use the default Anchore Enterprise service ports.
@@ -1158,6 +1184,38 @@ To restore your deployment to using your previous driver configurations:
 | `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`                        |
 | `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15`            |
 | `postgresql.image.pullSecrets`                | Specifies the image pull secrets to use for this chart.                                     | `["anchore-enterprise-pullcreds"]` |
+
+### Optional Prometheus Monitoring for Anchore Enterprise
+
+| Name                                                          | Description                                                                                                                                                                                | Value                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| `prometheus.chartEnabled`                                     | Enable Prometheus monitoring for Anchore Enterprise                                                                                                                                        | `false`                                |
+| `prometheus.alertmanager.enabled`                             | Enable Alertmanager for alert management                                                                                                                                                   | `false`                                |
+| `prometheus.server.retention`                                 | Data retention period for Prometheus                                                                                                                                                       | `14d`                                  |
+| `prometheus.server.retentionSize`                             | Maximum storage size for Prometheus data                                                                                                                                                   | `8GB`                                  |
+| `prometheus.server.service.type`                              | Kubernetes service type for Prometheus                                                                                                                                                     | `ClusterIP`                            |
+| `prometheus.server.persistentVolume.enabled`                  | Enable persistent storage for Prometheus                                                                                                                                                   | `true`                                 |
+| `prometheus.server.persistentVolume.size`                     | Storage size for Prometheus persistent volume                                                                                                                                              | `10Gi`                                 |
+| `prometheus.prometheus-node-exporter.enabled`                 | Enable node-exporter for node metrics                                                                                                                                                      | `true`                                 |
+| `prometheus.kube-state-metrics.enabled`                       | Enable kube-state-metrics for cluster metrics                                                                                                                                              | `true`                                 |
+| `prometheus.prometheus-pushgateway.enabled`                   | Enable pushgateway for custom metrics                                                                                                                                                      | `false`                                |
+| `prometheus.server.name`                                      | Name override for Prometheus server resources                                                                                                                                              | `enterprise-prometheus-server`         |
+| `prometheus.server.configMapOverrideName`                     | Name of an existing ConfigMap to override the default Prometheus server configuration                                                                                                      | `anchore-enterprise-prometheus-config` |
+| `prometheus.prometheus-node-exporter.nameOverride`            | Base name for node-exporter resources (will be prefixed by release name)                                                                                                                   | `enterprise-prometheus-node-exporter`  |
+| `prometheus.prometheus-node-exporter.port`                    | Container port where node-exporter exposes metrics                                                                                                                                         | `9120`                                 |
+| `prometheus.prometheus-node-exporter.service.name`            | Service name for node-exporter                                                                                                                                                             | `enterprise-prometheus-node-exporter`  |
+| `prometheus.prometheus-node-exporter.service.port`            | Service port for node-exporter                                                                                                                                                             | `9120`                                 |
+| `prometheus.prometheus-node-exporter.service.targetPort`      | Target port on the node-exporter pod the Service forwards to                                                                                                                               | `9120`                                 |
+| `prometheus.prometheus-pushgateway.persistence.enabled`       | Enable persistence using Persistent Volume Claims. If you have multiple instances (server.repicacount > 1), please consider using an external storage service like Thanos or Grafana Mimir | `false`                                |
+| `prometheus.prometheus-pushgateway.persistence.mountPath`     | Path to mount the volume at.                                                                                                                                                               | `/bitnami/prometheus/data`             |
+| `prometheus.prometheus-pushgateway.persistence.subPath`       | The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services                                                                                    | `""`                                   |
+| `prometheus.prometheus-pushgateway.persistence.storageClass`  | Storage class of backing PVC                                                                                                                                                               | `""`                                   |
+| `prometheus.prometheus-pushgateway.persistence.annotations`   | Persistent Volume Claim annotations                                                                                                                                                        | `{}`                                   |
+| `prometheus.prometheus-pushgateway.persistence.accessModes`   | Persistent Volume Access Modes                                                                                                                                                             | `["ReadWriteOnce"]`                    |
+| `prometheus.prometheus-pushgateway.persistence.size`          | Size of data volume                                                                                                                                                                        | `10Gi`                                 |
+| `prometheus.prometheus-pushgateway.persistence.existingClaim` | The name of an existing PVC to use for persistence                                                                                                                                         | `""`                                   |
+| `prometheus.prometheus-pushgateway.persistence.selector`      | Selector to match an existing Persistent Volume for Prometheus data PVC                                                                                                                    | `{}`                                   |
+| `prometheus.prometheus-pushgateway.persistence.dataSource`    | Custom PVC data source                                                                                                                                                                     | `{}`                                   |
 
 ### Anchore Object Store and Analysis Archive Migration
 

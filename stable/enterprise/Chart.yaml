@@ -1,6 +1,6 @@
 apiVersion: v2
 name: enterprise
-version: "3.15.0"
+version: "3.15.2"
 appVersion: "5.21.0"
 kubeVersion: 1.23.x - 1.33.x || 1.23.x-x - 1.33.x-x
 description: |
@@ -40,3 +40,8 @@ dependencies:
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: ui-redis.chartEnabled
     alias: ui-redis
+  - name: prometheus
+    version: "~27.30.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: prometheus.chartEnabled
+    alias: prometheus
