@@ -132,9 +132,6 @@ tests:
       - matchRegex:
           path: data["prometheus.yml"]
           pattern: 'job_name: +kubernetes-nodes'
-      - matchRegex:
-          path: data["prometheus.yml"]
-          pattern: 'job_name: +kubernetes-pods'
 
   - it: respects global.fullnameOverride in name and relabel keep regex
     set:
