@@ -1983,7 +1983,7 @@ prometheus:
 
   # Enable supporting components - users can disable if not needed
   prometheus-node-exporter:
-    enabled: true
+    enabled: false
     ## @param prometheus.prometheus-node-exporter.nameOverride Base name for node-exporter resources (will be prefixed by release name)
     nameOverride: enterprise-prometheus-node-exporter
     # Listen and expose metrics on port 9120 to avoid conflicts if a user has an existing Prometheus setup
