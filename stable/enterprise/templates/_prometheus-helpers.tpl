@@ -3,14 +3,14 @@ Prometheus helper templates for Anchore Enterprise monitoring configuration.
 */}}
 
 {{/*
-Generate optimized Prometheus configuration for Anchore Enterprise monitoring.
-This template automatically discovers all Anchore services with proper port mapping.
+Prometheus configuration for Anchore Enterprise monitoring.
+This template automatically discovers Anchore services with proper port mapping.
 */}}
 {{- define "enterprise.prometheus.config" -}}
 global:
   evaluation_interval: 1m
   scrape_interval: 1m
-  scrape_timeout: 10s
+  scrape_timeout: 15s
 rule_files:
 - /etc/config/recording_rules.yml
 - /etc/config/alerting_rules.yml
@@ -62,6 +62,9 @@ scrape_configs:
 
 # Anchore Enterprise services - auto-discovery with port mapping
 - job_name: anchore-enterprise
+  # NOTE: Metrics endpoints are currently assumed to be exposed without authentication
+  # (anchoreConfig.metrics.auth_disabled=true). Support for authenticated scrape
+  # configurations will be added in the future.
   kubernetes_sd_configs:
   - role: pod
   relabel_configs:
@@ -70,6 +73,11 @@ scrape_configs:
     regex: {{ include "enterprise.fullname" . }}
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_name
+  # Drop pods that are no longer running to avoid scraping terminated workloads
+  - action: drop
+    source_labels:
+    - __meta_kubernetes_pod_phase
+    regex: "(Succeeded|Failed)"
   # Skip containers that don't expose metrics
   - action: drop
     regex: upgrade-enterprise-db|anchore-scripts
@@ -164,19 +172,35 @@ scrape_configs:
 {{ else if and (hasKey $ne "service") (hasKey (get $ne "service") "port") }}
 {{   $nePort = get (get $ne "service") "port" }}
 {{ end }}
-# Node exporter for system metrics
+# Node exporter for system metrics (scoped to this Helm release only via .Release.Namespace)
 - job_name: node-exporter
   kubernetes_sd_configs:
   - role: pod
   relabel_configs:
+    # Keep only pods in this release's namespace
     - action: keep
       source_labels:
-        - __meta_kubernetes_pod_label_app_kubernetes_io_name
-      regex: "^(?:{{ .Release.Name }}-)?{{ $neName }}$"
+        - __meta_kubernetes_namespace
+      regex: "^{{ .Release.Namespace }}$"
+    # Require the instance label to match this release
     - action: keep
       source_labels:
         - __meta_kubernetes_pod_label_app_kubernetes_io_instance
       regex: "^{{ .Release.Name }}$"
+    # This rule keeps pods where the 'app.kubernetes.io/name' label matches the expected
+    # node-exporter name. The regex accounts for optional prefixes like the release name.
+    # If using 'nameOverride' for the node-exporter chart, ensure the resulting label
+    # still matches this pattern.
+    - action: keep
+      source_labels:
+        - __meta_kubernetes_pod_label_app_kubernetes_io_name
+      regex: "^(?:{{ .Release.Name }}-)?(?:enterprise-)?{{ $neName }}$"
+    # Drop pods that have completed or failed to prevent stale /metrics scraping
+    - action: drop
+      source_labels:
+        - __meta_kubernetes_pod_phase
+      regex: "(Succeeded|Failed)"
+    # Map IP to metrics address with discovered port
     - action: replace
       source_labels:
         - __meta_kubernetes_pod_ip
@@ -190,9 +214,19 @@ scrape_configs:
   kubernetes_sd_configs:
   - role: pod
   relabel_configs:
+  # Restrict to this release namespace to avoid scraping similarly named pods cluster-wide
+  - action: keep
+    source_labels:
+      - __meta_kubernetes_namespace
+    regex: "^{{ .Release.Namespace }}$"
   - action: keep
     regex: kube-state-metrics
     source_labels:
     - __meta_kubernetes_pod_label_app_kubernetes_io_name
+  # Drop pods in terminal phases to avoid stale /metrics scraping
+  - action: drop
+    source_labels:
+    - __meta_kubernetes_pod_phase
+    regex: "(Succeeded|Failed)"
 {{- end }}
 {{- end }}
