@@ -21,10 +21,10 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.21.0
+image: docker.io/anchore/enterprise:v5.22.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.21.0"
+  # tag: "v5.22.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -655,8 +655,8 @@ anchoreConfig:
     vulnerabilities:
       extended_support:
         rhel:
-          enabled: <ALLOW_API_CONFIGURATION>  # auto
-          versions: <ALLOW_API_CONFIGURATION>  # '>=8'
+          enabled: "<ALLOW_API_CONFIGURATION>"  # auto
+          versions: "<ALLOW_API_CONFIGURATION>"  # '>=8'
       matching:
         exclude:
           providers: null
@@ -720,12 +720,12 @@ anchoreConfig:
 
     ## @param anchoreConfig.reports_worker.enable_data_egress Periodically remove reporting data that has been removed in other parts of system
     ##
-    enable_data_egress: false
+    enable_data_egress: "<ALLOW_API_CONFIGURATION>"  # true
 
     ## @param anchoreConfig.reports_worker.data_egress_window defines a number of days to keep reporting data following its deletion in the rest of system.
     ## Default value of 0 will remove it on next task run
     ##
-    data_egress_window: 0
+    data_egress_window: "<ALLOW_API_CONFIGURATION>"  # 30
 
     ## @param anchoreConfig.reports_worker.data_refresh_max_workers The maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service.
     ##
@@ -1572,10 +1572,10 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.21.0
+  image: docker.io/anchore/enterprise-ui:v5.22.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.21.0"
+    # tag: "v5.22.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image

@@ -651,7 +651,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.21.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.22.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
@@ -810,8 +810,8 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.reports.use_volume`                                                      | Configure the reports service to buffer report generation to disk instead of in memory                                           | `false`                     |
 | `anchoreConfig.reports_worker.ingress_images_max_workers`                               | The maximum number of concurrent threads to ingress images                                                                       | `10`                        |
 | `anchoreConfig.reports_worker.enable_data_ingress`                                      | Enable periodically syncing data into the Anchore Reports Service                                                                | `true`                      |
-| `anchoreConfig.reports_worker.enable_data_egress`                                       | Periodically remove reporting data that has been removed in other parts of system                                                | `false`                     |
-| `anchoreConfig.reports_worker.data_egress_window`                                       | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `0`                         |
+| `anchoreConfig.reports_worker.enable_data_egress`                                       | Periodically remove reporting data that has been removed in other parts of system                                                | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.reports_worker.data_egress_window`                                       | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.reports_worker.data_refresh_max_workers`                                 | The maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service.   | `10`                        |
 | `anchoreConfig.reports_worker.data_load_max_workers`                                    | The maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service.           | `10`                        |
 | `anchoreConfig.reports_worker.cycle_timers.reports_image_load`                          | Interval that vulnerabilities for images are synced                                                                              | `600`                       |
@@ -1056,7 +1056,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.21.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.22.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1191,6 +1191,14 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.16.x
+
+  #### V3.16.0
+  - Deploys Anchore Enterprise v5.22.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5220/) for more information.
+  - Changes the defaults of the following for new installations only (If upgrading and the value was not overridden, the old defaults will be saved in the database during the upgrade migration. If overridden, the overridden value will still be respected)
+    - anchoreConfig.reports_worker.enable_data_egress: false -> true
+    - anchoreConfig.reports_worker.data_egress_window: 0 -> 30
 
 ### V3.15.x
 
