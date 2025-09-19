@@ -125,6 +125,10 @@ should render additional audit uris when additionalResourceURIs is set:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
 
+        vex_annotation_author: <ALLOW_API_CONFIGURATION>
+        object_store:
+          direct_access: false
+
         services:
           apiext:
             enabled: true
@@ -553,6 +557,10 @@ should render the configmaps:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
+
+        vex_annotation_author: <ALLOW_API_CONFIGURATION>
+        object_store:
+          direct_access: false
 
         services:
           apiext:

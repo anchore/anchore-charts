@@ -95,6 +95,10 @@ account_gc:
   max_resource_gc_chunk: 4096
   max_deletion_threads: 4
 
+vex_annotation_author: {{ .Values.anchoreConfig.vex_annotation_author }}
+object_store:
+  direct_access: {{ .Values.anchoreConfig.object_store.direct_access }}
+
 services:
   apiext:
     enabled: true

@@ -463,6 +463,13 @@ anchoreConfig:
     #     ....
     #   }
 
+  ## @param anchoreConfig.vex_annotation_author The default author to use for generated VEX documents"
+  vex_annotation_author: "<ALLOW_API_CONFIGURATION>"  # null
+
+  ## @param anchoreConfig.object_store.direct_access Directly access object store from each service instead of routing via Catalog
+  object_store:
+    direct_access: false
+
   apiext:
     ## TODO - get better documentation for the 'external' option
     ## @param anchoreConfig.apiext.external.enabled Allow overrides for constructing Anchore API URLs

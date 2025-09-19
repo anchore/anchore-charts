@@ -123,6 +123,10 @@ should render the configmaps for osaa migration if enabled:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
 
+        vex_annotation_author: <ALLOW_API_CONFIGURATION>
+        object_store:
+          direct_access: false
+
         services:
           apiext:
             enabled: true
@@ -510,6 +514,10 @@ should render the configmaps for osaa migration if enabled:
         account_gc:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
+
+        vex_annotation_author: <ALLOW_API_CONFIGURATION>
+        object_store:
+          direct_access: false
 
         services:
           apiext:
