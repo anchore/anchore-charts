@@ -246,6 +246,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
             vulnerabilities:
+              nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
               sync:
                 enabled: true
                 ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
@@ -296,7 +297,6 @@ should render additional audit uris when additionalResourceURIs is set:
                       by_cpe:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                         enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
-            nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
             server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -679,6 +679,7 @@ should render the configmaps:
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
             vulnerabilities:
+              nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
               sync:
                 enabled: true
                 ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
@@ -729,7 +730,6 @@ should render the configmaps:
                       by_cpe:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                         enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
-            nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
             server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}

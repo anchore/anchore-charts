@@ -801,8 +801,8 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`            | List of package types to exclude from matching                                                                                   | `nil`                       |
 | `anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled`             | Account for RHEL Extended Update Support (EUS) releases when matching vulnerabilities                                            | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions`            | RHEL versions for which to apply Extended Update Support (EUS) releases when matching                                            | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss`            | Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable                         | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.policy_engine.enable_user_base_image`                                    | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`                      |
-| `anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss`                            | Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable                         | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.policy_engine.server`                                                    | Server configuration for the service                                                                                             | `{}`                        |
 | `anchoreConfig.notifications.cycle_timers.notifications`                                | Interval that notifications are sent                                                                                             | `30`                        |
 | `anchoreConfig.notifications.ui_url`                                                    | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`                        |
@@ -1201,6 +1201,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - Changes the defaults of the following for new installations only (If upgrading and the value was not overridden, the old defaults will be saved in the database during the upgrade migration. If overridden, the overridden value will still be respected)
     - anchoreConfig.reports_worker.enable_data_egress: false -> true
     - anchoreConfig.reports_worker.data_egress_window: 0 -> 30
+  - Changes the key of the following. This was a bug in the chart and any set value was not getting respected due to being under the wrong key so this doesnt break any existing deployments
+    - anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss -> anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss
 
 ### V3.15.x
 
