@@ -34,26 +34,12 @@ audit:
     - delete
     - patch
   resource_uris:
-    - "/accounts"
-    - "/accounts/{account_name}"
-    - "/accounts/{account_name}/state"
-    - "/accounts/{account_name}/users"
-    - "/accounts/{account_name}/users/{username}"
-    - "/accounts/{account_name}/users/{username}/api-keys"
-    - "/accounts/{account_name}/users/{username}/api-keys/{key_name}"
-    - "/accounts/{account_name}/users/{username}/credentials"
-    - "/rbac-manager/roles"
-    - "/rbac-manager/roles/{role_name}/members"
-    - "/rbac-manager/saml/idps"
-    - "/rbac-manager/saml/idps/{name}"
-    - "/rbac-manager/saml/idps/{name}/user-group-mappings"
-    - "/system/user-groups"
-    - "/system/user-groups/{group_uuid}"
-    - "/system/user-groups/{group_uuid}/roles"
-    - "/system/user-groups/{group_uuid}/users"
-    - "/user/api-keys"
-    - "/user/api-keys/{key_name}"
-    - "/user/credentials"
+{{ include "enterprise.defaultAuditResourceURIs" . | indent 4 }}
+{{- with .Values.anchoreConfig.audit.additionalResourceURIs }}
+{{- range . }}
+    - {{ . | quote }}
+{{- end }}
+{{- end }}
 
 metrics:
   enabled: ${ANCHORE_ENABLE_METRICS}
@@ -108,6 +94,10 @@ credentials:
 account_gc:
   max_resource_gc_chunk: 4096
   max_deletion_threads: 4
+
+vex_annotation_author: {{ .Values.anchoreConfig.vex_annotation_author }}
+object_store:
+  direct_access: {{ .Values.anchoreConfig.object_store.direct_access }}
 
 services:
   apiext:
@@ -209,6 +199,7 @@ services:
     enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
+      nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss }}
       sync:
         enabled: true
         ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
@@ -267,7 +258,6 @@ services:
               by_cpe:
                 # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                 enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
-    nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
