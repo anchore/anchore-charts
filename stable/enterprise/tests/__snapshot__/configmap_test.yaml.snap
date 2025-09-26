@@ -125,6 +125,10 @@ should render additional audit uris when additionalResourceURIs is set:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
 
+        vex_annotation_author: <ALLOW_API_CONFIGURATION>
+        object_store:
+          direct_access: false
+
         services:
           apiext:
             enabled: true
@@ -242,6 +246,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
             vulnerabilities:
+              nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
               sync:
                 enabled: true
                 ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
@@ -292,7 +297,6 @@ should render additional audit uris when additionalResourceURIs is set:
                       by_cpe:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                         enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
-            nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
             server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -554,6 +558,10 @@ should render the configmaps:
           max_resource_gc_chunk: 4096
           max_deletion_threads: 4
 
+        vex_annotation_author: <ALLOW_API_CONFIGURATION>
+        object_store:
+          direct_access: false
+
         services:
           apiext:
             enabled: true
@@ -671,6 +679,7 @@ should render the configmaps:
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
             vulnerabilities:
+              nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
               sync:
                 enabled: true
                 ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
@@ -721,7 +730,6 @@ should render the configmaps:
                       by_cpe:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                         enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
-            nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
             server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -841,10 +849,10 @@ should render the configmaps:
       ANCHORE_ENABLE_METRICS: "false"
       ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS: "2"
       ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT: 48h
-      ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: "0"
+      ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: <ALLOW_API_CONFIGURATION>
       ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "10"
       ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS: "10"
-      ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS: "false"
+      ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS: <ALLOW_API_CONFIGURATION>
       ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS: "true"
       ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL: "true"
       ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS: "1"
