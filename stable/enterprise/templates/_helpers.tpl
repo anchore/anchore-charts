@@ -141,26 +141,29 @@ nodePort: {{ (index .Values (print $component)).service.nodePort }}
 Checks if the appVersion.minor has increased, which is indicitive of requiring a db upgrade/service scaling down
 */}}
 {{- define "enterprise.appVersionChanged" -}}
-
-{{- $configMapName := include "enterprise.fullname" . -}}
-{{- $configMap := (lookup "v1" "ConfigMap" .Release.Namespace $configMapName) -}}
-{{- if $configMap -}}
-  {{- $currentAppVersion := .Chart.AppVersion -}}
-  {{- $currentAppVersionSplit := splitList "." $currentAppVersion -}}
-  {{- $currentAppVersionMajorMinor := ($currentAppVersionSplit | initial | join ".") -}}
-  {{- $labelVersionKey := "app.kubernetes.io/version" -}}
-  {{- $configMapAppVersion := index $configMap.metadata.labels $labelVersionKey -}}
-  {{- $configMapAppVersionSplit := splitList "." $configMapAppVersion -}}
-  {{- $configMapAppVersionMajorMinor := ($configMapAppVersionSplit | initial | join ".") -}}
-  {{- if ne $currentAppVersionMajorMinor $configMapAppVersionMajorMinor -}}
+  {{- if .Values.upgradeJob.forceScaleDownDeployment -}}
     {{- print "true" -}}
   {{- else -}}
-    {{- print "false" -}}
-  {{- end -}}
-{{- else -}}
-  {{- print "true" -}}
-{{- end -}}
+    {{- $configMapName := include "enterprise.fullname" . -}}
+    {{- $configMap := (lookup "v1" "ConfigMap" .Release.Namespace $configMapName) -}}
+    {{- if $configMap -}}
+      {{- $currentAppVersion := .Chart.AppVersion -}}
+      {{- $currentAppVersionSplit := splitList "." $currentAppVersion -}}
+      {{- $currentAppVersionMajorMinor := ($currentAppVersionSplit | initial | join ".") -}}
+      {{- $labelVersionKey := "app.kubernetes.io/version" -}}
+      {{- $configMapAppVersion := index $configMap.metadata.labels $labelVersionKey -}}
+      {{- $configMapAppVersionSplit := splitList "." $configMapAppVersion -}}
+      {{- $configMapAppVersionMajorMinor := ($configMapAppVersionSplit | initial | join ".") -}}
+      {{- if ne $currentAppVersionMajorMinor $configMapAppVersionMajorMinor -}}
+        {{- print "true" -}}
+      {{- else -}}
+        {{- print "false" -}}
+      {{- end -}}
+    {{- else -}}
+      {{- print "true" -}}
+    {{- end -}}
 
+  {{- end -}}
 {{- end -}}
 
 {{/*
