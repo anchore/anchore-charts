@@ -318,6 +318,7 @@ tests:
             port: 80
             targetPort: 3000
             protocol: TCP
+            appProtocol: http
         count: 1
 
   - it: should render component service selectors
