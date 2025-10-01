@@ -960,6 +960,7 @@ api:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    appProtocol: "http"
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -1611,6 +1612,7 @@ ui:
     sessionAffinity: ClientIP
     nodePort: ""
     domainSuffix: ""
+    appProtocol: "http"
 
 
   ## @param ui.extraEnv Set extra environment variables for Anchore UI pods
