@@ -1679,9 +1679,14 @@ upgradeJob:
   ##
   enabled: true
 
-  ## @param upgradeJob.force Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook
+  ## @param upgradeJob.force Force the Anchore database upgrade job to run as a regular job instead of as a Helm hook
   ##
   force: false
+
+  ## @param upgradeJob.forceScaleDownDeployment Force the Anchore upgrade job to scale down the anchore deployments before running the upgrade. By default
+  ## the upgrade job will only scale down the deployments if it detects that the app version has changed since the last upgrade.
+  ##
+  forceScaleDownDeployment: false
 
   ## @param upgradeJob.rbacCreate Create RBAC resources for the Anchore upgrade job
   ## By default, the anchore upgrade job utilizes a service account that will be created to call kubectl to scale down the deployment before running the upgrade job.
