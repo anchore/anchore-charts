@@ -453,6 +453,55 @@ tests:
             appProtocol: http
         count: 1
 
+  - it: should render service appProtocol as https when internalServicesSSL is enabled
+    template: api_deployment.yaml
+    documentIndex: 1
+    set:
+      anchoreConfig:
+        internalServicesSSL:
+          enabled: true
+    asserts:
+      - isSubset:
+          path: spec.ports[0]
+          content:
+            name: api
+            port: 8228
+            targetPort: 8228
+            protocol: TCP
+            appProtocol: https
+
+  - it: should render probe schemes as HTTPS when internalServicesSSL is enabled
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        internalServicesSSL:
+          enabled: true
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].livenessProbe
+          content:
+            httpGet:
+              path: /health
+              port: api
+              scheme: HTTPS
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].readinessProbe
+          content:
+            httpGet:
+              path: /health
+              port: api
+              scheme: HTTPS
+            timeoutSeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+
   - it: should render component service selectors
     template: api_deployment.yaml
     documentIndex: 1
