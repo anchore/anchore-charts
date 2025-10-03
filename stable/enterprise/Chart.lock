@@ -5,5 +5,8 @@ dependencies:
 - name: redis
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 17.11.8
-digest: sha256:0ecd9810e416973f8bc4caa4641764b10ff5224edaecb1a5b66d3b1f82948537
-generated: "2024-08-15T22:30:42.63806-07:00"
+- name: prometheus
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 27.39.0
+digest: sha256:dcda1bbf7238771e6e21d2628557c3e7f2832ee83393af23f33f388ee1cdb530
+generated: "2025-10-03T11:24:56.876443-04:00"

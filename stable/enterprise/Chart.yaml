@@ -40,3 +40,7 @@ dependencies:
     repository: "oci://registry-1.docker.io/bitnamicharts"
     condition: ui-redis.chartEnabled
     alias: ui-redis
+  - name: prometheus
+    version: "~27.39"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: prometheus.enabled

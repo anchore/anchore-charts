@@ -17,6 +17,19 @@ global:
 ## Common params used by all Anchore k8s resources
 ###################################################
 
+horizontalPodAutoscaler:
+  ## @param horizontalPodAutoscaler.enabled Enable HPA for all deployments
+  ##
+  enabled: false
+
+  ## @param horizontalPodAutoscaler.minReplicas Minimum number of pod replicas for HPA
+  ##
+  minReplicas: 1
+
+  ## @param horizontalPodAutoscaler.maxReplicas Maximum number of pod replicas for HPA
+  ##
+  maxReplicas: 5
+
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
@@ -1881,6 +1894,64 @@ ui-redis:
     tag: 7.4.6
     pullSecrets:
       - anchore-enterprise-pullcreds
+
+###################################################
+## @section Prometheus Monitoring Parameters
+###################################################
+prometheus:
+  ## @param prometheus.enabled Deploy Prometheus for metrics collection for the support bundle
+  ## Set to false if you have an existing Prometheus installation
+  ## This is a lightweight Prometheus instance scoped to Anchore metrics only
+  ##
+  enabled: false
+
+  ## @param prometheus.server Prometheus server configuration
+  ##
+  server:
+    ## @param prometheus.server.retention Data retention period for Prometheus metrics
+    ##
+    retention: "7d"
+
+    ## @param prometheus.server.persistentVolume.enabled Enable persistent storage for Prometheus
+    ## @param prometheus.server.persistentVolume.size Size of Prometheus persistent volume
+    ##
+    persistentVolume:
+      enabled: true
+      size: 8Gi
+
+    ## @param prometheus.server.resources Resource requests and limits for Prometheus server
+    ##
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        memory: 512Mi
+
+    ## @param prometheus.server.configFromSecret the custom prometheus config secret to use for Prometheus server.
+    ## The Secret is created by templates/anchore_prometheus_config_secret.yaml; If overridden, you must create your own full prometheus.yml config
+    ##
+    configFromSecret: "anchore-prometheus-configs"
+
+  ## @param prometheus.alertmanager.enabled Disable AlertManager (not needed for Anchore metrics collection)
+  ##
+  alertmanager:
+    enabled: false
+
+  ## @param prometheus.kube-state-metrics.enabled Disable kube-state-metrics (not needed for Anchore metrics)
+  ##
+  kube-state-metrics:
+    enabled: false
+
+  ## @param prometheus.prometheus-node-exporter.enabled Disable node-exporter (not needed for Anchore metrics)
+  ##
+  prometheus-node-exporter:
+    enabled: false
+
+  ## @param prometheus.prometheus-pushgateway.enabled Disable pushgateway (not needed for Anchore metrics)
+  ##
+  prometheus-pushgateway:
+    enabled: false
 
 #######################################
 ## @section Anchore Database Parameters
