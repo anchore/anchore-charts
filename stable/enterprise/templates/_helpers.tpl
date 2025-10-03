@@ -270,3 +270,20 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 {{- end -}}
 
 {{- end -}}
+
+{{/*
+Conditionally set replica count based on component autoscaling configuration
+Usage: {{- include "enterprise.replicaCount" (merge (dict "component" $component) .) }}
+If autoscaling is enabled for the component, don't set replicas (let HPA manage it)
+Otherwise, set it to the component's replicaCount value
+*/}}
+{{- define "enterprise.replicaCount" -}}
+{{- $component := .component -}}
+{{- $componentValues := index .Values $component -}}
+{{- if and $componentValues (hasKey $componentValues "autoscaling") $componentValues.autoscaling.enabled -}}
+  {{- /* Autoscaling is enabled - don't set replicas */ -}}
+{{- else -}}
+  {{- /* Autoscaling is disabled - set replicas */ -}}
+replicas: {{ $componentValues.replicaCount }}
+{{- end -}}
+{{- end -}}

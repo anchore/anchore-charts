@@ -17,19 +17,6 @@ global:
 ## Common params used by all Anchore k8s resources
 ###################################################
 
-horizontalPodAutoscaler:
-  ## @param horizontalPodAutoscaler.enabled Enable HPA for all deployments
-  ##
-  enabled: false
-
-  ## @param horizontalPodAutoscaler.minReplicas Minimum number of pod replicas for HPA
-  ##
-  minReplicas: 1
-
-  ## @param horizontalPodAutoscaler.maxReplicas Maximum number of pod replicas for HPA
-  ##
-  maxReplicas: 5
-
 ## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
@@ -901,6 +888,17 @@ analyzer:
   ##
   replicaCount: 1
 
+  autoscaling:
+    ## @param analyzer.autoscaling.enabled Enable autoscaling for Anchore Analyzer deployment
+    ##
+    enabled: false
+    ## @param analyzer.autoscaling.minReplicas Minimum number of replicas for Anchore Analyzer deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param analyzer.autoscaling.maxReplicas Maximum number of replicas for Anchore Analyzer deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
+
   ## @param analyzer.service.port The port used for gatherings metrics when .Values.metricsEnabled=true
   ## @param analyzer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
@@ -964,6 +962,17 @@ api:
   ## @param api.replicaCount Number of replicas for Anchore API deployment
   ##
   replicaCount: 1
+
+  autoscaling:
+    ## @param api.autoscaling.enabled Enable autoscaling for Anchore API deployment
+    ##
+    enabled: false
+    ## @param api.autoscaling.minReplicas Minimum number of replicas for Anchore API deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param api.autoscaling.maxReplicas Maximum number of replicas for Anchore API deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
 
   ## @param api.service.type Service type for Anchore API
   ## @param api.service.port Service port for Anchore API
@@ -1037,6 +1046,17 @@ catalog:
   ## @param catalog.replicaCount Number of replicas for the Anchore Catalog deployment
   ##
   replicaCount: 1
+
+  autoscaling:
+    ## @param catalog.autoscaling.enabled Enable autoscaling for Anchore Catalog deployment
+    ##
+    enabled: false
+    ## @param catalog.autoscaling.minReplicas Minimum number of replicas for Anchore Catalog deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param catalog.autoscaling.maxReplicas Maximum number of replicas for Anchore Catalog deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
 
   ## @param catalog.service.type Service type for Anchore Catalog
   ## @param catalog.service.port Service port for Anchore Catalog
@@ -1118,6 +1138,17 @@ dataSyncer:
   ##
   replicaCount: 1
 
+  autoscaling:
+    ## @param dataSyncer.autoscaling.enabled Enable autoscaling for Anchore DataSyncer deployment
+    ##
+    enabled: false
+    ## @param dataSyncer.autoscaling.minReplicas Minimum number of replicas for Anchore DataSyncer deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param dataSyncer.autoscaling.maxReplicas Maximum number of replicas for Anchore DataSyncer deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
+
   ## @param dataSyncer.service.type Service type for Anchore DataSyncer
   ## @param dataSyncer.service.port Service port for Anchore DataSyncer
   ## @param dataSyncer.service.annotations Annotations for Anchore DataSyncer service
@@ -1198,6 +1229,17 @@ notifications:
   ##
   replicaCount: 1
 
+  autoscaling:
+    ## @param notifications.autoscaling.enabled Enable autoscaling for Anchore Notifications deployment
+    ##
+    enabled: false
+    ## @param notifications.autoscaling.minReplicas Minimum number of replicas for Anchore Notifications deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param notifications.autoscaling.maxReplicas Maximum number of replicas for Anchore Notifications deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
+
   ## @param notifications.service.type Service type for Anchore Notifications
   ## @param notifications.service.port Service port for Anchore Notifications
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
@@ -1271,6 +1313,17 @@ policyEngine:
   ## @param policyEngine.replicaCount Number of replicas for the Anchore Policy Engine deployment
   ##
   replicaCount: 1
+
+  autoscaling:
+    ## @param policyEngine.autoscaling.enabled Enable autoscaling for Anchore Policy Engine deployment
+    ##
+    enabled: false
+    ## @param policyEngine.autoscaling.minReplicas Minimum number of replicas for Anchore Policy Engine deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param policyEngine.autoscaling.maxReplicas Maximum number of replicas for Anchore Policy Engine deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
 
   ## @param policyEngine.service.type Service type for Anchore Policy Engine
   ## @param policyEngine.service.port Service port for Anchore Policy Engine
@@ -1351,6 +1404,17 @@ reports:
   ## @param reports.replicaCount Number of replicas for the Anchore Reports deployment
   ##
   replicaCount: 1
+
+  autoscaling:
+    ## @param reports.autoscaling.enabled Enable autoscaling for Anchore Reports deployment
+    ##
+    enabled: false
+    ## @param reports.autoscaling.minReplicas Minimum number of replicas for Anchore Reports deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param reports.autoscaling.maxReplicas Maximum number of replicas for Anchore Reports deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
 
   ## @param reports.service.type Service type for Anchore Reports
   ## @param reports.service.port Service port for Anchore Reports
@@ -1444,6 +1508,17 @@ reportsWorker:
   ##
   replicaCount: 1
 
+  autoscaling:
+    ## @param reportsWorker.autoscaling.enabled Enable autoscaling for Anchore Reports Worker deployment
+    ##
+    enabled: false
+    ## @param reportsWorker.autoscaling.minReplicas Minimum number of replicas for Anchore Reports Worker deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param reportsWorker.autoscaling.maxReplicas Maximum number of replicas for Anchore Reports Worker deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
+
   ## @param reportsWorker.service.type Service type for Anchore Reports Worker
   ## @param reportsWorker.service.port Service port for Anchore Reports Worker
   ## @param reportsWorker.service.annotations Annotations for Anchore Reports Worker service
@@ -1517,6 +1592,17 @@ simpleQueue:
   ## @param simpleQueue.replicaCount Number of replicas for the Anchore Simple Queue deployment
   ##
   replicaCount: 1
+
+  autoscaling:
+    ## @param simpleQueue.autoscaling.enabled Enable autoscaling for Anchore Simple Queue deployment
+    ##
+    enabled: false
+    ## @param simpleQueue.autoscaling.minReplicas Minimum number of replicas for Anchore Simple Queue deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param simpleQueue.autoscaling.maxReplicas Maximum number of replicas for Anchore Simple Queue deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
 
   ## @param simpleQueue.service.type Service type for Anchore Simple Queue
   ## @param simpleQueue.service.port Service port for Anchore Simple Queue
