@@ -922,7 +922,7 @@ analyzer:
             name: anchore_queue_length_total_analyzer_tasks
           target:
             type: AverageValue
-            averageValue: "400"
+            averageValue: "25"
 
     ## @param analyzer.autoscaling.behavior HPA scaling behavior configuration
     ## this lets hpa scale down up to half the pods every 60 seconds window, or scale up to double the pods every 60 seconds window
@@ -2351,6 +2351,43 @@ prometheus:
   ##
   prometheus-pushgateway:
     enabled: false
+
+###################################################
+## @section Prometheus Adapter Parameters
+## Prometheus Adapter exposes Prometheus metrics to the Kubernetes Custom Metrics API
+## This enables HPA to autoscale based on custom metrics like queue_length
+###################################################
+prometheus-adapter:
+  ## @param prometheus-adapter.enabled Deploy Prometheus Adapter to expose custom metrics to Kubernetes
+  ## Required for HPA autoscaling based on custom metrics (e.g., anchore_queue_length)
+  ## Requires prometheus.enabled: true
+  ##
+  enabled: false
+
+  ## @param prometheus-adapter.prometheus.url URL of Prometheus service
+  ## This should point to the Prometheus server that is collecting Anchore metrics
+  ## If using the bundled Prometheus, this should be set to http://{{ .Release.Name }}-prometheus-server
+  ##
+  prometheus:
+    url: ""
+    port: 80
+
+  ## @param prometheus-adapter.rules Rules for transforming Prometheus metrics into Custom Metrics API
+  ## These rules map Prometheus metrics to Kubernetes custom metrics that HPA can use
+  ##
+  rules:
+    default: false
+    custom: []
+    external: []
+
+  ## @param prometheus-adapter.resources Resource requests and limits for Prometheus Adapter
+  ##
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 128Mi
 
 #######################################
 ## @section Anchore Database Parameters
