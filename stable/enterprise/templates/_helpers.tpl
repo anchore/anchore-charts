@@ -287,3 +287,16 @@ Otherwise, set it to the component's replicaCount value
 replicas: {{ $componentValues.replicaCount }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+helper to error out if prometheus adapter is enabled but url is not set
+Usage: {{- include "enterprise.prometheusAdapterCheck" . }}
+*/}}
+
+{{- define "enterprise.prometheusAdapterCheck" -}}
+{{- if index .Values "prometheus-adapter" "enabled" }}
+  {{- if or (not (index .Values "prometheus-adapter" "prometheus")) (not (index .Values "prometheus-adapter" "prometheus" "url")) (eq (index .Values "prometheus-adapter" "prometheus" "url") "") }}
+    {{- fail "prometheus-adapter is enabled but prometheus.url is not set. Please set prometheus.url to the Prometheus server that is collecting Anchore metrics." -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
