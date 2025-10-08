@@ -1254,6 +1254,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
   #### V3.15.0
   - Deploys Anchore Enterprise v5.21.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5210/) for more information.
+  #### V3.15.1
+  - Updates the redis image from docker.io/bitnamilegacy/redis:7.0.12-debian-11-r0 to docker.io/redis:7.4.6 to address https://redis.io/blog/security-advisory-cve-2025-49844/
 
 ### V3.14.x
 
