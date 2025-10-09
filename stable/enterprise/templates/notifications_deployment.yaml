@@ -10,7 +10,7 @@ metadata:
 spec:
   selector:
     matchLabels: {{- include "enterprise.common.matchLabels" (merge (dict "component" $component) .) | nindent 6 }}
-  replicas: {{ .Values.notifications.replicaCount }}
+  {{- include "enterprise.replicaCount" (merge (dict "component" $component) .) | nindent 2 }}
   strategy: {{- include "enterprise.common.deploymentStrategy" . | nindent 4 }}
   template:
     metadata:

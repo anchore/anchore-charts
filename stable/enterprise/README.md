@@ -1204,7 +1204,6 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     - anchoreConfig.reports_worker.data_egress_window: 0 -> 30
   - Changes the key of the following. This was a bug in the chart and any set value was not getting respected due to being under the wrong key so this doesnt break any existing deployments
     - anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss -> anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss
-  - Updates the redis image from docker.io/bitnamilegacy/redis:7.0.12-debian-11-r0 to docker.io/redis:7.4.6 to address https://redis.io/blog/security-advisory-cve-2025-49844/
 
 ### V3.15.x
 

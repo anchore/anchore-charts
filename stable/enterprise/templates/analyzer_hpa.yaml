@@ -1,0 +1,42 @@
+{{- $component := "analyzer" -}}
+{{- include "enterprise.prometheusAdapterCheck" . }}
+{{- if .Values.analyzer.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "enterprise.analyzer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "enterprise.analyzer.fullname" . }}
+  minReplicas: {{ .Values.analyzer.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.analyzer.autoscaling.maxReplicas }}
+  metrics:
+  {{- with .Values.analyzer.autoscaling.customMetrics }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- if and .Values.analyzer.autoscaling.targetCPUUtilizationPercentage .Values.analyzer.autoscaling.enableCPUBasedScaling }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.analyzer.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if and .Values.analyzer.autoscaling.targetMemoryUtilizationPercentage .Values.analyzer.autoscaling.enableMemoryBasedScaling }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.analyzer.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+  {{- with .Values.analyzer.autoscaling.behavior }}
+  behavior: {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
