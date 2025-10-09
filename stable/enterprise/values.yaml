@@ -915,14 +915,14 @@ analyzer:
 
     ## @param analyzer.autoscaling.customMetrics Custom metrics for autoscaling
     ## Example:
-    customMetrics:
-      - type: External
-        external:
-          metric:
-            name: anchore_queue_length_total_analyzer_tasks
-          target:
-            type: AverageValue
-            averageValue: "25"
+    customMetrics: []
+      # - type: External
+      #   external:
+      #     metric:
+      #       name: anchore_queue_length_total_analyzer_tasks
+      #     target:
+      #       type: AverageValue
+      #       averageValue: "25"
 
     ## @param analyzer.autoscaling.behavior HPA scaling behavior configuration
     ## this lets hpa scale down up to half the pods every 60 seconds window, or scale up to double the pods every 60 seconds window
@@ -2379,6 +2379,14 @@ prometheus-adapter:
     default: false
     custom: []
     external: []
+    # - seriesQuery: 'anchore_queue_length{queue_name="analyzer_tasks",count="total"}'
+    #   resources:
+    #     overrides:
+    #       namespace: {resource: "namespace"}
+    #   name:
+    #     matches: "anchore_queue_length"
+    #     as: "anchore_queue_length_total_analyzer_tasks"
+    #   metricsQuery: 'avg(anchore_queue_length{queue_name="analyzer_tasks",count="total"})'
 
   ## @param prometheus-adapter.resources Resource requests and limits for Prometheus Adapter
   ##
