@@ -418,14 +418,16 @@ anchoreConfig:
 
 For those using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/developer/getting-started.md), a ServiceMonitor can be deployed within the same namespace as your Anchore Enterprise release. Once deployed, the Prometheus operator will automatically begin scraping the pre-configured endpoints for metrics.
 
-#### Built-in Prometheus (optional)
+#### Built-in Prometheus (Beta - Optional)
 
-This chart can optionally deploy the community Prometheus chart and setup a ConfigMap containing a working prometheus.yml with a scalable scrape config for Anchore Enterprise and common Kubernetes targets.
+**Note:** This feature is currently in **beta**. It provides an easy way to deploy a pre-configured Prometheus instance for monitoring Anchore Enterprise. Future enhancements and support for this is planned.
+
+This chart can optionally deploy the community Prometheus chart and set up a ConfigMap containing a working `prometheus.yml` with a scalable scrape configuration for Anchore Enterprise and common Kubernetes targets automatically.
 
 - Toggle with `prometheus.chartEnabled` (default: `false`).
-- By default, this chart renders a ConfigMap named `<release-name>-anchore-enterprise-prometheus-config` (via `prometheus.server.configMapOverrideName`). You can override the suffix by setting `prometheus.server.configMapOverrideName`.
-- To have Prometheus use that ConfigMap, set `serverFiles` via the subchart or set `prometheus.server.configMapOverrideName` to the same name used by the generated ConfigMap.
 - You must enable the Anchore metrics endpoint as shown above for services to export metrics.
+
+**Example usage:**
 
 Minimal example to enable metrics and the bundled Prometheus:
 
@@ -433,16 +435,12 @@ Minimal example to enable metrics and the bundled Prometheus:
 anchoreConfig:
   metrics:
     enabled: true
+    # Note: The current beta Prometheus implementation requires metrics to be unauthenticated.
     auth_disabled: true
 
 prometheus:
   chartEnabled: true
 ```
-
-Notes:
-
-- The generated prometheus.yml autodiscovers Anchore Enterprise pods and maps each component to its metrics port, and sets `__metrics_path__` to `/metrics`.
-- If you set a custom `configMapOverrideName`, ensure it matches both the generated ConfigMap and the Prometheus subchart setting so the server picks it up.
 
 #### Example ServiceMonitor Configuration
 
@@ -1162,8 +1160,8 @@ To restore your deployment to using your previous driver configurations:
 | `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`                       |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`                            |
 | `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`                        |
-| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnamilegacy/redis`              |
-| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0`              |
+| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `redis`                            |
+| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.4.6`                            |
 | `ui-redis.image.pullSecrets`          | Specifies the image pull secrets to use for this chart.                                          | `["anchore-enterprise-pullcreds"]` |
 
 ### Anchore Database Parameters
@@ -1196,7 +1194,7 @@ To restore your deployment to using your previous driver configurations:
 | `prometheus.server.service.type`                              | Kubernetes service type for Prometheus                                                                                                                                                     | `ClusterIP`                            |
 | `prometheus.server.persistentVolume.enabled`                  | Enable persistent storage for Prometheus                                                                                                                                                   | `true`                                 |
 | `prometheus.server.persistentVolume.size`                     | Storage size for Prometheus persistent volume                                                                                                                                              | `10Gi`                                 |
-| `prometheus.prometheus-node-exporter.enabled`                 | Enable node-exporter for node metrics                                                                                                                                                      | `true`                                 |
+| `prometheus.prometheus-node-exporter.enabled`                 | Enable node-exporter for node metrics                                                                                                                                                      | `false`                                |
 | `prometheus.kube-state-metrics.enabled`                       | Enable kube-state-metrics for cluster metrics                                                                                                                                              | `true`                                 |
 | `prometheus.prometheus-pushgateway.enabled`                   | Enable pushgateway for custom metrics                                                                                                                                                      | `false`                                |
 | `prometheus.server.name`                                      | Name override for Prometheus server resources                                                                                                                                              | `enterprise-prometheus-server`         |
