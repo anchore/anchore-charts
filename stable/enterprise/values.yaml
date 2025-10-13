@@ -1866,8 +1866,8 @@ ui-redis:
   ##
   image:
     registry: docker.io
-    repository: bitnamilegacy/redis
-    tag: 7.0.12-debian-11-r0
+    repository: redis
+    tag: 7.4.6
     pullSecrets:
       - anchore-enterprise-pullcreds
 
