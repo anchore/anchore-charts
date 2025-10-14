@@ -31,6 +31,12 @@ spec:
       securityContext:
         {{ toYaml . | nindent 12 }}
     {{- end }}
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "100m"
+        limits:
+          memory: "256Mi"
       envFrom: {{- include "enterprise.common.envFrom" . | nindent 6 }}
       env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 6 }}
       - name: ANCHORECTL_URL

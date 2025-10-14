@@ -21,10 +21,10 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.21.0
+image: docker.io/anchore/enterprise:v5.22.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.21.0"
+  # tag: "v5.22.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -463,6 +463,13 @@ anchoreConfig:
     #     ....
     #   }
 
+  ## @param anchoreConfig.vex_annotation_author The default author to use for generated VEX documents"
+  vex_annotation_author: "<ALLOW_API_CONFIGURATION>"  # null
+
+  ## @param anchoreConfig.object_store.direct_access Directly access object store from each service instead of routing via Catalog
+  object_store:
+    direct_access: false
+
   apiext:
     ## TODO - get better documentation for the 'external' option
     ## @param anchoreConfig.apiext.external.enabled Allow overrides for constructing Anchore API URLs
@@ -655,18 +662,17 @@ anchoreConfig:
     vulnerabilities:
       extended_support:
         rhel:
-          enabled: <ALLOW_API_CONFIGURATION>  # auto
-          versions: <ALLOW_API_CONFIGURATION>  # '>=8'
+          enabled: "<ALLOW_API_CONFIGURATION>"  # auto
+          versions: "<ALLOW_API_CONFIGURATION>"  # '>=8'
       matching:
         exclude:
           providers: null
           package_types: null
+      ## @param anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
+      nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
-
-    ## @param anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
-    nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
 
     ## @param anchoreConfig.policy_engine.server [object] Server configuration for the service
     server: {}
@@ -720,12 +726,12 @@ anchoreConfig:
 
     ## @param anchoreConfig.reports_worker.enable_data_egress Periodically remove reporting data that has been removed in other parts of system
     ##
-    enable_data_egress: false
+    enable_data_egress: "<ALLOW_API_CONFIGURATION>"  # true
 
     ## @param anchoreConfig.reports_worker.data_egress_window defines a number of days to keep reporting data following its deletion in the rest of system.
     ## Default value of 0 will remove it on next task run
     ##
-    data_egress_window: 0
+    data_egress_window: "<ALLOW_API_CONFIGURATION>"  # 30
 
     ## @param anchoreConfig.reports_worker.data_refresh_max_workers The maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service.
     ##
@@ -1572,10 +1578,10 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.21.0
+  image: docker.io/anchore/enterprise-ui:v5.22.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.21.0"
+    # tag: "v5.22.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
@@ -1673,9 +1679,14 @@ upgradeJob:
   ##
   enabled: true
 
-  ## @param upgradeJob.force Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook
+  ## @param upgradeJob.force Force the Anchore database upgrade job to run as a regular job instead of as a Helm hook
   ##
   force: false
+
+  ## @param upgradeJob.forceScaleDownDeployment Force the Anchore upgrade job to scale down the anchore deployments before running the upgrade. By default
+  ## the upgrade job will only scale down the deployments if it detects that the app version has changed since the last upgrade.
+  ##
+  forceScaleDownDeployment: false
 
   ## @param upgradeJob.rbacCreate Create RBAC resources for the Anchore upgrade job
   ## By default, the anchore upgrade job utilizes a service account that will be created to call kubectl to scale down the deployment before running the upgrade job.

@@ -651,7 +651,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.21.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.22.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
@@ -759,6 +759,8 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.internalServicesSSL.certSecretKeyFileName`                               | File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName                 | `""`                        |
 | `anchoreConfig.internalServicesSSL.certSecretCertFileName`                              | File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName         | `""`                        |
 | `anchoreConfig.policyBundles`                                                           | Include custom Anchore policy bundles                                                                                            | `{}`                        |
+| `anchoreConfig.vex_annotation_author`                                                   | The default author to use for generated VEX documents"                                                                           | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.object_store.direct_access`                                              | Directly access object store from each service instead of routing via Catalog                                                    | `false`                     |
 | `anchoreConfig.apiext.external.enabled`                                                 | Allow overrides for constructing Anchore API URLs                                                                                | `false`                     |
 | `anchoreConfig.apiext.external.useTLS`                                                  | Enable TLS for external API access                                                                                               | `true`                      |
 | `anchoreConfig.apiext.external.hostname`                                                | Hostname for the external Anchore API                                                                                            | `""`                        |
@@ -799,8 +801,8 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types`            | List of package types to exclude from matching                                                                                   | `nil`                       |
 | `anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled`             | Account for RHEL Extended Update Support (EUS) releases when matching vulnerabilities                                            | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions`            | RHEL versions for which to apply Extended Update Support (EUS) releases when matching                                            | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss`            | Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable                         | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.policy_engine.enable_user_base_image`                                    | Enables usage of Well Known Annotation to identify base image for use in ancestry calculations                                   | `true`                      |
-| `anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss`                            | Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable                         | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.policy_engine.server`                                                    | Server configuration for the service                                                                                             | `{}`                        |
 | `anchoreConfig.notifications.cycle_timers.notifications`                                | Interval that notifications are sent                                                                                             | `30`                        |
 | `anchoreConfig.notifications.ui_url`                                                    | Set the UI URL that is included in the notification, defaults to the Enterprise UI service name                                  | `""`                        |
@@ -810,8 +812,8 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.reports.use_volume`                                                      | Configure the reports service to buffer report generation to disk instead of in memory                                           | `false`                     |
 | `anchoreConfig.reports_worker.ingress_images_max_workers`                               | The maximum number of concurrent threads to ingress images                                                                       | `10`                        |
 | `anchoreConfig.reports_worker.enable_data_ingress`                                      | Enable periodically syncing data into the Anchore Reports Service                                                                | `true`                      |
-| `anchoreConfig.reports_worker.enable_data_egress`                                       | Periodically remove reporting data that has been removed in other parts of system                                                | `false`                     |
-| `anchoreConfig.reports_worker.data_egress_window`                                       | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `0`                         |
+| `anchoreConfig.reports_worker.enable_data_egress`                                       | Periodically remove reporting data that has been removed in other parts of system                                                | `<ALLOW_API_CONFIGURATION>` |
+| `anchoreConfig.reports_worker.data_egress_window`                                       | defines a number of days to keep reporting data following its deletion in the rest of system.                                    | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.reports_worker.data_refresh_max_workers`                                 | The maximum number of concurrent threads to refresh existing results (etl vulnerabilities and evaluations) in reports service.   | `10`                        |
 | `anchoreConfig.reports_worker.data_load_max_workers`                                    | The maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service.           | `10`                        |
 | `anchoreConfig.reports_worker.cycle_timers.reports_image_load`                          | Interval that vulnerabilities for images are synced                                                                              | `600`                       |
@@ -1056,7 +1058,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.21.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.22.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1084,7 +1086,8 @@ To restore your deployment to using your previous driver configurations:
 | Name                                   | Description                                                                                                                                     | Value                        |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
 | `upgradeJob.enabled`                   | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`                       |
-| `upgradeJob.force`                     | Force the Anchore Feeds database upgrade job to run as a regular job instead of as a Helm hook                                                  | `false`                      |
+| `upgradeJob.force`                     | Force the Anchore database upgrade job to run as a regular job instead of as a Helm hook                                                        | `false`                      |
+| `upgradeJob.forceScaleDownDeployment`  | Force the Anchore upgrade job to scale down the anchore deployments before running the upgrade. By default                                      | `false`                      |
 | `upgradeJob.rbacCreate`                | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`                       |
 | `upgradeJob.serviceAccountName`        | Use an existing service account for the Anchore upgrade job                                                                                     | `""`                         |
 | `upgradeJob.usePostUpgradeHook`        | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false`                      |
@@ -1136,8 +1139,8 @@ To restore your deployment to using your previous driver configurations:
 | `ui-redis.architecture`               | Redis deployment architecture                                                                    | `standalone`                       |
 | `ui-redis.master.persistence.enabled` | enables persistence                                                                              | `false`                            |
 | `ui-redis.image.registry`             | Specifies the image registry to use for this chart.                                              | `docker.io`                        |
-| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `bitnamilegacy/redis`              |
-| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.0.12-debian-11-r0`              |
+| `ui-redis.image.repository`           | Specifies the image repository to use for this chart.                                            | `redis`                            |
+| `ui-redis.image.tag`                  | Specifies the image to use for this chart.                                                       | `7.4.6`                            |
 | `ui-redis.image.pullSecrets`          | Specifies the image pull secrets to use for this chart.                                          | `["anchore-enterprise-pullcreds"]` |
 
 ### Anchore Database Parameters
@@ -1191,6 +1194,16 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### V3.16.x
+
+  #### V3.16.0
+  - Deploys Anchore Enterprise v5.22.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5220/) for more information.
+  - Changes the defaults of the following for new installations only (If upgrading and the value was not overridden, the old defaults will be saved in the database during the upgrade migration. If overridden, the overridden value will still be respected)
+    - anchoreConfig.reports_worker.enable_data_egress: false -> true
+    - anchoreConfig.reports_worker.data_egress_window: 0 -> 30
+  - Changes the key of the following. This was a bug in the chart and any set value was not getting respected due to being under the wrong key so this doesnt break any existing deployments
+    - anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss -> anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss
 
 ### V3.15.x
 
