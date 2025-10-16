@@ -45,3 +45,15 @@ tests:
         - "/containers"
     asserts:
       - matchSnapshot: {}
+
+  - it: should render the correct dbConnectArgs when dbConnectArgs is set
+    template: templates/anchore_configmap.yaml
+    set:
+      anchoreConfig.database.dbConnectArgs:
+        timeout: 30s
+        ssl: true
+        sslmode: require
+        sslrootcert: /etc/ssl/certs/ca-certificates.crt
+        random_arg: some_value
+    asserts:
+      - matchSnapshot: {}

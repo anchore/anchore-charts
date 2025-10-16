@@ -754,6 +754,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.database.db_pool_size`                                                   | The database max connection pool size                                                                                            | `30`                        |
 | `anchoreConfig.database.db_pool_max_overflow`                                           | The maximum overflow size of the database connection pool                                                                        | `100`                       |
 | `anchoreConfig.database.engineArgs`                                                     | Set custom database engine arguments for SQLAlchemy                                                                              | `{}`                        |
+| `anchoreConfig.database.dbConnectArgs`                                                  | Set custom database connection; If specified, this overrides other database connection settings                                  | `{}`                        |
 | `anchoreConfig.internalServicesSSL.enabled`                                             | Force all Enterprise services to use SSL for internal communication                                                              | `false`                     |
 | `anchoreConfig.internalServicesSSL.verifyCerts`                                         | Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed                       | `false`                     |
 | `anchoreConfig.internalServicesSSL.certSecretKeyFileName`                               | File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName                 | `""`                        |
@@ -1204,6 +1205,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     - anchoreConfig.reports_worker.data_egress_window: 0 -> 30
   - Changes the key of the following. This was a bug in the chart and any set value was not getting respected due to being under the wrong key so this doesnt break any existing deployments
     - anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss -> anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss
+  #### V3.16.1
+  - Adds anchoreConfig.database.dbConnectArgs to override db_connect_args
 
 ### V3.15.x
 
