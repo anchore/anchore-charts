@@ -1,0 +1,47 @@
+# Anchore Helm Charts
+
+This repository contains Helm charts for deploying Anchore container security software on Kubernetes.
+
+## About
+
+Anchore provides comprehensive container security analysis and vulnerability scanning. This repository includes Helm charts for:
+
+- Anchore Enterprise
+- Anchore Engine  
+- Anchore Admission Controller
+- K8s Inventory
+- ECS Inventory
+- Feeds service
+- KAI (Kubernetes Automated Inventory; Replaced by K8s Inventory)
+
+## Repository Structure
+
+- `stable/` - Production-ready Helm charts
+- `scripts/` - Build and utility scripts
+- Chart testing with GitHub Actions and Helm Chart Testing tool
+
+## Key Charts
+
+- `enterprise/` - Main Anchore Enterprise platform
+- `anchore-engine/` - Open source container analysis engine
+- `anchore-admission-controller/` - Kubernetes admission controller for policy enforcement
+- `k8s-inventory/` - Kubernetes cluster inventory scanning
+- `feeds/` - Vulnerability feed service
+- `ecs-inventory/` - Amazon Elastic Container Service (ECS) inventory scanning for Anchore
+- `kai` - Kubernetes Automated Inventory (replaced by k8s-inventory)
+
+## Installation
+
+Add the Anchore Helm repository:
+```bash
+helm repo add anchore https://charts.anchore.io
+```
+
+## Requirements
+
+- Helm >=3.8
+- Kubernetes >=1.23
+
+## Documentation
+
+See individual chart README files for detailed configuration options and deployment instructions.
