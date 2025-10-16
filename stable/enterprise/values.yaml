@@ -418,6 +418,7 @@ anchoreConfig:
   ## @param anchoreConfig.database.db_pool_size The database max connection pool size
   ## @param anchoreConfig.database.db_pool_max_overflow The maximum overflow size of the database connection pool
   ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy
+  ## @param anchoreConfig.database.dbConnectArgs Set custom database connection; If specified, this overrides other database connection settings
   ## ref: https://docs.sqlalchemy.org/en/14/core/engines.html#engine-creation-api
   ##
   database:
