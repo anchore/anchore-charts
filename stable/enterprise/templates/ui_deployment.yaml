@@ -56,9 +56,8 @@ spec:
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.ui.image" . | trim }}
           imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
-        {{- with .Values.containerSecurityContext }}
-          securityContext:
-            {{ toYaml . | nindent 12 }}
+        {{- if or .Values.containerSecurityContext .Values.api.containerSecurityContext }}
+          securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
           command: ["/bin/sh", "-c"]
           args:

@@ -915,6 +915,7 @@ To restore your deployment to using your previous driver configurations:
 | `analyzer.affinity`                  | Affinity for Anchore Analyzer pod assignment                                                                                                                                 | `{}`   |
 | `analyzer.topologySpreadConstraints` | Topology spread constraints for Anchore Analyzer pod assignment                                                                                                              | `[]`   |
 | `analyzer.serviceAccountName`        | Service account name for Anchore API pods                                                                                                                                    | `""`   |
+| `analyzer.containerSecurityContext`  | Security context for the Anchore Analyzer containers                                                                                                                         | `{}`   |
 | `analyzer.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Analyzer scratch space                                                                                                  | `{}`   |
 
 ### Anchore API k8s Deployment Parameters
@@ -940,6 +941,7 @@ To restore your deployment to using your previous driver configurations:
 | `api.affinity`                  | Affinity for Anchore API pod assignment                                                                                                                                      | `{}`        |
 | `api.topologySpreadConstraints` | Topology spread constraints for Anchore API pod assignment                                                                                                                   | `[]`        |
 | `api.serviceAccountName`        | Service account name for Anchore API pods                                                                                                                                    | `""`        |
+| `api.containerSecurityContext`  | Security context for the Anchore API containers                                                                                                                              | `{}`        |
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -964,6 +966,7 @@ To restore your deployment to using your previous driver configurations:
 | `catalog.affinity`                  | Affinity for Anchore Catalog pod assignment                                                                                                                                  | `{}`        |
 | `catalog.topologySpreadConstraints` | Topology spread constraints for Anchore Catalog pod assignment                                                                                                               | `[]`        |
 | `catalog.serviceAccountName`        | Service account name for Anchore Catalog pods                                                                                                                                | `""`        |
+| `catalog.containerSecurityContext`  | Security context for the Anchore Catalog containers                                                                                                                          | `{}`        |
 | `catalog.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Catalog scratch space                                                                                                   | `{}`        |
 
 ### Anchore DataSyncer k8s Deployment Parameters
@@ -989,6 +992,7 @@ To restore your deployment to using your previous driver configurations:
 | `dataSyncer.affinity`                  | Affinity for Anchore DataSyncer pod assignment                                                                                                                               | `{}`        |
 | `dataSyncer.topologySpreadConstraints` | Topology spread constraints for Anchore DataSyncer pod assignment                                                                                                            | `[]`        |
 | `dataSyncer.serviceAccountName`        | Service account name for Anchore DataSyncer pods                                                                                                                             | `""`        |
+| `dataSyncer.containerSecurityContext`  | Security context for the Anchore DataSyncer containers                                                                                                                       | `{}`        |
 | `dataSyncer.scratchVolume.details`     | Details for the k8s volume to be created for Anchore DataSyncer scratch space                                                                                                | `{}`        |
 
 ### Anchore Notifications Parameters
@@ -1013,6 +1017,7 @@ To restore your deployment to using your previous driver configurations:
 | `notifications.tolerations`               | Tolerations for Anchore Notifications pod assignment                                                                                                                         | `[]`        |
 | `notifications.affinity`                  | Affinity for Anchore Notifications pod assignment                                                                                                                            | `{}`        |
 | `notifications.topologySpreadConstraints` | Topology spread constraints for Anchore Notifications pod assignment                                                                                                         | `[]`        |
+| `notifications.containerSecurityContext`  | Security context for the Anchore Notifications containers                                                                                                                    | `{}`        |
 | `notifications.serviceAccountName`        | Service account name for Anchore Notifications pods                                                                                                                          | `""`        |
 
 ### Anchore Policy Engine k8s Deployment Parameters
@@ -1038,6 +1043,7 @@ To restore your deployment to using your previous driver configurations:
 | `policyEngine.affinity`                  | Affinity for Anchore Policy Engine pod assignment                                                                                                                            | `{}`        |
 | `policyEngine.topologySpreadConstraints` | Topology spread constraints for Anchore Policy Engine pod assignment                                                                                                         | `[]`        |
 | `policyEngine.serviceAccountName`        | Service account name for Anchore Policy Engine pods                                                                                                                          | `""`        |
+| `policyEngine.containerSecurityContext`  | Security context for the Anchore Policy Engine containers                                                                                                                    | `{}`        |
 | `policyEngine.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Policy Engine scratch space                                                                                             | `{}`        |
 
 ### Anchore Reports Parameters
@@ -1063,6 +1069,7 @@ To restore your deployment to using your previous driver configurations:
 | `reports.affinity`                  | Affinity for Anchore Reports pod assignment                                                                                                                                  | `{}`        |
 | `reports.topologySpreadConstraints` | Topology spread constraints for Anchore Reports pod assignment                                                                                                               | `[]`        |
 | `reports.serviceAccountName`        | Service account name for Anchore Reports pods                                                                                                                                | `""`        |
+| `reports.containerSecurityContext`  | Security context for the Anchore Reports containers                                                                                                                          | `{}`        |
 | `reports.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Reports scratch space                                                                                                   | `{}`        |
 
 ### Anchore Reports Worker Parameters
@@ -1088,6 +1095,7 @@ To restore your deployment to using your previous driver configurations:
 | `reportsWorker.affinity`                  | Affinity for Anchore Reports Worker pod assignment                                                                                                                           | `{}`        |
 | `reportsWorker.topologySpreadConstraints` | Topology spread constraints for Anchore Reports Worker pod assignment                                                                                                        | `[]`        |
 | `reportsWorker.serviceAccountName`        | Service account name for Anchore Reports Worker pods                                                                                                                         | `""`        |
+| `reportsWorker.containerSecurityContext`  | Security context for the Anchore Reports Worker containers                                                                                                                   | `{}`        |
 
 ### Anchore Simple Queue Parameters
 
@@ -1112,6 +1120,7 @@ To restore your deployment to using your previous driver configurations:
 | `simpleQueue.affinity`                  | Affinity for Anchore Simple Queue pod assignment                                                                                                                             | `{}`        |
 | `simpleQueue.topologySpreadConstraints` | Topology spread constraints for Anchore Simple Queue pod assignment                                                                                                          | `[]`        |
 | `simpleQueue.serviceAccountName`        | Service account name for Anchore Simple Queue pods                                                                                                                           | `""`        |
+| `simpleQueue.containerSecurityContext`  | Security context for the Anchore Simple Queue containers                                                                                                                     | `{}`        |
 
 ### Anchore UI Parameters
 
@@ -1139,6 +1148,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui.tolerations`               | Tolerations for Anchore UI pod assignment                                                                                                                                    | `[]`                                      |
 | `ui.affinity`                  | Affinity for Anchore ui pod assignment                                                                                                                                       | `{}`                                      |
 | `ui.topologySpreadConstraints` | Topology spread constraints for Anchore UI pod assignment                                                                                                                    | `[]`                                      |
+| `ui.containerSecurityContext`  | Security context for the Anchore UI containers                                                                                                                               | `{}`                                      |
 | `ui.serviceAccountName`        | Service account name for Anchore UI pods                                                                                                                                     | `""`                                      |
 
 ### Anchore Upgrade Job Parameters
@@ -1156,6 +1166,7 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.tolerations`               | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`                         |
 | `upgradeJob.affinity`                  | Affinity for the Anchore upgrade job pod assignment                                                                                             | `{}`                         |
 | `upgradeJob.topologySpreadConstraints` | Topology spread constraints for the Anchore upgrade job pod assignment                                                                          | `[]`                         |
+| `upgradeJob.containerSecurityContext`  | Security context for the Anchore upgrade job containers                                                                                         | `{}`                         |
 | `upgradeJob.annotations`               | Annotations for the Anchore upgrade job                                                                                                         | `{}`                         |
 | `upgradeJob.resources`                 | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                         |
 | `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                         |
@@ -1242,6 +1253,7 @@ To restore your deployment to using your previous driver configurations:
 | `osaaMigrationJob.tolerations`                               | Tolerations for Anchore Object Store and Analysis Archive migration job pod assignment                           | `[]`                         |
 | `osaaMigrationJob.affinity`                                  | Affinity for Anchore Object Store and Analysis Archive migration job pod assignment                              | `{}`                         |
 | `osaaMigrationJob.topologySpreadConstraints`                 | Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment           | `[]`                         |
+| `osaaMigrationJob.containerSecurityContext`                  | Security context for the Anchore Object Store and Analysis Archive migration job containers                      | `{}`                         |
 | `osaaMigrationJob.serviceAccountName`                        | Service account name for Anchore Object Store and Analysis Archive migration job pods                            | `""`                         |
 | `osaaMigrationJob.analysisArchiveMigration.bucket`           | The name of the bucket to migrate                                                                                | `analysis_archive`           |
 | `osaaMigrationJob.analysisArchiveMigration.run`              | Run the analysis_archive migration                                                                               | `false`                      |

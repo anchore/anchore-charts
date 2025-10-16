@@ -965,6 +965,10 @@ analyzer:
   ##
   serviceAccountName: ""
 
+  ## @param analyzer.containerSecurityContext Security context for the Anchore Analyzer containers
+  ##
+  containerSecurityContext: {}
+
   ## @param analyzer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Analyzer scratch space
   ## Used for analysis of the images scanned by the Anchore Analyzer
   ##
@@ -1052,6 +1056,10 @@ api:
   ##
   serviceAccountName: ""
 
+  ## @param api.containerSecurityContext Security context for the Anchore API containers
+  ##
+  containerSecurityContext: {}
+
 #####################################################
 ## @section Anchore Catalog k8s Deployment Parameters
 #####################################################
@@ -1133,6 +1141,10 @@ catalog:
   ## @param catalog.serviceAccountName Service account name for Anchore Catalog pods
   ##
   serviceAccountName: ""
+
+  ## @param catalog.containerSecurityContext Security context for the Anchore Catalog containers
+  ##
+  containerSecurityContext: {}
 
   ## @param catalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Catalog scratch space
   ## Used for the Anchore Catalog service archival process, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
@@ -1222,6 +1234,10 @@ dataSyncer:
   ##
   serviceAccountName: ""
 
+  ## @param dataSyncer.containerSecurityContext Security context for the Anchore DataSyncer containers
+  ##
+  containerSecurityContext: {}
+
   ## @param dataSyncer.scratchVolume.details [object] Details for the k8s volume to be created for Anchore DataSyncer scratch space
   ## Used for the Anchore DataSyncer service to download and sync the feeds data
   ##
@@ -1305,6 +1321,10 @@ notifications:
   ## @param notifications.topologySpreadConstraints Topology spread constraints for Anchore Notifications pod assignment
   ##
   topologySpreadConstraints: []
+
+  ## @param notifications.containerSecurityContext Security context for the Anchore Notifications containers
+  ##
+  containerSecurityContext: {}
 
   ## @param notifications.serviceAccountName Service account name for Anchore Notifications pods
   ##
@@ -1391,6 +1411,10 @@ policyEngine:
   ## @param policyEngine.serviceAccountName Service account name for Anchore Policy Engine pods
   ##
   serviceAccountName: ""
+
+  ## @param policyEngine.containerSecurityContext Security context for the Anchore Policy Engine containers
+  ##
+  containerSecurityContext: {}
 
   ## @param policyEngine.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Policy Engine scratch space
   ## policy_engine uses the scratch space for locally synced copy of the feeds data
@@ -1481,6 +1505,10 @@ reports:
   ## @param reports.serviceAccountName Service account name for Anchore Reports pods
   ##
   serviceAccountName: ""
+
+  ## @param reports.containerSecurityContext Security context for the Anchore Reports containers
+  ##
+  containerSecurityContext: {}
 
   ## @param reports.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Reports scratch space
   ## Used for the Anchore Reports service to buffer report generation to disk instead of in memory. Off by default, only used if `anchoreConfig.reports.use_volume=true`
@@ -1580,6 +1608,10 @@ reportsWorker:
   ##
   serviceAccountName: ""
 
+  ## @param reportsWorker.containerSecurityContext Security context for the Anchore Reports Worker containers
+  ##
+  containerSecurityContext: {}
+
 ###########################################
 ## @section Anchore Simple Queue Parameters
 ###########################################
@@ -1661,6 +1693,10 @@ simpleQueue:
   ## @param simpleQueue.serviceAccountName Service account name for Anchore Simple Queue pods
   ##
   serviceAccountName: ""
+
+  ## @param simpleQueue.containerSecurityContext Security context for the Anchore Simple Queue containers
+  ##
+  containerSecurityContext: {}
 
 #################################
 ## @section Anchore UI Parameters
@@ -1765,6 +1801,10 @@ ui:
   ##
   topologySpreadConstraints: []
 
+  ## @param ui.containerSecurityContext Security context for the Anchore UI containers
+  ##
+  containerSecurityContext: {}
+
   ## @param ui.serviceAccountName Service account name for Anchore UI pods
   ##
   serviceAccountName: ""
@@ -1822,6 +1862,10 @@ upgradeJob:
   ## @param upgradeJob.topologySpreadConstraints Topology spread constraints for the Anchore upgrade job pod assignment
   ##
   topologySpreadConstraints: []
+
+  ## @param upgradeJob.containerSecurityContext Security context for the Anchore upgrade job containers
+  ##
+  containerSecurityContext: {}
 
   ## @param upgradeJob.annotations Annotations for the Anchore upgrade job
   ##
@@ -2131,6 +2175,10 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.topologySpreadConstraints Topology spread constraints for Anchore Object Store and Analysis Archive migration job pod assignment
   ##
   topologySpreadConstraints: []
+
+  ## @param osaaMigrationJob.containerSecurityContext Security context for the Anchore Object Store and Analysis Archive migration job containers
+  ##
+  containerSecurityContext: {}
 
   ## @param osaaMigrationJob.serviceAccountName Service account name for Anchore Object Store and Analysis Archive migration job pods
   ##
