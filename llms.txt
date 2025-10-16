@@ -12,7 +12,7 @@ Anchore provides comprehensive container security analysis and vulnerability sca
 - K8s Inventory
 - ECS Inventory
 - Feeds service
-- KAI (Kubernetes Automated Intelligence)
+- KAI (Kubernetes Automated Inventory; Replaced by K8s Inventory)
 
 ## Repository Structure
 
@@ -27,6 +27,8 @@ Anchore provides comprehensive container security analysis and vulnerability sca
 - `anchore-admission-controller/` - Kubernetes admission controller for policy enforcement
 - `k8s-inventory/` - Kubernetes cluster inventory scanning
 - `feeds/` - Vulnerability feed service
+- `ecs-inventory/` - Amazon Elastic Container Service (ECS) inventory scanning for Anchore
+- `kai` - Kubernetes Automated Inventory (replaced by k8s-inventory)
 
 ## Installation
 
