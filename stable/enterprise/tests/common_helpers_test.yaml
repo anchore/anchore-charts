@@ -1314,7 +1314,7 @@ tests:
     templates: *deployment_templates
     documentIndex: 0
     asserts:
-      - isNotSubset:
+      - notExists:
           path: spec.template.spec.containers[0].securityContext
 
   - it: should render the containerSecurityContext from the component level over the global level when both are set
