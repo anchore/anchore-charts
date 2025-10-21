@@ -1247,7 +1247,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### V3.15.3
 
-- Enables Prometheus administrative HTTP API (`web.enable-admin-api`) by default via `prometheus.server.extraFlags`.
+- Enables Anchore Internal Prometheus administrative HTTP API (`web.enable-admin-api`) by default via `prometheus.server.extraFlags`. This allows for taking snapshots and performing administrative operations needed by the product and tools.
 
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
