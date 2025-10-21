@@ -244,6 +244,15 @@ tests:
           path: data["prometheus.yml"]
           pattern: 'target_label: +kubernetes_pod_name'
 
+  # ---------------------------------------------------------------------------
+  # Annotation Tests
+  # We expose an annotation (prometheus.server.extra-flags) on the generated
+  # Prometheus config ConfigMap to provide a stable surface to assert against
+  # the effective list of prometheus.server.extraFlags. This avoids depending
+  # on upstream subchart Deployment args. The first test validates the default
+  # (only web.enable-admin-api). The second ensures an override replaces the
+  # list entirely without merging.
+  # ---------------------------------------------------------------------------
   - it: renders annotations on the ConfigMap
     set:
       prometheus.chartEnabled: true
@@ -252,3 +261,17 @@ tests:
     asserts:
       - exists:
           path: metadata.annotations
+      - equal:
+          path: metadata.annotations["prometheus.server.extra-flags"]
+          value: "web.enable-admin-api"
+  - it: annotation reflects overridden extraFlags
+    set:
+      prometheus.chartEnabled: true
+      prometheus.server.extraFlags:
+        - storage.tsdb.wal-compression
+    templates:
+      - templates/prometheus-config.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["prometheus.server.extra-flags"]
+          value: "storage.tsdb.wal-compression"

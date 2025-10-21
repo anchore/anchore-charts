@@ -1199,6 +1199,7 @@ To restore your deployment to using your previous driver configurations:
 | `prometheus.prometheus-pushgateway.enabled`                   | Enable pushgateway for custom metrics                                                                                                                                                      | `false`                                |
 | `prometheus.server.name`                                      | Name override for Prometheus server resources                                                                                                                                              | `enterprise-prometheus-server`         |
 | `prometheus.server.configMapOverrideName`                     | Name of an existing ConfigMap to override the default Prometheus server configuration                                                                                                      | `anchore-enterprise-prometheus-config` |
+| `prometheus.server.extraFlags`                                | Additional Prometheus server flags (list). Default enables the admin API endpoint.                                                                                                         | `["web.enable-admin-api"]`             |
 | `prometheus.prometheus-node-exporter.nameOverride`            | Base name for node-exporter resources (will be prefixed by release name)                                                                                                                   | `enterprise-prometheus-node-exporter`  |
 | `prometheus.prometheus-node-exporter.port`                    | Container port where node-exporter exposes metrics                                                                                                                                         | `9120`                                 |
 | `prometheus.prometheus-node-exporter.service.name`            | Service name for node-exporter                                                                                                                                                             | `enterprise-prometheus-node-exporter`  |
@@ -1243,6 +1244,10 @@ To restore your deployment to using your previous driver configurations:
 ## Release Notes
 
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
+
+### V3.15.3
+
+- Enables Prometheus administrative HTTP API (`web.enable-admin-api`) by default via `prometheus.server.extraFlags`.
 
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
