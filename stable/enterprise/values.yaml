@@ -1970,6 +1970,12 @@ prometheus:
     retention: "14d"
     retentionSize: "8GB"
 
+  ## @param prometheus.server.extraFlags Additional Prometheus server flags (list).
+  ## We enable the admin API by default so that administrative endpoints (e.g. Prometheus snapshot) are available.
+    ## Reference: https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
+    extraFlags:
+      - web.enable-admin-api
+
     # Service configuration - internal only by default
     service:
       type: ClusterIP
@@ -1977,7 +1983,7 @@ prometheus:
     # Persistent storage configuration
     persistentVolume:
       enabled: true
-      size: 10Gi
+      size: 20Gi
 
   # The chart includes defaults for Anchore services with ports and intervals set
 

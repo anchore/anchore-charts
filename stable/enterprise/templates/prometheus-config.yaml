@@ -13,6 +13,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+    prometheus.server.extra-flags: "{{- if and .Values.prometheus .Values.prometheus.server .Values.prometheus.server.extraFlags -}}{{ join "," .Values.prometheus.server.extraFlags }}{{- end -}}"
 data:
   prometheus.yml: |
 {{ include "enterprise.prometheus.config" . | indent 4 }}
