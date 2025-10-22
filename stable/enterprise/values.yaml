@@ -901,6 +901,14 @@ analyzer:
   ##
   extraEnv: []
 
+  ## @param analyzer.extraVolumes Define additional volumes for Anchore Analyzer pods
+  ##
+  extraVolumes: []
+
+  ## @param analyzer.extraVolumeMounts Define additional volume mounts for Anchore Analyzer pods
+  ##
+  extraVolumeMounts: []
+
   ## @param analyzer.resources Resource requests and limits for Anchore Analyzer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1737,6 +1745,14 @@ upgradeJob:
   ## @param upgradeJob.labels Labels for the Anchore upgrade job
   ##
   labels: {}
+
+  ## @param upgradeJob.extraVolumes Define additional volumes for Anchore Upgrade pods
+  ##
+  extraVolumes: []
+
+  ## @param upgradeJob.extraVolumeMounts Define additional volume mounts for Anchore Upgrade pods
+  ##
+  extraVolumeMounts: []
 
   ## @param upgradeJob.ttlSecondsAfterFinished The time period in seconds the upgrade job, and it's related pods should be retained for
   ## Defaults to 0 == immediate deletion after completion

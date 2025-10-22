@@ -640,6 +640,52 @@ tests:
         count: 1
         any: true
 
+  - it: should render extraVolumeMounts at a component level
+    set:
+      upgradeJob:
+        extraVolumeMounts:
+          - name: my-volume
+            mountPath: /my/path
+            subPath: my-subpath
+          - name: my-volume-two
+            mountPath: /my/other/path
+            subPath: my-other-subpath
+      analyzer:
+        extraVolumeMounts:
+          - name: my-volume
+            mountPath: /my/path
+            subPath: my-subpath
+          - name: my-volume-two
+            mountPath: /my/other/path
+            subPath: my-other-subpath
+    templates:
+      - hooks/pre-upgrade/upgrade_job.yaml
+      - analyzer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-volume
+            mountPath: /my/path
+            subPath: my-subpath
+        count: 1
+        any: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: my-volume-two
+            mountPath: /my/other/path
+            subPath: my-other-subpath
+        count: 1
+        any: true
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: certs
+        count: 1
+        any: true
+
   - it: should render emptyDir scratchVolume if no global or component specific values are set
     templates:
       - analyzer_deployment.yaml
