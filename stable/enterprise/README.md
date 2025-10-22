@@ -857,6 +857,8 @@ To restore your deployment to using your previous driver configurations:
 | `analyzer.service.port`              | The port used for gatherings metrics when .Values.metricsEnabled=true                                                                                                        | `8084` |
 | `analyzer.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`   |
 | `analyzer.extraEnv`                  | Set extra environment variables for Anchore Analyzer pods                                                                                                                    | `[]`   |
+| `analyzer.extraVolumes`              | Define additional volumes for Anchore Analyzer pods                                                                                                                          | `[]`   |
+| `analyzer.extraVolumeMounts`         | Define additional volume mounts for Anchore Analyzer pods                                                                                                                    | `[]`   |
 | `analyzer.resources`                 | Resource requests and limits for Anchore Analyzer pods                                                                                                                       | `{}`   |
 | `analyzer.labels`                    | Labels for Anchore Analyzer pods                                                                                                                                             | `{}`   |
 | `analyzer.annotations`               | Annotation for Anchore Analyzer pods                                                                                                                                         | `{}`   |
@@ -1100,6 +1102,8 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.annotations`               | Annotations for the Anchore upgrade job                                                                                                         | `{}`                         |
 | `upgradeJob.resources`                 | Resource requests and limits for the Anchore upgrade job                                                                                        | `{}`                         |
 | `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                         |
+| `upgradeJob.extraVolumes`              | Define additional volumes for Anchore Upgrade pods                                                                                              | `[]`                         |
+| `upgradeJob.extraVolumeMounts`         | Define additional volume mounts for Anchore Upgrade pods                                                                                        | `[]`                         |
 | `upgradeJob.ttlSecondsAfterFinished`   | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                         |
 
 ### Ingress Parameters
@@ -1207,6 +1211,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     - anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss -> anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss
   #### V3.16.1
   - Adds anchoreConfig.database.dbConnectArgs to override db_connect_args
+  #### V3.16.2
+  - Adds analyzer service and exposes extraVolume/extraVolumeMounts to the analyzer and upgradeJob in the values.yaml
 
 ### V3.15.x
 
