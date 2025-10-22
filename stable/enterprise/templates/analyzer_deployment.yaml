@@ -65,3 +65,23 @@ spec:
         {{- with .Values.analyzer.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "enterprise.analyzer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.service.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  type: {{ .Values.analyzer.service.type }}
+  ports:
+    - name: {{ $component | lower }}
+      port: {{ .Values.analyzer.service.port }}
+      targetPort: {{ .Values.analyzer.service.port }}
+      protocol: TCP
+      {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
+  selector:
+    app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
+    app.kubernetes.io/component: {{ $component | lower }}
