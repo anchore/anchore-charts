@@ -1983,7 +1983,7 @@ prometheus:
     # Persistent storage configuration
     persistentVolume:
       enabled: true
-      size: 20Gi
+      size: 40Gi
 
   # The chart includes defaults for Anchore services with ports and intervals set
 
