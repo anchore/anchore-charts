@@ -1,5 +1,10 @@
 {{/*
 Prometheus helper templates for Anchore Enterprise monitoring configuration.
+
+NOTE: this is a beta feature and may undergo changes in future releases. 
+This is an optional and initial implementation to facilitate Prometheus monitoring 
+of Anchore Enterprise components. The intent is to provide detailed service
+health and metrics for troubleshooting and debugging purposes.
 */}}
 
 {{/*

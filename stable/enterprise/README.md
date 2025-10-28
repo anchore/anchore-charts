@@ -418,18 +418,22 @@ anchoreConfig:
 
 For those using the [Prometheus operator](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/developer/getting-started.md), a ServiceMonitor can be deployed within the same namespace as your Anchore Enterprise release. Once deployed, the Prometheus operator will automatically begin scraping the pre-configured endpoints for metrics.
 
-#### Built-in Prometheus (Beta - Optional)
+#### Prometheus Metrics Internal Scraping (Optional) - *Beta Feature*
 
-**Note:** This feature is currently in **beta**. It provides an easy way to deploy a pre-configured Prometheus instance for monitoring Anchore Enterprise. Future enhancements and support for this is planned.
+**Note:** This feature is currently in **BETA**. More features, functionality, and support for this is planned.
 
-This chart can optionally deploy the community Prometheus chart and set up a ConfigMap containing a working `prometheus.yml` with a scalable scrape configuration for Anchore Enterprise and common Kubernetes targets automatically.
+Enabling this feature is optional. It provides a built-in Prometheus instance configured for monitoring Anchore Enterprise. It is setup to be internal only, scrape targets internally, and the intention is to provide service information and metrics for debugging and troubleshooting purposes. There is no ingress created for this Prometheus instance by default.
+
+**If you are looking to add Prometheus monitoring to your deployment for Operational purposes, it is recommended to use an external Prometheus instance and configure it to scrape the Anchore Enterprise services as shown above in the "Prometheus Metrics" section above.*
+
+This chart uses the community Prometheus chart and sets up a ConfigMap containing a working `prometheus.yml` with a scalable scrape configuration for Anchore Enterprise and common Kubernetes targets automatically.
 
 - Toggle with `prometheus.chartEnabled` (default: `false`).
-- You must enable the Anchore metrics endpoint as shown above for services to export metrics.
+- You **MUST** enable the Anchore metrics endpoint as shown above for the Enterprise services to expose metrics.
 
 **Example usage:**
 
-Minimal example to enable metrics and the bundled Prometheus:
+Minimal example to enable metrics and the internal Prometheus:
 
 ```yaml
 anchoreConfig:
@@ -440,6 +444,24 @@ anchoreConfig:
 
 prometheus:
   chartEnabled: true
+```
+
+**Obtaining more detail by enabling the Node Exporter**
+
+Additionally, adding the optional Node Exporter with this Prometheus deployment can provide additional node-level metrics for your Anchore Enterprise deployment.
+
+Minimal example to enable metrics, the internal Prometheus, and the Node Exporter:
+
+```yaml
+anchoreConfig:
+  metrics:
+    enabled: true
+    # Note: The current beta Prometheus implementation requires metrics to be unauthenticated.
+    auth_disabled: true
+prometheus:
+  chartEnabled: true
+  prometheus-node-exporter:
+    enabled: true
 ```
 
 #### Example ServiceMonitor Configuration
@@ -1193,13 +1215,13 @@ To restore your deployment to using your previous driver configurations:
 | `prometheus.server.retentionSize`                             | Maximum storage size for Prometheus data                                                                                                                                                   | `8GB`                                  |
 | `prometheus.server.service.type`                              | Kubernetes service type for Prometheus                                                                                                                                                     | `ClusterIP`                            |
 | `prometheus.server.persistentVolume.enabled`                  | Enable persistent storage for Prometheus                                                                                                                                                   | `true`                                 |
-| `prometheus.server.persistentVolume.size`                     | Storage size for Prometheus persistent volume                                                                                                                                              | `10Gi`                                 |
+| `prometheus.server.persistentVolume.size`                     | Storage size for Prometheus persistent volume                                                                                                                                              | `20Gi`                                 |
 | `prometheus.prometheus-node-exporter.enabled`                 | Enable node-exporter for node metrics                                                                                                                                                      | `false`                                |
 | `prometheus.kube-state-metrics.enabled`                       | Enable kube-state-metrics for cluster metrics                                                                                                                                              | `true`                                 |
 | `prometheus.prometheus-pushgateway.enabled`                   | Enable pushgateway for custom metrics                                                                                                                                                      | `false`                                |
-| `prometheus.server.name`                                      | Name override for Prometheus server resources                                                                                                                                              | `enterprise-prometheus-server`         |
+| `prometheus.server.name`                                      | Name override for Prometheus server resources                                                                                                                                              | `internal-anchore-prometheus-server`   |
 | `prometheus.server.configMapOverrideName`                     | Name of an existing ConfigMap to override the default Prometheus server configuration                                                                                                      | `anchore-enterprise-prometheus-config` |
-| `prometheus.server.extraFlags`                                | Additional Prometheus server flags (list). Default enables the admin API endpoint.                                                                                                         | `["web.enable-admin-api"]`             |
+| `prometheus.server.extraFlags`                                | Additional Prometheus server flags (list).                                                                                                                                                 | `["web.enable-admin-api"]`             |
 | `prometheus.prometheus-node-exporter.nameOverride`            | Base name for node-exporter resources (will be prefixed by release name)                                                                                                                   | `enterprise-prometheus-node-exporter`  |
 | `prometheus.prometheus-node-exporter.port`                    | Container port where node-exporter exposes metrics                                                                                                                                         | `9120`                                 |
 | `prometheus.prometheus-node-exporter.service.name`            | Service name for node-exporter                                                                                                                                                             | `enterprise-prometheus-node-exporter`  |
