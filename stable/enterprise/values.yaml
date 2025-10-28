@@ -1960,7 +1960,7 @@ prometheus:
   # Server configuration defaults for Anchore monitoring
   server:
     ## @param prometheus.server.name Name override for Prometheus server resources
-    name: enterprise-prometheus-server
+    name: internal-anchore-prometheus-server
 
     ## @param prometheus.server.configMapOverrideName Name of an existing ConfigMap to override the default Prometheus server configuration
     # Config map override
