@@ -18,12 +18,14 @@ set:
 tests:
   - it: should render a valid analyzer config file
     template: analyzer_configmap.yaml
+    documentIndex: 0
     asserts:
       - matchRegex:
           path: data["analyzer_config.yaml"]
           pattern: (?m)^(retrieve_files|secret_search|content_search|malware):$
 
   - it: should set the correct resource names
+    documentIndex: 0
     templates:
       - analyzer_deployment.yaml
       - analyzer_configmap.yaml
@@ -33,6 +35,7 @@ tests:
           value: test-release-enterprise-analyzer
 
   - it: should render component labels
+    documentIndex: 0
     templates:
       - analyzer_deployment.yaml
       - analyzer_configmap.yaml
@@ -54,6 +57,7 @@ tests:
         template: analyzer_deployment.yaml
 
   - it: should render component annotations
+    documentIndex: 0
     templates:
       - analyzer_deployment.yaml
       - analyzer_configmap.yaml
@@ -75,6 +79,7 @@ tests:
         template: analyzer_deployment.yaml
 
   - it: should render component matchLabels
+    documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - isSubset:
@@ -84,6 +89,7 @@ tests:
             app.kubernetes.io/component: analyzer
 
   - it: should render component serviceAccountName
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.serviceAccountName: analyzer-test
@@ -93,6 +99,7 @@ tests:
           value: analyzer-test
 
   - it: should render component serviceAccountName even when global serviceAccountName is set
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       serviceAccountName: global-test
@@ -103,6 +110,7 @@ tests:
           value: analyzer-test
 
   - it: should render component nodeSelector
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.nodeSelector:
@@ -114,6 +122,7 @@ tests:
             analyzer: test
 
   - it: should render component affinity
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.affinity:
@@ -125,6 +134,7 @@ tests:
             analyzer: test
 
   - it: should render component tolerations
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.tolerations:
@@ -143,6 +153,7 @@ tests:
           count: 1
 
   - it: should render scratch volume details from Analyzer values
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.scratchVolume.details:
@@ -162,6 +173,7 @@ tests:
         count: 1
 
   - it: should render scratch volume using details from analyzer values, even when global scratchVolume is explicitly set
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.scratchVolume.details:
@@ -183,6 +195,7 @@ tests:
         count: 1
 
   - it: should render analyzer-configmap volume
+    documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - contains:
@@ -194,6 +207,7 @@ tests:
         count: 1
 
   - it: should render component container name
+    documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - equal:
@@ -201,6 +215,7 @@ tests:
           value: enterprise-analyzer
 
   - it: should render component entrypoint args
+    documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - matchRegex:
@@ -209,6 +224,7 @@ tests:
         count: 1
 
   - it: should render component environment variables
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.extraEnv:
@@ -242,6 +258,7 @@ tests:
             value: foobar
 
   - it: should render component ports
+    documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - contains:
@@ -252,6 +269,7 @@ tests:
         count: 1
 
   - it: should render component volumeMounts
+    documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - contains:
@@ -271,6 +289,7 @@ tests:
         any: true
 
   - it: should render component extraVolumes
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.extraVolumes:
@@ -285,6 +304,7 @@ tests:
         count: 1
 
   - it: should render component extraVolumeMounts
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.extraVolumeMounts:
@@ -301,6 +321,7 @@ tests:
         count: 1
 
   - it: should render component and global extraVolumes
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.extraVolumes:
@@ -324,6 +345,7 @@ tests:
         count: 1
 
   - it: should render component and global extraVolumeMounts
+    documentIndex: 0
     template: analyzer_deployment.yaml
     set:
       analyzer.extraVolumeMounts:
@@ -351,6 +373,7 @@ tests:
         count: 1
 
   - it: should render component probes
+    documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - isSubset:
@@ -381,6 +404,7 @@ tests:
 
   - it: should render component resource requests & limits
     template: analyzer_deployment.yaml
+    documentIndex: 0
     set:
       analyzer.resources:
         requests:
@@ -441,6 +465,7 @@ tests:
 
   - it: should render component topologySpreadConstraints
     template: analyzer_deployment.yaml
+    documentIndex: 0
     set:
       analyzer:
         topologySpreadConstraints:
