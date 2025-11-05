@@ -422,7 +422,7 @@ For those using the [Prometheus operator](https://github.com/prometheus-operator
 
 **Note:** This feature is currently in **BETA**. More features, functionality, and support for this is planned.
 
-Enabling this feature is optional. It provides a built-in Prometheus instance configured for monitoring Anchore Enterprise. It is setup to be internal only, scrape targets internally, and the intention is to provide service information and metrics for debugging and troubleshooting purposes. There is no ingress created for this Prometheus instance by default.
+Enabling this feature is optional. It provides a built-in Prometheus instance configured for monitoring Anchore Enterprise. It is setup to be internal only, scrape targets internally, and the intention is to provide service information and metrics for debugging and troubleshooting purposes. There is no ingress created for this Prometheus instance by default. There are also no dashboards or other human-friendly configurations set inside Prometheus since this iteration is intended to support automated tooling only, not direct human use.
 
 **If you are looking to add Prometheus monitoring to your deployment for Operational purposes, it is recommended to use an external Prometheus instance and configure it to scrape the Anchore Enterprise services as shown above in the "Prometheus Metrics" section above.*
 
