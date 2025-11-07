@@ -426,6 +426,9 @@ timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
 periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
 failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
 successThreshold: {{ .Values.probes.readiness.successThreshold }}
+{{- with .Values.probes.readiness.initialDelaySeconds }}
+initialDelaySeconds: {{ . }}
+{{- end }}
 {{- end -}}
 
 

@@ -105,6 +105,9 @@ spec:
               path: /service/health
               port: {{ $component | lower }}
               scheme: HTTP
+            {{- with .Values.probes.readiness.initialDelaySeconds }}
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            {{- end }}
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
