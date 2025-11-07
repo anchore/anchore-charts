@@ -106,7 +106,7 @@ spec:
               port: {{ $component | lower }}
               scheme: HTTP
             {{- with .Values.probes.readiness.initialDelaySeconds }}
-            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            initialDelaySeconds: {{ . }}
             {{- end }}
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
