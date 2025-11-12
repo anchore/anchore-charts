@@ -33,6 +33,7 @@ spec:
         {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup .Values.anchoreConfig.reports.use_volume }}
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
         {{- end -}}
+        {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
     {{- end }}
       containers:
