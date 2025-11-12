@@ -945,7 +945,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@test-release-postgresql/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@test-release-postgresql/anchore
         count: 1
         any: true
 
@@ -963,13 +963,13 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@my-endpoint/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@my-endpoint/anchore
         count: 1
         any: true
       - isNotSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@localhost/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@localhost/anchore
 
   - it: should render dbHostname with externalEndpoint defined and postgresql disabled for ui_secret.yaml
     set:
@@ -983,7 +983,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@my-endpoint/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@my-endpoint/anchore
         count: 1
         any: true
 
@@ -1000,7 +1000,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@127.0.0.1/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@127.0.0.1/anchore
         count: 1
         any: true
 
@@ -1018,7 +1018,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres,123@test-release-postgresql/anchore
+            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@test-release-postgresql/anchore
         count: 1
         any: true
 
