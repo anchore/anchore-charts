@@ -1200,10 +1200,17 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### V3.18.x
+  #### V3.18.0
+  - Deploys Anchore Enterprise v5.24.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5240/) for more information.
+  - uriencodes appdb_uri in the ui secrets
+
 ### V3.17.x
 
   #### V3.17.0
   - Deploys Anchore Enterprise v5.23.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5230/) for more information.
+  #### V3.17.2
+  - Allows setting initialDelaySeconds for readiness probe
 
 ### V3.16.x
 
