@@ -188,6 +188,14 @@ extraVolumeMounts: []
 #   subPath: config
 #   readOnly: true
 
+## @param sidecars Add custom sidecar containers to all Anchore Enterprise pods
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/
+##
+sidecars: []
+# - name: global-sidecar
+#   image: example/sidecar:latest
+#   imagePullPolicy: IfNotPresent
+
 ## @param securityContext.runAsUser The securityContext runAsUser for all Anchore pods
 ## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore pods
 ## @param securityContext.fsGroup The securityContext fsGroup for all Anchore pods
@@ -909,6 +917,13 @@ analyzer:
   ##
   extraVolumeMounts: []
 
+  ## @param analyzer.sidecars Define additional sidecar containers for Anchore Analyzer pods
+  ##
+  sidecars: []
+  # - name: analyzer-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
   ## @param analyzer.resources Resource requests and limits for Anchore Analyzer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -989,6 +1004,13 @@ api:
   ##
   extraVolumeMounts: []
 
+  ## @param api.sidecars Define additional sidecar containers for Anchore API pods
+  ##
+  sidecars: []
+  # - name: api-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
   ## @param api.resources Resource requests and limits for Anchore API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1061,6 +1083,13 @@ catalog:
   ## @param catalog.extraVolumeMounts Define additional volume mounts for Anchore Catalog pods
   ##
   extraVolumeMounts: []
+
+  ## @param catalog.sidecars Define additional sidecar containers for Anchore Catalog pods
+  ##
+  sidecars: []
+  # - name: catalog-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
 
   ## @param catalog.resources Resource requests and limits for Anchore Catalog pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1142,6 +1171,13 @@ dataSyncer:
   ##
   extraVolumeMounts: []
 
+  ## @param dataSyncer.sidecars Define additional sidecar containers for Anchore Data Syncer pods
+  ##
+  sidecars: []
+  # - name: dataSyncer-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
   ## @param dataSyncer.resources Resource requests and limits for Anchore DataSyncer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1222,6 +1258,13 @@ notifications:
   ##
   extraVolumeMounts: []
 
+  ## @param notifications.sidecars Define additional sidecar containers for Anchore Notification pods
+  ##
+  sidecars: []
+  # - name: notifications-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
   ## @param notifications.resources Resource requests and limits for Anchore Notifications pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1295,6 +1338,13 @@ policyEngine:
   ## @param policyEngine.extraVolumeMounts Define additional volume mounts for Anchore Policy Engine pods
   ##
   extraVolumeMounts: []
+
+  ## @param policyEngine.sidecars Define additional sidecar containers for Anchore Policy Engine pods
+  ##
+  sidecars: []
+  # - name: policyEngine-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
 
   ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1375,6 +1425,13 @@ reports:
   ## @param reports.extraVolumeMounts Define additional volume mounts for Anchore Reports pods
   ##
   extraVolumeMounts: []
+
+  ## @param reports.sidecars Define additional sidecar containers for Anchore Reports pods
+  ##
+  sidecars: []
+  # - name: reports-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
 
   ## @param reports.resources Resource requests and limits for Anchore Reports pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1468,6 +1525,13 @@ reportsWorker:
   ##
   extraVolumeMounts: []
 
+  ## @param reportsWorker.sidecars Define additional sidecar containers for Anchore Reports Worker pods
+  ##
+  sidecars: []
+  # - name: reportsWorker-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+
   ## @param reportsWorker.resources Resource requests and limits for Anchore Reports Worker pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1541,6 +1605,13 @@ simpleQueue:
   ## @param simpleQueue.extraVolumeMounts Define additional volume mounts for Anchore Simple Queue pods
   ##
   extraVolumeMounts: []
+
+  ## @param simpleQueue.sidecars Define additional sidecar containers for Anchore Simple Queue pods
+  ##
+  sidecars: []
+  # - name: simpleQueue-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
 
   ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1640,6 +1711,13 @@ ui:
   ## @param ui.extraVolumeMounts Define additional volume mounts for Anchore UI pods
   ##
   extraVolumeMounts: []
+
+  ## @param ui.sidecars Define additional sidecar containers for Anchore UI pods
+  ##
+  sidecars: []
+  # - name: ui-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
 
   ## @param ui.resources Resource requests and limits for Anchore UI pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
