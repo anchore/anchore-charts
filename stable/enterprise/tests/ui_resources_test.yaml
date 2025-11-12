@@ -524,3 +524,53 @@ tests:
                     app: foobar
                 matchLabelKeys:
                   - pod-template-hash
+
+  - it: should URL encode ANCHORE_APPDB_URI credentials with SSL enabled
+    template: ui_secret.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.database.ssl: true
+      anchoreConfig.database.sslMode: require
+      postgresql.auth.username: "user@domain"
+      postgresql.auth.password: "pass word!@#"
+    asserts:
+      - equal:
+          path: stringData.ANCHORE_APPDB_URI
+          value: 'postgresql://user%40domain:pass+word%21%40%23@test-release-postgresql/anchore?sslMode=require'
+
+  - it: should URL encode ANCHORE_APPDB_URI credentials with SSL disabled
+    template: ui_secret.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.database.ssl: false
+      postgresql.auth.username: "user@domain"
+      postgresql.auth.password: "pass word!@#"
+    asserts:
+      - equal:
+          path: stringData.ANCHORE_APPDB_URI
+          value: 'postgresql://user%40domain:pass+word%21%40%23@test-release-postgresql/anchore'
+
+  - it: should render ANCHORE_REDIS_URI with URL encoded password for internal redis
+    template: ui_secret.yaml
+    documentIndex: 0
+    set:
+      ui-redis:
+        chartEnabled: true
+        auth:
+          password: "redis pass!@#"
+    asserts:
+      - equal:
+          path: stringData.ANCHORE_REDIS_URI
+          value: 'redis://:redis+pass%21%40%23@test-release-ui-redis-master:6379'
+
+  - it: should render ANCHORE_REDIS_URI with URL encoded external endpoint but doesnt uriencode it
+    template: ui_secret.yaml
+    documentIndex: 0
+    set:
+      ui-redis:
+        chartEnabled: false
+        externalEndpoint: "redis://:my pass@external-redis:6379"
+    asserts:
+      - equal:
+          path: stringData.ANCHORE_REDIS_URI
+          value: 'redis://:my pass@external-redis:6379'
