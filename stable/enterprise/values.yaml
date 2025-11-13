@@ -1915,7 +1915,7 @@ postgresql:
     ## NOTE: If your storage class does not allow dynamic resizing then be sure to set the size appropriately!!
     ##
     persistence:
-      size: 20Gi
+      size: 26Gi
       storageClass: ""
 
     ## @param postgresql.primary.extraEnvVars An array to add extra environment variables
@@ -1968,7 +1968,7 @@ prometheus:
 
     # Storage and retention settings
     retention: "14d"
-    retentionSize: "8GB"
+    retentionSize: "10GB"
 
   ## @param prometheus.server.extraFlags Additional Prometheus server flags (list).
   ## We enable the admin API by default so that administrative endpoints (e.g. Prometheus snapshot) are available.
