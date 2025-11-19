@@ -775,6 +775,7 @@ anchoreConfig:
     enable_proxy: false
 
     ## @param anchoreConfig.ui.enable_ssl Enable SSL in the Anchore UI container
+    ## NOTE: requires enable_proxy: true
     ##
     enable_ssl: false
 
@@ -786,8 +787,9 @@ anchoreConfig:
 
     ## @param anchoreConfig.ui.redis_flushdb Flush user session keys and empty data on Anchore UI startup
     ## If the datastore is flushed, any users with active sessions will be required to re-authenticate
+    ## When running multiple UI replicas this should be set to false
     ##
-    redis_flushdb: true
+    redis_flushdb: false
 
     ## @param anchoreConfig.ui.force_websocket Force WebSocket protocol for socket message communications
     ##
@@ -1610,6 +1612,10 @@ ui:
   ##
   ldapsRootCaCertName: ""
 
+  ## @param ui.replicaCount Number of replicas for the Anchore UI deployment
+  ##
+  replicaCount: 1
+
   ## @param ui.service.type Service type for Anchore UI
   ## @param ui.service.port Service port for Anchore UI
   ## @param ui.service.annotations Annotations for Anchore UI service
@@ -1621,7 +1627,6 @@ ui:
   service:
     type: ClusterIP
     port: 80
-    ## TODO - add service specific annotations & labels to ALL services
     annotations: {}
     labels: {}
     sessionAffinity: ClientIP
