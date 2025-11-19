@@ -1003,7 +1003,7 @@ should render the configmaps:
         enable_ssl: false
         enable_proxy: false
         allow_shared_login: true
-        redis_flushdb: true
+        redis_flushdb: false
         force_websocket: false
         authentication_lock:
           count: 5
