@@ -191,11 +191,11 @@ extraVolumeMounts: []
 ## @param sidecars Add custom sidecar containers to all Anchore Enterprise pods
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/
 ##
-sidecars: 
-- name: global-sidecar
-  image: example/sidecar:latest
-  imagePullPolicy: IfNotPresent
-  restartPolicy: Always
+sidecars: []
+# - name: global-sidecar
+#   image: example/sidecar:latest
+#   imagePullPolicy: IfNotPresent
+#   restartPolicy: Always
 
 ## @param securityContext.runAsUser The securityContext runAsUser for all Anchore pods
 ## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore pods
