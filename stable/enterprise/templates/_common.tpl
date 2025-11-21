@@ -478,9 +478,18 @@ Usage:
   {{- end }}
 */}}
 {{- define "enterprise.common.hasSidecars" -}}
-{{- $component := .component | default "" -}}
-{{- $componentVals := (get .Values $component) | default (dict) -}}
-{{- if or .Values.sidecars $componentVals.sidecars -}}true{{- end -}}
+{{- $component := .component -}}
+
+{{- with .Values.sidecars -}}
+true
+{{- end }}
+
+{{- if $component }}
+  {{- with (index .Values (print $component)).sidecars -}}
+true
+  {{- end }}
+{{- end }}
+
 {{- end -}}
 
 {{/*

@@ -29,7 +29,7 @@ spec:
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
       {{- end }}
       {{- if or
-            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup .Values.anchoreConfig.reports.use_volume)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
             (include "enterprise.common.hasSidecars" (merge (dict "component" $component) .))
         }}
