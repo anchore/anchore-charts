@@ -469,6 +469,21 @@ Setup the common anchore volume mounts
 {{- end -}}
 
 {{/*
+Helper: returns a truthy value if any sidecars (global or component-specific)
+are configured for the given component.
+
+Usage:
+  {{- if include "enterprise.common.hasSidecars" (merge (dict "component" $component) .) }}
+    ...
+  {{- end }}
+*/}}
+{{- define "enterprise.common.hasSidecars" -}}
+{{- $component := .component | default "" -}}
+{{- $componentVals := (get .Values $component) | default (dict) -}}
+{{- if or .Values.sidecars $componentVals.sidecars -}}true{{- end -}}
+{{- end -}}
+
+{{/*
 Render sidecar containers for a specific component
 Usage: {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
 */}}

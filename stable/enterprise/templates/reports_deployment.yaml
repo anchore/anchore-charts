@@ -28,13 +28,19 @@ spec:
         - name: "anchore-scratch"
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
       {{- end }}
-    {{- if or (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup .Values.anchoreConfig.reports.use_volume) (and .Values.cloudsql.enabled .Values.cloudsql.useSideCar) }}
+      {{- if or
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
+            (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
+            (include "enterprise.common.hasSidecars" (merge (dict "component" $component) .))
+        }}
       initContainers:
         {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup .Values.anchoreConfig.reports.use_volume }}
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
         {{- end -}}
         {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
+        {{- if and .Values.cloudsql.enabled .Values.cloudsql.useSideCar }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
+        {{- end }}
     {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}

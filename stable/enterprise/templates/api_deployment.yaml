@@ -32,12 +32,17 @@ spec:
           configMap:
             name: {{ template "enterprise.fullname" . }}-policy-bundles
       {{- end }}
-      {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
+      {{- if or
+            (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
+            (include "enterprise.common.hasSidecars" (merge (dict "component" $component) .))
+        }}
       initContainers:
+        {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
+        {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
+        {{- end }}
       {{- end }}
       containers:
-        {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}

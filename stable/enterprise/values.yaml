@@ -191,10 +191,11 @@ extraVolumeMounts: []
 ## @param sidecars Add custom sidecar containers to all Anchore Enterprise pods
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/
 ##
-sidecars: []
-# - name: global-sidecar
-#   image: example/sidecar:latest
-#   imagePullPolicy: IfNotPresent
+sidecars: 
+- name: global-sidecar
+  image: example/sidecar:latest
+  imagePullPolicy: IfNotPresent
+  restartPolicy: Always
 
 ## @param securityContext.runAsUser The securityContext runAsUser for all Anchore pods
 ## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore pods
@@ -923,6 +924,7 @@ analyzer:
   # - name: analyzer-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param analyzer.resources Resource requests and limits for Anchore Analyzer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1010,6 +1012,7 @@ api:
   # - name: api-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param api.resources Resource requests and limits for Anchore API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1090,6 +1093,7 @@ catalog:
   # - name: catalog-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param catalog.resources Resource requests and limits for Anchore Catalog pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1177,6 +1181,7 @@ dataSyncer:
   # - name: dataSyncer-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param dataSyncer.resources Resource requests and limits for Anchore DataSyncer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1264,6 +1269,7 @@ notifications:
   # - name: notifications-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param notifications.resources Resource requests and limits for Anchore Notifications pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1345,6 +1351,7 @@ policyEngine:
   # - name: policyEngine-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1432,6 +1439,7 @@ reports:
   # - name: reports-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param reports.resources Resource requests and limits for Anchore Reports pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1531,6 +1539,7 @@ reportsWorker:
   # - name: reportsWorker-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param reportsWorker.resources Resource requests and limits for Anchore Reports Worker pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1612,6 +1621,7 @@ simpleQueue:
   # - name: simpleQueue-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1718,6 +1728,7 @@ ui:
   # - name: ui-sidecar
   #   image: example/sidecar:latest
   #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param ui.resources Resource requests and limits for Anchore UI pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/

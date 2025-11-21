@@ -34,15 +34,21 @@ spec:
           configMap:
             name: {{ template "enterprise.fullname" . }}-policy-bundles
       {{- end }}
-    {{- if or (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup) (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar)) }}
+      {{- if or
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
+            (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
+            (include "enterprise.common.hasSidecars" (merge (dict "component" $component) .))
+        }}
       initContainers:
         {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
         {{- end -}}
+        {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
+        {{- end }}
+        {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
     {{- end }}
       containers:
-      {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
       {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
       {{- end }}
