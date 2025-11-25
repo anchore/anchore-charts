@@ -1,3 +1,4 @@
+{{- include "enterprise.useProxyCheck" . -}}
 {{- $component := "ui" -}}
 
 apiVersion: v1
