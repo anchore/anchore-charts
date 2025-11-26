@@ -137,7 +137,7 @@ should render additional audit uris when additionalResourceURIs is set:
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -147,7 +147,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timer_seconds: 1
@@ -168,7 +168,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             account_prometheus_metrics: <ALLOW_API_CONFIGURATION>
@@ -228,7 +228,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -240,7 +240,7 @@ should render additional audit uris when additionalResourceURIs is set:
             require_auth: true
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
@@ -306,7 +306,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
@@ -323,7 +323,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
@@ -356,7 +356,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timers:
@@ -370,7 +370,7 @@ should render additional audit uris when additionalResourceURIs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: 0.0.0.0
+            listen: ::
             port: ${ANCHORE_PORT}
             auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
             upload_dir: /analysis_scratch
@@ -570,7 +570,7 @@ should render the configmaps:
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -580,7 +580,7 @@ should render the configmaps:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timer_seconds: 1
@@ -601,7 +601,7 @@ should render the configmaps:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             account_prometheus_metrics: <ALLOW_API_CONFIGURATION>
@@ -661,7 +661,7 @@ should render the configmaps:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -673,7 +673,7 @@ should render the configmaps:
             require_auth: true
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
@@ -739,7 +739,7 @@ should render the configmaps:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
@@ -756,7 +756,7 @@ should render the configmaps:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
@@ -789,7 +789,7 @@ should render the configmaps:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timers:
@@ -803,7 +803,7 @@ should render the configmaps:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: 0.0.0.0
+            listen: ::
             port: ${ANCHORE_PORT}
             auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
             upload_dir: /analysis_scratch
@@ -1176,7 +1176,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -1186,7 +1186,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timer_seconds: 1
@@ -1207,7 +1207,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             account_prometheus_metrics: <ALLOW_API_CONFIGURATION>
@@ -1267,7 +1267,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -1279,7 +1279,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             require_auth: true
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
@@ -1345,7 +1345,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
@@ -1362,7 +1362,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
@@ -1395,7 +1395,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: '0.0.0.0'
+            listen: '::'
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timers:
@@ -1409,7 +1409,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enabled: true
             require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            listen: 0.0.0.0
+            listen: '::'
             port: ${ANCHORE_PORT}
             auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
             upload_dir: /analysis_scratch
