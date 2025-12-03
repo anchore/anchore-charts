@@ -1,0 +1,20 @@
+{{- if .Values.prometheus.chartEnabled }}
+{{- $component := "prometheus-config" -}}
+{{- $defaultName := printf "%s-prometheus-config" (include "enterprise.fullname" .) -}}
+{{- $cmName := $defaultName -}}
+{{- if and .Values.prometheus .Values.prometheus.server .Values.prometheus.server.configMapOverrideName }}
+{{- /* Match prometheus subchart behavior: it prefixes the override with Release.Name */ -}}
+{{- $cmName = printf "%s-%s" .Release.Name .Values.prometheus.server.configMapOverrideName -}}
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $cmName }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+    prometheus.server.extra-flags: "{{ if and .Values.prometheus .Values.prometheus.server .Values.prometheus.server.extraFlags }}{{ join "," .Values.prometheus.server.extraFlags }}{{ end }}"
+data:
+  prometheus.yml: |
+{{ include "enterprise.prometheus.config" . | indent 4 }}
+{{- end }}

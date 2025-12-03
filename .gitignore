@@ -6,3 +6,7 @@ charts/
 *.code-workspace
 .DS_Store
 .vscode/
+.env
+.envrc
+*.log
+MyValues*.yaml
