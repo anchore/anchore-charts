@@ -2181,3 +2181,80 @@ extraManifests: []
   #     name: prometheus-extra
   #   data:
   #     extra-data: "value"
+
+########################################################################################
+################################################################################
+## @section Optional Prometheus Monitoring for Anchore Enterprise
+## Built-in Prometheus monitoring with defaults for Anchore Enterprise
+################################################################################
+
+## @param prometheus.chartEnabled Enable Prometheus monitoring for Anchore Enterprise
+## @param prometheus.alertmanager.enabled Enable Alertmanager for alert management
+## @param prometheus.server.retention Data retention period for Prometheus
+## @param prometheus.server.retentionSize Maximum storage size for Prometheus data
+## @param prometheus.server.service.type Kubernetes service type for Prometheus
+## @param prometheus.server.persistentVolume.enabled Enable persistent storage for Prometheus
+## @param prometheus.server.persistentVolume.size Storage size for Prometheus persistent volume
+## @param prometheus.prometheus-node-exporter.enabled Enable node-exporter for node metrics
+## @param prometheus.kube-state-metrics.enabled Enable kube-state-metrics for cluster metrics
+## @param prometheus.prometheus-pushgateway.enabled Enable pushgateway for custom metrics
+prometheus:
+  chartEnabled: false
+
+  # Disable alertmanager by default
+  alertmanager:
+    enabled: false
+
+  # Server configuration defaults for Anchore monitoring
+  server:
+    ## @param prometheus.server.name Name override for Prometheus server resources
+    name: internal-anchore-prometheus-server
+
+    ## @param prometheus.server.configMapOverrideName Name of an existing ConfigMap to override the default Prometheus server configuration
+    # Config map override
+    configMapOverrideName: "anchore-enterprise-prometheus-config"
+
+    # Storage and retention settings
+    retention: "14d"
+    retentionSize: "12GB"
+
+  ## @param prometheus.server.extraFlags Additional Prometheus server flags (list).
+  ## We enable the admin API by default so that administrative endpoints (e.g. Prometheus snapshot) are available.
+    ## Reference: https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
+    extraFlags:
+      - web.enable-admin-api
+
+    # Service configuration - internal only by default
+    service:
+      type: ClusterIP
+
+    # Persistent storage configuration
+    persistentVolume:
+      enabled: true
+      size: 40Gi
+
+  # The chart includes defaults for Anchore services with ports and intervals set
+
+  # Enable supporting components - users can disable if not needed
+  prometheus-node-exporter:
+    enabled: false
+    ## @param prometheus.prometheus-node-exporter.nameOverride Base name for node-exporter resources (will be prefixed by release name)
+    nameOverride: enterprise-prometheus-node-exporter
+    # Listen and expose metrics on port 9120 to avoid conflicts if a user has an existing Prometheus setup
+    ## @param prometheus.prometheus-node-exporter.port Container port where node-exporter exposes metrics
+    port: 9120
+    service:
+      ## @param prometheus.prometheus-node-exporter.service.name Service name for node-exporter
+      name: enterprise-prometheus-node-exporter
+      ## @param prometheus.prometheus-node-exporter.service.port Service port for node-exporter
+      port: 9120
+      ## @param prometheus.prometheus-node-exporter.service.targetPort Target port on the node-exporter pod the Service forwards to
+      targetPort: 9120
+
+  # Enable cluster monitoring
+  kube-state-metrics:
+    enabled: true
+
+  # Enable pushgateway for custom metrics
+  prometheus-pushgateway:
+    enabled: false

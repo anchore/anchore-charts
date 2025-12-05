@@ -45,7 +45,23 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-          anchorectl system smoke-tests run
+          max_retries=3
+          retry_count=0
+
+          while [ $retry_count -lt $max_retries ]; do
+            if anchorectl system wait; then
+              echo "System is ready, running smoke tests..."
+              anchorectl system smoke-tests run
+              exit $?
+            fi
+
+            retry_count=$((retry_count + 1))
+            echo "Attempt $retry_count of $max_retries failed. Retrying..."
+            sleep 30
+          done
+
+          echo "System wait failed after $max_retries attempts. Exiting."
+          exit 1
 
       volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 6 }}
   restartPolicy: Never
