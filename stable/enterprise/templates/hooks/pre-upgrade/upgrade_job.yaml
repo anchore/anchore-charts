@@ -39,7 +39,11 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
-      {{- if or (eq (include "enterprise.appVersionChanged" .) "true") (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar)) }}
+      {{- if or
+            (eq (include "enterprise.appVersionChanged" .) "true")
+            (and .Values.cloudsql.enabled .Values.cloudsql.useSideCar)
+            (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
+        }}
       initContainers:
       {{- if eq (include "enterprise.appVersionChanged" .) "true" }}
         - name: scale-down-anchore
@@ -86,6 +90,9 @@ spec:
           {{- with .Values.upgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- end }}
+          {{- if include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .) }}
+          {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
           {{- end }}
           {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
       {{- end }}

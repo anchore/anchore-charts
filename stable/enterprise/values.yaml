@@ -188,6 +188,15 @@ extraVolumeMounts: []
 #   subPath: config
 #   readOnly: true
 
+## @param initContainers Add custom initContainer containers to all Anchore Enterprise pods
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/
+##
+initContainers: []
+# - name: global-initContainer
+#   image: example/initContainer:latest
+#   imagePullPolicy: IfNotPresent
+#   restartPolicy: Always
+
 ## @param securityContext.runAsUser The securityContext runAsUser for all Anchore pods
 ## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore pods
 ## @param securityContext.fsGroup The securityContext fsGroup for all Anchore pods
@@ -909,6 +918,14 @@ analyzer:
   ##
   extraVolumeMounts: []
 
+  ## @param analyzer.initContainers Define additional initContainer containers for Anchore Analyzer pods
+  ##
+  initContainers: []
+  # - name: analyzer-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
+
   ## @param analyzer.resources Resource requests and limits for Anchore Analyzer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -989,6 +1006,14 @@ api:
   ##
   extraVolumeMounts: []
 
+  ## @param api.initContainers Define additional initContainer containers for Anchore API pods
+  ##
+  initContainers: []
+  # - name: api-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
+
   ## @param api.resources Resource requests and limits for Anchore API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1061,6 +1086,14 @@ catalog:
   ## @param catalog.extraVolumeMounts Define additional volume mounts for Anchore Catalog pods
   ##
   extraVolumeMounts: []
+
+  ## @param catalog.initContainers Define additional initContainer containers for Anchore Catalog pods
+  ##
+  initContainers: []
+  # - name: catalog-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param catalog.resources Resource requests and limits for Anchore Catalog pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1142,6 +1175,14 @@ dataSyncer:
   ##
   extraVolumeMounts: []
 
+  ## @param dataSyncer.initContainers Define additional initContainer containers for Anchore Data Syncer pods
+  ##
+  initContainers: []
+  # - name: dataSyncer-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
+
   ## @param dataSyncer.resources Resource requests and limits for Anchore DataSyncer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1222,6 +1263,14 @@ notifications:
   ##
   extraVolumeMounts: []
 
+  ## @param notifications.initContainers Define additional initContainer containers for Anchore Notification pods
+  ##
+  initContainers: []
+  # - name: notifications-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
+
   ## @param notifications.resources Resource requests and limits for Anchore Notifications pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1295,6 +1344,14 @@ policyEngine:
   ## @param policyEngine.extraVolumeMounts Define additional volume mounts for Anchore Policy Engine pods
   ##
   extraVolumeMounts: []
+
+  ## @param policyEngine.initContainers Define additional initContainer containers for Anchore Policy Engine pods
+  ##
+  initContainers: []
+  # - name: policyEngine-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1375,6 +1432,14 @@ reports:
   ## @param reports.extraVolumeMounts Define additional volume mounts for Anchore Reports pods
   ##
   extraVolumeMounts: []
+
+  ## @param reports.initContainers Define additional initContainer containers for Anchore Reports pods
+  ##
+  initContainers: []
+  # - name: reports-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param reports.resources Resource requests and limits for Anchore Reports pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1468,6 +1533,14 @@ reportsWorker:
   ##
   extraVolumeMounts: []
 
+  ## @param reportsWorker.initContainers Define additional initContainer containers for Anchore Reports Worker pods
+  ##
+  initContainers: []
+  # - name: reportsWorker-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
+
   ## @param reportsWorker.resources Resource requests and limits for Anchore Reports Worker pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1541,6 +1614,14 @@ simpleQueue:
   ## @param simpleQueue.extraVolumeMounts Define additional volume mounts for Anchore Simple Queue pods
   ##
   extraVolumeMounts: []
+
+  ## @param simpleQueue.initContainers Define additional initContainer containers for Anchore Simple Queue pods
+  ##
+  initContainers: []
+  # - name: simpleQueue-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1640,6 +1721,14 @@ ui:
   ## @param ui.extraVolumeMounts Define additional volume mounts for Anchore UI pods
   ##
   extraVolumeMounts: []
+
+  ## @param ui.initContainers Define additional initContainer containers for Anchore UI pods
+  ##
+  initContainers: []
+  # - name: ui-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param ui.resources Resource requests and limits for Anchore UI pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1753,6 +1842,14 @@ upgradeJob:
   ## @param upgradeJob.extraVolumeMounts Define additional volume mounts for Anchore Upgrade pods
   ##
   extraVolumeMounts: []
+
+  ## @param upgradeJob.initContainers Add custom initContainer containers to the Anchore upgrade job pods
+  ##
+  initContainers: []
+  # - name: upgradeJob-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param upgradeJob.ttlSecondsAfterFinished The time period in seconds the upgrade job, and it's related pods should be retained for
   ## Defaults to 0 == immediate deletion after completion
@@ -1991,6 +2088,14 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.extraVolumeMounts Define additional volume mounts for Anchore Object Store and Analysis Archive migration job
   ##
   extraVolumeMounts: []
+
+  ## @param osaaMigrationJob.initContainers Add custom initContainer containers to the Anchore Object Store and Analysis Archive migration job pods
+  ##
+  initContainers: []
+  # - name: osaaMigrationJob-initContainer
+  #   image: example/initContainer:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param osaaMigrationJob.resources Resource requests and limits for Anchore Object Store and Analysis Archive migration job
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/

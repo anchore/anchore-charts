@@ -468,6 +468,49 @@ Setup the common anchore volume mounts
 {{- end }}
 {{- end -}}
 
+{{/*
+Helper: returns a truthy value if any initContainers (global or component-specific)
+are configured for the given component.
+
+Usage:
+  {{- if include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .) }}
+    ...
+  {{- end }}
+*/}}
+{{- define "enterprise.common.hasInitContainers" -}}
+{{- $component := .component -}}
+
+{{- with .Values.initContainers -}}
+true
+{{- end }}
+
+{{- if $component }}
+  {{- with (index .Values (print $component)).initContainers -}}
+true
+  {{- end }}
+{{- end }}
+
+{{- end -}}
+
+{{/*
+Render initContainers for a specific component
+Usage: {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
+*/}}
+{{- define "enterprise.common.initContainers" -}}
+{{- $component := .component -}}
+
+{{/* First add any global initContainers */}}
+{{- with .Values.initContainers }}
+{{ toYaml . }}
+{{- end }}
+
+{{/* Then add component-specific initContainers */}}
+{{- if $component }}
+  {{- with (index .Values (print $component)).initContainers }}
+{{ toYaml . }}
+  {{- end }}
+{{- end }}
+{{- end -}}
 
 {{/*
 Setup the common anchore volumes
