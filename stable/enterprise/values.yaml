@@ -1843,6 +1843,15 @@ upgradeJob:
   ##
   extraVolumeMounts: []
 
+  ## @param upgradeJob.sidecars Add custom sidecar containers to the Anchore upgrade job pods
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/
+  ##
+  sidecars: []
+  # - name: upgradeJob-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
+
   ## @param upgradeJob.ttlSecondsAfterFinished The time period in seconds the upgrade job, and it's related pods should be retained for
   ## Defaults to 0 == immediate deletion after completion
   ## Set this to -1 to disable deleting the job automatically (NOTE: This can cause issues with upgrades)
@@ -2080,6 +2089,15 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.extraVolumeMounts Define additional volume mounts for Anchore Object Store and Analysis Archive migration job
   ##
   extraVolumeMounts: []
+
+  ## @param osaaMigrationJob.sidecars Add custom sidecar containers to the Anchore Object Store and Analysis Archive migration job pods
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/
+  ##
+  sidecars: []
+  # - name: osaaMigrationJob-sidecar
+  #   image: example/sidecar:latest
+  #   imagePullPolicy: IfNotPresent
+  #   restartPolicy: Always
 
   ## @param osaaMigrationJob.resources Resource requests and limits for Anchore Object Store and Analysis Archive migration job
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
