@@ -29,7 +29,7 @@ spec:
       {{- if or
             (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
-            (include "enterprise.common.hasSidecars" (merge (dict "component" $component) .))
+            (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
       initContainers:
         {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
@@ -38,7 +38,7 @@ spec:
         {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
-        {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
+        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
     {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}

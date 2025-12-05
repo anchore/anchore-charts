@@ -684,7 +684,7 @@ To restore your deployment to using your previous driver configurations:
 | `scratchVolume.details`                 | Details for the k8s volume to be created (defaults to default emptyDir)                                                            | `{}`                                   |
 | `extraVolumes`                          | mounts additional volumes to each pod                                                                                              | `[]`                                   |
 | `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                              | `[]`                                   |
-| `sidecars`                              | Add custom sidecar containers to all Anchore Enterprise pods                                                                       | `[]`                                   |
+| `initContainers`                        | Add custom initContainer containers to all Anchore Enterprise pods                                                                 | `[]`                                   |
 | `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                                                                 | `1000`                                 |
 | `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                                                                | `1000`                                 |
 | `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                                                                   | `1000`                                 |
@@ -860,7 +860,7 @@ To restore your deployment to using your previous driver configurations:
 | `analyzer.extraEnv`                  | Set extra environment variables for Anchore Analyzer pods                                                                                                                    | `[]`   |
 | `analyzer.extraVolumes`              | Define additional volumes for Anchore Analyzer pods                                                                                                                          | `[]`   |
 | `analyzer.extraVolumeMounts`         | Define additional volume mounts for Anchore Analyzer pods                                                                                                                    | `[]`   |
-| `analyzer.sidecars`                  | Define additional sidecar containers for Anchore Analyzer pods                                                                                                               | `[]`   |
+| `analyzer.initContainers`            | Define additional initContainer containers for Anchore Analyzer pods                                                                                                         | `[]`   |
 | `analyzer.resources`                 | Resource requests and limits for Anchore Analyzer pods                                                                                                                       | `{}`   |
 | `analyzer.labels`                    | Labels for Anchore Analyzer pods                                                                                                                                             | `{}`   |
 | `analyzer.annotations`               | Annotation for Anchore Analyzer pods                                                                                                                                         | `{}`   |
@@ -885,7 +885,7 @@ To restore your deployment to using your previous driver configurations:
 | `api.extraEnv`                  | Set extra environment variables for Anchore API pods                                                                                                                         | `[]`        |
 | `api.extraVolumes`              | Define additional volumes for Anchore API pods                                                                                                                               | `[]`        |
 | `api.extraVolumeMounts`         | Define additional volume mounts for Anchore API pods                                                                                                                         | `[]`        |
-| `api.sidecars`                  | Define additional sidecar containers for Anchore API pods                                                                                                                    | `[]`        |
+| `api.initContainers`            | Define additional initContainer containers for Anchore API pods                                                                                                              | `[]`        |
 | `api.resources`                 | Resource requests and limits for Anchore API pods                                                                                                                            | `{}`        |
 | `api.labels`                    | Labels for Anchore API pods                                                                                                                                                  | `{}`        |
 | `api.annotations`               | Annotation for Anchore API pods                                                                                                                                              | `{}`        |
@@ -909,7 +909,7 @@ To restore your deployment to using your previous driver configurations:
 | `catalog.extraEnv`                  | Set extra environment variables for Anchore Catalog pods                                                                                                                     | `[]`        |
 | `catalog.extraVolumes`              | Define additional volumes for Anchore Catalog pods                                                                                                                           | `[]`        |
 | `catalog.extraVolumeMounts`         | Define additional volume mounts for Anchore Catalog pods                                                                                                                     | `[]`        |
-| `catalog.sidecars`                  | Define additional sidecar containers for Anchore Catalog pods                                                                                                                | `[]`        |
+| `catalog.initContainers`            | Define additional initContainer containers for Anchore Catalog pods                                                                                                          | `[]`        |
 | `catalog.resources`                 | Resource requests and limits for Anchore Catalog pods                                                                                                                        | `{}`        |
 | `catalog.labels`                    | Labels for Anchore Catalog pods                                                                                                                                              | `{}`        |
 | `catalog.annotations`               | Annotation for Anchore Catalog pods                                                                                                                                          | `{}`        |
@@ -934,7 +934,7 @@ To restore your deployment to using your previous driver configurations:
 | `dataSyncer.extraEnv`                  | Set extra environment variables for Anchore DataSyncer pods                                                                                                                  | `[]`        |
 | `dataSyncer.extraVolumes`              | Define additional volumes for Anchore DataSyncer pods                                                                                                                        | `[]`        |
 | `dataSyncer.extraVolumeMounts`         | Define additional volume mounts for Anchore DataSyncer pods                                                                                                                  | `[]`        |
-| `dataSyncer.sidecars`                  | Define additional sidecar containers for Anchore Data Syncer pods                                                                                                            | `[]`        |
+| `dataSyncer.initContainers`            | Define additional initContainer containers for Anchore Data Syncer pods                                                                                                      | `[]`        |
 | `dataSyncer.resources`                 | Resource requests and limits for Anchore DataSyncer pods                                                                                                                     | `{}`        |
 | `dataSyncer.labels`                    | Labels for Anchore DataSyncer pods                                                                                                                                           | `{}`        |
 | `dataSyncer.annotations`               | Annotation for Anchore DataSyncer pods                                                                                                                                       | `{}`        |
@@ -959,7 +959,7 @@ To restore your deployment to using your previous driver configurations:
 | `notifications.extraEnv`                  | Set extra environment variables for Anchore Notifications pods                                                                                                               | `[]`        |
 | `notifications.extraVolumes`              | Define additional volumes for Anchore Notifications pods                                                                                                                     | `[]`        |
 | `notifications.extraVolumeMounts`         | Define additional volume mounts for Anchore Notifications pods                                                                                                               | `[]`        |
-| `notifications.sidecars`                  | Define additional sidecar containers for Anchore Notification pods                                                                                                           | `[]`        |
+| `notifications.initContainers`            | Define additional initContainer containers for Anchore Notification pods                                                                                                     | `[]`        |
 | `notifications.resources`                 | Resource requests and limits for Anchore Notifications pods                                                                                                                  | `{}`        |
 | `notifications.labels`                    | Labels for Anchore Notifications pods                                                                                                                                        | `{}`        |
 | `notifications.annotations`               | Annotation for Anchore Notifications pods                                                                                                                                    | `{}`        |
@@ -983,7 +983,7 @@ To restore your deployment to using your previous driver configurations:
 | `policyEngine.extraEnv`                  | Set extra environment variables for Anchore Policy Engine pods                                                                                                               | `[]`        |
 | `policyEngine.extraVolumes`              | Define additional volumes for Anchore Policy Engine pods                                                                                                                     | `[]`        |
 | `policyEngine.extraVolumeMounts`         | Define additional volume mounts for Anchore Policy Engine pods                                                                                                               | `[]`        |
-| `policyEngine.sidecars`                  | Define additional sidecar containers for Anchore Policy Engine pods                                                                                                          | `[]`        |
+| `policyEngine.initContainers`            | Define additional initContainer containers for Anchore Policy Engine pods                                                                                                    | `[]`        |
 | `policyEngine.resources`                 | Resource requests and limits for Anchore Policy Engine pods                                                                                                                  | `{}`        |
 | `policyEngine.labels`                    | Labels for Anchore Policy Engine pods                                                                                                                                        | `{}`        |
 | `policyEngine.annotations`               | Annotation for Anchore Policy Engine pods                                                                                                                                    | `{}`        |
@@ -1008,7 +1008,7 @@ To restore your deployment to using your previous driver configurations:
 | `reports.extraEnv`                  | Set extra environment variables for Anchore Reports pods                                                                                                                     | `[]`        |
 | `reports.extraVolumes`              | Define additional volumes for Anchore Reports pods                                                                                                                           | `[]`        |
 | `reports.extraVolumeMounts`         | Define additional volume mounts for Anchore Reports pods                                                                                                                     | `[]`        |
-| `reports.sidecars`                  | Define additional sidecar containers for Anchore Reports pods                                                                                                                | `[]`        |
+| `reports.initContainers`            | Define additional initContainer containers for Anchore Reports pods                                                                                                          | `[]`        |
 | `reports.resources`                 | Resource requests and limits for Anchore Reports pods                                                                                                                        | `{}`        |
 | `reports.labels`                    | Labels for Anchore Reports pods                                                                                                                                              | `{}`        |
 | `reports.annotations`               | Annotation for Anchore Reports pods                                                                                                                                          | `{}`        |
@@ -1033,7 +1033,7 @@ To restore your deployment to using your previous driver configurations:
 | `reportsWorker.extraEnv`                  | Set extra environment variables for Anchore Reports Worker pods                                                                                                              | `[]`        |
 | `reportsWorker.extraVolumes`              | Define additional volumes for Anchore Reports Worker pods                                                                                                                    | `[]`        |
 | `reportsWorker.extraVolumeMounts`         | Define additional volume mounts for Anchore Reports Worker pods                                                                                                              | `[]`        |
-| `reportsWorker.sidecars`                  | Define additional sidecar containers for Anchore Reports Worker pods                                                                                                         | `[]`        |
+| `reportsWorker.initContainers`            | Define additional initContainer containers for Anchore Reports Worker pods                                                                                                   | `[]`        |
 | `reportsWorker.resources`                 | Resource requests and limits for Anchore Reports Worker pods                                                                                                                 | `{}`        |
 | `reportsWorker.labels`                    | Labels for Anchore Reports Worker pods                                                                                                                                       | `{}`        |
 | `reportsWorker.annotations`               | Annotation for Anchore Reports Worker pods                                                                                                                                   | `{}`        |
@@ -1057,7 +1057,7 @@ To restore your deployment to using your previous driver configurations:
 | `simpleQueue.extraEnv`                  | Set extra environment variables for Anchore Simple Queue pods                                                                                                                | `[]`        |
 | `simpleQueue.extraVolumes`              | Define additional volumes for Anchore Simple Queue pods                                                                                                                      | `[]`        |
 | `simpleQueue.extraVolumeMounts`         | Define additional volume mounts for Anchore Simple Queue pods                                                                                                                | `[]`        |
-| `simpleQueue.sidecars`                  | Define additional sidecar containers for Anchore Simple Queue pods                                                                                                           | `[]`        |
+| `simpleQueue.initContainers`            | Define additional initContainer containers for Anchore Simple Queue pods                                                                                                     | `[]`        |
 | `simpleQueue.resources`                 | Resource requests and limits for Anchore Simple Queue pods                                                                                                                   | `{}`        |
 | `simpleQueue.labels`                    | Labels for Anchore Simple Queue pods                                                                                                                                         | `{}`        |
 | `simpleQueue.annotations`               | Annotation for Anchore Simple Queue pods                                                                                                                                     | `{}`        |
@@ -1085,7 +1085,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui.extraEnv`                  | Set extra environment variables for Anchore UI pods                                                                                                                          | `[]`                                      |
 | `ui.extraVolumes`              | Define additional volumes for Anchore UI pods                                                                                                                                | `[]`                                      |
 | `ui.extraVolumeMounts`         | Define additional volume mounts for Anchore UI pods                                                                                                                          | `[]`                                      |
-| `ui.sidecars`                  | Define additional sidecar containers for Anchore UI pods                                                                                                                     | `[]`                                      |
+| `ui.initContainers`            | Define additional initContainer containers for Anchore UI pods                                                                                                               | `[]`                                      |
 | `ui.resources`                 | Resource requests and limits for Anchore UI pods                                                                                                                             | `{}`                                      |
 | `ui.labels`                    | Labels for Anchore UI pods                                                                                                                                                   | `{}`                                      |
 | `ui.annotations`               | Annotation for Anchore UI pods                                                                                                                                               | `{}`                                      |
@@ -1115,7 +1115,7 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                         |
 | `upgradeJob.extraVolumes`              | Define additional volumes for Anchore Upgrade pods                                                                                              | `[]`                         |
 | `upgradeJob.extraVolumeMounts`         | Define additional volume mounts for Anchore Upgrade pods                                                                                        | `[]`                         |
-| `upgradeJob.sidecars`                  | Add custom sidecar containers to the Anchore upgrade job pods                                                                                   | `[]`                         |
+| `upgradeJob.initContainers`            | Add custom initContainer containers to the Anchore upgrade job pods                                                                             | `[]`                         |
 | `upgradeJob.ttlSecondsAfterFinished`   | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                         |
 
 ### Ingress Parameters
@@ -1188,7 +1188,7 @@ To restore your deployment to using your previous driver configurations:
 | `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                         |
 | `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                         |
 | `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                         |
-| `osaaMigrationJob.sidecars`                                  | Add custom sidecar containers to the Anchore upgrade job pods                                                    | `[]`                         |
+| `osaaMigrationJob.initContainers`                            | Add custom initContainer containers to the Anchore Object Store and Analysis Archive migration job pods          | `[]`                         |
 | `osaaMigrationJob.resources`                                 | Resource requests and limits for Anchore Object Store and Analysis Archive migration job                         | `{}`                         |
 | `osaaMigrationJob.labels`                                    | Labels for Anchore Object Store and Analysis Archive migration job                                               | `{}`                         |
 | `osaaMigrationJob.annotations`                               | Annotation for Anchore Object Store and Analysis Archive migration job                                           | `{}`                         |
@@ -1215,7 +1215,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### V3.18.x
   #### V3.17.0
-  - Adds support for specifying sidecars in deployments and jobs
+  - Adds support for specifying custom init containers in deployments and jobs
 
 ### V3.17.x
 

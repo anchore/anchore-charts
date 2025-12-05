@@ -469,23 +469,23 @@ Setup the common anchore volume mounts
 {{- end -}}
 
 {{/*
-Helper: returns a truthy value if any sidecars (global or component-specific)
+Helper: returns a truthy value if any initContainers (global or component-specific)
 are configured for the given component.
 
 Usage:
-  {{- if include "enterprise.common.hasSidecars" (merge (dict "component" $component) .) }}
+  {{- if include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .) }}
     ...
   {{- end }}
 */}}
-{{- define "enterprise.common.hasSidecars" -}}
+{{- define "enterprise.common.hasInitContainers" -}}
 {{- $component := .component -}}
 
-{{- with .Values.sidecars -}}
+{{- with .Values.initContainers -}}
 true
 {{- end }}
 
 {{- if $component }}
-  {{- with (index .Values (print $component)).sidecars -}}
+  {{- with (index .Values (print $component)).initContainers -}}
 true
   {{- end }}
 {{- end }}
@@ -493,20 +493,20 @@ true
 {{- end -}}
 
 {{/*
-Render sidecar containers for a specific component
-Usage: {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
+Render initContainers for a specific component
+Usage: {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
 */}}
-{{- define "enterprise.common.sidecars" -}}
+{{- define "enterprise.common.initContainers" -}}
 {{- $component := .component -}}
 
-{{/* First add any global sidecars */}}
-{{- with .Values.sidecars }}
+{{/* First add any global initContainers */}}
+{{- with .Values.initContainers }}
 {{ toYaml . }}
 {{- end }}
 
-{{/* Then add component-specific sidecars */}}
+{{/* Then add component-specific initContainers */}}
 {{- if $component }}
-  {{- with (index .Values (print $component)).sidecars }}
+  {{- with (index .Values (print $component)).initContainers }}
 {{ toYaml . }}
   {{- end }}
 {{- end }}

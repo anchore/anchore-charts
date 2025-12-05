@@ -42,7 +42,7 @@ spec:
       {{- if or
             (eq (include "enterprise.appVersionChanged" .) "true")
             (and .Values.cloudsql.enabled .Values.cloudsql.useSideCar)
-            (include "enterprise.common.hasSidecars" (merge (dict "component" $component) .))
+            (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
       initContainers:
       {{- if eq (include "enterprise.appVersionChanged" .) "true" }}
@@ -91,8 +91,8 @@ spec:
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- end }}
-          {{- if include "enterprise.common.hasSidecars" (merge (dict "component" $component) .) }}
-          {{- include "enterprise.common.sidecars" (merge (dict "component" $component) .) | nindent 8 }}
+          {{- if include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .) }}
+          {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
           {{- end }}
           {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
       {{- end }}
