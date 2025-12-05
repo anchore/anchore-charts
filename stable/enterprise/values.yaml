@@ -1887,6 +1887,13 @@ ui-redis:
   master:
     persistence:
       enabled: false
+    customLivenessProbe:
+      exec:
+        command: ["sh", "-c", "redis-cli -h $(hostname -i) ping"]
+    customReadinessProbe:
+      exec:
+        command: ["sh", "-c", "redis-cli -h $(hostname -i) ping"]
+
 
   ## @param ui-redis.image.registry Specifies the image registry to use for this chart.
   ## @param ui-redis.image.repository Specifies the image repository to use for this chart.
