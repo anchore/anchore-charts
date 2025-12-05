@@ -730,6 +730,7 @@ To restore your deployment to using your previous driver configurations:
 | `scratchVolume.details`                 | Details for the k8s volume to be created (defaults to default emptyDir)                                                            | `{}`                                   |
 | `extraVolumes`                          | mounts additional volumes to each pod                                                                                              | `[]`                                   |
 | `extraVolumeMounts`                     | mounts additional volumes to each pod                                                                                              | `[]`                                   |
+| `initContainers`                        | Add custom initContainer containers to all Anchore Enterprise pods                                                                 | `[]`                                   |
 | `securityContext.runAsUser`             | The securityContext runAsUser for all Anchore pods                                                                                 | `1000`                                 |
 | `securityContext.runAsGroup`            | The securityContext runAsGroup for all Anchore pods                                                                                | `1000`                                 |
 | `securityContext.fsGroup`               | The securityContext fsGroup for all Anchore pods                                                                                   | `1000`                                 |
@@ -905,6 +906,7 @@ To restore your deployment to using your previous driver configurations:
 | `analyzer.extraEnv`                  | Set extra environment variables for Anchore Analyzer pods                                                                                                                    | `[]`   |
 | `analyzer.extraVolumes`              | Define additional volumes for Anchore Analyzer pods                                                                                                                          | `[]`   |
 | `analyzer.extraVolumeMounts`         | Define additional volume mounts for Anchore Analyzer pods                                                                                                                    | `[]`   |
+| `analyzer.initContainers`            | Define additional initContainer containers for Anchore Analyzer pods                                                                                                         | `[]`   |
 | `analyzer.resources`                 | Resource requests and limits for Anchore Analyzer pods                                                                                                                       | `{}`   |
 | `analyzer.labels`                    | Labels for Anchore Analyzer pods                                                                                                                                             | `{}`   |
 | `analyzer.annotations`               | Annotation for Anchore Analyzer pods                                                                                                                                         | `{}`   |
@@ -929,6 +931,7 @@ To restore your deployment to using your previous driver configurations:
 | `api.extraEnv`                  | Set extra environment variables for Anchore API pods                                                                                                                         | `[]`        |
 | `api.extraVolumes`              | Define additional volumes for Anchore API pods                                                                                                                               | `[]`        |
 | `api.extraVolumeMounts`         | Define additional volume mounts for Anchore API pods                                                                                                                         | `[]`        |
+| `api.initContainers`            | Define additional initContainer containers for Anchore API pods                                                                                                              | `[]`        |
 | `api.resources`                 | Resource requests and limits for Anchore API pods                                                                                                                            | `{}`        |
 | `api.labels`                    | Labels for Anchore API pods                                                                                                                                                  | `{}`        |
 | `api.annotations`               | Annotation for Anchore API pods                                                                                                                                              | `{}`        |
@@ -952,6 +955,7 @@ To restore your deployment to using your previous driver configurations:
 | `catalog.extraEnv`                  | Set extra environment variables for Anchore Catalog pods                                                                                                                     | `[]`        |
 | `catalog.extraVolumes`              | Define additional volumes for Anchore Catalog pods                                                                                                                           | `[]`        |
 | `catalog.extraVolumeMounts`         | Define additional volume mounts for Anchore Catalog pods                                                                                                                     | `[]`        |
+| `catalog.initContainers`            | Define additional initContainer containers for Anchore Catalog pods                                                                                                          | `[]`        |
 | `catalog.resources`                 | Resource requests and limits for Anchore Catalog pods                                                                                                                        | `{}`        |
 | `catalog.labels`                    | Labels for Anchore Catalog pods                                                                                                                                              | `{}`        |
 | `catalog.annotations`               | Annotation for Anchore Catalog pods                                                                                                                                          | `{}`        |
@@ -976,6 +980,7 @@ To restore your deployment to using your previous driver configurations:
 | `dataSyncer.extraEnv`                  | Set extra environment variables for Anchore DataSyncer pods                                                                                                                  | `[]`        |
 | `dataSyncer.extraVolumes`              | Define additional volumes for Anchore DataSyncer pods                                                                                                                        | `[]`        |
 | `dataSyncer.extraVolumeMounts`         | Define additional volume mounts for Anchore DataSyncer pods                                                                                                                  | `[]`        |
+| `dataSyncer.initContainers`            | Define additional initContainer containers for Anchore Data Syncer pods                                                                                                      | `[]`        |
 | `dataSyncer.resources`                 | Resource requests and limits for Anchore DataSyncer pods                                                                                                                     | `{}`        |
 | `dataSyncer.labels`                    | Labels for Anchore DataSyncer pods                                                                                                                                           | `{}`        |
 | `dataSyncer.annotations`               | Annotation for Anchore DataSyncer pods                                                                                                                                       | `{}`        |
@@ -1000,6 +1005,7 @@ To restore your deployment to using your previous driver configurations:
 | `notifications.extraEnv`                  | Set extra environment variables for Anchore Notifications pods                                                                                                               | `[]`        |
 | `notifications.extraVolumes`              | Define additional volumes for Anchore Notifications pods                                                                                                                     | `[]`        |
 | `notifications.extraVolumeMounts`         | Define additional volume mounts for Anchore Notifications pods                                                                                                               | `[]`        |
+| `notifications.initContainers`            | Define additional initContainer containers for Anchore Notification pods                                                                                                     | `[]`        |
 | `notifications.resources`                 | Resource requests and limits for Anchore Notifications pods                                                                                                                  | `{}`        |
 | `notifications.labels`                    | Labels for Anchore Notifications pods                                                                                                                                        | `{}`        |
 | `notifications.annotations`               | Annotation for Anchore Notifications pods                                                                                                                                    | `{}`        |
@@ -1023,6 +1029,7 @@ To restore your deployment to using your previous driver configurations:
 | `policyEngine.extraEnv`                  | Set extra environment variables for Anchore Policy Engine pods                                                                                                               | `[]`        |
 | `policyEngine.extraVolumes`              | Define additional volumes for Anchore Policy Engine pods                                                                                                                     | `[]`        |
 | `policyEngine.extraVolumeMounts`         | Define additional volume mounts for Anchore Policy Engine pods                                                                                                               | `[]`        |
+| `policyEngine.initContainers`            | Define additional initContainer containers for Anchore Policy Engine pods                                                                                                    | `[]`        |
 | `policyEngine.resources`                 | Resource requests and limits for Anchore Policy Engine pods                                                                                                                  | `{}`        |
 | `policyEngine.labels`                    | Labels for Anchore Policy Engine pods                                                                                                                                        | `{}`        |
 | `policyEngine.annotations`               | Annotation for Anchore Policy Engine pods                                                                                                                                    | `{}`        |
@@ -1047,6 +1054,7 @@ To restore your deployment to using your previous driver configurations:
 | `reports.extraEnv`                  | Set extra environment variables for Anchore Reports pods                                                                                                                     | `[]`        |
 | `reports.extraVolumes`              | Define additional volumes for Anchore Reports pods                                                                                                                           | `[]`        |
 | `reports.extraVolumeMounts`         | Define additional volume mounts for Anchore Reports pods                                                                                                                     | `[]`        |
+| `reports.initContainers`            | Define additional initContainer containers for Anchore Reports pods                                                                                                          | `[]`        |
 | `reports.resources`                 | Resource requests and limits for Anchore Reports pods                                                                                                                        | `{}`        |
 | `reports.labels`                    | Labels for Anchore Reports pods                                                                                                                                              | `{}`        |
 | `reports.annotations`               | Annotation for Anchore Reports pods                                                                                                                                          | `{}`        |
@@ -1071,6 +1079,7 @@ To restore your deployment to using your previous driver configurations:
 | `reportsWorker.extraEnv`                  | Set extra environment variables for Anchore Reports Worker pods                                                                                                              | `[]`        |
 | `reportsWorker.extraVolumes`              | Define additional volumes for Anchore Reports Worker pods                                                                                                                    | `[]`        |
 | `reportsWorker.extraVolumeMounts`         | Define additional volume mounts for Anchore Reports Worker pods                                                                                                              | `[]`        |
+| `reportsWorker.initContainers`            | Define additional initContainer containers for Anchore Reports Worker pods                                                                                                   | `[]`        |
 | `reportsWorker.resources`                 | Resource requests and limits for Anchore Reports Worker pods                                                                                                                 | `{}`        |
 | `reportsWorker.labels`                    | Labels for Anchore Reports Worker pods                                                                                                                                       | `{}`        |
 | `reportsWorker.annotations`               | Annotation for Anchore Reports Worker pods                                                                                                                                   | `{}`        |
@@ -1094,6 +1103,7 @@ To restore your deployment to using your previous driver configurations:
 | `simpleQueue.extraEnv`                  | Set extra environment variables for Anchore Simple Queue pods                                                                                                                | `[]`        |
 | `simpleQueue.extraVolumes`              | Define additional volumes for Anchore Simple Queue pods                                                                                                                      | `[]`        |
 | `simpleQueue.extraVolumeMounts`         | Define additional volume mounts for Anchore Simple Queue pods                                                                                                                | `[]`        |
+| `simpleQueue.initContainers`            | Define additional initContainer containers for Anchore Simple Queue pods                                                                                                     | `[]`        |
 | `simpleQueue.resources`                 | Resource requests and limits for Anchore Simple Queue pods                                                                                                                   | `{}`        |
 | `simpleQueue.labels`                    | Labels for Anchore Simple Queue pods                                                                                                                                         | `{}`        |
 | `simpleQueue.annotations`               | Annotation for Anchore Simple Queue pods                                                                                                                                     | `{}`        |
@@ -1121,6 +1131,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui.extraEnv`                  | Set extra environment variables for Anchore UI pods                                                                                                                          | `[]`                                      |
 | `ui.extraVolumes`              | Define additional volumes for Anchore UI pods                                                                                                                                | `[]`                                      |
 | `ui.extraVolumeMounts`         | Define additional volume mounts for Anchore UI pods                                                                                                                          | `[]`                                      |
+| `ui.initContainers`            | Define additional initContainer containers for Anchore UI pods                                                                                                               | `[]`                                      |
 | `ui.resources`                 | Resource requests and limits for Anchore UI pods                                                                                                                             | `{}`                                      |
 | `ui.labels`                    | Labels for Anchore UI pods                                                                                                                                                   | `{}`                                      |
 | `ui.annotations`               | Annotation for Anchore UI pods                                                                                                                                               | `{}`                                      |
@@ -1150,6 +1161,7 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.labels`                    | Labels for the Anchore upgrade job                                                                                                              | `{}`                         |
 | `upgradeJob.extraVolumes`              | Define additional volumes for Anchore Upgrade pods                                                                                              | `[]`                         |
 | `upgradeJob.extraVolumeMounts`         | Define additional volume mounts for Anchore Upgrade pods                                                                                        | `[]`                         |
+| `upgradeJob.initContainers`            | Add custom initContainer containers to the Anchore upgrade job pods                                                                             | `[]`                         |
 | `upgradeJob.ttlSecondsAfterFinished`   | The time period in seconds the upgrade job, and it's related pods should be retained for                                                        | `-1`                         |
 
 ### Ingress Parameters
@@ -1222,6 +1234,7 @@ To restore your deployment to using your previous driver configurations:
 | `osaaMigrationJob.extraEnv`                                  | An array to add extra environment variables                                                                      | `[]`                         |
 | `osaaMigrationJob.extraVolumes`                              | Define additional volumes for Anchore Object Store and Analysis Archive migration job                            | `[]`                         |
 | `osaaMigrationJob.extraVolumeMounts`                         | Define additional volume mounts for Anchore Object Store and Analysis Archive migration job                      | `[]`                         |
+| `osaaMigrationJob.initContainers`                            | Add custom initContainer containers to the Anchore Object Store and Analysis Archive migration job pods          | `[]`                         |
 | `osaaMigrationJob.resources`                                 | Resource requests and limits for Anchore Object Store and Analysis Archive migration job                         | `{}`                         |
 | `osaaMigrationJob.labels`                                    | Labels for Anchore Object Store and Analysis Archive migration job                                               | `{}`                         |
 | `osaaMigrationJob.annotations`                               | Annotation for Anchore Object Store and Analysis Archive migration job                                           | `{}`                         |
@@ -1240,53 +1253,50 @@ To restore your deployment to using your previous driver configurations:
 
 ### Optional Prometheus Monitoring for Anchore Enterprise
 
-| Name                                                          | Description                                                                                                                                                                                | Value                                  |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
-| `prometheus.chartEnabled`                                     | Enable Prometheus monitoring for Anchore Enterprise                                                                                                                                        | `false`                                |
-| `prometheus.alertmanager.enabled`                             | Enable Alertmanager for alert management                                                                                                                                                   | `false`                                |
-| `prometheus.server.retention`                                 | Data retention period for Prometheus                                                                                                                                                       | `14d`                                  |
-| `prometheus.server.retentionSize`                             | Maximum storage size for Prometheus data                                                                                                                                                   | `12GB`                                 |
-| `prometheus.server.service.type`                              | Kubernetes service type for Prometheus                                                                                                                                                     | `ClusterIP`                            |
-| `prometheus.server.persistentVolume.enabled`                  | Enable persistent storage for Prometheus                                                                                                                                                   | `true`                                 |
-| `prometheus.server.persistentVolume.size`                     | Storage size for Prometheus persistent volume                                                                                                                                              | `40Gi`                                 |
-| `prometheus.prometheus-node-exporter.enabled`                 | Enable node-exporter for node metrics                                                                                                                                                      | `false`                                |
-| `prometheus.kube-state-metrics.enabled`                       | Enable kube-state-metrics for cluster metrics                                                                                                                                              | `true`                                 |
-| `prometheus.prometheus-pushgateway.enabled`                   | Enable pushgateway for custom metrics                                                                                                                                                      | `false`                                |
-| `prometheus.server.name`                                      | Name override for Prometheus server resources                                                                                                                                              | `internal-anchore-prometheus-server`   |
-| `prometheus.server.configMapOverrideName`                     | Name of an existing ConfigMap to override the default Prometheus server configuration                                                                                                      | `anchore-enterprise-prometheus-config` |
-| `prometheus.server.extraFlags`                                | Additional Prometheus server flags (list).                                                                                                                                                 | `["web.enable-admin-api"]`             |
-| `prometheus.prometheus-node-exporter.nameOverride`            | Base name for node-exporter resources (will be prefixed by release name)                                                                                                                   | `enterprise-prometheus-node-exporter`  |
-| `prometheus.prometheus-node-exporter.port`                    | Container port where node-exporter exposes metrics                                                                                                                                         | `9120`                                 |
-| `prometheus.prometheus-node-exporter.service.name`            | Service name for node-exporter                                                                                                                                                             | `enterprise-prometheus-node-exporter`  |
-| `prometheus.prometheus-node-exporter.service.port`            | Service port for node-exporter                                                                                                                                                             | `9120`                                 |
-| `prometheus.prometheus-node-exporter.service.targetPort`      | Target port on the node-exporter pod the Service forwards to                                                                                                                               | `9120`                                 |
-| `prometheus.prometheus-pushgateway.persistence.enabled`       | Enable persistence using Persistent Volume Claims. If you have multiple instances (server.repicacount > 1), please consider using an external storage service like Thanos or Grafana Mimir | `false`                                |
-| `prometheus.prometheus-pushgateway.persistence.mountPath`     | Path to mount the volume at.                                                                                                                                                               | `/bitnami/prometheus/data`             |
-| `prometheus.prometheus-pushgateway.persistence.subPath`       | The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services                                                                                    | `""`                                   |
-| `prometheus.prometheus-pushgateway.persistence.storageClass`  | Storage class of backing PVC                                                                                                                                                               | `""`                                   |
-| `prometheus.prometheus-pushgateway.persistence.annotations`   | Persistent Volume Claim annotations                                                                                                                                                        | `{}`                                   |
-| `prometheus.prometheus-pushgateway.persistence.accessModes`   | Persistent Volume Access Modes                                                                                                                                                             | `["ReadWriteOnce"]`                    |
-| `prometheus.prometheus-pushgateway.persistence.size`          | Size of data volume                                                                                                                                                                        | `10Gi`                                 |
-| `prometheus.prometheus-pushgateway.persistence.existingClaim` | The name of an existing PVC to use for persistence                                                                                                                                         | `""`                                   |
-| `prometheus.prometheus-pushgateway.persistence.selector`      | Selector to match an existing Persistent Volume for Prometheus data PVC                                                                                                                    | `{}`                                   |
-| `prometheus.prometheus-pushgateway.persistence.dataSource`    | Custom PVC data source                                                                                                                                                                     | `{}`                                   |
+| Name                                                     | Description                                                                           | Value                                  |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------- |
+| `prometheus.chartEnabled`                                | Enable Prometheus monitoring for Anchore Enterprise                                   | `false`                                |
+| `prometheus.alertmanager.enabled`                        | Enable Alertmanager for alert management                                              | `false`                                |
+| `prometheus.server.retention`                            | Data retention period for Prometheus                                                  | `14d`                                  |
+| `prometheus.server.retentionSize`                        | Maximum storage size for Prometheus data                                              | `12GB`                                 |
+| `prometheus.server.service.type`                         | Kubernetes service type for Prometheus                                                | `ClusterIP`                            |
+| `prometheus.server.persistentVolume.enabled`             | Enable persistent storage for Prometheus                                              | `true`                                 |
+| `prometheus.server.persistentVolume.size`                | Storage size for Prometheus persistent volume                                         | `40Gi`                                 |
+| `prometheus.prometheus-node-exporter.enabled`            | Enable node-exporter for node metrics                                                 | `false`                                |
+| `prometheus.kube-state-metrics.enabled`                  | Enable kube-state-metrics for cluster metrics                                         | `true`                                 |
+| `prometheus.prometheus-pushgateway.enabled`              | Enable pushgateway for custom metrics                                                 | `false`                                |
+| `prometheus.server.name`                                 | Name override for Prometheus server resources                                         | `internal-anchore-prometheus-server`   |
+| `prometheus.server.configMapOverrideName`                | Name of an existing ConfigMap to override the default Prometheus server configuration | `anchore-enterprise-prometheus-config` |
+| `prometheus.server.extraFlags`                           | Additional Prometheus server flags (list).                                            | `["web.enable-admin-api"]`             |
+| `prometheus.prometheus-node-exporter.nameOverride`       | Base name for node-exporter resources (will be prefixed by release name)              | `enterprise-prometheus-node-exporter`  |
+| `prometheus.prometheus-node-exporter.port`               | Container port where node-exporter exposes metrics                                    | `9120`                                 |
+| `prometheus.prometheus-node-exporter.service.name`       | Service name for node-exporter                                                        | `enterprise-prometheus-node-exporter`  |
+| `prometheus.prometheus-node-exporter.service.port`       | Service port for node-exporter                                                        | `9120`                                 |
+| `prometheus.prometheus-node-exporter.service.targetPort` | Target port on the node-exporter pod the Service forwards to                          | `9120`                                 |
 
 ## Release Notes
 
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
 
-### V3.18.0
-
-- Enables Anchore Internal Prometheus administrative HTTP API (`web.enable-admin-api`) by default via `prometheus.server.extraFlags`. This allows for taking snapshots and performing administrative operations needed by the product and tools.
 
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v3.19.x
+  #### V3.19.0
+  - Adds an optional Prometheus monitoring setup to Anchore Enterprise for future internal monitoring and support
+
+### V3.18.x
+  #### V3.18.0
+  - Adds support for specifying custom init containers in deployments and jobs
+
 ### V3.17.x
 
   #### V3.17.0
   - Deploys Anchore Enterprise v5.23.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5230/) for more information.
+  #### V3.17.2
+  - add initialDelaySeconds for readiness probe
 
 ### V3.16.x
 

@@ -30,12 +30,19 @@ spec:
         - name: analyzer-config-volume
           configMap:
             name: {{ template "enterprise.analyzer.fullname" . }}
-    {{- if or (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup) (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar)) }}
+      {{- if or
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
+            (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
+            (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
+        }}
       initContainers:
         {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
         {{- end -}}
+        {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
+        {{- end }}
+        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
     {{- end }}
       containers:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
