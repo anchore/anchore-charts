@@ -22,6 +22,7 @@ spec:
         {{- end }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      {{- include "enterprise.common.hostAliases" (merge (dict "component" $component) .) | nindent 6 }}
       restartPolicy: Never
       volumes:
       {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
