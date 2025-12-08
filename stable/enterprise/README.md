@@ -1298,6 +1298,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### v3.19.x
   #### V3.19.0
   - Adds an optional Prometheus monitoring setup to Anchore Enterprise for future internal monitoring and support
+  #### V3.19.1
+  - Adds component level containerSecurityContext. If set at both the toplevel and component level, the component level containerSecurityContext definition will be honored
 
 ### V3.18.x
   #### V3.18.0
