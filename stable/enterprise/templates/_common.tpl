@@ -591,3 +591,41 @@ When calling this template, .component can be included in the context for compon
   {{- .Values.listenAddress }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Emit hostAliases for a component, merging global and component-specific entries.
+
+Expected values:
+  .Values.hostAliases: []                   # global/common entries
+  .Values.<component>.hostAliases: []       # per-component entries
+
+Call with:
+  {{ include "enterprise.common.hostAliases" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.common.hostAliases" -}}
+  {{- $vals := .Values -}}
+
+  {{- /* Determine component name (string) if provided */ -}}
+  {{- $comp := "" -}}
+  {{- if and (hasKey . "component") (kindIs "string" .component) -}}
+    {{- $comp = .component -}}
+  {{- end }}
+
+  {{- /* Global/common hostAliases (may be empty) */ -}}
+  {{- $global := default (list) $vals.hostAliases -}}
+
+  {{- /* Component-specific hostAliases (may be empty) */ -}}
+  {{- $local := list -}}
+  {{- if and $comp (hasKey $vals $comp) -}}
+    {{- $compVals := index $vals $comp -}}
+    {{- $local = default (list) $compVals.hostAliases -}}
+  {{- end }}
+
+  {{- /* Global first, then component-specific */ -}}
+  {{- $merged := concat $global $local -}}
+
+  {{- if gt (len $merged) 0 }}
+hostAliases:
+{{ toYaml $merged | nindent 2 }}
+  {{- end }}
+{{- end }}
