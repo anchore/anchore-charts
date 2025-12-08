@@ -566,3 +566,18 @@ When calling this template, .anchoreService can be included in the context for a
 {{- else -}}
 {}{{- end }}
 {{- end }}
+
+{{/*
+containerSecurityContext helper to include security context if defined. service level context takes precedence over toplevel context.
+When calling this template, .component can be included in the context for component specific security context
+{{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) }}
+*/}}
+{{- define "enterprise.common.containerSecurityContext" -}}
+{{- $component := .component -}}
+{{- $componentCtx := index .Values (print $component) }}
+{{- if $componentCtx.containerSecurityContext }}
+  {{- toYaml $componentCtx.containerSecurityContext }}
+{{- else if .Values.containerSecurityContext }}
+  {{- toYaml .Values.containerSecurityContext }}
+{{- end }}
+{{- end -}}
