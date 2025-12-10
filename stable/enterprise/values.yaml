@@ -509,7 +509,7 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
     ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
     ## When setting .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes, ensure the scratch volume has sufficient storage space
-    ## ref: https://docs.anchore.com/current/docs/installation/storage/layer_caching/
+    ## ref: https://docs.anchore.com/current/docs/configuration/storage/file/layer_caching/
     ##
     layer_cache_max_gigabytes: 0
 
