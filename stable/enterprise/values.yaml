@@ -908,7 +908,7 @@ analyzer:
   service:
     port: 8084
     domainSuffix: ""
-  
+
   ## @param analyzer.extraEnv Set extra environment variables for Anchore Analyzer pods
   ##
   extraEnv: []

@@ -744,6 +744,7 @@ To restore your deployment to using your previous driver configurations:
 | `probes.readiness.periodSeconds`        | Period seconds for the readiness probe                                                                                             | `10`                                   |
 | `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                          | `3`                                    |
 | `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                          | `1`                                    |
+| `listenAddress`                         | The listen address for all Anchore services if not overridden at the service level                                                 | `0.0.0.0`                              |
 | `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services                                                          | `false`                                |
 | `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                   |
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                   |
@@ -1294,6 +1295,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v3.20.x
+  #### V3.20.0
+  - Deploys Anchore Enterprise v5.24.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5240/) for more information.
+  - Makes listen address configurable. Still defaults to 0.0.0.0
+  - uri encoding by default for ui secrets
 
 ### v3.19.x
   #### V3.19.0
