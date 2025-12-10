@@ -901,10 +901,12 @@ analyzer:
 
   ## @param analyzer.service.port The port used for gatherings metrics when .Values.metricsEnabled=true
   ## @param analyzer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param analyzer.service.listenAddress The listen address for the Anchore Analyzer service
   ##
   service:
     port: 8084
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param analyzer.extraEnv Set extra environment variables for Anchore Analyzer pods
   ##
@@ -989,6 +991,7 @@ api:
   ## @param api.service.labels Labels for Anchore API service
   ## @param api.service.nodePort nodePort for Anchore API service
   ## @param api.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param api.service.listenAddress The listen address for the Anchore API service
   ##
   service:
     type: ClusterIP
@@ -997,6 +1000,7 @@ api:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param api.extraEnv Set extra environment variables for Anchore API pods
   ##
@@ -1074,6 +1078,7 @@ catalog:
   ## @param catalog.service.labels Labels for Anchore Catalog service
   ## @param catalog.service.nodePort nodePort for Anchore Catalog service
   ## @param catalog.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param catalog.service.listenAddress The listen address for the Anchore Catalog service
   ##
   service:
     type: ClusterIP
@@ -1082,6 +1087,7 @@ catalog:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param catalog.extraEnv Set extra environment variables for Anchore Catalog pods
   ##
@@ -1166,6 +1172,7 @@ dataSyncer:
   ## @param dataSyncer.service.labels Labels for Anchore DataSyncer service
   ## @param dataSyncer.service.nodePort nodePort for Anchore DataSyncer service
   ## @param dataSyncer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param dataSyncer.service.listenAddress The listen address for the Anchore DataSyncer service
   ##
   service:
     type: ClusterIP
@@ -1174,6 +1181,7 @@ dataSyncer:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param dataSyncer.extraEnv Set extra environment variables for Anchore DataSyncer pods
   ##
@@ -1258,6 +1266,7 @@ notifications:
   ## @param notifications.service.labels Labels for Anchore Notifications service
   ## @param notifications.service.nodePort nodePort for Anchore Notifications service
   ## @param notifications.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param notifications.service.listenAddress The listen address for the Anchore Notifications service
   ##
   service:
     type: ClusterIP
@@ -1266,6 +1275,7 @@ notifications:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param notifications.extraEnv Set extra environment variables for Anchore Notifications pods
   ##
@@ -1344,6 +1354,7 @@ policyEngine:
   ## @param policyEngine.service.labels Labels for Anchore Policy Engine service
   ## @param policyEngine.service.nodePort nodePort for Anchore Policy Engine service
   ## @param policyEngine.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param policyEngine.service.listenAddress The listen address for the Anchore Policy Engine service
   ##
   service:
     type: ClusterIP
@@ -1352,6 +1363,7 @@ policyEngine:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param policyEngine.extraEnv Set extra environment variables for Anchore Policy Engine pods
   ##
@@ -1436,6 +1448,7 @@ reports:
   ## @param reports.service.labels Labels for Anchore Reports service
   ## @param reports.service.nodePort nodePort for Anchore Reports service
   ## @param reports.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param reports.service.listenAddress The listen address for the Anchore Reports service
   ##
   service:
     type: ClusterIP
@@ -1444,6 +1457,7 @@ reports:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param reports.extraEnv Set extra environment variables for Anchore Reports pods
   ##
@@ -1540,6 +1554,7 @@ reportsWorker:
   ## @param reportsWorker.service.labels Labels for Anchore Reports Worker service
   ## @param reportsWorker.service.nodePort nodePort for Anchore Reports Worker service
   ## @param reportsWorker.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param reportsWorker.service.listenAddress The listen address for the Anchore Reports Worker service
   ##
   service:
     type: ClusterIP
@@ -1548,6 +1563,7 @@ reportsWorker:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param reportsWorker.extraEnv Set extra environment variables for Anchore Reports Worker pods
   ##
@@ -1626,6 +1642,7 @@ simpleQueue:
   ## @param simpleQueue.service.labels Labels for Anchore Simple Queue service
   ## @param simpleQueue.service.nodePort nodePort for Anchore Simple Queue service
   ## @param simpleQueue.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ## @param simpleQueue.service.listenAddress The listen address for the Anchore Simple Queue service
   ##
   service:
     type: ClusterIP
@@ -1634,6 +1651,7 @@ simpleQueue:
     labels: {}
     nodePort: ""
     domainSuffix: ""
+    listenAddress: "0.0.0.0"
 
   ## @param simpleQueue.extraEnv Set extra environment variables for Anchore Simple Queue pods
   ##
