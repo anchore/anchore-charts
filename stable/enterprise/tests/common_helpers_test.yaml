@@ -1344,3 +1344,57 @@ tests:
             runAsUser: 1000
             runAsGroup: 1000
             fsGroup: 1000
+
+  - it: should render the default listenAddress (0.0.0.0) for all services in anchore_configmap.yaml
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'listen: "0\.0\.0\.0"'
+
+  - it: should render custom global listenAddress for all services in anchore_configmap.yaml
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      listenAddress: "127.0.0.1"
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'listen: "127\.0\.0\.1"'
+
+  - it: should render service-level listenAddress with precedence over global listenAddress in anchore_configmap.yaml
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      listenAddress: "0.0.0.0"
+      api.service.listenAddress: "192.168.1.100"
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'apiext:[\s\S]*?listen: "192\.168\.1\.100"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'analyzer:[\s\S]*?listen: "0\.0\.0\.0"'
+
+  - it: should render multiple service-level listenAddress configurations in anchore_configmap.yaml
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      listenAddress: "0.0.0.0"
+      api.service.listenAddress: "10.1.1.1"
+      catalog.service.listenAddress: "10.1.1.2"
+      policyEngine.service.listenAddress: "10.1.1.3"
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'apiext:[\s\S]*?listen: "10\.1\.1\.1"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'catalog:[\s\S]*?listen: "10\.1\.1\.2"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'policy_engine:[\s\S]*?listen: "10\.1\.1\.3"'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'analyzer:[\s\S]*?listen: "0\.0\.0\.0"'
