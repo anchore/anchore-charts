@@ -581,3 +581,13 @@ When calling this template, .component can be included in the context for compon
   {{- toYaml .Values.containerSecurityContext }}
 {{- end }}
 {{- end -}}
+
+{{- define "enterprise.common.listenAddress" -}}
+{{- $component := .component -}}
+{{- $componentCtx := index .Values (print $component) }}
+{{- if $componentCtx.service.listenAddress }}
+  {{- $componentCtx.service.listenAddress }}
+{{- else if .Values.listenAddress }}
+  {{- .Values.listenAddress }}
+{{- end }}
+{{- end -}}

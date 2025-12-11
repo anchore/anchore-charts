@@ -237,6 +237,9 @@ probes:
     failureThreshold: 3
     successThreshold: 1
 
+## @param listenAddress The listen address for all Anchore services if not overridden at the service level
+listenAddress: "0.0.0.0"
+
 ## @param doSourceAtEntry.enabled Does a `source` of the file path defined before starting Anchore services
 ## @param doSourceAtEntry.filePaths List of file paths to `source` before starting Anchore services
 ## For example, if using hashicorp vault, set to /vault/secrets/config
@@ -1166,6 +1169,7 @@ dataSyncer:
   ## @param dataSyncer.service.labels Labels for Anchore DataSyncer service
   ## @param dataSyncer.service.nodePort nodePort for Anchore DataSyncer service
   ## @param dataSyncer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+
   ##
   service:
     type: ClusterIP
