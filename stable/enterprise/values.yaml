@@ -21,10 +21,10 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.23.0
+image: docker.io/anchore/enterprise:v5.24.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.23.0"
+  # tag: "v5.24.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -236,6 +236,9 @@ probes:
     periodSeconds: 10
     failureThreshold: 3
     successThreshold: 1
+
+## @param listenAddress The listen address for all Anchore services if not overridden at the service level
+listenAddress: "0.0.0.0"
 
 ## @param doSourceAtEntry.enabled Does a `source` of the file path defined before starting Anchore services
 ## @param doSourceAtEntry.filePaths List of file paths to `source` before starting Anchore services
@@ -1166,6 +1169,7 @@ dataSyncer:
   ## @param dataSyncer.service.labels Labels for Anchore DataSyncer service
   ## @param dataSyncer.service.nodePort nodePort for Anchore DataSyncer service
   ## @param dataSyncer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+
   ##
   service:
     type: ClusterIP
@@ -1705,10 +1709,10 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.23.0
+  image: docker.io/anchore/enterprise-ui:v5.24.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.23.0"
+    # tag: "v5.24.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
