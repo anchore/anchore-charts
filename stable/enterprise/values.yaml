@@ -197,6 +197,15 @@ initContainers: []
 #   imagePullPolicy: IfNotPresent
 #   restartPolicy: Always
 
+## @param hostAliases Add /etc/hosts entries to all Anchore Enterprise pods
+## ref: https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+##
+hostAliases: []
+# - ip: "10.0.0.10"
+#   hostnames:
+#     - "common-registry.local"
+#     - "cache.internal"
+
 ## @param securityContext.runAsUser The securityContext runAsUser for all Anchore pods
 ## @param securityContext.runAsGroup The securityContext runAsGroup for all Anchore pods
 ## @param securityContext.fsGroup The securityContext fsGroup for all Anchore pods
@@ -929,6 +938,15 @@ analyzer:
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
 
+  ## @param analyzer.hostAliases Define custom /etc/hosts entries for Anchore Analyzer pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.20"
+  #   hostnames:
+  #     - "common-registry.remote"
+  #     - "cache.external"
+
   ## @param analyzer.resources Resource requests and limits for Anchore Analyzer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1021,6 +1039,15 @@ api:
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
 
+  ## @param api.hostAliases Define custom /etc/hosts entries for Anchore API pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
+
   ## @param api.resources Resource requests and limits for Anchore API pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1105,6 +1132,15 @@ catalog:
   #   image: example/initContainer:latest
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
+
+  ## @param catalog.hostAliases Define custom /etc/hosts entries for Anchore Catalog pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
 
   ## @param catalog.resources Resource requests and limits for Anchore Catalog pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1199,6 +1235,15 @@ dataSyncer:
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
 
+  ## @param dataSyncer.hostAliases Define custom /etc/hosts entries for Anchore Data Syncer pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
+
   ## @param dataSyncer.resources Resource requests and limits for Anchore DataSyncer pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1291,6 +1336,15 @@ notifications:
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
 
+  ## @param notifications.hostAliases Define custom /etc/hosts entries for Anchore Notifications pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
+
   ## @param notifications.resources Resource requests and limits for Anchore Notifications pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1376,6 +1430,15 @@ policyEngine:
   #   image: example/initContainer:latest
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
+
+  ## @param policyEngine.hostAliases Define custom /etc/hosts entries for Anchore Policy Engine pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
 
   ## @param policyEngine.resources Resource requests and limits for Anchore Policy Engine pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1468,6 +1531,15 @@ reports:
   #   image: example/initContainer:latest
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
+
+  ## @param reports.hostAliases Define custom /etc/hosts entries for Anchore Reports pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
 
   ## @param reports.resources Resource requests and limits for Anchore Reports pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1573,6 +1645,15 @@ reportsWorker:
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
 
+  ## @param reportsWorker.hostAliases Define custom /etc/hosts entries for Anchore Reports Worker pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
+
   ## @param reportsWorker.resources Resource requests and limits for Anchore Reports Worker pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   ## Commented values below are just a suggested baseline. Contact Anchore support for deployment specific recommendations.
@@ -1658,6 +1739,15 @@ simpleQueue:
   #   image: example/initContainer:latest
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
+
+  ## @param simpleQueue.hostAliases Define custom /etc/hosts entries for Anchore Simple Queue pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
 
   ## @param simpleQueue.resources Resource requests and limits for Anchore Simple Queue pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1769,6 +1859,15 @@ ui:
   #   image: example/initContainer:latest
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
+
+  ## @param ui.hostAliases Define custom /etc/hosts entries for Anchore UI pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
 
   ## @param ui.resources Resource requests and limits for Anchore UI pods
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1891,13 +1990,22 @@ upgradeJob:
   ##
   extraVolumeMounts: []
 
-  ## @param upgradeJob.initContainers Add custom initContainer containers to the Anchore upgrade job pods
+  ## @param upgradeJob.initContainers Add custom initContainer containers to the Anchore Upgrade pods
   ##
   initContainers: []
   # - name: upgradeJob-initContainer
   #   image: example/initContainer:latest
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
+
+  ## @param upgradeJob.hostAliases Define custom /etc/hosts entries for Anchore Upgrade pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
 
   ## @param upgradeJob.ttlSecondsAfterFinished The time period in seconds the upgrade job, and it's related pods should be retained for
   ## Defaults to 0 == immediate deletion after completion
@@ -2144,6 +2252,15 @@ osaaMigrationJob:
   #   image: example/initContainer:latest
   #   imagePullPolicy: IfNotPresent
   #   restartPolicy: Always
+
+  ## @param osaaMigrationJob.hostAliases Define custom /etc/hosts entries for Anchore Object Store and Analysis Archive migraction job pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+  # - ip: "10.0.0.10"
+  #   hostnames:
+  #     - "common-registry.local"
+  #     - "cache.internal"
 
   ## @param osaaMigrationJob.resources Resource requests and limits for Anchore Object Store and Analysis Archive migration job
   ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
