@@ -801,6 +801,10 @@ anchoreConfig:
     ##
     redis_flushdb: true
 
+    ## @param anchoreConfig.ui.redis_uri_params Additional URI parameters to append to the Redis connection string
+    ## Example: "/?family=6" will result in ANCHORE_REDIS_URI=redis://:<redis-password>@<redis-host>:<redis-port>/?family=6
+    redis_uri_params: ""
+
     ## @param anchoreConfig.ui.force_websocket Force WebSocket protocol for socket message communications
     ##
     force_websocket: false
