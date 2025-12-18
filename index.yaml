@@ -13335,6 +13335,31 @@ entries:
   k8s-inventory:
   - apiVersion: v2
     appVersion: 1.8.1
+    created: "2025-12-18T22:07:39.585786245Z"
+    description: A Helm chart for Kubernetes Automated Inventory, which describes
+      which images are in use in a given Kubernetes Cluster
+    digest: a43ea852cbc97de33198042972dcd398462c093ba54e19fa0c0abe03cbefef0c
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: k8s-inventory
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/k8s-inventory-0.6.2/k8s-inventory-0.6.2.tgz
+    version: 0.6.2
+  - apiVersion: v2
+    appVersion: 1.8.1
     created: "2025-12-04T15:13:10.839011036Z"
     description: A Helm chart for Kubernetes Automated Inventory, which describes
       which images are in use in a given Kubernetes Cluster
@@ -14253,4 +14278,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-18T21:57:27.607024846Z"
+generated: "2025-12-18T22:07:39.586386996Z"
