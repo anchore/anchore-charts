@@ -5,7 +5,9 @@ fullnameOverride: Null
 replicaCount: 1
 logVerbosity: 3
 
-image: "anchore/kubernetes-admission-controller:v0.8.1"
+image:
+  repository: "anchore/kubernetes-admission-controller"
+  tag: ""  # default to chart appVersion but tag can be overridden here
 imagePullPolicy: IfNotPresent
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
