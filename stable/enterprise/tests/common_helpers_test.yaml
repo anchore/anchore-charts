@@ -1398,3 +1398,223 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: 'analyzer:[\s\S]*?listen: "0\.0\.0\.0"'
+
+  - it: should render global hostAliases for all deployments
+    templates: *deployment_templates
+    documentIndex: 0
+    set:
+      hostAliases:
+        - ip: "10.0.0.10"
+          hostnames:
+            - "common-registry.local"
+            - "cache.internal"
+        - ip: "10.0.0.20"
+          hostnames:
+            - "db.internal"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.10"
+                hostnames:
+                  - "common-registry.local"
+                  - "cache.internal"
+              - ip: "10.0.0.20"
+                hostnames:
+                  - "db.internal"
+
+  - it: should not render hostAliases when not set
+    templates: *deployment_templates
+    documentIndex: 0
+    asserts:
+      - notExists:
+          path: spec.template.spec.hostAliases
+
+  - it: should render component-level hostAliases for analyzer
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      analyzer:
+        hostAliases:
+          - ip: "10.0.0.30"
+            hostnames:
+              - "analyzer-specific.local"
+              - "scanner.internal"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.30"
+                hostnames:
+                  - "analyzer-specific.local"
+                  - "scanner.internal"
+
+  - it: should render component-level hostAliases for catalog
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      catalog:
+        hostAliases:
+          - ip: "10.0.0.40"
+            hostnames:
+              - "catalog-db.local"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.40"
+                hostnames:
+                  - "catalog-db.local"
+
+  - it: should render component-level hostAliases for api
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      api:
+        hostAliases:
+          - ip: "10.0.0.50"
+            hostnames:
+              - "auth.api.local"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.50"
+                hostnames:
+                  - "auth.api.local"
+
+  - it: should merge global and component-level hostAliases (global first, then component)
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      hostAliases:
+        - ip: "10.0.0.10"
+          hostnames:
+            - "common-registry.local"
+            - "shared-cache.internal"
+        - ip: "10.0.0.20"
+          hostnames:
+            - "shared-db.internal"
+      analyzer:
+        hostAliases:
+          - ip: "10.0.0.30"
+            hostnames:
+              - "analyzer-specific.local"
+              - "scanner.analyzer.internal"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.10"
+                hostnames:
+                  - "common-registry.local"
+                  - "shared-cache.internal"
+              - ip: "10.0.0.20"
+                hostnames:
+                  - "shared-db.internal"
+              - ip: "10.0.0.30"
+                hostnames:
+                  - "analyzer-specific.local"
+                  - "scanner.analyzer.internal"
+
+  - it: should merge global and component-level hostAliases for catalog
+    template: catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      hostAliases:
+        - ip: "10.0.0.10"
+          hostnames:
+            - "common-registry.local"
+      catalog:
+        hostAliases:
+          - ip: "10.0.0.40"
+            hostnames:
+              - "catalog-db.local"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.10"
+                hostnames:
+                  - "common-registry.local"
+              - ip: "10.0.0.40"
+                hostnames:
+                  - "catalog-db.local"
+
+  - it: should only render global hostAliases when component-level not set
+    templates:
+      - analyzer_deployment.yaml
+      - catalog_deployment.yaml
+      - api_deployment.yaml
+    documentIndex: 0
+    set:
+      hostAliases:
+        - ip: "10.0.0.10"
+          hostnames:
+            - "common-registry.local"
+      analyzer:
+        hostAliases: []
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.10"
+                hostnames:
+                  - "common-registry.local"
+
+  - it: should render hostAliases for UI deployment
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      hostAliases:
+        - ip: "10.0.0.10"
+          hostnames:
+            - "common-registry.local"
+      ui:
+        hostAliases:
+          - ip: "10.0.0.60"
+            hostnames:
+              - "ui-backend.local"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.10"
+                hostnames:
+                  - "common-registry.local"
+              - ip: "10.0.0.60"
+                hostnames:
+                  - "ui-backend.local"
+
+  - it: should render hostAliases for upgrade job
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      hostAliases:
+        - ip: "10.0.0.10"
+          hostnames:
+            - "common-registry.local"
+      upgradeJob:
+        hostAliases:
+          - ip: "10.0.0.70"
+            hostnames:
+              - "migration-db.local"
+    asserts:
+      - isSubset:
+          path: spec.template.spec
+          content:
+            hostAliases:
+              - ip: "10.0.0.10"
+                hostnames:
+                  - "common-registry.local"
+              - ip: "10.0.0.70"
+                hostnames:
+                  - "migration-db.local"
