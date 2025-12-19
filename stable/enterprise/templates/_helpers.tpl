@@ -270,3 +270,15 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 {{- end -}}
 
 {{- end -}}
+
+
+{{/*
+Ensuring use_proxy cannot be enabled without enable_ssl
+*/}}
+{{- define "enterprise.useProxyCheck" -}}
+{{- if .Values.anchoreConfig.ui.enable_proxy }}
+    {{- if not .Values.anchoreConfig.ui.enable_ssl -}}
+        {{ fail (printf "Cannot enable use_proxy without enabling enable_ssl") }}
+    {{- end }}
+{{- end }}
+{{- end }}
