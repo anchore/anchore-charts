@@ -297,6 +297,12 @@ services:
       vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
       vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
       vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+    event_stream:
+      enabled: {{ .Values.anchoreConfig.reports_worker.event_stream.enabled }}
+      max_file_size_mb: {{ .Values.anchoreConfig.reports_worker.event_stream.max_file_size_mb }}
+      max_file_count: {{ .Values.anchoreConfig.reports_worker.event_stream.max_file_count }}
+      enrichments: {{ .Values.anchoreConfig.reports_worker.event_stream.enrichments | toJson }}
+
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
