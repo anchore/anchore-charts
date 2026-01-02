@@ -309,7 +309,6 @@ services:
       enabled: {{ .Values.anchoreConfig.reports_worker.event_stream.enabled }}
       max_file_size_mb: {{ .Values.anchoreConfig.reports_worker.event_stream.max_file_size_mb }}
       max_file_count: {{ .Values.anchoreConfig.reports_worker.event_stream.max_file_count }}
-      enrichments: {{ .Values.anchoreConfig.reports_worker.event_stream.enrichments | toJson }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}

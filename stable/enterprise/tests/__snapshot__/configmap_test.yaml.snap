@@ -348,6 +348,11 @@ should render additional audit uris when additionalResourceURIs is set:
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
               vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+            event_stream:
+              enabled: false
+              max_file_size_mb: 100
+              max_file_count: 10
+
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -781,6 +786,11 @@ should render the configmaps:
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
               vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+            event_stream:
+              enabled: false
+              max_file_size_mb: 100
+              max_file_count: 10
+
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -1387,6 +1397,11 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
               vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+            event_stream:
+              enabled: false
+              max_file_size_mb: 100
+              max_file_count: 10
+
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}

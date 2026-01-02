@@ -793,18 +793,11 @@ anchoreConfig:
     ## @param anchoreConfig.reports_worker.event_stream.enabled Enable event streaming to file for log forwarder consumption
     ## @param anchoreConfig.reports_worker.event_stream.max_file_size_mb Maximum size of each event file in MB before rotation
     ## @param anchoreConfig.reports_worker.event_stream.max_file_count Maximum number of event files to queue for processing
-    ## @param anchoreConfig.reports_worker.event_stream.enrichments List of enrichments to include in event payloads.
-    ### Options are:
-    ### "vuln_details: verbose vulnerability fields. "
-    ### "vex: full VEX annotation details. "
-    ### "image: full image metadata. "
-    ### "runtime: runtime deployment context.",
     ##
     event_stream:
       enabled: false
       max_file_size_mb: 100
       max_file_count: 10
-      enrichments: []
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
