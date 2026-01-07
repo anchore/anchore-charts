@@ -697,7 +697,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                        | Value                                  |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.24.0` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.24.1` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
@@ -1314,6 +1314,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - Deploys Anchore Enterprise v5.24.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5240/) for more information.
   - Makes listen address configurable. Still defaults to 0.0.0.0 if not overriden.
   - Added URI encoding by default ANCHORE_APPDB_URI and ANCHORE_REDIS_URI in ui_secrets.yaml
+  #### V3.20.2
+  - Adds support for specifying hostAliases
+  #### V3.20.3
+  - Deploys Anchore Enterprise v5.24.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5241/) for more information.
 
 ### v3.19.x
   #### V3.19.0
