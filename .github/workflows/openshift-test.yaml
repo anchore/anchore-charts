@@ -17,8 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         cluster: [
-          {distribution: "openshift", version: "4.13.0-okd"},
-          {distribution: "openshift", version: "4.15.0-okd"},
+          {distribution: "openshift", version: "4.18.0-okd"},
           {distribution: "gke", version: "1.32"},
           {distribution: aks, version: "1.32"},
         ]
