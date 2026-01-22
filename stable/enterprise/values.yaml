@@ -1090,6 +1090,12 @@ api:
   ##
   containerSecurityContext: {}
 
+  ## @param api.scratchVolume.details [object] Details for the k8s volume to be created for Anchore API scratch space
+  ## Used for common tmp directory, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
+  ##
+  scratchVolume:
+    details: {}
+
 #####################################################
 ## @section Anchore Catalog k8s Deployment Parameters
 #####################################################
@@ -1387,6 +1393,12 @@ notifications:
   ## @param notifications.serviceAccountName Service account name for Anchore Notifications pods
   ##
   serviceAccountName: ""
+
+  ## @param notifications.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Notifications scratch space
+  ## Used for common tmp directory, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
+  ##
+  scratchVolume:
+    details: {}
 
 ###########################################################
 ## @section Anchore Policy Engine k8s Deployment Parameters
@@ -1697,6 +1709,12 @@ reportsWorker:
   ##
   containerSecurityContext: {}
 
+  ## @param reportsWorker.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Reports Worker scratch space
+  ## Used for common tmp directory, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
+  ##
+  scratchVolume:
+    details: {}
+
 ###########################################
 ## @section Anchore Simple Queue Parameters
 ###########################################
@@ -1791,6 +1809,12 @@ simpleQueue:
   ## @param simpleQueue.containerSecurityContext Security context for the Anchore Simple Queue containers
   ##
   containerSecurityContext: {}
+
+  ## @param simpleQueue.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Simple Queue scratch space
+  ## Used for common tmp directory, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
+  ##
+  scratchVolume:
+    details: {}
 
 #################################
 ## @section Anchore UI Parameters

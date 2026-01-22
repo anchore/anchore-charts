@@ -295,7 +295,7 @@ tests:
             app.kubernetes.io/component: reports
         count: 1
 
-  - it: should render emptyDir scratch volume when use_volume is enabled
+  - it: should render emptyDir scratch volume
     template: reports_deployment.yaml
     documentIndex: 0
     set:
@@ -369,16 +369,17 @@ tests:
               memoryLimit: 128Mi
         count: 1
 
-  - it: should not render scratch volume when use_volume is not enabled (default)
-    template: reports_deployment.yaml
-    documentIndex: 0
-    asserts:
-      - notContains:
-          path: spec.template.spec.volumes
-          content:
-            name: anchore-scratch
-            emptyDir: {}
-        count: 1
+  ## With the prometheus_multiproc dir writing to the ANCHORE_TMP_DIR (which defaults to /analysis_scratch), this now needs to be ignored
+  # - it: should not render scratch volume when use_volume is not enabled (default)
+  #   template: reports_deployment.yaml
+  #   documentIndex: 0
+  #   asserts:
+  #     - notContains:
+  #         path: spec.template.spec.volumes
+  #         content:
+  #           name: anchore-scratch
+  #           emptyDir: {}
+  #       count: 1
 
   - it: should render fixPermissionsInitContainer when use_volume is enabled and fixGroupPermissions is set
     templates:
