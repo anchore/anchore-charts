@@ -25,10 +25,9 @@ spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       {{- include "enterprise.common.hostAliases" (merge (dict "component" $component) .) | nindent 6 }}
       volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}
-      {{- if .Values.anchoreConfig.reports.use_volume }}
-        - name: "anchore-scratch"
+        - name: anchore-scratch
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
-      {{- end }}
+
       {{- if or
             (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup .Values.anchoreConfig.reports.use_volume)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))

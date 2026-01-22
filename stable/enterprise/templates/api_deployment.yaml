@@ -28,6 +28,8 @@ spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       {{- include "enterprise.common.hostAliases" (merge (dict "component" $component) .) | nindent 6 }}
       volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}
+        - name: anchore-scratch
+          {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
       {{- if .Values.anchoreConfig.policyBundles }}
         - name: policy-bundle-volume
           configMap:
