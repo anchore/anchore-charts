@@ -696,8 +696,8 @@ To restore your deployment to using your previous driver configurations:
 ### Common Resource Parameters
 
 | Name                                    | Description                                                                                                                        | Value                                  |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.24.1` |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |----------------------------------------|
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.24.2` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
@@ -1318,7 +1318,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - Adds support for specifying hostAliases
   #### V3.20.3
   - Deploys Anchore Enterprise v5.24.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5241/) for more information.
-
+  #### V3.20.4
+  - Deploys Anchore Enterprise v5.24.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5242/) for more information.
 ### v3.19.x
   #### V3.19.0
   - Adds an optional Prometheus monitoring setup to Anchore Enterprise for future internal monitoring and support
