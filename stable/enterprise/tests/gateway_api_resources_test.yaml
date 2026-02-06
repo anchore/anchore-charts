@@ -46,6 +46,19 @@ tests:
       - hasDocuments:
           count: 0
 
+  - it: should fail when creating Gateway without listeners
+    template: gateway-api-gateway.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          create: true
+          gatewayClassName: istio
+        routes: {}
+    asserts:
+      - failedTemplate:
+          errorMessage: "gatewayApi.gateway.listeners is required when creating a Gateway"
+
   - it: should render Gateway when gatewayApi.gateway.create is true
     template: gateway-api-gateway.yaml
     set:
@@ -54,6 +67,10 @@ tests:
         gateway:
           create: true
           gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
         routes: {}
     asserts:
       - hasDocuments:
@@ -117,6 +134,10 @@ tests:
         gateway:
           create: true
           gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
           addresses:
             - type: IPAddress
               value: "192.168.1.1"
@@ -141,6 +162,10 @@ tests:
         gateway:
           create: true
           gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
         routes: {}
     asserts:
       - isSubset:
@@ -161,6 +186,10 @@ tests:
         gateway:
           create: true
           gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
         routes: {}
     asserts:
       - isSubset:
@@ -368,6 +397,10 @@ tests:
         gateway:
           create: true
           gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
         routes:
           api:
             rules:

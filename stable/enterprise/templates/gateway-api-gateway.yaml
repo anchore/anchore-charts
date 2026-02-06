@@ -20,10 +20,12 @@ metadata:
   {{- end }}
 spec:
   gatewayClassName: {{ required "gatewayApi.gateway.gatewayClassName is required when creating a Gateway" .Values.gatewayApi.gateway.gatewayClassName }}
-  {{- with .Values.gatewayApi.gateway.listeners }}
   listeners:
+    {{- with .Values.gatewayApi.gateway.listeners }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- else }}
+    {{- fail "gatewayApi.gateway.listeners is required when creating a Gateway" }}
+    {{- end }}
   {{- with .Values.gatewayApi.gateway.addresses }}
   addresses:
     {{- toYaml . | nindent 4 }}
