@@ -89,6 +89,10 @@ tests:
       - equal:
           path: spec.gatewayClassName
           value: istio
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/component: gateway
 
   - it: should render Gateway with listeners
     template: gateway-api-gateway.yaml
@@ -508,6 +512,36 @@ tests:
             app.kubernetes.io/instance: test-release
             app.kubernetes.io/part-of: anchore
             app.kubernetes.io/managed-by: Helm
+
+  - it: should render HTTPRoute with component label based on route name
+    template: gateway-api-httproutes.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          ui:
+            rules:
+              - backendRefs:
+                  - name: test-ui
+                    port: 80
+          custom-service:
+            rules:
+              - backendRefs:
+                  - name: test-custom
+                    port: 8080
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/component: httproute-custom-service
+        documentIndex: 0
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/component: httproute-ui
+        documentIndex: 1
 
   - it: should render HTTPRoute with global labels
     template: gateway-api-httproutes.yaml
