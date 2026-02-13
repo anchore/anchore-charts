@@ -18,7 +18,7 @@ jobs:
     env:
       REPO: "${{ github.repository }}"
       REPO_NAME: "${{ github.event.repository.name }}"
-      TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
+      TARGET_BRANCH: "${{ github.ref_name }}"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,7 +39,7 @@ jobs:
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
       - name: Run chart-releaser not latest
-        if: github.event.pull_request.base.ref != 'main'
+        if: github.ref_name != 'main'
         uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
         with:
           charts_dir: stable
@@ -50,7 +50,7 @@ jobs:
           CR_MAKE_RELEASE_LATEST: "false"
 
       - name: Run chart-releaser
-        if: github.event.pull_request.base.ref == 'main'
+        if: github.ref_name == 'main'
         uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
         with:
           charts_dir: stable
