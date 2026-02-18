@@ -5,7 +5,7 @@ fullnameOverride: Null
 replicaCount: 1
 logVerbosity: 3
 
-image: "anchore/kubernetes-admission-controller:v0.8.1"
+image: "anchore/kubernetes-admission-controller:v0.8.3"
 imagePullPolicy: IfNotPresent
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
