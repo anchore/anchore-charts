@@ -696,8 +696,8 @@ To restore your deployment to using your previous driver configurations:
 ### Common Resource Parameters
 
 | Name                                    | Description                                                                                                                        | Value                                  |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |----------------------------------------|
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.24.2` |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                            | `docker.io/anchore/enterprise:v5.25.0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                          | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                      | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade              | `bitnamilegacy/kubectl:1.30`           |
@@ -946,6 +946,7 @@ To restore your deployment to using your previous driver configurations:
 | `api.topologySpreadConstraints` | Topology spread constraints for Anchore API pod assignment                                                                                                                   | `[]`        |
 | `api.serviceAccountName`        | Service account name for Anchore API pods                                                                                                                                    | `""`        |
 | `api.containerSecurityContext`  | Security context for the Anchore API containers                                                                                                                              | `{}`        |
+| `api.scratchVolume.details`     | Details for the k8s volume to be created for Anchore API scratch space                                                                                                       | `{}`        |
 
 ### Anchore Catalog k8s Deployment Parameters
 
@@ -1026,6 +1027,7 @@ To restore your deployment to using your previous driver configurations:
 | `notifications.topologySpreadConstraints` | Topology spread constraints for Anchore Notifications pod assignment                                                                                                         | `[]`        |
 | `notifications.containerSecurityContext`  | Security context for the Anchore Notifications containers                                                                                                                    | `{}`        |
 | `notifications.serviceAccountName`        | Service account name for Anchore Notifications pods                                                                                                                          | `""`        |
+| `notifications.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Notifications scratch space                                                                                             | `{}`        |
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
@@ -1106,6 +1108,7 @@ To restore your deployment to using your previous driver configurations:
 | `reportsWorker.topologySpreadConstraints` | Topology spread constraints for Anchore Reports Worker pod assignment                                                                                                        | `[]`        |
 | `reportsWorker.serviceAccountName`        | Service account name for Anchore Reports Worker pods                                                                                                                         | `""`        |
 | `reportsWorker.containerSecurityContext`  | Security context for the Anchore Reports Worker containers                                                                                                                   | `{}`        |
+| `reportsWorker.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Reports Worker scratch space                                                                                            | `{}`        |
 
 ### Anchore Simple Queue Parameters
 
@@ -1132,12 +1135,13 @@ To restore your deployment to using your previous driver configurations:
 | `simpleQueue.topologySpreadConstraints` | Topology spread constraints for Anchore Simple Queue pod assignment                                                                                                          | `[]`        |
 | `simpleQueue.serviceAccountName`        | Service account name for Anchore Simple Queue pods                                                                                                                           | `""`        |
 | `simpleQueue.containerSecurityContext`  | Security context for the Anchore Simple Queue containers                                                                                                                     | `{}`        |
+| `simpleQueue.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Simple Queue scratch space                                                                                              | `{}`        |
 
 ### Anchore UI Parameters
 
 | Name                           | Description                                                                                                                                                                  | Value                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.24.0` |
+| `ui.image`                     | Image used for the Anchore UI container                                                                                                                                      | `docker.io/anchore/enterprise-ui:v5.25.0` |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`               |
 | `ui.ldapsRootCaCertName`       | Name of the custom CA certificate file store in `.Values.certStoreSecretName`                                                                                                | `""`                                      |
@@ -1308,6 +1312,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v3.21.x
+  #### V3.21.0
+  - Deploys Anchore Enterprise v5.25.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5250/) for more information.
 
 ### v3.20.x
   #### V3.20.0
