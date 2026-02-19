@@ -6014,6 +6014,32 @@ entries:
     version: 1.7.0
   ecs-inventory:
   - apiVersion: v2
+    appVersion: 1.4.1
+    created: "2026-02-19T01:16:53.637529226Z"
+    description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
+      of images in use by Amazon Elastic Container Service (ECS).
+    digest: 87691bf178fc77a1ab5b692c31816eece54c00c2c71e2d626b949bda1922451e
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - ecs
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: ecs-inventory
+    type: application
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/ecs-inventory-0.0.16/ecs-inventory-0.0.16.tgz
+    version: 0.0.16
+  - apiVersion: v2
     appVersion: 1.4.0
     created: "2025-12-18T22:10:18.813993631Z"
     description: A Helm chart for the Anchore ECS Inventory, which gathers an inventory
@@ -13560,6 +13586,31 @@ entries:
     version: 0.0.1
   k8s-inventory:
   - apiVersion: v2
+    appVersion: 1.8.2
+    created: "2026-02-19T01:16:53.823277329Z"
+    description: A Helm chart for Kubernetes Automated Inventory, which describes
+      which images are in use in a given Kubernetes Cluster
+    digest: a02b27825c576a542cc9d2f8159880d498b9e21f49985f519bcf60c81e4be6f7
+    home: https://anchore.com
+    icon: https://anchoreprd.wpengine.com/wp-content/uploads/2021/12/favicon.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - image
+    - inventory
+    - security
+    - scanner
+    maintainers:
+    - email: bradyt@anchore.com
+      name: btodhunter
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    name: k8s-inventory
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/k8s-inventory-0.6.3/k8s-inventory-0.6.3.tgz
+    version: 0.6.3
+  - apiVersion: v2
     appVersion: 1.8.1
     created: "2025-12-18T22:07:39.585786245Z"
     description: A Helm chart for Kubernetes Automated Inventory, which describes
@@ -14504,4 +14555,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-18T22:23:11.272423575Z"
+generated: "2026-02-19T01:16:53.823926976Z"
