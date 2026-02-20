@@ -304,6 +304,9 @@ anchoreConfig:
   ##
   log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
+  ## @param anchoreConfig.global_client_read_timeout Global client read timeout (in seconds)
+  global_client_read_timeout: 120
+
   ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
   ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
   ## @param anchoreConfig.logging.exception_diagnose_logging Enable detailed exception information in the logs
@@ -684,6 +687,16 @@ anchoreConfig:
     ##
     integrations:
       integration_health_report_ttl_days: 2
+
+  component_catalog:
+    global_client_read_timeout: 0
+    logging:
+      log_level: "INFO" # override the log_level for component catalog since <ALLOW_API_CONFIGURATION> isn't an accepted value for this component
+      server_response_debug_logging: ""
+      file_retention_rule: "10"
+      server_access_logging: ""
+      server_log_level: ""
+
 
   policy_engine:
     ## @param anchoreConfig.policy_engine.extendedConfig appends additional configs to the policy_engine service's Anchore configs
@@ -1221,6 +1234,92 @@ catalog:
 
   ## @param catalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Catalog scratch space
   ## Used for the Anchore Catalog service archival process, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
+  ##
+  scratchVolume:
+    details: {}
+
+###############################################################
+## @section Anchore Component Catalog k8s Deployment Parameters
+###############################################################
+componentCatalog:
+  ## @param componentCatalog.replicaCount Number of replicas for the Anchore Component Catalog deployment
+  ##
+  replicaCount: 1
+
+  ## @param componentCatalog.service.type Service type for Anchore Component Catalog
+  ## @param componentCatalog.service.port Service port for Anchore Component Catalog
+  ## @param componentCatalog.service.annotations Annotations for Anchore Component Catalog service
+  ## @param componentCatalog.service.labels Labels for Anchore Component Catalog service
+  ## @param componentCatalog.service.nodePort nodePort for Anchore Component Catalog service
+  ## @param componentCatalog.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ##
+  service:
+    type: ClusterIP
+    port: 8228
+    annotations: {}
+    labels: {}
+    nodePort: ""
+    domainSuffix: ""
+
+  ## @param componentCatalog.extraEnv Set extra environment variables for Anchore Component Catalog pods
+  ##
+  extraEnv: []
+
+  ## @param componentCatalog.extraVolumes Define additional volumes for Anchore Component Catalog pods
+  ##
+  extraVolumes: []
+
+  ## @param componentCatalog.extraVolumeMounts Define additional volume mounts for Anchore Component Catalog pods
+  ##
+  extraVolumeMounts: []
+
+  ## @param componentCatalog.initContainers Define additional initContainer containers for Anchore Component Catalog pods
+  ##
+  initContainers: []
+
+  ## @param componentCatalog.hostAliases Define custom /etc/hosts entries for Anchore Component Catalog pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+
+  ## @param componentCatalog.resources Resource requests and limits for Anchore Component Catalog pods
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ##
+  resources: {}
+
+  ## @param componentCatalog.labels Labels for Anchore Component Catalog pods
+  ##
+  labels: {}
+
+  ## @param componentCatalog.annotations Annotation for Anchore Component Catalog pods
+  ##
+  annotations: {}
+
+  ## @param componentCatalog.nodeSelector Node labels for Anchore Component Catalog pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param componentCatalog.tolerations Tolerations for Anchore Component Catalog pod assignment
+  ##
+  tolerations: []
+
+  ## @param componentCatalog.affinity Affinity for Anchore Component Catalog pod assignment
+  ##
+  affinity: {}
+
+  ## @param componentCatalog.topologySpreadConstraints Topology spread constraints for Anchore Component Catalog pod assignment
+  ##
+  topologySpreadConstraints: []
+
+  ## @param componentCatalog.serviceAccountName Service account name for Anchore Component Catalog pods
+  ##
+  serviceAccountName: ""
+
+  ## @param componentCatalog.containerSecurityContext Security context for the Anchore Component Catalog containers
+  ##
+  containerSecurityContext: {}
+
+  ## @param componentCatalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Component Catalog scratch space
   ##
   scratchVolume:
     details: {}
