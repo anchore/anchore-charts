@@ -1,3 +1,5 @@
+{{- $logging := include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "logging") .) | fromYaml -}}
+{{- $keys := include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "keys") .) | fromYaml -}}
 # Host identification
 host_id: ${ANCHORE_HOST_ID}
 
@@ -5,10 +7,9 @@ host_id: ${ANCHORE_HOST_ID}
 internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
 
 # Global client timeouts
-global_client_connect_timeout: {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "global_client_read_timeout") .) }}
-global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
+global_client_connect_timeout: {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "global_client_connect_timeout") .) }}
+global_client_read_timeout: {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "global_client_read_timeout") .) }}
 
-{{- $logging := include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "logging") .) | fromYaml -}}
 # Global logging settings (can be overridden per service via anchoreConfig.<configComponent>.logging)
 logging:
     # { include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "logging") .) | indent 2 } this puts the whole logging block merged here, but pydantic errors
@@ -24,9 +25,9 @@ logging:
 # Secret is for a shared secret and if set, all components in anchore should
 # have the exact same value in their configs.
 keys:
-  secret: ${ANCHORE_AUTH_SECRET}
-  public_key_path: ${ANCHORE_AUTH_PUBKEY}
-  private_key_path: ${ANCHORE_AUTH_PRIVKEY}
+  secret: ${ANCHORE_SAML_SECRET}
+  public_key_path: {{ $keys.publicKeyFileName }}
+  private_key_path: {{ $keys.privateKeyFileName }}
 
 # OAuth configuration for internal service-to-service authentication
 oauth:
@@ -46,8 +47,7 @@ credentials:
   {{- end }}
   {{- else }}
     db_connect_args:
-      timeout: ${ANCHORE_DB_TIMEOUT}
-      ssl: ${ANCHORE_DB_SSL}
+      connect_timeout: ${ANCHORE_DB_TIMEOUT}
     {{- if .Values.anchoreConfig.database.ssl }}
       sslmode: ${ANCHORE_DB_SSL_MODE}
       sslrootcert: ${ANCHORE_DB_SSL_ROOT_CERT}

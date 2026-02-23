@@ -305,7 +305,8 @@ anchoreConfig:
   log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
   ## @param anchoreConfig.global_client_read_timeout Global client read timeout (in seconds)
-  global_client_read_timeout: 120
+  global_client_connect_timeout: 0
+  global_client_read_timeout: 0
 
   ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
   ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
@@ -689,7 +690,9 @@ anchoreConfig:
       integration_health_report_ttl_days: 2
 
   component_catalog:
+    global_client_connect_timeout: 0
     global_client_read_timeout: 0
+
     logging:
       log_level: "INFO" # override the log_level for component catalog since <ALLOW_API_CONFIGURATION> isn't an accepted value for this component
       server_response_debug_logging: ""
