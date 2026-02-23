@@ -243,6 +243,10 @@ services:
             search:
               by_cpe:
                 enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+          jvm:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JVM_SEARCH_BY_CPE_ENABLED}
           python:
             search:
               by_cpe:
@@ -251,6 +255,10 @@ services:
             search:
               by_cpe:
                 enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+          rust:
+            search:
+              by_cpe:
+                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUST_SEARCH_BY_CPE_ENABLED}
           stock:
             search:
               by_cpe:

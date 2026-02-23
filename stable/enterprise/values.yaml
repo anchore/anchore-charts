@@ -21,10 +21,10 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise:v5.25.0
+image: docker.io/anchore/enterprise:v5.26.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.25.0"
+  # tag: "v5.26.0"
   # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -1823,10 +1823,10 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui:v5.25.0
+  image: docker.io/anchore/enterprise-ui:v5.26.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.25.0"
+    # tag: "v5.26.0"
     # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
