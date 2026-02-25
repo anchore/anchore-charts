@@ -685,7 +685,7 @@ anchoreConfig:
     global_client_read_timeout: 0
 
     logging:
-      log_level: "INFO" # override the log_level for component catalog since <ALLOW_API_CONFIGURATION> isn't an accepted value for this component
+      log_level: "INFO"  # override the log_level for component catalog since <ALLOW_API_CONFIGURATION> isn't an accepted value for this component
       server_response_debug_logging: ""
       file_retention_rule: "10"
       server_access_logging: ""
