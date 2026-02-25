@@ -1,0 +1,138 @@
+suite: OSAA Extended Config Tests
+templates:
+  - templates/osaa_configmap.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
+  osaaMigrationJob:
+    enabled: true
+    analysisArchiveMigration:
+      run: false
+      analysis_archive: {}
+    objectStoreMigration:
+      run: false
+      object_store: {}
+
+tests:
+  - it: should render extendedConfig for apiext service
+    set:
+      anchoreConfig.apiext.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)apiext:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)apiext:.*require_auth: true"
+
+  - it: should render extendedConfig for analyzer service
+    set:
+      anchoreConfig.analyzer.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)analyzer:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)analyzer:.*cycle_timers:"
+
+  - it: should render extendedConfig for catalog service
+    set:
+      anchoreConfig.catalog.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)catalog:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)catalog:.*cycle_timers:"
+
+  - it: should render extendedConfig for simplequeue service
+    set:
+      anchoreConfig.simplequeue.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)simplequeue:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)simplequeue:.*require_auth: true"
+
+  - it: should render extendedConfig for policy_engine service
+    set:
+      anchoreConfig.policy_engine.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)policy_engine:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)policy_engine:.*enable_user_base_image:"
+
+  - it: should render extendedConfig for notifications service
+    set:
+      anchoreConfig.notifications.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)notifications:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)notifications:.*cycle_timers:"
+
+  - it: should render extendedConfig for reports service
+    set:
+      anchoreConfig.reports.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)reports:.*use_volume:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)reports:.*enable_graphiql:"
+
+  - it: should render extendedConfig for reports_worker service
+    set:
+      anchoreConfig.reports_worker.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)reports_worker:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)reports_worker:.*cycle_timers:"
+
+  - it: should render extendedConfig for data_syncer service
+    set:
+      anchoreConfig.data_syncer.extendedConfig:
+        custom_key: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)data_syncer:.*ssl_key:.*custom_key: custom_value"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?s)data_syncer:.*auto_sync_enabled:"
+
+  - it: should not render extendedConfig when empty
+    asserts:
+      - not: true
+        matchRegex:
+          path: data["config.yaml"]
+          pattern: "custom_key: custom_value"
