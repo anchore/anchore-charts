@@ -138,9 +138,17 @@ jobs:
         fi
       shell: bash
 
-    - name: Deploy enterprise
+    - name: Deploy enterprise for admission-controller/k8s-inventory testing
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
+        kubectl create namespace anchore-enterprise
+        echo "${ANCHORE_LICENSE}" | base64 --decode > /tmp/anchore-license
+        kubectl --namespace anchore-enterprise create secret generic anchore-enterprise-license --from-file=license.yaml=/tmp/anchore-license
+        kubectl --namespace anchore-enterprise create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username="${DOCKER_USER}" --docker-password="${DOCKER_PASS}"
+
+        kubectl apply -f scripts/cnpg/cnpg-cluster-ci-enterprise.yaml
+        kubectl wait --for=condition=Ready cluster/anchore-db -n anchore-enterprise --timeout=300s
+
         helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
         helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
         helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || echo "prometheus-community repo already added"
@@ -148,13 +156,16 @@ jobs:
 
         if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
           echo "Installing enterprise on openshift"
-          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait
+          helm install enterprise anchore/enterprise --namespace anchore-enterprise -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait
         else
           echo "Installing enterprise"
-          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
+          helm install enterprise anchore/enterprise --namespace anchore-enterprise -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
         fi
-        kubectl --namespace anchore get pods
+        kubectl --namespace anchore-enterprise get pods
       env:
+        ANCHORE_LICENSE: ${{ secrets.B64_ANCHORE_LICENSE }}
+        DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
+        DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
         KUBECONFIG: ./tmp/kubeconfig
 
     - name: Update to rc image if needed
