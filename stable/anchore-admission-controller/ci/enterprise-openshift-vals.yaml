@@ -18,7 +18,7 @@ anchoreConfig:
 
 postgresql:
   chartEnabled: false
-  externalEndpoint: "anchore-db-rw.anchore.svc:5432"
+  externalEndpoint: "anchore-db-rw.anchore.svc.cluster.local"
   auth:
     username: anchore
     password: anchore-postgres,123
