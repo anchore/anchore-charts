@@ -212,7 +212,17 @@ jobs:
             popd
           fi
         done
-        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+        changed_charts=$(ct list-changed --config ct-config.yaml --target-branch ${{ github.event.pull_request.base.ref }})
+        other_charts=$(echo "$changed_charts" | grep -v 'anchore-admission-controller' || true)
+        if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
+          if [[ -n "$other_charts" ]]; then
+            echo "Admission controller changed alongside other charts. Installing other charts first, then admission controller."
+            ct install --config ct-config.yaml --excluded-charts "anchore-admission-controller" --helm-extra-args "--timeout 600s"
+          fi
+          ct install --config ct-config.yaml --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
+        else
+          ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+        fi
       env:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
