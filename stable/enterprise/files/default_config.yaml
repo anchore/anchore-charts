@@ -123,6 +123,7 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "apiext") .) }}
 
   analyzer:
     enabled: true
@@ -142,6 +143,7 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}
 
   catalog:
     enabled: true
@@ -174,6 +176,7 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "catalog") .) }}
 
   simplequeue:
     enabled: true
@@ -185,6 +188,7 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "simplequeue") .) }}
 
   policy_engine:
     enabled: true
@@ -260,6 +264,7 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "policy_engine") .) }}
 
   reports:
     enabled: true
@@ -276,6 +281,7 @@ services:
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
     use_volume: {{ .Values.anchoreConfig.reports.use_volume }}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "reports") .) }}
 
   reports_worker:
     enabled: true
@@ -300,6 +306,7 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "reports_worker") .) }}
 
   notifications:
     enabled: true
@@ -313,6 +320,7 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "notifications") .) }}
 
   data_syncer:
     enabled: true
@@ -325,3 +333,4 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+  {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "data_syncer") .) }}

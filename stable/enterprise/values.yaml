@@ -494,6 +494,9 @@ anchoreConfig:
     direct_access: false
 
   apiext:
+    ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
+    extendedConfig: {}
+
     ## TODO - get better documentation for the 'external' option
     ## @param anchoreConfig.apiext.external.enabled Allow overrides for constructing Anchore API URLs
     ## @param anchoreConfig.apiext.external.useTLS Enable TLS for external API access
@@ -511,6 +514,9 @@ anchoreConfig:
       remove_license_content_from_sbom_return: "<ALLOW_API_CONFIGURATION>"  # false
 
   analyzer:
+    ## @param anchoreConfig.analyzer.extendedConfig appends additional configs to the analyzer service's Anchore configs
+    extendedConfig: {}
+
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
     ##
@@ -573,6 +579,9 @@ anchoreConfig:
           max_scan_time: 1800000
 
   catalog:
+    ## @param anchoreConfig.catalog.extendedConfig appends additional configs to the catalog service's Anchore configs
+    extendedConfig: {}
+
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
     account_prometheus_metrics: "<ALLOW_API_CONFIGURATION>"  # false
@@ -677,6 +686,9 @@ anchoreConfig:
       integration_health_report_ttl_days: 2
 
   policy_engine:
+    ## @param anchoreConfig.policy_engine.extendedConfig appends additional configs to the policy_engine service's Anchore configs
+    extendedConfig: {}
+
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled Account for RHEL Extended Update Support (EUS) releases when matching vulnerabilities
@@ -703,6 +715,9 @@ anchoreConfig:
     ##   process_worker_count: 1
 
   notifications:
+    ## @param anchoreConfig.notifications.extendedConfig appends additional configs to the notifications service's Anchore configs
+    extendedConfig: {}
+
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
     ##
     cycle_timers:
@@ -713,6 +728,9 @@ anchoreConfig:
     ui_url: ""
 
   reports:
+    ## @param anchoreConfig.reports.extendedConfig appends additional configs to the reports service's Anchore configs
+    extendedConfig: {}
+
     ## @param anchoreConfig.reports.enable_graphiql Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations
     ## Go to http://<host>:<port>/v2/reports/graphql in a browser for the reports API
     ## ref: https://docs.anchore.com/current/docs/using/api_usage/reports/
@@ -738,6 +756,8 @@ anchoreConfig:
     use_volume: false
 
   reports_worker:
+    ## @param anchoreConfig.reports_worker.extendedConfig appends additional configs to the reports_worker service's Anchore configs
+    extendedConfig: {}
 
     ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
     ##
@@ -789,6 +809,14 @@ anchoreConfig:
     ##
     runtime_report_generation:
       use_legacy_loaders_and_queries: false
+
+  simplequeue:
+    ## @param anchoreConfig.simplequeue.extendedConfig appends additional configs to the simplequeue service's Anchore configs
+    extendedConfig: {}
+
+  data_syncer:
+    ## @param anchoreConfig.data_syncer.extendedConfig appends additional configs to the data_syncer service's Anchore configs
+    extendedConfig: {}
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
