@@ -457,7 +457,12 @@ Setup the common anchore volume mounts
   mountPath: /home/anchore/license.yaml
   subPath: license.yaml
 - name: config-volume
+  {{- $componentConfigMaps := list "componentCatalog" }}
+  {{- if has $component $componentConfigMaps }}
+  mountPath: /config/config_ng.yaml
+  {{- else }}
   mountPath: /config/config.yaml
+  {{- end }}
   subPath: config.yaml
 - name: anchore-scripts
   mountPath: /scripts
@@ -532,7 +537,12 @@ Setup the common anchore volumes
 {{- else }}
 - name: config-volume
   configMap:
+    {{- $componentConfigMaps := list "componentCatalog" }}
+    {{- if has $component $componentConfigMaps }}
+    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }} # new per service configmap architecture
+    {{- else }}
     name: {{ template "enterprise.fullname" . }}
+    {{- end }}
 {{- end }}
 {{- with .Values.certStoreSecretName }}
 - name: certs

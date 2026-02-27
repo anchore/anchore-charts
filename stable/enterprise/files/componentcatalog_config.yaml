@@ -1,0 +1,10 @@
+services:
+  component_catalog:
+    endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
+    port: ${ANCHORE_COMPONENT_CATALOG_PORT}
+    external_tls: ${ANCHORE_EXTERNAL_TLS}
+    logging:
+      log_level: {{ (include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "logging") .) | fromYaml).log_level }}
+    server:
+      process_worker_count: ${ANCHORE_COMPONENT_CATALOG_WORKERS}
+      timeout_keep_alive: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
