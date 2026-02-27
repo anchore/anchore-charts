@@ -16,7 +16,7 @@ containerSecurityContext:
   seccompProfile:
     type: "RuntimeDefault"
 
-anchoreEndpoint: "http://enterprise-enterprise-api:8228"
+anchoreEndpoint: "http://enterprise-enterprise-api.anchore-enterprise.svc.cluster.local:8228"
 credentials:
   users:
   - username: admin
