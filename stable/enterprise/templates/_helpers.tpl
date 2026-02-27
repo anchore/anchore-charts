@@ -1,4 +1,45 @@
 {{/*
+Allow configOverride per service.
+*/}}
+{{- define "enterprise.configOverride" -}}
+{{- $component := .component -}}
+
+{{- with (index .Values (print $component)).configOverride }}
+  {{- print .  -}}
+{{- else }}
+  {{- if .Values.configOverride }}
+    {{- print .Values.configOverride -}}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Creates the configMap based on component passed in.
+*/}}
+{{- define "enterprise.configMap" -}}
+{{- $component := .component -}}
+{{- $configMapName := include "enterprise.fullname" . -}}
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ $configMapName }}-{{ $component | lower }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  config.yaml: |
+    # Anchore {{ $component | title }} Service Configuration File, mounted from a configmap
+    #
+{{- if (include "enterprise.configOverride" (merge (dict "component" $component) .)) }}
+{{ tpl (include "enterprise.configOverride" (merge (dict "component" $component) .)) . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/base_config.yaml") . | indent 4 }}
+{{ tpl (.Files.Get (printf "files/%s_config.yaml" ($component | lower))) . | indent 4 }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Create database hostname string from supplied values file. Used for setting the ANCHORE_DB_HOST env var in the UI & Engine secret.
 */}}
 {{- define "enterprise.dbHostname" }}
@@ -291,5 +332,42 @@ Usage: {{ include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" 
 {{- $extendedConfig := (index .Values.anchoreConfig (print .serviceName)).extendedConfig -}}
 {{- if $extendedConfig }}
 {{- toYaml $extendedConfig | nindent 4 }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Get a value from anchoreConfig with component-level override support and deep merge.
+Checks anchoreConfig.<configComponent>.<configKey> first, falls back to anchoreConfig.<configKey>.
+When both levels define a map for the same key, the maps are deep merged with the component values taking precedence.
+
+Usage:
+  {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" "component_catalog" "configKey" "log_level") .) }}
+  {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" "component_catalog" "configKey" "logging") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.get" -}}
+{{- $component := .configComponent -}}
+{{- $key := .configKey -}}
+{{- $global := .Values.anchoreConfig -}}
+{{- $componentCfg := dict -}}
+{{- if hasKey $global $component -}}
+  {{- $val := index $global $component -}}
+  {{- if $val -}}
+    {{- $componentCfg = $val -}}
+  {{- end -}}
+{{- end -}}
+{{- $hasGlobal := hasKey $global $key -}}
+{{- $hasComponent := hasKey $componentCfg $key -}}
+{{- if and $hasGlobal $hasComponent -}}
+  {{- $gv := index $global $key -}}
+  {{- $cv := index $componentCfg $key -}}
+  {{- if and (kindIs "map" $gv) (kindIs "map" $cv) -}}
+    {{- merge (deepCopy $cv) $gv | toYaml -}}
+  {{- else -}}
+    {{- $cv | toYaml -}}
+  {{- end -}}
+{{- else if $hasComponent -}}
+  {{- index $componentCfg $key | toYaml -}}
+{{- else if $hasGlobal -}}
+  {{- index $global $key | toYaml -}}
 {{- end -}}
 {{- end -}}
