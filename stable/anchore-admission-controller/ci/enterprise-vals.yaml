@@ -2,7 +2,7 @@ anchoreConfig:
   default_admin_password: foobar
 postgresql:
   chartEnabled: false
-  externalEndpoint: "anchore-db-rw.anchore.svc.cluster.local"
+  externalEndpoint: "anchore-db-rw.anchore-enterprise.svc.cluster.local"
   auth:
     username: anchore
     password: anchore-postgres,123
