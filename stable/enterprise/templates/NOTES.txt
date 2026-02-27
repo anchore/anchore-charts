@@ -49,3 +49,13 @@ The following values changes will be needed to use their legacy image repo if yo
 This is a temporary workaround while we review options on how to proceed with these dependencies
 ******************
 {{ end }}
+
+
+{{- if .Release.IsUpgrade }}
+\033[1;33m******************
+UPGRADE ATTENTION: This deployment was an upgrade. 
+Please ensure you update anchorectl and other Anchore Enterprise components 
+as per the recommendations found in the release notes at:
+https://docs.anchore.com
+******************\033[0m
+{{- end }}
