@@ -79,6 +79,20 @@ jobs:
         DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
 
+    - name: Install CNPG operator
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        helm repo add cnpg https://cloudnative-pg.github.io/charts
+        helm repo update
+        helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace --wait
+
+    - name: Deploy CNPG PostgreSQL cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        kubectl apply -f scripts/cnpg/cnpg-cluster.yaml
+        kubectl wait --for=condition=Ready cluster/anchore-db -n anchore --timeout=300s
+        kubectl --namespace anchore get pods
+
     - name: Check if anchore-enterprise endpoint is required for admission controller chart
       id: enterprise_required
       run: |
@@ -98,7 +112,6 @@ jobs:
     - name: Deploy enterprise
       if: steps.enterprise_required.outputs.changed == 'true'
       run: |
-
         helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
         helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
         helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || echo "prometheus-community repo already added"

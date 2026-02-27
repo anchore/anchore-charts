@@ -100,6 +100,28 @@ jobs:
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
         KUBECONFIG: ./tmp/kubeconfig
 
+    - name: Install CNPG operator
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        helm repo add cnpg https://cloudnative-pg.github.io/charts
+        helm repo update
+        if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+          helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace -f scripts/cnpg/cnpg-openshift-install.yaml --wait
+        else
+          helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace --wait
+        fi
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+
+    - name: Deploy CNPG PostgreSQL cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        kubectl apply -f scripts/cnpg/cnpg-cluster.yaml
+        kubectl wait --for=condition=Ready cluster/anchore-db -n anchore --timeout=300s
+        kubectl --namespace anchore get pods
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+
     - name: Check if anchore-enterprise endpoint is required for admission controller chart
       id: enterprise_required
       run: |
