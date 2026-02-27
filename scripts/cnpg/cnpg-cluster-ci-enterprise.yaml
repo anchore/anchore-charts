@@ -31,7 +31,7 @@ spec:
       cron.database_name: anchore
 
   storage:
-    size: 20Gi
+    size: 10Gi
 
 ---
 apiVersion: v1
