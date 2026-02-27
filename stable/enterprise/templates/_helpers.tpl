@@ -293,3 +293,25 @@ Usage: {{ include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" 
 {{- toYaml $extendedConfig | nindent 4 }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Gateway API - Returns the Gateway name for parentRefs
+*/}}
+{{- define "enterprise.gatewayApi.gatewayName" -}}
+{{- if .Values.gatewayApi.gateway.create -}}
+  {{- printf "%s-gateway" (include "enterprise.fullname" .) -}}
+{{- else -}}
+  {{- required "gatewayApi.gateway.name is required when gatewayApi.gateway.create is false" .Values.gatewayApi.gateway.name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Gateway API - Returns the Gateway namespace if cross-namespace reference is needed
+*/}}
+{{- define "enterprise.gatewayApi.gatewayNamespace" -}}
+{{- if .Values.gatewayApi.gateway.create -}}
+  {{- .Release.Namespace -}}
+{{- else if .Values.gatewayApi.gateway.namespace -}}
+  {{- .Values.gatewayApi.gateway.namespace -}}
+{{- end -}}
+{{- end -}}

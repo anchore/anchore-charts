@@ -2120,6 +2120,117 @@ ingress:
   ##
   ingressClassName: nginx
 
+###########################################
+## @section Kubernetes Gateway API Parameters
+###########################################
+## Gateway API support for Anchore Enterprise
+## ref: https://gateway-api.sigs.k8s.io/
+##
+gatewayApi:
+  ## @param gatewayApi.enabled Enable Gateway API resources (HTTPRoutes and optionally Gateway)
+  ##
+  enabled: false
+
+  ## @param gatewayApi.labels Common labels to add to all Gateway API resources
+  ##
+  labels: {}
+
+  ## @param gatewayApi.annotations Common annotations to add to all Gateway API resources
+  ##
+  annotations: {}
+
+  ## Gateway configuration - reference existing or create new
+  ##
+  gateway:
+    ## @param gatewayApi.gateway.create Create a new Gateway resource. If false, reference an existing Gateway
+    ##
+    create: false
+
+    ## @param gatewayApi.gateway.name Name of existing Gateway to reference (required if create=false)
+    ##
+    name: ""
+
+    ## @param gatewayApi.gateway.namespace Namespace of existing Gateway (for cross-namespace references)
+    ##
+    namespace: ""
+
+    ## @param gatewayApi.gateway.sectionName Specific listener section name on the Gateway
+    ##
+    sectionName: ""
+
+    ## @param gatewayApi.gateway.gatewayClassName Gateway class name (required if create=true)
+    ## Examples: istio, cilium, nginx, contour, gke-l7-global-external-managed
+    ##
+    gatewayClassName: ""
+
+    ## @param gatewayApi.gateway.listeners Listener configuration when creating a Gateway
+    ## Example:
+    ## listeners:
+    ##   - name: http
+    ##     port: 80
+    ##     protocol: HTTP
+    ##     allowedRoutes:
+    ##       namespaces:
+    ##         from: Same
+    ##
+    listeners: []
+
+    ## @param gatewayApi.gateway.addresses Gateway addresses configuration
+    ##
+    addresses: []
+
+  ## @param gatewayApi.routes HTTPRoute definitions - each key creates an HTTPRoute resource
+  ## The key becomes the HTTPRoute name suffix, and the value is rendered directly as the HTTPRoute spec
+  ## (parentRefs is automatically injected from gateway config above)
+  ##
+  ## Example - separate hosts for API and UI:
+  ##   routes:
+  ##     api:
+  ##       hostnames:
+  ##         - api.anchore.example.com
+  ##       rules:
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /v2/
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-api
+  ##               port: 8228
+  ##     ui:
+  ##       hostnames:
+  ##         - anchore.example.com
+  ##       rules:
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-ui
+  ##               port: 80
+  ##
+  ## Example - single host with path-based routing:
+  ##   routes:
+  ##     anchore:
+  ##       hostnames:
+  ##         - anchore.example.com
+  ##       rules:
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /v2/
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-api
+  ##               port: 8228
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-ui
+  ##               port: 80
+  ##
+  routes: {}
+
 #########################################
 ## @section Google CloudSQL DB Parameters
 #########################################
