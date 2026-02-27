@@ -2,15 +2,20 @@ securityContext:
   fsGroup: null
   runAsGroup: null
   runAsUser: null
-postgresql:
-  primary:
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
 ui-redis:
   master:
     podSecurityContext:
       enabled: false
     containerSecurityContext:
       enabled: false
+postgresql:
+  chartEnabled: false
+  externalEndpoint: "anchore-db-rw.anchore.svc.cluster.local"
+  auth:
+    username: anchore
+    password: anchore-postgres,123
+    database: anchore
+
+image: docker.io/anchore/enterprise-dev:nightly
+ui:
+  image: docker.io/anchore/anchore-on-prem-ui-dev:nightly
