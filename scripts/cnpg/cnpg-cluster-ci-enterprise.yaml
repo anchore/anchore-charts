@@ -1,0 +1,45 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: anchore-db
+  namespace: anchore-enterprise
+spec:
+  instances: 1
+  imageName: docker.io/anchore/anchore-charts-testing:17-pg-cron
+  imagePullSecrets:
+    - name: anchore-enterprise-pullcreds
+
+  bootstrap:
+    initdb:
+      database: anchore
+      owner: anchore
+      secret:
+        name: anchore-db-credentials
+      postInitSQL:
+        - ALTER ROLE anchore WITH SUPERUSER;
+      postInitApplicationSQL:
+        - CREATE EXTENSION pg_cron;
+        - GRANT USAGE ON SCHEMA cron TO anchore;
+        - GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO anchore;
+        - GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA cron TO anchore;
+        - ALTER ROLE anchore WITH NOSUPERUSER;
+
+  postgresql:
+    shared_preload_libraries:
+      - pg_cron
+    parameters:
+      cron.database_name: anchore
+
+  storage:
+    size: 10Gi
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-db-credentials
+  namespace: anchore-enterprise
+type: kubernetes.io/basic-auth
+stringData:
+  username: anchore
+  password: "anchore-postgres,123"  # for example/reference purposes only. Be sure to never use the default password in production.

@@ -1,0 +1,73 @@
+{{- $logging := include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "logging") .) | fromYaml -}}
+{{- $keys := include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "keys") .) | fromYaml -}}
+# Host identification
+host_id: ${ANCHORE_HOST_ID}
+
+# Internal SSL verification
+internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+
+# Global client timeouts
+global_client_connect_timeout: {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "global_client_connect_timeout") .) }}
+global_client_read_timeout: {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "global_client_read_timeout") .) }}
+
+# Global logging settings (can be overridden per service via anchoreConfig.<configComponent>.logging)
+logging:
+    # { include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "logging") .) | indent 2 } this puts the whole logging block merged here, but pydantic errors
+  log_level: {{ $logging.log_level }}
+  colored_logging: {{ $logging.colored_logging }}
+  exception_backtrace_logging: {{ $logging.exception_backtrace_logging }}
+  exception_diagnose_logging: {{ $logging.exception_diagnose_logging }}
+
+
+# Locations for keys used for signing and encryption. Only one of 'secret' or
+# 'public_key_path'/'private_key_path' needs to be set. If all are set then the
+# keys take precedence over the secret value.
+# Secret is for a shared secret and if set, all components in anchore should
+# have the exact same value in their configs.
+keys:
+  secret: ${ANCHORE_SAML_SECRET}
+  public_key_path: {{ $keys.publicKeyFileName }}
+  private_key_path: {{ $keys.privateKeyFileName }}
+
+# OAuth configuration for internal service-to-service authentication
+oauth:
+  default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+
+# Credentials configuration
+credentials:
+  database:
+    user: ${ANCHORE_DB_USER}
+    password: ${ANCHORE_DB_PASSWORD}
+    host: ${ANCHORE_DB_HOST}
+    port: ${ANCHORE_DB_PORT}
+    database: ${ANCHORE_DB_NAME}
+  {{- if .Values.anchoreConfig.database.dbConnectArgs }}
+  {{- with .Values.anchoreConfig.database.dbConnectArgs }}
+    db_connect_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
+    db_connect_args:
+      connect_timeout: ${ANCHORE_DB_TIMEOUT}
+    {{- if .Values.anchoreConfig.database.ssl }}
+      sslmode: ${ANCHORE_DB_SSL_MODE}
+      sslrootcert: ${ANCHORE_DB_SSL_ROOT_CERT}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.anchoreConfig.database.engineArgs }}
+    db_engine_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+
+  # Optional read replica configuration (uses same DbConfig model)
+  # database_read_replica:
+  #   user: ${ANCHORE_DB_USER}
+  #   password: ${ANCHORE_DB_PASSWORD}
+  #   host: ${ANCHORE_DB_READ_REPLICA_HOST}
+  #   port: ${ANCHORE_DB_PORT}
+  #   database: ${ANCHORE_DB_NAME}
+  #   db_connect_args:
+  #     connect_timeout: 120
+  #   db_engine_args:
+  #     pool_size: 30
+  #     max_overflow: 100
+
+# Services configuration
