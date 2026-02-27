@@ -100,6 +100,28 @@ jobs:
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
         KUBECONFIG: ./tmp/kubeconfig
 
+    - name: Install CNPG operator
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        helm repo add cnpg https://cloudnative-pg.github.io/charts
+        helm repo update
+        if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+          helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace -f scripts/cnpg/cnpg-openshift-install.yaml --wait
+        else
+          helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace --wait
+        fi
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+
+    - name: Deploy CNPG PostgreSQL cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
+      run: |
+        kubectl apply -f scripts/cnpg/cnpg-cluster.yaml
+        kubectl wait --for=condition=Ready cluster/anchore-db -n anchore --timeout=300s
+        kubectl --namespace anchore get pods
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+
     - name: Check if anchore-enterprise endpoint is required for admission controller chart
       id: enterprise_required
       run: |
@@ -190,7 +212,17 @@ jobs:
             popd
           fi
         done
-        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+        changed_charts=$(ct list-changed --config ct-config.yaml --target-branch ${{ github.event.pull_request.base.ref }})
+        other_charts=$(echo "$changed_charts" | grep -v 'anchore-admission-controller' || true)
+        if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
+          if [[ -n "$other_charts" ]]; then
+            echo "Admission controller changed alongside other charts. Installing other charts first, then admission controller."
+            ct install --config ct-config.yaml --excluded-charts "anchore-admission-controller" --helm-extra-args "--timeout 600s"
+          fi
+          ct install --config ct-config.yaml --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
+        else
+          ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+        fi
       env:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"

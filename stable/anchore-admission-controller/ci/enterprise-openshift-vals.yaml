@@ -2,12 +2,6 @@ securityContext:
   fsGroup: null
   runAsGroup: null
   runAsUser: null
-postgresql:
-  primary:
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
 ui-redis:
   master:
     podSecurityContext:
@@ -21,3 +15,11 @@ analyzer:
 
 anchoreConfig:
   default_admin_password: foobar
+
+postgresql:
+  chartEnabled: false
+  externalEndpoint: "anchore-db-rw.anchore.svc.cluster.local"
+  auth:
+    username: anchore
+    password: anchore-postgres,123
+    database: anchore
