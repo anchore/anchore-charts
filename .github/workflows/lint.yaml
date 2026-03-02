@@ -16,6 +16,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
+      with:
+        persist-credentials: false
 
     - name: Fetch history
       run: git fetch --prune --unshallow
@@ -28,8 +30,10 @@ jobs:
 
     - name: Run chart-testing (list-changed)
       id: list-changed
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       run: |
-        changed=$(ct list-changed --config 'ct-config.yaml' --target-branch ${{ github.event.pull_request.base.ref }})
+        changed=$(ct list-changed --config 'ct-config.yaml' --target-branch "$BASE_REF")
         if [[ -n "$changed" ]]; then
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
         fi

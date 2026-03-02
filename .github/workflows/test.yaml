@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
+      with:
+        persist-credentials: false
 
     - name: Fetch history
       run: git fetch --prune --unshallow
@@ -39,8 +41,10 @@ jobs:
 
     - name: Run chart-testing (list-changed)
       id: list-changed
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       run: |
-        changed=$(ct list-changed --config 'ct-config.yaml' --target-branch ${{ github.event.pull_request.base.ref }})
+        changed=$(ct list-changed --config 'ct-config.yaml' --target-branch "$BASE_REF")
         if [[ -n "$changed" ]]; then
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
         fi
@@ -81,12 +85,16 @@ jobs:
 
     - name: Check if anchore-enterprise endpoint is required for admission controller chart
       id: enterprise_required
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        HEAD_SHA: ${{ github.sha }}
+        HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
-        if [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'anchore-admission-controller') ]]; then
+        if [[ -n $(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'anchore-admission-controller') ]]; then
           echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an Enterprise deployment"
           echo "::set-output name=changed::true"
-        elif [[ -n $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep 'k8s-inventory') ]]; then
-          echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        elif [[ -n $(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'k8s-inventory') ]]; then
+          echo "Branch: $HEAD_REF"
           echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
           echo "::set-output name=changed::true"
         else
@@ -108,8 +116,10 @@ jobs:
 
     - name: Update to rc image if needed
       if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x'  }}
+      env:
+        HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
-        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo "Branch: $HEAD_REF"
         echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
         echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
         echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
@@ -117,8 +127,10 @@ jobs:
 
     - name: Update to nightly image if needed
       if: ${{ github.event.pull_request.base.ref == 'nightly' || github.ref_name == 'nightly' }}
+      env:
+        HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
-        echo "Branch: ${{ github.event.pull_request.head.ref }}"
+        echo "Branch: $HEAD_REF"
         echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
         echo 'ui:' >> stable/enterprise/ci/nightly-values.yaml
         echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
