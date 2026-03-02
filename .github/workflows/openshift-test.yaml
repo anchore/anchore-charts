@@ -106,16 +106,17 @@ jobs:
 
     - name: Install CNPG operator
       if: steps.list-changed.outputs.CHANGED == 'true'
+      env:
+        KUBECONFIG: ./tmp/kubeconfig
+        CLUSTER_DISTRIBUTION: ${{ matrix.cluster.distribution }}
       run: |
         helm repo add cnpg https://cloudnative-pg.github.io/charts
         helm repo update
-        if [[ "${{ matrix.cluster.distribution }}" == "openshift" ]]; then
+        if [[ "$CLUSTER_DISTRIBUTION" == "openshift" ]]; then
           helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace -f scripts/cnpg/cnpg-openshift-install.yaml --wait
         else
           helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace --wait
         fi
-      env:
-        KUBECONFIG: ./tmp/kubeconfig
 
     - name: Deploy CNPG PostgreSQL cluster
       if: steps.list-changed.outputs.CHANGED == 'true'
@@ -238,7 +239,7 @@ jobs:
             popd
           fi
         done
-        changed_charts=$(ct list-changed --config ct-config.yaml --target-branch ${{ github.event.pull_request.base.ref }})
+        changed_charts=$(ct list-changed --config ct-config.yaml --target-branch "$TARGET_BRANCH")
         other_charts=$(echo "$changed_charts" | grep -v 'anchore-admission-controller' || true)
         if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
           if [[ -n "$other_charts" ]]; then
