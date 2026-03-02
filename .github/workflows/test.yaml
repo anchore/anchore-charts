@@ -163,8 +163,10 @@ jobs:
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       run: |
-        changed_charts=$(ct list-changed --config ct-config.yaml --target-branch ${{ github.event.pull_request.base.ref }})
+        changed_charts=$(ct list-changed --config ct-config.yaml --target-branch "$BASE_REF")
         other_charts=$(echo "$changed_charts" | grep -v 'anchore-admission-controller' || true)
         if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
           if [[ -n "$other_charts" ]]; then
