@@ -19,10 +19,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
       with:
-        persist-credentials: false
-
-    - name: Fetch history
-      run: git fetch --prune --unshallow
+        fetch-depth: 0
 
     - name: Shellcheck
       uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
