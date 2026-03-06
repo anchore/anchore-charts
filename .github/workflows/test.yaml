@@ -19,10 +19,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
       with:
-        persist-credentials: false
-
-    - name: Fetch history
-      run: git fetch --prune --unshallow
+        fetch-depth: 0
 
     - name: Shellcheck
       uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
@@ -48,15 +45,22 @@ jobs:
         if [[ -n "$changed" ]]; then
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
         fi
+        if echo "$changed" | grep -qE 'anchore-admission-controller|k8s-inventory'; then
+          echo "ENTERPRISE_REQUIRED=true" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Run chart-testing (lint)
       id: lint
-      run: ct lint --config 'ct-config.yaml'
+      run: ct lint --config 'ct-config.yaml' --target-branch "$BASE_REF"
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
 
     - name: Run chart-testing but skip version check (lint)
       id: lintskipversion
-      run: ct lint --config 'ct-config.yaml' --check-version-increment=false
+      run: ct lint --config 'ct-config.yaml' --check-version-increment=false --target-branch "$BASE_REF"
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref != 'main'
 
     - name: Install kind
@@ -97,28 +101,8 @@ jobs:
         kubectl wait --for=condition=Ready cluster/anchore-db -n anchore --timeout=300s
         kubectl --namespace anchore get pods
 
-    - name: Check if anchore-enterprise endpoint is required for admission controller chart
-      id: enterprise_required
-      env:
-        BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        HEAD_SHA: ${{ github.sha }}
-        HEAD_REF: ${{ github.event.pull_request.head.ref }}
-      run: |
-        if [[ -n $(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'anchore-admission-controller') ]]; then
-          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an Enterprise deployment"
-          echo "::set-output name=changed::true"
-        elif [[ -n $(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'k8s-inventory') ]]; then
-          echo "Branch: $HEAD_REF"
-          echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
-          echo "::set-output name=changed::true"
-        else
-          echo "No files in 'stable/anchore-admission-controller' or 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
-          echo "::set-output name=changed::false"
-        fi
-      shell: bash
-
     - name: Deploy enterprise for admission-controller/k8s-inventory testing
-      if: steps.enterprise_required.outputs.changed == 'true'
+      if: steps.list-changed.outputs.ENTERPRISE_REQUIRED == 'true'
       run: |
         kubectl create namespace anchore-enterprise
         echo "${ANCHORE_LICENSE}" | base64 --decode > /tmp/anchore-license
@@ -171,9 +155,9 @@ jobs:
         if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
           if [[ -n "$other_charts" ]]; then
             echo "Admission controller changed alongside other charts. Installing other charts first, then admission controller."
-            ct install --config ct-config.yaml --excluded-charts "anchore-admission-controller" --helm-extra-args "--timeout 600s"
+            ct install --config ct-config.yaml --target-branch "$BASE_REF" --excluded-charts "anchore-admission-controller" --helm-extra-args "--timeout 600s"
           fi
-          ct install --config ct-config.yaml --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
+          ct install --config ct-config.yaml --target-branch "$BASE_REF" --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
         else
-          ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+          ct install --config ct-config.yaml --target-branch "$BASE_REF" --helm-extra-args "--timeout 600s"
         fi
