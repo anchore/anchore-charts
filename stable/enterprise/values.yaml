@@ -498,7 +498,7 @@ anchoreConfig:
   object_store:
     direct_access: false
 
-  ## @param anchoreConfig.extendedConfig appends additional configs to the root config. This should only be used with guidance from Anchore CS.
+  ## @param anchoreConfig.extendedConfig appends additional configs to the root config for enterprise. This should only be used with guidance from Anchore CS.
   extendedConfig: {}
 
   apiext:
