@@ -51,12 +51,16 @@ jobs:
 
     - name: Run chart-testing (lint)
       id: lint
-      run: ct lint --config 'ct-config.yaml'
+      run: ct lint --config 'ct-config.yaml' --target-branch "$BASE_REF"
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
 
     - name: Run chart-testing but skip version check (lint)
       id: lintskipversion
-      run: ct lint --config 'ct-config.yaml' --check-version-increment=false
+      run: ct lint --config 'ct-config.yaml' --check-version-increment=false --target-branch "$BASE_REF"
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref != 'main'
 
     - name: Install kind
@@ -151,9 +155,9 @@ jobs:
         if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
           if [[ -n "$other_charts" ]]; then
             echo "Admission controller changed alongside other charts. Installing other charts first, then admission controller."
-            ct install --config ct-config.yaml --excluded-charts "anchore-admission-controller" --helm-extra-args "--timeout 600s"
+            ct install --config ct-config.yaml --target-branch "$BASE_REF" --excluded-charts "anchore-admission-controller" --helm-extra-args "--timeout 600s"
           fi
-          ct install --config ct-config.yaml --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
+          ct install --config ct-config.yaml --target-branch "$BASE_REF" --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
         else
-          ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+          ct install --config ct-config.yaml --target-branch "$BASE_REF" --helm-extra-args "--timeout 600s"
         fi
