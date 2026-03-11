@@ -71,7 +71,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
     helm install ${RELEASE} -n ${NAMESPACE} anchore/enterprise -f anchore_values.yaml
     ```
 
-    > **Note**: This command installs Anchore Enterprise with a chart-managed PostgreSQL database, which may not be suitable for production use. See the [External Database](#external-database-requirements) section for details on using an external database.
+    > **Note**: This chart requires a user-provided PostgreSQL database. See the [External Database](#external-database-requirements) section for details on configuring your database connection.
 
 4. **Post-Installation Steps**: Anchore Enterprise will take some time to initialize. Use the following [anchorectl](https://docs.anchore.com/current/docs/deployment/anchorectl/) commands to check the system status:
 
@@ -89,7 +89,7 @@ This guide covers deploying Anchore Enterprise on a Kubernetes cluster with the 
 
 ### Installing on Openshift
 
-You will need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` and any PostgreSQL database that you deploy using the Enterprise chart (e.g., via `postgresql.chartEnabled`). Also, by default, Anchore Enterprise creates a user that normally runs the application with a uid/gid/group of 1000. If your deployment uses any other user as openshift usually does, you will need to update the HOME environment variable to a directory where the analyzer service can write to.
+You will need to either disable or properly set the parameters for `containerSecurityContext`, `runAsUser`, and `fsGroup` for the `ui-redis` dependency. Also, by default, Anchore Enterprise creates a user that normally runs the application with a uid/gid/group of 1000. If your deployment uses any other user as openshift usually does, you will need to update the HOME environment variable to a directory where the analyzer service can write to.
 
 For example:
 
@@ -100,10 +100,9 @@ For example:
       --set securityContext.fsGroup=null \
       --set securityContext.runAsGroup=null \
       --set securityContext.runAsUser=null \
-      --set postgresql.primary.containerSecurityContext.enabled=false \
-      --set postgresql.primary.podSecurityContext.enabled=false \
       --set ui-redis.master.podSecurityContext.enabled=false \
       --set ui-redis.master.containerSecurityContext.enabled=false \
+      --set postgresql.externalEndpoint=<POSTGRES_ENDPOINT> \
       --set analyzer.extraEnv[0].name=HOME \
       --set analyzer.extraEnv[0].value=/tmp
     ```
@@ -120,11 +119,7 @@ securityContext:
   runAsGroup: null
   runAsUser: null
 postgresql:
-  primary:
-    containerSecurityContext:
-      enabled: false
-    podSecurityContext:
-      enabled: false
+  externalEndpoint: <POSTGRES_ENDPOINT>
 ui-redis:
   master:
     podSecurityContext:
@@ -172,7 +167,6 @@ After deleting the helm release, there are still a few persistent volume claims 
   export RELEASE=my-release
 
   kubectl get pvc -n ${NAMESPACE}
-  kubectl delete pvc ${RELEASE}-postgresql -n ${NAMESPACE}
   ```
 
 ## Configuration
@@ -190,7 +184,7 @@ For additional guidance on customizing your Anchore Enterprise deployment, reach
 
 ### External Database Requirements
 
-Anchore Enterprise requires the use of a PostgreSQL-compatible database version 13 or above. For production environments, leveraging managed database services like AWS RDS or Google Cloud SQL is advised. While the Helm chart includes a chart-managed database by default, you can override this setting to use an external database.
+Anchore Enterprise requires the use of a PostgreSQL-compatible database version 13 or above. For production environments, leveraging managed database services like AWS RDS or Google Cloud SQL is advised. This chart requires you to provide your own PostgreSQL database.
 
 For optimal performance, allocate a minimum of 100GB storage to accommodate images, tags, subscriptions, policies, and other data entities. Furthermore, configure the database to support a minimum of 2,000 client connections. This limit may need to be adjusted upward if you're running more Anchore services than the default configuration.
 
@@ -198,11 +192,11 @@ For optimal performance, allocate a minimum of 100GB storage to accommodate imag
 
 ```yaml
 postgresql:
-  chartEnabled: false
-  auth.password: <PASSWORD>
-  auth.username: <USER>
-  auth.database: <DATABASE>
   externalEndpoint: <HOSTNAME>
+  auth:
+    password: <PASSWORD>
+    username: <USER>
+    database: <DATABASE>
 
 anchoreConfig:
   database:
@@ -220,11 +214,11 @@ To obtain a comprehensive AWS RDS PostgreSQL certificate bundle, which includes 
 
 ```yaml
 postgresql:
-  chartEnabled: false
-  auth.password: <PASSWORD>
-  auth.username: <USER>
-  auth.database: <DATABASE>
   externalEndpoint: <HOSTNAME>
+  auth:
+    password: <PASSWORD>
+    username: <USER>
+    database: <DATABASE>
 
 certStoreSecretName: some-cert-store-secret
 
@@ -241,10 +235,10 @@ anchoreConfig:
 ```yaml
 ## anchore_values.yaml
 postgresql:
-  chartEnabled: false
-  auth.password: <CLOUDSQL-PASSWORD>
-  auth.username: <CLOUDSQL-USER>
-  auth.database: <CLOUDSQL-DATABASE>
+  auth:
+    password: <CLOUDSQL-PASSWORD>
+    username: <CLOUDSQL-USER>
+    database: <CLOUDSQL-DATABASE>
 
 cloudsql:
   enabled: true
@@ -706,9 +700,6 @@ To restore your deployment to using your previous driver configurations:
 | `imageCredentials.username`             | The username for the image pull secret                                                                                             | `""`                                   |
 | `imageCredentials.password`             | The password for the image pull secret                                                                                             | `""`                                   |
 | `imageCredentials.email`                | The email for the image pull secret                                                                                                | `""`                                   |
-| `startMigrationPod`                     | Spin up a Database migration pod to help migrate the database to the new schema                                                    | `false`                                |
-| `migrationPodImage`                     | The image reference to the migration pod                                                                                           | `docker.io/postgres:13-bookworm`       |
-| `migrationAnchoreEngineSecretName`      | The name of the secret that has anchore-engine values                                                                              | `my-engine-anchore-engine`             |
 | `serviceAccountName`                    | Name of a service account used to run all Anchore pods                                                                             | `""`                                   |
 | `injectSecretsViaEnv`                   | Enable secret injection into pod via environment variables instead of via k8s secrets                                              | `false`                                |
 | `license`                               | License for Anchore Enterprise                                                                                                     | `{}`                                   |
@@ -1278,22 +1269,13 @@ To restore your deployment to using your previous driver configurations:
 
 ### Anchore Database Parameters
 
-| Name                                          | Description                                                                                 | Value                              |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `postgresql.chartEnabled`                     | Use the dependent chart for Postgresql deployment                                           | `true`                             |
-| `postgresql.externalEndpoint`                 | External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io) | `""`                               |
-| `postgresql.auth.username`                    | Username used to connect to postgresql                                                      | `anchore`                          |
-| `postgresql.auth.password`                    | Password used to connect to postgresql                                                      | `anchore-postgres,123`             |
-| `postgresql.auth.database`                    | Database name used when connecting to postgresql                                            | `anchore`                          |
-| `postgresql.primary.resources`                | The resource limits & requests for the PostgreSQL Primary containers                        | `{}`                               |
-| `postgresql.primary.service.ports.postgresql` | Port used to connect to Postgresql                                                          | `5432`                             |
-| `postgresql.primary.persistence.size`         | Configure size of the persistent volume for PostgreSQL Primary data volume                  | `20Gi`                             |
-| `postgresql.primary.persistence.storageClass` | PVC Storage Class for PostgreSQL Primary data volume                                        | `""`                               |
-| `postgresql.primary.extraEnvVars`             | An array to add extra environment variables                                                 | `[]`                               |
-| `postgresql.image.repository`                 | Specifies the image repository to use for this chart.                                       | `bitnamilegacy/postgresql`         |
-| `postgresql.image.registry`                   | Specifies the image registry to use for this chart.                                         | `docker.io`                        |
-| `postgresql.image.tag`                        | Specifies the image to use for this chart.                                                  | `13.11.0-debian-11-r15`            |
-| `postgresql.image.pullSecrets`                | Specifies the image pull secrets to use for this chart.                                     | `["anchore-enterprise-pullcreds"]` |
+| Name                          | Description                                                    | Value                  |
+| ----------------------------- | -------------------------------------------------------------- | ---------------------- |
+| `postgresql.externalEndpoint` | External Postgresql hostname (eg. mypostgres.myserver.io)      | `""`                   |
+| `postgresql.auth.username`    | Username used to connect to postgresql                         | `anchore`              |
+| `postgresql.auth.password`    | Password used to connect to postgresql                         | `anchore-postgres,123` |
+| `postgresql.auth.database`    | Database name used when connecting to postgresql               | `anchore`              |
+| `postgresql.port`             | Port used to connect to Postgresql                             | `5432`                 |
 
 ### Anchore Object Store and Analysis Archive Migration
 
@@ -1424,21 +1406,13 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 #### V3.13.0
 - Deploys Anchore Enterprise v5.20.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5201/) for more information.
 - :warning: **WARNING:** Upcoming values file changes necessary:
-- **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for postgres and redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025. This is a temporary workaround while we review options on how to proceed with these dependencies:**
-  - `postgresql.image.repository`
+- **Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the upgrade job, object storage/analysis archive migration job, and the dependent helm chart for redis. The following values will need to be changed to use Bitnami's legacy image repo - which will not receive any further updates post August 28th, 2025. This is a temporary workaround while we review options on how to proceed with these dependencies:**
   - `ui-redis.image.repository`
   - `kubectlImage`
   - `upgradeJob.kubectlImage`
   - `osaaMigrationJob.kubectlImage`
 
   ```yaml
-  postgresql:
-    image:
-      repository: bitnamilegacy/postgresql
-      registry: docker.io
-      tag: 13.11.0-debian-11-r15
-      pullSecrets:
-        - anchore-enterprise-pullcreds
   ui-redis:
     image:
       registry: docker.io
