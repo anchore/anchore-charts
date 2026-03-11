@@ -10,6 +10,7 @@ chart:
   version: 9.9.9
   appVersion: 9.9.9
 set:
+  postgresql.externalEndpoint: test-postgresql
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 tests:
@@ -531,24 +532,26 @@ tests:
     set:
       anchoreConfig.database.ssl: true
       anchoreConfig.database.sslMode: require
+      postgresql.externalEndpoint: "my-db-host"
       postgresql.auth.username: "user@domain"
       postgresql.auth.password: "pass word!@#"
     asserts:
       - equal:
           path: stringData.ANCHORE_APPDB_URI
-          value: 'postgresql://user%40domain:pass+word%21%40%23@test-release-postgresql/anchore?sslMode=require'
+          value: 'postgresql://user%40domain:pass+word%21%40%23@my-db-host/anchore?sslMode=require'
 
   - it: should URL encode ANCHORE_APPDB_URI credentials with SSL disabled
     template: ui_secret.yaml
     documentIndex: 0
     set:
       anchoreConfig.database.ssl: false
+      postgresql.externalEndpoint: "my-db-host"
       postgresql.auth.username: "user@domain"
       postgresql.auth.password: "pass word!@#"
     asserts:
       - equal:
           path: stringData.ANCHORE_APPDB_URI
-          value: 'postgresql://user%40domain:pass+word%21%40%23@test-release-postgresql/anchore'
+          value: 'postgresql://user%40domain:pass+word%21%40%23@my-db-host/anchore'
 
   - it: should render ANCHORE_REDIS_URI with URL encoded password for internal redis
     template: ui_secret.yaml

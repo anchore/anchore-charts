@@ -9,6 +9,8 @@ chart:
 
 values:
   - values.yaml
+set:
+  postgresql.externalEndpoint: test-postgresql
 
 tests:
   - it: does not render when prometheus is disabled

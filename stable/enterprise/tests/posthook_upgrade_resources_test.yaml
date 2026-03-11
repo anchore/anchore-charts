@@ -31,6 +31,7 @@ deployment-resources: &deployment-resources
 values:
   - values.yaml
 set:
+  postgresql.externalEndpoint: test-postgresql
   upgradeJob.enabled: true
   upgradeJob.usePostUpgradeHook: true
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []

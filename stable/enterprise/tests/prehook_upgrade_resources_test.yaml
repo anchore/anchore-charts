@@ -39,6 +39,7 @@ chart:
   version: 9.9.9
   appVersion: 9.9.9
 set:
+  postgresql.externalEndpoint: test-postgresql
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 upgrade-resource: &upgrade-resources
