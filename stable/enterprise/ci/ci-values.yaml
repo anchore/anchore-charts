@@ -1,5 +1,4 @@
 postgresql:
-  chartEnabled: false
   externalEndpoint: "anchore-db-rw.anchore.svc.cluster.local"
   auth:
     username: anchore
