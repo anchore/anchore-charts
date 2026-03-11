@@ -592,6 +592,21 @@ When calling this template, .component can be included in the context for compon
 {{- end }}
 {{- end -}}
 
+{{/*
+Return the logging config for a service, with service-level override support.
+Checks anchoreConfig.<service>.logging first, falls back to anchoreConfig.logging.
+Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .) }}
+*/}}
+{{- define "enterprise.common.logging" -}}
+{{- $service := .service -}}
+{{- $serviceCfg := index .Values.anchoreConfig $service -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") -}}
+  {{- toYaml $serviceCfg.logging -}}
+{{- else -}}
+  {{- toYaml .Values.anchoreConfig.logging -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "enterprise.common.listenAddress" -}}
 {{- $component := .component -}}
 {{- $componentCtx := index .Values (print $component) }}

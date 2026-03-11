@@ -333,6 +333,13 @@ anchoreConfig:
     timeout_graceful_shutdown: false
     timeout_keep_alive: 5
 
+    # ??? REVIEW
+    process_worker_count: 1
+    ssl_cert: false
+    ssl_chain: false
+    ssl_enable: false
+    ssl_key: false
+
   ## @param anchoreConfig.audit.enabled Enable audit logging
   ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
   ##
@@ -513,12 +520,25 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.extendedConfig appends additional configs to the analyzer service's Anchore configs
     extendedConfig: {}
 
+    ## @param anchoreConfig.analyzer.server [object] Server configuration for the service
+    server: {}
+    ## server:
+    ##   process_worker_count: 1
+
+    logging:
+      log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
+
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
     ##
     cycle_timers:
       image_analyzer: 1
       sync_clamav_db: 60
+      analysis_data_disk_gc: 3600
+      handle_metrics: 15
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
     ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
@@ -542,12 +562,14 @@ anchoreConfig:
       # Anchore Analyzer config file
       ## WARNING - malforming this file can cause the Anchore Analyzer to fail on all image analysis
       #
-      retrieve_files:
+      retrieve_files: # ?? delete? ??
         file_list:
           - '/etc/passwd'
           # - '/etc/services'
           # - '/etc/sudoers'
       secret_search:
+        enabled: true
+        layer_scope: squashed
         match_params:
           - MAXFILESIZE=10000
           - STOREONMATCH=n

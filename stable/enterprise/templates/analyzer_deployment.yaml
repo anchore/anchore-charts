@@ -20,7 +20,6 @@ spec:
         checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
       {{- end }}
         checksum/enterprise-config: {{ include (print $.Template.BasePath "/anchore_configmap.yaml") . | sha256sum }}
-        checksum/analyzer-config: {{ include (print $.Template.BasePath "/analyzer_configmap.yaml") . | sha256sum }}
         checksum/enterprise-envvar: {{ include (print $.Template.BasePath "/envvars_configmap.yaml") . | sha256sum }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
@@ -28,9 +27,6 @@ spec:
       volumes: {{- include "enterprise.common.volumes" (merge (dict "component" $component) .) | nindent 8 }}
         - name: anchore-scratch
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
-        - name: analyzer-config-volume
-          configMap:
-            name: {{ template "enterprise.analyzer.fullname" . }}
       {{- if or
             (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
@@ -62,9 +58,6 @@ spec:
             - name: {{ $component | lower }}
               containerPort: {{ .Values.analyzer.service.port }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
-            - name: analyzer-config-volume
-              mountPath: "{{ .Values.anchoreConfig.service_dir }}/analyzer_config.yaml"
-              subPath: analyzer_config.yaml
             - name: "anchore-scratch"
               mountPath: {{ .Values.scratchVolume.mountPath }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}

@@ -1,6 +1,5 @@
 service_dir: ${ANCHORE_SERVICE_DIR}
 tmp_dir: ${ANCHORE_TMP_DIR}
-log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
 
 logging:
   {{- toYaml .Values.anchoreConfig.logging | nindent 2 }}
@@ -112,6 +111,8 @@ object_store:
 services:
   apiext:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "apiext") .) | nindent 6 }}
     image_content:
       remove_license_content_from_sbom_return: {{ .Values.anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return }}
     require_auth: true
@@ -131,14 +132,39 @@ services:
 
   analyzer:
     enabled: true
-    require_auth: true
+    analyzer_scanner_config:
+      syft:
+        parallel_workers: 2
+      windows:
+        enabled: true
+      content_search:
+        enabled: true
+        layer_scope: squashed
+        match_params: []
+        regexp_match: []
+      file_contents:
+        enabled: true
+        file_list:
+        - /etc/passwd
+        - /anchore_hints.json
+        layer_scope: squashed
+        max_file_size_kb: 1000
+  {{- with .Values.anchoreConfig.analyzer.configFile }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+
+
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "analyzer") .) | nindent 6 }}
+    require_auth: true # DELETE ME?
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "analyzer") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS} # DELETE ME?
     cycle_timer_seconds: 1
     cycle_timers: {{- toYaml .Values.anchoreConfig.analyzer.cycle_timers | nindent 6 }}
-    analyzer_driver: 'nodocker'
+    analyzer_driver: 'nodocker' # DELETE ME?
     layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
     layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
     enable_hints: ${ANCHORE_HINTS_ENABLED}
@@ -147,10 +173,18 @@ services:
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
+
+    # external_hostname: null ??
+    # external_port: null ??
+    # external_tls: false ??
+
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}
 
   catalog:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "catalog") .) | nindent 6 }}
     require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "catalog") .) }}"
@@ -184,6 +218,8 @@ services:
 
   simplequeue:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "simplequeue") .) | nindent 6 }}
     require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "simpleQueue") .) }}"
@@ -196,6 +232,8 @@ services:
 
   policy_engine:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "policy_engine") .) | nindent 6 }}
     require_auth: true
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
@@ -280,6 +318,8 @@ services:
 
   reports:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "reports") .) | nindent 6 }}
     require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reports") .) }}"
@@ -297,6 +337,8 @@ services:
 
   reports_worker:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "reports_worker") .) | nindent 6 }}
     require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reportsWorker") .) }}"
@@ -322,6 +364,8 @@ services:
 
   notifications:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "notifications") .) | nindent 6 }}
     require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "notifications") .) }}"
@@ -336,6 +380,8 @@ services:
 
   data_syncer:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "data_syncer") .) | nindent 6 }}
     require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "dataSyncer") .) }}"
