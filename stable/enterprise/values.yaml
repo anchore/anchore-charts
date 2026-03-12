@@ -2315,9 +2315,9 @@ postgresql:
   ## @param postgresql.auth.database Database name used when connecting to postgresql
   ##
   auth:
-    username: anchore
-    password: anchore-postgres,123
-    database: anchore
+    username: ""
+    password: ""
+    database: ""
 
   ## @param postgresql.port Port used to connect to Postgresql
   ##
