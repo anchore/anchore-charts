@@ -40,6 +40,9 @@ chart:
   appVersion: 9.9.9
 set:
   postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 upgrade-resource: &upgrade-resources

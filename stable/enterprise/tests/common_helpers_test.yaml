@@ -25,6 +25,9 @@ chart:
   appVersion: 9.9.9
 set:
   postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
@@ -925,7 +928,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@my-endpoint/anchore
+            ANCHORE_APPDB_URI: postgresql://test-user:test-password@my-endpoint/test-db
         count: 1
         any: true
 
@@ -940,7 +943,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@127.0.0.1/anchore
+            ANCHORE_APPDB_URI: postgresql://test-user:test-password@127.0.0.1/test-db
         count: 1
         any: true
 
