@@ -47,21 +47,6 @@ spec:
         }}
       initContainers:
       {{- if eq (include "enterprise.appVersionChanged" .) "true" }}
-        - name: scale-down-anchore
-          image: {{ include "enterprise.kubectl.image" . | trim }}
-          command: ["/bin/bash", "-c"]
-          args:
-            - |
-              kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "enterprise.fullname" . }};
-              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
-                echo 'waiting for pods to go down...' && sleep 5;
-              done
-        {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
-        {{- end }}
-        {{- with .Values.upgradeJob.resources }}
-          resources: {{- toYaml . | nindent 12 }}
-          {{- end }}
         - name: wait-for-db
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -89,6 +74,21 @@ spec:
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.upgradeJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: scale-down-anchore
+          image: {{ include "enterprise.kubectl.image" . | trim }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "enterprise.fullname" . }};
+              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+                echo 'waiting for pods to go down...' && sleep 5;
+              done
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.upgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- end }}

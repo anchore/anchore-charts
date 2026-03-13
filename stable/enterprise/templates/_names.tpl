@@ -86,10 +86,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s-%s-%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "smoke-test" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "postgres.fullname" -}}
-{{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "redis.fullname" -}}
 {{- printf "%s-%s" .Release.Name "ui-redis" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
