@@ -62,18 +62,6 @@ imageCredentials:
   password: ""
   email: ""
 
-## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema
-##
-startMigrationPod: false
-
-## @param migrationPodImage The image reference to the migration pod
-##
-migrationPodImage: docker.io/postgres:13-bookworm
-
-## @param migrationAnchoreEngineSecretName The name of the secret that has anchore-engine values
-##
-migrationAnchoreEngineSecretName: my-engine-anchore-engine
-
 ## @param createServiceAccount Create a service account for Anchore pods. The service account name will be the fullname of the release.
 ## @param serviceAccountName Name of a service account used to run all Anchore pods. If createServiceAccount is true and this is empty, the chart-generated name is used.
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -950,12 +938,12 @@ anchoreConfig:
         idle: 10000
 
     ## @param anchoreConfig.ui.dbUser allows overriding and separation of the ui database user.
-    ## The UI config defaults to postgresql.auth.username if not set
+    ## Defaults to postgresql.auth.username if not set
     ##
     dbUser: ""
 
     ## @param anchoreConfig.ui.dbPassword allows overriding and separation of the ui database user authentication
-    ## The UI config defaults to postgresql.auth.password if not set
+    ## Defaults to postgresql.auth.password if not set
     ##
     dbPassword: ""
 
@@ -2325,12 +2313,8 @@ ui-redis:
 ## @section Anchore Database Parameters
 #######################################
 postgresql:
-  ## @param postgresql.chartEnabled Use the dependent chart for Postgresql deployment
-  ##
-  chartEnabled: true
-
-  ## @param postgresql.externalEndpoint External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io)
-  ## externalEndpoint, auth.username, auth.password, auth.database, & primary.service.ports.postgresql are required values for external Postgres
+  ## @param postgresql.externalEndpoint External Postgresql hostname (eg. mypostgres.myserver.io)
+  ## This is required when not using an existing secret for database credentials
   ##
   externalEndpoint: ""
 
@@ -2339,50 +2323,13 @@ postgresql:
   ## @param postgresql.auth.database Database name used when connecting to postgresql
   ##
   auth:
-    username: anchore
-    password: anchore-postgres,123
-    database: anchore
+    username: ""
+    password: ""
+    database: ""
 
-  primary:
-    ## PostgreSQL Primary resource requests and limits
-    ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-    ## @param postgresql.primary.resources The resource limits & requests for the PostgreSQL Primary containers
-    ##
-    resources: {}
-      # limits: {}
-      # requests:
-      #   memory: 512Mi
-      #   cpu: 2
-
-    ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
-    ##
-    service:
-      ports:
-        postgresql: 5432
-
-    ## @param postgresql.primary.persistence.size Configure size of the persistent volume for PostgreSQL Primary data volume
-    ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
-    ## NOTE: If your storage class does not allow dynamic resizing then be sure to set the size appropriately!!
-    ##
-    persistence:
-      size: 20Gi
-      storageClass: ""
-
-    ## @param postgresql.primary.extraEnvVars An array to add extra environment variables
-    ##
-    extraEnvVars: []
-
-  ## @param postgresql.image.repository Specifies the image repository to use for this chart.
-  ## @param postgresql.image.registry Specifies the image registry to use for this chart.
-  ## @param postgresql.image.tag Specifies the image to use for this chart.
-  ## @param postgresql.image.pullSecrets Specifies the image pull secrets to use for this chart.
+  ## @param postgresql.port Port used to connect to Postgresql
   ##
-  image:
-    repository: bitnamilegacy/postgresql
-    registry: docker.io
-    tag: 13.11.0-debian-11-r15
-    pullSecrets:
-      - anchore-enterprise-pullcreds
+  port: 5432
 
 ########################################################################################
 ## @section Anchore Object Store and Analysis Archive Migration

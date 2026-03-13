@@ -40,16 +40,23 @@ data:
 {{- end -}}
 
 {{/*
+Fail if the removed postgresql.chartEnabled value is still set. This was removed when the Bitnami PostgreSQL
+dependency was dropped — users must now provide their own external PostgreSQL database.
+*/}}
+{{- define "enterprise.validateNoChartEnabled" -}}
+{{- if hasKey .Values.postgresql "chartEnabled" }}
+  {{- fail "postgresql.chartEnabled is no longer supported. The Bitnami PostgreSQL dependency has been removed. Please remove postgresql.chartEnabled from your values and configure postgresql.externalEndpoint, postgresql.auth.username, postgresql.auth.password, and postgresql.auth.database (or use existing secrets) to connect to your own PostgreSQL database." }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Create database hostname string from supplied values file. Used for setting the ANCHORE_DB_HOST env var in the UI & Engine secret.
 */}}
 {{- define "enterprise.dbHostname" }}
-  {{- if (index .Values "postgresql" "externalEndpoint") }}
-    {{- print ( index .Values "postgresql" "externalEndpoint" ) }}
-  {{- else if and (index .Values "cloudsql" "enabled") }}
+  {{- if and (index .Values "cloudsql" "enabled") }}
     {{- print "127.0.0.1" }}
   {{- else }}
-    {{- $db_host := include "postgres.fullname" . }}
-    {{- printf "%s" $db_host -}}
+    {{- required "postgresql.externalEndpoint is required" .Values.postgresql.externalEndpoint }}
   {{- end }}
 {{- end }}
 
@@ -247,6 +254,7 @@ Takes in a map of drivers and checks if the driver is enabled. If not, update th
 Checks if the feeds chart was previously disabled or if any of the drivers were disabled. If so and required values aren't set, fail the upgrade.
 */}}
 {{- define "enterprise.exclusionCheck" -}}
+{{- include "enterprise.validateNoChartEnabled" . }}
 
 {{ $notify := false }}
 

@@ -14,6 +14,11 @@ release:
 chart:
   version: 9.9.9
   appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
 tests:
   - it: should render the configmaps
     asserts:
