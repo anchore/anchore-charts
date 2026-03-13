@@ -594,17 +594,6 @@ should render proper initContainers:
   1: |
     - args:
         - |
-          kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;
-          while [[ $(kubectl get pods -l app.kubernetes.io/name=test-release-enterprise --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
-            echo 'waiting for pods to go down...' && sleep 5;
-          done
-      command:
-        - /bin/bash
-        - -c
-      image: bitnamilegacy/kubectl:1.30
-      name: scale-down-anchore
-    - args:
-        - |
           while true; do
             CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
             if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
@@ -640,3 +629,14 @@ should render proper initContainers:
       image: docker.io/anchore/enterprise@sha256:66b214f11280f1329e4ad028a0f2d045c894846ff79da0070e1b7fb13d2b148d
       imagePullPolicy: IfNotPresent
       name: wait-for-db
+    - args:
+        - |
+          kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;
+          while [[ $(kubectl get pods -l app.kubernetes.io/name=test-release-enterprise --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
+            echo 'waiting for pods to go down...' && sleep 5;
+          done
+      command:
+        - /bin/bash
+        - -c
+      image: bitnamilegacy/kubectl:1.30
+      name: scale-down-anchore

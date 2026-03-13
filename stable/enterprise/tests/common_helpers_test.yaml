@@ -24,6 +24,10 @@ chart:
   version: 9.9.9
   appVersion: 9.9.9
 set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
@@ -878,7 +882,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_DB_HOST: test-release-postgresql
+            ANCHORE_DB_HOST: test-postgresql
         count: 1
         any: true
 
@@ -887,8 +891,6 @@ tests:
     set:
       postgresql:
         externalEndpoint: my-endpoint
-        cloudsql:
-          enabled: true
     templates:
       - anchore_secret.yaml
     documentIndex: 0
@@ -899,10 +901,6 @@ tests:
             ANCHORE_DB_HOST: my-endpoint
         count: 1
         any: true
-      - isNotSubset:
-          path: stringData
-          content:
-            ANCHORE_DB_HOST: localhost
 
   - it: should render dbHostname with cloudsql enabled
     set:
@@ -919,43 +917,10 @@ tests:
         count: 1
         any: true
 
-  - it: should render default dbHostname with postgresql disabled, postgresql externalEndpoint not defined, and cloudsql disabled
-    set:
-      postgresql:
-        enabled: false
-        externalEndpoint: ""
-      cloudsql:
-        enabled: false
-    templates:
-      - anchore_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_DB_HOST: test-release-postgresql
-        count: 1
-        any: true
-
-  - it: should render dbHostname for ui_secret.yaml
-    templates:
-      - ui_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@test-release-postgresql/anchore
-        count: 1
-        any: true
-
-  - it: should render dbHostname with externalEndpoint defined and postgresql enabled for ui_secret.yaml
+  - it: should render dbHostname with externalEndpoint defined for ui_secret.yaml
     set:
       postgresql:
         externalEndpoint: my-endpoint
-        chartEnabled: true
-        cloudsql:
-          enabled: true
     templates:
       - ui_secret.yaml
     documentIndex: 0
@@ -963,34 +928,12 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@my-endpoint/anchore
-        count: 1
-        any: true
-      - isNotSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@localhost/anchore
-
-  - it: should render dbHostname with externalEndpoint defined and postgresql disabled for ui_secret.yaml
-    set:
-      postgresql:
-        externalEndpoint: my-endpoint
-
-    templates:
-      - ui_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@my-endpoint/anchore
+            ANCHORE_APPDB_URI: postgresql://test-user:test-password@my-endpoint/test-db
         count: 1
         any: true
 
-  - it: should render dbHostname with cloudsql enabled and postgresql disabled for ui_secret.yaml
+  - it: should render dbHostname with cloudsql enabled for ui_secret.yaml
     set:
-      postgresql:
-        chartEnabled: false
       cloudsql:
         enabled: true
     templates:
@@ -1000,25 +943,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@127.0.0.1/anchore
-        count: 1
-        any: true
-
-  - it: should render default dbHostname with postgresql disabled, postgresql externalEndpoint not defined, and cloudsql disabled for ui_secret.yaml
-    set:
-      postgresql:
-        enabled: false
-        externalEndpoint: ""
-      cloudsql:
-        enabled: false
-    templates:
-      - ui_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@test-release-postgresql/anchore
+            ANCHORE_APPDB_URI: postgresql://test-user:test-password@127.0.0.1/test-db
         count: 1
         any: true
 
