@@ -325,6 +325,11 @@ anchoreConfig:
   ## @param anchoreConfig.server.max_wsgi_middleware_worker_count Max number of workers to have in the ASGI2WSGI middleware worker pool
   ## @param anchoreConfig.server.timeout_graceful_shutdown Seconds to permit for graceful shutdown or false to disable
   ## @param anchoreConfig.server.timeout_keep_alive Seconds to keep a connection alive before closing
+  ## @param anchoreConfig.server.process_worker_count Number of worker processes for the server
+  ## @param anchoreConfig.server.ssl_cert Path to the SSL certificate file or false to disable
+  ## @param anchoreConfig.server.ssl_chain Path to the SSL certificate chain file or false to disable
+  ## @param anchoreConfig.server.ssl_enable Enable SSL for the server
+  ## @param anchoreConfig.server.ssl_key Path to the SSL key file or false to disable
   ##
   server:
     max_connection_backlog: 2048
@@ -333,7 +338,6 @@ anchoreConfig:
     timeout_graceful_shutdown: false
     timeout_keep_alive: 5
 
-    # ??? REVIEW
     process_worker_count: 1
     ssl_cert: false
     ssl_chain: false
@@ -525,11 +529,17 @@ anchoreConfig:
     ## server:
     ##   process_worker_count: 1
 
+    ## @param anchoreConfig.analyzer.logging.log_level Log level for the analyzer service
     logging:
       log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
 
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
+    ## @param anchoreConfig.analyzer.cycle_timers.analysis_data_disk_gc Interval in seconds between analysis data disk garbage collection runs
+    ## @param anchoreConfig.analyzer.cycle_timers.handle_metrics Interval in seconds between metrics collection cycles
+    ## @param anchoreConfig.analyzer.cycle_timers.service_heartbeat Interval in seconds between service heartbeat checks
+    ## @param anchoreConfig.analyzer.cycle_timers.system_config_environment_watcher Interval in seconds between environment config watch cycles
+    ## @param anchoreConfig.analyzer.cycle_timers.system_config_refresh_watcher Interval in seconds between config refresh watch cycles
     ##
     cycle_timers:
       image_analyzer: 1
@@ -670,7 +680,7 @@ anchoreConfig:
     ##    enabled: true
     ##    min_size_kbytes: 100
     ##  storage_driver:
-    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    # Valid storage driver names: 'db', 's3'
     ##    name: db
     ##    config: {}
 
@@ -684,7 +694,7 @@ anchoreConfig:
         enabled: true
         min_size_kbytes: 100
       storage_driver:
-        # Valid storage driver names: 'db', 's3', 'swift'
+        # Valid storage driver names: 'db', 's3'
         name: db
         config: {}
 
@@ -735,6 +745,57 @@ anchoreConfig:
         exclude:
           providers: null
           package_types: null
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.default.search.by_cpe.enabled Enable default search by CPE for vulnerability matching
+        default:
+          search:
+            by_cpe:
+              enabled: "<ALLOW_API_CONFIGURATION>"
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled Enable CPE-based vulnerability matching for dotnet packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled Enable CPE-based vulnerability matching for golang packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.java.search.by_cpe.enabled Enable CPE-based vulnerability matching for java packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.javascript.search.by_cpe.enabled Enable CPE-based vulnerability matching for javascript packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.jvm.search.by_cpe.enabled Enable CPE-based vulnerability matching for JVM packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled Enable CPE-based vulnerability matching for python packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled Enable CPE-based vulnerability matching for ruby packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled Enable CPE-based vulnerability matching for rust packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.stock.search.by_cpe.enabled Enable CPE-based vulnerability matching for stock (binary-only) packages
+        ecosystem_specific:
+          dotnet:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          golang:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          java:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          javascript:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          jvm:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          python:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          ruby:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          rust:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          stock:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
       ## @param anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
       nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
 
@@ -836,11 +897,6 @@ anchoreConfig:
       reports_metrics: 3600
       reports_image_egress: 600
       reports_tag_egress: 600
-
-    ## @param anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries Use legacy loaders and queries for runtime report generation
-    ##
-    runtime_report_generation:
-      use_legacy_loaders_and_queries: false
 
   simplequeue:
     ## @param anchoreConfig.simplequeue.extendedConfig appends additional configs to the simplequeue service's Anchore configs
@@ -2449,7 +2505,7 @@ osaaMigrationJob:
     ##    enabled: true
     ##    min_size_kbytes: 100
     ##  storage_driver:
-    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    # Valid storage driver names: 'db', 's3'
     ##    name: db
     ##    config: {}
 

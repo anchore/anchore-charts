@@ -35,7 +35,6 @@ should render additional audit uris when additionalResourceURIs is set:
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
-        server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
 
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
@@ -266,45 +265,45 @@ should render additional audit uris when additionalResourceURIs is set:
                 default:
                   search:
                     by_cpe:
-                      enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+                      enabled: <ALLOW_API_CONFIGURATION>
                 ecosystem_specific:
                   dotnet:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   golang:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   java:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   javascript:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   jvm:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JVM_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   python:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   ruby:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   rust:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUST_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   stock:
                     search:
                       by_cpe:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
             server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -351,7 +350,6 @@ should render additional audit uris when additionalResourceURIs is set:
               reports_tag_load: 600
               reports_tag_refresh: 7200
             runtime_report_generation:
-              use_legacy_loaders_and_queries: false
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
@@ -478,7 +476,6 @@ should render the configmaps:
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
-        server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
 
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
@@ -707,45 +704,45 @@ should render the configmaps:
                 default:
                   search:
                     by_cpe:
-                      enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+                      enabled: <ALLOW_API_CONFIGURATION>
                 ecosystem_specific:
                   dotnet:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   golang:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   java:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   javascript:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   jvm:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JVM_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   python:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   ruby:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   rust:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUST_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   stock:
                     search:
                       by_cpe:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
             server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -792,7 +789,6 @@ should render the configmaps:
               reports_tag_load: 600
               reports_tag_refresh: 7200
             runtime_report_generation:
-              use_legacy_loaders_and_queries: false
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
@@ -907,16 +903,6 @@ should render the configmaps:
       ANCHORE_SSL_KEY: "null"
       ANCHORE_SSO_REQUIRES_EXISTING_USERS: "false"
       ANCHORE_TMP_DIR: /analysis_scratch
-      ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JVM_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUST_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
-      ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED: <ALLOW_API_CONFIGURATION>
       ANCHORECTL_ACCOUNT: admin
       ANCHORECTL_URL: http://localhost:8228
       ANCHORECTL_USERNAME: admin
@@ -1092,7 +1078,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
-        server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
 
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
@@ -1324,45 +1309,45 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
                 default:
                   search:
                     by_cpe:
-                      enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+                      enabled: <ALLOW_API_CONFIGURATION>
                 ecosystem_specific:
                   dotnet:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   golang:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   java:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   javascript:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   jvm:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JVM_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   python:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   ruby:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   rust:
                     search:
                       by_cpe:
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUST_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
                   stock:
                     search:
                       by_cpe:
                         # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
-                        enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+                        enabled: <ALLOW_API_CONFIGURATION>
             server: {}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
@@ -1409,7 +1394,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               reports_tag_load: 600
               reports_tag_refresh: 7200
             runtime_report_generation:
-              use_legacy_loaders_and_queries: false
               inventory_images_by_vulnerability: true
               vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
               vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
