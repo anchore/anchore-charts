@@ -490,6 +490,17 @@ anchoreConfig:
     external_port: null
     external_tls: false
 
+    ## @param anchoreConfig.apiext.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.apiext.cycle_timers [object] Cycle timers for the apiext service
+    cycle_timers:
+      api_key_token_cleanup: 43200
+      oauth_token_cleanup: 21600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+
     ## @param anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return Remove license content from SBOM downloads
     image_content:
       remove_license_content_from_sbom_return: "<ALLOW_API_CONFIGURATION>"  # false
@@ -513,6 +524,9 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.logging.log_level Log level for the analyzer service
     logging:
       log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
+
+    ## @param anchoreConfig.analyzer.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
 
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
@@ -616,38 +630,46 @@ anchoreConfig:
       batch_size: 1
       pool_size: 1
 
-    ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
-    ## @param anchoreConfig.catalog.cycle_timers.policy_eval Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated
-    ## @param anchoreConfig.catalog.cycle_timers.vulnerability_scan Interval to run a vulnerability scan on images with vuln_update subscription activated
-    ## @param anchoreConfig.catalog.cycle_timers.analyzer_queue Interval to add new work on the image analysis queue
-    ## @param anchoreConfig.catalog.cycle_timers.archive_tasks Interval to trigger Anchore Catalog archive Tasks
-    ## @param anchoreConfig.catalog.cycle_timers.notifications Interval in which notifications will be processed for state changes
-    ## @param anchoreConfig.catalog.cycle_timers.service_watcher Interval of service state update poll, used for system status
-    ## @param anchoreConfig.catalog.cycle_timers.policy_bundle_sync Interval of policy bundle sync
-    ## @param anchoreConfig.catalog.cycle_timers.repo_watcher Interval between checks to repo for new tags
-    ## @param anchoreConfig.catalog.cycle_timers.image_gc Interval for garbage collection of images marked for deletion
-    ## @param anchoreConfig.catalog.cycle_timers.k8s_image_watcher Interval for the runtime inventory image analysis poll
-    ## @param anchoreConfig.catalog.cycle_timers.resource_metrics Interval (seconds) for computing metrics from the DB
-    ## @param anchoreConfig.catalog.cycle_timers.events_gc Interval (seconds) for cleaning up events in the system based on timestamp
-    ## @param anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks Interval (seconds) for running artifact lifecycle policy tasks
-    ## @param anchoreConfig.catalog.cycle_timers.syft_sbom_metadata_annotations Time in seconds between syft SBOM metadata annotations
+    ## @param anchoreConfig.catalog.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.catalog.cycle_timers [object] Cycle timers for the catalog service
     ##
     cycle_timers:
-      image_watcher: 3600
-      policy_eval: 3600
-      vulnerability_scan: 14400
+      account_resource_cleanup: 30
+      alerts_watcher: 600
       analyzer_queue: 1
       archive_tasks: 43200
-      notifications: 30
-      service_watcher: 15
-      policy_bundle_sync: 300
-      repo_watcher: 60
-      image_gc: 60
-      k8s_image_watcher: 150
-      resource_metrics: 60
-      events_gc: 43200
       artifact_lifecycle_policy_tasks: 43200
+      document_view_collection_prune_watcher: 43200
+      events_gc: 43200
+      handle_deployment_metrics: 300
+      handle_metrics: 60
+      image_gc: 60
+      image_watcher: 3600
+      import_gc: 60
+      integration_account_association_expiration_watcher: 300
+      integration_health_report_ttl_watcher: 86400
+      integration_status_update_watcher: 300
+      k8s_image_watcher: 150
+      legacy_syft_hybrid_view_builder: 60
+      notifications: 30
+      policy_eval: 3600
+      repo_watcher: 60
+      resource_limit_notifications: 3600
+      resource_metrics: 300
+      runtime_inventory_image_ttl_watcher: 86400
+      sbom_vuln_scan_refresh_watcher: 60
+      sbom_vuln_scan_watcher: 10
+      service_heartbeat: 60
+      service_watcher: 15
+      source_gc: 60
+      source_import_gc: 60
       syft_sbom_metadata_annotations: 150
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+      system_logs_gc: 43200
+      vulnerability_scan: 14400
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
     ## ref: https://docs.anchore.com/current/docs/using/cli_usage/event/#sending-events-as-webhook-notifications
@@ -825,6 +847,17 @@ anchoreConfig:
     external_port: null
     external_tls: false
 
+    ## @param anchoreConfig.policy_engine.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.policy_engine.cycle_timers [object] Cycle timers for the policy engine service
+    cycle_timers:
+      grypedb_sync: 60
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+      vulnerability_metadata_capture: 300
+
   notifications:
     ## @param anchoreConfig.notifications.extendedConfig appends additional configs to the notifications service's Anchore configs
     extendedConfig: {}
@@ -839,10 +872,16 @@ anchoreConfig:
     external_port: null
     external_tls: false
 
-    ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
+    ## @param anchoreConfig.notifications.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.notifications.cycle_timers [object] Cycle timers for the notifications service
     ##
     cycle_timers:
       notifications: 30
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.notifications.ui_url Set the UI URL that is included in the notification, defaults to the Enterprise UI service name
     ##
@@ -873,10 +912,16 @@ anchoreConfig:
     ## The value should be a number followed by "w", "d", or "h" to represent weeks, days or hours
     async_execution_timeout: 48h
 
-    ## @param anchoreConfig.reports.cycle_timers.reports_scheduled_queries Interval  in seconds to check for scheduled queries that need to be run
+    ## @param anchoreConfig.reports.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.reports.cycle_timers [object] Cycle timers for the reports service
     ##
     cycle_timers:
       reports_scheduled_queries: 600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.reports.use_volume Configure the reports service to buffer report generation to disk instead of in memory
     ## This should be configured in production systems with large amounts of data (10s of thousands of images or more)
@@ -925,26 +970,25 @@ anchoreConfig:
     ##
     data_load_max_workers: 10
 
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_load Interval that vulnerabilities for images are synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_load Interval that vulnerabilities by tags are synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_runtime_inventory_load Interval that the runtime inventory is synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_extended_runtime_vuln_load Interval extended runtime reports are synched (ecs, k8s containers and namespaces)
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_refresh Interval that images are refreshed
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_refresh Interval that tags are refreshed
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_metrics Interval for how often reporting metrics are generated
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_egress Interval stale states are removed by image
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_egress Interval stale states are removed by tag
+    ## @param anchoreConfig.reports_worker.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.reports_worker.cycle_timers [object] Cycle timers for the reports worker service
     ##
     cycle_timers:
-      reports_image_load: 600
-      reports_tag_load: 600
-      reports_runtime_inventory_load: 600
+      event_stream_health: 60
       reports_extended_runtime_vuln_load: 1800
-      reports_image_refresh: 7200
-      reports_tag_refresh: 7200
-      reports_metrics: 3600
       reports_image_egress: 600
+      reports_image_load: 600
+      reports_image_refresh: 7200
+      reports_metrics: 3600
+      reports_runtime_inventory_load: 600
       reports_tag_egress: 600
+      reports_tag_load: 600
+      reports_tag_refresh: 7200
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
   simplequeue:
     ## @param anchoreConfig.simplequeue.extendedConfig appends additional configs to the simplequeue service's Anchore configs
@@ -960,6 +1004,16 @@ anchoreConfig:
     external_port: null
     external_tls: false
 
+    ## @param anchoreConfig.simplequeue.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.simplequeue.cycle_timers [object] Cycle timers for the simplequeue service
+    cycle_timers:
+      handle_metrics: 15
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+
   data_syncer:
     ## @param anchoreConfig.data_syncer.extendedConfig appends additional configs to the data_syncer service's Anchore configs
     extendedConfig: {}
@@ -973,6 +1027,18 @@ anchoreConfig:
     external_hostname: null
     external_port: null
     external_tls: false
+
+    ## @param anchoreConfig.data_syncer.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.data_syncer.cycle_timers [object] Cycle timers for the data syncer service
+    cycle_timers:
+      grypedb_sync: 120
+      scheduled_data_cleanup: 86400
+      scheduled_data_sync: 3600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)

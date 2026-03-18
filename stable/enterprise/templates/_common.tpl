@@ -577,6 +577,18 @@ Renders external_hostname, external_port, and external_tls from the service's an
 {{- end }}
 
 {{/*
+Cycle timers configuration for a service.
+Renders cycle_timer_seconds and cycle_timers from the service's anchoreConfig.
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "analyzer") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.cycleTimers" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
+    cycle_timer_seconds: {{ $serviceConfig.cycle_timer_seconds }}
+    cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 6 }}
+{{- end }}
+
+{{/*
 Common server blocks
 When calling this template, .anchoreService can be included in the context for anchoreService specific server blocks
 {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
