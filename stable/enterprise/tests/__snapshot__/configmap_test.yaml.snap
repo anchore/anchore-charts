@@ -146,7 +146,6 @@ should render additional audit uris when additionalResourceURIs is set:
             image_content:
               remove_license_content_from_sbom_return: <ALLOW_API_CONFIGURATION>
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -197,7 +196,6 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS} # DELETE ME?
             cycle_timer_seconds: 1
             cycle_timers:
               analysis_data_disk_gc: 3600
@@ -207,7 +205,6 @@ should render additional audit uris when additionalResourceURIs is set:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            analyzer_driver: 'nodocker' # DELETE ME?
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
             enable_hints: ${ANCHORE_HINTS_ENABLED}
@@ -238,7 +235,6 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             account_prometheus_metrics: <ALLOW_API_CONFIGURATION>
             cycle_timer_seconds: 1
             cycle_timers:
@@ -308,7 +304,6 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -326,7 +321,6 @@ should render additional audit uris when additionalResourceURIs is set:
               server_log_level: info
               server_response_debug_logging: false
               structured_logging: false
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -426,7 +420,6 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
             cycle_timers:
               reports_scheduled_queries: 600
@@ -453,7 +446,6 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
             enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
             data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
@@ -495,7 +487,6 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timers:
               notifications: 30
             ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
@@ -686,7 +677,6 @@ should render the configmaps:
             image_content:
               remove_license_content_from_sbom_return: <ALLOW_API_CONFIGURATION>
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -737,7 +727,6 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS} # DELETE ME?
             cycle_timer_seconds: 1
             cycle_timers:
               analysis_data_disk_gc: 3600
@@ -747,7 +736,6 @@ should render the configmaps:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            analyzer_driver: 'nodocker' # DELETE ME?
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
             enable_hints: ${ANCHORE_HINTS_ENABLED}
@@ -778,7 +766,6 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             account_prometheus_metrics: <ALLOW_API_CONFIGURATION>
             cycle_timer_seconds: 1
             cycle_timers:
@@ -848,7 +835,6 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -866,7 +852,6 @@ should render the configmaps:
               server_log_level: info
               server_response_debug_logging: false
               structured_logging: false
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -966,7 +951,6 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
             cycle_timers:
               reports_scheduled_queries: 600
@@ -993,7 +977,6 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
             enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
             data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
@@ -1035,7 +1018,6 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timers:
               notifications: 30
             ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
@@ -1131,7 +1113,6 @@ should render the configmaps:
       ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
       ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
       ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
-      ANCHORE_MAX_REQUEST_THREADS: "50"
       ANCHORE_OAUTH_ENABLED: "true"
       ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "86400"
       ANCHORE_OAUTH_TOKEN_EXPIRATION: "3600"
@@ -1432,7 +1413,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             image_content:
               remove_license_content_from_sbom_return: <ALLOW_API_CONFIGURATION>
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
@@ -1483,7 +1463,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS} # DELETE ME?
             cycle_timer_seconds: 1
             cycle_timers:
               analysis_data_disk_gc: 3600
@@ -1493,7 +1472,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            analyzer_driver: 'nodocker' # DELETE ME?
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
             enable_hints: ${ANCHORE_HINTS_ENABLED}
@@ -1524,7 +1502,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             account_prometheus_metrics: <ALLOW_API_CONFIGURATION>
             cycle_timer_seconds: 1
             cycle_timers:
@@ -1594,7 +1571,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
@@ -1612,7 +1588,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               server_log_level: info
               server_response_debug_logging: false
               structured_logging: false
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -1712,7 +1687,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
             cycle_timers:
               reports_scheduled_queries: 600
@@ -1739,7 +1713,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
             enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
             data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
@@ -1781,7 +1754,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timers:
               notifications: 30
             ui_url: ${ANCHORE_ENTERPRISE_UI_URL}

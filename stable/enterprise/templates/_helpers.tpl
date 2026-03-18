@@ -40,12 +40,20 @@ data:
 {{- end -}}
 
 {{/*
-Fail if the removed postgresql.chartEnabled value is still set. This was removed when the Bitnami PostgreSQL
-dependency was dropped — users must now provide their own external PostgreSQL database.
+Consolidated deprecation and validation checks for breaking changes.
 */}}
-{{- define "enterprise.validateNoChartEnabled" -}}
+{{- define "enterprise.deprecationChecks" -}}
+{{/* postgresql.chartEnabled was removed when the Bitnami PostgreSQL dependency was dropped */}}
 {{- if hasKey .Values.postgresql "chartEnabled" }}
   {{- fail "postgresql.chartEnabled is no longer supported. The Bitnami PostgreSQL dependency has been removed. Please remove postgresql.chartEnabled from your values and configure postgresql.externalEndpoint, postgresql.auth.username, postgresql.auth.password, and postgresql.auth.database (or use existing secrets) to connect to your own PostgreSQL database." }}
+{{- end }}
+{{/* retrieve_files was renamed to file_contents */}}
+{{- if hasKey .Values.anchoreConfig.analyzer.configFile "retrieve_files" }}
+  {{- fail "anchoreConfig.analyzer.configFile.retrieve_files is no longer supported. This key has been renamed to `file_contents`. Please update your values file to use `anchoreConfig.analyzer.configFile.file_contents` instead." }}
+{{- end }}
+{{/* image_ttl_days=-1 is no longer valid */}}
+{{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" }}
+  {{- fail "The value `-1` is no longer valid for `anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days` must be set to a value >1." }}
 {{- end }}
 {{- end -}}
 
@@ -252,7 +260,7 @@ Takes in a map of drivers and checks if the driver is enabled. If not, update th
 Checks if the feeds chart was previously disabled or if any of the drivers were disabled. If so and required values aren't set, fail the upgrade.
 */}}
 {{- define "enterprise.exclusionCheck" -}}
-{{- include "enterprise.validateNoChartEnabled" . }}
+{{- include "enterprise.deprecationChecks" . }}
 
 {{ $notify := false }}
 

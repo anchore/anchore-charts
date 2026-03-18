@@ -113,7 +113,6 @@ services:
     image_content:
       remove_license_content_from_sbom_return: {{ .Values.anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "api") .) }}"
     port: ${ANCHORE_PORT}
   {{- if .Values.anchoreConfig.apiext.external.enabled }}
@@ -137,10 +136,8 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "analyzer") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS} # DELETE ME?
     cycle_timer_seconds: 1
     cycle_timers: {{- toYaml .Values.anchoreConfig.analyzer.cycle_timers | nindent 6 }}
-    analyzer_driver: 'nodocker' # DELETE ME?
     layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
     layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
     enable_hints: ${ANCHORE_HINTS_ENABLED}
@@ -164,7 +161,6 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "catalog") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     account_prometheus_metrics: {{ .Values.anchoreConfig.catalog.account_prometheus_metrics }}
     cycle_timer_seconds: 1
     cycle_timers: {{- toYaml .Values.anchoreConfig.catalog.cycle_timers | nindent 6 }}
@@ -198,7 +194,6 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "simpleQueue") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}
     ssl_key: ${ANCHORE_SSL_KEY}
@@ -208,7 +203,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "policy_engine") .) | nindent 6 }}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "policyEngine") .) }}"
     port: ${ANCHORE_PORT}
@@ -308,7 +302,6 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reports") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
     cycle_timers: {{- toYaml .Values.anchoreConfig.reports.cycle_timers | nindent 6 }}
     max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
@@ -326,7 +319,6 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reportsWorker") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
     enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
     data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
@@ -351,7 +343,6 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "notifications") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     cycle_timers: {{- toYaml .Values.anchoreConfig.notifications.cycle_timers | nindent 6 }}
     ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
