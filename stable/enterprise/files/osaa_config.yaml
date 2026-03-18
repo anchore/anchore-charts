@@ -43,8 +43,6 @@ metrics:
   enabled: ${ANCHORE_ENABLE_METRICS}
   auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
 
-webhooks: {{- toYaml .Values.anchoreConfig.webhooks | nindent 2 }}
-
 default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
 default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
@@ -114,7 +112,6 @@ services:
       {{- include "enterprise.common.logging" (merge (dict "service" "apiext") .) | nindent 6 }}
     image_content:
       remove_license_content_from_sbom_return: {{ .Values.anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "api") .) }}"
@@ -131,32 +128,12 @@ services:
 
   analyzer:
     enabled: true
-    analyzer_scanner_config:
-      syft:
-        parallel_workers: 2
-      windows:
-        enabled: true
-      content_search:
-        enabled: true
-        layer_scope: squashed
-        match_params: []
-        regexp_match: []
-      file_contents:
-        enabled: true
-        file_list:
-        - /etc/passwd
-        - /anchore_hints.json
-        layer_scope: squashed
-        max_file_size_kb: 1000
-  {{- with .Values.anchoreConfig.analyzer.configFile }}
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    analyzer_scanner_config: {{- toYaml .Values.anchoreConfig.analyzer.configFile | nindent 6 }}
 
 
 
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "analyzer") .) | nindent 6 }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "analyzer") .) }}"
     port: ${ANCHORE_PORT}
@@ -179,7 +156,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "catalog") .) | nindent 6 }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "catalog") .) }}"
     port: ${ANCHORE_PORT}
@@ -222,7 +198,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "simplequeue") .) | nindent 6 }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "simpleQueue") .) }}"
     port: ${ANCHORE_PORT}
@@ -236,7 +211,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "policy_engine") .) | nindent 6 }}
-    require_auth: true
     max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "policyEngine") .) }}"
@@ -279,10 +253,18 @@ services:
             search:
               by_cpe:
                 enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled }}
+          dpkg:
+            search:
+              by_cpe:
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dpkg.search.by_cpe.enabled }}
           golang:
             search:
               by_cpe:
                 enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled }}
+          hex:
+            search:
+              by_cpe:
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.hex.search.by_cpe.enabled }}
           java:
             search:
               by_cpe:
@@ -299,6 +281,10 @@ services:
             search:
               by_cpe:
                 enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled }}
+          rpm:
+            search:
+              by_cpe:
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rpm.search.by_cpe.enabled }}
           ruby:
             search:
               by_cpe:
@@ -322,7 +308,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "reports") .) | nindent 6 }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reports") .) }}"
     port: ${ANCHORE_PORT}
@@ -341,7 +326,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "reports_worker") .) | nindent 6 }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reportsWorker") .) }}"
     port: ${ANCHORE_PORT}
@@ -367,7 +351,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "notifications") .) | nindent 6 }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "notifications") .) }}"
     port: ${ANCHORE_PORT}
@@ -383,7 +366,6 @@ services:
     enabled: true
     logging:
       {{- include "enterprise.common.logging" (merge (dict "service" "data_syncer") .) | nindent 6 }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "dataSyncer") .) }}"
     port: ${ANCHORE_PORT}

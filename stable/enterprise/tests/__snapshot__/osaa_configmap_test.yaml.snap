@@ -7,7 +7,6 @@ should render the configmaps for osaa migration if enabled:
         #
         service_dir: ${ANCHORE_SERVICE_DIR}
         tmp_dir: ${ANCHORE_TMP_DIR}
-        log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
 
         logging:
           colored_logging: false
@@ -25,6 +24,11 @@ should render the configmaps for osaa migration if enabled:
           max_connection_backlog: 2048
           max_wsgi_middleware_worker_count: 50
           max_wsgi_middleware_worker_queue_size: 100
+          process_worker_count: 1
+          ssl_cert: false
+          ssl_chain: false
+          ssl_enable: false
+          ssl_key: false
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
@@ -78,9 +82,6 @@ should render the configmaps for osaa migration if enabled:
           enabled: ${ANCHORE_ENABLE_METRICS}
           auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
 
-        webhooks:
-          {}
-
         default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
         default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
@@ -129,9 +130,19 @@ should render the configmaps for osaa migration if enabled:
         services:
           apiext:
             enabled: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             image_content:
               remove_license_content_from_sbom_return: <ALLOW_API_CONFIGURATION>
-            require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             listen: "0.0.0.0"
@@ -142,16 +153,59 @@ should render the configmaps for osaa migration if enabled:
 
           analyzer:
             enabled: true
-            require_auth: true
+            analyzer_scanner_config:
+              content_search:
+                enabled: true
+                layer_scope: squashed
+                match_params: []
+                regexp_match: []
+              file_contents:
+                enabled: true
+                file_list:
+                - /etc/passwd
+                - /anchore_hints.json
+                layer_scope: squashed
+                max_file_size_kb: 1000
+              malware:
+                clamav:
+                  db_update_enabled: true
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  max_scan_time: 1800000
+              secret_search:
+                enabled: true
+                layer_scope: squashed
+                match_params:
+                - MAXFILESIZE=10000
+                - STOREONMATCH=n
+                regexp_match:
+                - AWS_ACCESS_KEY=(?i).*aws_access_key_id( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9]).*
+                - AWS_SECRET_KEY=(?i).*aws_secret_access_key( *=+ *).*(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=]).*
+                - PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+
+                - 'DOCKER_AUTH=(?i).*"auth": *".+"'
+                - API_KEY=(?i).*api(-|_)key( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*
+              syft:
+                parallel_workers: 2
+              windows:
+                enabled: true
+
+
+
+            logging:
+              log_level: <ALLOW_API_CONFIGURATION>
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+            max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS} # DELETE ME?
             cycle_timer_seconds: 1
             cycle_timers:
+              analysis_data_disk_gc: 3600
+              handle_metrics: 15
               image_analyzer: 1
+              service_heartbeat: 60
               sync_clamav_db: 60
-            analyzer_driver: 'nodocker'
+              system_config_environment_watcher: 20
+              system_config_refresh_watcher: 20
+            analyzer_driver: 'nodocker' # DELETE ME?
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
             enable_hints: ${ANCHORE_HINTS_ENABLED}
@@ -160,10 +214,25 @@ should render the configmaps for osaa migration if enabled:
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
+            server: {}
+
+            # external_hostname: null ??
+            # external_port: null ??
+            # external_tls: false ??
 
           catalog:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -223,7 +292,17 @@ should render the configmaps for osaa migration if enabled:
 
           simplequeue:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -234,7 +313,17 @@ should render the configmaps for osaa migration if enabled:
 
           policy_engine:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
@@ -269,7 +358,15 @@ should render the configmaps for osaa migration if enabled:
                     search:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
+                  dpkg:
+                    search:
+                      by_cpe:
+                        enabled: <ALLOW_API_CONFIGURATION>
                   golang:
+                    search:
+                      by_cpe:
+                        enabled: <ALLOW_API_CONFIGURATION>
+                  hex:
                     search:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
@@ -286,6 +383,10 @@ should render the configmaps for osaa migration if enabled:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
                   python:
+                    search:
+                      by_cpe:
+                        enabled: <ALLOW_API_CONFIGURATION>
+                  rpm:
                     search:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
@@ -309,7 +410,17 @@ should render the configmaps for osaa migration if enabled:
 
           reports:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -326,7 +437,17 @@ should render the configmaps for osaa migration if enabled:
 
           reports_worker:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -358,7 +479,17 @@ should render the configmaps for osaa migration if enabled:
 
           notifications:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -372,7 +503,17 @@ should render the configmaps for osaa migration if enabled:
 
           data_syncer:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -405,7 +546,6 @@ should render the configmaps for osaa migration if enabled:
         #
         service_dir: ${ANCHORE_SERVICE_DIR}
         tmp_dir: ${ANCHORE_TMP_DIR}
-        log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
 
         logging:
           colored_logging: false
@@ -423,6 +563,11 @@ should render the configmaps for osaa migration if enabled:
           max_connection_backlog: 2048
           max_wsgi_middleware_worker_count: 50
           max_wsgi_middleware_worker_queue_size: 100
+          process_worker_count: 1
+          ssl_cert: false
+          ssl_chain: false
+          ssl_enable: false
+          ssl_key: false
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
@@ -476,9 +621,6 @@ should render the configmaps for osaa migration if enabled:
           enabled: ${ANCHORE_ENABLE_METRICS}
           auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
 
-        webhooks:
-          {}
-
         default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
         default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
@@ -527,9 +669,19 @@ should render the configmaps for osaa migration if enabled:
         services:
           apiext:
             enabled: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             image_content:
               remove_license_content_from_sbom_return: <ALLOW_API_CONFIGURATION>
-            require_auth: true
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             listen: "0.0.0.0"
@@ -540,15 +692,58 @@ should render the configmaps for osaa migration if enabled:
 
           analyzer:
             enabled: true
-            require_auth: true
+            analyzer_scanner_config:
+              content_search:
+                enabled: true
+                layer_scope: squashed
+                match_params: []
+                regexp_match: []
+              file_contents:
+                enabled: true
+                file_list:
+                - /etc/passwd
+                - /anchore_hints.json
+                layer_scope: squashed
+                max_file_size_kb: 1000
+              malware:
+                clamav:
+                  db_update_enabled: true
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  max_scan_time: 1800000
+              secret_search:
+                enabled: true
+                layer_scope: squashed
+                match_params:
+                - MAXFILESIZE=10000
+                - STOREONMATCH=n
+                regexp_match:
+                - AWS_ACCESS_KEY=(?i).*aws_access_key_id( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20}(?![A-Z0-9]).*
+                - AWS_SECRET_KEY=(?i).*aws_secret_access_key( *=+ *).*(?<![A-Za-z0-9/+=])[A-Za-z0-9/+=]{40}(?![A-Za-z0-9/+=]).*
+                - PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+
+                - 'DOCKER_AUTH=(?i).*"auth": *".+"'
+                - API_KEY=(?i).*api(-|_)key( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*
+              syft:
+                parallel_workers: 2
+              windows:
+                enabled: true
+
+
+
+            logging:
+              log_level: <ALLOW_API_CONFIGURATION>
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             cycle_timer_seconds: 1
             cycle_timers:
+              analysis_data_disk_gc: 3600
+              handle_metrics: 15
               image_analyzer: 1
+              service_heartbeat: 60
               sync_clamav_db: 60
+              system_config_environment_watcher: 20
+              system_config_refresh_watcher: 20
             analyzer_driver: 'nodocker'
             layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
             layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
@@ -558,10 +753,21 @@ should render the configmaps for osaa migration if enabled:
             ssl_enable: ${ANCHORE_SSL_ENABLED}
             ssl_cert: ${ANCHORE_SSL_CERT}
             ssl_key: ${ANCHORE_SSL_KEY}
+            server: {}
 
           catalog:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -632,7 +838,17 @@ should render the configmaps for osaa migration if enabled:
 
           simplequeue:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -643,7 +859,17 @@ should render the configmaps for osaa migration if enabled:
 
           policy_engine:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
@@ -678,7 +904,15 @@ should render the configmaps for osaa migration if enabled:
                     search:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
+                  dpkg:
+                    search:
+                      by_cpe:
+                        enabled: <ALLOW_API_CONFIGURATION>
                   golang:
+                    search:
+                      by_cpe:
+                        enabled: <ALLOW_API_CONFIGURATION>
+                  hex:
                     search:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
@@ -695,6 +929,10 @@ should render the configmaps for osaa migration if enabled:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
                   python:
+                    search:
+                      by_cpe:
+                        enabled: <ALLOW_API_CONFIGURATION>
+                  rpm:
                     search:
                       by_cpe:
                         enabled: <ALLOW_API_CONFIGURATION>
@@ -718,7 +956,17 @@ should render the configmaps for osaa migration if enabled:
 
           reports:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -735,7 +983,17 @@ should render the configmaps for osaa migration if enabled:
 
           reports_worker:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -767,7 +1025,17 @@ should render the configmaps for osaa migration if enabled:
 
           notifications:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -781,7 +1049,17 @@ should render the configmaps for osaa migration if enabled:
 
           data_syncer:
             enabled: true
-            require_auth: true
+            logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
+              log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}

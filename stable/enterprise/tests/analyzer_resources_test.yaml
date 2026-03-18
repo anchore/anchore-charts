@@ -1,6 +1,5 @@
 suite: Analyzer Resources Tests
 templates:
-  - analyzer_configmap.yaml
   - analyzer_deployment.yaml
   - anchore_secret.yaml
   - anchore_configmap.yaml
@@ -20,19 +19,17 @@ set:
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
 tests:
-  - it: should render a valid analyzer config file
-    template: analyzer_configmap.yaml
+  - it: should render a valid analyzer config in main configmap
+    template: anchore_configmap.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
-          path: data["analyzer_config.yaml"]
-          pattern: (?m)^(retrieve_files|secret_search|content_search|malware):$
+          path: data["config.yaml"]
+          pattern: "(?s)analyzer:.*analyzer_scanner_config:"
 
   - it: should set the correct resource names
     documentIndex: 0
-    templates:
-      - analyzer_deployment.yaml
-      - analyzer_configmap.yaml
+    template: analyzer_deployment.yaml
     asserts:
       - equal:
           path: metadata.name
@@ -40,9 +37,7 @@ tests:
 
   - it: should render component labels
     documentIndex: 0
-    templates:
-      - analyzer_deployment.yaml
-      - analyzer_configmap.yaml
+    template: analyzer_deployment.yaml
     set:
       analyzer.labels:
         analyzer: test
@@ -58,13 +53,10 @@ tests:
           content:
             analyzer: test
             test: foobar
-        template: analyzer_deployment.yaml
 
   - it: should render component annotations
     documentIndex: 0
-    templates:
-      - analyzer_deployment.yaml
-      - analyzer_configmap.yaml
+    template: analyzer_deployment.yaml
     set:
       analyzer.annotations:
         analyzer: test
@@ -80,7 +72,6 @@ tests:
           content:
             analyzer: test
             test: foobar
-        template: analyzer_deployment.yaml
 
   - it: should render component matchLabels
     documentIndex: 0
@@ -198,16 +189,16 @@ tests:
               type: Directory
         count: 1
 
-  - it: should render analyzer-configmap volume
+  - it: should render config volume
     documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
       - contains:
           path: spec.template.spec.volumes
           content:
-            name: analyzer-config-volume
+            name: config-volume
             configMap:
-              name: test-release-enterprise-analyzer
+              name: test-release-enterprise
         count: 1
 
   - it: should render component container name
@@ -276,14 +267,6 @@ tests:
     documentIndex: 0
     template: analyzer_deployment.yaml
     asserts:
-      - contains:
-          path: spec.template.spec.containers[0].volumeMounts
-          content:
-            name: analyzer-config-volume
-            mountPath: /anchore_service/analyzer_config.yaml
-            subPath: analyzer_config.yaml
-        count: 1
-        any: true
       - contains:
           path: spec.template.spec.containers[0].volumeMounts
           content:

@@ -31,9 +31,6 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)apiext:.*nested_config:"
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "(?s)apiext:.*require_auth: true"
 
   - it: should render extendedConfig for analyzer service
     set:
@@ -67,9 +64,6 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)simplequeue:.*ssl_key:.*custom_key: custom_value"
-      - matchRegex:
-          path: data["config.yaml"]
-          pattern: "(?s)simplequeue:.*require_auth: true"
 
   - it: should render extendedConfig for policy_engine service
     set:

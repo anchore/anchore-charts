@@ -411,21 +411,6 @@ anchoreConfig:
     enabled: false
     auth_disabled: false
 
-  ## @param anchoreConfig.webhooks Enable Anchore services to provide webhooks for external system updates
-  ## Used to configure an endpoint for general notification delivery. These events are image/tag updates etc
-  ## This is globally configured and updates for all users are sent to the same host but with a different path for each user
-  ## <notification_type>/<userId> are required as documented at end of URI - only hostname:port should be configured
-  ## ref: https://docs.anchore.com/current/docs/using/cli_usage/subscriptions/#webhook-configuration
-  ##
-  webhooks: {}
-    # webhook_user: 'user'
-    # webhook_pass: 'pass'
-    # ssl_verify: true
-    # general: {}
-    #   url: "http://somehost:9090/<notification_type>/<userId>"
-    # policy_eval: {}
-    # event_log: {}
-
   ## @param anchoreConfig.default_admin_password The password for the Anchore Enterprise admin user
   ## This value is only used during creation of the admin user, cannot be used to change the password
   ##
@@ -564,19 +549,27 @@ anchoreConfig:
     enable_hints: false
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
-    ## This configuration file is used to configure regex matching, file content searching and malware scanning
+    ## Configures syft, content search, file contents, secret search, and malware scanning
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/policy/policy_checks/#gate-files
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis/malware_scanning/
     ##
     configFile:
-      # Anchore Analyzer config file
-      ## WARNING - malforming this file can cause the Anchore Analyzer to fail on all image analysis
-      #
-      retrieve_files: # ?? delete? ??
+      syft:
+        parallel_workers: 2
+      windows:
+        enabled: true
+      content_search:
+        enabled: true
+        layer_scope: squashed
+        match_params: []
+        regexp_match: []
+      file_contents:
+        enabled: true
         file_list:
-          - '/etc/passwd'
-          # - '/etc/services'
-          # - '/etc/sudoers'
+          - /etc/passwd
+          - /anchore_hints.json
+        layer_scope: squashed
+        max_file_size_kb: 1000
       secret_search:
         enabled: true
         layer_scope: squashed
@@ -589,21 +582,10 @@ anchoreConfig:
           - "PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+"
           - "DOCKER_AUTH=(?i).*\"auth\": *\".+\""
           - "API_KEY=(?i).*api(-|_)key( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*"
-          # - "ALPINE_NULL_ROOT=^root:::0:::::$"
-        #
-        ## Uncomment content_search: {} to configure file content searching
-        # content_search:
-        #   match_params:
-        #     - MAXFILESIZE=10000
-        #   regexp_match:
-        #     - "EXAMPLE_MATCH="
-        #
-        ## Malware scanning occurs only at analysis time when the image content itself is available
       malware:
         clamav:
           enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
-          # Maximum time in milliseconds that a ClamAV scan is allowed to run
           max_scan_time: 1800000
 
   catalog:
@@ -758,13 +740,32 @@ anchoreConfig:
         ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled Enable CPE-based vulnerability matching for python packages
         ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled Enable CPE-based vulnerability matching for ruby packages
         ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled Enable CPE-based vulnerability matching for rust packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled Enable CPE-based vulnerability matching for dotnet packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dpkg.search.by_cpe.enabled Enable CPE-based vulnerability matching for dpkg packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled Enable CPE-based vulnerability matching for golang packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.hex.search.by_cpe.enabled Enable CPE-based vulnerability matching for hex packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.java.search.by_cpe.enabled Enable CPE-based vulnerability matching for java packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.javascript.search.by_cpe.enabled Enable CPE-based vulnerability matching for javascript packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.jvm.search.by_cpe.enabled Enable CPE-based vulnerability matching for JVM packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled Enable CPE-based vulnerability matching for python packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rpm.search.by_cpe.enabled Enable CPE-based vulnerability matching for rpm packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled Enable CPE-based vulnerability matching for ruby packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled Enable CPE-based vulnerability matching for rust packages
         ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.stock.search.by_cpe.enabled Enable CPE-based vulnerability matching for stock (binary-only) packages
         ecosystem_specific:
           dotnet:
             search:
               by_cpe:
                 enabled: "<ALLOW_API_CONFIGURATION>"
+          dpkg:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
           golang:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          hex:
             search:
               by_cpe:
                 enabled: "<ALLOW_API_CONFIGURATION>"
@@ -781,6 +782,10 @@ anchoreConfig:
               by_cpe:
                 enabled: "<ALLOW_API_CONFIGURATION>"
           python:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          rpm:
             search:
               by_cpe:
                 enabled: "<ALLOW_API_CONFIGURATION>"
