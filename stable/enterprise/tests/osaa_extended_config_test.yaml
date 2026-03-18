@@ -33,7 +33,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)apiext:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)apiext:.*server:.*custom_key: custom_value"
 
   - it: should render extendedConfig for analyzer service
     set:
@@ -42,7 +42,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)analyzer:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)analyzer:.*server:.*custom_key: custom_value"
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)analyzer:.*cycle_timers:"
@@ -54,7 +54,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)catalog:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)catalog:.*server:.*custom_key: custom_value"
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)catalog:.*cycle_timers:"
@@ -66,7 +66,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)simplequeue:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)simplequeue:.*server:.*custom_key: custom_value"
 
   - it: should render extendedConfig for policy_engine service
     set:
@@ -75,7 +75,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)policy_engine:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)policy_engine:.*server:.*custom_key: custom_value"
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)policy_engine:.*enable_user_base_image:"
@@ -87,7 +87,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)notifications:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)notifications:.*server:.*custom_key: custom_value"
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)notifications:.*cycle_timers:"
@@ -111,7 +111,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)reports_worker:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)reports_worker:.*server:.*custom_key: custom_value"
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)reports_worker:.*cycle_timers:"
@@ -123,7 +123,7 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "(?s)data_syncer:.*ssl_key:.*custom_key: custom_value"
+          pattern: "(?s)data_syncer:.*server:.*custom_key: custom_value"
       - matchRegex:
           path: data["config.yaml"]
           pattern: "(?s)data_syncer:.*auto_sync_enabled:"

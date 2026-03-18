@@ -55,6 +55,14 @@ Consolidated deprecation and validation checks for breaking changes.
 {{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" }}
   {{- fail "The value `-1` is no longer valid for `anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days` must be set to a value >1." }}
 {{- end }}
+{{/* internalServicesSSL has been removed — SSL is now configured via the server block at the root or per-service level */}}
+{{- if hasKey .Values.anchoreConfig "internalServicesSSL" }}
+  {{- fail "anchoreConfig.internalServicesSSL is no longer supported. SSL is now configured via `anchoreConfig.server` (root level) or per-service `anchoreConfig.<service>.server` blocks using `ssl_enable`, `ssl_cert`, `ssl_chain`, and `ssl_key`." }}
+{{- end }}
+{{/* apiext.external has been replaced by per-service external_hostname, external_port, external_tls */}}
+{{- if hasKey .Values.anchoreConfig.apiext "external" }}
+  {{- fail "anchoreConfig.apiext.external is no longer supported. Use `anchoreConfig.apiext.external_hostname`, `anchoreConfig.apiext.external_port`, and `anchoreConfig.apiext.external_tls` instead." }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -157,10 +165,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 
 
 {{/*
-Return the proper protocol when Anchore internal SSL is enabled
+Return the proper protocol when Anchore SSL is enabled via the root server block
 */}}
 {{- define "enterprise.setProtocol" -}}
-  {{- if .Values.anchoreConfig.internalServicesSSL.enabled }}
+  {{- if .Values.anchoreConfig.server.ssl_enable }}
 {{- print "https" -}}
   {{- else -}}
 {{- print "http" -}}

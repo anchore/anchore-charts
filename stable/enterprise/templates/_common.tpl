@@ -564,6 +564,19 @@ type: Recreate
 {{- end -}}
 
 {{/*
+External access configuration for a service.
+Renders external_hostname, external_port, and external_tls from the service's anchoreConfig.
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "apiext") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.external" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
+    external_hostname: {{ $serviceConfig.external_hostname }}
+    external_port: {{ $serviceConfig.external_port }}
+    external_tls: {{ $serviceConfig.external_tls }}
+{{- end }}
+
+{{/*
 Common server blocks
 When calling this template, .anchoreService can be included in the context for anchoreService specific server blocks
 {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}

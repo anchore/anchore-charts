@@ -292,6 +292,9 @@ anchoreConfig:
   ##
   log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
+  ## @param anchoreConfig.internal_ssl_verify Enable cert verification for internal service-to-service SSL communication
+  internal_ssl_verify: true
+
   ## @param anchoreConfig.global_client_read_timeout Global client read timeout
   ## @param anchoreConfig.global_client_connect_timeout Global client connect timeout
   global_client_connect_timeout: 0
@@ -441,18 +444,6 @@ anchoreConfig:
     engineArgs: {}
     dbConnectArgs: {}
 
-  ## @param anchoreConfig.internalServicesSSL.enabled Force all Enterprise services to use SSL for internal communication
-  ## @param anchoreConfig.internalServicesSSL.verifyCerts Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed
-  ## @param anchoreConfig.internalServicesSSL.certSecretKeyFileName File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName
-  ## @param anchoreConfig.internalServicesSSL.certSecretCertFileName File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName
-  ## ref: https://docs.anchore.com/current/docs/installation/configuration/tls_ssl_config/
-  ##
-  internalServicesSSL:
-    enabled: false
-    verifyCerts: false
-    certSecretKeyFileName: ""
-    certSecretCertFileName: ""
-
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
   ## ref: https://docs.anchore.com/current/docs/overview/concepts/policy/bundles/
@@ -489,17 +480,15 @@ anchoreConfig:
     ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
     extendedConfig: {}
 
-    ## TODO - get better documentation for the 'external' option
-    ## @param anchoreConfig.apiext.external.enabled Allow overrides for constructing Anchore API URLs
-    ## @param anchoreConfig.apiext.external.useTLS Enable TLS for external API access
-    ## @param anchoreConfig.apiext.external.hostname Hostname for the external Anchore API
-    ## @param anchoreConfig.apiext.external.port Port configured for external Anchore API
-    ##
-    external:
-      enabled: false
-      useTLS: true
-      hostname: ""
-      port: 8443
+    ## @param anchoreConfig.apiext.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.apiext.external_hostname External hostname for the service
+    ## @param anchoreConfig.apiext.external_port External port for the service
+    ## @param anchoreConfig.apiext.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return Remove license content from SBOM downloads
     image_content:
@@ -511,6 +500,13 @@ anchoreConfig:
 
     ## @param anchoreConfig.analyzer.server [object] Server configuration for the service
     server: {}
+
+    ## @param anchoreConfig.analyzer.external_hostname External hostname for the service
+    ## @param anchoreConfig.analyzer.external_port External port for the service
+    ## @param anchoreConfig.analyzer.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
     ## server:
     ##   process_worker_count: 1
 
@@ -591,6 +587,16 @@ anchoreConfig:
   catalog:
     ## @param anchoreConfig.catalog.extendedConfig appends additional configs to the catalog service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.catalog.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.catalog.external_hostname External hostname for the service
+    ## @param anchoreConfig.catalog.external_port External port for the service
+    ## @param anchoreConfig.catalog.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
@@ -812,9 +818,26 @@ anchoreConfig:
     ## server:
     ##   process_worker_count: 1
 
+    ## @param anchoreConfig.policy_engine.external_hostname External hostname for the service
+    ## @param anchoreConfig.policy_engine.external_port External port for the service
+    ## @param anchoreConfig.policy_engine.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+
   notifications:
     ## @param anchoreConfig.notifications.extendedConfig appends additional configs to the notifications service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.notifications.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.notifications.external_hostname External hostname for the service
+    ## @param anchoreConfig.notifications.external_port External port for the service
+    ## @param anchoreConfig.notifications.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
     ##
@@ -828,6 +851,16 @@ anchoreConfig:
   reports:
     ## @param anchoreConfig.reports.extendedConfig appends additional configs to the reports service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.reports.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.reports.external_hostname External hostname for the service
+    ## @param anchoreConfig.reports.external_port External port for the service
+    ## @param anchoreConfig.reports.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.reports.enable_graphiql Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations
     ## Go to http://<host>:<port>/v2/reports/graphql in a browser for the reports API
@@ -856,6 +889,16 @@ anchoreConfig:
   reports_worker:
     ## @param anchoreConfig.reports_worker.extendedConfig appends additional configs to the reports_worker service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.reports_worker.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.reports_worker.external_hostname External hostname for the service
+    ## @param anchoreConfig.reports_worker.external_port External port for the service
+    ## @param anchoreConfig.reports_worker.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
     ##
@@ -907,9 +950,29 @@ anchoreConfig:
     ## @param anchoreConfig.simplequeue.extendedConfig appends additional configs to the simplequeue service's Anchore configs
     extendedConfig: {}
 
+    ## @param anchoreConfig.simplequeue.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.simplequeue.external_hostname External hostname for the service
+    ## @param anchoreConfig.simplequeue.external_port External port for the service
+    ## @param anchoreConfig.simplequeue.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+
   data_syncer:
     ## @param anchoreConfig.data_syncer.extendedConfig appends additional configs to the data_syncer service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.data_syncer.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.data_syncer.external_hostname External hostname for the service
+    ## @param anchoreConfig.data_syncer.external_port External port for the service
+    ## @param anchoreConfig.data_syncer.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)

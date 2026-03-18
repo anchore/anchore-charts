@@ -73,7 +73,6 @@ data:
   ANCHORE_HINTS_ENABLED: "{{ .Values.anchoreConfig.analyzer.enable_hints }}"
   ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "36000"
   ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
-  ANCHORE_INTERNAL_SSL_VERIFY: "{{ .Values.anchoreConfig.internalServicesSSL.verifyCerts }}"
   ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
   ANCHORE_LAYER_CACHE_ENABLED: {{ ternary "true" "false" (gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0) | quote }}
   ANCHORE_LAYER_CACHE_SIZE_GB: "{{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}"
@@ -90,16 +89,5 @@ data:
   ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
   ANCHORE_SAML_SECRET: "null"
   ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
-  ANCHORE_SSL_ENABLED: "{{ .Values.anchoreConfig.internalServicesSSL.enabled }}"
-{{- with .Values.anchoreConfig.internalServicesSSL.certSecretCertFileName }}
-  ANCHORE_SSL_CERT: "/home/anchore/certs/{{- . }}"
-{{- else }}
-  ANCHORE_SSL_CERT: "null"
-{{- end }}
-{{- with .Values.anchoreConfig.internalServicesSSL.certSecretKeyFileName }}
-  ANCHORE_SSL_KEY: "/home/anchore/certs/{{- . }}"
-{{- else }}
-  ANCHORE_SSL_KEY: "null"
-{{- end }}
   ANCHORE_SSO_REQUIRES_EXISTING_USERS: "{{ .Values.anchoreConfig.user_authentication.sso_require_existing_users }}"
   ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
