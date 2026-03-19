@@ -971,9 +971,9 @@ tests:
           path: stringData["ANCHORE_ADMIN_PASSWORD"]
           pattern: ^[a-zA-Z0-9]{32}$
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to true for deployments
     set:
-      anchoreConfig.internalServicesSSL.enabled: true
+      anchoreConfig.server.ssl_enable: true
     templates:
       - catalog_deployment.yaml
       - policyengine_deployment.yaml
@@ -987,9 +987,9 @@ tests:
           content:
             scheme: HTTPS
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to false for deployments
     set:
-      anchoreConfig.internalServicesSSL.enabled: false
+      anchoreConfig.server.ssl_enable: false
     templates:
       - catalog_deployment.yaml
       - policyengine_deployment.yaml
@@ -1003,9 +1003,9 @@ tests:
           content:
             scheme: HTTP
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for ui_configmap.yaml
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to false for ui_configmap.yaml
     set:
-      anchoreConfig.internalServicesSSL.enabled: false
+      anchoreConfig.server.ssl_enable: false
     templates:
       - ui_configmap.yaml
     documentIndex: 0
@@ -1020,9 +1020,9 @@ tests:
           path: data["config-ui.yaml"]
           pattern: "reports_uri: 'http://test-release-enterprise-api:8228/v2'"
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for ui_configmap.yaml
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to true for ui_configmap.yaml
     set:
-      anchoreConfig.internalServicesSSL.enabled: true
+      anchoreConfig.server.ssl_enable: true
     templates:
       - ui_configmap.yaml
     documentIndex: 0

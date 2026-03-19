@@ -298,6 +298,9 @@ anchoreConfig:
   ##
   log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
 
+  ## @param anchoreConfig.internal_ssl_verify Enable cert verification for internal service-to-service SSL communication
+  internal_ssl_verify: true
+
   ## @param anchoreConfig.global_client_read_timeout Global client read timeout
   ## @param anchoreConfig.global_client_connect_timeout Global client connect timeout
   global_client_connect_timeout: 0
@@ -331,6 +334,11 @@ anchoreConfig:
   ## @param anchoreConfig.server.max_wsgi_middleware_worker_count Max number of workers to have in the ASGI2WSGI middleware worker pool
   ## @param anchoreConfig.server.timeout_graceful_shutdown Seconds to permit for graceful shutdown or false to disable
   ## @param anchoreConfig.server.timeout_keep_alive Seconds to keep a connection alive before closing
+  ## @param anchoreConfig.server.process_worker_count Number of worker processes for the server
+  ## @param anchoreConfig.server.ssl_cert Path to the SSL certificate file or false to disable
+  ## @param anchoreConfig.server.ssl_chain Path to the SSL certificate chain file or false to disable
+  ## @param anchoreConfig.server.ssl_enable Enable SSL for the server
+  ## @param anchoreConfig.server.ssl_key Path to the SSL key file or false to disable
   ##
   server:
     max_connection_backlog: 2048
@@ -338,6 +346,12 @@ anchoreConfig:
     max_wsgi_middleware_worker_count: 50
     timeout_graceful_shutdown: false
     timeout_keep_alive: 5
+
+    process_worker_count: 1
+    ssl_cert: false
+    ssl_chain: false
+    ssl_enable: false
+    ssl_key: false
 
   ## @param anchoreConfig.audit.enabled Enable audit logging
   ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
@@ -406,21 +420,6 @@ anchoreConfig:
     enabled: false
     auth_disabled: false
 
-  ## @param anchoreConfig.webhooks Enable Anchore services to provide webhooks for external system updates
-  ## Used to configure an endpoint for general notification delivery. These events are image/tag updates etc
-  ## This is globally configured and updates for all users are sent to the same host but with a different path for each user
-  ## <notification_type>/<userId> are required as documented at end of URI - only hostname:port should be configured
-  ## ref: https://docs.anchore.com/current/docs/using/cli_usage/subscriptions/#webhook-configuration
-  ##
-  webhooks: {}
-    # webhook_user: 'user'
-    # webhook_pass: 'pass'
-    # ssl_verify: true
-    # general: {}
-    #   url: "http://somehost:9090/<notification_type>/<userId>"
-    # policy_eval: {}
-    # event_log: {}
-
   ## @param anchoreConfig.default_admin_password The password for the Anchore Enterprise admin user
   ## This value is only used during creation of the admin user, cannot be used to change the password
   ##
@@ -450,18 +449,6 @@ anchoreConfig:
     db_pool_max_overflow: 100
     engineArgs: {}
     dbConnectArgs: {}
-
-  ## @param anchoreConfig.internalServicesSSL.enabled Force all Enterprise services to use SSL for internal communication
-  ## @param anchoreConfig.internalServicesSSL.verifyCerts Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed
-  ## @param anchoreConfig.internalServicesSSL.certSecretKeyFileName File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName
-  ## @param anchoreConfig.internalServicesSSL.certSecretCertFileName File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName
-  ## ref: https://docs.anchore.com/current/docs/configuration/tls_ssl/
-  ##
-  internalServicesSSL:
-    enabled: false
-    verifyCerts: false
-    certSecretKeyFileName: ""
-    certSecretCertFileName: ""
 
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
@@ -499,17 +486,26 @@ anchoreConfig:
     ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
     extendedConfig: {}
 
-    ## TODO - get better documentation for the 'external' option
-    ## @param anchoreConfig.apiext.external.enabled Allow overrides for constructing Anchore API URLs
-    ## @param anchoreConfig.apiext.external.useTLS Enable TLS for external API access
-    ## @param anchoreConfig.apiext.external.hostname Hostname for the external Anchore API
-    ## @param anchoreConfig.apiext.external.port Port configured for external Anchore API
-    ##
-    external:
-      enabled: false
-      useTLS: true
-      hostname: ""
-      port: 8443
+    ## @param anchoreConfig.apiext.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.apiext.external_hostname External hostname for the service
+    ## @param anchoreConfig.apiext.external_port External port for the service
+    ## @param anchoreConfig.apiext.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+
+    ## @param anchoreConfig.apiext.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.apiext.cycle_timers [object] Cycle timers for the apiext service
+    cycle_timers:
+      api_key_token_cleanup: 43200
+      oauth_token_cleanup: 21600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return Remove license content from SBOM downloads
     image_content:
@@ -519,12 +515,41 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.extendedConfig appends additional configs to the analyzer service's Anchore configs
     extendedConfig: {}
 
+    ## @param anchoreConfig.analyzer.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.analyzer.external_hostname External hostname for the service
+    ## @param anchoreConfig.analyzer.external_port External port for the service
+    ## @param anchoreConfig.analyzer.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+    ## server:
+    ##   process_worker_count: 1
+
+    ## @param anchoreConfig.analyzer.logging.log_level Log level for the analyzer service
+    logging:
+      log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
+
+    ## @param anchoreConfig.analyzer.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
+    ## @param anchoreConfig.analyzer.cycle_timers.analysis_data_disk_gc Interval in seconds between analysis data disk garbage collection runs
+    ## @param anchoreConfig.analyzer.cycle_timers.handle_metrics Interval in seconds between metrics collection cycles
+    ## @param anchoreConfig.analyzer.cycle_timers.service_heartbeat Interval in seconds between service heartbeat checks
+    ## @param anchoreConfig.analyzer.cycle_timers.system_config_environment_watcher Interval in seconds between environment config watch cycles
+    ## @param anchoreConfig.analyzer.cycle_timers.system_config_refresh_watcher Interval in seconds between config refresh watch cycles
     ##
     cycle_timers:
       image_analyzer: 1
       sync_clamav_db: 60
+      analysis_data_disk_gc: 3600
+      handle_metrics: 15
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
     ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
@@ -540,20 +565,30 @@ anchoreConfig:
     enable_hints: false
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
-    ## This configuration file is used to configure regex matching, file content searching and malware scanning
+    ## Configures syft, content search, file contents, secret search, and malware scanning
     ## ref: https://docs.anchore.com/current/docs/compliance_management/policy_gates/#gate-files
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis/malware_scanning/
     ##
     configFile:
-      # Anchore Analyzer config file
-      ## WARNING - malforming this file can cause the Anchore Analyzer to fail on all image analysis
-      #
-      retrieve_files:
+      syft:
+        parallel_workers: 2
+      windows:
+        enabled: true
+      content_search:
+        enabled: true
+        layer_scope: squashed
+        match_params: []
+        regexp_match: []
+      file_contents:
+        enabled: true
         file_list:
-          - '/etc/passwd'
-          # - '/etc/services'
-          # - '/etc/sudoers'
+          - /etc/passwd
+          - /anchore_hints.json
+        layer_scope: squashed
+        max_file_size_kb: 1000
       secret_search:
+        enabled: true
+        layer_scope: squashed
         match_params:
           - MAXFILESIZE=10000
           - STOREONMATCH=n
@@ -563,26 +598,25 @@ anchoreConfig:
           - "PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+"
           - "DOCKER_AUTH=(?i).*\"auth\": *\".+\""
           - "API_KEY=(?i).*api(-|_)key( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*"
-          # - "ALPINE_NULL_ROOT=^root:::0:::::$"
-        #
-        ## Uncomment content_search: {} to configure file content searching
-        # content_search:
-        #   match_params:
-        #     - MAXFILESIZE=10000
-        #   regexp_match:
-        #     - "EXAMPLE_MATCH="
-        #
-        ## Malware scanning occurs only at analysis time when the image content itself is available
       malware:
         clamav:
           enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
-          # Maximum time in milliseconds that a ClamAV scan is allowed to run
           max_scan_time: 1800000
 
   catalog:
     ## @param anchoreConfig.catalog.extendedConfig appends additional configs to the catalog service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.catalog.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.catalog.external_hostname External hostname for the service
+    ## @param anchoreConfig.catalog.external_port External port for the service
+    ## @param anchoreConfig.catalog.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
@@ -602,38 +636,46 @@ anchoreConfig:
       batch_size: 1
       pool_size: 1
 
-    ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
-    ## @param anchoreConfig.catalog.cycle_timers.policy_eval Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated
-    ## @param anchoreConfig.catalog.cycle_timers.vulnerability_scan Interval to run a vulnerability scan on images with vuln_update subscription activated
-    ## @param anchoreConfig.catalog.cycle_timers.analyzer_queue Interval to add new work on the image analysis queue
-    ## @param anchoreConfig.catalog.cycle_timers.archive_tasks Interval to trigger Anchore Catalog archive Tasks
-    ## @param anchoreConfig.catalog.cycle_timers.notifications Interval in which notifications will be processed for state changes
-    ## @param anchoreConfig.catalog.cycle_timers.service_watcher Interval of service state update poll, used for system status
-    ## @param anchoreConfig.catalog.cycle_timers.policy_bundle_sync Interval of policy bundle sync
-    ## @param anchoreConfig.catalog.cycle_timers.repo_watcher Interval between checks to repo for new tags
-    ## @param anchoreConfig.catalog.cycle_timers.image_gc Interval for garbage collection of images marked for deletion
-    ## @param anchoreConfig.catalog.cycle_timers.k8s_image_watcher Interval for the runtime inventory image analysis poll
-    ## @param anchoreConfig.catalog.cycle_timers.resource_metrics Interval (seconds) for computing metrics from the DB
-    ## @param anchoreConfig.catalog.cycle_timers.events_gc Interval (seconds) for cleaning up events in the system based on timestamp
-    ## @param anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks Interval (seconds) for running artifact lifecycle policy tasks
-    ## @param anchoreConfig.catalog.cycle_timers.syft_sbom_metadata_annotations Time in seconds between syft SBOM metadata annotations
+    ## @param anchoreConfig.catalog.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.catalog.cycle_timers [object] Cycle timers for the catalog service
     ##
     cycle_timers:
-      image_watcher: 3600
-      policy_eval: 3600
-      vulnerability_scan: 14400
+      account_resource_cleanup: 30
+      alerts_watcher: 600
       analyzer_queue: 1
       archive_tasks: 43200
-      notifications: 30
-      service_watcher: 15
-      policy_bundle_sync: 300
-      repo_watcher: 60
-      image_gc: 60
-      k8s_image_watcher: 150
-      resource_metrics: 60
-      events_gc: 43200
       artifact_lifecycle_policy_tasks: 43200
+      document_view_collection_prune_watcher: 43200
+      events_gc: 43200
+      handle_deployment_metrics: 300
+      handle_metrics: 60
+      image_gc: 60
+      image_watcher: 3600
+      import_gc: 60
+      integration_account_association_expiration_watcher: 300
+      integration_health_report_ttl_watcher: 86400
+      integration_status_update_watcher: 300
+      k8s_image_watcher: 150
+      legacy_syft_hybrid_view_builder: 60
+      notifications: 30
+      policy_eval: 3600
+      repo_watcher: 60
+      resource_limit_notifications: 3600
+      resource_metrics: 300
+      runtime_inventory_image_ttl_watcher: 86400
+      sbom_vuln_scan_refresh_watcher: 60
+      sbom_vuln_scan_watcher: 10
+      service_heartbeat: 60
+      service_watcher: 15
+      source_gc: 60
+      source_import_gc: 60
       syft_sbom_metadata_annotations: 150
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+      system_logs_gc: 43200
+      vulnerability_scan: 14400
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
     ## ref: https://docs.anchore.com/current/docs/monitoring/events/#sending-events-as-webhook-notifications
@@ -646,6 +688,18 @@ anchoreConfig:
           - error
           # - info
 
+    ## @param anchoreConfig.catalog.document_views [object] Document views generation configuration
+    document_views:
+      generation:
+        max_document_execution_seconds: 300
+        multiprocess_count: 2
+        multiprocess_enabled: true
+        recycle_worker_processes_count: 10
+
+    ## @param anchoreConfig.catalog.system_logs [object] System logs configuration
+    system_logs:
+      expiration_days: 730
+
     ## @param anchoreConfig.catalog.analysis_archive [object] Custom analysis archive YAML configuration
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis_archive/
     ##
@@ -654,7 +708,7 @@ anchoreConfig:
     ##    enabled: true
     ##    min_size_kbytes: 100
     ##  storage_driver:
-    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    # Valid storage driver names: 'db', 's3'
     ##    name: db
     ##    config: {}
 
@@ -668,7 +722,7 @@ anchoreConfig:
         enabled: true
         min_size_kbytes: 100
       storage_driver:
-        # Valid storage driver names: 'db', 's3', 'swift'
+        # Valid storage driver names: 'db', 's3'
         name: db
         config: {}
 
@@ -719,8 +773,87 @@ anchoreConfig:
         exclude:
           providers: null
           package_types: null
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.default.search.by_cpe.enabled Enable default search by CPE for vulnerability matching
+        default:
+          search:
+            by_cpe:
+              enabled: "<ALLOW_API_CONFIGURATION>"
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled Enable CPE-based vulnerability matching for dotnet packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled Enable CPE-based vulnerability matching for golang packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.java.search.by_cpe.enabled Enable CPE-based vulnerability matching for java packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.javascript.search.by_cpe.enabled Enable CPE-based vulnerability matching for javascript packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.jvm.search.by_cpe.enabled Enable CPE-based vulnerability matching for JVM packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled Enable CPE-based vulnerability matching for python packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled Enable CPE-based vulnerability matching for ruby packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled Enable CPE-based vulnerability matching for rust packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled Enable CPE-based vulnerability matching for dotnet packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dpkg.search.by_cpe.enabled Enable CPE-based vulnerability matching for dpkg packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled Enable CPE-based vulnerability matching for golang packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.hex.search.by_cpe.enabled Enable CPE-based vulnerability matching for hex packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.java.search.by_cpe.enabled Enable CPE-based vulnerability matching for java packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.javascript.search.by_cpe.enabled Enable CPE-based vulnerability matching for javascript packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.jvm.search.by_cpe.enabled Enable CPE-based vulnerability matching for JVM packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled Enable CPE-based vulnerability matching for python packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rpm.search.by_cpe.enabled Enable CPE-based vulnerability matching for rpm packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled Enable CPE-based vulnerability matching for ruby packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled Enable CPE-based vulnerability matching for rust packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.stock.search.by_cpe.enabled Enable CPE-based vulnerability matching for stock (binary-only) packages
+        ecosystem_specific:
+          dotnet:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          dpkg:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          golang:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          hex:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          java:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          javascript:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          jvm:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          python:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          rpm:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          ruby:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          rust:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          stock:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
       ## @param anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
       nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
+
+    ## @param anchoreConfig.policy_engine.catalog_client_conn_timeout Timeout in seconds for catalog client connections (-1 for no timeout)
+    ## @param anchoreConfig.policy_engine.catalog_client_read_timeout Timeout in seconds for catalog client reads (-1 for no timeout)
+    catalog_client_conn_timeout: -1
+    catalog_client_read_timeout: -1
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
@@ -730,14 +863,48 @@ anchoreConfig:
     ## server:
     ##   process_worker_count: 1
 
+    ## @param anchoreConfig.policy_engine.external_hostname External hostname for the service
+    ## @param anchoreConfig.policy_engine.external_port External port for the service
+    ## @param anchoreConfig.policy_engine.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+
+    ## @param anchoreConfig.policy_engine.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.policy_engine.cycle_timers [object] Cycle timers for the policy engine service
+    cycle_timers:
+      grypedb_sync: 60
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+      vulnerability_metadata_capture: 300
+
   notifications:
     ## @param anchoreConfig.notifications.extendedConfig appends additional configs to the notifications service's Anchore configs
     extendedConfig: {}
 
-    ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
+    ## @param anchoreConfig.notifications.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.notifications.external_hostname External hostname for the service
+    ## @param anchoreConfig.notifications.external_port External port for the service
+    ## @param anchoreConfig.notifications.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+
+    ## @param anchoreConfig.notifications.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.notifications.cycle_timers [object] Cycle timers for the notifications service
     ##
     cycle_timers:
       notifications: 30
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.notifications.ui_url Set the UI URL that is included in the notification, defaults to the Enterprise UI service name
     ##
@@ -746,6 +913,16 @@ anchoreConfig:
   reports:
     ## @param anchoreConfig.reports.extendedConfig appends additional configs to the reports service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.reports.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.reports.external_hostname External hostname for the service
+    ## @param anchoreConfig.reports.external_port External port for the service
+    ## @param anchoreConfig.reports.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.reports.enable_graphiql Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations
     ## Go to http://<host>:<port>/v2/reports/graphql in a browser for the reports API
@@ -758,10 +935,16 @@ anchoreConfig:
     ## The value should be a number followed by "w", "d", or "h" to represent weeks, days or hours
     async_execution_timeout: 48h
 
-    ## @param anchoreConfig.reports.cycle_timers.reports_scheduled_queries Interval  in seconds to check for scheduled queries that need to be run
+    ## @param anchoreConfig.reports.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.reports.cycle_timers [object] Cycle timers for the reports service
     ##
     cycle_timers:
       reports_scheduled_queries: 600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.reports.use_volume Configure the reports service to buffer report generation to disk instead of in memory
     ## This should be configured in production systems with large amounts of data (10s of thousands of images or more)
@@ -774,6 +957,16 @@ anchoreConfig:
   reports_worker:
     ## @param anchoreConfig.reports_worker.extendedConfig appends additional configs to the reports_worker service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.reports_worker.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.reports_worker.external_hostname External hostname for the service
+    ## @param anchoreConfig.reports_worker.external_port External port for the service
+    ## @param anchoreConfig.reports_worker.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
 
     ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
     ##
@@ -800,39 +993,101 @@ anchoreConfig:
     ##
     data_load_max_workers: 10
 
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_load Interval that vulnerabilities for images are synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_load Interval that vulnerabilities by tags are synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_runtime_inventory_load Interval that the runtime inventory is synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_extended_runtime_vuln_load Interval extended runtime reports are synched (ecs, k8s containers and namespaces)
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_refresh Interval that images are refreshed
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_refresh Interval that tags are refreshed
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_metrics Interval for how often reporting metrics are generated
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_egress Interval stale states are removed by image
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_egress Interval stale states are removed by tag
+    ## @param anchoreConfig.reports_worker.event_stream [object] Event stream configuration for reports worker
+    event_stream:
+      directory_path: /var/log/anchore/events
+      enabled: false
+      enrichments:
+        - vuln_details
+        - vex
+        - image
+        - runtime
+      filter_list: null
+      filter_mode: allow
+      initialized_at: null
+      max_file_count: 5
+      max_file_size_mb: 100
+
+    ## @param anchoreConfig.reports_worker.runtime_report_generation [object] Runtime report generation configuration
+    runtime_report_generation:
+      ecs_container_vulns_per_page: 1000
+      extended_runtime_page_size: 100
+      inventory_images_by_vulnerability: true
+      k8s_container_vulns_per_page: 1000
+      k8s_namespaces_per_page: 1000
+      vulnerabilities_by_ecs_container: true
+      vulnerabilities_by_k8s_container: true
+      vulnerabilities_by_k8s_namespace: true
+
+    ## @param anchoreConfig.reports_worker.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.reports_worker.cycle_timers [object] Cycle timers for the reports worker service
     ##
     cycle_timers:
-      reports_image_load: 600
-      reports_tag_load: 600
-      reports_runtime_inventory_load: 600
+      event_stream_health: 60
       reports_extended_runtime_vuln_load: 1800
-      reports_image_refresh: 7200
-      reports_tag_refresh: 7200
-      reports_metrics: 3600
       reports_image_egress: 600
+      reports_image_load: 600
+      reports_image_refresh: 7200
+      reports_metrics: 3600
+      reports_runtime_inventory_load: 600
       reports_tag_egress: 600
-
-    ## @param anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries Use legacy loaders and queries for runtime report generation
-    ##
-    runtime_report_generation:
-      use_legacy_loaders_and_queries: false
+      reports_tag_load: 600
+      reports_tag_refresh: 7200
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
   simplequeue:
     ## @param anchoreConfig.simplequeue.extendedConfig appends additional configs to the simplequeue service's Anchore configs
     extendedConfig: {}
 
+    ## @param anchoreConfig.simplequeue.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.simplequeue.external_hostname External hostname for the service
+    ## @param anchoreConfig.simplequeue.external_port External port for the service
+    ## @param anchoreConfig.simplequeue.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+
+    ## @param anchoreConfig.simplequeue.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.simplequeue.cycle_timers [object] Cycle timers for the simplequeue service
+    cycle_timers:
+      handle_metrics: 15
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+
   data_syncer:
     ## @param anchoreConfig.data_syncer.extendedConfig appends additional configs to the data_syncer service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.data_syncer.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.data_syncer.external_hostname External hostname for the service
+    ## @param anchoreConfig.data_syncer.external_port External port for the service
+    ## @param anchoreConfig.data_syncer.external_tls Enable TLS for external access to the service
+    external_hostname: null
+    external_port: null
+    external_tls: false
+
+    ## @param anchoreConfig.data_syncer.cycle_timer_seconds Default cycle timer interval in seconds
+    cycle_timer_seconds: 1
+
+    ## @param anchoreConfig.data_syncer.cycle_timers [object] Cycle timers for the data syncer service
+    cycle_timers:
+      grypedb_sync: 120
+      scheduled_data_cleanup: 86400
+      scheduled_data_sync: 3600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
@@ -2435,7 +2690,7 @@ osaaMigrationJob:
     ##    enabled: true
     ##    min_size_kbytes: 100
     ##  storage_driver:
-    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    # Valid storage driver names: 'db', 's3'
     ##    name: db
     ##    config: {}
 
