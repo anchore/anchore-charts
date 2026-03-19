@@ -350,7 +350,9 @@ Ensuring use_proxy cannot be enabled without enable_ssl
 
 {{/*
 Adds extendedConfig for a given service. Appends arbitrary user-supplied YAML to the service config block. Should only be used by recommendation of Anchore Support.
-Usage: {{ include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "catalog") .) }}
+NOTE: nindent is intentionally inside the helper (not at the call site) because piping an empty result through nindent
+produces trailing whitespace, which causes YAML to render config.yaml as a quoted string instead of a block scalar.
+Usage: {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "catalog") .) }}
 */}}
 {{- define "enterprise.serviceExtendedConfig" -}}
 {{- $extendedConfig := (index .Values.anchoreConfig (print .serviceName)).extendedConfig -}}
