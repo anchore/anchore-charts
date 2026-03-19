@@ -374,12 +374,12 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.max_api_key_age_days The maximum age, in days, for API keys
   ## @param anchoreConfig.user_authentication.max_api_keys_per_user The maximum number of API keys per user
   ## @param anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days The number of days elapsed after a user API key is deleted before it is garbage collected (-1 to disable)
-  ## ref: https://docs.anchore.com/current/docs/installation/configuration/user_credential_storage/#bearer-tokensoauth2
+  ## ref: https://docs.anchore.com/current/docs/configuration/#bearer-tokensoauth2
   ##
   ## @param anchoreConfig.user_authentication.hashed_passwords Enable storing passwords as secure hashes in the database
   ## This can dramatically increase CPU usage if you don't also use OAuth and tokens for internal communications
   ## WARNING: You should not change this after a system has been initialized as it may cause a mismatch in existing passwords
-  ## ref: https://docs.anchore.com/current/docs/installation/configuration/user_credential_storage/#configuring-hashed-passwords-and-oauth
+  ## ref: https://docs.anchore.com/current/docs/configuration/#configuring-hashed-passwords-and-oauth
   ##
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
@@ -456,7 +456,7 @@ anchoreConfig:
   ## @param anchoreConfig.internalServicesSSL.verifyCerts Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed
   ## @param anchoreConfig.internalServicesSSL.certSecretKeyFileName File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName
   ## @param anchoreConfig.internalServicesSSL.certSecretCertFileName File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName
-  ## ref: https://docs.anchore.com/current/docs/installation/configuration/tls_ssl_config/
+  ## ref: https://docs.anchore.com/current/docs/configuration/tls_ssl/
   ##
   internalServicesSSL:
     enabled: false
@@ -466,7 +466,7 @@ anchoreConfig:
 
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
-  ## ref: https://docs.anchore.com/current/docs/overview/concepts/policy/bundles/
+  ## ref: https://docs.anchore.com/current/docs/overview/concepts/policy/policies/
   ##
   policyBundles: {}
     # custom_policy_bundle1.json: |
@@ -527,19 +527,19 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
     ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
     ## When setting .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes, ensure the scratch volume has sufficient storage space
-    ## ref: https://docs.anchore.com/current/docs/installation/storage/layer_caching/
+    ## ref: https://docs.anchore.com/current/docs/configuration/storage/file/layer_caching/
     ##
     layer_cache_max_gigabytes: 0
 
     ## @param anchoreConfig.analyzer.enable_hints Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis
     ## Once enabled, the Anchore Analyzer services will look for a file with a specific name, location and format located within the container image - /anchore_hints.json
-    ## ref: https://docs.anchore.com/current/docs/installation/configuration/content_hints/
+    ## ref: https://docs.anchore.com/current/docs/configuration/general/content_hints/
     ##
     enable_hints: false
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
     ## This configuration file is used to configure regex matching, file content searching and malware scanning
-    ## ref: https://docs.anchore.com/current/docs/overview/concepts/policy/policy_checks/#gate-files
+    ## ref: https://docs.anchore.com/current/docs/compliance_management/policy_gates/#gate-files
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis/malware_scanning/
     ##
     configFile:
@@ -634,7 +634,7 @@ anchoreConfig:
       syft_sbom_metadata_annotations: 150
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
-    ## ref: https://docs.anchore.com/current/docs/using/cli_usage/event/#sending-events-as-webhook-notifications
+    ## ref: https://docs.anchore.com/current/docs/monitoring/events/#sending-events-as-webhook-notifications
     ##
     event_log:
       max_retention_age_days: 180
@@ -645,7 +645,7 @@ anchoreConfig:
           # - info
 
     ## @param anchoreConfig.catalog.analysis_archive [object] Custom analysis archive YAML configuration
-    ## ref: https://docs.anchore.com/current/docs/configuration/storage/analysis_archive/
+    ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis_archive/
     ##
     analysis_archive: {}
     ##  compression:
@@ -674,7 +674,7 @@ anchoreConfig:
     ## @param anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite force runtime inventory to be overwritten upon every update for that reported context.
     ## When `inventory_ingest_overwrite=true` upon ingestion of inventory, removes anything previously reported by the namespace and only keep the latest inventory posted.
     ## This new config value is used instead of setting `image_ttl_days=-1`
-    ## ref: https://docs.anchore.com/current/docs/configuration/runtime_inventory/
+    ## ref: https://docs.anchore.com/current/docs/configuration/runtime/
     ##
     runtime_inventory:
       inventory_ttl_days: 120
@@ -733,7 +733,7 @@ anchoreConfig:
 
     ## @param anchoreConfig.reports.enable_graphiql Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations
     ## Go to http://<host>:<port>/v2/reports/graphql in a browser for the reports API
-    ## ref: https://docs.anchore.com/current/docs/using/api_usage/reports/
+    ## ref: https://docs.anchore.com/current/docs/configuration/reports/
     ##
     enable_graphiql: true
 

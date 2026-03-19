@@ -1325,23 +1325,39 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### v3.21.x
   #### V3.21.0
   - Deploys Anchore Enterprise v5.25.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5250/) for more information.
+  #### V3.21.1
+  - Added ability to add extended configs to services via `extendedConfig`. Bumped admission controller, k8s-inventory, and ecs-inventory versions. Added unit tests.
+  #### V3.21.3
+  - Deploys Anchore Enterprise v5.25.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5251/) for more information.
+  - Cleaned up GitHub Action workflows.
+  #### V3.21.4
+  - Release note updates
+  - NOTES.txt notice to update anchorectl on upgrades
+  - update reference links in values.yaml
 
 ### v3.20.x
   #### V3.20.0
   - Deploys Anchore Enterprise v5.24.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5240/) for more information.
   - Makes listen address configurable. Still defaults to 0.0.0.0 if not overriden.
   - Added URI encoding by default ANCHORE_APPDB_URI and ANCHORE_REDIS_URI in ui_secrets.yaml
+  #### V3.20.1
+  - Updated appVersion to v5.24.0 and bumped integrations chart versions.
   #### V3.20.2
   - Adds support for specifying hostAliases
   #### V3.20.3
   - Deploys Anchore Enterprise v5.24.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5241/) for more information.
   #### V3.20.4
   - Deploys Anchore Enterprise v5.24.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5242/) for more information.
+  #### V3.20.5
+  - Added missing `scratchVolume` include to deployment templates that were missing it.
+
 ### v3.19.x
   #### V3.19.0
   - Adds an optional Prometheus monitoring setup to Anchore Enterprise for future internal monitoring and support
   #### V3.19.1
   - Adds component level containerSecurityContext. If set at both the toplevel and component level, the component level containerSecurityContext definition will be honored
+  #### V3.19.2
+  - Updated smoketest URL to use dynamic variables.
 
 ### V3.18.x
   #### V3.18.0
@@ -1351,8 +1367,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
   #### V3.17.0
   - Deploys Anchore Enterprise v5.23.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5230/) for more information.
+  #### V3.17.1
+  - Added `initialDelaySeconds` for readiness probes.
   #### V3.17.2
-  - add initialDelaySeconds for readiness probe
+  - Fixed `initialDelaySeconds` for readiness probe on UI deployment.
 
 ### V3.16.x
 
@@ -1367,6 +1385,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - Adds anchoreConfig.database.dbConnectArgs to override db_connect_args
   #### V3.16.2
   - Adds analyzer service and exposes extraVolume/extraVolumeMounts to the analyzer and upgradeJob in the values.yaml
+  #### V3.16.3
+  - Bumped Kubernetes version compatibility to 1.34.x.
 
 ### V3.15.x
 
@@ -1384,6 +1404,9 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - kubectl
 #### V3.14.1
 - Deploys Anchore Enterprise v5.20.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5202/) for more information.
+
+#### V3.14.2
+- Added templating for audit resource URIs to allow specifying additional URIs via `anchoreConfig.audit.additionalResourceURIs`.
 
 ### V3.13.x
 
@@ -1423,6 +1446,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### V3.12.x
 
 - Deploys Anchore Enterprise v5.19.x.
+#### V3.12.5
+- Deploys Anchore Enterprise v5.19.4. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5194/) for more information.
+
+#### V3.12.4
+- Deploys Anchore Enterprise v5.19.3. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5193/) for more information.
+
 #### V3.12.3
 - Deploys Anchore Enterprise UI v5.19.1. See the [Release Notes](https://docs.anchore.com/current/docs/release_notes/enterprise/5191/) for more information.
 
