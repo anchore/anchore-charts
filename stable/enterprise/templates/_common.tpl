@@ -571,9 +571,9 @@ Renders external_hostname, external_port, and external_tls from the service's an
 {{- define "enterprise.anchoreConfig.anchoreService.external" -}}
 {{- $anchoreService := .anchoreService -}}
 {{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
-    external_hostname: {{ $serviceConfig.external_hostname }}
-    external_port: {{ $serviceConfig.external_port }}
-    external_tls: {{ $serviceConfig.external_tls }}
+external_hostname: {{ $serviceConfig.external_hostname }}
+external_port: {{ $serviceConfig.external_port }}
+external_tls: {{ $serviceConfig.external_tls }}
 {{- end }}
 
 {{/*
@@ -584,8 +584,8 @@ Renders cycle_timer_seconds and cycle_timers from the service's anchoreConfig.
 {{- define "enterprise.anchoreConfig.anchoreService.cycleTimers" -}}
 {{- $anchoreService := .anchoreService -}}
 {{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
-    cycle_timer_seconds: {{ $serviceConfig.cycle_timer_seconds }}
-    cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 6 }}
+cycle_timer_seconds: {{ $serviceConfig.cycle_timer_seconds }}
+cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 2 }}
 {{- end }}
 
 {{/*
