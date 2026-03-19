@@ -32,10 +32,10 @@ should render the configmaps for osaa migration if enabled:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
-        allow_awsecr_iam_auto: true
+        allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: true
-        image_analyze_timeout_seconds: 36000
+        image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
@@ -43,10 +43,10 @@ should render the configmaps for osaa migration if enabled:
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
 
-        max_source_import_size_mb: 100
-        max_import_content_size_mb: 100
+        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
 
-        max_compressed_image_size_mb: -1
+        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
 
         audit:
           enabled: true
@@ -79,25 +79,27 @@ should render the configmaps for osaa migration if enabled:
             - "/user/credentials"
 
         metrics:
-          enabled: false
-          auth_disabled: false
+          enabled: ${ANCHORE_ENABLE_METRICS}
+          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
 
         default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
-        default_admin_email: admin@myanchore
+        default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
         configuration:
-          api_driven_configuration_enabled: true
+          api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
 
         keys:
           secret: "${ANCHORE_SAML_SECRET}"
-          public_key_path: null
-          private_key_path: null
+          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
+          private_key_path: ${ANCHORE_AUTH_PUBKEY}
 
         user_authentication:
           oauth:
-            default_token_expiration_seconds: 3600
-            refresh_token_expiration_seconds: 86400
-          sso_require_existing_users: false
+            enabled: ${ANCHORE_OAUTH_ENABLED}
+            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
+          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
           max_api_keys_per_user: 100
@@ -209,11 +211,11 @@ should render the configmaps for osaa migration if enabled:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            layer_cache_enable: false
-            layer_cache_max_gigabytes: 0
-            enable_hints: false
-            enable_owned_package_filtering: true
-            keep_image_analysis_tmpfiles: false
+            layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
+            layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
+            enable_hints: ${ANCHORE_HINTS_ENABLED}
+            enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
@@ -279,15 +281,15 @@ should render the configmaps for osaa migration if enabled:
                 level:
                 - error
             runtime_inventory:
-              inventory_ttl_days: 120
-              inventory_ingest_overwrite: false
+              inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
+              inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
             integrations:
-              integration_health_report_ttl_days: 2
+              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
             image_gc:
-              max_worker_threads: 4
+              max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            import_operation_expiration_days: 7
+            import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
               auto_scale: true
@@ -361,11 +363,18 @@ should render the configmaps for osaa migration if enabled:
             port: ${ANCHORE_PORT}
             catalog_client_conn_timeout: -1
             catalog_client_read_timeout: -1
-            policy_evaluation_cache_ttl: 3600
-            enable_package_db_load: false
+            policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
+            enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
+              sync:
+                enabled: true
+                connection_timeout_seconds: 3
+                read_timeout_seconds: 60
+                data:
+                  grypedb:
+                    enabled: true
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
@@ -456,15 +465,15 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_graphiql: true
+            enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
             cycle_timer_seconds: 1
             cycle_timers:
               reports_scheduled_queries: 600
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            max_async_execution_threads: 1
-            async_execution_timeout: 48h
+            max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
+            async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
             use_volume: false
             external_hostname: null
             external_port: null
@@ -487,11 +496,11 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_data_ingress: true
-            enable_data_egress: <ALLOW_API_CONFIGURATION>
-            data_egress_window: <ALLOW_API_CONFIGURATION>
-            data_refresh_max_workers: 10
-            data_load_max_workers: 10
+            enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
+            enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
+            data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
+            data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
+            data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
             ingress_images_max_workers: 10
             cycle_timer_seconds: 1
             cycle_timers:
@@ -557,7 +566,7 @@ should render the configmaps for osaa migration if enabled:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            ui_url: test-release-enterprise-ui
+            ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
             external_hostname: null
             external_port: null
             external_tls: false
@@ -579,7 +588,7 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            auto_sync_enabled: true
+            auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
             upload_dir: /analysis_scratch
             cycle_timer_seconds: 1
             cycle_timers:
@@ -642,10 +651,10 @@ should render the configmaps for osaa migration if enabled:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
-        allow_awsecr_iam_auto: true
+        allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: true
-        image_analyze_timeout_seconds: 36000
+        image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
@@ -653,10 +662,10 @@ should render the configmaps for osaa migration if enabled:
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
 
-        max_source_import_size_mb: 100
-        max_import_content_size_mb: 100
+        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
+        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
 
-        max_compressed_image_size_mb: -1
+        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
 
         audit:
           enabled: true
@@ -689,25 +698,27 @@ should render the configmaps for osaa migration if enabled:
             - "/user/credentials"
 
         metrics:
-          enabled: false
-          auth_disabled: false
+          enabled: ${ANCHORE_ENABLE_METRICS}
+          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
 
         default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
-        default_admin_email: admin@myanchore
+        default_admin_email: ${ANCHORE_ADMIN_EMAIL}
 
         configuration:
-          api_driven_configuration_enabled: true
+          api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
 
         keys:
           secret: "${ANCHORE_SAML_SECRET}"
-          public_key_path: null
-          private_key_path: null
+          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
+          private_key_path: ${ANCHORE_AUTH_PUBKEY}
 
         user_authentication:
           oauth:
-            default_token_expiration_seconds: 3600
-            refresh_token_expiration_seconds: 86400
-          sso_require_existing_users: false
+            enabled: ${ANCHORE_OAUTH_ENABLED}
+            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
+          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
+          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
           max_api_keys_per_user: 100
@@ -819,11 +830,11 @@ should render the configmaps for osaa migration if enabled:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            layer_cache_enable: false
-            layer_cache_max_gigabytes: 0
-            enable_hints: false
-            enable_owned_package_filtering: true
-            keep_image_analysis_tmpfiles: false
+            layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
+            layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
+            enable_hints: ${ANCHORE_HINTS_ENABLED}
+            enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
@@ -889,15 +900,15 @@ should render the configmaps for osaa migration if enabled:
                 level:
                 - error
             runtime_inventory:
-              inventory_ttl_days: 120
-              inventory_ingest_overwrite: false
+              inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
+              inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
             integrations:
-              integration_health_report_ttl_days: 2
+              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
             image_gc:
-              max_worker_threads: 4
+              max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            import_operation_expiration_days: 7
+            import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
               auto_scale: true
@@ -910,10 +921,10 @@ should render the configmaps for osaa migration if enabled:
               enabled: true
               storage_driver:
                 config:
-                  access_key: ${ANCHORE_ANALYSIS_ARCHIVE_ACCESS_KEY}
+                  access_key: itsa
                   bucket: analysisarchive
                   region: null
-                  secret_key: ${ANCHORE_ANALYSIS_ARCHIVE_SECRET_KEY}
+                  secret_key: test
                   url: http://myminio.mynamespace.svc.cluster.local:9000
                 name: s3
             object_store:
@@ -982,11 +993,18 @@ should render the configmaps for osaa migration if enabled:
             port: ${ANCHORE_PORT}
             catalog_client_conn_timeout: -1
             catalog_client_read_timeout: -1
-            policy_evaluation_cache_ttl: 3600
-            enable_package_db_load: false
+            policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
+            enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
+              sync:
+                enabled: true
+                connection_timeout_seconds: 3
+                read_timeout_seconds: 60
+                data:
+                  grypedb:
+                    enabled: true
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
@@ -1077,15 +1095,15 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_graphiql: true
+            enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
             cycle_timer_seconds: 1
             cycle_timers:
               reports_scheduled_queries: 600
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            max_async_execution_threads: 1
-            async_execution_timeout: 48h
+            max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
+            async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
             use_volume: false
             external_hostname: null
             external_port: null
@@ -1108,11 +1126,11 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_data_ingress: true
-            enable_data_egress: <ALLOW_API_CONFIGURATION>
-            data_egress_window: <ALLOW_API_CONFIGURATION>
-            data_refresh_max_workers: 10
-            data_load_max_workers: 10
+            enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
+            enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
+            data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
+            data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
+            data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
             ingress_images_max_workers: 10
             cycle_timer_seconds: 1
             cycle_timers:
@@ -1178,7 +1196,7 @@ should render the configmaps for osaa migration if enabled:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            ui_url: test-release-enterprise-ui
+            ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
             external_hostname: null
             external_port: null
             external_tls: false
@@ -1200,7 +1218,7 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            auto_sync_enabled: true
+            auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
             upload_dir: /analysis_scratch
             cycle_timer_seconds: 1
             cycle_timers:
