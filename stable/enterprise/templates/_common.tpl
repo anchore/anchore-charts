@@ -382,7 +382,7 @@ Setup the common pod spec configs
 {{- with .Values.securityContext }}
 securityContext: {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if or .Values.serviceAccountName (index .Values (print $component)).serviceAccountName (eq $component "upgradeJob") (eq $component "osaaMigrationJob") }}
+{{- if or .Values.createServiceAccount .Values.serviceAccountName (index .Values (print $component)).serviceAccountName (eq $component "upgradeJob") (eq $component "osaaMigrationJob") }}
 serviceAccountName: {{ include "enterprise.serviceAccountName" (merge (dict "component" $component) .) }}
 {{- end }}
 {{- if .Values.useExistingPullCredSecret }}

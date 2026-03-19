@@ -95,6 +95,8 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
     {{- printf "%s-%s" (include "enterprise.fullname" .) "upgrade-sa" -}}
   {{- else if .Values.serviceAccountName }}
     {{- print .Values.serviceAccountName | trunc 63 | trimSuffix "-" -}}
+  {{- else if .Values.createServiceAccount }}
+    {{- printf "%s-%s" (include "enterprise.fullname" .) "sa" -}}
   {{- end }}
 {{- end }}
 {{- end -}}

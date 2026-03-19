@@ -80,6 +80,9 @@ spec:
       port: {{ .Values.notifications.service.port }}
       targetPort: {{ .Values.notifications.service.port }}
       protocol: TCP
+    {{- if .Values.setServiceAppProtocol }}
+      appProtocol: {{ include "enterprise.setProtocol" . }}
+    {{- end }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
