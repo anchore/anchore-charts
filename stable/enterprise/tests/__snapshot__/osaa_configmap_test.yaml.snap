@@ -305,6 +305,14 @@ should render the configmaps for osaa migration if enabled:
                 config: {}
                 name: db
               verify_content_digests: true
+            document_views:
+              generation:
+                max_document_execution_seconds: 300
+                multiprocess_count: 2
+                multiprocess_enabled: true
+                recycle_worker_processes_count: 10
+            system_logs:
+              expiration_days: 730
             external_hostname: null
             external_port: null
             external_tls: false
@@ -353,6 +361,8 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
+            catalog_client_conn_timeout: -1
+            catalog_client_read_timeout: -1
             policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
@@ -507,11 +517,28 @@ should render the configmaps for osaa migration if enabled:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
+            event_stream:
+              directory_path: /var/log/anchore/events
+              enabled: false
+              enrichments:
+              - vuln_details
+              - vex
+              - image
+              - runtime
+              filter_list: null
+              filter_mode: allow
+              initialized_at: null
+              max_file_count: 5
+              max_file_size_mb: 100
             runtime_report_generation:
+              ecs_container_vulns_per_page: 1000
+              extended_runtime_page_size: 100
               inventory_images_by_vulnerability: true
-              vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
-              vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
-              vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+              k8s_container_vulns_per_page: 1000
+              k8s_namespaces_per_page: 1000
+              vulnerabilities_by_ecs_container: true
+              vulnerabilities_by_k8s_container: true
+              vulnerabilities_by_k8s_namespace: true
             external_hostname: null
             external_port: null
             external_tls: false
@@ -908,6 +935,14 @@ should render the configmaps for osaa migration if enabled:
                 config: {}
                 name: db
               verify_content_digests: true
+            document_views:
+              generation:
+                max_document_execution_seconds: 300
+                multiprocess_count: 2
+                multiprocess_enabled: true
+                recycle_worker_processes_count: 10
+            system_logs:
+              expiration_days: 730
             external_hostname: null
             external_port: null
             external_tls: false
@@ -956,6 +991,8 @@ should render the configmaps for osaa migration if enabled:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
+            catalog_client_conn_timeout: -1
+            catalog_client_read_timeout: -1
             policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
             enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
             enable_user_base_image: true
@@ -1110,11 +1147,28 @@ should render the configmaps for osaa migration if enabled:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
+            event_stream:
+              directory_path: /var/log/anchore/events
+              enabled: false
+              enrichments:
+              - vuln_details
+              - vex
+              - image
+              - runtime
+              filter_list: null
+              filter_mode: allow
+              initialized_at: null
+              max_file_count: 5
+              max_file_size_mb: 100
             runtime_report_generation:
+              ecs_container_vulns_per_page: 1000
+              extended_runtime_page_size: 100
               inventory_images_by_vulnerability: true
-              vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
-              vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
-              vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
+              k8s_container_vulns_per_page: 1000
+              k8s_namespaces_per_page: 1000
+              vulnerabilities_by_ecs_container: true
+              vulnerabilities_by_k8s_container: true
+              vulnerabilities_by_k8s_namespace: true
             external_hostname: null
             external_port: null
             external_tls: false

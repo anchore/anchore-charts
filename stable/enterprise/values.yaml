@@ -682,6 +682,18 @@ anchoreConfig:
           - error
           # - info
 
+    ## @param anchoreConfig.catalog.document_views [object] Document views generation configuration
+    document_views:
+      generation:
+        max_document_execution_seconds: 300
+        multiprocess_count: 2
+        multiprocess_enabled: true
+        recycle_worker_processes_count: 10
+
+    ## @param anchoreConfig.catalog.system_logs [object] System logs configuration
+    system_logs:
+      expiration_days: 730
+
     ## @param anchoreConfig.catalog.analysis_archive [object] Custom analysis archive YAML configuration
     ## ref: https://docs.anchore.com/current/docs/configuration/storage/analysis_archive/
     ##
@@ -832,6 +844,11 @@ anchoreConfig:
       ## @param anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
       nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
 
+    ## @param anchoreConfig.policy_engine.catalog_client_conn_timeout Timeout in seconds for catalog client connections (-1 for no timeout)
+    ## @param anchoreConfig.policy_engine.catalog_client_read_timeout Timeout in seconds for catalog client reads (-1 for no timeout)
+    catalog_client_conn_timeout: -1
+    catalog_client_read_timeout: -1
+
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
 
@@ -969,6 +986,32 @@ anchoreConfig:
     ## @param anchoreConfig.reports_worker.data_load_max_workers The maximum number of concurrent threads to load new results (etl vulnerabilities and evaluations) to reports service.
     ##
     data_load_max_workers: 10
+
+    ## @param anchoreConfig.reports_worker.event_stream [object] Event stream configuration for reports worker
+    event_stream:
+      directory_path: /var/log/anchore/events
+      enabled: false
+      enrichments:
+        - vuln_details
+        - vex
+        - image
+        - runtime
+      filter_list: null
+      filter_mode: allow
+      initialized_at: null
+      max_file_count: 5
+      max_file_size_mb: 100
+
+    ## @param anchoreConfig.reports_worker.runtime_report_generation [object] Runtime report generation configuration
+    runtime_report_generation:
+      ecs_container_vulns_per_page: 1000
+      extended_runtime_page_size: 100
+      inventory_images_by_vulnerability: true
+      k8s_container_vulns_per_page: 1000
+      k8s_namespaces_per_page: 1000
+      vulnerabilities_by_ecs_container: true
+      vulnerabilities_by_k8s_container: true
+      vulnerabilities_by_k8s_namespace: true
 
     ## @param anchoreConfig.reports_worker.cycle_timer_seconds Default cycle timer interval in seconds
     cycle_timer_seconds: 1
