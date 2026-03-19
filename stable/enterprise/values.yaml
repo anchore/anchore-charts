@@ -936,6 +936,7 @@ anchoreConfig:
 ######################################################
 analyzer:
   ## @param analyzer.replicaCount Number of replicas for the Anchore Analyzer deployment
+  ## Please note that Anchore licensing may dictate the permitted number of analyzers
   ##
   replicaCount: 1
 
@@ -1083,9 +1084,9 @@ api:
   resources: {}
     # requests:
     #   cpu: 1
-    #   memory: 4G
+    #   memory: 8G
     # limits:
-    #   memory: 4G
+    #   memory: 8G
 
   ## @param api.labels Labels for Anchore API pods
   ##
@@ -1183,9 +1184,9 @@ catalog:
   resources: {}
     # requests:
     #   cpu: 2
-    #   memory: 8G
+    #   memory: 12G
     # limits:
-    #   memory: 8G
+    #   memory: 12G
 
   ## @param catalog.labels Labels for Anchore Catalog pods
   ##
@@ -1590,7 +1591,7 @@ reports:
   resources: {}
     # requests:
     #   memory: 8G
-    #   cpu: 1
+    #   cpu: 2
     # limits:
     #   memory: 8G
 
@@ -1801,7 +1802,7 @@ simpleQueue:
   ##
   resources: {}
     # requests:
-    #   cpu: 1
+    #   cpu: 2
     #   memory: 8G
     # limits:
     #   memory: 8G

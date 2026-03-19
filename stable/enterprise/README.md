@@ -1334,6 +1334,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - Release note updates
   - NOTES.txt notice to update anchorectl on upgrades
   - update reference links in values.yaml
+  - update resource comments in values.yaml
 
 ### v3.20.x
   #### V3.20.0
