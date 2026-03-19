@@ -82,6 +82,7 @@ spec:
       port: {{ .Values.policyEngine.service.port }}
       targetPort: {{ .Values.policyEngine.service.port }}
       protocol: TCP
+      appProtocol: {{ include "enterprise.setProtocol" . }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}

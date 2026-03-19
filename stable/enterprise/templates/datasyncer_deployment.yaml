@@ -83,6 +83,7 @@ spec:
       port: {{ .Values.dataSyncer.service.port }}
       targetPort: {{ .Values.dataSyncer.service.port }}
       protocol: TCP
+      appProtocol: {{ include "enterprise.setProtocol" . }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}

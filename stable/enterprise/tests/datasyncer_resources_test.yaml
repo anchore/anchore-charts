@@ -376,6 +376,7 @@ tests:
             port: 8778
             targetPort: 8778
             protocol: TCP
+            appProtocol: http
         count: 1
 
   - it: should render document[1] component spec.selectors

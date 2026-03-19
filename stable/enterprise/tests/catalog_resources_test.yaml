@@ -463,6 +463,7 @@ tests:
             port: 8082
             targetPort: 8082
             protocol: TCP
+            appProtocol: http
         count: 1
 
   - it: should render component service selectors

@@ -79,6 +79,7 @@ spec:
       port: {{ .Values.simpleQueue.service.port }}
       targetPort: {{ .Values.simpleQueue.service.port }}
       protocol: TCP
+      appProtocol: {{ include "enterprise.setProtocol" . }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}
