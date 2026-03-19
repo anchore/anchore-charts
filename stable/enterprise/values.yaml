@@ -74,9 +74,11 @@ migrationPodImage: docker.io/postgres:13-bookworm
 ##
 migrationAnchoreEngineSecretName: my-engine-anchore-engine
 
-## @param serviceAccountName Name of a service account used to run all Anchore pods
+## @param createServiceAccount Create a service account for Anchore pods. The service account name will be the fullname of the release.
+## @param serviceAccountName Name of a service account used to run all Anchore pods. If createServiceAccount is true and this is empty, the chart-generated name is used.
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 ##
+createServiceAccount: false
 serviceAccountName: ""
 
 ## @param injectSecretsViaEnv Enable secret injection into pod via environment variables instead of via k8s secrets
