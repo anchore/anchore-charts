@@ -137,7 +137,9 @@ spec:
     - name: {{ $component | lower }}
       port: {{ .Values.ui.service.port }}
       protocol: TCP
+    {{- if .Values.setServiceAppProtocol }}
       appProtocol: http
+    {{- end }}
       targetPort: 3000
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:

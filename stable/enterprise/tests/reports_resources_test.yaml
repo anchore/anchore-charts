@@ -282,7 +282,6 @@ tests:
             port: 8558
             targetPort: 8558
             protocol: TCP
-            appProtocol: http
         count: 1
 
   - it: should render component service selectors

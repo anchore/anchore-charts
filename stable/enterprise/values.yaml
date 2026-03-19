@@ -249,6 +249,10 @@ probes:
 ## @param listenAddress The listen address for all Anchore services if not overridden at the service level
 listenAddress: "0.0.0.0"
 
+## @param setServiceAppProtocol Enable setting appProtocol on service ports. Useful for Istio and other service meshes.
+## When enabled, backend services will use http/https based on SSL config, and the UI will use http.
+setServiceAppProtocol: false
+
 ## @param doSourceAtEntry.enabled Does a `source` of the file path defined before starting Anchore services
 ## @param doSourceAtEntry.filePaths List of file paths to `source` before starting Anchore services
 ## For example, if using hashicorp vault, set to /vault/secrets/config

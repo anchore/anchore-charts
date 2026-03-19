@@ -746,6 +746,7 @@ To restore your deployment to using your previous driver configurations:
 | `probes.readiness.failureThreshold`     | Failure threshold for the readiness probe                                                                                          | `3`                                    |
 | `probes.readiness.successThreshold`     | Success threshold for the readiness probe                                                                                          | `1`                                    |
 | `listenAddress`                         | The listen address for all Anchore services if not overridden at the service level                                                 | `0.0.0.0`                              |
+| `setServiceAppProtocol`                 | Enable setting appProtocol on service ports. Useful for Istio and other service meshes.                                            | `false`                                |
 | `doSourceAtEntry.enabled`               | Does a `source` of the file path defined before starting Anchore services                                                          | `false`                                |
 | `doSourceAtEntry.filePaths`             | List of file paths to `source` before starting Anchore services                                                                    | `[]`                                   |
 | `configOverride`                        | Allows for overriding the default Anchore configuration file                                                                       | `""`                                   |
@@ -1322,6 +1323,14 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v3.22.x
+  #### V3.22.0
+  - Release note updates
+  - NOTES.txt notice to update anchorectl on upgrades
+  - update reference links in values.yaml
+  - update resource comments in values.yaml
+  - adding appProtocol to services
+
 ### v3.21.x
   #### V3.21.0
   - Deploys Anchore Enterprise v5.25.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5250/) for more information.
@@ -1330,11 +1339,6 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   #### V3.21.3
   - Deploys Anchore Enterprise v5.25.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5251/) for more information.
   - Cleaned up GitHub Action workflows.
-  #### V3.21.4
-  - Release note updates
-  - NOTES.txt notice to update anchorectl on upgrades
-  - update reference links in values.yaml
-  - update resource comments in values.yaml
 
 ### v3.20.x
   #### V3.20.0
