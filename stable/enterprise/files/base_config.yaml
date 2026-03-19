@@ -4,7 +4,7 @@
 host_id: ${ANCHORE_HOST_ID}
 
 # Internal SSL verification
-internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+internal_ssl_verify: {{ .Values.anchoreConfig.internal_ssl_verify }}
 
 # Global client timeouts
 global_client_connect_timeout: {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" .configComponent "configKey" "global_client_connect_timeout") .) }}
