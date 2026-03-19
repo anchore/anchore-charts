@@ -1,6 +1,5 @@
 service_dir: ${ANCHORE_SERVICE_DIR}
 tmp_dir: ${ANCHORE_TMP_DIR}
-log_level: ${ANCHORE_LOG_LEVEL} # Deprecated - prefer use of logging.log_level
 
 logging:
   {{- toYaml .Values.anchoreConfig.logging | nindent 2 }}
@@ -10,12 +9,11 @@ server:
 
 allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
 host_id: "${ANCHORE_HOST_ID}"
-internal_ssl_verify: ${ANCHORE_INTERNAL_SSL_VERIFY}
+internal_ssl_verify: {{ .Values.anchoreConfig.internal_ssl_verify }}
 image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
 
 global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
 global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
-server_request_timeout_seconds: ${ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC}
 
 license_file: ${ANCHORE_LICENSE_FILE}
 auto_restart_services: false
@@ -44,8 +42,6 @@ audit:
 metrics:
   enabled: ${ANCHORE_ENABLE_METRICS}
   auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
-
-webhooks: {{- toYaml .Values.anchoreConfig.webhooks | nindent 2 }}
 
 default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
 default_admin_email: ${ANCHORE_ADMIN_EMAIL}
@@ -112,53 +108,48 @@ object_store:
 services:
   apiext:
     enabled: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "apiext") .) | nindent 6 }}
     image_content:
       remove_license_content_from_sbom_return: {{ .Values.anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return }}
-    require_auth: true
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "api") .) }}"
     port: ${ANCHORE_PORT}
-  {{- if .Values.anchoreConfig.apiext.external.enabled }}
-    external_tls: {{ .Values.anchoreConfig.apiext.external.useTLS }}
-    external_hostname: {{ .Values.anchoreConfig.apiext.external.hostname }}
-    external_port: {{ .Values.anchoreConfig.apiext.external.port }}
-  {{- end }}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "apiext") .) | nindent 4 }}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "apiext") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "apiext") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "apiext") .) }}
 
   analyzer:
     enabled: true
-    require_auth: true
+    analyzer_scanner_config: {{- toYaml .Values.anchoreConfig.analyzer.configFile | nindent 6 }}
+
+
+
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "analyzer") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "analyzer") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-    cycle_timer_seconds: 1
-    cycle_timers: {{- toYaml .Values.anchoreConfig.analyzer.cycle_timers | nindent 6 }}
-    analyzer_driver: 'nodocker'
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
     layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
     layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
     enable_hints: ${ANCHORE_HINTS_ENABLED}
     enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
     keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}
 
   catalog:
     enabled: true
-    require_auth: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "catalog") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "catalog") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     account_prometheus_metrics: {{ .Values.anchoreConfig.catalog.account_prometheus_metrics }}
-    cycle_timer_seconds: 1
-    cycle_timers: {{- toYaml .Values.anchoreConfig.catalog.cycle_timers | nindent 6 }}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "catalog") .) | nindent 4 }}
     event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
     runtime_inventory:
       inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
@@ -185,30 +176,33 @@ services:
   {{- else }}
     object_store: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 6 }}
   {{- end }}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
+    document_views: {{- toYaml .Values.anchoreConfig.catalog.document_views | nindent 6 }}
+    system_logs: {{- toYaml .Values.anchoreConfig.catalog.system_logs | nindent 6 }}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "catalog") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "catalog") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "catalog") .) }}
 
   simplequeue:
     enabled: true
-    require_auth: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "simplequeue") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "simpleQueue") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "simplequeue") .) | nindent 4 }}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "simplequeue") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "simplequeue") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "simplequeue") .) }}
 
   policy_engine:
     enabled: true
-    require_auth: true
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "policy_engine") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "policyEngine") .) }}"
     port: ${ANCHORE_PORT}
+    catalog_client_conn_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_conn_timeout }}
+    catalog_client_read_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_read_timeout }}
     policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
     enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
@@ -216,7 +210,6 @@ services:
       nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss }}
       sync:
         enabled: true
-        ssl_verify: ${ANCHORE_FEEDS_SSL_VERIFY}
         connection_timeout_seconds: 3
         read_timeout_seconds: 60
         data:
@@ -241,116 +234,121 @@ services:
         default:
           search:
             by_cpe:
-              enabled: ${ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED}
+              enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.default.search.by_cpe.enabled }}
         ecosystem_specific:
           dotnet:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled }}
+          dpkg:
+            search:
+              by_cpe:
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dpkg.search.by_cpe.enabled }}
           golang:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled }}
+          hex:
+            search:
+              by_cpe:
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.hex.search.by_cpe.enabled }}
           java:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.java.search.by_cpe.enabled }}
           javascript:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.javascript.search.by_cpe.enabled }}
           jvm:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JVM_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.jvm.search.by_cpe.enabled }}
           python:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled }}
+          rpm:
+            search:
+              by_cpe:
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rpm.search.by_cpe.enabled }}
           ruby:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled }}
           rust:
             search:
               by_cpe:
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUST_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled }}
           stock:
             search:
               by_cpe:
                 # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
-                enabled: ${ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED}
+                enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.stock.search.by_cpe.enabled }}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "policy_engine") .) | nindent 4 }}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "policy_engine") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "policy_engine") .) }}
 
   reports:
     enabled: true
-    require_auth: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "reports") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reports") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
-    cycle_timers: {{- toYaml .Values.anchoreConfig.reports.cycle_timers | nindent 6 }}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
     max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
     async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
     use_volume: {{ .Values.anchoreConfig.reports.use_volume }}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "reports") .) }}
 
   reports_worker:
     enabled: true
-    require_auth: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "reports_worker") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reportsWorker") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
     enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
     enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
     data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
     data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
     data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
     ingress_images_max_workers: {{ .Values.anchoreConfig.reports_worker.ingress_images_max_workers }}
-    cycle_timers: {{- toYaml .Values.anchoreConfig.reports_worker.cycle_timers | nindent 6 }}
-    runtime_report_generation:
-      use_legacy_loaders_and_queries: {{ .Values.anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries }}
-      inventory_images_by_vulnerability: true
-      vulnerabilities_by_k8s_namespace: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE}
-      vulnerabilities_by_k8s_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER}
-      vulnerabilities_by_ecs_container: ${ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "reports_worker") .) | nindent 4 }}
+    event_stream: {{- toYaml .Values.anchoreConfig.reports_worker.event_stream | nindent 6 }}
+    runtime_report_generation: {{- toYaml .Values.anchoreConfig.reports_worker.runtime_report_generation | nindent 6 }}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "reports_worker") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports_worker") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "reports_worker") .) }}
 
   notifications:
     enabled: true
-    require_auth: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "notifications") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "notifications") .) }}"
     port: ${ANCHORE_PORT}
-    max_request_threads: ${ANCHORE_MAX_REQUEST_THREADS}
-    cycle_timers: {{- toYaml .Values.anchoreConfig.notifications.cycle_timers | nindent 6 }}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "notifications") .) | nindent 4 }}
     ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "notifications") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "notifications") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "notifications") .) }}
 
   data_syncer:
     enabled: true
-    require_auth: true
+    logging:
+      {{- include "enterprise.common.logging" (merge (dict "service" "data_syncer") .) | nindent 6 }}
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "dataSyncer") .) }}"
     port: ${ANCHORE_PORT}
     auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
     upload_dir: {{ .Values.scratchVolume.mountPath }}
-    ssl_enable: ${ANCHORE_SSL_ENABLED}
-    ssl_cert: ${ANCHORE_SSL_CERT}
-    ssl_key: ${ANCHORE_SSL_KEY}
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
+    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "data_syncer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "data_syncer") .) }}

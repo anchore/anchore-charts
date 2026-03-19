@@ -566,6 +566,31 @@ type: Recreate
 {{- end -}}
 
 {{/*
+External access configuration for a service.
+Renders external_hostname, external_port, and external_tls from the service's anchoreConfig.
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "apiext") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.external" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
+external_hostname: {{ $serviceConfig.external_hostname | toYaml }}
+external_port: {{ $serviceConfig.external_port | toYaml }}
+external_tls: {{ $serviceConfig.external_tls }}
+{{- end }}
+
+{{/*
+Cycle timers configuration for a service.
+Renders cycle_timer_seconds and cycle_timers from the service's anchoreConfig.
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "analyzer") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.cycleTimers" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
+cycle_timer_seconds: {{ $serviceConfig.cycle_timer_seconds }}
+cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 2 }}
+{{- end }}
+
+{{/*
 Common server blocks
 When calling this template, .anchoreService can be included in the context for anchoreService specific server blocks
 {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
@@ -592,6 +617,21 @@ When calling this template, .component can be included in the context for compon
 {{- else if .Values.containerSecurityContext }}
   {{- toYaml .Values.containerSecurityContext }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Return the logging config for a service, with service-level override support.
+Checks anchoreConfig.<service>.logging first, falls back to anchoreConfig.logging.
+Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .) }}
+*/}}
+{{- define "enterprise.common.logging" -}}
+{{- $service := .service -}}
+{{- $serviceCfg := index .Values.anchoreConfig $service -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") -}}
+  {{- toYaml $serviceCfg.logging -}}
+{{- else -}}
+  {{- toYaml .Values.anchoreConfig.logging -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "enterprise.common.listenAddress" -}}

@@ -56,15 +56,8 @@ data:
   ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "{{ .Values.anchoreConfig.reports_worker.data_load_max_workers }}"
   ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL: "{{ .Values.anchoreConfig.reports.enable_graphiql }}"
   ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS: "1"
-  ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_ECS_CONTAINER: "true"
-  ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_CONTAINER: "true"
-  ANCHORE_ENTERPRISE_REPORTS_VULNERABILITIES_BY_K8S_NAMESPACE: "true"
-{{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" }}
-  {{- fail "The Value `-1` is no longer valid for `.Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `.Values.anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `.Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days` must be set to a value >1." -}}
-{{- else }}
   ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days }}"
   ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite }}"
-{{- end }}
   ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.integrations.integration_health_report_ttl_days }}"
 {{- with .Values.anchoreConfig.notifications.ui_url }}
   ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
@@ -77,7 +70,6 @@ data:
   ANCHORE_HINTS_ENABLED: "{{ .Values.anchoreConfig.analyzer.enable_hints }}"
   ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "36000"
   ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
-  ANCHORE_INTERNAL_SSL_VERIFY: "{{ .Values.anchoreConfig.internalServicesSSL.verifyCerts }}"
   ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
   ANCHORE_LAYER_CACHE_ENABLED: {{ ternary "true" "false" (gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0) | quote }}
   ANCHORE_LAYER_CACHE_SIZE_GB: "{{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}"
@@ -86,7 +78,6 @@ data:
   ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
   ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
   ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
-  ANCHORE_MAX_REQUEST_THREADS: "50"
   ANCHORE_OAUTH_ENABLED: "{{ .Values.anchoreConfig.user_authentication.oauth.enabled }}"
   ANCHORE_OAUTH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}"
   ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds }}"
@@ -95,26 +86,5 @@ data:
   ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
   ANCHORE_SAML_SECRET: "null"
   ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
-  ANCHORE_SSL_ENABLED: "{{ .Values.anchoreConfig.internalServicesSSL.enabled }}"
-{{- with .Values.anchoreConfig.internalServicesSSL.certSecretCertFileName }}
-  ANCHORE_SSL_CERT: "/home/anchore/certs/{{- . }}"
-{{- else }}
-  ANCHORE_SSL_CERT: "null"
-{{- end }}
-{{- with .Values.anchoreConfig.internalServicesSSL.certSecretKeyFileName }}
-  ANCHORE_SSL_KEY: "/home/anchore/certs/{{- . }}"
-{{- else }}
-  ANCHORE_SSL_KEY: "null"
-{{- end }}
   ANCHORE_SSO_REQUIRES_EXISTING_USERS: "{{ .Values.anchoreConfig.user_authentication.sso_require_existing_users }}"
   ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_DOTNET_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_GOLANG_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVA_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JAVASCRIPT_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_PYTHON_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUBY_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_STOCK_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_DEFAULT_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_RUST_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
-  ANCHORE_VULN_MATCHING_ECOSYSTEM_SPECIFIC_JVM_SEARCH_BY_CPE_ENABLED: "<ALLOW_API_CONFIGURATION>"
