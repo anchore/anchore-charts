@@ -21,11 +21,11 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise@sha256:66b214f11280f1329e4ad028a0f2d045c894846ff79da0070e1b7fb13d2b148d
+image: docker.io/anchore/enterprise:v6.0.0
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.26.0"
-  # digest: sha256:66b214f11280f1329e4ad028a0f2d045c894846ff79da0070e1b7fb13d2b148d
+  # tag: "v6.0.0"
+  # digest: sha256:abcdef123456
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -2209,12 +2209,11 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui@sha256:bcfd94db6b810b762274c74b52bba27a886f3a53f57bb70874a5c142a6709f97
+  image: docker.io/anchore/enterprise-ui:v6.0.0
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.26.0"
-    # digest: sha256:bcfd94db6b810b762274c74b52bba27a886f3a53f57bb70874a5c142a6709f97
-
+    # tag: "v6.0.0"
+    # digest: sha256:abcdef123456
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
