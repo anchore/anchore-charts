@@ -696,8 +696,8 @@ To restore your deployment to using your previous driver configurations:
 ### Common Resource Parameters
 
 | Name                                    | Description                                                                                                                                  | Value                                  |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                                      | `docker.io/anchore/enterprise:v5.25.1` |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |----------------------------------------|
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                                      | `docker.io/anchore/enterprise:v5.25.2` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                                    | `IfNotPresent`                         |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                                | `anchore-enterprise-pullcreds`         |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade                        | `bitnamilegacy/kubectl:1.30`           |
@@ -1332,6 +1332,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - update resource comments in values.yaml
   - adding appProtocol to services
   - adding optional serviceAccount creation
+  ### V.22.1
+    - Deploys Anchore Enterprise v5.25.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5252/) for more information.
 
 ### v3.21.x
   #### V3.21.0
