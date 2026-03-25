@@ -26,7 +26,7 @@ jobs:
       uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
 
     - name: Set up chart-testing
-      uses: helm/chart-testing-action@b43128a8b25298e1e7b043b78ea6613844e079b1 # v2.7.0
+      uses: helm/chart-testing-action@b43128a8b25298e1e7b043b78ea6613844e079b1 # v2.6.0
 
     - name: Run chart-testing (list-changed)
       id: list-changed
