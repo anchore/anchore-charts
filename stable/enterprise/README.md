@@ -1327,6 +1327,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### v3.23.x
   #### V3.23.0
     - Deploys Anchore Enterprise v5.26.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5260/) for more information.
+    - Defaults for cpe search now set by Anchore Enterprise service
 ### v3.22.x
   #### V3.22.0
   - Release note updates
