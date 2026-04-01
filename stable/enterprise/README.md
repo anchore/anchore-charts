@@ -1217,6 +1217,22 @@ To restore your deployment to using your previous driver configurations:
 | `ingress.tls`              | Configure tls for the ingress resource                             | `[]`                           |
 | `ingress.ingressClassName` | sets the ingress class name. As of k8s v1.18, this should be nginx | `nginx`                        |
 
+### Kubernetes Gateway API Parameters
+
+| Name                                  | Description                                                            | Value   |
+| ------------------------------------- | ---------------------------------------------------------------------- | ------- |
+| `gatewayApi.enabled`                  | Enable Gateway API resources (HTTPRoutes and optionally Gateway)       | `false` |
+| `gatewayApi.labels`                   | Common labels to add to all Gateway API resources                      | `{}`    |
+| `gatewayApi.annotations`              | Common annotations to add to all Gateway API resources                 | `{}`    |
+| `gatewayApi.gateway.create`           | Create a new Gateway resource. If false, reference an existing Gateway | `false` |
+| `gatewayApi.gateway.name`             | Name of existing Gateway to reference (required if create=false)       | `""`    |
+| `gatewayApi.gateway.namespace`        | Namespace of existing Gateway (for cross-namespace references)         | `""`    |
+| `gatewayApi.gateway.sectionName`      | Specific listener section name on the Gateway                          | `""`    |
+| `gatewayApi.gateway.gatewayClassName` | Gateway class name (required if create=true)                           | `""`    |
+| `gatewayApi.gateway.listeners`        | Listener configuration when creating a Gateway                         | `[]`    |
+| `gatewayApi.gateway.addresses`        | Gateway addresses configuration                                        | `[]`    |
+| `gatewayApi.routes`                   | HTTPRoute definitions - each key creates an HTTPRoute resource         | `{}`    |
+
 ### Google CloudSQL DB Parameters
 
 | Name                             | Description                                                                    | Value                                     |
@@ -1323,6 +1339,9 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+### v3.23.x
+  #### V3.23.0
+  - Adds support for Gateway API - disabled by default.
 
 ### v3.23.x
   #### V3.23.0
@@ -1347,6 +1366,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   #### V3.21.3
   - Deploys Anchore Enterprise v5.25.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5251/) for more information.
   - Cleaned up GitHub Action workflows.
+  - Adds a way to extend anchore enterprise service configs. This should only be used with guidance from Anchore Support.
 
 ### v3.20.x
   #### V3.20.0
