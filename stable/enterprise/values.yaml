@@ -2201,6 +2201,12 @@ gatewayApi:
   ##             - path:
   ##                 type: PathPrefix
   ##                 value: /v2/
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /version/
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /exp/
   ##           backendRefs:
   ##             - name: my-release-enterprise-api
   ##               port: 8228
