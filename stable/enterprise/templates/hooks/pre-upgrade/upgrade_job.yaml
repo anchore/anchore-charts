@@ -22,9 +22,6 @@ spec:
       name: {{ template "enterprise.upgradeJob.fullname" . }}
       labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
       annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
-        {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
-        checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
-        {{- end }}
     spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       {{- include "enterprise.common.hostAliases" (merge (dict "component" $component) .) | nindent 6 }}
@@ -50,7 +47,7 @@ spec:
         - name: wait-for-db
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
           command: ["/bin/bash", "-c"]
           args:
             - |
@@ -105,8 +102,7 @@ spec:
         {{- with .Values.containerSecurityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
         {{- end }}
-          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
-          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
           volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
           {{- if .Values.certStoreSecretName }}
             - name: certs
