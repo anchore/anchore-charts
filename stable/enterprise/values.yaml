@@ -2344,6 +2344,58 @@ ui:
   ##
   serviceAccountName: ""
 
+##################################################
+## @section Anchore Pre-Install Job Parameters
+## Pre-install job uses a Helm pre-install hook
+## to verify database connectivity before install
+##################################################
+preInstallJob:
+  ## @param preInstallJob.resources Resource requests and limits for the Anchore pre-install job
+  ##
+  resources: {}
+
+  ## @param preInstallJob.nodeSelector Node labels for the Anchore pre-install job pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param preInstallJob.tolerations Tolerations for the Anchore pre-install job pod assignment
+  ##
+  tolerations: []
+
+  ## @param preInstallJob.affinity Affinity for the Anchore pre-install job pod assignment
+  ##
+  affinity: {}
+
+  ## @param preInstallJob.annotations Annotations for the Anchore pre-install job
+  ##
+  annotations: {}
+
+  ## @param preInstallJob.labels Labels for the Anchore pre-install job
+  ##
+  labels: {}
+
+  ## @param preInstallJob.extraVolumes Define additional volumes for Anchore pre-install job pods
+  ##
+  extraVolumes: []
+
+  ## @param preInstallJob.extraVolumeMounts Define additional volume mounts for Anchore pre-install job pods
+  ##
+  extraVolumeMounts: []
+
+  ## @param preInstallJob.initContainers Add custom initContainer containers to the Anchore pre-install job pods
+  ##
+  initContainers: []
+
+  ## @param preInstallJob.hostAliases Define custom /etc/hosts entries for Anchore pre-install job pods
+  ##
+  hostAliases: []
+
+  ## @param preInstallJob.ttlSecondsAfterFinished The time period in seconds the pre-install job, and its related pods should be retained for
+  ## 0 == immediate deletion after completion
+  ## Set this to -1 to disable deleting the job automatically
+  ##
+  ttlSecondsAfterFinished: -1
+
 ############################################
 ## @section Anchore Upgrade Job Parameters
 ## Upgrade job uses a Helm post-install-hook
