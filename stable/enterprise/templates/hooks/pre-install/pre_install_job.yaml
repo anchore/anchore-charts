@@ -1,0 +1,83 @@
+{{- $component := "preInstallJob" -}}
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "enterprise.preInstallJob.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  {{- if ne (.Values.preInstallJob.ttlSecondsAfterFinished | quote) (-1 | quote) }}
+  ttlSecondsAfterFinished: {{ .Values.preInstallJob.ttlSecondsAfterFinished }}
+  {{- end }}
+  template:
+    metadata:
+      name: {{ template "enterprise.preInstallJob.fullname" . }}
+      labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
+      annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
+    spec:
+      {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
+      {{- include "enterprise.common.hostAliases" (merge (dict "component" $component) .) | nindent 6 }}
+      restartPolicy: Never
+      volumes: {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+      {{- with .Values.certStoreSecretName }}
+        - name: certs
+          secret:
+            secretName: {{ . }}
+      {{- end }}
+      {{- if .Values.cloudsql.useExistingServiceAcc }}
+        - name: {{ .Values.cloudsql.serviceAccSecretName }}
+          secret:
+            secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+      {{- end }}
+      {{- if or
+            (and .Values.cloudsql.enabled .Values.cloudsql.useSideCar)
+            (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
+        }}
+      initContainers:
+          {{- if include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .) }}
+          {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
+          {{- end }}
+          {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
+      {{- end }}
+      containers:
+        {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
+        - name: wait-for-db
+          image: {{ include "enterprise.common.image" . | trim }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- with .Values.containerSecurityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+        {{- end }}
+          envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
+          volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+          {{- if .Values.certStoreSecretName }}
+            - name: certs
+              mountPath: /home/anchore/certs/
+              readOnly: true
+          {{- end }}
+        {{- with .Values.preInstallJob.resources }}
+          resources: {{- toYaml . | nindent 12 }}
+        {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              while true; do
+                CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+                if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
+                  CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
+                fi
+                if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
+                  CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
+                fi
+                err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
+                if [[ !$err ]]; then
+                  echo "Database is ready"
+                  exit 0
+                fi
+                echo "Database is not ready yet, sleeping 10 seconds..."
+                sleep 10
+              done

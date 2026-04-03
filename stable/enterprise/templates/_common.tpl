@@ -137,12 +137,17 @@ Setup the common docker-entrypoint command for all Anchore Enterprise containers
 Setup the common envFrom configs
 */}}
 {{- define "enterprise.common.envFrom" -}}
+{{- if not .hook }}
 - configMapRef:
     name: {{ .Release.Name }}-enterprise-config-env-vars
+{{- end }}
 {{- if not .Values.injectSecretsViaEnv }}
   {{- if .Values.useExistingSecrets }}
 - secretRef:
     name: {{ .Values.existingSecretName }}
+  {{- else if .hook }}
+- secretRef:
+    name: {{ template "enterprise.hooks.fullname" . }}
   {{- else }}
 - secretRef:
     name: {{ template "enterprise.fullname" . }}

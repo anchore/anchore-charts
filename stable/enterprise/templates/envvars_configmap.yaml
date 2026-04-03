@@ -74,6 +74,7 @@ data:
   ANCHORE_LAYER_CACHE_ENABLED: {{ ternary "true" "false" (gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0) | quote }}
   ANCHORE_LAYER_CACHE_SIZE_GB: "{{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}"
   ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
+  ANCHORE_ENTERPRISE_LICENSE_PATH: "/home/anchore/license.yaml"
   ANCHORE_LOG_LEVEL: "{{ .Values.anchoreConfig.log_level }}"
   ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
   ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
