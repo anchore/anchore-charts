@@ -613,19 +613,9 @@ should render proper initContainers:
       command:
         - /bin/bash
         - -c
-      env:
-        - name: foo
-          value: bar
-        - name: bar
-          value: baz
-        - name: ANCHORE_ENDPOINT_HOSTNAME
-          value: test-release-enterprise-999-upgrade.test-namespace.svc.cluster.local
-        - name: ANCHORE_PORT
-          value: "null"
-        - name: ANCHORE_HOST_ID
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
+      envFrom:
+        - secretRef:
+            name: test-release-enterprise-hooks
       image: docker.io/anchore/enterprise:v6.0.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db

@@ -170,10 +170,10 @@ tests:
             "helm.sh/hook": pre-upgrade
             "helm.sh/hook-weight": "3"
 
-  - it: should render file checksum/secret annotation
+  - it: should not render file checksum/secret annotation
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
     asserts:
-      - exists:
+      - notExists:
           path: spec.template.metadata.annotations['checksum/secrets']
 
   - it: should render component serviceAccountName
@@ -292,26 +292,15 @@ tests:
           pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_DB_USER\}\":\"\$\{ANCHORE_DB_PASSWORD\}\"@\"\$\{ANCHORE_DB_HOST\}\":\"\$\{ANCHORE_DB_PORT\}\"\/\"\$\{ANCHORE_DB_NAME\}\"\?sslmode\=verify-full\\&sslrootcert\=\/home\/anchore\/certs\/test-root\.crt upgrade --dontask;
         count: 1
 
-  - it: should render upgradeJob component environment variables
+  - it: should render hook envFrom with hooks secret
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
-    set:
-      upgradeJob.extraEnv:
-        - name: upgradeJob
-          value: test
-        - name: test
-          value: foobar
     asserts:
-      - contains:
-          path: spec.template.spec.containers[0].env
+      - isSubset:
+          path: spec.template.spec.containers[0]
           content:
-            name: upgradeJob
-            value: test
-        count: 1
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: test
-            value: foobar
+            envFrom:
+              - secretRef:
+                  name: test-release-enterprise-hooks
 
   - it: should render component resource requests & limits
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
