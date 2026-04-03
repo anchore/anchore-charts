@@ -52,7 +52,6 @@ test_templates: &test_templates
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
-  - hooks/pre-upgrade/upgrade_job.yaml
   - datasyncer_deployment.yaml
 
 deployment_templates: &deployment_templates
@@ -146,7 +145,6 @@ tests:
       - policyengine_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
-      - hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -170,7 +168,6 @@ tests:
       - policyengine_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
-      - hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -195,7 +192,6 @@ tests:
       - policyengine_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
-      - hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
       - isNotSubset:
@@ -204,6 +200,31 @@ tests:
             envFrom:
               - configMapRef:
                   name: test-release-enterprise-config-env-vars
+              - secretRef:
+                  name: myExistingSecretName
+
+  - it: should render hook envFrom with hooks secret
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - secretRef:
+                  name: test-release-enterprise-hooks
+
+  - it: should render hook envFrom with existing secret
+    set:
+      useExistingSecrets: true
+      existingSecretName: "myExistingSecretName"
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
               - secretRef:
                   name: myExistingSecretName
 
