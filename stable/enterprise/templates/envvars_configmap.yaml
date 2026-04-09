@@ -18,7 +18,6 @@ data:
   ANCHORE_ADMIN_EMAIL: "{{ .Values.anchoreConfig.default_admin_email }}"
   ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED: "true"
   ANCHORE_ALLOW_ECR_IAM_AUTO: "{{ .Values.anchoreConfig.allow_awsecr_iam_auto }}"
-  ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "{{ .Values.anchoreConfig.user_authentication.hashed_passwords }}"
 {{- with .Values.anchoreConfig.keys.publicKeyFileName }}
   ANCHORE_AUTH_PRIVKEY: "/home/anchore/certs/{{- . }}"
 {{- else }}
@@ -78,7 +77,6 @@ data:
   ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
   ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
   ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
-  ANCHORE_OAUTH_ENABLED: "{{ .Values.anchoreConfig.user_authentication.oauth.enabled }}"
   ANCHORE_OAUTH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}"
   ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds }}"
   ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
