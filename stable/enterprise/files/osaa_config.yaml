@@ -208,13 +208,6 @@ services:
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
       nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss }}
-      sync:
-        enabled: true
-        connection_timeout_seconds: 3
-        read_timeout_seconds: 60
-        data:
-          grypedb:
-            enabled: true
       extended_support:
         rhel:
           enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled }}
