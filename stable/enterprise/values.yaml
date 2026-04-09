@@ -379,7 +379,6 @@ anchoreConfig:
     privateKeyFileName: ""
     publicKeyFileName: ""
 
-  ## @param anchoreConfig.user_authentication.oauth.enabled Enable OAuth for Anchore user authentication
   ## @param anchoreConfig.user_authentication.oauth.default_token_expiration_seconds The expiration, in seconds, for OAuth tokens
   ## @param anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds The expiration, in seconds, for OAuth refresh tokens
   ## @param anchoreConfig.user_authentication.allow_api_keys_for_saml_users Enable API key generation and authentication for SAML users
@@ -389,11 +388,6 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days The number of days elapsed after a user API key is deleted before it is garbage collected (-1 to disable)
   ## ref: https://docs.anchore.com/current/docs/configuration/#bearer-tokensoauth2
   ##
-  ## @param anchoreConfig.user_authentication.hashed_passwords Enable storing passwords as secure hashes in the database
-  ## This can dramatically increase CPU usage if you don't also use OAuth and tokens for internal communications
-  ## WARNING: You should not change this after a system has been initialized as it may cause a mismatch in existing passwords
-  ## ref: https://docs.anchore.com/current/docs/configuration/#configuring-hashed-passwords-and-oauth
-  ##
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
   ## @param anchoreConfig.user_authentication.disallow_native_users Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.
@@ -401,13 +395,11 @@ anchoreConfig:
   ##
   user_authentication:
     oauth:
-      enabled: true
       default_token_expiration_seconds: 3600
       refresh_token_expiration_seconds: 86400
     allow_api_keys_for_saml_users: false
     max_api_key_age_days: 365
     max_api_keys_per_user: 100
-    hashed_passwords: true
     sso_require_existing_users: false
     remove_deleted_user_api_keys_older_than_days: 365
     disallow_native_users: false
