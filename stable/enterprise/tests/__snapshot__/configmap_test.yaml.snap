@@ -97,10 +97,8 @@ should render additional audit uris when additionalResourceURIs is set:
 
         user_authentication:
           oauth:
-            enabled: ${ANCHORE_OAUTH_ENABLED}
             default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
             refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
           sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
@@ -370,13 +368,6 @@ should render additional audit uris when additionalResourceURIs is set:
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
-              sync:
-                enabled: true
-                connection_timeout_seconds: 3
-                read_timeout_seconds: 60
-                data:
-                  grypedb:
-                    enabled: true
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
@@ -717,10 +708,8 @@ should render the configmaps:
 
         user_authentication:
           oauth:
-            enabled: ${ANCHORE_OAUTH_ENABLED}
             default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
             refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
           sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
@@ -990,13 +979,6 @@ should render the configmaps:
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
-              sync:
-                enabled: true
-                connection_timeout_seconds: 3
-                read_timeout_seconds: 60
-                data:
-                  grypedb:
-                    enabled: true
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
@@ -1246,7 +1228,6 @@ should render the configmaps:
       ANCHORE_ADMIN_EMAIL: admin@myanchore
       ANCHORE_ALLOW_ECR_IAM_AUTO: "true"
       ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED: "true"
-      ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS: "true"
       ANCHORE_AUTH_PRIVKEY: "null"
       ANCHORE_AUTH_PUBKEY: "null"
       ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
@@ -1288,7 +1269,6 @@ should render the configmaps:
       ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
       ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
       ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
-      ANCHORE_OAUTH_ENABLED: "true"
       ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "86400"
       ANCHORE_OAUTH_TOKEN_EXPIRATION: "3600"
       ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
@@ -1533,10 +1513,8 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
 
         user_authentication:
           oauth:
-            enabled: ${ANCHORE_OAUTH_ENABLED}
             default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
             refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-          hashed_passwords: ${ANCHORE_AUTH_ENABLE_HASHED_PASSWORDS}
           sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
@@ -1809,13 +1787,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
-              sync:
-                enabled: true
-                connection_timeout_seconds: 3
-                read_timeout_seconds: 60
-                data:
-                  grypedb:
-                    enabled: true
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
