@@ -271,6 +271,7 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 */}}
 {{- define "enterprise.exclusionCheck" -}}
 {{- include "enterprise.deprecationChecks" . }}
+{{- include "enterprise.envVarExtraEnvCheck" . }}
 
 {{ $notify := false }}
 
@@ -338,6 +339,40 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 
 {{- end -}}
 
+
+{{/*
+Checks if any removed env vars are set via extraEnv (global or component-level).
+These env vars have been replaced by direct values file configuration and should no longer be set via extraEnv.
+Each entry in the list is a dict with "name" (env var name), "values_path" (replacement values path), and "components" (list of component keys to check).
+*/}}
+{{- define "enterprise.envVarExtraEnvCheck" -}}
+{{- $disallowedEnvVars := list
+  (dict "name" "ANCHORE_LAYER_CACHE_ENABLED" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_LAYER_CACHE_SIZE_GB" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_HINTS_ENABLED" "values_path" "anchoreConfig.analyzer.enable_hints" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED" "values_path" "N/A (hardcoded to true)" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES" "values_path" "N/A (hardcoded to false)" "components" (list "analyzer"))
+-}}
+{{- range $disallowed := $disallowedEnvVars }}
+  {{- range $envEntry := $.Values.extraEnv }}
+    {{- if eq $envEntry.name $disallowed.name }}
+      {{- fail (printf "The environment variable '%s' is no longer supported via extraEnv. Please remove it from extraEnv and set it directly via the values file at '%s'." $disallowed.name $disallowed.values_path) }}
+    {{- end }}
+  {{- end }}
+  {{- range $comp := $disallowed.components }}
+    {{- $compValues := index $.Values $comp }}
+    {{- if $compValues }}
+      {{- if $compValues.extraEnv }}
+        {{- range $envEntry := $compValues.extraEnv }}
+          {{- if eq $envEntry.name $disallowed.name }}
+            {{- fail (printf "The environment variable '%s' is no longer supported via %s.extraEnv. Please remove it and set it directly via the values file at '%s'." $disallowed.name $comp $disallowed.values_path) }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
 
 {{/*
 Ensuring use_proxy cannot be enabled without enable_ssl
