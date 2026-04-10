@@ -193,8 +193,8 @@ services:
     port: ${ANCHORE_PORT}
     catalog_client_conn_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_conn_timeout }}
     catalog_client_read_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_read_timeout }}
-    policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
-    enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+    policy_evaluation_cache_ttl: 3600
+    enable_package_db_load: {{ include "enterprise.policyEngineEnablePackageDBLoad" . }}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
       nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss }}
