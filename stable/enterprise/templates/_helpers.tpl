@@ -271,6 +271,7 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 */}}
 {{- define "enterprise.exclusionCheck" -}}
 {{- include "enterprise.deprecationChecks" . }}
+{{- include "enterprise.envVarExtraEnvCheck" . }}
 
 {{ $notify := false }}
 
@@ -338,6 +339,72 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 
 {{- end -}}
 
+
+{{/*
+Returns the value of ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD, preserving it from the
+previous env var ConfigMap on upgrades. Defaults to false on fresh installs.
+*/}}
+{{- define "enterprise.policyEngineEnablePackageDBLoad" -}}
+{{- $val := false -}}
+{{- if .Release.IsUpgrade -}}
+  {{- $envvarConfigmap := (lookup "v1" "ConfigMap" .Release.Namespace (printf "%s-enterprise-config-env-vars" .Release.Name)) -}}
+  {{- if $envvarConfigmap -}}
+    {{- $val = index $envvarConfigmap.data "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" -}}
+  {{- end -}}
+{{- end -}}
+{{- $val -}}
+{{- end -}}
+
+{{/*
+Checks if any removed env vars are set via extraEnv (global or component-level).
+These env vars have been replaced by direct values file configuration and should no longer be set via extraEnv.
+Each entry in the list is a dict with "name" (env var name), "values_path" (replacement values path), and "components" (list of component keys to check).
+*/}}
+{{- define "enterprise.envVarExtraEnvCheck" -}}
+{{- $disallowedEnvVars := list
+  (dict "name" "ANCHORE_LAYER_CACHE_ENABLED" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_LAYER_CACHE_SIZE_GB" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_HINTS_ENABLED" "values_path" "anchoreConfig.analyzer.enable_hints" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED" "values_path" "anchoreConfig.analyzer.enable_owned_package_filtering" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES" "values_path" "anchoreConfig.analyzer.keep_image_analysis_tmpfiles" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_CATALOG_IMAGE_GC_WORKERS" "values_path" "anchoreConfig.catalog.image_gc.max_worker_threads" "components" (list "catalog"))
+  (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ttl_days" "components" (list "catalog"))
+  (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite" "components" (list "catalog"))
+  (dict "name" "ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS" "values_path" "anchoreConfig.catalog.integrations.integration_health_report_ttl_days" "components" (list "catalog"))
+  (dict "name" "ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS" "values_path" "anchoreConfig.catalog.import_operation_expiration_days" "components" (list "catalog"))
+  (dict "name" "ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS" "values_path" "anchoreConfig.policy_engine.policy_evaluation_cache_ttl" "components" (list "policyEngine"))
+  (dict "name" "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" "values_path" "N/A (managed automatically on upgrades)" "components" (list "policyEngine"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL" "values_path" "anchoreConfig.reports.enable_graphiql" "components" (list "reports"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS" "values_path" "anchoreConfig.reports.max_async_execution_threads" "components" (list "reports"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT" "values_path" "anchoreConfig.reports.async_execution_timeout" "components" (list "reports"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS" "values_path" "anchoreConfig.reports_worker.enable_data_ingress" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS" "values_path" "anchoreConfig.reports_worker.enable_data_egress" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW" "values_path" "anchoreConfig.reports_worker.data_egress_window" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS" "values_path" "anchoreConfig.reports_worker.data_refresh_max_workers" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS" "values_path" "anchoreConfig.reports_worker.data_load_max_workers" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_UI_URL" "values_path" "anchoreConfig.notifications.ui_url" "components" (list "notifications"))
+  (dict "name" "ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED" "values_path" "anchoreConfig.data_syncer.auto_sync_enabled" "components" (list "dataSyncer"))
+-}}
+{{- range $disallowed := $disallowedEnvVars }}
+  {{- range $envEntry := $.Values.extraEnv }}
+    {{- if eq $envEntry.name $disallowed.name }}
+      {{- fail (printf "The environment variable '%s' is no longer supported via extraEnv. Please remove it from extraEnv and set it directly via the values file at '%s'." $disallowed.name $disallowed.values_path) }}
+    {{- end }}
+  {{- end }}
+  {{- range $comp := $disallowed.components }}
+    {{- $compValues := index $.Values $comp }}
+    {{- if $compValues }}
+      {{- if $compValues.extraEnv }}
+        {{- range $envEntry := $compValues.extraEnv }}
+          {{- if eq $envEntry.name $disallowed.name }}
+            {{- fail (printf "The environment variable '%s' is no longer supported via %s.extraEnv. Please remove it and set it directly via the values file at '%s'." $disallowed.name $comp $disallowed.values_path) }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
 
 {{/*
 Ensuring use_proxy cannot be enabled without enable_ssl

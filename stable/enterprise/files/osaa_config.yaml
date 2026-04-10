@@ -130,11 +130,11 @@ services:
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "analyzer") .) }}"
     port: ${ANCHORE_PORT}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
-    layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
-    layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
-    enable_hints: ${ANCHORE_HINTS_ENABLED}
-    enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
-    keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
+    layer_cache_enable: {{ gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0 }}
+    layer_cache_max_gigabytes: {{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}
+    enable_hints: {{ .Values.anchoreConfig.analyzer.enable_hints }}
+    enable_owned_package_filtering: {{ .Values.anchoreConfig.analyzer.enable_owned_package_filtering }}
+    keep_image_analysis_tmpfiles: {{ .Values.anchoreConfig.analyzer.keep_image_analysis_tmpfiles }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}
@@ -150,15 +150,15 @@ services:
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "catalog") .) | nindent 4 }}
     event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
     runtime_inventory:
-      inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
-      inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+      inventory_ttl_days: {{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days }}
+      inventory_ingest_overwrite: {{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite }}
     integrations:
-      integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
+      integration_health_report_ttl_days: {{ .Values.anchoreConfig.catalog.integrations.integration_health_report_ttl_days }}
     image_gc:
-      max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+      max_worker_threads: {{ .Values.anchoreConfig.catalog.image_gc.max_worker_threads }}
     runtime_compliance:
       object_store_bucket: "runtime_compliance_check"
-    import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+    import_operation_expiration_days: {{ .Values.anchoreConfig.catalog.import_operation_expiration_days }}
     analysis_queue_priority: {{ .Values.anchoreConfig.catalog.analysis_queue_priority }}
     sbom_vuln_scan:
       auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
@@ -201,8 +201,8 @@ services:
     port: ${ANCHORE_PORT}
     catalog_client_conn_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_conn_timeout }}
     catalog_client_read_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_read_timeout }}
-    policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
-    enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+    policy_evaluation_cache_ttl: {{ .Values.anchoreConfig.policy_engine.policy_evaluation_cache_ttl }}
+    enable_package_db_load: {{ include "enterprise.policyEngineEnablePackageDBLoad" . }}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
       nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss }}
@@ -288,10 +288,10 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reports") .) }}"
     port: ${ANCHORE_PORT}
-    enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
+    enable_graphiql: {{ .Values.anchoreConfig.reports.enable_graphiql }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
-    max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
-    async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
+    max_async_execution_threads: {{ .Values.anchoreConfig.reports.max_async_execution_threads }}
+    async_execution_timeout: {{ .Values.anchoreConfig.reports.async_execution_timeout }}
     use_volume: {{ .Values.anchoreConfig.reports.use_volume }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports") .) }}
@@ -304,11 +304,11 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reportsWorker") .) }}"
     port: ${ANCHORE_PORT}
-    enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
-    enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
-    data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
-    data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
-    data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+    enable_data_ingress: {{ .Values.anchoreConfig.reports_worker.enable_data_ingress }}
+    enable_data_egress: {{ .Values.anchoreConfig.reports_worker.enable_data_egress }}
+    data_egress_window: {{ .Values.anchoreConfig.reports_worker.data_egress_window }}
+    data_refresh_max_workers: {{ .Values.anchoreConfig.reports_worker.data_refresh_max_workers }}
+    data_load_max_workers: {{ .Values.anchoreConfig.reports_worker.data_load_max_workers }}
     ingress_images_max_workers: {{ .Values.anchoreConfig.reports_worker.ingress_images_max_workers }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "reports_worker") .) | nindent 4 }}
     event_stream: {{- toYaml .Values.anchoreConfig.reports_worker.event_stream | nindent 6 }}
@@ -325,7 +325,7 @@ services:
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "notifications") .) }}"
     port: ${ANCHORE_PORT}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "notifications") .) | nindent 4 }}
-    ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
+    ui_url: {{ .Values.anchoreConfig.notifications.ui_url | default (include "enterprise.ui.fullname" .) }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "notifications") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "notifications") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "notifications") .) }}
@@ -337,7 +337,7 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "dataSyncer") .) }}"
     port: ${ANCHORE_PORT}
-    auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
+    auto_sync_enabled: {{ .Values.anchoreConfig.data_syncer.auto_sync_enabled }}
     upload_dir: {{ .Values.scratchVolume.mountPath }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
