@@ -374,6 +374,9 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS" "values_path" "N/A (hardcoded to 7)" "components" (list "catalog"))
   (dict "name" "ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS" "values_path" "N/A (hardcoded to 3600)" "components" (list "policyEngine"))
   (dict "name" "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" "values_path" "N/A (managed automatically on upgrades)" "components" (list "policyEngine"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL" "values_path" "anchoreConfig.reports.enable_graphiql" "components" (list "reports"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS" "values_path" "N/A (hardcoded to 1)" "components" (list "reports"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT" "values_path" "anchoreConfig.reports.async_execution_timeout" "components" (list "reports"))
 -}}
 {{- range $disallowed := $disallowedEnvVars }}
   {{- range $envEntry := $.Values.extraEnv }}
