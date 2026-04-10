@@ -64,12 +64,8 @@ data:
   ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
   ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
   ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
-  ANCHORE_HINTS_ENABLED: "{{ .Values.anchoreConfig.analyzer.enable_hints }}"
   ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "36000"
   ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
-  ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
-  ANCHORE_LAYER_CACHE_ENABLED: {{ ternary "true" "false" (gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0) | quote }}
-  ANCHORE_LAYER_CACHE_SIZE_GB: "{{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}"
   ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
   ANCHORE_ENTERPRISE_LICENSE_PATH: "/home/anchore/license.yaml"
   ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
@@ -77,7 +73,6 @@ data:
   ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
   ANCHORE_OAUTH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}"
   ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "{{ .Values.anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds }}"
-  ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
   ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD: {{ $anchorePolicyEngineEnablePackageDBLoad }}
   ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
   ANCHORE_SAML_SECRET: "null"

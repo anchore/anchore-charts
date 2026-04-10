@@ -130,11 +130,11 @@ services:
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "analyzer") .) }}"
     port: ${ANCHORE_PORT}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
-    layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
-    layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
-    enable_hints: ${ANCHORE_HINTS_ENABLED}
-    enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
-    keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
+    layer_cache_enable: {{ gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0 }}
+    layer_cache_max_gigabytes: {{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}
+    enable_hints: {{ .Values.anchoreConfig.analyzer.enable_hints }}
+    enable_owned_package_filtering: true
+    keep_image_analysis_tmpfiles: false
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}
