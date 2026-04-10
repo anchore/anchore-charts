@@ -28,7 +28,6 @@ data:
 {{- else }}
   ANCHORE_AUTH_PUBKEY: "null"
 {{- end }}
-  ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
   ANCHORECTL_URL: "http://localhost:8228"
   ANCHORECTL_USERNAME: "admin"
   ANCHORECTL_ACCOUNT: "admin"
@@ -53,9 +52,6 @@ data:
   ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "{{ .Values.anchoreConfig.reports_worker.data_load_max_workers }}"
   ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL: "{{ .Values.anchoreConfig.reports.enable_graphiql }}"
   ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS: "1"
-  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days }}"
-  ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "{{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite }}"
-  ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS: "{{ .Values.anchoreConfig.catalog.integrations.integration_health_report_ttl_days }}"
 {{- with .Values.anchoreConfig.notifications.ui_url }}
   ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
 {{- else }}
@@ -65,7 +61,6 @@ data:
   ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
   ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
   ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "36000"
-  ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
   ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
   ANCHORE_ENTERPRISE_LICENSE_PATH: "/home/anchore/license.yaml"
   ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
