@@ -150,15 +150,15 @@ services:
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "catalog") .) | nindent 4 }}
     event_log: {{- toYaml .Values.anchoreConfig.catalog.event_log | nindent 6 }}
     runtime_inventory:
-      inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
-      inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+      inventory_ttl_days: {{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ttl_days }}
+      inventory_ingest_overwrite: {{ .Values.anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite }}
     integrations:
-      integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
+      integration_health_report_ttl_days: {{ .Values.anchoreConfig.catalog.integrations.integration_health_report_ttl_days }}
     image_gc:
-      max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+      max_worker_threads: 4
     runtime_compliance:
       object_store_bucket: "runtime_compliance_check"
-    import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+    import_operation_expiration_days: 7
     analysis_queue_priority: {{ .Values.anchoreConfig.catalog.analysis_queue_priority }}
     sbom_vuln_scan:
       auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}

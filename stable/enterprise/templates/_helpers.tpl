@@ -352,6 +352,11 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_HINTS_ENABLED" "values_path" "anchoreConfig.analyzer.enable_hints" "components" (list "analyzer"))
   (dict "name" "ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED" "values_path" "N/A (hardcoded to true)" "components" (list "analyzer"))
   (dict "name" "ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES" "values_path" "N/A (hardcoded to false)" "components" (list "analyzer"))
+  (dict "name" "ANCHORE_CATALOG_IMAGE_GC_WORKERS" "values_path" "N/A (hardcoded to 4)" "components" (list "catalog"))
+  (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ttl_days" "components" (list "catalog"))
+  (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite" "components" (list "catalog"))
+  (dict "name" "ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS" "values_path" "anchoreConfig.catalog.integrations.integration_health_report_ttl_days" "components" (list "catalog"))
+  (dict "name" "ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS" "values_path" "N/A (hardcoded to 7)" "components" (list "catalog"))
 -}}
 {{- range $disallowed := $disallowedEnvVars }}
   {{- range $envEntry := $.Values.extraEnv }}
