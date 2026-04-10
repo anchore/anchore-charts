@@ -29,8 +29,6 @@ data:
   ANCHORE_AUTH_PUBKEY: "null"
 {{- end }}
   ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
-  ANCHORE_CLI_URL: "http://localhost:8228"
-  ANCHORE_CLI_USER: "admin"
   ANCHORECTL_URL: "http://localhost:8228"
   ANCHORECTL_USERNAME: "admin"
   ANCHORECTL_ACCOUNT: "admin"
@@ -74,7 +72,6 @@ data:
   ANCHORE_LAYER_CACHE_SIZE_GB: "{{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}"
   ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
   ANCHORE_ENTERPRISE_LICENSE_PATH: "/home/anchore/license.yaml"
-  ANCHORE_LOG_LEVEL: "{{ .Values.anchoreConfig.log_level }}"
   ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
   ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
   ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
