@@ -133,8 +133,8 @@ services:
     layer_cache_enable: {{ gt .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes 0.0 }}
     layer_cache_max_gigabytes: {{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}
     enable_hints: {{ .Values.anchoreConfig.analyzer.enable_hints }}
-    enable_owned_package_filtering: true
-    keep_image_analysis_tmpfiles: false
+    enable_owned_package_filtering: {{ .Values.anchoreConfig.analyzer.enable_owned_package_filtering }}
+    keep_image_analysis_tmpfiles: {{ .Values.anchoreConfig.analyzer.keep_image_analysis_tmpfiles }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}
@@ -155,10 +155,10 @@ services:
     integrations:
       integration_health_report_ttl_days: {{ .Values.anchoreConfig.catalog.integrations.integration_health_report_ttl_days }}
     image_gc:
-      max_worker_threads: 4
+      max_worker_threads: {{ .Values.anchoreConfig.catalog.image_gc.max_worker_threads }}
     runtime_compliance:
       object_store_bucket: "runtime_compliance_check"
-    import_operation_expiration_days: 7
+    import_operation_expiration_days: {{ .Values.anchoreConfig.catalog.import_operation_expiration_days }}
     analysis_queue_priority: {{ .Values.anchoreConfig.catalog.analysis_queue_priority }}
     sbom_vuln_scan:
       auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
@@ -193,7 +193,7 @@ services:
     port: ${ANCHORE_PORT}
     catalog_client_conn_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_conn_timeout }}
     catalog_client_read_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_read_timeout }}
-    policy_evaluation_cache_ttl: 3600
+    policy_evaluation_cache_ttl: {{ .Values.anchoreConfig.policy_engine.policy_evaluation_cache_ttl }}
     enable_package_db_load: {{ include "enterprise.policyEngineEnablePackageDBLoad" . }}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
@@ -282,7 +282,7 @@ services:
     port: ${ANCHORE_PORT}
     enable_graphiql: {{ .Values.anchoreConfig.reports.enable_graphiql }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
-    max_async_execution_threads: 1
+    max_async_execution_threads: {{ .Values.anchoreConfig.reports.max_async_execution_threads }}
     async_execution_timeout: {{ .Values.anchoreConfig.reports.async_execution_timeout }}
     use_volume: {{ .Values.anchoreConfig.reports.use_volume }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
@@ -329,7 +329,7 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "dataSyncer") .) }}"
     port: ${ANCHORE_PORT}
-    auto_sync_enabled: true
+    auto_sync_enabled: {{ .Values.anchoreConfig.data_syncer.auto_sync_enabled }}
     upload_dir: {{ .Values.scratchVolume.mountPath }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
