@@ -36,11 +36,6 @@ data:
 {{- end }}
   ANCHORE_DB_TIMEOUT: "{{ .Values.anchoreConfig.database.timeout }}"
   ANCHORE_ENABLE_METRICS: "{{ .Values.anchoreConfig.metrics.enabled }}"
-  ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS: "{{ .Values.anchoreConfig.reports_worker.enable_data_ingress }}"
-  ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS: "{{ .Values.anchoreConfig.reports_worker.enable_data_egress }}"
-  ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: "{{ .Values.anchoreConfig.reports_worker.data_egress_window }}"
-  ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS: "{{ .Values.anchoreConfig.reports_worker.data_refresh_max_workers }}"
-  ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "{{ .Values.anchoreConfig.reports_worker.data_load_max_workers }}"
 {{- with .Values.anchoreConfig.notifications.ui_url }}
   ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
 {{- else }}

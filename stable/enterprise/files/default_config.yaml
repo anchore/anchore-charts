@@ -296,11 +296,11 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reportsWorker") .) }}"
     port: ${ANCHORE_PORT}
-    enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
-    enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
-    data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
-    data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
-    data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+    enable_data_ingress: {{ .Values.anchoreConfig.reports_worker.enable_data_ingress }}
+    enable_data_egress: {{ .Values.anchoreConfig.reports_worker.enable_data_egress }}
+    data_egress_window: {{ .Values.anchoreConfig.reports_worker.data_egress_window }}
+    data_refresh_max_workers: {{ .Values.anchoreConfig.reports_worker.data_refresh_max_workers }}
+    data_load_max_workers: {{ .Values.anchoreConfig.reports_worker.data_load_max_workers }}
     ingress_images_max_workers: {{ .Values.anchoreConfig.reports_worker.ingress_images_max_workers }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "reports_worker") .) | nindent 4 }}
     event_stream: {{- toYaml .Values.anchoreConfig.reports_worker.event_stream | nindent 6 }}
