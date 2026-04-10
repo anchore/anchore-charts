@@ -556,6 +556,12 @@ anchoreConfig:
     ##
     enable_hints: false
 
+    ## @param anchoreConfig.analyzer.enable_owned_package_filtering Enable filtering of packages that are owned by other packages
+    enable_owned_package_filtering: true
+
+    ## @param anchoreConfig.analyzer.keep_image_analysis_tmpfiles Keep temporary files generated during image analysis
+    keep_image_analysis_tmpfiles: false
+
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
     ## Configures syft, content search, file contents, secret search, and malware scanning
     ## ref: https://docs.anchore.com/current/docs/compliance_management/policy_gates/#gate-files
@@ -752,6 +758,13 @@ anchoreConfig:
 
     ## @param anchoreConfig.catalog.integrations.integration_health_report_ttl_days TTL for integration health reports.
     ##
+    ## @param anchoreConfig.catalog.image_gc.max_worker_threads Number of worker threads for image garbage collection
+    image_gc:
+      max_worker_threads: 4
+
+    ## @param anchoreConfig.catalog.import_operation_expiration_days Number of days before incomplete import operations expire
+    import_operation_expiration_days: 7
+
     integrations:
       integration_health_report_ttl_days: 2
 
@@ -772,6 +785,9 @@ anchoreConfig:
   ## @param anchoreConfig.policy_engine.extendedConfig appends additional configs to the policy_engine service's Anchore configs
   policy_engine:
     extendedConfig: {}
+
+    ## @param anchoreConfig.policy_engine.policy_evaluation_cache_ttl TTL in seconds for policy evaluation cache
+    policy_evaluation_cache_ttl: 3600
 
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
@@ -949,6 +965,9 @@ anchoreConfig:
     ## The value should be a number followed by "w", "d", or "h" to represent weeks, days or hours
     async_execution_timeout: 48h
 
+    ## @param anchoreConfig.reports.max_async_execution_threads Maximum number of threads for async report execution
+    max_async_execution_threads: 1
+
     ## @param anchoreConfig.reports.cycle_timer_seconds Default cycle timer interval in seconds
     cycle_timer_seconds: 1
 
@@ -1078,6 +1097,9 @@ anchoreConfig:
       system_config_refresh_watcher: 20
 
   data_syncer:
+    ## @param anchoreConfig.data_syncer.auto_sync_enabled Enable automatic data synchronization
+    auto_sync_enabled: true
+
     ## @param anchoreConfig.data_syncer.extendedConfig appends additional configs to the data_syncer service's Anchore configs
     extendedConfig: {}
 
