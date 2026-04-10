@@ -341,6 +341,21 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 
 
 {{/*
+Returns the value of ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD, preserving it from the
+previous env var ConfigMap on upgrades. Defaults to false on fresh installs.
+*/}}
+{{- define "enterprise.policyEngineEnablePackageDBLoad" -}}
+{{- $val := false -}}
+{{- if .Release.IsUpgrade -}}
+  {{- $envvarConfigmap := (lookup "v1" "ConfigMap" .Release.Namespace (printf "%s-enterprise-config-env-vars" .Release.Name)) -}}
+  {{- if $envvarConfigmap -}}
+    {{- $val = index $envvarConfigmap.data "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" -}}
+  {{- end -}}
+{{- end -}}
+{{- $val -}}
+{{- end -}}
+
+{{/*
 Checks if any removed env vars are set via extraEnv (global or component-level).
 These env vars have been replaced by direct values file configuration and should no longer be set via extraEnv.
 Each entry in the list is a dict with "name" (env var name), "values_path" (replacement values path), and "components" (list of component keys to check).
@@ -357,6 +372,8 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite" "components" (list "catalog"))
   (dict "name" "ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS" "values_path" "anchoreConfig.catalog.integrations.integration_health_report_ttl_days" "components" (list "catalog"))
   (dict "name" "ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS" "values_path" "N/A (hardcoded to 7)" "components" (list "catalog"))
+  (dict "name" "ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS" "values_path" "N/A (hardcoded to 3600)" "components" (list "policyEngine"))
+  (dict "name" "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" "values_path" "N/A (managed automatically on upgrades)" "components" (list "policyEngine"))
 -}}
 {{- range $disallowed := $disallowedEnvVars }}
   {{- range $envEntry := $.Values.extraEnv }}
