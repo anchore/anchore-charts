@@ -377,6 +377,11 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL" "values_path" "anchoreConfig.reports.enable_graphiql" "components" (list "reports"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS" "values_path" "N/A (hardcoded to 1)" "components" (list "reports"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT" "values_path" "anchoreConfig.reports.async_execution_timeout" "components" (list "reports"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS" "values_path" "anchoreConfig.reports_worker.enable_data_ingress" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS" "values_path" "anchoreConfig.reports_worker.enable_data_egress" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW" "values_path" "anchoreConfig.reports_worker.data_egress_window" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS" "values_path" "anchoreConfig.reports_worker.data_refresh_max_workers" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS" "values_path" "anchoreConfig.reports_worker.data_load_max_workers" "components" (list "reportsWorker"))
 -}}
 {{- range $disallowed := $disallowedEnvVars }}
   {{- range $envEntry := $.Values.extraEnv }}
