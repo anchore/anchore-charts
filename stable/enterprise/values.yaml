@@ -21,11 +21,11 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise@sha256:66b214f11280f1329e4ad028a0f2d045c894846ff79da0070e1b7fb13d2b148d
+image: docker.io/anchore/enterprise@sha256:<TBD>
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.26.0"
-  # digest: sha256:66b214f11280f1329e4ad028a0f2d045c894846ff79da0070e1b7fb13d2b148d
+  # tag: "v5.26.1"
+  # digest: sha256:<TBD>
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -159,7 +159,7 @@ affinity: {}
 ##
 topologySpreadConstraints: []
 
-## @param scratchVolume.mountPath The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports
+## @param scratchVolume.mountPath The mount path of an external volume for scratch space. This top level value will set it for ALL anchore pods. For specific components, you can override this value using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume.details)
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
 ## @param scratchVolume.fixerInitContainerImage The image to use for the mode-fixer initContainer
 ## @param scratchVolume.details [object] Details for the k8s volume to be created (defaults to default emptyDir)
