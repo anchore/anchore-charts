@@ -288,10 +288,10 @@ services:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     listen: "{{ include "enterprise.common.listenAddress" (merge (dict "component" "reports") .) }}"
     port: ${ANCHORE_PORT}
-    enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
+    enable_graphiql: {{ .Values.anchoreConfig.reports.enable_graphiql }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
-    max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
-    async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
+    max_async_execution_threads: 1
+    async_execution_timeout: {{ .Values.anchoreConfig.reports.async_execution_timeout }}
     use_volume: {{ .Values.anchoreConfig.reports.use_volume }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports") .) }}
