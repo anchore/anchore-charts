@@ -382,6 +382,8 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW" "values_path" "anchoreConfig.reports_worker.data_egress_window" "components" (list "reportsWorker"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS" "values_path" "anchoreConfig.reports_worker.data_refresh_max_workers" "components" (list "reportsWorker"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS" "values_path" "anchoreConfig.reports_worker.data_load_max_workers" "components" (list "reportsWorker"))
+  (dict "name" "ANCHORE_ENTERPRISE_UI_URL" "values_path" "anchoreConfig.notifications.ui_url" "components" (list "notifications"))
+  (dict "name" "ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED" "values_path" "N/A (hardcoded to true)" "components" (list "dataSyncer"))
 -}}
 {{- range $disallowed := $disallowedEnvVars }}
   {{- range $envEntry := $.Values.extraEnv }}

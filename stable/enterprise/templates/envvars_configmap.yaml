@@ -23,7 +23,6 @@ data:
   ANCHORECTL_URL: "http://localhost:8228"
   ANCHORECTL_USERNAME: "admin"
   ANCHORECTL_ACCOUNT: "admin"
-  ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED: "true"
   ANCHORE_DISABLE_METRICS_AUTH: "{{ .Values.anchoreConfig.metrics.auth_disabled }}"
   ANCHORE_DB_POOL_MAX_OVERFLOW: "{{ .Values.anchoreConfig.database.db_pool_max_overflow }}"
   ANCHORE_DB_POOL_SIZE: "{{ .Values.anchoreConfig.database.db_pool_size }}"
@@ -36,11 +35,6 @@ data:
 {{- end }}
   ANCHORE_DB_TIMEOUT: "{{ .Values.anchoreConfig.database.timeout }}"
   ANCHORE_ENABLE_METRICS: "{{ .Values.anchoreConfig.metrics.enabled }}"
-{{- with .Values.anchoreConfig.notifications.ui_url }}
-  ANCHORE_ENTERPRISE_UI_URL: "{{ . }}"
-{{- else }}
-  ANCHORE_ENTERPRISE_UI_URL: {{ include "enterprise.ui.fullname" . | quote }}
-{{- end }}
   ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
   ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
   ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
