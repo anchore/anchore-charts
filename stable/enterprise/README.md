@@ -22,6 +22,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [Configuring Object Storage](#configuring-object-storage)
   - [Configuring Analysis Archive Storage](#configuring-analysis-archive-storage)
   - [Existing Secrets](#existing-secrets)
+    - [Object Store & Analysis Archive Credential Secrets](#object-store--analysis-archive-credential-secrets)
   - [Ingress](#ingress)
   - [Prometheus Metrics](#prometheus-metrics)
   - [Scaling Individual Services](#scaling-individual-services)
@@ -337,6 +338,61 @@ stringData:
   ANCHORE_APPDB_URI: postgresql://anchoreengine:anchore-postgres,123@anchore-postgresql:5432/anchore
   ANCHORE_REDIS_URI: redis://:anchore-redis,123@anchore-ui-redis-master:6379
 
+```
+
+#### Object Store & Analysis Archive Credential Secrets
+
+When using S3-compatible storage for the object store or analysis archive, the chart can manage storage driver credentials via Kubernetes secrets instead of storing them in plaintext in the ConfigMap.
+
+There are two modes of operation:
+
+**Auto-created secret** - If `access_key` and `secret_key` are set directly in the storage driver config, the chart will automatically create a secret named `<release>-enterprise-osaa-creds` containing the credentials. The ConfigMap will reference the credentials via environment variable placeholders instead of containing them in plaintext.
+
+**Existing secret** - If you prefer to manage the secret yourself, set `existingCredentialSecret` in the storage driver config to reference a pre-created secret. You can optionally set `accessKeySecretKey` and `secretKeySecretKey` to specify custom key names within the secret (defaults: `access_key` and `secret_key`).
+
+To use an existing secret, first create it:
+
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-osaa-creds
+type: Opaque
+stringData:
+  object_store_access_key: ABCDEFGHIJK123456789
+  object_store_secret_key: 987654321LKJIHGFEDCBA
+  analysis_archive_access_key: ABCDEFGHIJK123456789
+  analysis_archive_secret_key: 987654321LKJIHGFEDCBA
+```
+
+Then reference it in your values file:
+
+```yaml
+anchoreConfig:
+  catalog:
+    object_store:
+      storage_driver:
+        name: s3
+        config:
+          bucket: my-object-store-bucket
+          create_bucket: false
+          region: us-west-1
+          iamauto: false
+          existingCredentialSecret: my-osaa-creds
+          accessKeySecretKey: object_store_access_key
+          secretKeySecretKey: object_store_secret_key
+    analysis_archive:
+      storage_driver:
+        name: s3
+        config:
+          bucket: my-analysis-archive-bucket
+          create_bucket: false
+          region: us-west-1
+          iamauto: false
+          existingCredentialSecret: my-osaa-creds
+          accessKeySecretKey: analysis_archive_access_key
+          secretKeySecretKey: analysis_archive_secret_key
 ```
 
 ### Ingress

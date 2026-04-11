@@ -172,14 +172,14 @@ services:
       batch_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.batch_size }}
       pool_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.pool_size }}
   {{- if and .Values.osaaMigrationJob.enabled .Values.osaaMigrationJob.analysisArchiveMigration.run }}
-    analysis_archive: {{- toYaml .Values.osaaMigrationJob.analysisArchiveMigration.analysis_archive | nindent 6 }}
+    analysis_archive: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.osaaMigrationJob.analysisArchiveMigration.analysis_archive "envPrefix" "ANCHORE_ANALYSIS_ARCHIVE" "storeName" "analysis_archive" "context" .) | nindent 6 }}
   {{- else }}
-    analysis_archive: {{- toYaml .Values.anchoreConfig.catalog.analysis_archive | nindent 6 }}
+    analysis_archive: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.analysis_archive "envPrefix" "ANCHORE_ANALYSIS_ARCHIVE" "storeName" "analysis_archive" "context" .) | nindent 6 }}
   {{- end }}
   {{- if and .Values.osaaMigrationJob.enabled .Values.osaaMigrationJob.objectStoreMigration.run }}
-    object_store: {{- toYaml .Values.osaaMigrationJob.objectStoreMigration.object_store | nindent 6 }}
+    object_store: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.osaaMigrationJob.objectStoreMigration.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 6 }}
   {{- else }}
-    object_store: {{- toYaml .Values.anchoreConfig.catalog.object_store | nindent 6 }}
+    object_store: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 6 }}
   {{- end }}
     ssl_enable: ${ANCHORE_SSL_ENABLED}
     ssl_cert: ${ANCHORE_SSL_CERT}

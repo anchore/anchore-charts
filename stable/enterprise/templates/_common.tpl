@@ -191,6 +191,8 @@ When calling this template, .component can be included in the context for compon
   valueFrom:
     fieldRef:
       fieldPath: metadata.name
+{{- include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) }}
+{{- include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.anchoreConfig.catalog.analysis_archive "envPrefix" "ANCHORE_ANALYSIS_ARCHIVE" "storeName" "analysis_archive" "context" .) }}
 {{- end -}}
 
 
