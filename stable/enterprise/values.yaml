@@ -660,7 +660,17 @@ anchoreConfig:
     ##  storage_driver:
     ##    # Valid storage driver names: 'db', 's3', 'swift'
     ##    name: db
-    ##    config: {}
+    ##    config:
+    ##      access_key: 'MY_ACCESS_KEY'
+    ##      secret_key: 'MY_SECRET_KEY'
+    ##      url: 'https://my-s3-compatible-endpoint.example.com'
+    ##      region: false
+    ##      bucket: anchorearchive
+    ##      create_bucket: true
+    ##      # Use an existing Kubernetes secret for access_key and secret_key instead of inline values
+    ##      # existingCredentialSecret: ""
+    ##      # accessKeySecretKey: access_key
+    ##      # secretKeySecretKey: secret_key
 
     ## @param anchoreConfig.catalog.object_store [object] Custom object storage YAML configuration
     ## ref: https://docs.anchore.com/current/docs/configuration/storage/object_store/
@@ -675,6 +685,18 @@ anchoreConfig:
         # Valid storage driver names: 'db', 's3', 'swift'
         name: db
         config: {}
+        ## When using s3-compatible storage, set config to:
+        ##  config:
+        ##    access_key: 'MY_ACCESS_KEY'
+        ##    secret_key: 'MY_SECRET_KEY'
+        ##    url: 'https://my-s3-compatible-endpoint.example.com'
+        ##    region: false
+        ##    bucket: anchorearchive
+        ##    create_bucket: true
+        ##    # Use an existing Kubernetes secret for access_key and secret_key instead of inline values
+        ##    existingCredentialSecret: ""
+        ##    accessKeySecretKey: access_key
+        ##    secretKeySecretKey: secret_key
 
     ## @param anchoreConfig.catalog.runtime_inventory.inventory_ttl_days TTL for runtime inventory.
     ## @param anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite force runtime inventory to be overwritten upon every update for that reported context.
