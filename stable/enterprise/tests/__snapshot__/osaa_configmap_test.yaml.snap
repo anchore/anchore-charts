@@ -615,10 +615,10 @@ should render the configmaps for osaa migration if enabled:
               enabled: true
               storage_driver:
                 config:
-                  access_key: itsa
+                  access_key: ${ANCHORE_ANALYSIS_ARCHIVE_ACCESS_KEY}
                   bucket: analysisarchive
                   region: null
-                  secret_key: test
+                  secret_key: ${ANCHORE_ANALYSIS_ARCHIVE_SECRET_KEY}
                   url: http://myminio.mynamespace.svc.cluster.local:9000
                 name: s3
             object_store:

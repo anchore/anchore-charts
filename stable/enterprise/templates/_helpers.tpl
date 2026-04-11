@@ -303,12 +303,17 @@ Usage: {{ include "enterprise.storageCredentialSecretName" (dict "storeConfig" .
 */}}
 {{- define "enterprise.storageCredentialSecretName" -}}
 {{- $storeConfig := .storeConfig -}}
-{{- if and $storeConfig (index $storeConfig "storage_driver") (index $storeConfig "storage_driver" "config") -}}
-  {{- $sdConfig := index $storeConfig "storage_driver" "config" -}}
-  {{- if index $sdConfig "existingCredentialSecret" -}}
-    {{- index $sdConfig "existingCredentialSecret" -}}
-  {{- else if and (index $sdConfig "access_key") (index $sdConfig "secret_key") -}}
-    {{- printf "%s-osaa-creds" (include "enterprise.fullname" .context) -}}
+{{- if $storeConfig -}}
+  {{- $sd := index $storeConfig "storage_driver" -}}
+  {{- if $sd -}}
+    {{- $sdConfig := index $sd "config" -}}
+    {{- if $sdConfig -}}
+      {{- if index $sdConfig "existingCredentialSecret" -}}
+        {{- index $sdConfig "existingCredentialSecret" -}}
+      {{- else if and (index $sdConfig "access_key") (index $sdConfig "secret_key") -}}
+        {{- printf "%s-osaa-creds" (include "enterprise.fullname" .context) -}}
+      {{- end -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -322,8 +327,17 @@ Usage: {{ include "enterprise.storageConfig" (dict "storeConfig" .Values.anchore
 {{- $storeConfig := .storeConfig -}}
 {{- $envPrefix := .envPrefix -}}
 {{- $secretName := include "enterprise.storageCredentialSecretName" . -}}
-{{- if and $storeConfig (index $storeConfig "storage_driver") (index $storeConfig "storage_driver" "config") -}}
-  {{- $sdConfig := deepCopy (index $storeConfig "storage_driver" "config") -}}
+{{- $hasDriverConfig := false -}}
+{{- if $storeConfig -}}
+  {{- $sd := index $storeConfig "storage_driver" -}}
+  {{- if $sd -}}
+    {{- if index $sd "config" -}}
+      {{- $hasDriverConfig = true -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $hasDriverConfig -}}
+  {{- $sdConfig := deepCopy (index (index $storeConfig "storage_driver") "config") -}}
   {{- if $secretName -}}
     {{- $_ := set $sdConfig "access_key" (printf "${%s_ACCESS_KEY}" $envPrefix) -}}
     {{- $_ := set $sdConfig "secret_key" (printf "${%s_SECRET_KEY}" $envPrefix) -}}
