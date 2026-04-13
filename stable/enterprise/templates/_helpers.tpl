@@ -384,6 +384,20 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS" "values_path" "anchoreConfig.reports_worker.data_load_max_workers" "components" (list "reportsWorker"))
   (dict "name" "ANCHORE_ENTERPRISE_UI_URL" "values_path" "anchoreConfig.notifications.ui_url" "components" (list "notifications"))
   (dict "name" "ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED" "values_path" "anchoreConfig.data_syncer.auto_sync_enabled" "components" (list "dataSyncer"))
+  (dict "name" "ANCHORE_ADMIN_EMAIL" "values_path" "anchoreConfig.default_admin_email" "components" (list))
+  (dict "name" "ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED" "values_path" "anchoreConfig.api_driven_configuration_enabled" "components" (list))
+  (dict "name" "ANCHORE_ALLOW_ECR_IAM_AUTO" "values_path" "anchoreConfig.allow_awsecr_iam_auto" "components" (list))
+  (dict "name" "ANCHORE_AUTH_PRIVKEY" "values_path" "anchoreConfig.keys.publicKeyFileName" "components" (list))
+  (dict "name" "ANCHORE_AUTH_PUBKEY" "values_path" "anchoreConfig.keys.privateKeyFileName" "components" (list))
+  (dict "name" "ANCHORE_DISABLE_METRICS_AUTH" "values_path" "anchoreConfig.metrics.auth_disabled" "components" (list))
+  (dict "name" "ANCHORE_ENABLE_METRICS" "values_path" "anchoreConfig.metrics.enabled" "components" (list))
+  (dict "name" "ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB" "values_path" "anchoreConfig.max_compressed_image_size_mb" "components" (list))
+  (dict "name" "ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB" "values_path" "anchoreConfig.max_import_content_size_mb" "components" (list))
+  (dict "name" "ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB" "values_path" "anchoreConfig.max_source_import_size_mb" "components" (list))
+  (dict "name" "ANCHORE_OAUTH_TOKEN_EXPIRATION" "values_path" "anchoreConfig.user_authentication.oauth.default_token_expiration_seconds" "components" (list))
+  (dict "name" "ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION" "values_path" "anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds" "components" (list))
+  (dict "name" "ANCHORE_SSO_REQUIRES_EXISTING_USERS" "values_path" "anchoreConfig.user_authentication.sso_require_existing_users" "components" (list))
+  (dict "name" "ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS" "values_path" "anchoreConfig.image_analyze_timeout_seconds" "components" (list))
 -}}
 {{- range $disallowed := $disallowedEnvVars }}
   {{- range $envEntry := $.Values.extraEnv }}
