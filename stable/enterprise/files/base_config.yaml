@@ -31,7 +31,7 @@ keys:
 
 # OAuth configuration for internal service-to-service authentication
 oauth:
-  default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
+  default_token_expiration_seconds: {{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}
 
 # Credentials configuration
 credentials:
