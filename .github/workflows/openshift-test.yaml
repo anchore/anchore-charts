@@ -18,8 +18,8 @@ jobs:
       matrix:
         cluster: [
           {distribution: "openshift", version: "4.18.0-okd"},
-          {distribution: "gke", version: "1.32"},
-          {distribution: aks, version: "1.32"},
+          {distribution: "gke", version: "1.34"},
+          {distribution: aks, version: "1.34"},
         ]
     runs-on: ubuntu-22.04
     steps:
@@ -27,6 +27,7 @@ jobs:
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
       with:
         fetch-depth: 0
+        persist-credentials: false
 
     - name: Shellcheck
       uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
