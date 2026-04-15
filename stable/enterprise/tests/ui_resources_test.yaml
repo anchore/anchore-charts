@@ -70,6 +70,18 @@ tests:
             app.kubernetes.io/name: test-release-enterprise
             app.kubernetes.io/component: ui
 
+  - it: should not render replicas when autoscaling is enabled
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      ui.autoscaling.enabled: true
+      ui.autoscaling.minReplicas: 1
+      ui.autoscaling.maxReplicas: 5
+      ui.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isNull:
+          path: spec.replicas
+
   - it: should render component serviceAccountName
     template: ui_deployment.yaml
     documentIndex: 0

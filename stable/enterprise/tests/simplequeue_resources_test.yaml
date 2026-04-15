@@ -81,6 +81,18 @@ tests:
           path: spec.replicas
           value: 2
 
+  - it: should not render replicas when autoscaling is enabled
+    template: simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      simpleQueue.autoscaling.enabled: true
+      simpleQueue.autoscaling.minReplicas: 1
+      simpleQueue.autoscaling.maxReplicas: 5
+      simpleQueue.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isNull:
+          path: spec.replicas
+
   - it: should render component serviceAccountName
     template: simplequeue_deployment.yaml
     documentIndex: 0

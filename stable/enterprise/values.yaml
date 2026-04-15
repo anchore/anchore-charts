@@ -946,6 +946,19 @@ analyzer:
   ##
   replicaCount: 1
 
+  ## @param analyzer.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore Analyzer
+  ## @param analyzer.autoscaling.minReplicas Minimum number of replicas for the Anchore Analyzer autoscaler
+  ## @param analyzer.autoscaling.maxReplicas Maximum number of replicas for the Anchore Analyzer autoscaler
+  ## @param analyzer.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore Analyzer autoscaler
+  ## @param analyzer.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore Analyzer autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
+
   ## @param analyzer.service.port The port used for gatherings metrics when .Values.metricsEnabled=true
   ## @param analyzer.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
   ##
@@ -1038,6 +1051,19 @@ api:
   ## @param api.replicaCount Number of replicas for Anchore API deployment
   ##
   replicaCount: 1
+
+  ## @param api.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore API
+  ## @param api.autoscaling.minReplicas Minimum number of replicas for the Anchore API autoscaler
+  ## @param api.autoscaling.maxReplicas Maximum number of replicas for the Anchore API autoscaler
+  ## @param api.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore API autoscaler
+  ## @param api.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore API autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
   ## @param api.service.type Service type for Anchore API
   ## @param api.service.port Service port for Anchore API
@@ -1139,6 +1165,19 @@ catalog:
   ##
   replicaCount: 1
 
+  ## @param catalog.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore Catalog
+  ## @param catalog.autoscaling.minReplicas Minimum number of replicas for the Anchore Catalog autoscaler
+  ## @param catalog.autoscaling.maxReplicas Maximum number of replicas for the Anchore Catalog autoscaler
+  ## @param catalog.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore Catalog autoscaler
+  ## @param catalog.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore Catalog autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
+
   ## @param catalog.service.type Service type for Anchore Catalog
   ## @param catalog.service.port Service port for Anchore Catalog
   ## @param catalog.service.annotations Annotations for Anchore Catalog service
@@ -1239,6 +1278,19 @@ dataSyncer:
   ## @param dataSyncer.replicaCount Number of replicas for the Anchore DataSyncer deployment
   ##
   replicaCount: 1
+
+  ## @param dataSyncer.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore DataSyncer
+  ## @param dataSyncer.autoscaling.minReplicas Minimum number of replicas for the Anchore DataSyncer autoscaler
+  ## @param dataSyncer.autoscaling.maxReplicas Maximum number of replicas for the Anchore DataSyncer autoscaler
+  ## @param dataSyncer.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore DataSyncer autoscaler
+  ## @param dataSyncer.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore DataSyncer autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
   ## @param dataSyncer.service.type Service type for Anchore DataSyncer
   ## @param dataSyncer.service.port Service port for Anchore DataSyncer
@@ -1342,6 +1394,19 @@ notifications:
   ##
   replicaCount: 1
 
+  ## @param notifications.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore Notifications
+  ## @param notifications.autoscaling.minReplicas Minimum number of replicas for the Anchore Notifications autoscaler
+  ## @param notifications.autoscaling.maxReplicas Maximum number of replicas for the Anchore Notifications autoscaler
+  ## @param notifications.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore Notifications autoscaler
+  ## @param notifications.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore Notifications autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
+
   ## @param notifications.service.type Service type for Anchore Notifications
   ## @param notifications.service.port Service port for Anchore Notifications
   ## @param notifications.service.annotations Annotations for Anchore Notifications service
@@ -1443,6 +1508,19 @@ policyEngine:
   ##
   replicaCount: 1
 
+  ## @param policyEngine.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore Policy Engine
+  ## @param policyEngine.autoscaling.minReplicas Minimum number of replicas for the Anchore Policy Engine autoscaler
+  ## @param policyEngine.autoscaling.maxReplicas Maximum number of replicas for the Anchore Policy Engine autoscaler
+  ## @param policyEngine.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore Policy Engine autoscaler
+  ## @param policyEngine.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore Policy Engine autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
+
   ## @param policyEngine.service.type Service type for Anchore Policy Engine
   ## @param policyEngine.service.port Service port for Anchore Policy Engine
   ## @param policyEngine.service.annotations Annotations for Anchore Policy Engine service
@@ -1543,6 +1621,19 @@ reports:
   ## @param reports.replicaCount Number of replicas for the Anchore Reports deployment
   ##
   replicaCount: 1
+
+  ## @param reports.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore Reports
+  ## @param reports.autoscaling.minReplicas Minimum number of replicas for the Anchore Reports autoscaler
+  ## @param reports.autoscaling.maxReplicas Maximum number of replicas for the Anchore Reports autoscaler
+  ## @param reports.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore Reports autoscaler
+  ## @param reports.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore Reports autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
   ## @param reports.service.type Service type for Anchore Reports
   ## @param reports.service.port Service port for Anchore Reports
@@ -1657,6 +1748,19 @@ reportsWorker:
   ##
   replicaCount: 1
 
+  ## @param reportsWorker.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore Reports Worker
+  ## @param reportsWorker.autoscaling.minReplicas Minimum number of replicas for the Anchore Reports Worker autoscaler
+  ## @param reportsWorker.autoscaling.maxReplicas Maximum number of replicas for the Anchore Reports Worker autoscaler
+  ## @param reportsWorker.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore Reports Worker autoscaler
+  ## @param reportsWorker.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore Reports Worker autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
+
   ## @param reportsWorker.service.type Service type for Anchore Reports Worker
   ## @param reportsWorker.service.port Service port for Anchore Reports Worker
   ## @param reportsWorker.service.annotations Annotations for Anchore Reports Worker service
@@ -1757,6 +1861,19 @@ simpleQueue:
   ## @param simpleQueue.replicaCount Number of replicas for the Anchore Simple Queue deployment
   ##
   replicaCount: 1
+
+  ## @param simpleQueue.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore Simple Queue
+  ## @param simpleQueue.autoscaling.minReplicas Minimum number of replicas for the Anchore Simple Queue autoscaler
+  ## @param simpleQueue.autoscaling.maxReplicas Maximum number of replicas for the Anchore Simple Queue autoscaler
+  ## @param simpleQueue.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore Simple Queue autoscaler
+  ## @param simpleQueue.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore Simple Queue autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
   ## @param simpleQueue.service.type Service type for Anchore Simple Queue
   ## @param simpleQueue.service.port Service port for Anchore Simple Queue
@@ -1868,6 +1985,23 @@ ui:
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
   imagePullPolicy: IfNotPresent
+
+  ## @param ui.replicaCount Number of replicas for the Anchore UI deployment
+  ##
+  replicaCount: 1
+
+  ## @param ui.autoscaling.enabled Enable Horizontal Pod Autoscaler for Anchore UI
+  ## @param ui.autoscaling.minReplicas Minimum number of replicas for the Anchore UI autoscaler
+  ## @param ui.autoscaling.maxReplicas Maximum number of replicas for the Anchore UI autoscaler
+  ## @param ui.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for the Anchore UI autoscaler
+  ## @param ui.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for the Anchore UI autoscaler
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
   ## @param ui.existingSecretName Name of an existing secret to be used for Anchore UI DB and Redis endpoints
   ## This secret should define the following ENV vars

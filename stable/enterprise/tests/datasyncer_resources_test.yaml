@@ -79,6 +79,18 @@ tests:
           path: spec.replicas
           value: 99
 
+  - it: should not render replicas when autoscaling is enabled
+    template: datasyncer_deployment.yaml
+    documentIndex: 0
+    set:
+      dataSyncer.autoscaling.enabled: true
+      dataSyncer.autoscaling.minReplicas: 1
+      dataSyncer.autoscaling.maxReplicas: 5
+      dataSyncer.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isNull:
+          path: spec.replicas
+
   - it: should render the correct deployment spec.strategy
     template: datasyncer_deployment.yaml
     documentIndex: 0

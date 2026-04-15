@@ -1,0 +1,34 @@
+{{- if .Values.policyEngine.autoscaling.enabled }}
+{{- $component := "policyEngine" -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "enterprise.policyEngine.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "enterprise.policyEngine.fullname" . }}
+  minReplicas: {{ .Values.policyEngine.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.policyEngine.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.policyEngine.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.policyEngine.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.policyEngine.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.policyEngine.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}

@@ -83,6 +83,18 @@ tests:
           path: spec.replicas
           value: 2
 
+  - it: should not render replicas when autoscaling is enabled
+    template: notifications_deployment.yaml
+    documentIndex: 0
+    set:
+      notifications.autoscaling.enabled: true
+      notifications.autoscaling.minReplicas: 1
+      notifications.autoscaling.maxReplicas: 5
+      notifications.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isNull:
+          path: spec.replicas
+
   - it: should render component serviceAccountName
     template: notifications_deployment.yaml
     documentIndex: 0
