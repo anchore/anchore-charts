@@ -83,6 +83,18 @@ tests:
           path: spec.replicas
           value: 2
 
+  - it: should not render replicas when autoscaling is enabled
+    template: policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      policyEngine.autoscaling.enabled: true
+      policyEngine.autoscaling.minReplicas: 1
+      policyEngine.autoscaling.maxReplicas: 5
+      policyEngine.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isNull:
+          path: spec.replicas
+
   - it: should render component serviceAccountName
     template: policyengine_deployment.yaml
     documentIndex: 0

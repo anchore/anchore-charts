@@ -88,6 +88,18 @@ tests:
             app.kubernetes.io/name: test-release-enterprise
             app.kubernetes.io/component: analyzer
 
+  - it: should not render replicas when autoscaling is enabled
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.minReplicas: 1
+      analyzer.autoscaling.maxReplicas: 5
+      analyzer.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isNull:
+          path: spec.replicas
+
   - it: should render component serviceAccountName
     documentIndex: 0
     template: analyzer_deployment.yaml

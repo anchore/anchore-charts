@@ -1,0 +1,34 @@
+{{- if .Values.ui.autoscaling.enabled }}
+{{- $component := "ui" -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "enterprise.ui.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component) .) | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "enterprise.ui.fullname" . }}
+  minReplicas: {{ .Values.ui.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.ui.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.ui.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.ui.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.ui.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.ui.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}

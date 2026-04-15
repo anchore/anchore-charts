@@ -81,6 +81,18 @@ tests:
           path: spec.replicas
           value: 2
 
+  - it: should not render replicas when autoscaling is enabled
+    template: reports_deployment.yaml
+    documentIndex: 0
+    set:
+      reports.autoscaling.enabled: true
+      reports.autoscaling.minReplicas: 1
+      reports.autoscaling.maxReplicas: 5
+      reports.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isNull:
+          path: spec.replicas
+
   - it: should render component serviceAccountName
     template: reports_deployment.yaml
     documentIndex: 0
