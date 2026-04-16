@@ -24,7 +24,7 @@ global:
 image: docker.io/anchore/enterprise@sha256:<TBD>
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.26.1"
+  # tag: "v5.27.0"
   # digest: sha256:<TBD>
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -1858,11 +1858,11 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui@sha256:bcfd94db6b810b762274c74b52bba27a886f3a53f57bb70874a5c142a6709f97
+  image: docker.io/anchore/enterprise-ui@sha256:<TBD>
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.26.0"
-    # digest: sha256:bcfd94db6b810b762274c74b52bba27a886f3a53f57bb70874a5c142a6709f97
+    # tag: "v5.27.0"
+    # digest: sha256:<TBD>
 
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
