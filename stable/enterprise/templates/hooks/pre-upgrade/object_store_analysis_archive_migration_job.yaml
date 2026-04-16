@@ -115,6 +115,12 @@ spec:
         {{- end }}
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
+          {{- if and .Values.osaaMigrationJob.objectStoreMigration.run .Values.osaaMigrationJob.objectStoreMigration.object_store }}
+            {{- include "enterprise.migrationStorageCredentialEnv" (dict "storeConfig" .Values.osaaMigrationJob.objectStoreMigration.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 12 }}
+          {{- end }}
+          {{- if and .Values.osaaMigrationJob.analysisArchiveMigration.run .Values.osaaMigrationJob.analysisArchiveMigration.analysis_archive }}
+            {{- include "enterprise.migrationStorageCredentialEnv" (dict "storeConfig" .Values.osaaMigrationJob.analysisArchiveMigration.analysis_archive "envPrefix" "ANCHORE_ANALYSIS_ARCHIVE" "storeName" "analysis_archive" "context" .) | nindent 12 }}
+          {{- end }}
           volumeMounts:
             {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
             - name: dest-config
