@@ -44,7 +44,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image }}"
+        image: {{ include "anchore-admission-controller.image" . }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
       {{- with .Values.containerSecurityContext }}
         securityContext: {{- toYaml . | nindent 10 }}
