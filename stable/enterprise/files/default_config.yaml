@@ -142,7 +142,7 @@ services:
     layer_cache_max_gigabytes: {{ .Values.anchoreConfig.analyzer.layer_cache_max_gigabytes }}
     enable_hints: {{ .Values.anchoreConfig.analyzer.enable_hints }}
     enable_owned_package_filtering: {{ .Values.anchoreConfig.analyzer.enable_owned_package_filtering }}
-    keep_image_analysis_tmpfiles: {{ .Values.anchoreConfig.analyzer.keep_image_analysis_tmpfiles }}
+    keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
     server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}

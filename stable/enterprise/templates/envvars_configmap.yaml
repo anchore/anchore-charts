@@ -27,4 +27,5 @@ data:
   ANCHORE_ENTERPRISE_LICENSE_PATH: "/home/anchore/license.yaml"
   ANCHORE_SAML_SECRET: "null"
   ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
+  ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
   ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"

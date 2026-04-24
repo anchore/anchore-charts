@@ -574,8 +574,6 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.enable_owned_package_filtering Enable filtering of packages that are owned by other packages
     enable_owned_package_filtering: true
 
-    ## @param anchoreConfig.analyzer.keep_image_analysis_tmpfiles Keep temporary files generated during image analysis
-    keep_image_analysis_tmpfiles: false
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
     ## Configures syft, content search, file contents, secret search, and malware scanning
