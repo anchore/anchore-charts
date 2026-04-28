@@ -295,3 +295,140 @@ Usage: {{ include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" 
 {{- toYaml $extendedConfig | nindent 4 }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Determine the secret name for a storage driver's credentials.
+Returns the existingCredentialSecret if set, or the auto-generated osaa-creds name if access_key/secret_key are in config.
+Usage: {{ include "enterprise.storageCredentialSecretName" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "storeName" "object_store" "context" .) }}
+*/}}
+{{- define "enterprise.storageCredentialSecretName" -}}
+{{- $storeConfig := .storeConfig -}}
+{{- if $storeConfig -}}
+  {{- $sd := index $storeConfig "storage_driver" -}}
+  {{- if $sd -}}
+    {{- $sdConfig := index $sd "config" -}}
+    {{- if $sdConfig -}}
+      {{- if index $sdConfig "existingCredentialSecret" -}}
+        {{- index $sdConfig "existingCredentialSecret" -}}
+      {{- else if and (index $sdConfig "access_key") (index $sdConfig "secret_key") -}}
+        {{- printf "%s-osaa-creds" (include "enterprise.fullname" .context) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Determine the secret name for an OSAA migration storage driver's credentials.
+Returns the existingCredentialSecret if set, or the auto-generated osaa-migration-creds name if access_key/secret_key are in config.
+Usage: {{ include "enterprise.migrationStorageCredentialSecretName" (dict "storeConfig" .Values.osaaMigrationJob.objectStoreMigration.object_store "storeName" "object_store" "context" .) }}
+*/}}
+{{- define "enterprise.migrationStorageCredentialSecretName" -}}
+{{- $storeConfig := .storeConfig -}}
+{{- if $storeConfig -}}
+  {{- $sd := index $storeConfig "storage_driver" -}}
+  {{- if $sd -}}
+    {{- $sdConfig := index $sd "config" -}}
+    {{- if $sdConfig -}}
+      {{- if index $sdConfig "existingCredentialSecret" -}}
+        {{- index $sdConfig "existingCredentialSecret" -}}
+      {{- else if and (index $sdConfig "access_key") (index $sdConfig "secret_key") -}}
+        {{- printf "%s-osaa-migration-creds" (include "enterprise.fullname" .context) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render env vars sourced from a secret for an OSAA migration storage driver.
+Uses the same env var names (ANCHORE_OBJECT_STORE_ACCESS_KEY, etc.) so that the
+osaa configmap's ${ANCHORE_*} placeholders resolve correctly in the migration pod.
+Usage: {{ include "enterprise.migrationStorageCredentialEnv" (dict "storeConfig" .Values.osaaMigrationJob.objectStoreMigration.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) }}
+*/}}
+{{- define "enterprise.migrationStorageCredentialEnv" -}}
+{{- $secretName := include "enterprise.migrationStorageCredentialSecretName" . -}}
+{{- $envPrefix := .envPrefix -}}
+{{- $storeName := .storeName -}}
+{{- if $secretName }}
+{{- $sdConfig := index .storeConfig "storage_driver" "config" -}}
+{{- $isExisting := index $sdConfig "existingCredentialSecret" -}}
+{{- $accessKeyField := ternary (index $sdConfig "accessKeySecretKey" | default "access_key") (printf "%s_access_key" $storeName) (not (empty $isExisting)) -}}
+{{- $secretKeyField := ternary (index $sdConfig "secretKeySecretKey" | default "secret_key") (printf "%s_secret_key" $storeName) (not (empty $isExisting)) }}
+- name: {{ $envPrefix }}_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ $secretName }}
+      key: {{ $accessKeyField }}
+- name: {{ $envPrefix }}_SECRET_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ $secretName }}
+      key: {{ $secretKeyField }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render a storage config block (object_store or analysis_archive), replacing access_key/secret_key
+with env var placeholders when credentials will be sourced from a secret (either existing or auto-created).
+Usage: {{ include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) }}
+*/}}
+{{- define "enterprise.storageConfig" -}}
+{{- $storeConfig := .storeConfig -}}
+{{- $envPrefix := .envPrefix -}}
+{{- $secretName := include "enterprise.storageCredentialSecretName" . -}}
+{{- $hasDriverConfig := false -}}
+{{- if $storeConfig -}}
+  {{- $sd := index $storeConfig "storage_driver" -}}
+  {{- if $sd -}}
+    {{- if index $sd "config" -}}
+      {{- $hasDriverConfig = true -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $hasDriverConfig -}}
+  {{- $sdConfig := deepCopy (index (index $storeConfig "storage_driver") "config") -}}
+  {{- if $secretName -}}
+    {{- $_ := set $sdConfig "access_key" (printf "${%s_ACCESS_KEY}" $envPrefix) -}}
+    {{- $_ := set $sdConfig "secret_key" (printf "${%s_SECRET_KEY}" $envPrefix) -}}
+  {{- end -}}
+  {{- $_ := unset $sdConfig "existingCredentialSecret" -}}
+  {{- $_ := unset $sdConfig "accessKeySecretKey" -}}
+  {{- $_ := unset $sdConfig "secretKeySecretKey" -}}
+  {{- $sd := deepCopy (index $storeConfig "storage_driver") -}}
+  {{- $_ := set $sd "config" $sdConfig -}}
+  {{- $modified := deepCopy $storeConfig -}}
+  {{- $_ := set $modified "storage_driver" $sd -}}
+  {{- toYaml $modified -}}
+{{- else -}}
+  {{- toYaml $storeConfig -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render env vars sourced from a secret for a given storage driver (existing or auto-created).
+For existing secrets, uses accessKeySecretKey/secretKeySecretKey as the key names (defaults: access_key/secret_key).
+For auto-created osaa-creds, uses <storeName>_access_key/<storeName>_secret_key as the key names.
+Usage: {{ include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) }}
+*/}}
+{{- define "enterprise.storageCredentialEnv" -}}
+{{- $secretName := include "enterprise.storageCredentialSecretName" . -}}
+{{- $envPrefix := .envPrefix -}}
+{{- $storeName := .storeName -}}
+{{- if $secretName }}
+{{- $sdConfig := index .storeConfig "storage_driver" "config" -}}
+{{- $isExisting := index $sdConfig "existingCredentialSecret" -}}
+{{- $accessKeyField := ternary (index $sdConfig "accessKeySecretKey" | default "access_key") (printf "%s_access_key" $storeName) (not (empty $isExisting)) -}}
+{{- $secretKeyField := ternary (index $sdConfig "secretKeySecretKey" | default "secret_key") (printf "%s_secret_key" $storeName) (not (empty $isExisting)) }}
+- name: {{ $envPrefix }}_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ $secretName }}
+      key: {{ $accessKeyField }}
+- name: {{ $envPrefix }}_SECRET_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ $secretName }}
+      key: {{ $secretKeyField }}
+{{- end -}}
+{{- end -}}
