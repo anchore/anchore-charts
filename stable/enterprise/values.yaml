@@ -21,11 +21,11 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise@sha256:66b214f11280f1329e4ad028a0f2d045c894846ff79da0070e1b7fb13d2b148d
+image: docker.io/anchore/enterprise@sha256:36fc28ece9ff7dc67b2905119bfcdf63ca83830f34c5af04f8d6c0398d146efc
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.26.0"
-  # digest: sha256:66b214f11280f1329e4ad028a0f2d045c894846ff79da0070e1b7fb13d2b148d
+  # tag: "v5.27.0"
+  # digest: sha256:36fc28ece9ff7dc67b2905119bfcdf63ca83830f34c5af04f8d6c0398d146efc
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -159,7 +159,7 @@ affinity: {}
 ##
 topologySpreadConstraints: []
 
-## @param scratchVolume.mountPath The mount path of an external volume for scratch space. Used for the following pods: analyzer, policy-engine, catalog, and reports
+## @param scratchVolume.mountPath The mount path of an external volume for scratch space. This top level value will set it for ALL anchore pods. For specific components, you can override this value using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume.details)
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
 ## @param scratchVolume.fixerInitContainerImage The image to use for the mode-fixer initContainer
 ## @param scratchVolume.details [object] Details for the k8s volume to be created (defaults to default emptyDir)
@@ -1880,11 +1880,11 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui@sha256:bcfd94db6b810b762274c74b52bba27a886f3a53f57bb70874a5c142a6709f97
+  image: docker.io/anchore/enterprise-ui@sha256:1532943f9a1a43236b480a2b20dcc7ea95b193b0e78209d0c9b38d37068dda02
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.26.0"
-    # digest: sha256:bcfd94db6b810b762274c74b52bba27a886f3a53f57bb70874a5c142a6709f97
+    # tag: "v5.27.0"
+    # digest: sha256:1532943f9a1a43236b480a2b20dcc7ea95b193b0e78209d0c9b38d37068dda02
 
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
