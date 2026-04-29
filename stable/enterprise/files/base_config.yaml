@@ -49,8 +49,10 @@ credentials:
     db_connect_args:
       connect_timeout: ${ANCHORE_DB_TIMEOUT}
     {{- if .Values.anchoreConfig.database.ssl }}
-      sslmode: ${ANCHORE_DB_SSL_MODE}
-      sslrootcert: ${ANCHORE_DB_SSL_ROOT_CERT}
+      sslmode: {{ .Values.anchoreConfig.database.sslMode }}
+    {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+      sslrootcert: /home/anchore/certs/{{ . }}
+    {{- end }}
     {{- end }}
   {{- end }}
   {{- with .Values.anchoreConfig.database.engineArgs }}

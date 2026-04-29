@@ -87,10 +87,12 @@ credentials:
   {{- else }}
     db_connect_args:
       timeout: ${ANCHORE_DB_TIMEOUT}
-      ssl: ${ANCHORE_DB_SSL}
+      ssl: {{ .Values.anchoreConfig.database.ssl }}
     {{- if .Values.anchoreConfig.database.ssl }}
-      sslmode: ${ANCHORE_DB_SSL_MODE}
-      sslrootcert: ${ANCHORE_DB_SSL_ROOT_CERT}
+      sslmode: {{ .Values.anchoreConfig.database.sslMode }}
+    {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+      sslrootcert: /home/anchore/certs/{{ . }}
+    {{- end }}
     {{- end }}
   {{- end }}
     db_pool_size: ${ANCHORE_DB_POOL_SIZE}

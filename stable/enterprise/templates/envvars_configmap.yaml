@@ -7,25 +7,16 @@ metadata:
   annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
 
 data:
-  ANCHORECTL_URL: "http://localhost:8228"
-  ANCHORECTL_USERNAME: "admin"
-  ANCHORECTL_ACCOUNT: "admin"
   ANCHORE_DB_POOL_MAX_OVERFLOW: "{{ .Values.anchoreConfig.database.db_pool_max_overflow }}"
   ANCHORE_DB_POOL_SIZE: "{{ .Values.anchoreConfig.database.db_pool_size }}"
-  ANCHORE_DB_SSL: "{{ .Values.anchoreConfig.database.ssl }}"
-  ANCHORE_DB_SSL_MODE: "{{ .Values.anchoreConfig.database.sslMode }}"
-{{- with .Values.anchoreConfig.database.sslRootCertFileName }}
-  ANCHORE_DB_SSL_ROOT_CERT: "/home/anchore/certs/{{- . }}"
-{{- else }}
-  ANCHORE_DB_SSL_ROOT_CERT: "null"
-{{- end }}
   ANCHORE_DB_TIMEOUT: "{{ .Values.anchoreConfig.database.timeout }}"
   ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
   ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
   ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
+
   ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
   ANCHORE_ENTERPRISE_LICENSE_PATH: "/home/anchore/license.yaml"
+  ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
   ANCHORE_SAML_SECRET: "null"
   ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
-  ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
   ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
