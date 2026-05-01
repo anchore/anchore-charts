@@ -174,8 +174,8 @@ services:
       auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
       batch_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.batch_size }}
       pool_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.pool_size }}
-    analysis_archive: {{- toYaml .Values.anchoreConfig.catalog.analysis_archive | nindent 6 }}
-    object_store: {{- toYaml .Values.anchoreConfig.catalog.object_store | nindent 6 }}
+    analysis_archive: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.analysis_archive "envPrefix" "ANCHORE_ANALYSIS_ARCHIVE" "storeName" "analysis_archive" "context" .) | nindent 6 }}
+    object_store: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 6 }}
     document_views: {{- toYaml .Values.anchoreConfig.catalog.document_views | nindent 6 }}
     system_logs: {{- toYaml .Values.anchoreConfig.catalog.system_logs | nindent 6 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "catalog") .) | nindent 4 }}

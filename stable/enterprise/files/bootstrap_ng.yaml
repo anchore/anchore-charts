@@ -79,13 +79,4 @@ oauth:
   default_token_expiration_seconds: {{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}
 
 # Object store configuration
-# Default is the database driver. For S3, uncomment and configure:
-# object_store:
-#   storage_driver:
-#     name: s3
-#     access_key: ${ANCHORE_OBJECT_STORE_S3_ACCESS_KEY}
-#     secret_key: ${ANCHORE_OBJECT_STORE_S3_SECRET_KEY}
-#     bucket: ${ANCHORE_OBJECT_STORE_S3_BUCKET}
-#     url: ${ANCHORE_OBJECT_STORE_S3_URL}
-#     region: ${ANCHORE_OBJECT_STORE_S3_REGION}
-#     create_bucket: false
+object_store: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 2 }}
