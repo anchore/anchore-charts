@@ -781,6 +781,7 @@ anchoreConfig:
 
     ## @param anchoreConfig.component_catalog.global_client_connect_timeout Global timeout for client connections
     ## @param anchoreConfig.component_catalog.global_client_read_timeout Global timeout for client reads
+    ## @param anchoreConfig.component_catalog.server [object] Server configuration for the component catalog. Falls back to anchoreConfig.server if empty.
     ## @param anchoreConfig.component_catalog.logging [object] Logging configuration for the component catalog
   component_catalog:
     global_client_connect_timeout: 0
