@@ -1,3 +1,0 @@
-{{- $component := "componentCatalog" -}}
-
-{{- include "enterprise.configMap" (merge (dict "component" $component "configComponent" "component_catalog") .) -}}

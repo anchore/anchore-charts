@@ -14,9 +14,38 @@ Allow configOverride per service.
 {{- end -}}
 
 {{/*
-Creates the configMap based on component passed in.
+Creates the NG bootstrap configMap for a component.
+Concatenates files/bootstrap_ng.yaml (shared base) with an optional
+files/{component}/bootstrap_ng.yaml (per-component service instance fields).
 */}}
-{{- define "enterprise.configMap" -}}
+{{- define "enterprise.bootstrapConfigMap" -}}
+{{- $component := .component -}}
+{{- $configMapName := include "enterprise.fullname" . -}}
+{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ $configMapName }}-{{ $component | lower }}-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  bootstrap_ng.yaml: |
+    # Anchore {{ $component | title }} Bootstrap Configuration, mounted from a configmap
+    #
+{{ tpl (.Files.Get "files/bootstrap_ng.yaml") . | indent 4 }}
+{{- $componentBootstrap := printf "files/%s/bootstrap_ng.yaml" ($component | lower) -}}
+{{- if .Files.Get $componentBootstrap }}
+{{ tpl (.Files.Get $componentBootstrap) . | indent 4 }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Creates the NG application configMap for a component.
+Concatenates files/config_ng.yaml (shared base) with an optional
+files/{component}/config_ng.yaml (per-component overrides).
+*/}}
+{{- define "enterprise.ngConfigMap" -}}
 {{- $component := .component -}}
 {{- $configMapName := include "enterprise.fullname" . -}}
 {{- include "enterprise.exclusionCheck" . -}}
@@ -28,14 +57,13 @@ metadata:
   labels: {{- include "enterprise.common.labels" . | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
 data:
-  config.yaml: |
-    # Anchore {{ $component | title }} Service Configuration File, mounted from a configmap
+  config_ng.yaml: |
+    # Anchore {{ $component | title }} NG Application Configuration, mounted from a configmap
     #
-{{- if (include "enterprise.configOverride" (merge (dict "component" $component) .)) }}
-{{ tpl (include "enterprise.configOverride" (merge (dict "component" $component) .)) . | indent 4 }}
-{{- else }}
-{{ tpl (.Files.Get "files/base_config.yaml") . | indent 4 }}
-{{ tpl (.Files.Get (printf "files/%s_config.yaml" ($component | lower))) . | indent 4 }}
+{{ tpl (.Files.Get "files/config_ng.yaml") . | indent 4 }}
+{{- $componentConfig := printf "files/%s/config_ng.yaml" ($component | lower) -}}
+{{- if .Files.Get $componentConfig }}
+{{ tpl (.Files.Get $componentConfig) . | indent 4 }}
 {{- end }}
 {{- end -}}
 

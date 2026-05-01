@@ -463,14 +463,19 @@ Setup the common anchore volume mounts
 - name: anchore-license
   mountPath: /home/anchore/license.yaml
   subPath: license.yaml
+{{- $ngComponents := list "componentCatalog" }}
+{{- if has $component $ngComponents }}
+- name: bootstrap-config-volume
+  mountPath: /config/bootstrap_ng.yaml
+  subPath: bootstrap_ng.yaml
 - name: config-volume
-  {{- $componentConfigMaps := list "componentCatalog" }}
-  {{- if has $component $componentConfigMaps }}
   mountPath: /config/config_ng.yaml
-  {{- else }}
+  subPath: config_ng.yaml
+{{- else }}
+- name: config-volume
   mountPath: /config/config.yaml
-  {{- end }}
   subPath: config.yaml
+{{- end }}
 - name: anchore-scripts
   mountPath: /scripts
 {{- if .Values.certStoreSecretName }}
@@ -537,19 +542,22 @@ Setup the common anchore volumes
   configMap:
     name: {{ .Release.Name }}-enterprise-scripts
     defaultMode: 0755
-{{- if .Values.osaaMigrationJob.enabled }}
+{{- $ngComponents := list "componentCatalog" }}
+{{- if has $component $ngComponents }}
+- name: bootstrap-config-volume
+  configMap:
+    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }}-bootstrap
+- name: config-volume
+  configMap:
+    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }}
+{{- else if .Values.osaaMigrationJob.enabled }}
 - name: config-volume
   configMap:
     name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
 {{- else }}
 - name: config-volume
   configMap:
-    {{- $componentConfigMaps := list "componentCatalog" }}
-    {{- if has $component $componentConfigMaps }}
-    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }} # new per service configmap architecture
-    {{- else }}
     name: {{ template "enterprise.fullname" . }}
-    {{- end }}
 {{- end }}
 {{- with .Values.certStoreSecretName }}
 - name: certs
@@ -605,8 +613,9 @@ When calling this template, .anchoreService can be included in the context for a
 {{- $server := (index .Values.anchoreConfig (print $anchoreService)).server }}
 {{- if $server }}
 {{- toYaml $server | nindent 6 }}
-{{- else -}}
-{}{{- end }}
+{{- else }}
+{{- toYaml .Values.anchoreConfig.server | nindent 6 }}
+{{- end }}
 {{- end }}
 
 {{/*
