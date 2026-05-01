@@ -70,9 +70,17 @@ credentials:
 
 # Authentication keys
 keys:
-  secret: ${ANCHORE_AUTH_SECRET}
-  public_key_path: {{ .Values.anchoreConfig.keys.publicKeyFileName }}
-  private_key_path: {{ .Values.anchoreConfig.keys.privateKeyFileName }}
+  secret: "${ANCHORE_SAML_SECRET}"
+{{- with .Values.anchoreConfig.keys.publicKeyFileName }}
+  public_key_path: /home/anchore/certs/{{ . }}
+{{- else }}
+  public_key_path: null
+{{- end }}
+{{- with .Values.anchoreConfig.keys.privateKeyFileName }}
+  private_key_path: /home/anchore/certs/{{ . }}
+{{- else }}
+  private_key_path: null
+{{- end }}
 
 # OAuth configuration
 oauth:
