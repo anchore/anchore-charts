@@ -11,28 +11,62 @@ host_id: ${ANCHORE_HOST_ID}
 # Database credentials
 credentials:
   database:
-    user: ${ANCHORE_DB_USER}
-    password: ${ANCHORE_DB_PASSWORD}
-    host: ${ANCHORE_DB_HOST}
-    port: ${ANCHORE_DB_PORT}
-    database: ${ANCHORE_DB_NAME}
+    user: "${ANCHORE_DB_USER}"
+    password: "${ANCHORE_DB_PASSWORD}"
+    host: "${ANCHORE_DB_HOST}"
+    port: "${ANCHORE_DB_PORT}"
+    name: "${ANCHORE_DB_NAME}"
+    database: "${ANCHORE_DB_NAME}"
+  {{- if .Values.anchoreConfig.database.ngDbConnectArgs }}
+  {{- with .Values.anchoreConfig.database.ngDbConnectArgs }}
+    db_connect_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
     db_connect_args:
-      connect_timeout: 120
+      connect_timeout: {{ .Values.anchoreConfig.database.timeout }}
+      ssl: {{ .Values.anchoreConfig.database.ssl }}
+    {{- if .Values.anchoreConfig.database.ssl }}
+      sslmode: {{ .Values.anchoreConfig.database.sslMode }}
+    {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+      sslrootcert: /home/anchore/certs/{{ . }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.anchoreConfig.database.ngEngineArgs }}
+  {{- with .Values.anchoreConfig.database.ngEngineArgs }}
+    db_engine_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
     db_engine_args:
-      pool_size: 30
-      max_overflow: 100
-  # Optional read replica configuration
-  # database_read_replica:
-  #   user: ${ANCHORE_DB_USER}
-  #   password: ${ANCHORE_DB_PASSWORD}
-  #   host: ${ANCHORE_DB_READ_REPLICA_HOST}
-  #   port: ${ANCHORE_DB_PORT}
-  #   database: ${ANCHORE_DB_NAME}
-  #   db_connect_args:
-  #     connect_timeout: 120
-  #   db_engine_args:
-  #     pool_size: 30
-  #     max_overflow: 100
+      pool_size: {{ .Values.anchoreConfig.database.db_pool_size }}
+      max_overflow: {{ .Values.anchoreConfig.database.db_pool_max_overflow }}
+  {{- end }}
+
+{{- if .Values.anchoreConfig.database.read_replica.enabled }}
+  database_read_replica:
+    user: "${ANCHORE_DB_USER}"
+    password: "${ANCHORE_DB_PASSWORD}"
+    host: "${ANCHORE_DB_READ_REPLICA_HOST}"
+    port: "${ANCHORE_DB_PORT}"
+    database: "${ANCHORE_DB_NAME}"
+  {{- if .Values.anchoreConfig.database.read_replica.dbConnectArgs }}
+  {{- with .Values.anchoreConfig.database.read_replica.dbConnectArgs }}
+    db_connect_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
+    db_connect_args:
+      connect_timeout: {{ .Values.anchoreConfig.database.read_replica.timeout }}
+  {{- end }}
+  {{- if .Values.anchoreConfig.database.read_replica.engineArgs }}
+  {{- with .Values.anchoreConfig.database.read_replica.engineArgs }}
+    db_engine_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
+    db_engine_args:
+      pool_size: {{ .Values.anchoreConfig.database.read_replica.db_pool_size }}
+      max_overflow: {{ .Values.anchoreConfig.database.read_replica.db_pool_max_overflow }}
+  {{- end }}
+{{- end }}
 
 # Authentication keys
 keys:

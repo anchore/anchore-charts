@@ -443,8 +443,10 @@ anchoreConfig:
   ## @param anchoreConfig.database.sslRootCertFileName File name of the database root CA certificate stored in the k8s secret specified with .Values.certStoreSecretName
   ## @param anchoreConfig.database.db_pool_size The database max connection pool size
   ## @param anchoreConfig.database.db_pool_max_overflow The maximum overflow size of the database connection pool
-  ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy
-  ## @param anchoreConfig.database.dbConnectArgs Set custom database connection; If specified, this overrides other database connection settings
+  ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy (legacy/psycopg2)
+  ## @param anchoreConfig.database.dbConnectArgs Set custom database connection args (legacy/psycopg2); If specified, this overrides other database connection settings
+  ## @param anchoreConfig.database.ngEngineArgs Set custom database engine arguments (ng/psycopg3); If specified, this overrides pool_size and max_overflow for ng services
+  ## @param anchoreConfig.database.ngDbConnectArgs Set custom database connection args (ng/psycopg3); If specified, this overrides other database connection settings for ng services
   ## ref: https://docs.sqlalchemy.org/en/14/core/engines.html#engine-creation-api
   ##
   database:
@@ -456,6 +458,24 @@ anchoreConfig:
     db_pool_max_overflow: 100
     engineArgs: {}
     dbConnectArgs: {}
+    ngEngineArgs: {}
+    ngDbConnectArgs: {}
+
+    ## @param anchoreConfig.database.read_replica.enabled Enable a read replica database connection
+    ## @param anchoreConfig.database.read_replica.host The hostname of the read replica database. When useExistingSecrets is false, this is used to set ANCHORE_DB_READ_REPLICA_HOST in the generated secret. When useExistingSecrets is true, ANCHORE_DB_READ_REPLICA_HOST must be included in the existing secret.
+    ## @param anchoreConfig.database.read_replica.timeout Connection timeout for the read replica
+    ## @param anchoreConfig.database.read_replica.db_pool_size Connection pool size for the read replica
+    ## @param anchoreConfig.database.read_replica.db_pool_max_overflow Max overflow for the read replica connection pool
+    ## @param anchoreConfig.database.read_replica.engineArgs Set custom database engine arguments for the read replica; If specified, this overrides pool_size and max_overflow
+    ## @param anchoreConfig.database.read_replica.dbConnectArgs Set custom database connection args for the read replica; If specified, this overrides timeout
+    read_replica:
+      enabled: false
+      host: ""
+      timeout: 120
+      db_pool_size: 30
+      db_pool_max_overflow: 100
+      engineArgs: {}
+      dbConnectArgs: {}
 
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
