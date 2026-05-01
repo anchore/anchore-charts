@@ -24,8 +24,6 @@ logging:
 
 # Feature-domain configuration (NG-owned, namespaced under `domains.*` in the DB)
 domains:
-  jobs:
-    pool_size: ${ANCHORE_JOB_POOL_SIZE}
-  catalog: {}
+  {{- toYaml .Values.anchoreConfig.domains | nindent 2 }}
 
 # Per-service overrides are in files/{component}/config_ng.yaml

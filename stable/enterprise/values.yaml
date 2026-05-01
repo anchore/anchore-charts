@@ -509,6 +509,22 @@ anchoreConfig:
   ## @param anchoreConfig.extendedConfig appends additional configs to the root config for enterprise. This should only be used with guidance from Anchore CS.
   extendedConfig: {}
 
+  ## @param anchoreConfig.domains [object] Feature-domain configuration for NG services
+  ## @param anchoreConfig.domains.catalog [object] Catalog domain configuration
+  ## @param anchoreConfig.domains.jobs.gc_retention_days Number of days to retain completed job records
+  ## @param anchoreConfig.domains.jobs.pool_size Number of concurrent job workers
+  ## @param anchoreConfig.domains.jobs.job_types List of job types to enable (empty list enables all)
+  ## @param anchoreConfig.domains.jobs.memory_threshold_mb Memory threshold in MB for job workers
+  ## @param anchoreConfig.domains.jobs.heartbeat_interval_seconds Interval in seconds between job heartbeats
+  domains:
+    catalog: {}
+    jobs:
+      gc_retention_days: 14
+      pool_size: 4
+      job_types: []
+      memory_threshold_mb: 512
+      heartbeat_interval_seconds: 5.0
+
   apiext:
     ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
     extendedConfig: {}
