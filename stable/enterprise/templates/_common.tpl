@@ -567,7 +567,7 @@ Renders external_hostname, external_port, and external_tls from the service's an
 external_hostname: {{ $serviceConfig.external_hostname | toYaml }}
 external_port: {{ $serviceConfig.external_port | toYaml }}
 external_tls: {{ $serviceConfig.external_tls }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Cycle timers configuration for a service.
@@ -579,7 +579,7 @@ Renders cycle_timer_seconds and cycle_timers from the service's anchoreConfig.
 {{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
 cycle_timer_seconds: {{ $serviceConfig.cycle_timer_seconds }}
 cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 2 }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Common server blocks
@@ -588,13 +588,13 @@ When calling this template, .anchoreService can be included in the context for a
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.server" -}}
 {{- $anchoreService := .anchoreService -}}
-{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server }}
+{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server -}}
 {{- if $server }}
 {{- toYaml $server | nindent 6 }}
 {{- else }}
 {{- toYaml .Values.anchoreConfig.server | nindent 6 }}
-{{- end }}
-{{- end }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 containerSecurityContext helper to include security context if defined. service level context takes precedence over toplevel context.

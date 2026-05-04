@@ -32,10 +32,10 @@ should render additional audit uris when additionalResourceURIs is set:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
-        allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
+        allow_awsecr_iam_auto: true
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: true
-        image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
+        image_analyze_timeout_seconds: 36000
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
@@ -43,10 +43,10 @@ should render additional audit uris when additionalResourceURIs is set:
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
 
-        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
-        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+        max_source_import_size_mb: 100
+        max_import_content_size_mb: 100
 
-        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+        max_compressed_image_size_mb: -1
 
         audit:
           enabled: true
@@ -81,25 +81,25 @@ should render additional audit uris when additionalResourceURIs is set:
             - "/containers"
 
         metrics:
-          enabled: ${ANCHORE_ENABLE_METRICS}
-          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
+          enabled: false
+          auth_disabled: false
 
         default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
-        default_admin_email: ${ANCHORE_ADMIN_EMAIL}
+        default_admin_email: admin@myanchore
 
         configuration:
-          api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
+          api_driven_configuration_enabled: true
 
         keys:
           secret: "${ANCHORE_SAML_SECRET}"
-          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
-          private_key_path: ${ANCHORE_AUTH_PUBKEY}
+          public_key_path: null
+          private_key_path: null
 
         user_authentication:
           oauth:
-            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
-            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+            default_token_expiration_seconds: 3600
+            refresh_token_expiration_seconds: 86400
+          sso_require_existing_users: false
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
           max_api_keys_per_user: 100
@@ -115,7 +115,7 @@ should render additional audit uris when additionalResourceURIs is set:
             name: "${ANCHORE_DB_NAME}"
             db_connect_args:
               timeout: ${ANCHORE_DB_TIMEOUT}
-              ssl: ${ANCHORE_DB_SSL}
+              ssl: false
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
 
@@ -156,7 +156,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -211,15 +221,25 @@ should render additional audit uris when additionalResourceURIs is set:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
-            layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
-            enable_hints: ${ANCHORE_HINTS_ENABLED}
-            enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+            layer_cache_enable: false
+            layer_cache_max_gigabytes: 0
+            enable_hints: false
+            enable_owned_package_filtering: true
             keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -281,15 +301,15 @@ should render additional audit uris when additionalResourceURIs is set:
                 level:
                 - error
             runtime_inventory:
-              inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
-              inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+              inventory_ttl_days: 120
+              inventory_ingest_overwrite: false
             integrations:
-              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
+              integration_health_report_ttl_days: 2
             image_gc:
-              max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+              max_worker_threads: 4
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+            import_operation_expiration_days: 7
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
               auto_scale: true
@@ -316,7 +336,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -343,7 +373,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -363,8 +403,8 @@ should render additional audit uris when additionalResourceURIs is set:
             port: ${ANCHORE_PORT}
             catalog_client_conn_timeout: -1
             catalog_client_read_timeout: -1
-            policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
-            enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+            policy_evaluation_cache_ttl: 3600
+            enable_package_db_load: false
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
@@ -440,7 +480,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -458,20 +508,30 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
+            enable_graphiql: true
             cycle_timer_seconds: 1
             cycle_timers:
               reports_scheduled_queries: 600
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
-            async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
+            max_async_execution_threads: 1
+            async_execution_timeout: 48h
             use_volume: false
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -489,11 +549,11 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
-            enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
-            data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
-            data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
-            data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+            enable_data_ingress: true
+            enable_data_egress: <ALLOW_API_CONFIGURATION>
+            data_egress_window: <ALLOW_API_CONFIGURATION>
+            data_refresh_max_workers: 10
+            data_load_max_workers: 10
             ingress_images_max_workers: 10
             cycle_timer_seconds: 1
             cycle_timers:
@@ -535,7 +595,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -559,11 +629,21 @@ should render additional audit uris when additionalResourceURIs is set:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
+            ui_url: test-release-enterprise-ui
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -581,7 +661,7 @@ should render additional audit uris when additionalResourceURIs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
+            auto_sync_enabled: true
             upload_dir: /analysis_scratch
             cycle_timer_seconds: 1
             cycle_timers:
@@ -594,7 +674,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:
@@ -645,10 +735,10 @@ should render the configmaps:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
-        allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
+        allow_awsecr_iam_auto: true
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: true
-        image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
+        image_analyze_timeout_seconds: 36000
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
@@ -656,10 +746,10 @@ should render the configmaps:
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
 
-        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
-        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+        max_source_import_size_mb: 100
+        max_import_content_size_mb: 100
 
-        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+        max_compressed_image_size_mb: -1
 
         audit:
           enabled: true
@@ -692,25 +782,25 @@ should render the configmaps:
             - "/user/credentials"
 
         metrics:
-          enabled: ${ANCHORE_ENABLE_METRICS}
-          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
+          enabled: false
+          auth_disabled: false
 
         default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
-        default_admin_email: ${ANCHORE_ADMIN_EMAIL}
+        default_admin_email: admin@myanchore
 
         configuration:
-          api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
+          api_driven_configuration_enabled: true
 
         keys:
           secret: "${ANCHORE_SAML_SECRET}"
-          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
-          private_key_path: ${ANCHORE_AUTH_PUBKEY}
+          public_key_path: null
+          private_key_path: null
 
         user_authentication:
           oauth:
-            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
-            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+            default_token_expiration_seconds: 3600
+            refresh_token_expiration_seconds: 86400
+          sso_require_existing_users: false
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
           max_api_keys_per_user: 100
@@ -726,7 +816,7 @@ should render the configmaps:
             name: "${ANCHORE_DB_NAME}"
             db_connect_args:
               timeout: ${ANCHORE_DB_TIMEOUT}
-              ssl: ${ANCHORE_DB_SSL}
+              ssl: false
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
 
@@ -767,7 +857,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -822,15 +922,25 @@ should render the configmaps:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
-            layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
-            enable_hints: ${ANCHORE_HINTS_ENABLED}
-            enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+            layer_cache_enable: false
+            layer_cache_max_gigabytes: 0
+            enable_hints: false
+            enable_owned_package_filtering: true
             keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -892,15 +1002,15 @@ should render the configmaps:
                 level:
                 - error
             runtime_inventory:
-              inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
-              inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+              inventory_ttl_days: 120
+              inventory_ingest_overwrite: false
             integrations:
-              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
+              integration_health_report_ttl_days: 2
             image_gc:
-              max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+              max_worker_threads: 4
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+            import_operation_expiration_days: 7
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
               auto_scale: true
@@ -927,7 +1037,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -954,7 +1074,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -974,8 +1104,8 @@ should render the configmaps:
             port: ${ANCHORE_PORT}
             catalog_client_conn_timeout: -1
             catalog_client_read_timeout: -1
-            policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
-            enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+            policy_evaluation_cache_ttl: 3600
+            enable_package_db_load: false
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
@@ -1051,7 +1181,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -1069,20 +1209,30 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
+            enable_graphiql: true
             cycle_timer_seconds: 1
             cycle_timers:
               reports_scheduled_queries: 600
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
-            async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
+            max_async_execution_threads: 1
+            async_execution_timeout: 48h
             use_volume: false
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -1100,11 +1250,11 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
-            enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
-            data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
-            data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
-            data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+            enable_data_ingress: true
+            enable_data_egress: <ALLOW_API_CONFIGURATION>
+            data_egress_window: <ALLOW_API_CONFIGURATION>
+            data_refresh_max_workers: 10
+            data_load_max_workers: 10
             ingress_images_max_workers: 10
             cycle_timer_seconds: 1
             cycle_timers:
@@ -1146,7 +1296,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -1170,11 +1330,21 @@ should render the configmaps:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
+            ui_url: test-release-enterprise-ui
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -1192,7 +1362,7 @@ should render the configmaps:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
+            auto_sync_enabled: true
             upload_dir: /analysis_scratch
             cycle_timer_seconds: 1
             cycle_timers:
@@ -1205,7 +1375,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:
@@ -1225,62 +1405,18 @@ should render the configmaps:
   2: |
     apiVersion: v1
     data:
-      ANCHORE_ADMIN_EMAIL: admin@myanchore
-      ANCHORE_ALLOW_ECR_IAM_AUTO: "true"
-      ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED: "true"
-      ANCHORE_AUTH_PRIVKEY: "null"
-      ANCHORE_AUTH_PUBKEY: "null"
-      ANCHORE_CATALOG_IMAGE_GC_WORKERS: "4"
-      ANCHORE_CLI_URL: http://localhost:8228
-      ANCHORE_CLI_USER: admin
-      ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED: "true"
       ANCHORE_DB_POOL_MAX_OVERFLOW: "100"
       ANCHORE_DB_POOL_SIZE: "30"
-      ANCHORE_DB_SSL: "false"
-      ANCHORE_DB_SSL_MODE: verify-full
-      ANCHORE_DB_SSL_ROOT_CERT: "null"
       ANCHORE_DB_TIMEOUT: "120"
-      ANCHORE_DISABLE_METRICS_AUTH: "false"
-      ANCHORE_ENABLE_METRICS: "false"
-      ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS: "2"
       ANCHORE_ENTERPRISE_LICENSE_PATH: /home/anchore/license.yaml
-      ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT: 48h
-      ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW: <ALLOW_API_CONFIGURATION>
-      ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS: "10"
-      ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS: "10"
-      ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS: <ALLOW_API_CONFIGURATION>
-      ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS: "true"
-      ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL: "true"
-      ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS: "1"
-      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE: "false"
-      ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS: "120"
-      ANCHORE_ENTERPRISE_UI_URL: test-release-enterprise-ui
       ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
       ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
       ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
-      ANCHORE_HINTS_ENABLED: "false"
-      ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS: "36000"
-      ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS: "7"
       ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
-      ANCHORE_LAYER_CACHE_ENABLED: "false"
-      ANCHORE_LAYER_CACHE_SIZE_GB: "0"
       ANCHORE_LICENSE_FILE: /home/anchore/license.yaml
-      ANCHORE_LOG_LEVEL: <ALLOW_API_CONFIGURATION>
-      ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB: "-1"
-      ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB: "100"
-      ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB: "100"
-      ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION: "86400"
-      ANCHORE_OAUTH_TOKEN_EXPIRATION: "3600"
-      ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED: "true"
-      ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD: "false"
-      ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS: "3600"
       ANCHORE_SAML_SECRET: "null"
       ANCHORE_SERVICE_DIR: /anchore_service
-      ANCHORE_SSO_REQUIRES_EXISTING_USERS: "false"
       ANCHORE_TMP_DIR: /analysis_scratch
-      ANCHORECTL_ACCOUNT: admin
-      ANCHORECTL_URL: http://localhost:8228
-      ANCHORECTL_USERNAME: admin
     kind: ConfigMap
     metadata:
       annotations:
@@ -1450,10 +1586,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
-        allow_awsecr_iam_auto: ${ANCHORE_ALLOW_ECR_IAM_AUTO}
+        allow_awsecr_iam_auto: true
         host_id: "${ANCHORE_HOST_ID}"
         internal_ssl_verify: true
-        image_analyze_timeout_seconds: ${ANCHORE_IMAGE_ANALYZE_TIMEOUT_SECONDS}
+        image_analyze_timeout_seconds: 36000
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
         global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
@@ -1461,10 +1597,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
         license_file: ${ANCHORE_LICENSE_FILE}
         auto_restart_services: false
 
-        max_source_import_size_mb: ${ANCHORE_MAX_IMPORT_SOURCE_SIZE_MB}
-        max_import_content_size_mb: ${ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB}
+        max_source_import_size_mb: 100
+        max_import_content_size_mb: 100
 
-        max_compressed_image_size_mb: ${ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB}
+        max_compressed_image_size_mb: -1
 
         audit:
           enabled: true
@@ -1497,25 +1633,25 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             - "/user/credentials"
 
         metrics:
-          enabled: ${ANCHORE_ENABLE_METRICS}
-          auth_disabled: ${ANCHORE_DISABLE_METRICS_AUTH}
+          enabled: false
+          auth_disabled: false
 
         default_admin_password: "${ANCHORE_ADMIN_PASSWORD}"
-        default_admin_email: ${ANCHORE_ADMIN_EMAIL}
+        default_admin_email: admin@myanchore
 
         configuration:
-          api_driven_configuration_enabled: ${ANCHORE_API_DRIVEN_CONFIGURATION_ENABLED}
+          api_driven_configuration_enabled: true
 
         keys:
           secret: "${ANCHORE_SAML_SECRET}"
-          public_key_path: ${ANCHORE_AUTH_PRIVKEY}
-          private_key_path: ${ANCHORE_AUTH_PUBKEY}
+          public_key_path: null
+          private_key_path: null
 
         user_authentication:
           oauth:
-            default_token_expiration_seconds: ${ANCHORE_OAUTH_TOKEN_EXPIRATION}
-            refresh_token_expiration_seconds: ${ANCHORE_OAUTH_REFRESH_TOKEN_EXPIRATION}
-          sso_require_existing_users: ${ANCHORE_SSO_REQUIRES_EXISTING_USERS}
+            default_token_expiration_seconds: 3600
+            refresh_token_expiration_seconds: 86400
+          sso_require_existing_users: false
           allow_api_keys_for_saml_users: false
           max_api_key_age_days: 365
           max_api_keys_per_user: 100
@@ -1575,7 +1711,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -1630,15 +1776,25 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               sync_clamav_db: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            layer_cache_enable: ${ANCHORE_LAYER_CACHE_ENABLED}
-            layer_cache_max_gigabytes: ${ANCHORE_LAYER_CACHE_SIZE_GB}
-            enable_hints: ${ANCHORE_HINTS_ENABLED}
-            enable_owned_package_filtering: ${ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED}
+            layer_cache_enable: false
+            layer_cache_max_gigabytes: 0
+            enable_hints: false
+            enable_owned_package_filtering: true
             keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -1700,15 +1856,15 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
                 level:
                 - error
             runtime_inventory:
-              inventory_ttl_days: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS}
-              inventory_ingest_overwrite: ${ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE}
+              inventory_ttl_days: 120
+              inventory_ingest_overwrite: false
             integrations:
-              integration_health_report_ttl_days: ${ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS}
+              integration_health_report_ttl_days: 2
             image_gc:
-              max_worker_threads: ${ANCHORE_CATALOG_IMAGE_GC_WORKERS}
+              max_worker_threads: 4
             runtime_compliance:
               object_store_bucket: "runtime_compliance_check"
-            import_operation_expiration_days: ${ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS}
+            import_operation_expiration_days: 7
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
             sbom_vuln_scan:
               auto_scale: true
@@ -1735,7 +1891,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -1762,7 +1928,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -1782,8 +1958,8 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             port: ${ANCHORE_PORT}
             catalog_client_conn_timeout: -1
             catalog_client_read_timeout: -1
-            policy_evaluation_cache_ttl: ${ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS}
-            enable_package_db_load: ${ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD}
+            policy_evaluation_cache_ttl: 3600
+            enable_package_db_load: false
             enable_user_base_image: true
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
@@ -1859,7 +2035,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -1877,20 +2063,30 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_graphiql: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL}
+            enable_graphiql: true
             cycle_timer_seconds: 1
             cycle_timers:
               reports_scheduled_queries: 600
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            max_async_execution_threads: ${ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS}
-            async_execution_timeout: ${ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT}
+            max_async_execution_threads: 1
+            async_execution_timeout: 48h
             use_volume: false
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -1908,11 +2104,11 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            enable_data_ingress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_INGRESS}
-            enable_data_egress: ${ANCHORE_ENTERPRISE_REPORTS_ENABLE_DATA_EGRESS}
-            data_egress_window: ${ANCHORE_ENTERPRISE_REPORTS_DATA_EGRESS_WINDOW}
-            data_refresh_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_REFRESH_MAX_WORKERS}
-            data_load_max_workers: ${ANCHORE_ENTERPRISE_REPORTS_DATA_LOAD_MAX_WORKERS}
+            enable_data_ingress: true
+            enable_data_egress: <ALLOW_API_CONFIGURATION>
+            data_egress_window: <ALLOW_API_CONFIGURATION>
+            data_refresh_max_workers: 10
+            data_load_max_workers: 10
             ingress_images_max_workers: 10
             cycle_timer_seconds: 1
             cycle_timers:
@@ -1954,7 +2150,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -1978,11 +2184,21 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
-            ui_url: ${ANCHORE_ENTERPRISE_UI_URL}
+            ui_url: test-release-enterprise-ui
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -2000,7 +2216,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
-            auto_sync_enabled: ${ANCHORE_DATA_SYNC_AUTO_SYNC_ENABLED}
+            auto_sync_enabled: true
             upload_dir: /analysis_scratch
             cycle_timer_seconds: 1
             cycle_timers:
@@ -2013,7 +2229,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:

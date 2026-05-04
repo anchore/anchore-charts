@@ -1208,10 +1208,10 @@ tests:
           # server:
           #   process_worker_count: 453
 
-  - it: should render the service level server config as {} if not set (enterprise.anchoreConfig.anchoreService.server)
+  - it: should fall back to global server config if not set on service (enterprise.anchoreConfig.anchoreService.server)
     template: anchore_configmap.yaml
     documentIndex: 0
-    # default value is {}, so this is equivalent to
+    # default value is {}, so this falls back to anchoreConfig.server
     # set:
     #   anchoreConfig:
     #     policy_engine:
@@ -1219,9 +1219,9 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "server: {}"
-          # this matches:
-          # server: {}
+          pattern: "server:\\s*\\n\\s*max_connection_backlog: 2048"
+          # this matches the global anchoreConfig.server defaults falling through
+          # when no service-level server block is set
 
   - it: should render the containerSecurityContext when set at a component level
     template: api_deployment.yaml

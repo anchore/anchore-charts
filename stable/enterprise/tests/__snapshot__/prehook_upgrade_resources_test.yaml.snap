@@ -38,6 +38,8 @@ migration job should match snapshot:
             subPath: config.yaml
           - mountPath: /scripts
             name: anchore-scripts
+          - mountPath: /analysis_scratch
+            name: anchore-scratch
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
@@ -63,12 +65,6 @@ migration job should match snapshot:
           - |
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-              fi
-              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
-              fi
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
               if [[ !$err ]]; then
                 echo "Database is ready"
@@ -164,6 +160,8 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             subPath: config.yaml
           - mountPath: /scripts
             name: anchore-scripts
+          - mountPath: /analysis_scratch
+            name: anchore-scratch
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
@@ -189,12 +187,6 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
           - |
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-              fi
-              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
-              fi
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
               if [[ !$err ]]; then
                 echo "Database is ready"
@@ -288,6 +280,8 @@ migration job should match snapshot analysisArchiveMigration to true:
             subPath: config.yaml
           - mountPath: /scripts
             name: anchore-scripts
+          - mountPath: /analysis_scratch
+            name: anchore-scratch
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
@@ -313,12 +307,6 @@ migration job should match snapshot analysisArchiveMigration to true:
           - |
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-              fi
-              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
-              fi
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
               if [[ !$err ]]; then
                 echo "Database is ready"
@@ -411,6 +399,8 @@ migration job should match snapshot objectStoreMigration to true:
             subPath: config.yaml
           - mountPath: /scripts
             name: anchore-scripts
+          - mountPath: /analysis_scratch
+            name: anchore-scratch
           - mountPath: /config/dest-config.yaml
             name: dest-config
             subPath: dest-config.yaml
@@ -436,12 +426,6 @@ migration job should match snapshot objectStoreMigration to true:
           - |
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-                CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-              fi
-              if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-                CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
-              fi
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
               if [[ !$err ]]; then
                 echo "Database is ready"
@@ -596,12 +580,6 @@ should render proper initContainers:
         - |
           while true; do
             CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-            if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-              CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-            fi
-            if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-              CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
-            fi
             err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
             if [[ !$err ]]; then
               echo "Database is ready"

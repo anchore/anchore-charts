@@ -125,7 +125,7 @@ services:
     port: ${ANCHORE_PORT}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "apiext") .) | nindent 4 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "apiext") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "apiext") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "apiext") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "apiext") .) }}
 
   analyzer:
@@ -146,7 +146,7 @@ services:
     enable_owned_package_filtering: {{ .Values.anchoreConfig.analyzer.enable_owned_package_filtering }}
     keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "analyzer") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "analyzer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "analyzer") .) }}
 
   catalog:
@@ -187,7 +187,7 @@ services:
     document_views: {{- toYaml .Values.anchoreConfig.catalog.document_views | nindent 6 }}
     system_logs: {{- toYaml .Values.anchoreConfig.catalog.system_logs | nindent 6 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "catalog") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "catalog") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "catalog") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "catalog") .) }}
 
   simplequeue:
@@ -199,7 +199,7 @@ services:
     port: ${ANCHORE_PORT}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "simplequeue") .) | nindent 4 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "simplequeue") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "simplequeue") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "simplequeue") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "simplequeue") .) }}
 
   policy_engine:
@@ -288,7 +288,7 @@ services:
                 enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.stock.search.by_cpe.enabled }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "policy_engine") .) | nindent 4 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "policy_engine") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "policy_engine") .) }}
 
   reports:
@@ -304,7 +304,7 @@ services:
     async_execution_timeout: {{ .Values.anchoreConfig.reports.async_execution_timeout }}
     use_volume: {{ .Values.anchoreConfig.reports.use_volume }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "reports") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "reports") .) }}
 
   reports_worker:
@@ -324,7 +324,7 @@ services:
     event_stream: {{- toYaml .Values.anchoreConfig.reports_worker.event_stream | nindent 6 }}
     runtime_report_generation: {{- toYaml .Values.anchoreConfig.reports_worker.runtime_report_generation | nindent 6 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "reports_worker") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports_worker") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "reports_worker") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "reports_worker") .) }}
 
   notifications:
@@ -337,7 +337,7 @@ services:
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "notifications") .) | nindent 4 }}
     ui_url: {{ .Values.anchoreConfig.notifications.ui_url | default (include "enterprise.ui.fullname" .) }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "notifications") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "notifications") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "notifications") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "notifications") .) }}
 
   data_syncer:
@@ -351,5 +351,5 @@ services:
     upload_dir: {{ .Values.scratchVolume.mountPath }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "data_syncer") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "data_syncer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "data_syncer") .) }}
