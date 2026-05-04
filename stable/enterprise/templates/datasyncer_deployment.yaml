@@ -42,9 +42,7 @@ spec:
         {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
     {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
-      {{- end }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
