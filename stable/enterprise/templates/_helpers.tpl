@@ -400,17 +400,6 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 Returns the value of ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD, preserving it from the
 previous env var ConfigMap on upgrades. Defaults to false on fresh installs.
 */}}
-{{- define "enterprise.policyEngineEnablePackageDBLoad" -}}
-{{- $val := false -}}
-{{- if .Release.IsUpgrade -}}
-  {{- $envvarConfigmap := (lookup "v1" "ConfigMap" .Release.Namespace (printf "%s-enterprise-config-env-vars" .Release.Name)) -}}
-  {{- if $envvarConfigmap -}}
-    {{- $val = index $envvarConfigmap.data "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" -}}
-  {{- end -}}
-{{- end -}}
-{{- $val -}}
-{{- end -}}
-
 {{/*
 Checks if any removed env vars are set via extraEnv (global or component-level).
 These env vars have been replaced by direct values file configuration and should no longer be set via extraEnv.
@@ -428,7 +417,7 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS" "values_path" "anchoreConfig.catalog.integrations.integration_health_report_ttl_days" "components" (list "catalog"))
   (dict "name" "ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS" "values_path" "anchoreConfig.catalog.import_operation_expiration_days" "components" (list "catalog"))
   (dict "name" "ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS" "values_path" "anchoreConfig.policy_engine.policy_evaluation_cache_ttl" "components" (list "policyEngine"))
-  (dict "name" "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" "values_path" "N/A (managed automatically on upgrades)" "components" (list "policyEngine"))
+  (dict "name" "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" "values_path" "anchoreConfig.policy_engine.enable_package_db_load" "components" (list "policyEngine"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL" "values_path" "anchoreConfig.reports.enable_graphiql" "components" (list "reports"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS" "values_path" "anchoreConfig.reports.max_async_execution_threads" "components" (list "reports"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT" "values_path" "anchoreConfig.reports.async_execution_timeout" "components" (list "reports"))

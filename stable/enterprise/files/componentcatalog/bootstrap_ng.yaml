@@ -3,4 +3,4 @@ services:
   component_catalog:
     endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
     port: {{ .Values.componentCatalog.service.port }}
-    server: {{ include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "component_catalog") .) }}
+    server: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}

@@ -16,11 +16,7 @@ global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
 
 # Global logging settings (can be overridden per service under `services.*.logging`)
 logging:
-  {{- $logging := deepCopy .Values.anchoreConfig.logging }}
-  {{- if eq (toString $logging.log_level) "<ALLOW_API_CONFIGURATION>" }}
-    {{- $_ := set $logging "log_level" "INFO" }}
-  {{- end }}
-  {{- toYaml $logging | nindent 2 }}
+  {{- toYaml .Values.anchoreConfig.ngLogging | nindent 2 }}
 
 # Feature-domain configuration (NG-owned, namespaced under `domains.*` in the DB)
 domains:

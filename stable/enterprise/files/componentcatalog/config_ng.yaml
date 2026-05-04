@@ -2,4 +2,4 @@
 services:
   component_catalog:
     logging:
-      {{ include "enterprise.common.logging" (merge (dict "service" "component_catalog") .) | nindent 6 }}
+      {{ include "enterprise.common.ngLogging" (merge (dict "service" "component_catalog") .) | nindent 6 }}

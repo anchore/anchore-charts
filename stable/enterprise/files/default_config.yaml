@@ -204,7 +204,7 @@ services:
     catalog_client_conn_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_conn_timeout }}
     catalog_client_read_timeout: {{ .Values.anchoreConfig.policy_engine.catalog_client_read_timeout }}
     policy_evaluation_cache_ttl: {{ .Values.anchoreConfig.policy_engine.policy_evaluation_cache_ttl }}
-    enable_package_db_load: {{ include "enterprise.policyEngineEnablePackageDBLoad" . }}
+    enable_package_db_load: {{ .Values.anchoreConfig.policy_engine.enable_package_db_load }}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
     vulnerabilities:
       nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss }}

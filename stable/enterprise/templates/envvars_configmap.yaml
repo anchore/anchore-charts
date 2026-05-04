@@ -15,7 +15,6 @@ data:
   ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
 
   ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
-  ANCHORE_ENTERPRISE_LICENSE_PATH: "/home/anchore/license.yaml"
   ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
   ANCHORE_SAML_SECRET: "null"
   ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"

@@ -15,7 +15,6 @@ credentials:
     password: "${ANCHORE_DB_PASSWORD}"
     host: "${ANCHORE_DB_HOST}"
     port: "${ANCHORE_DB_PORT}"
-    name: "${ANCHORE_DB_NAME}"
     database: "${ANCHORE_DB_NAME}"
   {{- if .Values.anchoreConfig.database.ngDbConnectArgs }}
   {{- with .Values.anchoreConfig.database.ngDbConnectArgs }}
@@ -87,4 +86,8 @@ oauth:
   default_token_expiration_seconds: {{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}
 
 # Object store configuration
-object_store: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 2 }}
+object_store:
+  verify_content_digests: {{ .Values.anchoreConfig.catalog.object_store.verify_content_digests }}
+  compression: {{- toYaml .Values.anchoreConfig.catalog.object_store.compression | nindent 4 }}
+  storage_driver:
+    name: {{ .Values.anchoreConfig.catalog.object_store.storage_driver.name }}

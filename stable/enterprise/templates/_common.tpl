@@ -597,6 +597,20 @@ When calling this template, .anchoreService can be included in the context for a
 {{- end -}}
 
 {{/*
+NG server blocks — falls back to anchoreConfig.ngServer instead of the legacy server block.
+{{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.ngServer" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server -}}
+{{- if $server }}
+{{- toYaml $server | nindent 6 }}
+{{- else }}
+{{- toYaml .Values.anchoreConfig.ngServer | nindent 6 }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 containerSecurityContext helper to include security context if defined. service level context takes precedence over toplevel context.
 When calling this template, .component can be included in the context for component specific security context
 {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) }}
@@ -619,10 +633,25 @@ Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .
 {{- define "enterprise.common.logging" -}}
 {{- $service := .service -}}
 {{- $serviceCfg := index .Values.anchoreConfig $service -}}
-{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
   {{- toYaml $serviceCfg.logging -}}
 {{- else -}}
   {{- toYaml .Values.anchoreConfig.logging -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the logging config for an ng service, with service-level override support.
+Checks anchoreConfig.<service>.logging first, falls back to anchoreConfig.ngLogging.
+Usage: {{ include "enterprise.common.ngLogging" (merge (dict "service" "component_catalog") .) }}
+*/}}
+{{- define "enterprise.common.ngLogging" -}}
+{{- $service := .service -}}
+{{- $serviceCfg := index .Values.anchoreConfig $service -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
+  {{- toYaml $serviceCfg.logging -}}
+{{- else -}}
+  {{- toYaml .Values.anchoreConfig.ngLogging -}}
 {{- end -}}
 {{- end -}}
 
