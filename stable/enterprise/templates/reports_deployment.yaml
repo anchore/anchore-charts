@@ -61,10 +61,6 @@ spec:
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
-          {{- if .Values.anchoreConfig.reports.use_volume }}
-            - name: "anchore-scratch"
-              mountPath: {{ .Values.scratchVolume.mountPath }}
-          {{- end }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
           readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
         {{- with .Values.reports.resources }}

@@ -28,6 +28,7 @@ spec:
         - name: anchore-scratch
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
       {{- if or
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}

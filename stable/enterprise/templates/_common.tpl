@@ -454,6 +454,8 @@ Setup the common anchore volume mounts
 {{- end }}
 - name: anchore-scripts
   mountPath: /scripts
+- name: anchore-scratch
+  mountPath: {{ .Values.scratchVolume.mountPath }}
 {{- if .Values.certStoreSecretName }}
 - name: certs
   mountPath: /home/anchore/certs/
