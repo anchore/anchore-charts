@@ -36,7 +36,6 @@ files/{component}/bootstrap_ng.yaml (per-component service instance fields).
 {{- define "enterprise.bootstrapConfigMap" -}}
 {{- $component := .component -}}
 {{- $configMapName := include "enterprise.fullname" . -}}
-{{- include "enterprise.exclusionCheck" . -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -67,7 +66,6 @@ files/{component}/config_ng.yaml (per-component overrides).
 {{- define "enterprise.ngConfigMap" -}}
 {{- $component := .component -}}
 {{- $configMapName := include "enterprise.fullname" . -}}
-{{- include "enterprise.exclusionCheck" . -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:
