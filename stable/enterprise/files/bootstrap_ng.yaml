@@ -23,7 +23,6 @@ credentials:
   {{- else }}
     db_connect_args:
       connect_timeout: {{ .Values.anchoreConfig.database.timeout }}
-      ssl: {{ .Values.anchoreConfig.database.ssl }}
     {{- if .Values.anchoreConfig.database.ssl }}
       sslmode: {{ .Values.anchoreConfig.database.sslMode }}
     {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
