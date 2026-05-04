@@ -351,34 +351,10 @@ based on component-specific or global settings
 
 
 {{/*
-Create an image specification template for kubectl that can override the default image
-based on component-specific or global settings
+Create an image specification template for kubectl
 */}}
 {{- define "enterprise.kubectl.image" -}}
-{{- $kubectlImage := .Values.kubectlImage }}
-{{- $legacyOsaa := .Values.osaaMigrationJob.kubectlImage }}
-{{- $legacyUpgrade := .Values.upgradeJob.kubectlImage }}
-{{- if $kubectlImage }}
-  {{ include "enterprise.renderImage" (dict "image" $kubectlImage) }}
-{{- else if and $legacyOsaa (eq (printf "%T" $legacyOsaa) "string") }}
-  {{ $legacyOsaa | trim }}
-{{- else if and $legacyUpgrade (eq (printf "%T" $legacyUpgrade) "string") }}
-  {{ $legacyUpgrade | trim }}
-{{- else }}
-  {{ fail "No valid kubectlImage found in Values." }}
-{{- end }}
-{{- end }}
-
-{{/*
-Display deprecation warnings if legacy kubectlImage values are set
-*/}}
-{{- define "enterprise.kubectl.deprecationWarnings" -}}
-{{- if .Values.osaaMigrationJob.kubectlImage }}
-{{ printf "NOTICE: 'osaaMigrationJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
-{{- if .Values.upgradeJob.kubectlImage }}
-{{ printf "NOTICE: 'upgradeJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
+  {{ include "enterprise.renderImage" (dict "image" .Values.kubectlImage) }}
 {{- end }}
 
 {{/*

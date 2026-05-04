@@ -1,14 +1,29 @@
 {{/*
-Allow configOverride per service.
+Allow bootstrap config override per service.
+Checks component-level configOverrideBootstrap first, falls back to global configOverrideBootstrap.
 */}}
-{{- define "enterprise.configOverride" -}}
+{{- define "enterprise.configOverrideBootstrap" -}}
 {{- $component := .component -}}
-
-{{- with (index .Values (print $component)).configOverride }}
+{{- with (index .Values (print $component)).configOverrideBootstrap }}
   {{- print .  -}}
 {{- else }}
-  {{- if .Values.configOverride }}
-    {{- print .Values.configOverride -}}
+  {{- if .Values.configOverrideBootstrap }}
+    {{- print .Values.configOverrideBootstrap -}}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Allow NG application config override per service.
+Checks component-level configOverrideNg first, falls back to global configOverrideNg.
+*/}}
+{{- define "enterprise.configOverrideNg" -}}
+{{- $component := .component -}}
+{{- with (index .Values (print $component)).configOverrideNg }}
+  {{- print .  -}}
+{{- else }}
+  {{- if .Values.configOverrideNg }}
+    {{- print .Values.configOverrideNg -}}
   {{- end }}
 {{- end }}
 {{- end -}}
@@ -33,10 +48,14 @@ data:
   bootstrap_ng.yaml: |
     # Anchore {{ $component | title }} Bootstrap Configuration, mounted from a configmap
     #
+{{- if (include "enterprise.configOverrideBootstrap" (merge (dict "component" $component) .)) }}
+{{ tpl (include "enterprise.configOverrideBootstrap" (merge (dict "component" $component) .)) . | indent 4 }}
+{{- else }}
 {{ tpl (.Files.Get "files/bootstrap_ng.yaml") . | indent 4 }}
 {{- $componentBootstrap := printf "files/%s/bootstrap_ng.yaml" ($component | lower) -}}
 {{- if .Files.Get $componentBootstrap }}
 {{ tpl (.Files.Get $componentBootstrap) . | indent 4 }}
+{{- end }}
 {{- end }}
 {{- end -}}
 
@@ -60,10 +79,14 @@ data:
   config_ng.yaml: |
     # Anchore {{ $component | title }} NG Application Configuration, mounted from a configmap
     #
+{{- if (include "enterprise.configOverrideNg" (merge (dict "component" $component) .)) }}
+{{ tpl (include "enterprise.configOverrideNg" (merge (dict "component" $component) .)) . | indent 4 }}
+{{- else }}
 {{ tpl (.Files.Get "files/config_ng.yaml") . | indent 4 }}
 {{- $componentConfig := printf "files/%s/config_ng.yaml" ($component | lower) -}}
 {{- if .Files.Get $componentConfig }}
 {{ tpl (.Files.Get $componentConfig) . | indent 4 }}
+{{- end }}
 {{- end }}
 {{- end -}}
 
@@ -90,6 +113,13 @@ Consolidated deprecation and validation checks for breaking changes.
 {{/* apiext.external has been replaced by per-service external_hostname, external_port, external_tls */}}
 {{- if hasKey .Values.anchoreConfig.apiext "external" }}
   {{- fail "anchoreConfig.apiext.external is no longer supported. Use `anchoreConfig.apiext.external_hostname`, `anchoreConfig.apiext.external_port`, and `anchoreConfig.apiext.external_tls` instead." }}
+{{- end }}
+{{/* per-job kubectlImage has been replaced by the top-level kubectlImage */}}
+{{- if hasKey .Values.upgradeJob "kubectlImage" }}
+  {{- fail "upgradeJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." }}
+{{- end }}
+{{- if hasKey .Values.osaaMigrationJob "kubectlImage" }}
+  {{- fail "osaaMigrationJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." }}
 {{- end }}
 {{- end -}}
 
@@ -299,6 +329,7 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 */}}
 {{- define "enterprise.exclusionCheck" -}}
 {{- include "enterprise.deprecationChecks" . }}
+{{- include "enterprise.envVarExtraEnvCheck" . }}
 
 {{ $notify := false }}
 

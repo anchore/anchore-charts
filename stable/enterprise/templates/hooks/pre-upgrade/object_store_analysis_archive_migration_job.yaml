@@ -69,7 +69,7 @@ spec:
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
         {{- if .Values.cloudsql.enabled  }}
-        {{- include "enterprise.common.initCloudsqlContainer" . | nindent 8 }}
+        {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
         - name: wait-for-db
           image: {{ include "enterprise.common.image" . | trim }}

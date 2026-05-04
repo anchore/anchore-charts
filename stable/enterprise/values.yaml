@@ -296,7 +296,7 @@ anchoreConfig:
   ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
   ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
-  log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
+  log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
 
   ## @param anchoreConfig.internal_ssl_verify Enable cert verification for internal service-to-service SSL communication
   internal_ssl_verify: true
@@ -2472,11 +2472,6 @@ upgradeJob:
   ##
   usePostUpgradeHook: false
 
-  ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
-  ## This is only used in the preupgrade job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
-  ##
-  kubectlImage: bitnamilegacy/kubectl:1.30
-
   ## @param upgradeJob.nodeSelector Node labels for the Anchore upgrade job pod assignment
   ##
   nodeSelector: {}
@@ -2713,11 +2708,6 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.enabled Enable the Anchore Object Store and Analysis Archive migration job
   ##
   enabled: false
-
-  ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
-  ## This is only used in the osaaMigrationJob job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
-  ##
-  kubectlImage: bitnamilegacy/kubectl:1.30
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
