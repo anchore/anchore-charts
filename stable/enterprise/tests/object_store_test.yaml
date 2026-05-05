@@ -110,3 +110,33 @@ tests:
       - matchRegex:
           path: data["config.yaml"]
           pattern: "storage_driver:\\s*\\n\\s*config: \\{\\}\\s*\\n\\s*name: db"
+
+  - it: snapshot - S3 legacy configmap
+    templates:
+      - anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.catalog.object_store.storage_driver.name: s3
+      anchoreConfig.catalog.object_store.storage_driver.config.access_key: MY_ACCESS_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.secret_key: MY_SECRET_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.bucket: mybucket
+      anchoreConfig.catalog.object_store.storage_driver.config.url: https://s3.amazonaws.com
+      anchoreConfig.catalog.object_store.storage_driver.config.region: us-east-1
+    asserts:
+      - matchSnapshot:
+          path: data["config.yaml"]
+
+  - it: snapshot - S3 ng bootstrap configmap
+    templates:
+      - configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.catalog.object_store.storage_driver.name: s3
+      anchoreConfig.catalog.object_store.storage_driver.config.access_key: MY_ACCESS_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.secret_key: MY_SECRET_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.bucket: mybucket
+      anchoreConfig.catalog.object_store.storage_driver.config.url: https://s3.amazonaws.com
+      anchoreConfig.catalog.object_store.storage_driver.config.region: us-east-1
+    asserts:
+      - matchSnapshot:
+          path: data["bootstrap_ng.yaml"]
