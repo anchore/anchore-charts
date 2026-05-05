@@ -90,3 +90,16 @@ object_store:
   compression: {{- toYaml .Values.anchoreConfig.catalog.object_store.compression | nindent 4 }}
   storage_driver:
     name: {{ .Values.anchoreConfig.catalog.object_store.storage_driver.name }}
+  {{- $sdConfig := .Values.anchoreConfig.catalog.object_store.storage_driver.config -}}
+  {{- $secretName := include "enterprise.storageCredentialSecretName" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "storeName" "object_store" "context" .) -}}
+  {{- if $sdConfig }}
+  {{- range $k, $v := $sdConfig }}
+  {{- if and (eq $k "access_key") $secretName }}
+    access_key: ${ANCHORE_OBJECT_STORE_ACCESS_KEY}
+  {{- else if and (eq $k "secret_key") $secretName }}
+    secret_key: ${ANCHORE_OBJECT_STORE_SECRET_KEY}
+  {{- else if not (has $k (list "existingCredentialSecret" "accessKeySecretKey" "secretKeySecretKey")) }}
+    {{ $k }}: {{ $v }}
+  {{- end }}
+  {{- end }}
+  {{- end }}

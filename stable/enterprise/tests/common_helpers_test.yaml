@@ -979,7 +979,6 @@ tests:
           path: stringData
           content:
             ANCHORE_ADMIN_PASSWORD: my-password
-            ANCHORECTL_PASSWORD: my-password
         count: 1
         any: true
 
