@@ -35,14 +35,23 @@ spec:
     {{- end }}
       resources:
         requests:
-          memory: "256Mi"
+          memory: "512Mi"
           cpu: "100m"
         limits:
-          memory: "256Mi"
+          memory: "512Mi"
       envFrom: {{- include "enterprise.common.envFrom" . | nindent 6 }}
       env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 6 }}
       - name: ANCHORECTL_URL
         value: {{ printf "http://%s:%v" (include "enterprise.api.fullname" .) .Values.api.service.port }}
+      - name: ANCHORECTL_USERNAME
+        value: "admin"
+      - name: ANCHORECTL_ACCOUNT
+        value: "admin"
+      - name: ANCHORECTL_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: {{ ternary .Values.existingSecretName (include "enterprise.fullname" .) .Values.useExistingSecrets }}
+            key: ANCHORE_ADMIN_PASSWORD
 
       command: ["/bin/bash", "-c"]
       args:
