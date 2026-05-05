@@ -1,0 +1,142 @@
+suite: Object Store Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+
+tests:
+  - it: should create osaa-creds secret when S3 credentials are set inline
+    templates:
+      - storage_credential_secret.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.catalog.object_store.storage_driver.name: s3
+      anchoreConfig.catalog.object_store.storage_driver.config.access_key: MY_ACCESS_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.secret_key: MY_SECRET_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.bucket: mybucket
+      anchoreConfig.catalog.object_store.storage_driver.config.url: https://s3.amazonaws.com
+      anchoreConfig.catalog.object_store.storage_driver.config.region: us-east-1
+    asserts:
+      - isSubset:
+          path: stringData
+          content:
+            object_store_access_key: MY_ACCESS_KEY
+            object_store_secret_key: MY_SECRET_KEY
+
+  - it: should not create osaa-creds secret with default db driver
+    templates:
+      - storage_credential_secret.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render S3 object_store in default_config.yaml with env var placeholders
+    templates:
+      - anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.catalog.object_store.storage_driver.name: s3
+      anchoreConfig.catalog.object_store.storage_driver.config.access_key: MY_ACCESS_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.secret_key: MY_SECRET_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.bucket: mybucket
+      anchoreConfig.catalog.object_store.storage_driver.config.url: https://s3.amazonaws.com
+      anchoreConfig.catalog.object_store.storage_driver.config.region: us-east-1
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "access_key: \\$\\{ANCHORE_OBJECT_STORE_ACCESS_KEY\\}"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "secret_key: \\$\\{ANCHORE_OBJECT_STORE_SECRET_KEY\\}"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "name: s3"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "bucket: mybucket"
+
+  - it: should render S3 object_store in bootstrap_ng.yaml with flattened keys and env var placeholders
+    templates:
+      - configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.catalog.object_store.storage_driver.name: s3
+      anchoreConfig.catalog.object_store.storage_driver.config.access_key: MY_ACCESS_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.secret_key: MY_SECRET_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.bucket: mybucket
+      anchoreConfig.catalog.object_store.storage_driver.config.url: https://s3.amazonaws.com
+      anchoreConfig.catalog.object_store.storage_driver.config.region: us-east-1
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "access_key: \\$\\{ANCHORE_OBJECT_STORE_ACCESS_KEY\\}"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "secret_key: \\$\\{ANCHORE_OBJECT_STORE_SECRET_KEY\\}"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "name: s3"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "bucket: mybucket"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "config:"
+
+  - it: should not render config key in bootstrap_ng.yaml object_store with db driver
+    templates:
+      - configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "storage_driver:\\s*\\n\\s*name: db"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "config:"
+
+  - it: should render default db object_store in default_config.yaml
+    templates:
+      - anchore_configmap.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "storage_driver:\\s*\\n\\s*config: \\{\\}\\s*\\n\\s*name: db"
+
+  - it: snapshot - S3 legacy configmap
+    templates:
+      - anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.catalog.object_store.storage_driver.name: s3
+      anchoreConfig.catalog.object_store.storage_driver.config.access_key: MY_ACCESS_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.secret_key: MY_SECRET_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.bucket: mybucket
+      anchoreConfig.catalog.object_store.storage_driver.config.url: https://s3.amazonaws.com
+      anchoreConfig.catalog.object_store.storage_driver.config.region: us-east-1
+    asserts:
+      - matchSnapshot:
+          path: data["config.yaml"]
+
+  - it: snapshot - S3 ng bootstrap configmap
+    templates:
+      - configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.catalog.object_store.storage_driver.name: s3
+      anchoreConfig.catalog.object_store.storage_driver.config.access_key: MY_ACCESS_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.secret_key: MY_SECRET_KEY
+      anchoreConfig.catalog.object_store.storage_driver.config.bucket: mybucket
+      anchoreConfig.catalog.object_store.storage_driver.config.url: https://s3.amazonaws.com
+      anchoreConfig.catalog.object_store.storage_driver.config.region: us-east-1
+    asserts:
+      - matchSnapshot:
+          path: data["bootstrap_ng.yaml"]

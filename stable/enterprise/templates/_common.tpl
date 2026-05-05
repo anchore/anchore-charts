@@ -351,34 +351,10 @@ based on component-specific or global settings
 
 
 {{/*
-Create an image specification template for kubectl that can override the default image
-based on component-specific or global settings
+Create an image specification template for kubectl
 */}}
 {{- define "enterprise.kubectl.image" -}}
-{{- $kubectlImage := .Values.kubectlImage }}
-{{- $legacyOsaa := .Values.osaaMigrationJob.kubectlImage }}
-{{- $legacyUpgrade := .Values.upgradeJob.kubectlImage }}
-{{- if $kubectlImage }}
-  {{ include "enterprise.renderImage" (dict "image" $kubectlImage) }}
-{{- else if and $legacyOsaa (eq (printf "%T" $legacyOsaa) "string") }}
-  {{ $legacyOsaa | trim }}
-{{- else if and $legacyUpgrade (eq (printf "%T" $legacyUpgrade) "string") }}
-  {{ $legacyUpgrade | trim }}
-{{- else }}
-  {{ fail "No valid kubectlImage found in Values." }}
-{{- end }}
-{{- end }}
-
-{{/*
-Display deprecation warnings if legacy kubectlImage values are set
-*/}}
-{{- define "enterprise.kubectl.deprecationWarnings" -}}
-{{- if .Values.osaaMigrationJob.kubectlImage }}
-{{ printf "NOTICE: 'osaaMigrationJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
-{{- if .Values.upgradeJob.kubectlImage }}
-{{ printf "NOTICE: 'upgradeJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
+  {{ include "enterprise.renderImage" (dict "image" .Values.kubectlImage) }}
 {{- end }}
 
 {{/*
@@ -463,16 +439,23 @@ Setup the common anchore volume mounts
 - name: anchore-license
   mountPath: /home/anchore/license.yaml
   subPath: license.yaml
+{{- $ngComponents := list "componentCatalog" }}
+{{- if has $component $ngComponents }}
+- name: bootstrap-config-volume
+  mountPath: /config/bootstrap_ng.yaml
+  subPath: bootstrap_ng.yaml
 - name: config-volume
-  {{- $componentConfigMaps := list "componentCatalog" }}
-  {{- if has $component $componentConfigMaps }}
   mountPath: /config/config_ng.yaml
-  {{- else }}
+  subPath: config_ng.yaml
+{{- else }}
+- name: config-volume
   mountPath: /config/config.yaml
-  {{- end }}
   subPath: config.yaml
+{{- end }}
 - name: anchore-scripts
   mountPath: /scripts
+- name: anchore-scratch
+  mountPath: {{ .Values.scratchVolume.mountPath }}
 {{- if .Values.certStoreSecretName }}
 - name: certs
   mountPath: /home/anchore/certs/
@@ -537,19 +520,22 @@ Setup the common anchore volumes
   configMap:
     name: {{ .Release.Name }}-enterprise-scripts
     defaultMode: 0755
-{{- if .Values.osaaMigrationJob.enabled }}
+{{- $ngComponents := list "componentCatalog" }}
+{{- if has $component $ngComponents }}
+- name: bootstrap-config-volume
+  configMap:
+    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }}-bootstrap
+- name: config-volume
+  configMap:
+    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }}
+{{- else if .Values.osaaMigrationJob.enabled }}
 - name: config-volume
   configMap:
     name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
 {{- else }}
 - name: config-volume
   configMap:
-    {{- $componentConfigMaps := list "componentCatalog" }}
-    {{- if has $component $componentConfigMaps }}
-    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }} # new per service configmap architecture
-    {{- else }}
     name: {{ template "enterprise.fullname" . }}
-    {{- end }}
 {{- end }}
 {{- with .Values.certStoreSecretName }}
 - name: certs
@@ -581,7 +567,7 @@ Renders external_hostname, external_port, and external_tls from the service's an
 external_hostname: {{ $serviceConfig.external_hostname | toYaml }}
 external_port: {{ $serviceConfig.external_port | toYaml }}
 external_tls: {{ $serviceConfig.external_tls }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Cycle timers configuration for a service.
@@ -593,7 +579,7 @@ Renders cycle_timer_seconds and cycle_timers from the service's anchoreConfig.
 {{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
 cycle_timer_seconds: {{ $serviceConfig.cycle_timer_seconds }}
 cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 2 }}
-{{- end }}
+{{- end -}}
 
 {{/*
 Common server blocks
@@ -602,12 +588,27 @@ When calling this template, .anchoreService can be included in the context for a
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.server" -}}
 {{- $anchoreService := .anchoreService -}}
-{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server }}
+{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server -}}
 {{- if $server }}
 {{- toYaml $server | nindent 6 }}
-{{- else -}}
-{}{{- end }}
-{{- end }}
+{{- else }}
+{{- toYaml .Values.anchoreConfig.server | nindent 6 }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+NG server blocks — falls back to anchoreConfig.ngServer instead of the legacy server block.
+{{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.ngServer" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server -}}
+{{- if $server }}
+{{- toYaml $server | nindent 6 }}
+{{- else }}
+{{- toYaml .Values.anchoreConfig.ngServer | nindent 6 }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 containerSecurityContext helper to include security context if defined. service level context takes precedence over toplevel context.
@@ -632,10 +633,25 @@ Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .
 {{- define "enterprise.common.logging" -}}
 {{- $service := .service -}}
 {{- $serviceCfg := index .Values.anchoreConfig $service -}}
-{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
   {{- toYaml $serviceCfg.logging -}}
 {{- else -}}
   {{- toYaml .Values.anchoreConfig.logging -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the logging config for an ng service, with service-level override support.
+Checks anchoreConfig.<service>.logging first, falls back to anchoreConfig.ngLogging.
+Usage: {{ include "enterprise.common.ngLogging" (merge (dict "service" "component_catalog") .) }}
+*/}}
+{{- define "enterprise.common.ngLogging" -}}
+{{- $service := .service -}}
+{{- $serviceCfg := index .Values.anchoreConfig $service -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
+  {{- toYaml $serviceCfg.logging -}}
+{{- else -}}
+  {{- toYaml .Values.anchoreConfig.ngLogging -}}
 {{- end -}}
 {{- end -}}
 

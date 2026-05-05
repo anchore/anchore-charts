@@ -113,7 +113,7 @@ should render the configmaps for osaa migration if enabled:
             name: "${ANCHORE_DB_NAME}"
             db_connect_args:
               timeout: ${ANCHORE_DB_TIMEOUT}
-              ssl: ${ANCHORE_DB_SSL}
+              ssl: false
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
 
@@ -154,7 +154,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -213,11 +223,21 @@ should render the configmaps for osaa migration if enabled:
             layer_cache_max_gigabytes: 0
             enable_hints: false
             enable_owned_package_filtering: true
-            keep_image_analysis_tmpfiles: false
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -314,7 +334,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -341,7 +371,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -438,7 +478,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -469,7 +519,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -533,7 +593,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -561,7 +631,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -592,7 +672,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:
@@ -723,7 +813,7 @@ should render the configmaps for osaa migration if enabled:
             name: "${ANCHORE_DB_NAME}"
             db_connect_args:
               timeout: ${ANCHORE_DB_TIMEOUT}
-              ssl: ${ANCHORE_DB_SSL}
+              ssl: false
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
 
@@ -764,7 +854,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -823,11 +923,21 @@ should render the configmaps for osaa migration if enabled:
             layer_cache_max_gigabytes: 0
             enable_hints: false
             enable_owned_package_filtering: true
-            keep_image_analysis_tmpfiles: false
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -935,7 +1045,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -962,7 +1082,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -1059,7 +1189,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -1090,7 +1230,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -1154,7 +1304,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -1182,7 +1342,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -1213,7 +1383,17 @@ should render the configmaps for osaa migration if enabled:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:

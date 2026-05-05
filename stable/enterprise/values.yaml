@@ -296,7 +296,7 @@ anchoreConfig:
   ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
   ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
-  log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
+  log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
 
   ## @param anchoreConfig.internal_ssl_verify Enable cert verification for internal service-to-service SSL communication
   internal_ssl_verify: true
@@ -352,6 +352,30 @@ anchoreConfig:
     ssl_chain: false
     ssl_enable: false
     ssl_key: false
+
+  ## NG service logging configuration. These fields are the subset of logging config accepted by ng (psycopg3) services.
+  ## @param anchoreConfig.ngLogging.log_level Log level for ng services
+  ## @param anchoreConfig.ngLogging.colored_logging Enable colored output in ng service logs
+  ## @param anchoreConfig.ngLogging.exception_backtrace_logging Enable stack traces in ng service logs
+  ## @param anchoreConfig.ngLogging.exception_diagnose_logging Enable detailed exception information in ng service logs
+  ## @param anchoreConfig.ngLogging.file_rotation_rule Maximum size of a log file before it is rotated
+  ## @param anchoreConfig.ngLogging.file_retention_rule Number of log files to retain
+  ## @param anchoreConfig.ngLogging.structured_logging Enable structured logging output (JSON)
+  ngLogging:
+    log_level: "INFO"
+    colored_logging: false
+    exception_backtrace_logging: false
+    exception_diagnose_logging: false
+    file_rotation_rule: "10 MB"
+    file_retention_rule: 10
+    structured_logging: false
+
+  ## NG service server configuration. These fields are the subset of server config accepted by ng (psycopg3) services.
+  ## @param anchoreConfig.ngServer.process_worker_count Number of worker processes for ng services
+  ## @param anchoreConfig.ngServer.timeout_keep_alive Seconds to keep a connection alive before closing
+  ngServer:
+    process_worker_count: 1
+    timeout_keep_alive: 5
 
   ## @param anchoreConfig.audit.enabled Enable audit logging
   ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
@@ -443,8 +467,10 @@ anchoreConfig:
   ## @param anchoreConfig.database.sslRootCertFileName File name of the database root CA certificate stored in the k8s secret specified with .Values.certStoreSecretName
   ## @param anchoreConfig.database.db_pool_size The database max connection pool size
   ## @param anchoreConfig.database.db_pool_max_overflow The maximum overflow size of the database connection pool
-  ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy
-  ## @param anchoreConfig.database.dbConnectArgs Set custom database connection; If specified, this overrides other database connection settings
+  ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy (legacy/psycopg2)
+  ## @param anchoreConfig.database.dbConnectArgs Set custom database connection args (legacy/psycopg2); If specified, this overrides other database connection settings
+  ## @param anchoreConfig.database.ngEngineArgs Set custom database engine arguments (ng/psycopg3); If specified, this overrides pool_size and max_overflow for ng services
+  ## @param anchoreConfig.database.ngDbConnectArgs Set custom database connection args (ng/psycopg3); If specified, this overrides other database connection settings for ng services
   ## ref: https://docs.sqlalchemy.org/en/14/core/engines.html#engine-creation-api
   ##
   database:
@@ -456,6 +482,24 @@ anchoreConfig:
     db_pool_max_overflow: 100
     engineArgs: {}
     dbConnectArgs: {}
+    ngEngineArgs: {}
+    ngDbConnectArgs: {}
+
+    ## @param anchoreConfig.database.read_replica.enabled Enable a read replica database connection
+    ## @param anchoreConfig.database.read_replica.host The hostname of the read replica database. When useExistingSecrets is false, this is used to set ANCHORE_DB_READ_REPLICA_HOST in the generated secret. When useExistingSecrets is true, ANCHORE_DB_READ_REPLICA_HOST must be included in the existing secret.
+    ## @param anchoreConfig.database.read_replica.timeout Connection timeout for the read replica
+    ## @param anchoreConfig.database.read_replica.db_pool_size Connection pool size for the read replica
+    ## @param anchoreConfig.database.read_replica.db_pool_max_overflow Max overflow for the read replica connection pool
+    ## @param anchoreConfig.database.read_replica.engineArgs Set custom database engine arguments for the read replica; If specified, this overrides pool_size and max_overflow
+    ## @param anchoreConfig.database.read_replica.dbConnectArgs Set custom database connection args for the read replica; If specified, this overrides timeout
+    read_replica:
+      enabled: false
+      host: ""
+      timeout: 120
+      db_pool_size: 30
+      db_pool_max_overflow: 100
+      engineArgs: {}
+      dbConnectArgs: {}
 
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
@@ -488,6 +532,22 @@ anchoreConfig:
 
   ## @param anchoreConfig.extendedConfig appends additional configs to the root config for enterprise. This should only be used with guidance from Anchore CS.
   extendedConfig: {}
+
+  ## @param anchoreConfig.domains [object] Feature-domain configuration for NG services
+  ## @param anchoreConfig.domains.catalog [object] Catalog domain configuration
+  ## @param anchoreConfig.domains.jobs.gc_retention_days Number of days to retain completed job records
+  ## @param anchoreConfig.domains.jobs.pool_size Number of concurrent job workers
+  ## @param anchoreConfig.domains.jobs.job_types List of job types to enable (empty list enables all)
+  ## @param anchoreConfig.domains.jobs.memory_threshold_mb Memory threshold in MB for job workers
+  ## @param anchoreConfig.domains.jobs.heartbeat_interval_seconds Interval in seconds between job heartbeats
+  domains:
+    catalog: {}
+    jobs:
+      gc_retention_days: 14
+      pool_size: 4
+      job_types: []
+      memory_threshold_mb: 512
+      heartbeat_interval_seconds: 5.0
 
   apiext:
     ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
@@ -574,8 +634,6 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.enable_owned_package_filtering Enable filtering of packages that are owned by other packages
     enable_owned_package_filtering: true
 
-    ## @param anchoreConfig.analyzer.keep_image_analysis_tmpfiles Keep temporary files generated during image analysis
-    keep_image_analysis_tmpfiles: false
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
     ## Configures syft, content search, file contents, secret search, and malware scanning
@@ -732,8 +790,6 @@ anchoreConfig:
     ##      create_bucket: true
     ##      # Use an existing Kubernetes secret for access_key and secret_key instead of inline values
     ##      # existingCredentialSecret: ""
-    ##      # accessKeySecretKey: access_key
-    ##      # secretKeySecretKey: secret_key
 
     ## @param anchoreConfig.catalog.object_store [object] Custom object storage YAML configuration
     ## ref: https://docs.anchore.com/current/docs/configuration/storage/object_store/
@@ -785,16 +841,13 @@ anchoreConfig:
 
     ## @param anchoreConfig.component_catalog.global_client_connect_timeout Global timeout for client connections
     ## @param anchoreConfig.component_catalog.global_client_read_timeout Global timeout for client reads
-    ## @param anchoreConfig.component_catalog.logging [object] Logging configuration for the component catalog
+    ## @param anchoreConfig.component_catalog.server [object] Server configuration for the component catalog. Falls back to anchoreConfig.ngServer if empty.
+    ## @param anchoreConfig.component_catalog.logging [object] Logging configuration for the component catalog. Falls back to anchoreConfig.ngLogging if empty.
   component_catalog:
     global_client_connect_timeout: 0
     global_client_read_timeout: 0
-    logging:
-      log_level: "INFO"  # override the log_level for component catalog since <ALLOW_API_CONFIGURATION> isn't an accepted value for this component
-      server_response_debug_logging: ""
-      file_retention_rule: "10"
-      server_access_logging: ""
-      server_log_level: ""
+    server: {}
+    logging: {}
 
 
   ## @param anchoreConfig.policy_engine.extendedConfig appends additional configs to the policy_engine service's Anchore configs
@@ -899,6 +952,9 @@ anchoreConfig:
     ## @param anchoreConfig.policy_engine.catalog_client_read_timeout Timeout in seconds for catalog client reads (-1 for no timeout)
     catalog_client_conn_timeout: -1
     catalog_client_read_timeout: -1
+
+    ## @param anchoreConfig.policy_engine.enable_package_db_load Enable loading package data into the policy engine database
+    enable_package_db_load: false
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
@@ -2458,11 +2514,6 @@ upgradeJob:
   ##
   usePostUpgradeHook: false
 
-  ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
-  ## This is only used in the preupgrade job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
-  ##
-  kubectlImage: bitnamilegacy/kubectl:1.30
-
   ## @param upgradeJob.nodeSelector Node labels for the Anchore upgrade job pod assignment
   ##
   nodeSelector: {}
@@ -2699,11 +2750,6 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.enabled Enable the Anchore Object Store and Analysis Archive migration job
   ##
   enabled: false
-
-  ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
-  ## This is only used in the osaaMigrationJob job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
-  ##
-  kubectlImage: bitnamilegacy/kubectl:1.30
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##

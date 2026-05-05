@@ -1,0 +1,105 @@
+# Anchore Enterprise NG Bootstrap Configuration
+#
+# Contains the minimum configuration required to start the service:
+# database credentials, authentication keys, host identity, and service
+# instance fields.  These values are NEVER stored in the system_configurations
+# table — they are always read from this file.
+
+# Host identification
+host_id: ${ANCHORE_HOST_ID}
+
+# Database credentials
+credentials:
+  database:
+    user: "${ANCHORE_DB_USER}"
+    password: "${ANCHORE_DB_PASSWORD}"
+    host: "${ANCHORE_DB_HOST}"
+    port: "${ANCHORE_DB_PORT}"
+    database: "${ANCHORE_DB_NAME}"
+  {{- if .Values.anchoreConfig.database.ngDbConnectArgs }}
+  {{- with .Values.anchoreConfig.database.ngDbConnectArgs }}
+    db_connect_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
+    db_connect_args:
+      connect_timeout: {{ .Values.anchoreConfig.database.timeout }}
+    {{- if .Values.anchoreConfig.database.ssl }}
+      sslmode: {{ .Values.anchoreConfig.database.sslMode }}
+    {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+      sslrootcert: /home/anchore/certs/{{ . }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.anchoreConfig.database.ngEngineArgs }}
+  {{- with .Values.anchoreConfig.database.ngEngineArgs }}
+    db_engine_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
+    db_engine_args:
+      pool_size: {{ .Values.anchoreConfig.database.db_pool_size }}
+      max_overflow: {{ .Values.anchoreConfig.database.db_pool_max_overflow }}
+  {{- end }}
+
+{{- if .Values.anchoreConfig.database.read_replica.enabled }}
+  database_read_replica:
+    user: "${ANCHORE_DB_USER}"
+    password: "${ANCHORE_DB_PASSWORD}"
+    host: "${ANCHORE_DB_READ_REPLICA_HOST}"
+    port: "${ANCHORE_DB_PORT}"
+    database: "${ANCHORE_DB_NAME}"
+  {{- if .Values.anchoreConfig.database.read_replica.dbConnectArgs }}
+  {{- with .Values.anchoreConfig.database.read_replica.dbConnectArgs }}
+    db_connect_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
+    db_connect_args:
+      connect_timeout: {{ .Values.anchoreConfig.database.read_replica.timeout }}
+  {{- end }}
+  {{- if .Values.anchoreConfig.database.read_replica.engineArgs }}
+  {{- with .Values.anchoreConfig.database.read_replica.engineArgs }}
+    db_engine_args: {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- else }}
+    db_engine_args:
+      pool_size: {{ .Values.anchoreConfig.database.read_replica.db_pool_size }}
+      max_overflow: {{ .Values.anchoreConfig.database.read_replica.db_pool_max_overflow }}
+  {{- end }}
+{{- end }}
+
+# Authentication keys
+keys:
+  secret: "${ANCHORE_SAML_SECRET}"
+{{- with .Values.anchoreConfig.keys.publicKeyFileName }}
+  public_key_path: /home/anchore/certs/{{ . }}
+{{- else }}
+  public_key_path: null
+{{- end }}
+{{- with .Values.anchoreConfig.keys.privateKeyFileName }}
+  private_key_path: /home/anchore/certs/{{ . }}
+{{- else }}
+  private_key_path: null
+{{- end }}
+
+# OAuth configuration
+oauth:
+  default_token_expiration_seconds: {{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}
+
+# Object store configuration
+object_store:
+  verify_content_digests: {{ .Values.anchoreConfig.catalog.object_store.verify_content_digests }}
+  compression: {{- toYaml .Values.anchoreConfig.catalog.object_store.compression | nindent 4 }}
+  storage_driver:
+    name: {{ .Values.anchoreConfig.catalog.object_store.storage_driver.name }}
+  {{- $sdConfig := .Values.anchoreConfig.catalog.object_store.storage_driver.config -}}
+  {{- $secretName := include "enterprise.storageCredentialSecretName" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "storeName" "object_store" "context" .) -}}
+  {{- if $sdConfig }}
+  {{- range $k, $v := $sdConfig }}
+  {{- if and (eq $k "access_key") $secretName }}
+    access_key: ${ANCHORE_OBJECT_STORE_ACCESS_KEY}
+  {{- else if and (eq $k "secret_key") $secretName }}
+    secret_key: ${ANCHORE_OBJECT_STORE_SECRET_KEY}
+  {{- else if not (has $k (list "existingCredentialSecret" "accessKeySecretKey" "secretKeySecretKey")) }}
+    {{ $k }}: {{ $v }}
+  {{- end }}
+  {{- end }}
+  {{- end }}

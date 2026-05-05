@@ -1,25 +1,71 @@
 {{/*
-Allow configOverride per service.
+Allow bootstrap config override per service.
+Checks component-level configOverrideBootstrap first, falls back to global configOverrideBootstrap.
 */}}
-{{- define "enterprise.configOverride" -}}
+{{- define "enterprise.configOverrideBootstrap" -}}
 {{- $component := .component -}}
-
-{{- with (index .Values (print $component)).configOverride }}
+{{- with (index .Values (print $component)).configOverrideBootstrap }}
   {{- print .  -}}
 {{- else }}
-  {{- if .Values.configOverride }}
-    {{- print .Values.configOverride -}}
+  {{- if .Values.configOverrideBootstrap }}
+    {{- print .Values.configOverrideBootstrap -}}
   {{- end }}
 {{- end }}
 {{- end -}}
 
 {{/*
-Creates the configMap based on component passed in.
+Allow NG application config override per service.
+Checks component-level configOverrideNg first, falls back to global configOverrideNg.
 */}}
-{{- define "enterprise.configMap" -}}
+{{- define "enterprise.configOverrideNg" -}}
+{{- $component := .component -}}
+{{- with (index .Values (print $component)).configOverrideNg }}
+  {{- print .  -}}
+{{- else }}
+  {{- if .Values.configOverrideNg }}
+    {{- print .Values.configOverrideNg -}}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Creates the NG bootstrap configMap for a component.
+Concatenates files/bootstrap_ng.yaml (shared base) with an optional
+files/{component}/bootstrap_ng.yaml (per-component service instance fields).
+*/}}
+{{- define "enterprise.bootstrapConfigMap" -}}
 {{- $component := .component -}}
 {{- $configMapName := include "enterprise.fullname" . -}}
-{{- include "enterprise.exclusionCheck" . -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ $configMapName }}-{{ $component | lower }}-bootstrap
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" . | nindent 4 }}
+  annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
+data:
+  bootstrap_ng.yaml: |
+    # Anchore {{ $component | title }} Bootstrap Configuration, mounted from a configmap
+    #
+{{- if (include "enterprise.configOverrideBootstrap" (merge (dict "component" $component) .)) }}
+{{ tpl (include "enterprise.configOverrideBootstrap" (merge (dict "component" $component) .)) . | indent 4 }}
+{{- else }}
+{{ tpl (.Files.Get "files/bootstrap_ng.yaml") . | indent 4 }}
+{{- $componentBootstrap := printf "files/%s/bootstrap_ng.yaml" ($component | lower) -}}
+{{- if .Files.Get $componentBootstrap }}
+{{ tpl (.Files.Get $componentBootstrap) . | indent 4 }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Creates the NG application configMap for a component.
+Concatenates files/config_ng.yaml (shared base) with an optional
+files/{component}/config_ng.yaml (per-component overrides).
+*/}}
+{{- define "enterprise.ngConfigMap" -}}
+{{- $component := .component -}}
+{{- $configMapName := include "enterprise.fullname" . -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -28,14 +74,17 @@ metadata:
   labels: {{- include "enterprise.common.labels" . | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" . | nindent 4 }}
 data:
-  config.yaml: |
-    # Anchore {{ $component | title }} Service Configuration File, mounted from a configmap
+  config_ng.yaml: |
+    # Anchore {{ $component | title }} NG Application Configuration, mounted from a configmap
     #
-{{- if (include "enterprise.configOverride" (merge (dict "component" $component) .)) }}
-{{ tpl (include "enterprise.configOverride" (merge (dict "component" $component) .)) . | indent 4 }}
+{{- if (include "enterprise.configOverrideNg" (merge (dict "component" $component) .)) }}
+{{ tpl (include "enterprise.configOverrideNg" (merge (dict "component" $component) .)) . | indent 4 }}
 {{- else }}
-{{ tpl (.Files.Get "files/base_config.yaml") . | indent 4 }}
-{{ tpl (.Files.Get (printf "files/%s_config.yaml" ($component | lower))) . | indent 4 }}
+{{ tpl (.Files.Get "files/config_ng.yaml") . | indent 4 }}
+{{- $componentConfig := printf "files/%s/config_ng.yaml" ($component | lower) -}}
+{{- if .Files.Get $componentConfig }}
+{{ tpl (.Files.Get $componentConfig) . | indent 4 }}
+{{- end }}
 {{- end }}
 {{- end -}}
 
@@ -62,6 +111,13 @@ Consolidated deprecation and validation checks for breaking changes.
 {{/* apiext.external has been replaced by per-service external_hostname, external_port, external_tls */}}
 {{- if hasKey .Values.anchoreConfig.apiext "external" }}
   {{- fail "anchoreConfig.apiext.external is no longer supported. Use `anchoreConfig.apiext.external_hostname`, `anchoreConfig.apiext.external_port`, and `anchoreConfig.apiext.external_tls` instead." }}
+{{- end }}
+{{/* per-job kubectlImage has been replaced by the top-level kubectlImage */}}
+{{- if hasKey .Values.upgradeJob "kubectlImage" }}
+  {{- fail "upgradeJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." }}
+{{- end }}
+{{- if hasKey .Values.osaaMigrationJob "kubectlImage" }}
+  {{- fail "osaaMigrationJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." }}
 {{- end }}
 {{- end -}}
 
@@ -344,17 +400,6 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 Returns the value of ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD, preserving it from the
 previous env var ConfigMap on upgrades. Defaults to false on fresh installs.
 */}}
-{{- define "enterprise.policyEngineEnablePackageDBLoad" -}}
-{{- $val := false -}}
-{{- if .Release.IsUpgrade -}}
-  {{- $envvarConfigmap := (lookup "v1" "ConfigMap" .Release.Namespace (printf "%s-enterprise-config-env-vars" .Release.Name)) -}}
-  {{- if $envvarConfigmap -}}
-    {{- $val = index $envvarConfigmap.data "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" -}}
-  {{- end -}}
-{{- end -}}
-{{- $val -}}
-{{- end -}}
-
 {{/*
 Checks if any removed env vars are set via extraEnv (global or component-level).
 These env vars have been replaced by direct values file configuration and should no longer be set via extraEnv.
@@ -366,14 +411,13 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_LAYER_CACHE_SIZE_GB" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
   (dict "name" "ANCHORE_HINTS_ENABLED" "values_path" "anchoreConfig.analyzer.enable_hints" "components" (list "analyzer"))
   (dict "name" "ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED" "values_path" "anchoreConfig.analyzer.enable_owned_package_filtering" "components" (list "analyzer"))
-  (dict "name" "ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES" "values_path" "anchoreConfig.analyzer.keep_image_analysis_tmpfiles" "components" (list "analyzer"))
   (dict "name" "ANCHORE_CATALOG_IMAGE_GC_WORKERS" "values_path" "anchoreConfig.catalog.image_gc.max_worker_threads" "components" (list "catalog"))
   (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ttl_days" "components" (list "catalog"))
   (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite" "components" (list "catalog"))
   (dict "name" "ANCHORE_ENTERPRISE_INTEGRATION_HEALTH_REPORTS_TTL_DAYS" "values_path" "anchoreConfig.catalog.integrations.integration_health_report_ttl_days" "components" (list "catalog"))
   (dict "name" "ANCHORE_IMPORT_OPERATION_EXPIRATION_DAYS" "values_path" "anchoreConfig.catalog.import_operation_expiration_days" "components" (list "catalog"))
   (dict "name" "ANCHORE_POLICY_EVAL_CACHE_TTL_SECONDS" "values_path" "anchoreConfig.policy_engine.policy_evaluation_cache_ttl" "components" (list "policyEngine"))
-  (dict "name" "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" "values_path" "N/A (managed automatically on upgrades)" "components" (list "policyEngine"))
+  (dict "name" "ANCHORE_POLICY_ENGINE_ENABLE_PACKAGE_DB_LOAD" "values_path" "anchoreConfig.policy_engine.enable_package_db_load" "components" (list "policyEngine"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ENABLE_GRAPHIQL" "values_path" "anchoreConfig.reports.enable_graphiql" "components" (list "reports"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_MAX_ASYNC_EXECUTION_THREADS" "values_path" "anchoreConfig.reports.max_async_execution_threads" "components" (list "reports"))
   (dict "name" "ANCHORE_ENTERPRISE_REPORTS_ASYNC_EXECUTION_TIMEOUT" "values_path" "anchoreConfig.reports.async_execution_timeout" "components" (list "reports"))
@@ -390,6 +434,9 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_AUTH_PRIVKEY" "values_path" "anchoreConfig.keys.publicKeyFileName" "components" (list))
   (dict "name" "ANCHORE_AUTH_PUBKEY" "values_path" "anchoreConfig.keys.privateKeyFileName" "components" (list))
   (dict "name" "ANCHORE_DISABLE_METRICS_AUTH" "values_path" "anchoreConfig.metrics.auth_disabled" "components" (list))
+  (dict "name" "ANCHORE_DB_SSL" "values_path" "anchoreConfig.database.ssl" "components" (list))
+  (dict "name" "ANCHORE_DB_SSL_MODE" "values_path" "anchoreConfig.database.sslMode" "components" (list))
+  (dict "name" "ANCHORE_DB_SSL_ROOT_CERT" "values_path" "anchoreConfig.database.sslRootCertFileName" "components" (list))
   (dict "name" "ANCHORE_ENABLE_METRICS" "values_path" "anchoreConfig.metrics.enabled" "components" (list))
   (dict "name" "ANCHORE_MAX_COMPRESSED_IMAGE_SIZE_MB" "values_path" "anchoreConfig.max_compressed_image_size_mb" "components" (list))
   (dict "name" "ANCHORE_MAX_IMPORT_CONTENT_SIZE_MB" "values_path" "anchoreConfig.max_import_content_size_mb" "components" (list))

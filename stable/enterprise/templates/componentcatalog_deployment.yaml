@@ -43,9 +43,7 @@ spec:
         {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
     {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
-      {{- end }}
         - name: {{ .Chart.Name }}-{{ $component | lower }}
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -61,8 +59,6 @@ spec:
             - name: {{ $portName }}
               containerPort: {{ .Values.componentCatalog.service.port }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
-            - name: anchore-scratch
-              mountPath: {{ .Values.scratchVolume.mountPath }}
             - name: anchore-license # TODO REMOVE ME
               mountPath: /license.yaml
               subPath: license.yaml
@@ -107,6 +103,9 @@ spec:
       port: {{ .Values.componentCatalog.service.port }}
       targetPort: {{ .Values.componentCatalog.service.port }}
       protocol: TCP
+    {{- if .Values.setServiceAppProtocol }}
+      appProtocol: {{ include "enterprise.setProtocol" . }}
+    {{- end }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
     app.kubernetes.io/name: {{ template "enterprise.fullname" . }}

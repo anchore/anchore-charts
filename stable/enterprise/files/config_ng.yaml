@@ -1,0 +1,25 @@
+# Anchore Enterprise NG Application Configuration
+#
+# Contains all configuration that can be reconciled with DB-stored config
+# by the config compiler.  Values here follow the priority:
+#   CONFIG_FILE > API > INHERITED_DEFAULT > DEFAULT
+#
+# Load this ALONGSIDE the bootstrap config (bootstrap.yaml).  The two are
+# deep-merged before validation.
+
+# Internal SSL verification
+internal_ssl_verify: {{ .Values.anchoreConfig.internal_ssl_verify }}
+
+# Global client timeouts
+global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
+global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
+
+# Global logging settings (can be overridden per service under `services.*.logging`)
+logging:
+  {{- toYaml .Values.anchoreConfig.ngLogging | nindent 2 }}
+
+# Feature-domain configuration (NG-owned, namespaced under `domains.*` in the DB)
+domains:
+  {{- toYaml .Values.anchoreConfig.domains | nindent 2 }}
+
+# Per-service overrides are in files/{component}/config_ng.yaml

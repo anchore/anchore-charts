@@ -115,7 +115,7 @@ should render additional audit uris when additionalResourceURIs is set:
             name: "${ANCHORE_DB_NAME}"
             db_connect_args:
               timeout: ${ANCHORE_DB_TIMEOUT}
-              ssl: ${ANCHORE_DB_SSL}
+              ssl: false
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
 
@@ -156,7 +156,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -215,11 +225,21 @@ should render additional audit uris when additionalResourceURIs is set:
             layer_cache_max_gigabytes: 0
             enable_hints: false
             enable_owned_package_filtering: true
-            keep_image_analysis_tmpfiles: false
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -316,7 +336,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -343,7 +373,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -440,7 +480,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -471,7 +521,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -535,7 +595,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -563,7 +633,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -594,7 +674,17 @@ should render additional audit uris when additionalResourceURIs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:
@@ -726,7 +816,7 @@ should render the configmaps:
             name: "${ANCHORE_DB_NAME}"
             db_connect_args:
               timeout: ${ANCHORE_DB_TIMEOUT}
-              ssl: ${ANCHORE_DB_SSL}
+              ssl: false
             db_pool_size: ${ANCHORE_DB_POOL_SIZE}
             db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
 
@@ -767,7 +857,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -826,11 +926,21 @@ should render the configmaps:
             layer_cache_max_gigabytes: 0
             enable_hints: false
             enable_owned_package_filtering: true
-            keep_image_analysis_tmpfiles: false
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -927,7 +1037,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -954,7 +1074,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -1051,7 +1181,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -1082,7 +1222,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -1146,7 +1296,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -1174,7 +1334,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -1205,7 +1375,17 @@ should render the configmaps:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:
@@ -1227,21 +1407,15 @@ should render the configmaps:
     data:
       ANCHORE_DB_POOL_MAX_OVERFLOW: "100"
       ANCHORE_DB_POOL_SIZE: "30"
-      ANCHORE_DB_SSL: "false"
-      ANCHORE_DB_SSL_MODE: verify-full
-      ANCHORE_DB_SSL_ROOT_CERT: "null"
       ANCHORE_DB_TIMEOUT: "120"
-      ANCHORE_ENTERPRISE_LICENSE_PATH: /home/anchore/license.yaml
       ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
       ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
       ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
+      ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
       ANCHORE_LICENSE_FILE: /home/anchore/license.yaml
       ANCHORE_SAML_SECRET: "null"
       ANCHORE_SERVICE_DIR: /anchore_service
       ANCHORE_TMP_DIR: /analysis_scratch
-      ANCHORECTL_ACCOUNT: admin
-      ANCHORECTL_URL: http://localhost:8228
-      ANCHORECTL_USERNAME: admin
     kind: ConfigMap
     metadata:
       annotations:
@@ -1536,7 +1710,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           analyzer:
             enabled: true
@@ -1595,11 +1779,21 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             layer_cache_max_gigabytes: 0
             enable_hints: false
             enable_owned_package_filtering: true
-            keep_image_analysis_tmpfiles: false
+            keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           catalog:
             enabled: true
@@ -1696,7 +1890,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           simplequeue:
             enabled: true
@@ -1723,7 +1927,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           policy_engine:
             enabled: true
@@ -1820,7 +2034,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports:
             enabled: true
@@ -1851,7 +2075,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           reports_worker:
             enabled: true
@@ -1915,7 +2149,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           notifications:
             enabled: true
@@ -1943,7 +2187,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
 
           data_syncer:
             enabled: true
@@ -1974,7 +2228,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             external_hostname: null
             external_port: null
             external_tls: false
-            server: {}
+            server:
+              max_connection_backlog: 2048
+              max_wsgi_middleware_worker_count: 50
+              max_wsgi_middleware_worker_queue_size: 100
+              process_worker_count: 1
+              ssl_cert: false
+              ssl_chain: false
+              ssl_enable: false
+              ssl_key: false
+              timeout_graceful_shutdown: false
+              timeout_keep_alive: 5
     kind: ConfigMap
     metadata:
       annotations:

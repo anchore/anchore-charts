@@ -67,12 +67,12 @@ spec:
             - |
               while true; do
                 CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-                if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-                  CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-                fi
-                if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-                  CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
-                fi
+              {{- if .Values.anchoreConfig.database.ssl }}
+                CONNSTR=${CONNSTR}?sslmode={{ .Values.anchoreConfig.database.sslMode }}
+              {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+                CONNSTR=${CONNSTR}\&sslrootcert=/home/anchore/certs/{{ . }}
+              {{- end }}
+              {{- end }}
                 err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
                 if [[ !$err ]]; then
                   echo "Database is ready"
