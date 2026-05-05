@@ -10,6 +10,8 @@ metadata:
     "helm.sh/hook": test
 spec:
   volumes: {{- include "enterprise.common.volumes" . | nindent 2 }}
+  - name: anchore-scratch
+    emptyDir: {}
   {{- with .Values.imagePullSecretName }}
   imagePullSecrets:
     - name: {{ . }}
