@@ -16,43 +16,21 @@ Get the default admin password using the following command:
     # for Linux
     kubectl get secret {{ template "enterprise.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.ANCHORE_ADMIN_PASSWORD}' | base64 -d
 
-* NOTE: On first startup of Anchore Enterprise, the policy-engine performs a CVE data sync which may take several minutes to complete.
-During this time the system status will report 'partially_down' and any images added for analysis will stay in the 'not_analyzed' state.
-Once the sync is complete, any queued images will be analyzed and the system status will change to 'all_up'.
+* NOTE: On first startup of Anchore Enterprise, the data-syncer service performs a vulnerability data sync which may take several minutes to complete.
+During this time any images added for analysis will stay in the 'not_analyzed' state.
+Once the sync is complete, any queued images will be analyzed.
 
 Initial setup time can be >120sec for postgresql setup and readiness checks to pass for the services as indicated by pod state.
 You can check with:
 
     kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{- template "enterprise.fullname" . -}},app.kubernetes.io/component=api
 
-{{ if and .Values.useExistingSecrets .Release.IsUpgrade (semverCompare "~2.1.0" .Chart.Version) }}
-******************
-
-WARNING: This deployment is utilizing Existing Secrets. Your ANCHORE_REDIS_URI environment variable needs to be updated.
-A username is no longer required, please remove `nouser` from the URI. The UI will not function unless this update is performed.
-
-For more details see the v2.1.0 release notes - https://github.com/anchore/anchore-charts/blob/main/stable/enterprise/README.md#v210
-
-******************
-{{ end }}
-
-
-{{ if (index .Values "ui-redis" "chartEnabled") }}
-******************
-
-WARNING: Starting August 28th, 2025, the Bitnami public catalog will undergo changes that will remove the current images used in the dependent helm chart for redis.
-The following values changes will be needed to use their legacy image repo if you are using the dependent redis chart which will not receive any further updates post August 28th, 2025.
-  ui-redis.image.repository=bitnamilegacy/redis
-
-This is a temporary workaround while we review options on how to proceed with this dependency
-******************
-{{ end }}
 
 {{- if .Release.IsUpgrade }}
-\033[1;33m******************
-UPGRADE ATTENTION: This deployment was an upgrade. 
-Please ensure you update anchorectl and other Anchore Enterprise components 
+******************
+UPGRADE ATTENTION: This deployment was an upgrade.
+Please ensure you update anchorectl and other Anchore Enterprise components
 as per the recommendations found in the release notes at:
 https://docs.anchore.com
-******************\033[0m
+******************
 {{- end }}

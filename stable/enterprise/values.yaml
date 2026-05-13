@@ -533,7 +533,7 @@ anchoreConfig:
   ## @param anchoreConfig.extendedConfig appends additional configs to the root config for enterprise. This should only be used with guidance from Anchore CS.
   extendedConfig: {}
 
-  ## @param anchoreConfig.domains [object] Feature-domain configuration for NG services
+  ## Feature-domain configuration for NG services
   ## @param anchoreConfig.domains.catalog [object] Catalog domain configuration
   ## @param anchoreConfig.domains.jobs.gc_retention_days Number of days to retain completed job records
   ## @param anchoreConfig.domains.jobs.pool_size Number of concurrent job workers
@@ -544,7 +544,7 @@ anchoreConfig:
     catalog: {}
     jobs:
       gc_retention_days: 14
-      pool_size: 4
+      pool_size: 16
       job_types: []
       memory_threshold_mb: 512
       heartbeat_interval_seconds: 5.0

@@ -84,6 +84,11 @@ keys:
 oauth:
   default_token_expiration_seconds: {{ .Values.anchoreConfig.user_authentication.oauth.default_token_expiration_seconds }}
 
+# Job worker pool size (bootstrap-only, not reconciled via config compiler)
+domains:
+  jobs:
+    pool_size: {{ .Values.anchoreConfig.domains.jobs.pool_size }}
+
 # Object store configuration
 object_store:
   verify_content_digests: {{ .Values.anchoreConfig.catalog.object_store.verify_content_digests }}

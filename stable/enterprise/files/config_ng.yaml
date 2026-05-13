@@ -19,7 +19,12 @@ logging:
   {{- toYaml .Values.anchoreConfig.ngLogging | nindent 2 }}
 
 # Feature-domain configuration (NG-owned, namespaced under `domains.*` in the DB)
+# NOTE: domains.jobs.pool_size is a bootstrap-only setting and lives in bootstrap_ng.yaml
+{{- $domains := deepCopy .Values.anchoreConfig.domains }}
+{{- if hasKey (default dict $domains.jobs) "pool_size" }}
+{{- $_ := unset $domains.jobs "pool_size" }}
+{{- end }}
 domains:
-  {{- toYaml .Values.anchoreConfig.domains | nindent 2 }}
+  {{- toYaml $domains | nindent 2 }}
 
 # Per-service overrides are in files/{component}/config_ng.yaml
