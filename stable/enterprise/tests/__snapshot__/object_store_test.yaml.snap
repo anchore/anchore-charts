@@ -728,7 +728,7 @@ snapshot - S3 ng bootstrap configmap:
       # Job worker pool size (bootstrap-only, not reconciled via config compiler)
       domains:
         jobs:
-          pool_size: 4
+          pool_size: 16
 
       # Object store configuration
       object_store:

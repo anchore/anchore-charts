@@ -29,6 +29,8 @@ spec:
       - pg_cron
     parameters:
       cron.database_name: anchore
+      cron.use_background_workers: "on"
+      max_worker_processes: "20"
 
   storage:
     size: 10Gi
