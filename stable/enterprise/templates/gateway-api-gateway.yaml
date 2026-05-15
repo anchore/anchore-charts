@@ -1,0 +1,33 @@
+{{- if and .Values.gatewayApi.enabled .Values.gatewayApi.gateway.create -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "enterprise.gatewayApi.gatewayName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "enterprise.common.labels" (merge (dict "component" "gateway") .) | nindent 4 }}
+    {{- with .Values.gatewayApi.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.annotations .Values.gatewayApi.annotations }}
+  annotations:
+    {{- with .Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.gatewayApi.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ required "gatewayApi.gateway.gatewayClassName is required when creating a Gateway" .Values.gatewayApi.gateway.gatewayClassName }}
+  listeners:
+    {{- with .Values.gatewayApi.gateway.listeners }}
+    {{- toYaml . | nindent 4 }}
+    {{- else }}
+    {{- fail "gatewayApi.gateway.listeners is required when creating a Gateway" }}
+    {{- end }}
+  {{- with .Values.gatewayApi.gateway.addresses }}
+  addresses:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

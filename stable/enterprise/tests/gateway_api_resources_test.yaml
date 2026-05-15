@@ -1,0 +1,718 @@
+suite: Gateway API Resources Tests
+templates:
+  - gateway-api-gateway.yaml
+  - gateway-api-httproutes.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  # ==========================================
+  # Gateway API Disabled Tests
+  # ==========================================
+  - it: should not render Gateway when gatewayApi is disabled
+    template: gateway-api-gateway.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render HTTPRoutes when gatewayApi is disabled
+    template: gateway-api-httproutes.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # ==========================================
+  # Gateway Creation Tests
+  # ==========================================
+  - it: should not render Gateway when gatewayApi.gateway.create is false
+    template: gateway-api-gateway.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          create: false
+          name: existing-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should fail when creating Gateway without listeners
+    template: gateway-api-gateway.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          create: true
+          gatewayClassName: istio
+        routes: {}
+    asserts:
+      - failedTemplate:
+          errorMessage: "gatewayApi.gateway.listeners is required when creating a Gateway"
+
+  - it: should render Gateway when gatewayApi.gateway.create is true
+    template: gateway-api-gateway.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          create: true
+          gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
+        routes: {}
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Gateway
+      - equal:
+          path: apiVersion
+          value: gateway.networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-gateway
+      - equal:
+          path: metadata.namespace
+          value: test-namespace
+      - equal:
+          path: spec.gatewayClassName
+          value: istio
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/component: gateway
+
+  - it: should render Gateway with listeners
+    template: gateway-api-gateway.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          create: true
+          gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
+              allowedRoutes:
+                namespaces:
+                  from: Same
+            - name: https
+              port: 443
+              protocol: HTTPS
+        routes: {}
+    asserts:
+      - equal:
+          path: spec.listeners[0].name
+          value: http
+      - equal:
+          path: spec.listeners[0].port
+          value: 80
+      - equal:
+          path: spec.listeners[0].protocol
+          value: HTTP
+      - equal:
+          path: spec.listeners[1].name
+          value: https
+      - equal:
+          path: spec.listeners[1].port
+          value: 443
+
+  - it: should render Gateway with addresses
+    template: gateway-api-gateway.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          create: true
+          gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
+          addresses:
+            - type: IPAddress
+              value: "192.168.1.1"
+        routes: {}
+    asserts:
+      - equal:
+          path: spec.addresses[0].type
+          value: IPAddress
+      - equal:
+          path: spec.addresses[0].value
+          value: "192.168.1.1"
+
+  - it: should render Gateway with global and gatewayApi labels
+    template: gateway-api-gateway.yaml
+    set:
+      labels:
+        global-label: global-value
+      gatewayApi:
+        enabled: true
+        labels:
+          gateway-api-label: gateway-api-value
+        gateway:
+          create: true
+          gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
+        routes: {}
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            global-label: global-value
+            gateway-api-label: gateway-api-value
+
+  - it: should render Gateway with global and gatewayApi annotations
+    template: gateway-api-gateway.yaml
+    set:
+      annotations:
+        global-annotation: global-value
+      gatewayApi:
+        enabled: true
+        annotations:
+          gateway-api-annotation: gateway-api-value
+        gateway:
+          create: true
+          gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
+        routes: {}
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            global-annotation: global-value
+            gateway-api-annotation: gateway-api-value
+
+  # ==========================================
+  # HTTPRoute Tests - Basic
+  # ==========================================
+  - it: should not render HTTPRoutes when routes is empty
+    template: gateway-api-httproutes.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes: {}
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render single HTTPRoute
+    template: gateway-api-httproutes.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            hostnames:
+              - api.example.com
+            rules:
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /v2/
+                backendRefs:
+                  - name: test-release-enterprise-api
+                    port: 8228
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: HTTPRoute
+      - equal:
+          path: apiVersion
+          value: gateway.networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-api
+      - equal:
+          path: metadata.namespace
+          value: test-namespace
+
+  - it: should render multiple HTTPRoutes
+    template: gateway-api-httproutes.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+          ui:
+            rules:
+              - backendRefs:
+                  - name: test-ui
+                    port: 80
+    asserts:
+      - hasDocuments:
+          count: 2
+
+  - it: should render HTTPRoute with hostnames
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            hostnames:
+              - api.example.com
+              - api.anchore.io
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.hostnames[0]
+          value: api.example.com
+      - equal:
+          path: spec.hostnames[1]
+          value: api.anchore.io
+
+  - it: should render HTTPRoute with multiple rules
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          combined:
+            hostnames:
+              - anchore.example.com
+            rules:
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /v2/
+                backendRefs:
+                  - name: test-api
+                    port: 8228
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+                backendRefs:
+                  - name: test-ui
+                    port: 80
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /v2/
+      - equal:
+          path: spec.rules[0].backendRefs[0].name
+          value: test-api
+      - equal:
+          path: spec.rules[1].matches[0].path.value
+          value: /
+      - equal:
+          path: spec.rules[1].backendRefs[0].name
+          value: test-ui
+
+  - it: should render HTTPRoute with filters
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+                filters:
+                  - type: RequestHeaderModifier
+                    requestHeaderModifier:
+                      add:
+                        - name: X-Custom-Header
+                          value: custom-value
+                backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.rules[0].filters[0].type
+          value: RequestHeaderModifier
+
+  # ==========================================
+  # HTTPRoute parentRefs Tests
+  # ==========================================
+  - it: should render HTTPRoute with parentRef to existing gateway
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: existing-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].name
+          value: existing-gateway
+      - notExists:
+          path: spec.parentRefs[0].namespace
+
+  - it: should render HTTPRoute with parentRef to created gateway
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          create: true
+          gatewayClassName: istio
+          listeners:
+            - name: http
+              port: 80
+              protocol: HTTP
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].name
+          value: test-release-enterprise-gateway
+
+  - it: should render HTTPRoute with cross-namespace gateway reference
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: shared-gateway
+          namespace: gateway-system
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].name
+          value: shared-gateway
+      - equal:
+          path: spec.parentRefs[0].namespace
+          value: gateway-system
+
+  - it: should render HTTPRoute with sectionName
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+          sectionName: https
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].sectionName
+          value: https
+
+  - it: should render HTTPRoute with namespace and sectionName
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: shared-gateway
+          namespace: gateway-system
+          sectionName: https
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].name
+          value: shared-gateway
+      - equal:
+          path: spec.parentRefs[0].namespace
+          value: gateway-system
+      - equal:
+          path: spec.parentRefs[0].sectionName
+          value: https
+
+  # ==========================================
+  # HTTPRoute Labels and Annotations Tests
+  # ==========================================
+  - it: should render HTTPRoute with standard labels
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/name: test-release-enterprise
+            app.kubernetes.io/component: httproute-api
+            app.kubernetes.io/instance: test-release
+            app.kubernetes.io/part-of: anchore
+            app.kubernetes.io/managed-by: Helm
+
+  - it: should render HTTPRoute with component label based on route name
+    template: gateway-api-httproutes.yaml
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          ui:
+            rules:
+              - backendRefs:
+                  - name: test-ui
+                    port: 80
+          custom-service:
+            rules:
+              - backendRefs:
+                  - name: test-custom
+                    port: 8080
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/component: httproute-custom-service
+        documentIndex: 0
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/component: httproute-ui
+        documentIndex: 1
+
+  - it: should render HTTPRoute with global labels
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      labels:
+        global-label: global-value
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            global-label: global-value
+
+  - it: should render HTTPRoute with gatewayApi labels
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        labels:
+          gateway-api-label: gateway-api-value
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            gateway-api-label: gateway-api-value
+
+  - it: should render HTTPRoute with global annotations
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      annotations:
+        global-annotation: global-value
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            global-annotation: global-value
+
+  - it: should render HTTPRoute with gatewayApi annotations
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        annotations:
+          gateway-api-annotation: gateway-api-value
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - backendRefs:
+                  - name: test-api
+                    port: 8228
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            gateway-api-annotation: gateway-api-value
+
+  # ==========================================
+  # Complex Route Configuration Tests
+  # ==========================================
+  - it: should render HTTPRoute with weighted backendRefs
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+                backendRefs:
+                  - name: api-v1
+                    port: 8228
+                    weight: 90
+                  - name: api-v2
+                    port: 8228
+                    weight: 10
+    asserts:
+      - equal:
+          path: spec.rules[0].backendRefs[0].weight
+          value: 90
+      - equal:
+          path: spec.rules[0].backendRefs[1].weight
+          value: 10
+
+  - it: should render HTTPRoute with header matching
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /
+                    headers:
+                      - name: X-Api-Version
+                        value: v2
+                backendRefs:
+                  - name: api-v2
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].headers[0].name
+          value: X-Api-Version
+      - equal:
+          path: spec.rules[0].matches[0].headers[0].value
+          value: v2
+
+  - it: should render HTTPRoute with method matching
+    template: gateway-api-httproutes.yaml
+    documentIndex: 0
+    set:
+      gatewayApi:
+        enabled: true
+        gateway:
+          name: test-gateway
+        routes:
+          api:
+            rules:
+              - matches:
+                  - path:
+                      type: PathPrefix
+                      value: /api
+                    method: POST
+                backendRefs:
+                  - name: api-write
+                    port: 8228
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].method
+          value: POST
