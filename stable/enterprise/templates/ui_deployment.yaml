@@ -136,7 +136,7 @@ spec:
       port: {{ .Values.ui.service.port }}
       protocol: TCP
     {{- if .Values.setServiceAppProtocol }}
-      appProtocol: http
+      appProtocol: {{ if .Values.anchoreConfig.ui.enable_ssl }}https{{ else }}http{{ end }}
     {{- end }}
       targetPort: 3000
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
