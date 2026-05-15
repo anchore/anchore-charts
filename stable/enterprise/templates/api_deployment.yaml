@@ -16,7 +16,7 @@ spec:
     metadata:
       labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 8 }}
       annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 8 }}
-      {{- if not .Values.injectSecretsViaEnv }}
+      {{- if and (not .Values.injectSecretsViaEnv) (not .Values.useExistingSecrets) }}
         checksum/secrets: {{ include (print $.Template.BasePath "/anchore_secret.yaml") . | sha256sum }}
       {{- end }}
       {{- if .Values.anchoreConfig.policyBundles }}
