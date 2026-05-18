@@ -45,10 +45,10 @@ spec:
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
       initContainers:
-        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
         {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
+        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
       {{- end }}
       containers:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
