@@ -309,7 +309,7 @@ secretName: {{ template "enterprise.fullname" . }}-license
 {{/*
 Takes in a map of drivers and checks if the driver is enabled. If not, update the map to sets the notify flag to true
 */}}
-{{- define "checkDriverEnabled" -}}
+{{- define "enterprise.checkDriverEnabled" -}}
   {{- $drivers := .drivers -}}
   {{- $driverName := .driverName -}}
   {{- $driver := index $drivers $driverName -}}
@@ -359,19 +359,19 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
         {{/* calling function to check if driver is enabled, if driver is disabled, set notify to true if its not already true */}}
         {{- if $drivers }}
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "gem" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
 
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "github" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
 
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "msrc" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
 
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "npm" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
         {{- end -}}
       {{- end -}}
