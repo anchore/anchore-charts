@@ -49,7 +49,6 @@ metadata:
   {{- end }}
 rules:
   - apiGroups:
-      - extensions
       - apps
     resources:
       - deployments
