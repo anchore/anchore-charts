@@ -45,17 +45,17 @@ spec:
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
       initContainers:
-        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
         {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
+        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
       {{- end }}
       containers:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.ui.image" . | trim }}
           imagePullPolicy: {{ .Values.ui.imagePullPolicy }}
-        {{- if or .Values.containerSecurityContext .Values.api.containerSecurityContext }}
+        {{- if or .Values.containerSecurityContext .Values.ui.containerSecurityContext }}
           securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
           command: ["/bin/sh", "-c"]
@@ -136,7 +136,7 @@ spec:
       port: {{ .Values.ui.service.port }}
       protocol: TCP
     {{- if .Values.setServiceAppProtocol }}
-      appProtocol: http
+      appProtocol: {{ if .Values.anchoreConfig.ui.enable_ssl }}https{{ else }}http{{ end }}
     {{- end }}
       targetPort: 3000
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}

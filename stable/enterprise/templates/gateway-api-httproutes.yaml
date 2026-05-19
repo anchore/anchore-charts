@@ -1,0 +1,38 @@
+{{- if .Values.gatewayApi.enabled -}}
+{{- $root := . -}}
+{{- range $name, $route := .Values.gatewayApi.routes }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ template "enterprise.fullname" $root }}-{{ $name }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+    {{- include "enterprise.common.labels" (merge (dict "component" (printf "httproute-%s" $name)) $root) | nindent 4 }}
+    {{- with $root.Values.gatewayApi.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if or $root.Values.annotations $root.Values.gatewayApi.annotations }}
+  annotations:
+    {{- with $root.Values.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with $root.Values.gatewayApi.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  parentRefs:
+    - name: {{ include "enterprise.gatewayApi.gatewayName" $root }}
+      {{- $gatewayNamespace := include "enterprise.gatewayApi.gatewayNamespace" $root }}
+      {{- if and $gatewayNamespace (ne $gatewayNamespace $root.Release.Namespace) }}
+      namespace: {{ $gatewayNamespace }}
+      {{- end }}
+      {{- with $root.Values.gatewayApi.gateway.sectionName }}
+      sectionName: {{ . }}
+      {{- end }}
+  {{- with $route }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end }}

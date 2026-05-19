@@ -1,13 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $component := "ingress" -}}
 
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
-{{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" }}
-apiVersion: networking.k8s.io/v1beta1
-{{- else }}
-apiVersion: extensions/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ template "enterprise.fullname" . }}
@@ -36,18 +30,12 @@ spec:
         paths:
         {{- range $apiPathIndex, $apiPath := $.Values.ingress.apiPaths }}
           - path: {{ $apiPath }}
-          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
               service:
                 name: {{ template "enterprise.api.fullname" $ }}
                 port:
                   number: {{ $.Values.api.service.port }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.api.service.port }}
-          {{- end }}
         {{- end }}
     {{- end }}
     {{- range $uiHostIndex, $uiHostName := .Values.ingress.uiHosts }}
@@ -55,51 +43,33 @@ spec:
       http:
         paths:
           - path: {{ $.Values.ingress.uiPath }}
-          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
               service:
                 name: {{ template "enterprise.ui.fullname" $ }}
                 port:
                   number: {{ $.Values.ui.service.port }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.ui.fullname" $ }}
-              servicePort: {{ $.Values.ui.service.port }}
-          {{- end }}
     {{- end }}
   {{- else }}
     - http:
         paths:
         {{- range .Values.ingress.apiPaths }}
           - path: {{ . }}
-          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
               service:
                 name: {{ template "enterprise.api.fullname" $ }}
                 port:
                   number: {{ $.Values.api.service.port }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.api.fullname" $ }}
-              servicePort: {{ $.Values.api.service.port }}
-          {{- end }}
         {{- end }}
         {{- with .Values.ingress.uiPath }}
           - path: {{ . }}
-          {{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
             pathType: Prefix
             backend:
               service:
                 name: {{ template "enterprise.ui.fullname" $ }}
                 port:
                   number: {{ $.Values.ui.service.port }}
-          {{- else }}
-            backend:
-              serviceName: {{ template "enterprise.ui.fullname" $ }}
-              servicePort: {{ $.Values.ui.service.port }}
-          {{- end }}
         {{- end }}
   {{- end }}
 {{- end -}}

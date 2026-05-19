@@ -309,7 +309,7 @@ secretName: {{ template "enterprise.fullname" . }}-license
 {{/*
 Takes in a map of drivers and checks if the driver is enabled. If not, update the map to sets the notify flag to true
 */}}
-{{- define "checkDriverEnabled" -}}
+{{- define "enterprise.checkDriverEnabled" -}}
   {{- $drivers := .drivers -}}
   {{- $driverName := .driverName -}}
   {{- $driver := index $drivers $driverName -}}
@@ -359,19 +359,19 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
         {{/* calling function to check if driver is enabled, if driver is disabled, set notify to true if its not already true */}}
         {{- if $drivers }}
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "gem" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
 
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "github" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
 
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "msrc" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
 
           {{- $context := dict "drivers" $drivers "notify" $notify "driverName" "npm" }}
-          {{- include "checkDriverEnabled" $context }}
+          {{- include "enterprise.checkDriverEnabled" $context }}
           {{- $notify = $context.notify }}
         {{- end -}}
       {{- end -}}
@@ -629,38 +629,23 @@ Usage: {{ include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.
 {{- end -}}
 
 {{/*
-Get a value from anchoreConfig with component-level override support and deep merge.
-Checks anchoreConfig.<configComponent>.<configKey> first, falls back to anchoreConfig.<configKey>.
-When both levels define a map for the same key, the maps are deep merged with the component values taking precedence.
-
-Usage:
-  {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" "component_catalog" "configKey" "log_level") .) }}
-  {{ include "enterprise.anchoreConfig.get" (merge (dict "configComponent" "component_catalog" "configKey" "logging") .) }}
+Gateway API - Returns the Gateway name for parentRefs
 */}}
-{{- define "enterprise.anchoreConfig.get" -}}
-{{- $component := .configComponent -}}
-{{- $key := .configKey -}}
-{{- $global := .Values.anchoreConfig -}}
-{{- $componentCfg := dict -}}
-{{- if hasKey $global $component -}}
-  {{- $val := index $global $component -}}
-  {{- if not (eq $val nil) -}}
-    {{- $componentCfg = $val -}}
-  {{- end -}}
+{{- define "enterprise.gatewayApi.gatewayName" -}}
+{{- if .Values.gatewayApi.gateway.create -}}
+  {{- printf "%s-gateway" (include "enterprise.fullname" .) -}}
+{{- else -}}
+  {{- required "gatewayApi.gateway.name is required when gatewayApi.gateway.create is false" .Values.gatewayApi.gateway.name -}}
 {{- end -}}
-{{- $hasGlobal := hasKey $global $key -}}
-{{- $hasComponent := hasKey $componentCfg $key -}}
-{{- if and $hasGlobal $hasComponent -}}
-  {{- $gv := index $global $key -}}
-  {{- $cv := index $componentCfg $key -}}
-  {{- if and (kindIs "map" $gv) (kindIs "map" $cv) -}}
-    {{- merge (deepCopy $cv) $gv | toYaml -}}
-  {{- else -}}
-    {{- $cv | toYaml -}}
-  {{- end -}}
-{{- else if $hasComponent -}}
-  {{- index $componentCfg $key | toYaml -}}
-{{- else if $hasGlobal -}}
-  {{- index $global $key | toYaml -}}
+{{- end -}}
+
+{{/*
+Gateway API - Returns the Gateway namespace if cross-namespace reference is needed
+*/}}
+{{- define "enterprise.gatewayApi.gatewayNamespace" -}}
+{{- if .Values.gatewayApi.gateway.create -}}
+  {{- .Release.Namespace -}}
+{{- else if .Values.gatewayApi.gateway.namespace -}}
+  {{- .Values.gatewayApi.gateway.namespace -}}
 {{- end -}}
 {{- end -}}

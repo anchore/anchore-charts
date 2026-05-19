@@ -550,7 +550,6 @@ rbac should match snapshot:
       namespace: test-namespace
     rules:
       - apiGroups:
-          - extensions
           - apps
         resources:
           - deployments

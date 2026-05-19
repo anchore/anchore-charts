@@ -1,6 +1,6 @@
 apiVersion: v2
 name: enterprise
-version: "3.23.4"
+version: "3.23.5"
 appVersion: "6.0.0"
 kubeVersion: 1.23.x - 1.35.x || 1.23.x-x - 1.35.x-x
 description: |

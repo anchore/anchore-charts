@@ -4,3 +4,8 @@ postgresql:
     username: anchore
     password: anchore-postgres,123
     database: anchore
+anchoreConfig:
+  default_admin_password: foobar
+image: anchore/enterprise-dev:nightly
+ui:
+  image: anchore/anchore-on-prem-ui-dev:nightly
