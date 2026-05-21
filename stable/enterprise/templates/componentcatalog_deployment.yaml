@@ -52,7 +52,7 @@ spec:
         {{- end }}
           command: ["/bin/sh", "-c"]
           args:
-            - {{ print (include "enterprise.doSourceFile" .) }} ng-enterprise service start component_catalog
+            - {{ print (include "enterprise.doSourceFile" .) }} ng-enterprise service start component_catalog --compile-config
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           ports:
