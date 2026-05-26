@@ -485,22 +485,6 @@ anchoreConfig:
     ngEngineArgs: {}
     ngDbConnectArgs: {}
 
-    ## @param anchoreConfig.database.read_replica.enabled Enable a read replica database connection
-    ## @param anchoreConfig.database.read_replica.host The hostname of the read replica database. When useExistingSecrets is false, this is used to set ANCHORE_DB_READ_REPLICA_HOST in the generated secret. When useExistingSecrets is true, ANCHORE_DB_READ_REPLICA_HOST must be included in the existing secret.
-    ## @param anchoreConfig.database.read_replica.timeout Connection timeout for the read replica
-    ## @param anchoreConfig.database.read_replica.db_pool_size Connection pool size for the read replica
-    ## @param anchoreConfig.database.read_replica.db_pool_max_overflow Max overflow for the read replica connection pool
-    ## @param anchoreConfig.database.read_replica.engineArgs Set custom database engine arguments for the read replica; If specified, this overrides pool_size and max_overflow
-    ## @param anchoreConfig.database.read_replica.dbConnectArgs Set custom database connection args for the read replica; If specified, this overrides timeout
-    read_replica:
-      enabled: false
-      host: ""
-      timeout: 120
-      db_pool_size: 30
-      db_pool_max_overflow: 100
-      engineArgs: {}
-      dbConnectArgs: {}
-
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
   ## ref: https://docs.anchore.com/current/docs/overview/concepts/policy/policies/

@@ -40,32 +40,6 @@ credentials:
       max_overflow: {{ .Values.anchoreConfig.database.db_pool_max_overflow }}
   {{- end }}
 
-{{- if .Values.anchoreConfig.database.read_replica.enabled }}
-  database_read_replica:
-    user: "${ANCHORE_DB_USER}"
-    password: "${ANCHORE_DB_PASSWORD}"
-    host: "${ANCHORE_DB_READ_REPLICA_HOST}"
-    port: "${ANCHORE_DB_PORT}"
-    database: "${ANCHORE_DB_NAME}"
-  {{- if .Values.anchoreConfig.database.read_replica.dbConnectArgs }}
-  {{- with .Values.anchoreConfig.database.read_replica.dbConnectArgs }}
-    db_connect_args: {{- toYaml . | nindent 6 }}
-  {{- end }}
-  {{- else }}
-    db_connect_args:
-      connect_timeout: {{ .Values.anchoreConfig.database.read_replica.timeout }}
-  {{- end }}
-  {{- if .Values.anchoreConfig.database.read_replica.engineArgs }}
-  {{- with .Values.anchoreConfig.database.read_replica.engineArgs }}
-    db_engine_args: {{- toYaml . | nindent 6 }}
-  {{- end }}
-  {{- else }}
-    db_engine_args:
-      pool_size: {{ .Values.anchoreConfig.database.read_replica.db_pool_size }}
-      max_overflow: {{ .Values.anchoreConfig.database.read_replica.db_pool_max_overflow }}
-  {{- end }}
-{{- end }}
-
 # Authentication keys
 keys:
   secret: "${ANCHORE_SAML_SECRET}"
