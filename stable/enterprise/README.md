@@ -230,22 +230,6 @@ anchoreConfig:
     sslRootCertFileName: postgres-root-ca-cert
 ```
 
-#### Read Replica Database Configuration
-
-Anchore Enterprise supports configuring a read replica database to offload read queries from the primary database. To enable a read replica, set `anchoreConfig.database.read_replica.enabled` to `true` and provide the read replica host:
-
-```yaml
-anchoreConfig:
-  database:
-    read_replica:
-      enabled: true
-      host: <READ_REPLICA_HOSTNAME>
-```
-
-When `useExistingSecrets` is `true`, the `ANCHORE_DB_READ_REPLICA_HOST` environment variable must be included in your existing secret (`.Values.existingSecretName`). When `useExistingSecrets` is `false`, the chart will automatically add `ANCHORE_DB_READ_REPLICA_HOST` to the generated secret using the `read_replica.host` value.
-
-The read replica uses the same database user, password, port, and database name as the primary database. Connection pool and timeout settings can be configured independently via `read_replica.db_pool_size`, `read_replica.db_pool_max_overflow`, and `read_replica.timeout`. For full control, use `read_replica.engineArgs` and `read_replica.dbConnectArgs` to override these settings wholesale.
-
 #### NG vs Legacy Database Driver Arguments
 
 Anchore Enterprise legacy services use psycopg2, while ng services use psycopg3. Because the two drivers may expect different parameter names (e.g. `timeout` vs `connect_timeout`), separate override fields are provided:
@@ -343,7 +327,7 @@ stringData:
   ANCHORE_DB_PORT: 5432
   ANCHORE_DB_PASSWORD: anchore-postgres,123
   # (if applicable) ANCHORE_SAML_SECRET: foobar,saml1234
-  # (if using read replica) ANCHORE_DB_READ_REPLICA_HOST: <READ_REPLICA_HOSTNAME>
+
 
 ---
 apiVersion: v1
@@ -843,13 +827,6 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.database.dbConnectArgs`                                                                     | Set custom database connection args (legacy/psycopg2); If specified, this overrides other database connection settings                                                                                                                                        | `{}`                        |
 | `anchoreConfig.database.ngEngineArgs`                                                                      | Set custom database engine arguments (ng/psycopg3); If specified, this overrides pool_size and max_overflow for ng services                                                                                                                                   | `{}`                        |
 | `anchoreConfig.database.ngDbConnectArgs`                                                                   | Set custom database connection args (ng/psycopg3); If specified, this overrides other database connection settings for ng services                                                                                                                            | `{}`                        |
-| `anchoreConfig.database.read_replica.enabled`                                                              | Enable a read replica database connection                                                                                                                                                                                                                     | `false`                     |
-| `anchoreConfig.database.read_replica.host`                                                                 | The hostname of the read replica database. When useExistingSecrets is false, this is used to set ANCHORE_DB_READ_REPLICA_HOST in the generated secret. When useExistingSecrets is true, ANCHORE_DB_READ_REPLICA_HOST must be included in the existing secret. | `""`                        |
-| `anchoreConfig.database.read_replica.timeout`                                                              | Connection timeout for the read replica                                                                                                                                                                                                                       | `120`                       |
-| `anchoreConfig.database.read_replica.db_pool_size`                                                         | Connection pool size for the read replica                                                                                                                                                                                                                     | `30`                        |
-| `anchoreConfig.database.read_replica.db_pool_max_overflow`                                                 | Max overflow for the read replica connection pool                                                                                                                                                                                                             | `100`                       |
-| `anchoreConfig.database.read_replica.engineArgs`                                                           | Set custom database engine arguments for the read replica; If specified, this overrides pool_size and max_overflow                                                                                                                                            | `{}`                        |
-| `anchoreConfig.database.read_replica.dbConnectArgs`                                                        | Set custom database connection args for the read replica; If specified, this overrides timeout                                                                                                                                                                | `{}`                        |
 | `anchoreConfig.policyBundles`                                                                              | Include custom Anchore policy bundles                                                                                                                                                                                                                         | `{}`                        |
 | `anchoreConfig.vex_annotation_author`                                                                      | The default author to use for generated VEX documents"                                                                                                                                                                                                        | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.object_store.direct_access`                                                                 | Directly access object store from each service instead of routing via Catalog                                                                                                                                                                                 | `false`                     |
