@@ -1592,10 +1592,6 @@ catalog:
 ## @section Anchore Component Catalog k8s Deployment Parameters
 ###############################################################
 componentCatalog:
-  ## @param componentCatalog.replicaCount Number of replicas for the Anchore Component Catalog deployment
-  ##
-  replicaCount: 1
-
   ## @param componentCatalog.service.type Service type for Anchore Component Catalog
   ## @param componentCatalog.service.port Service port for Anchore Component Catalog
   ## @param componentCatalog.service.annotations Annotations for Anchore Component Catalog service
