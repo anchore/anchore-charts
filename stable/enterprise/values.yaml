@@ -525,7 +525,7 @@ anchoreConfig:
     catalog: {}
     jobs:
       gc_retention_days: 14
-      pool_size: 16
+      pool_size: 8
 
   apiext:
     ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
