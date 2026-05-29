@@ -99,6 +99,40 @@ tests:
           pattern: "encryption:\\s*\\n\\s*keys: \"\\$\\{ANCHORE_DB_ENCRYPTION_KEYS\\}\""
 
   #
+  # Config tests - bootstrap_ng.yaml (via component configmaps)
+  #
+  - it: should not include encryption block in bootstrap_ng config when encryption is not configured
+    templates:
+      - templates/configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    asserts:
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "encryption:"
+
+  - it: should include encryption block in bootstrap_ng config when encryption keys are set
+    templates:
+      - templates/configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.database.encryption.keys: '["k1:dGVzdGtleWRhdGFiYXNlMTIzNDU2Nzg5MGFi"]'
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "encryption:\\s*\\n\\s*keys: \"\\$\\{ANCHORE_DB_ENCRYPTION_KEYS\\}\""
+
+  - it: should include encryption block in bootstrap_ng config when existingSecret is set
+    templates:
+      - templates/configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.database.encryption.existingSecret: my-encryption-secret
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "encryption:\\s*\\n\\s*keys: \"\\$\\{ANCHORE_DB_ENCRYPTION_KEYS\\}\""
+
+  #
   # Env var injection tests - existingSecret via secretKeyRef
   #
   - it: should not inject ANCHORE_DB_ENCRYPTION_KEYS env var when encryption is not configured
