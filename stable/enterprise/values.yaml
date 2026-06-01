@@ -116,6 +116,7 @@ useExistingSecrets: false
 ## ANCHORE_DB_PORT
 ## ANCHORE_SAML_SECRET (if applicable)
 ## ANCHORE_GITHUB_TOKEN (if applicable)
+## ANCHORE_DB_ENCRYPTION_KEYS (if using database encryption at rest)
 ##
 existingSecretName: anchore-enterprise-env
 
@@ -484,6 +485,25 @@ anchoreConfig:
     dbConnectArgs: {}
     ngEngineArgs: {}
     ngDbConnectArgs: {}
+
+    ## Database encryption at rest configuration
+    ## Anchore Enterprise encrypts sensitive columns in the database using AES-256-GCM.
+    ## The keyring is a JSON array of "kid:base64url-32-bytes" strings, e.g. '["k1:Hk7q...=="]'
+    ## ref: https://docs.anchore.com/current/docs/configuration/storage/database/#encrypting-database-secrets-at-rest
+    ##
+    ## @param anchoreConfig.database.encryption.keys JSON-encoded keyring array for database encryption at rest. When set, chart creates a secret with this value.
+    ## @param anchoreConfig.database.encryption.existingSecret Name of an existing Kubernetes secret containing the encryption keyring
+    ## @param anchoreConfig.database.encryption.existingSecretKey Key within the existing secret that holds the keyring value (default: "keys")
+    ##
+    encryption:
+      ## Provide the keyring value directly (chart-managed secret). Ignored when useExistingSecrets is true.
+      ## Example: '["k1:Hk7q...base64-32-bytes...=="]'
+      keys: ""
+
+      ## Use a pre-existing secret instead of having the chart create one.
+      ## The secret must contain the keyring JSON array string.
+      existingSecret: ""
+      existingSecretKey: "keys"
 
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
