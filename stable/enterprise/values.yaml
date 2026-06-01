@@ -355,7 +355,7 @@ anchoreConfig:
     ssl_key: false
 
   ## NG service logging configuration. These fields are the subset of logging config accepted by ng (psycopg3) services.
-  ## @param anchoreConfig.ngLogging.log_level Log level for ng services
+  ## NOTE: log_level is intentionally omitted so it remains API-editable (resolved by the config compiler), matching anchoreConfig.logging.log_level.
   ## @param anchoreConfig.ngLogging.colored_logging Enable colored output in ng service logs
   ## @param anchoreConfig.ngLogging.exception_backtrace_logging Enable stack traces in ng service logs
   ## @param anchoreConfig.ngLogging.exception_diagnose_logging Enable detailed exception information in ng service logs
@@ -363,7 +363,6 @@ anchoreConfig:
   ## @param anchoreConfig.ngLogging.file_retention_rule Number of log files to retain
   ## @param anchoreConfig.ngLogging.structured_logging Enable structured logging output (JSON)
   ngLogging:
-    log_level: "INFO"
     colored_logging: false
     exception_backtrace_logging: false
     exception_diagnose_logging: false
