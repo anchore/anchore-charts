@@ -39,10 +39,6 @@ credentials:
       pool_size: {{ .Values.anchoreConfig.database.db_pool_size }}
       max_overflow: {{ .Values.anchoreConfig.database.db_pool_max_overflow }}
   {{- end }}
-  {{- if or .Values.anchoreConfig.database.encryption.keys .Values.anchoreConfig.database.encryption.existingSecret }}
-    encryption:
-      keys: "${ANCHORE_DB_ENCRYPTION_KEYS}"
-  {{- end }}
 
 # Authentication keys
 keys:
