@@ -629,23 +629,6 @@ Usage: {{ include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.
 {{- end -}}
 
 {{/*
-Render an env var sourced from a separate existing secret for database encryption keys.
-Only emitted when anchoreConfig.database.encryption.existingSecret is set.
-When keys are provided inline (anchoreConfig.database.encryption.keys), the value is placed in the
-main anchore secret and mounted via envFrom, so no extra env entry is needed.
-Usage: {{ include "enterprise.dbEncryptionKeyEnv" . }}
-*/}}
-{{- define "enterprise.dbEncryptionKeyEnv" -}}
-{{- if and (not .Values.injectSecretsViaEnv) .Values.anchoreConfig.database.encryption.existingSecret }}
-- name: ANCHORE_DB_ENCRYPTION_KEYS
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.anchoreConfig.database.encryption.existingSecret }}
-      key: {{ .Values.anchoreConfig.database.encryption.existingSecretKey | default "keys" }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Gateway API - Returns the Gateway name for parentRefs
 */}}
 {{- define "enterprise.gatewayApi.gatewayName" -}}

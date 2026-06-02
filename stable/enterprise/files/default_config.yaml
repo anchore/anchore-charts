@@ -97,10 +97,6 @@ credentials:
   {{- end }}
     db_pool_size: ${ANCHORE_DB_POOL_SIZE}
     db_pool_max_overflow: ${ANCHORE_DB_POOL_MAX_OVERFLOW}
-  {{- if or .Values.anchoreConfig.database.encryption.keys .Values.anchoreConfig.database.encryption.existingSecret }}
-    encryption:
-      keys: "${ANCHORE_DB_ENCRYPTION_KEYS}"
-  {{- end }}
   {{- with .Values.anchoreConfig.database.engineArgs }}
     db_engine_args: {{- toYaml . | nindent 6 }}
   {{- end }}
