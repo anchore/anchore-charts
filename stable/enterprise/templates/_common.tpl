@@ -598,7 +598,7 @@ When calling this template, .anchoreService can be included in the context for a
 {{/*
 Return the ng-relevant subset of server config for a service.
 Checks anchoreConfig.<service>.server first, falls back to anchoreConfig.server.
-Only emits fields accepted by ng services: process_worker_count, timeout_keep_alive.
+Only emits fields accepted by ng services: process_worker_count, timeout_keep_alive, ssl_cert, ssl_chain, ssl_enable, ssl_key.
 Usage: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.ngServer" -}}
@@ -608,7 +608,7 @@ Usage: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (di
 {{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
   {{- $server = $serviceCfg.server -}}
 {{- end -}}
-{{- $ngFields := dict "process_worker_count" ($server.process_worker_count) "timeout_keep_alive" ($server.timeout_keep_alive) }}
+{{- $ngFields := dict "process_worker_count" ($server.process_worker_count) "timeout_keep_alive" ($server.timeout_keep_alive) "ssl_cert" ($server.ssl_cert) "ssl_chain" ($server.ssl_chain) "ssl_enable" ($server.ssl_enable) "ssl_key" ($server.ssl_key) }}
 {{- toYaml $ngFields | nindent 6 }}
 {{- end -}}
 
