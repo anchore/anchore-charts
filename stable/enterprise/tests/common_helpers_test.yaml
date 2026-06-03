@@ -1202,10 +1202,11 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "server:\\s*\\n\\s*process_worker_count: 453"
-          # this matches:
-          # server:
-          #   process_worker_count: 453
+          pattern: "process_worker_count: 453"
+      # global defaults should still be present via merge
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
 
   - it: should fall back to global server config if not set on service (enterprise.anchoreConfig.anchoreService.server)
     template: anchore_configmap.yaml

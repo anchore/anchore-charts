@@ -581,18 +581,17 @@ cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 2 }}
 {{- end -}}
 
 {{/*
-Common server blocks
-When calling this template, .anchoreService can be included in the context for anchoreService specific server blocks
+Common server blocks — merges component-level overrides on top of anchoreConfig.server.
 {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.server" -}}
 {{- $anchoreService := .anchoreService -}}
-{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server -}}
-{{- if $server }}
-{{- toYaml $server | nindent 6 }}
-{{- else }}
-{{- toYaml .Values.anchoreConfig.server | nindent 6 }}
+{{- $server := deepCopy .Values.anchoreConfig.server -}}
+{{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
+  {{- $server = merge $serviceCfg.server $server -}}
 {{- end -}}
+{{- toYaml $server | nindent 6 }}
 {{- end -}}
 
 {{/*
@@ -628,18 +627,17 @@ When calling this template, .component can be included in the context for compon
 {{- end -}}
 
 {{/*
-Return the logging config for a service, with service-level override support.
-Checks anchoreConfig.<service>.logging first, falls back to anchoreConfig.logging.
+Return the logging config for a service — merges component-level overrides on top of anchoreConfig.logging.
 Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .) }}
 */}}
 {{- define "enterprise.common.logging" -}}
 {{- $service := .service -}}
+{{- $logging := deepCopy .Values.anchoreConfig.logging -}}
 {{- $serviceCfg := index .Values.anchoreConfig $service -}}
 {{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
-  {{- toYaml $serviceCfg.logging -}}
-{{- else -}}
-  {{- toYaml .Values.anchoreConfig.logging -}}
+  {{- $logging = merge $serviceCfg.logging $logging -}}
 {{- end -}}
+  {{- toYaml $logging -}}
 {{- end -}}
 
 {{/*

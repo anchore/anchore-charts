@@ -207,7 +207,16 @@ should render additional audit uris when additionalResourceURIs is set:
 
 
             logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
               log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -883,7 +892,16 @@ should render the configmaps:
 
 
             logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
               log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -1711,7 +1729,16 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
 
 
             logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
               log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
