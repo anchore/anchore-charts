@@ -7,9 +7,6 @@
 # Load this ALONGSIDE the bootstrap config (bootstrap.yaml).  The two are
 # deep-merged before validation.
 
-# Internal SSL verification
-internal_ssl_verify: {{ .Values.anchoreConfig.internal_ssl_verify }}
-
 # Global logging settings (can be overridden per service under `services.*.logging`)
 logging:
   {{- include "enterprise.common.ngLogging" (merge (dict "service" "") .) | nindent 2 }}

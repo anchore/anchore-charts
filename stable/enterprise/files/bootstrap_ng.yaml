@@ -8,6 +8,9 @@
 # Host identification
 host_id: ${ANCHORE_HOST_ID}
 
+# Internal SSL verification
+internal_ssl_verify: {{ .Values.anchoreConfig.internal_ssl_verify }}
+
 # Database credentials
 credentials:
   database:
