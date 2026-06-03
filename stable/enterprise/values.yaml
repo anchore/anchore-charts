@@ -353,8 +353,6 @@ anchoreConfig:
     ssl_enable: false
     ssl_key: false
 
-
-
   ## @param anchoreConfig.audit.enabled Enable audit logging
   ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
   ##
