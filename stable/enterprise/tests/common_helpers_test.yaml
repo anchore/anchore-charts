@@ -1223,6 +1223,142 @@ tests:
           # this matches the global anchoreConfig.server defaults falling through
           # when no service-level server block is set
 
+  - it: should allow a service to add new server fields that merge with global defaults
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        policy_engine:
+          server:
+            custom_field: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "custom_field: custom_value"
+      # global defaults still present
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "process_worker_count: 1"
+
+  - it: should fall back to global server defaults when service server is empty
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.apiext.server: {}
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "process_worker_count: 1"
+
+  # ── Legacy Logging Merge ───────────────────────────────────────────────
+  - it: should merge a partial service logging override with global logging defaults
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        apiext:
+          logging:
+            log_level: DEBUG
+    asserts:
+      # overridden field
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?log_level: DEBUG"
+      # global defaults still present for apiext
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?colored_logging: false"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_access_logging: true"
+
+  - it: should fall back to global logging defaults when service logging is empty
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.apiext.logging: {}
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?colored_logging: false"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_access_logging: true"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?structured_logging: false"
+
+  - it: should allow a service to add new logging fields that merge with global defaults
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        policy_engine:
+          logging:
+            custom_log_field: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "custom_log_field: custom_value"
+      # global defaults still present
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "policy_engine:[\\s\\S]*?colored_logging: false"
+
+  # ── Combined logging + server override ─────────────────────────────────
+  - it: should merge both logging and server overrides independently on the same service
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        policy_engine:
+          logging:
+            log_level: WARNING
+          server:
+            process_worker_count: 10
+    asserts:
+      # logging override + global logging defaults
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "policy_engine:[\\s\\S]*?log_level: WARNING"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "policy_engine:[\\s\\S]*?colored_logging: false"
+      # server override + global server defaults
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "process_worker_count: 10"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
+
+  # ── Legacy vs NG coexistence ───────────────────────────────────────────
+  - it: legacy services should include legacy-only logging fields
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        apiext:
+          logging:
+            log_level: DEBUG
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_access_logging"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_log_level"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_response_debug_logging"
+
+
   - it: should render the containerSecurityContext when set at a component level
     template: api_deployment.yaml
     documentIndex: 0

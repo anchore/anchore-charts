@@ -187,3 +187,76 @@ tests:
       - matchRegex:
           path: data["config_ng.yaml"]
           pattern: "file_retention_rule: 10"
+
+  # ── NG Logging — legacy field filtering ────────────────────────────────
+  - it: should not leak legacy-only logging fields into ng output even when changed globally
+    documentIndex: 1
+    set:
+      anchoreConfig.logging.server_access_logging: false
+      anchoreConfig.logging.server_log_level: debug
+      anchoreConfig.logging.server_response_debug_logging: true
+    asserts:
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_access_logging"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_log_level"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_response_debug_logging"
+      # ng fields should still reflect global values
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: false"
+
+  # ── NG Server — legacy field filtering ─────────────────────────────────
+  - it: should not leak legacy-only server fields into ng server output
+    documentIndex: 0
+    asserts:
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "max_connection_backlog"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "max_wsgi_middleware_worker_count"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "max_wsgi_middleware_worker_queue_size"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_graceful_shutdown"
+
+  # ── Empty override fallback ────────────────────────────────────────────
+  - it: should fall back to global server defaults when component server is empty
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server: {}
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 1"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+
+  - it: should fall back to global logging defaults when component logging is empty
+    documentIndex: 1
+    set:
+      anchoreConfig.component_catalog.logging: {}
+    asserts:
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "structured_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_retention_rule: 10"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_access_logging"
