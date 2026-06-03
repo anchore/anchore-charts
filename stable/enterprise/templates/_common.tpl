@@ -596,19 +596,19 @@ When calling this template, .anchoreService can be included in the context for a
 {{- end -}}
 
 {{/*
-Return the ng-relevant subset of server config for a service.
-Checks anchoreConfig.<service>.server first, falls back to anchoreConfig.server.
-Only emits fields accepted by ng services: process_worker_count, timeout_keep_alive, ssl_cert, ssl_chain, ssl_enable, ssl_key.
+Return the ng-relevant server config for a service.
+Starts with the ng subset of anchoreConfig.server, then merges any component-level overrides on top.
+Component overrides can both override existing ng fields and add new ones (e.g. custom timeouts).
 Usage: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.ngServer" -}}
 {{- $anchoreService := .anchoreService -}}
-{{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
-{{- $server := deepCopy .Values.anchoreConfig.server -}}
-{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
-  {{- $server = merge $serviceCfg.server $server -}}
-{{- end -}}
+{{- $server := .Values.anchoreConfig.server -}}
 {{- $ngFields := dict "process_worker_count" ($server.process_worker_count) "timeout_keep_alive" ($server.timeout_keep_alive) "ssl_cert" ($server.ssl_cert) "ssl_chain" ($server.ssl_chain) "ssl_enable" ($server.ssl_enable) "ssl_key" ($server.ssl_key) }}
+{{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
+  {{- $ngFields = merge $serviceCfg.server $ngFields -}}
+{{- end -}}
 {{- toYaml $ngFields | nindent 6 }}
 {{- end -}}
 
@@ -643,20 +643,21 @@ Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .
 {{- end -}}
 
 {{/*
-Return the ng-relevant subset of logging config for a service.
-Checks anchoreConfig.<service>.logging first, merges with anchoreConfig.logging, then emits only ng-accepted fields.
+Return the ng-relevant logging config for a service.
+Starts with the ng subset of anchoreConfig.logging, then merges any component-level overrides on top.
+Component overrides can both override existing ng fields and add new ones (e.g. log_level).
 Usage: {{ include "enterprise.common.ngLogging" (merge (dict "service" "component_catalog") .) }}
 */}}
 {{- define "enterprise.common.ngLogging" -}}
 {{- $service := .service -}}
-{{- $logging := deepCopy .Values.anchoreConfig.logging -}}
+{{- $logging := .Values.anchoreConfig.logging -}}
+{{- $ngFields := dict "colored_logging" ($logging.colored_logging) "exception_backtrace_logging" ($logging.exception_backtrace_logging) "exception_diagnose_logging" ($logging.exception_diagnose_logging) "file_rotation_rule" ($logging.file_rotation_rule) "file_retention_rule" ($logging.file_retention_rule) "structured_logging" ($logging.structured_logging) -}}
 {{- if $service -}}
   {{- $serviceCfg := index .Values.anchoreConfig $service -}}
   {{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
-    {{- $logging = merge $serviceCfg.logging $logging -}}
+    {{- $ngFields = merge $serviceCfg.logging $ngFields -}}
   {{- end -}}
 {{- end -}}
-{{- $ngFields := dict "colored_logging" ($logging.colored_logging) "exception_backtrace_logging" ($logging.exception_backtrace_logging) "exception_diagnose_logging" ($logging.exception_diagnose_logging) "file_rotation_rule" ($logging.file_rotation_rule) "file_retention_rule" ($logging.file_retention_rule) "structured_logging" ($logging.structured_logging) -}}
   {{- toYaml $ngFields -}}
 {{- end -}}
 

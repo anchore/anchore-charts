@@ -80,15 +80,15 @@ tests:
           path: data["bootstrap_ng.yaml"]
           pattern: "ssl_key: false"
 
-  - it: should not pass through unknown server fields from a component override
+  - it: should allow a component to add new server fields via override
     documentIndex: 0
     set:
-      anchoreConfig.component_catalog.server.completely_new_field: some_value
+      anchoreConfig.component_catalog.server.custom_timeout: 60
     asserts:
-      # unknown field should not appear in output
-      - notMatchRegex:
+      # new field from component override should appear
+      - matchRegex:
           path: data["bootstrap_ng.yaml"]
-          pattern: "completely_new_field"
+          pattern: "custom_timeout: 60"
       # global defaults still present
       - matchRegex:
           path: data["bootstrap_ng.yaml"]
@@ -168,14 +168,15 @@ tests:
           path: data["config_ng.yaml"]
           pattern: "file_retention_rule: 10"
 
-  - it: should not pass through legacy-only logging fields from a component override
+  - it: should allow a component to add new logging fields like log_level via override
     documentIndex: 1
     set:
-      anchoreConfig.component_catalog.logging.server_access_logging: true
+      anchoreConfig.component_catalog.logging.log_level: DEBUG
     asserts:
-      - notMatchRegex:
+      # new field from component override should appear
+      - matchRegex:
           path: data["config_ng.yaml"]
-          pattern: "server_access_logging"
+          pattern: "log_level: DEBUG"
       # ng defaults still present
       - matchRegex:
           path: data["config_ng.yaml"]
@@ -183,3 +184,6 @@ tests:
       - matchRegex:
           path: data["config_ng.yaml"]
           pattern: "structured_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_retention_rule: 10"
