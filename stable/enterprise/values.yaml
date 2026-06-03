@@ -540,9 +540,6 @@ anchoreConfig:
     external_port: null
     external_tls: false
 
-    ## @param anchoreConfig.apiext.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
-
     ## @param anchoreConfig.apiext.cycle_timers [object] Cycle timers for the apiext service
     cycle_timers:
       api_key_token_cleanup: 43200
@@ -575,9 +572,6 @@ anchoreConfig:
     logging:
       log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
 
-    ## @param anchoreConfig.analyzer.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
-
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
     ## @param anchoreConfig.analyzer.cycle_timers.analysis_data_disk_gc Interval in seconds between analysis data disk garbage collection runs
@@ -607,10 +601,6 @@ anchoreConfig:
     ## ref: https://docs.anchore.com/current/docs/configuration/general/content_hints/
     ##
     enable_hints: false
-
-    ## @param anchoreConfig.analyzer.enable_owned_package_filtering Enable filtering of packages that are owned by other packages
-    enable_owned_package_filtering: true
-
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
     ## Configures syft, content search, file contents, secret search, and malware scanning
@@ -683,9 +673,6 @@ anchoreConfig:
       auto_scale: true
       batch_size: 1
       pool_size: 1
-
-    ## @param anchoreConfig.catalog.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
 
     ## @param anchoreConfig.catalog.cycle_timers [object] Cycle timers for the catalog service
     ##
@@ -925,11 +912,6 @@ anchoreConfig:
       ## @param anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
       nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
 
-    ## @param anchoreConfig.policy_engine.catalog_client_conn_timeout Timeout in seconds for catalog client connections (-1 for no timeout)
-    ## @param anchoreConfig.policy_engine.catalog_client_read_timeout Timeout in seconds for catalog client reads (-1 for no timeout)
-    catalog_client_conn_timeout: -1
-    catalog_client_read_timeout: -1
-
     ## @param anchoreConfig.policy_engine.enable_package_db_load Enable loading package data into the policy engine database
     enable_package_db_load: false
 
@@ -947,9 +929,6 @@ anchoreConfig:
     external_hostname: null
     external_port: null
     external_tls: false
-
-    ## @param anchoreConfig.policy_engine.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
 
     ## @param anchoreConfig.policy_engine.cycle_timers [object] Cycle timers for the policy engine service
     cycle_timers:
@@ -972,9 +951,6 @@ anchoreConfig:
     external_hostname: null
     external_port: null
     external_tls: false
-
-    ## @param anchoreConfig.notifications.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
 
     ## @param anchoreConfig.notifications.cycle_timers [object] Cycle timers for the notifications service
     ##
@@ -1015,9 +991,6 @@ anchoreConfig:
 
     ## @param anchoreConfig.reports.max_async_execution_threads Maximum number of threads for async report execution
     max_async_execution_threads: 1
-
-    ## @param anchoreConfig.reports.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
 
     ## @param anchoreConfig.reports.cycle_timers [object] Cycle timers for the reports service
     ##
@@ -1074,21 +1047,6 @@ anchoreConfig:
     ##
     data_load_max_workers: 10
 
-    ## @param anchoreConfig.reports_worker.event_stream [object] Event stream configuration for reports worker
-    event_stream:
-      directory_path: /var/log/anchore/events
-      enabled: false
-      enrichments:
-        - vuln_details
-        - vex
-        - image
-        - runtime
-      filter_list: null
-      filter_mode: allow
-      initialized_at: null
-      max_file_count: 5
-      max_file_size_mb: 100
-
     ## @param anchoreConfig.reports_worker.runtime_report_generation [object] Runtime report generation configuration
     runtime_report_generation:
       ecs_container_vulns_per_page: 1000
@@ -1099,9 +1057,6 @@ anchoreConfig:
       vulnerabilities_by_ecs_container: true
       vulnerabilities_by_k8s_container: true
       vulnerabilities_by_k8s_namespace: true
-
-    ## @param anchoreConfig.reports_worker.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
 
     ## @param anchoreConfig.reports_worker.cycle_timers [object] Cycle timers for the reports worker service
     ##
@@ -1134,9 +1089,6 @@ anchoreConfig:
     external_port: null
     external_tls: false
 
-    ## @param anchoreConfig.simplequeue.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
-
     ## @param anchoreConfig.simplequeue.cycle_timers [object] Cycle timers for the simplequeue service
     cycle_timers:
       handle_metrics: 15
@@ -1160,9 +1112,6 @@ anchoreConfig:
     external_hostname: null
     external_port: null
     external_tls: false
-
-    ## @param anchoreConfig.data_syncer.cycle_timer_seconds Default cycle timer interval in seconds
-    cycle_timer_seconds: 1
 
     ## @param anchoreConfig.data_syncer.cycle_timers [object] Cycle timers for the data syncer service
     cycle_timers:
