@@ -726,4 +726,8 @@ snapshot - S3 ng bootstrap configmap:
           port: 8228
           server:
             process_worker_count: 1
+            ssl_cert: false
+            ssl_chain: false
+            ssl_enable: false
+            ssl_key: false
             timeout_keep_alive: 5

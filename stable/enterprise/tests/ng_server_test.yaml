@@ -1,0 +1,100 @@
+suite: NG Server Config Tests
+templates:
+  - templates/configmaps/componentcatalog_configmap.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+tests:
+  - it: should use global server defaults when no component override is set
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 1"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_cert: false"
+
+  - it: should allow a component to override an existing server field
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server.process_worker_count: 8
+      anchoreConfig.component_catalog.server.timeout_keep_alive: 30
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 8"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 30"
+      # ssl fields should still come from global server defaults
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_cert: false"
+
+  - it: should merge a partial component override with global server defaults
+    documentIndex: 0
+    set:
+      # component only overrides one field — all other ng fields should come from global server
+      anchoreConfig.component_catalog.server.process_worker_count: 4
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 4"
+      # remaining fields inherit from global server
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_cert: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_chain: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_key: false"
+
+  - it: should not pass through unknown fields from a component override
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server.completely_new_field: some_value
+    asserts:
+      # unknown field should not appear in output
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "completely_new_field"
+      # global defaults still present
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 1"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"

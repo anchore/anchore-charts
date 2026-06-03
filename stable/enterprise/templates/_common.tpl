@@ -604,9 +604,9 @@ Usage: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (di
 {{- define "enterprise.anchoreConfig.anchoreService.ngServer" -}}
 {{- $anchoreService := .anchoreService -}}
 {{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
-{{- $server := .Values.anchoreConfig.server -}}
+{{- $server := deepCopy .Values.anchoreConfig.server -}}
 {{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
-  {{- $server = $serviceCfg.server -}}
+  {{- $server = merge $serviceCfg.server $server -}}
 {{- end -}}
 {{- $ngFields := dict "process_worker_count" ($server.process_worker_count) "timeout_keep_alive" ($server.timeout_keep_alive) "ssl_cert" ($server.ssl_cert) "ssl_chain" ($server.ssl_chain) "ssl_enable" ($server.ssl_enable) "ssl_key" ($server.ssl_key) }}
 {{- toYaml $ngFields | nindent 6 }}
