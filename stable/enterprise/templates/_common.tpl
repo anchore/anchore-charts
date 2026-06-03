@@ -596,17 +596,20 @@ When calling this template, .anchoreService can be included in the context for a
 {{- end -}}
 
 {{/*
-NG server blocks — falls back to anchoreConfig.ngServer instead of the legacy server block.
-{{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}
+Return the ng-relevant subset of server config for a service.
+Checks anchoreConfig.<service>.server first, falls back to anchoreConfig.server.
+Only emits fields accepted by ng services: process_worker_count, timeout_keep_alive.
+Usage: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.ngServer" -}}
 {{- $anchoreService := .anchoreService -}}
-{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server -}}
-{{- if $server }}
-{{- toYaml $server | nindent 6 }}
-{{- else }}
-{{- toYaml .Values.anchoreConfig.ngServer | nindent 6 }}
+{{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
+{{- $server := .Values.anchoreConfig.server -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
+  {{- $server = $serviceCfg.server -}}
 {{- end -}}
+{{- $ngFields := dict "process_worker_count" ($server.process_worker_count) "timeout_keep_alive" ($server.timeout_keep_alive) }}
+{{- toYaml $ngFields | nindent 6 }}
 {{- end -}}
 
 {{/*

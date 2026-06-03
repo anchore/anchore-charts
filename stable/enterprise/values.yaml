@@ -369,12 +369,6 @@ anchoreConfig:
     file_retention_rule: 10
     structured_logging: false
 
-  ## NG service server configuration. These fields are the subset of server config accepted by ng (psycopg3) services.
-  ## @param anchoreConfig.ngServer.process_worker_count Number of worker processes for ng services
-  ## @param anchoreConfig.ngServer.timeout_keep_alive Seconds to keep a connection alive before closing
-  ngServer:
-    process_worker_count: 1
-    timeout_keep_alive: 5
 
   ## @param anchoreConfig.audit.enabled Enable audit logging
   ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
@@ -805,7 +799,7 @@ anchoreConfig:
 
     ## @param anchoreConfig.component_catalog.global_client_connect_timeout Global timeout for client connections
     ## @param anchoreConfig.component_catalog.global_client_read_timeout Global timeout for client reads
-    ## @param anchoreConfig.component_catalog.server [object] Server configuration for the component catalog. Falls back to anchoreConfig.ngServer if empty.
+    ## @param anchoreConfig.component_catalog.server [object] Server configuration for the component catalog. Falls back to anchoreConfig.server if empty.
     ## @param anchoreConfig.component_catalog.logging [object] Logging configuration for the component catalog. Falls back to anchoreConfig.ngLogging if empty.
   component_catalog:
     global_client_connect_timeout: 0
