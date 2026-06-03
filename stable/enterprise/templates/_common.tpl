@@ -643,18 +643,21 @@ Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .
 {{- end -}}
 
 {{/*
-Return the logging config for an ng service, with service-level override support.
-Checks anchoreConfig.<service>.logging first, falls back to anchoreConfig.ngLogging.
+Return the ng-relevant subset of logging config for a service.
+Checks anchoreConfig.<service>.logging first, merges with anchoreConfig.logging, then emits only ng-accepted fields.
 Usage: {{ include "enterprise.common.ngLogging" (merge (dict "service" "component_catalog") .) }}
 */}}
 {{- define "enterprise.common.ngLogging" -}}
 {{- $service := .service -}}
-{{- $serviceCfg := index .Values.anchoreConfig $service -}}
-{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
-  {{- toYaml $serviceCfg.logging -}}
-{{- else -}}
-  {{- toYaml .Values.anchoreConfig.ngLogging -}}
+{{- $logging := deepCopy .Values.anchoreConfig.logging -}}
+{{- if $service -}}
+  {{- $serviceCfg := index .Values.anchoreConfig $service -}}
+  {{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
+    {{- $logging = merge $serviceCfg.logging $logging -}}
+  {{- end -}}
 {{- end -}}
+{{- $ngFields := dict "colored_logging" ($logging.colored_logging) "exception_backtrace_logging" ($logging.exception_backtrace_logging) "exception_diagnose_logging" ($logging.exception_diagnose_logging) "file_rotation_rule" ($logging.file_rotation_rule) "file_retention_rule" ($logging.file_retention_rule) "structured_logging" ($logging.structured_logging) -}}
+  {{- toYaml $ngFields -}}
 {{- end -}}
 
 {{- define "enterprise.common.listenAddress" -}}

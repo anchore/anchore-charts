@@ -353,21 +353,6 @@ anchoreConfig:
     ssl_enable: false
     ssl_key: false
 
-  ## NG service logging configuration. These fields are the subset of logging config accepted by ng (psycopg3) services.
-  ## NOTE: log_level is intentionally omitted so it remains API-editable (resolved by the config compiler), matching anchoreConfig.logging.log_level.
-  ## @param anchoreConfig.ngLogging.colored_logging Enable colored output in ng service logs
-  ## @param anchoreConfig.ngLogging.exception_backtrace_logging Enable stack traces in ng service logs
-  ## @param anchoreConfig.ngLogging.exception_diagnose_logging Enable detailed exception information in ng service logs
-  ## @param anchoreConfig.ngLogging.file_rotation_rule Maximum size of a log file before it is rotated
-  ## @param anchoreConfig.ngLogging.file_retention_rule Number of log files to retain
-  ## @param anchoreConfig.ngLogging.structured_logging Enable structured logging output (JSON)
-  ngLogging:
-    colored_logging: false
-    exception_backtrace_logging: false
-    exception_diagnose_logging: false
-    file_rotation_rule: "10 MB"
-    file_retention_rule: 10
-    structured_logging: false
 
 
   ## @param anchoreConfig.audit.enabled Enable audit logging
@@ -800,7 +785,7 @@ anchoreConfig:
     ## @param anchoreConfig.component_catalog.global_client_connect_timeout Global timeout for client connections
     ## @param anchoreConfig.component_catalog.global_client_read_timeout Global timeout for client reads
     ## @param anchoreConfig.component_catalog.server [object] Server configuration for the component catalog. Falls back to anchoreConfig.server if empty.
-    ## @param anchoreConfig.component_catalog.logging [object] Logging configuration for the component catalog. Falls back to anchoreConfig.ngLogging if empty.
+    ## @param anchoreConfig.component_catalog.logging [object] Logging configuration for the component catalog. Falls back to anchoreConfig.logging if empty.
   component_catalog:
     global_client_connect_timeout: 0
     global_client_read_timeout: 0
