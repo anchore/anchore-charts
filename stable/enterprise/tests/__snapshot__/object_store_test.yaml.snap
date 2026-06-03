@@ -142,7 +142,6 @@ snapshot - S3 legacy configmap:
           endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
-          cycle_timer_seconds: 1
           cycle_timers:
             api_key_token_cleanup: 43200
             oauth_token_cleanup: 21600
@@ -208,7 +207,6 @@ snapshot - S3 legacy configmap:
           endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
-          cycle_timer_seconds: 1
           cycle_timers:
             analysis_data_disk_gc: 3600
             handle_metrics: 15
@@ -220,7 +218,6 @@ snapshot - S3 legacy configmap:
           layer_cache_enable: false
           layer_cache_max_gigabytes: 0
           enable_hints: false
-          enable_owned_package_filtering: true
           keep_image_analysis_tmpfiles: ${ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES}
           external_hostname: null
           external_port: null
@@ -254,7 +251,6 @@ snapshot - S3 legacy configmap:
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
           account_prometheus_metrics: <ALLOW_API_CONFIGURATION>
-          cycle_timer_seconds: 1
           cycle_timers:
             account_resource_cleanup: 30
             alerts_watcher: 600
@@ -365,7 +361,6 @@ snapshot - S3 legacy configmap:
           endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
-          cycle_timer_seconds: 1
           cycle_timers:
             handle_metrics: 15
             service_heartbeat: 60
@@ -402,8 +397,6 @@ snapshot - S3 legacy configmap:
           endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
-          catalog_client_conn_timeout: -1
-          catalog_client_read_timeout: -1
           policy_evaluation_cache_ttl: 3600
           enable_package_db_load: false
           enable_user_base_image: true
@@ -471,7 +464,6 @@ snapshot - S3 legacy configmap:
                     by_cpe:
                       # Disabling search by CPE for the stock matcher will entirely disable binary-only matches and is not advised
                       enabled: <ALLOW_API_CONFIGURATION>
-          cycle_timer_seconds: 1
           cycle_timers:
             grypedb_sync: 60
             service_heartbeat: 60
@@ -510,7 +502,6 @@ snapshot - S3 legacy configmap:
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
           enable_graphiql: true
-          cycle_timer_seconds: 1
           cycle_timers:
             reports_scheduled_queries: 600
             service_heartbeat: 60
@@ -556,7 +547,6 @@ snapshot - S3 legacy configmap:
           data_refresh_max_workers: 10
           data_load_max_workers: 10
           ingress_images_max_workers: 10
-          cycle_timer_seconds: 1
           cycle_timers:
             event_stream_health: 60
             reports_extended_runtime_vuln_load: 1800
@@ -571,19 +561,6 @@ snapshot - S3 legacy configmap:
             service_heartbeat: 60
             system_config_environment_watcher: 20
             system_config_refresh_watcher: 20
-          event_stream:
-            directory_path: /var/log/anchore/events
-            enabled: false
-            enrichments:
-            - vuln_details
-            - vex
-            - image
-            - runtime
-            filter_list: null
-            filter_mode: allow
-            initialized_at: null
-            max_file_count: 5
-            max_file_size_mb: 100
           runtime_report_generation:
             ecs_container_vulns_per_page: 1000
             extended_runtime_page_size: 100
@@ -624,7 +601,6 @@ snapshot - S3 legacy configmap:
           endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
-          cycle_timer_seconds: 1
           cycle_timers:
             notifications: 30
             service_heartbeat: 60
@@ -664,7 +640,6 @@ snapshot - S3 legacy configmap:
           port: ${ANCHORE_PORT}
           auto_sync_enabled: true
           upload_dir: /analysis_scratch
-          cycle_timer_seconds: 1
           cycle_timers:
             grypedb_sync: 120
             scheduled_data_cleanup: 86400

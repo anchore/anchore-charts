@@ -10,10 +10,6 @@
 # Internal SSL verification
 internal_ssl_verify: {{ .Values.anchoreConfig.internal_ssl_verify }}
 
-# Global client timeouts
-global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
-global_client_read_timeout: ${ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT}
-
 # Global logging settings (can be overridden per service under `services.*.logging`)
 logging:
   {{- toYaml .Values.anchoreConfig.ngLogging | nindent 2 }}

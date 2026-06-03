@@ -571,13 +571,12 @@ external_tls: {{ $serviceConfig.external_tls }}
 
 {{/*
 Cycle timers configuration for a service.
-Renders cycle_timer_seconds and cycle_timers from the service's anchoreConfig.
+Renders cycle_timers from the service's anchoreConfig.
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "analyzer") .) }}
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.cycleTimers" -}}
 {{- $anchoreService := .anchoreService -}}
 {{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
-cycle_timer_seconds: {{ $serviceConfig.cycle_timer_seconds }}
 cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 2 }}
 {{- end -}}
 
