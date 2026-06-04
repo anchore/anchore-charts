@@ -32,7 +32,7 @@ snapshot - S3 legacy configmap:
 
       allow_awsecr_iam_auto: true
       host_id: "${ANCHORE_HOST_ID}"
-      internal_ssl_verify: true
+      internal_ssl_verify: false
       image_analyze_timeout_seconds: 36000
 
       global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
@@ -203,7 +203,16 @@ snapshot - S3 legacy configmap:
 
 
           logging:
+            colored_logging: false
+            exception_backtrace_logging: false
+            exception_diagnose_logging: false
+            file_retention_rule: 10
+            file_rotation_rule: 10 MB
             log_level: <ALLOW_API_CONFIGURATION>
+            server_access_logging: true
+            server_log_level: info
+            server_response_debug_logging: false
+            structured_logging: false
           endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
           listen: "0.0.0.0"
           port: ${ANCHORE_PORT}
@@ -676,6 +685,9 @@ snapshot - S3 ng bootstrap configmap:
       # Host identification
       host_id: ${ANCHORE_HOST_ID}
 
+      # Internal SSL verification
+      internal_ssl_verify: false
+
       # Database credentials
       credentials:
         database:
@@ -726,4 +738,8 @@ snapshot - S3 ng bootstrap configmap:
           port: 8228
           server:
             process_worker_count: 1
+            ssl_cert: false
+            ssl_chain: false
+            ssl_enable: false
+            ssl_key: false
             timeout_keep_alive: 5

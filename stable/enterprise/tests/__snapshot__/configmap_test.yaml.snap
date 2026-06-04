@@ -34,7 +34,7 @@ should render additional audit uris when additionalResourceURIs is set:
 
         allow_awsecr_iam_auto: true
         host_id: "${ANCHORE_HOST_ID}"
-        internal_ssl_verify: true
+        internal_ssl_verify: false
         image_analyze_timeout_seconds: 36000
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
@@ -207,7 +207,16 @@ should render additional audit uris when additionalResourceURIs is set:
 
 
             logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
               log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -712,7 +721,7 @@ should render the configmaps:
 
         allow_awsecr_iam_auto: true
         host_id: "${ANCHORE_HOST_ID}"
-        internal_ssl_verify: true
+        internal_ssl_verify: false
         image_analyze_timeout_seconds: 36000
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
@@ -883,7 +892,16 @@ should render the configmaps:
 
 
             logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
               log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
@@ -1537,7 +1555,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
 
         allow_awsecr_iam_auto: true
         host_id: "${ANCHORE_HOST_ID}"
-        internal_ssl_verify: true
+        internal_ssl_verify: false
         image_analyze_timeout_seconds: 36000
 
         global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
@@ -1711,7 +1729,16 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
 
 
             logging:
+              colored_logging: false
+              exception_backtrace_logging: false
+              exception_diagnose_logging: false
+              file_retention_rule: 10
+              file_rotation_rule: 10 MB
               log_level: <ALLOW_API_CONFIGURATION>
+              server_access_logging: true
+              server_log_level: info
+              server_response_debug_logging: false
+              structured_logging: false
             endpoint_hostname: ${ANCHORE_ENDPOINT_HOSTNAME}
             listen: "0.0.0.0"
             port: ${ANCHORE_PORT}
