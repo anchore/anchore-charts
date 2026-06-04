@@ -299,7 +299,7 @@ anchoreConfig:
   log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
 
   ## @param anchoreConfig.internal_ssl_verify Enable cert verification for internal service-to-service SSL communication
-  internal_ssl_verify: true
+  internal_ssl_verify: false
 
   ## @param anchoreConfig.global_client_read_timeout Global client read timeout
   ## @param anchoreConfig.global_client_connect_timeout Global client connect timeout
