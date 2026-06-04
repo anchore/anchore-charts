@@ -32,7 +32,7 @@ snapshot - S3 legacy configmap:
 
       allow_awsecr_iam_auto: true
       host_id: "${ANCHORE_HOST_ID}"
-      internal_ssl_verify: true
+      internal_ssl_verify: false
       image_analyze_timeout_seconds: 36000
 
       global_client_connect_timeout: ${ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT}
@@ -686,7 +686,7 @@ snapshot - S3 ng bootstrap configmap:
       host_id: ${ANCHORE_HOST_ID}
 
       # Internal SSL verification
-      internal_ssl_verify: true
+      internal_ssl_verify: false
 
       # Database credentials
       credentials:
