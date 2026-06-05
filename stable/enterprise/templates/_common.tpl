@@ -558,7 +558,9 @@ type: Recreate
 
 {{/*
 External access configuration for a service.
-Renders external_hostname, external_port, and external_tls from the service's anchoreConfig.
+Renders external_hostname and external_port from the service's anchoreConfig.
+external_tls is derived from the root anchoreConfig.server.ssl_enable so it tracks
+the chart-wide TLS toggle without per-service duplication.
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "apiext") .) }}
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.external" -}}
@@ -566,7 +568,7 @@ Renders external_hostname, external_port, and external_tls from the service's an
 {{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
 external_hostname: {{ $serviceConfig.external_hostname | toYaml }}
 external_port: {{ $serviceConfig.external_port | toYaml }}
-external_tls: {{ $serviceConfig.external_tls }}
+external_tls: {{ .Values.anchoreConfig.server.ssl_enable }}
 {{- end -}}
 
 {{/*
