@@ -23,10 +23,10 @@ snapshot - S3 legacy configmap:
         max_wsgi_middleware_worker_count: 50
         max_wsgi_middleware_worker_queue_size: 100
         process_worker_count: 1
-        ssl_cert: false
-        ssl_chain: false
+        ssl_cert: ""
+        ssl_chain: ""
         ssl_enable: false
-        ssl_key: false
+        ssl_key: ""
         timeout_graceful_shutdown: false
         timeout_keep_alive: 5
 
@@ -156,10 +156,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -236,10 +236,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -347,10 +347,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -383,10 +383,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -487,10 +487,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -527,10 +527,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -587,10 +587,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -624,10 +624,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 
@@ -664,10 +664,10 @@ snapshot - S3 legacy configmap:
             max_wsgi_middleware_worker_count: 50
             max_wsgi_middleware_worker_queue_size: 100
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_graceful_shutdown: false
             timeout_keep_alive: 5
 snapshot - S3 ng bootstrap configmap:
@@ -738,8 +738,8 @@ snapshot - S3 ng bootstrap configmap:
           port: 8228
           server:
             process_worker_count: 1
-            ssl_cert: false
-            ssl_chain: false
+            ssl_cert: ""
+            ssl_chain: ""
             ssl_enable: false
-            ssl_key: false
+            ssl_key: ""
             timeout_keep_alive: 5

@@ -32,7 +32,7 @@ tests:
           pattern: "ssl_enable: false"
       - matchRegex:
           path: data["bootstrap_ng.yaml"]
-          pattern: "ssl_cert: false"
+          pattern: 'ssl_cert: ""'
 
   - it: should allow a component to override an existing server field
     documentIndex: 0
@@ -52,7 +52,7 @@ tests:
           pattern: "ssl_enable: false"
       - matchRegex:
           path: data["bootstrap_ng.yaml"]
-          pattern: "ssl_cert: false"
+          pattern: 'ssl_cert: ""'
 
   - it: should merge a partial component server override with global server defaults
     documentIndex: 0
@@ -72,13 +72,13 @@ tests:
           pattern: "ssl_enable: false"
       - matchRegex:
           path: data["bootstrap_ng.yaml"]
-          pattern: "ssl_cert: false"
+          pattern: 'ssl_cert: ""'
       - matchRegex:
           path: data["bootstrap_ng.yaml"]
-          pattern: "ssl_chain: false"
+          pattern: 'ssl_chain: ""'
       - matchRegex:
           path: data["bootstrap_ng.yaml"]
-          pattern: "ssl_key: false"
+          pattern: 'ssl_key: ""'
 
   - it: should allow a component to add new server fields via override
     documentIndex: 0
