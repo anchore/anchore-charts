@@ -410,7 +410,6 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
   (dict "name" "ANCHORE_LAYER_CACHE_ENABLED" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
   (dict "name" "ANCHORE_LAYER_CACHE_SIZE_GB" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
   (dict "name" "ANCHORE_HINTS_ENABLED" "values_path" "anchoreConfig.analyzer.enable_hints" "components" (list "analyzer"))
-  (dict "name" "ANCHORE_OWNED_PACKAGE_FILTERING_ENABLED" "values_path" "anchoreConfig.analyzer.enable_owned_package_filtering" "components" (list "analyzer"))
   (dict "name" "ANCHORE_CATALOG_IMAGE_GC_WORKERS" "values_path" "anchoreConfig.catalog.image_gc.max_worker_threads" "components" (list "catalog"))
   (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_TTL_DAYS" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ttl_days" "components" (list "catalog"))
   (dict "name" "ANCHORE_ENTERPRISE_RUNTIME_INVENTORY_INGEST_OVERWRITE" "values_path" "anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite" "components" (list "catalog"))

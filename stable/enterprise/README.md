@@ -184,7 +184,7 @@ For additional guidance on customizing your Anchore Enterprise deployment, reach
 
 ### External Database Requirements
 
-Anchore Enterprise requires the use of a PostgreSQL-compatible database version 13 or above. For production environments, leveraging managed database services like AWS RDS or Google Cloud SQL is advised. This chart requires you to provide your own PostgreSQL database.
+Anchore Enterprise requires a PostgreSQL-compatible database **version 17 or above with the `pg_cron` extension installed and enabled**. For production environments, leveraging managed database services like AWS RDS or Google Cloud SQL is advised. This chart requires you to provide your own PostgreSQL database.
 
 For optimal performance, allocate a minimum of 100GB storage to accommodate images, tags, subscriptions, policies, and other data entities. Furthermore, configure the database to support a minimum of 2,000 client connections. This limit may need to be adjusted upward if you're running more Anchore services than the default configuration.
 
@@ -591,16 +591,23 @@ anchoreConfig:
     # sslRootCertName is the name of the Postgres root CA certificate stored in certStoreSecretName
     sslRootCertFileName: rds-combined-ca-cert-bundle.pem
 
-  internalServicesSSL:
-    enabled: true
-    # Specify whether cert is verified against the local certificate bundle (If set to false, self-signed certs are allowed)
-    verifyCerts: true
-    certSecretKeyFileName: internal-cert-key.pem
-    certSecretCertFileName: internal-cert.pem
+  # Enable cert verification for internal service-to-service SSL communication.
+  # Set to false to allow self-signed certs.
+  internal_ssl_verify: true
+
+  # Enable SSL on the Anchore service ports. Paths are relative to the mount
+  # point of certStoreSecretName (/home/anchore/certs). The same block can be
+  # set per-service under anchoreConfig.<service>.server to override these.
+  server:
+    ssl_enable: true
+    ssl_cert: /home/anchore/certs/internal-cert.pem
+    ssl_key: /home/anchore/certs/internal-cert-key.pem
+    # ssl_chain is optional; leave as "" if not used
+    ssl_chain: ""
 
 ui:
   # Specify an LDAP CA cert if using LDAP authenication.
-  # Note if using an internal ca cert for internalServicesSSL, combine that into the ldap-combined-ca-cert-bundle.pem
+  # Note if using an internal ca cert for internal service TLS, combine that into the ldap-combined-ca-cert-bundle.pem
   ldapsRootCaCertName: ldap-combined-ca-cert-bundle.pem
 ```
 
@@ -761,7 +768,7 @@ To restore your deployment to using your previous driver configurations:
 | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
 | `anchoreConfig.service_dir`                                                                                | Path to directory where default Anchore config files are placed at startup                                                                                                                                                                                    | `/anchore_service`          |
 | `anchoreConfig.log_level`                                                                                  | The log level for Anchore services: NOTE: This is deprecated, use logging.log_level                                                                                                                                                                           | `<ALLOW_API_CONFIGURATION>` |
-| `anchoreConfig.internal_ssl_verify`                                                                        | Enable cert verification for internal service-to-service SSL communication                                                                                                                                                                                    | `true`                      |
+| `anchoreConfig.internal_ssl_verify`                                                                        | Enable cert verification for internal service-to-service SSL communication                                                                                                                                                                                    | `false`                     |
 | `anchoreConfig.global_client_read_timeout`                                                                 | Global client read timeout                                                                                                                                                                                                                                    | `0`                         |
 | `anchoreConfig.global_client_connect_timeout`                                                              | Global client connect timeout                                                                                                                                                                                                                                 | `0`                         |
 | `anchoreConfig.logging.colored_logging`                                                                    | Enable colored output in the logs                                                                                                                                                                                                                             | `false`                     |
@@ -780,10 +787,10 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.server.timeout_graceful_shutdown`                                                           | Seconds to permit for graceful shutdown or false to disable                                                                                                                                                                                                   | `false`                     |
 | `anchoreConfig.server.timeout_keep_alive`                                                                  | Seconds to keep a connection alive before closing                                                                                                                                                                                                             | `5`                         |
 | `anchoreConfig.server.process_worker_count`                                                                | Number of worker processes for the server                                                                                                                                                                                                                     | `1`                         |
-| `anchoreConfig.server.ssl_cert`                                                                            | Path to the SSL certificate file or false to disable                                                                                                                                                                                                          | `false`                     |
-| `anchoreConfig.server.ssl_chain`                                                                           | Path to the SSL certificate chain file or false to disable                                                                                                                                                                                                    | `false`                     |
+| `anchoreConfig.server.ssl_cert`                                                                            | Path to the SSL certificate file, or an empty string to disable                                                                                                                                                                                               | `""`                        |
+| `anchoreConfig.server.ssl_chain`                                                                           | Path to the SSL certificate chain file, or an empty string to disable                                                                                                                                                                                         | `""`                        |
 | `anchoreConfig.server.ssl_enable`                                                                          | Enable SSL for the server                                                                                                                                                                                                                                     | `false`                     |
-| `anchoreConfig.server.ssl_key`                                                                             | Path to the SSL key file or false to disable                                                                                                                                                                                                                  | `false`                     |
+| `anchoreConfig.server.ssl_key`                                                                             | Path to the SSL key file, or an empty string to disable                                                                                                                                                                                                       | `""`                        |
 | `anchoreConfig.audit.enabled`                                                                              | Enable audit logging                                                                                                                                                                                                                                          | `true`                      |
 | `anchoreConfig.audit.additionalResourceURIs`                                                               | Additional resource URIs to audit                                                                                                                                                                                                                             | `[]`                        |
 | `anchoreConfig.allow_awsecr_iam_auto`                                                                      | Enable AWS IAM instance role for ECR auth                                                                                                                                                                                                                     | `true`                      |
@@ -852,7 +859,6 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.analyzer.cycle_timers.system_config_refresh_watcher`                                        | Interval in seconds between config refresh watch cycles                                                                                                                                                                                                       | `20`                        |
 | `anchoreConfig.analyzer.layer_cache_max_gigabytes`                                                         | Specify a cache size > 0GB to enable image layer caching                                                                                                                                                                                                      | `0`                         |
 | `anchoreConfig.analyzer.enable_hints`                                                                      | Enable a user-supplied 'hints' file to override and/or augment the software artifacts found during analysis                                                                                                                                                   | `false`                     |
-| `anchoreConfig.analyzer.enable_owned_package_filtering`                                                    | Enable filtering of packages that are owned by other packages                                                                                                                                                                                                 | `true`                      |
 | `anchoreConfig.analyzer.configFile`                                                                        | Custom Anchore Analyzer configuration file contents in YAML                                                                                                                                                                                                   | `{}`                        |
 | `anchoreConfig.catalog.extendedConfig`                                                                     | appends additional configs to the catalog service's Anchore configs                                                                                                                                                                                           | `{}`                        |
 | `anchoreConfig.catalog.server`                                                                             | Server configuration for the service                                                                                                                                                                                                                          | `{}`                        |
@@ -1451,6 +1457,16 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.0.0
+
+> :exclamation: **New installs only.** This release does not support upgrading from any previous chart version. To move an existing deployment to v4.x, install fresh against a new database and migrate data out-of-band.
+
+  #### V4.0.0
+  - Deploys Anchore Enterprise v6.0.0.
+  - **PostgreSQL 17+ with the `pg_cron` extension is now required.** See [External Database Requirements](#external-database-requirements).
+  - **Bitnami PostgreSQL chart dependency removed.** You must provide your own PostgreSQL database (`postgresql.externalEndpoint` + auth, or existing secrets).
+  - **Breaking values changes** — `helm install` template-fails on any removed or renamed key with a message pointing at its replacement. The authoritative list of guarded breaking changes is the `enterprise.deprecationChecks` helper in [`templates/_helpers.tpl`](templates/_helpers.tpl); install against this chart against a copy of your old values file to surface any required edits.
 
 ### v3.24.x
   #### V3.24.0
