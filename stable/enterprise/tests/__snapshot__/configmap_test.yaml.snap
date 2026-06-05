@@ -25,10 +25,10 @@ should render additional audit uris when additionalResourceURIs is set:
           max_wsgi_middleware_worker_count: 50
           max_wsgi_middleware_worker_queue_size: 100
           process_worker_count: 1
-          ssl_cert: false
-          ssl_chain: false
+          ssl_cert: ""
+          ssl_chain: ""
           ssl_enable: false
-          ssl_key: false
+          ssl_key: ""
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
@@ -160,10 +160,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -240,10 +240,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -346,10 +346,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -382,10 +382,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -486,10 +486,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -526,10 +526,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -586,10 +586,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -623,10 +623,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -663,10 +663,10 @@ should render additional audit uris when additionalResourceURIs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
     kind: ConfigMap
@@ -712,10 +712,10 @@ should render the configmaps:
           max_wsgi_middleware_worker_count: 50
           max_wsgi_middleware_worker_queue_size: 100
           process_worker_count: 1
-          ssl_cert: false
-          ssl_chain: false
+          ssl_cert: ""
+          ssl_chain: ""
           ssl_enable: false
-          ssl_key: false
+          ssl_key: ""
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
@@ -845,10 +845,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -925,10 +925,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1031,10 +1031,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1067,10 +1067,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1171,10 +1171,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1211,10 +1211,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1271,10 +1271,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1308,10 +1308,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1348,10 +1348,10 @@ should render the configmaps:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
     kind: ConfigMap
@@ -1546,10 +1546,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
           max_wsgi_middleware_worker_count: 50
           max_wsgi_middleware_worker_queue_size: 100
           process_worker_count: 1
-          ssl_cert: false
-          ssl_chain: false
+          ssl_cert: ""
+          ssl_chain: ""
           ssl_enable: false
-          ssl_key: false
+          ssl_key: ""
           timeout_graceful_shutdown: false
           timeout_keep_alive: 5
 
@@ -1682,10 +1682,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1762,10 +1762,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1868,10 +1868,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -1904,10 +1904,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -2008,10 +2008,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -2048,10 +2048,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -2108,10 +2108,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -2145,10 +2145,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
 
@@ -2185,10 +2185,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               max_wsgi_middleware_worker_count: 50
               max_wsgi_middleware_worker_queue_size: 100
               process_worker_count: 1
-              ssl_cert: false
-              ssl_chain: false
+              ssl_cert: ""
+              ssl_chain: ""
               ssl_enable: false
-              ssl_key: false
+              ssl_key: ""
               timeout_graceful_shutdown: false
               timeout_keep_alive: 5
     kind: ConfigMap
