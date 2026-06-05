@@ -1448,7 +1448,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### v4.0.0
 
-> :exclamation: **New installs only.** This release does not support upgrading from any previous chart version. To move an existing deployment to v4.x, install fresh against a new database and migrate data out-of-band.
+> :exclamation: **New installs only.** Anchore Enterprise v6.0.0 does not support upgrading from any previous version.
 
   #### V4.0.0
   - Deploys Anchore Enterprise v6.0.0.
