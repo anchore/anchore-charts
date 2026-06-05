@@ -512,10 +512,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.apiext.external_hostname External hostname for the service
     ## @param anchoreConfig.apiext.external_port External port for the service
-    ## @param anchoreConfig.apiext.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.apiext.cycle_timers [object] Cycle timers for the apiext service
     cycle_timers:
@@ -538,10 +536,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.analyzer.external_hostname External hostname for the service
     ## @param anchoreConfig.analyzer.external_port External port for the service
-    ## @param anchoreConfig.analyzer.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
     ## server:
     ##   process_worker_count: 1
 
@@ -628,10 +624,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.catalog.external_hostname External hostname for the service
     ## @param anchoreConfig.catalog.external_port External port for the service
-    ## @param anchoreConfig.catalog.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
@@ -902,10 +896,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.policy_engine.external_hostname External hostname for the service
     ## @param anchoreConfig.policy_engine.external_port External port for the service
-    ## @param anchoreConfig.policy_engine.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.policy_engine.cycle_timers [object] Cycle timers for the policy engine service
     cycle_timers:
@@ -924,10 +916,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.notifications.external_hostname External hostname for the service
     ## @param anchoreConfig.notifications.external_port External port for the service
-    ## @param anchoreConfig.notifications.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.notifications.cycle_timers [object] Cycle timers for the notifications service
     ##
@@ -950,10 +940,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.reports.external_hostname External hostname for the service
     ## @param anchoreConfig.reports.external_port External port for the service
-    ## @param anchoreConfig.reports.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.reports.enable_graphiql Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations
     ## Go to http://<host>:<port>/v2/reports/graphql in a browser for the reports API
@@ -994,10 +982,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.reports_worker.external_hostname External hostname for the service
     ## @param anchoreConfig.reports_worker.external_port External port for the service
-    ## @param anchoreConfig.reports_worker.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
     ##
@@ -1061,10 +1047,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.simplequeue.external_hostname External hostname for the service
     ## @param anchoreConfig.simplequeue.external_port External port for the service
-    ## @param anchoreConfig.simplequeue.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.simplequeue.cycle_timers [object] Cycle timers for the simplequeue service
     cycle_timers:
@@ -1085,10 +1069,8 @@ anchoreConfig:
 
     ## @param anchoreConfig.data_syncer.external_hostname External hostname for the service
     ## @param anchoreConfig.data_syncer.external_port External port for the service
-    ## @param anchoreConfig.data_syncer.external_tls Enable TLS for external access to the service
     external_hostname: null
     external_port: null
-    external_tls: false
 
     ## @param anchoreConfig.data_syncer.cycle_timers [object] Cycle timers for the data syncer service
     cycle_timers:
