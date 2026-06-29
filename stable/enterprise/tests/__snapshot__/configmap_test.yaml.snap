@@ -108,6 +108,13 @@ should render additional audit uris when additionalResourceURIs is set:
           log_saml_assertions: false
         credentials:
           database:
+            encryption:
+              provider: static
+              keys:
+                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
+                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
+              disable_db_encryption_unsafe: false
+
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
             host: "${ANCHORE_DB_HOST}"
@@ -793,6 +800,13 @@ should render the configmaps:
           log_saml_assertions: false
         credentials:
           database:
+            encryption:
+              provider: static
+              keys:
+                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
+                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
+              disable_db_encryption_unsafe: false
+
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
             host: "${ANCHORE_DB_HOST}"
@@ -1627,6 +1641,13 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
           log_saml_assertions: false
         credentials:
           database:
+            encryption:
+              provider: static
+              keys:
+                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
+                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
+              disable_db_encryption_unsafe: false
+
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
             host: "${ANCHORE_DB_HOST}"

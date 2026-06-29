@@ -628,6 +628,51 @@ Usage: {{ include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.
 {{- end -}}
 
 {{/*
+Determine the secret name for database encryption keys.
+Returns the existingSecret if set, or the auto-generated db-encryption-keys name if currentKey is in config.
+Usage: {{ include "enterprise.dbEncryptionSecretName" . }}
+*/}}
+{{- define "enterprise.dbEncryptionSecretName" -}}
+{{- $enc := .Values.anchoreConfig.database.encryption -}}
+{{- if .Values.anchoreConfig.database.disable_db_encryption_unsafe -}}
+{{- else if $enc.existingSecret -}}
+  {{- $enc.existingSecret -}}
+{{- else if and $enc.currentKey (not .Values.useExistingSecrets) -}}
+  {{- printf "%s-db-encryption-keys" (include "enterprise.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Render env vars sourced from a secret for database encryption keys (existing or auto-created).
+Order matters: ANCHORE_DB_ENCRYPTION_KEY_CURRENT is emitted first, then ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS.
+For existing secrets, uses currentKeySecretKey/previousKeySecretKey as the key names.
+For auto-created db-encryption-keys, uses current_key/previous_key as the key names.
+Usage: {{ include "enterprise.dbEncryptionKeyEnv" . }}
+*/}}
+{{- define "enterprise.dbEncryptionKeyEnv" -}}
+{{- $secretName := include "enterprise.dbEncryptionSecretName" . -}}
+{{- if $secretName }}
+{{- $enc := .Values.anchoreConfig.database.encryption -}}
+{{- $isExisting := $enc.existingSecret -}}
+{{- $currentKeyField := ternary ($enc.currentKeySecretKey | default "current_key") "current_key" (not (empty $isExisting)) -}}
+{{- $previousKeyField := ternary ($enc.previousKeySecretKey | default "previous_key") "previous_key" (not (empty $isExisting)) }}
+- name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+  valueFrom:
+    secretKeyRef:
+      name: {{ $secretName }}
+      key: {{ $currentKeyField }}
+{{- if or $isExisting $enc.previousKey }}
+- name: ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS
+  valueFrom:
+    secretKeyRef:
+      name: {{ $secretName }}
+      key: {{ $previousKeyField }}
+      optional: true
+{{- end }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Gateway API - Returns the Gateway name for parentRefs
 */}}
 {{- define "enterprise.gatewayApi.gatewayName" -}}
