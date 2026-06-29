@@ -75,6 +75,15 @@ user_authentication:
   log_saml_assertions: {{ .Values.anchoreConfig.user_authentication.log_saml_assertions }}
 credentials:
   database:
+    encryption:
+      provider: static
+    {{- if not .Values.anchoreConfig.database.disable_db_encryption_unsafe }}
+      keys:
+        - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
+        - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
+    {{- end }}
+      disable_db_encryption_unsafe: {{ .Values.anchoreConfig.database.disable_db_encryption_unsafe }}
+
     user: "${ANCHORE_DB_USER}"
     password: "${ANCHORE_DB_PASSWORD}"
     host: "${ANCHORE_DB_HOST}"

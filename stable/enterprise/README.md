@@ -18,6 +18,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 - [Configuration](#configuration)
   - [External Database Requirements](#external-database-requirements)
   - [Installing on Openshift](#installing-on-openshift)
+  - [Database Encryption at Rest](#database-encryption-at-rest)
   - [Analyzer Image Layer Cache Configuration](#analyzer-image-layer-cache-configuration)
   - [Configuring Object Storage](#configuring-object-storage)
   - [Configuring Analysis Archive Storage](#configuring-analysis-archive-storage)
@@ -261,6 +262,96 @@ cloudsql:
   serviceAccSecretName: my_service_acc
   serviceAccJsonName: for_cloudsql.json
 ```
+
+### Database Encryption at Rest
+
+Anchore Enterprise can encrypt sensitive columns (registry credentials and other secrets) in the database at rest. **Encryption is opt-in** — by default `anchoreConfig.database.disable_db_encryption_unsafe` is `true`, meaning sensitive columns are stored unencrypted. This default exists so existing deployments are not broken by upgrades; new installs are encouraged to enable encryption.
+
+To enable encryption, set `disable_db_encryption_unsafe: false` and configure keys using one of the options below.
+
+Two encryption keys are supported: a `current` key used to encrypt new data, and an optional `previous` key retained so the application can decrypt older rows during a rotation. **Order matters** — `current` is always read first.
+
+#### Generating a key
+
+Each key must be a 32-byte value, base64url-encoded. Generate one with:
+
+```bash
+python3 -c "import secrets, base64; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())"
+```
+
+#### Option 1: Inline keys (chart-managed secret)
+
+Set the keys directly in your values file. The chart will create a secret named `<release>-enterprise-db-encryption-keys` and wire the env vars into every deployment.
+
+```yaml
+anchoreConfig:
+  database:
+    disable_db_encryption_unsafe: false
+    encryption:
+      currentKey: "REPLACE_WITH_GENERATED_KEY"
+      # previousKey is only needed during/after a key rotation
+      previousKey: ""
+```
+
+#### Option 2: User-managed secret (`existingSecret`)
+
+Create the secret yourself (e.g. via Vault, External Secrets, sealed-secrets) and point the chart at it. Useful when keys are managed by a workflow separate from the Helm release.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-db-encryption-keys
+type: Opaque
+stringData:
+  current_key: "REPLACE_WITH_GENERATED_KEY"
+  previous_key: ""   # optional
+```
+
+```yaml
+anchoreConfig:
+  database:
+    disable_db_encryption_unsafe: false
+    encryption:
+      existingSecret: my-db-encryption-keys
+      # override these if your secret uses different data keys
+      currentKeySecretKey: current_key
+      previousKeySecretKey: previous_key
+```
+
+#### Option 3: With `useExistingSecrets: true`
+
+When the chart is configured to use a single pre-existing top-level secret (see [Existing Secrets](#existing-secrets)), add the encryption keys as env vars in that same secret — no `encryption.*` values needed.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: anchore-enterprise-env
+type: Opaque
+stringData:
+  ANCHORE_ADMIN_PASSWORD: foobar1234
+  # ... other ANCHORE_* env vars
+  ANCHORE_DB_ENCRYPTION_KEY_CURRENT: "REPLACE_WITH_GENERATED_KEY"
+  ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS: ""   # optional
+```
+
+In values, you still need to opt in:
+
+```yaml
+useExistingSecrets: true
+anchoreConfig:
+  database:
+    disable_db_encryption_unsafe: false
+```
+
+If you'd rather keep encryption keys in a *separate* secret even with `useExistingSecrets: true`, set `anchoreConfig.database.encryption.existingSecret` and the chart will source the keys from there instead.
+
+#### Leaving encryption disabled (default)
+
+By default `anchoreConfig.database.disable_db_encryption_unsafe` is `true`, which means Anchore Enterprise stores registry credentials (and other sensitive columns) **unencrypted** in the database. In this mode the chart skips creating the encryption secret, omits the keys env vars from each deployment, and leaves the `keys:` list out of the rendered service config — so no key configuration is required.
+
+This is the default to keep existing deployments working through upgrades. For new installs, enabling encryption is recommended.
 
 ### Analyzer Image Layer Cache Configuration
 

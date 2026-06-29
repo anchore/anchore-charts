@@ -1,0 +1,57 @@
+suite: Database Encryption Validation Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+  # Encryption is opt-out by default; flip on so we exercise the validator.
+  # The "pass when disable_db_encryption_unsafe is true" test overrides this.
+  anchoreConfig.database.disable_db_encryption_unsafe: false
+
+tests:
+  - it: should fail when encryption is enabled and no keys are configured
+    asserts:
+      - failedTemplate:
+          errorMessage: "Database encryption at rest is enabled but no keys are configured. Set one of: anchoreConfig.database.encryption.currentKey (inline), anchoreConfig.database.encryption.existingSecret (user-managed secret), or useExistingSecrets=true (with ANCHORE_DB_ENCRYPTION_KEY_CURRENT in your existing secret). To disable encryption, set anchoreConfig.database.disable_db_encryption_unsafe=true."
+
+  - it: should pass validation when currentKey is set inline
+    templates:
+      - anchore_configmap.yaml
+    set:
+      anchoreConfig.database.encryption.currentKey: CURRENT_KEY_VALUE
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: should pass validation when existingSecret is set
+    templates:
+      - anchore_configmap.yaml
+    set:
+      anchoreConfig.database.encryption.existingSecret: user-managed-keys
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: should pass validation when useExistingSecrets is true
+    templates:
+      - anchore_configmap.yaml
+    set:
+      useExistingSecrets: true
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: should pass validation when disable_db_encryption_unsafe is true
+    templates:
+      - anchore_configmap.yaml
+    set:
+      anchoreConfig.database.disable_db_encryption_unsafe: true
+    asserts:
+      - hasDocuments:
+          count: 1
