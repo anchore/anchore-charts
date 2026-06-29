@@ -14,3 +14,7 @@ postgresql:
     username: anchore
     password: anchore-postgres,123
     database: anchore
+anchoreConfig:
+  database:
+    # CI only - sensitive columns stored unencrypted
+    disable_db_encryption_unsafe: true

@@ -6,6 +6,9 @@ postgresql:
     database: anchore
 anchoreConfig:
   default_admin_password: foobar
+  database:
+    # CI only - sensitive columns stored unencrypted
+    disable_db_encryption_unsafe: true
 image: anchore/enterprise-dev:nightly
 ui:
   image: anchore/anchore-on-prem-ui-dev:nightly
