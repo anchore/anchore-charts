@@ -628,15 +628,12 @@ Usage: {{ include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.
 {{- end -}}
 
 {{/*
-Determine the secret name for database encryption keys.
-Returns the existingSecret if set, or the auto-generated db-encryption-keys name if currentKey is in config.
-Usage: {{ include "enterprise.dbEncryptionSecretName" . }}
-*/}}
-{{/*
 Fail fast if database secret encryption is enabled but no keys are configured.
-Encryption is considered configured if either:
-  - useExistingSecrets is true (keys expected in the top-level existing secret)
-  - anchoreConfig.database.encryption.existingSecret is set
+Encryption is considered enabled when anchoreConfig.database.disable_db_encryption_unsafe is false.
+When enabled, keys must be supplied via one of:
+  - anchoreConfig.database.encryption.existingSecret (separate user-managed secret)
+  - useExistingSecrets=true (keys expected in the top-level existing secret as
+    ANCHORE_DB_ENCRYPTION_KEY_CURRENT / _PREVIOUS env vars)
 Usage: {{ include "enterprise.validateDbEncryption" . }}
 */}}
 {{- define "enterprise.validateDbEncryption" -}}
