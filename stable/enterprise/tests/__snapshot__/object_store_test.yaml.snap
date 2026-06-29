@@ -106,10 +106,7 @@ snapshot - S3 legacy configmap:
         database:
           encryption:
             provider: static
-            keys:
-              - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
-              - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
-            disable_db_encryption_unsafe: false
+            disable_db_encryption_unsafe: true
 
           user: "${ANCHORE_DB_USER}"
           password: "${ANCHORE_DB_PASSWORD}"

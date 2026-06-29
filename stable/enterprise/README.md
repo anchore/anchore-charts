@@ -265,7 +265,11 @@ cloudsql:
 
 ### Database Encryption at Rest
 
-Anchore Enterprise encrypts sensitive columns in the database at rest. Two encryption keys are supported: a `current` key used to encrypt new data, and an optional `previous` key retained so the application can decrypt older rows during a rotation. **Order matters** — `current` is always read first.
+Anchore Enterprise can encrypt sensitive columns (registry credentials and other secrets) in the database at rest. **Encryption is opt-in** — by default `anchoreConfig.database.disable_db_encryption_unsafe` is `true`, meaning sensitive columns are stored unencrypted. This default exists so existing deployments are not broken by upgrades; new installs are encouraged to enable encryption.
+
+To enable encryption, set `disable_db_encryption_unsafe: false` and configure keys using one of the options below.
+
+Two encryption keys are supported: a `current` key used to encrypt new data, and an optional `previous` key retained so the application can decrypt older rows during a rotation. **Order matters** — `current` is always read first.
 
 #### Generating a key
 
@@ -282,6 +286,7 @@ Set the keys directly in your values file. The chart will create a secret named 
 ```yaml
 anchoreConfig:
   database:
+    disable_db_encryption_unsafe: false
     encryption:
       currentKey: "REPLACE_WITH_GENERATED_KEY"
       # previousKey is only needed during/after a key rotation
@@ -306,6 +311,7 @@ stringData:
 ```yaml
 anchoreConfig:
   database:
+    disable_db_encryption_unsafe: false
     encryption:
       existingSecret: my-db-encryption-keys
       # override these if your secret uses different data keys
@@ -330,19 +336,22 @@ stringData:
   ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS: ""   # optional
 ```
 
-If you'd rather keep encryption keys in a *separate* secret even with `useExistingSecrets: true`, set `anchoreConfig.database.encryption.existingSecret` and the chart will source the keys from there instead.
-
-#### Disabling encryption (`disable_db_encryption_unsafe`)
-
-When set to `true`, Anchore Enterprise will store registry credentials (and other sensitive columns) **unencrypted** in the database. Encryption keys are not required in this mode — the chart will skip creating the encryption secret, omit the keys env vars from each deployment, and leave the `keys:` list out of the rendered service config.
+In values, you still need to opt in:
 
 ```yaml
+useExistingSecrets: true
 anchoreConfig:
   database:
-    disable_db_encryption_unsafe: true
+    disable_db_encryption_unsafe: false
 ```
 
-This is generally not recommended, but is supported if you need it.
+If you'd rather keep encryption keys in a *separate* secret even with `useExistingSecrets: true`, set `anchoreConfig.database.encryption.existingSecret` and the chart will source the keys from there instead.
+
+#### Leaving encryption disabled (default)
+
+By default `anchoreConfig.database.disable_db_encryption_unsafe` is `true`, which means Anchore Enterprise stores registry credentials (and other sensitive columns) **unencrypted** in the database. In this mode the chart skips creating the encryption secret, omits the keys env vars from each deployment, and leaves the `keys:` list out of the rendered service config — so no key configuration is required.
+
+This is the default to keep existing deployments working through upgrades. For new installs, enabling encryption is recommended.
 
 ### Analyzer Image Layer Cache Configuration
 

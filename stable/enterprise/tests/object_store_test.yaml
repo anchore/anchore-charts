@@ -10,7 +10,6 @@ set:
   postgresql.auth.username: test-user
   postgresql.auth.password: test-password
   postgresql.auth.database: test-db
-  anchoreConfig.database.encryption.currentKey: TEST_KEY
 
 tests:
   - it: should create osaa-creds secret when S3 credentials are set inline

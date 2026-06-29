@@ -447,7 +447,7 @@ anchoreConfig:
   ## @param anchoreConfig.database.dbConnectArgs Set custom database connection args (legacy/psycopg2); If specified, this overrides other database connection settings
   ## @param anchoreConfig.database.ngEngineArgs Set custom database engine arguments (ng/psycopg3); If specified, this overrides pool_size and max_overflow for ng services
   ## @param anchoreConfig.database.ngDbConnectArgs Set custom database connection args (ng/psycopg3); If specified, this overrides other database connection settings for ng services
-  ## @param anchoreConfig.database.disable_db_encryption_unsafe Disable database encryption at rest. UNSAFE - intended for testing/migration only.
+  ## @param anchoreConfig.database.disable_db_encryption_unsafe When true, sensitive database columns (registry credentials, etc.) are stored unencrypted. Defaults to true so existing deployments are not broken; set to false to opt in to encryption at rest.
   ## @param anchoreConfig.database.encryption.currentKey Current key used for encrypting sensitive database columns at rest. Order matters - this key is used to encrypt new data.
   ## @param anchoreConfig.database.encryption.previousKey Previous key retained for decrypting older data during key rotation.
   ## @param anchoreConfig.database.encryption.existingSecret Name of an existing Kubernetes secret containing the encryption keys. When set, currentKey/previousKey are ignored.
@@ -466,7 +466,11 @@ anchoreConfig:
     dbConnectArgs: {}
     ngEngineArgs: {}
     ngDbConnectArgs: {}
-    disable_db_encryption_unsafe: false
+    ## Encryption is opt-in. Set to false to encrypt sensitive database columns at rest;
+    ## you must then also configure anchoreConfig.database.encryption.currentKey (or
+    ## existingSecret, or supply keys via useExistingSecrets). When true (the default),
+    ## sensitive columns are stored unencrypted.
+    disable_db_encryption_unsafe: true
     encryption:
       currentKey: ""
       previousKey: ""

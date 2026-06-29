@@ -110,10 +110,7 @@ should render additional audit uris when additionalResourceURIs is set:
           database:
             encryption:
               provider: static
-              keys:
-                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
-                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
-              disable_db_encryption_unsafe: false
+              disable_db_encryption_unsafe: true
 
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
@@ -802,10 +799,7 @@ should render the configmaps:
           database:
             encryption:
               provider: static
-              keys:
-                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
-                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
-              disable_db_encryption_unsafe: false
+              disable_db_encryption_unsafe: true
 
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
@@ -1643,10 +1637,7 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
           database:
             encryption:
               provider: static
-              keys:
-                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
-                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
-              disable_db_encryption_unsafe: false
+              disable_db_encryption_unsafe: true
 
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"

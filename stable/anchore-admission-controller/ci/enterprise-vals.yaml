@@ -1,8 +1,5 @@
 anchoreConfig:
   default_admin_password: foobar
-  database:
-    # CI only - sensitive columns stored unencrypted
-    disable_db_encryption_unsafe: true
 postgresql:
   chartEnabled: false
   externalEndpoint: "anchore-db-rw.anchore-enterprise.svc.cluster.local"
