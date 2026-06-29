@@ -18,16 +18,7 @@ tests:
   - it: should fail when encryption is enabled and no keys are configured
     asserts:
       - failedTemplate:
-          errorMessage: "Database encryption at rest is enabled but no keys are configured. Set one of: anchoreConfig.database.encryption.currentKey (inline), anchoreConfig.database.encryption.existingSecret (user-managed secret), or useExistingSecrets=true (with ANCHORE_DB_ENCRYPTION_KEY_CURRENT in your existing secret). To disable encryption, set anchoreConfig.database.disable_db_encryption_unsafe=true."
-
-  - it: should pass validation when currentKey is set inline
-    templates:
-      - anchore_configmap.yaml
-    set:
-      anchoreConfig.database.encryption.currentKey: CURRENT_KEY_VALUE
-    asserts:
-      - hasDocuments:
-          count: 1
+          errorMessage: "Database secret encryption is enabled but no keys are configured. Set anchoreConfig.database.encryption.existingSecret (separate user-managed secret) or useExistingSecrets=true (with ANCHORE_DB_ENCRYPTION_KEY_CURRENT in your existing secret). To disable encryption, set anchoreConfig.database.disable_db_encryption_unsafe=true."
 
   - it: should pass validation when existingSecret is set
     templates:
