@@ -632,6 +632,23 @@ Determine the secret name for database encryption keys.
 Returns the existingSecret if set, or the auto-generated db-encryption-keys name if currentKey is in config.
 Usage: {{ include "enterprise.dbEncryptionSecretName" . }}
 */}}
+{{/*
+Fail fast if database encryption is enabled but no keys are configured anywhere.
+Encryption is considered configured if any of:
+  - anchoreConfig.database.encryption.currentKey is set inline
+  - anchoreConfig.database.encryption.existingSecret is set
+  - useExistingSecrets is true (keys expected in the top-level existing secret)
+Usage: {{ include "enterprise.validateDbEncryption" . }}
+*/}}
+{{- define "enterprise.validateDbEncryption" -}}
+{{- $enc := .Values.anchoreConfig.database.encryption -}}
+{{- if not .Values.anchoreConfig.database.disable_db_encryption_unsafe -}}
+{{- if and (not $enc.currentKey) (not $enc.existingSecret) (not .Values.useExistingSecrets) -}}
+{{- fail (printf "Database encryption at rest is enabled but no keys are configured. Set one of: anchoreConfig.database.encryption.currentKey (inline), anchoreConfig.database.encryption.existingSecret (user-managed secret), or useExistingSecrets=true (with ANCHORE_DB_ENCRYPTION_KEY_CURRENT in your existing secret). To disable encryption, set anchoreConfig.database.disable_db_encryption_unsafe=true.") -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "enterprise.dbEncryptionSecretName" -}}
 {{- $enc := .Values.anchoreConfig.database.encryption -}}
 {{- if .Values.anchoreConfig.database.disable_db_encryption_unsafe -}}

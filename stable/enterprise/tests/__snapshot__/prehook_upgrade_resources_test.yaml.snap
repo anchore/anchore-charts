@@ -21,6 +21,11 @@ migration job should match snapshot:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         envFrom:
           - configMapRef:
               name: test-release-enterprise-config-env-vars
@@ -89,6 +94,11 @@ migration job should match snapshot:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         image: docker.io/anchore/enterprise:v6.0.0
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -143,6 +153,11 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         envFrom:
           - configMapRef:
               name: test-release-enterprise-config-env-vars
@@ -211,6 +226,11 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         image: docker.io/anchore/enterprise:v6.0.0
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -263,6 +283,11 @@ migration job should match snapshot analysisArchiveMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         envFrom:
           - configMapRef:
               name: test-release-enterprise-config-env-vars
@@ -331,6 +356,11 @@ migration job should match snapshot analysisArchiveMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         image: docker.io/anchore/enterprise:v6.0.0
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -382,6 +412,11 @@ migration job should match snapshot objectStoreMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         envFrom:
           - configMapRef:
               name: test-release-enterprise-config-env-vars
@@ -450,6 +485,11 @@ migration job should match snapshot objectStoreMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                key: current_key
+                name: test-release-enterprise-db-encryption-keys
         image: docker.io/anchore/enterprise:v6.0.0
         imagePullPolicy: IfNotPresent
         name: wait-for-db

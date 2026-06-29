@@ -10,8 +10,15 @@ set:
   postgresql.auth.username: test-user
   postgresql.auth.password: test-password
   postgresql.auth.database: test-db
+  # Default suite-level key so the validator passes; individual tests override
+  # this (set to "" or set disable_db_encryption_unsafe) when exercising the
+  # validator or the disable path.
+  anchoreConfig.database.encryption.currentKey: DEFAULT_TEST_KEY
 
 tests:
+  # Validation tests live in db_encryption_validation_test.yaml so the suite-level
+  # currentKey default below doesn't shadow the "no keys" scenarios.
+
   # --- Chart-managed secret (inline keys) -----------------------------------
 
   - it: should create db-encryption-keys secret when currentKey is set inline
@@ -44,13 +51,6 @@ tests:
           value: CURRENT_KEY_VALUE
       - isNull:
           path: stringData.previous_key
-
-  - it: should not create db-encryption-keys secret by default
-    templates:
-      - db_encryption_secret.yaml
-    asserts:
-      - hasDocuments:
-          count: 0
 
   - it: should not create db-encryption-keys secret when existingSecret is set
     templates:
