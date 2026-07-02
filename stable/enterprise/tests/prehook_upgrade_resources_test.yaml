@@ -430,7 +430,7 @@ tests:
   - it: migration job should match snapshot
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
     set:
-      image: docker.io/anchore/enterprise@sha256:<TBD>
+      image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
       osaaMigrationJob:
         enabled: true
         analysisArchiveMigration:
@@ -444,7 +444,7 @@ tests:
   - it: migration job should match snapshot analysisArchiveMigration to true
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
     set:
-      image: docker.io/anchore/enterprise@sha256:<TBD>
+      image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
       osaaMigrationJob:
         enabled: true
         analysisArchiveMigration:
@@ -458,7 +458,7 @@ tests:
   - it: migration job should match snapshot objectStoreMigration to true
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
     set:
-      image: docker.io/anchore/enterprise@sha256:<TBD>
+      image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
       osaaMigrationJob:
         enabled: true
         analysisArchiveMigration:
@@ -472,7 +472,7 @@ tests:
   - it: migration job should match snapshot analysisArchiveMigration and objectStoreMigration to true
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
     set:
-      image: docker.io/anchore/enterprise@sha256:<TBD>
+      image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
       osaaMigrationJob:
         enabled: true
         analysisArchiveMigration:
