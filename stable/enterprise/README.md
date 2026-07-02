@@ -1383,6 +1383,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 ### v3.24.x
   #### V3.24.0
     - Deploys Anchore Enterprise v5.27.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5270/) for more information.
+  #### V3.24.1
+    - Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5271/) for more information.
 
 ### v3.23.x
   #### V3.23.0
