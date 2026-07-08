@@ -34,6 +34,10 @@ jobs:
         persist-credentials: false
 
     - name: Shellcheck
+      # ludeeus/action-shellcheck ships an amd64 binary; it fails with
+      # "Exec format error" on arm64 runners. ShellCheck is arch-independent,
+      # so run it only on the x86 leg.
+      if: matrix.runner == 'ubuntu-latest'
       uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
 
     - uses: actions/setup-python@e9aba2c848f5ebd159c070c61ea2c4e2b122355e # v2.3.4
