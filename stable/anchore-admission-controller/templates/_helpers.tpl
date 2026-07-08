@@ -37,3 +37,20 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
+
+{{/*
+Resolve the image, replacing "latest" tag with AppVersion for the default upstream image.
+Existing customers pinning a specific tag are unaffected.
+*/}}
+{{- define "anchore-admission-controller.image" -}}
+{{- $parts := splitList ":" .Values.image -}}
+{{- $repo := first $parts -}}
+{{- $tag := last $parts -}}
+{{- $defaultRepo := "anchore/kubernetes-admission-controller" -}}
+{{- $isDefault := or (eq $repo $defaultRepo) (eq $repo (printf "docker.io/%s" $defaultRepo)) (eq $repo (printf "docker.io/library/%s" $defaultRepo)) -}}
+{{- if and $isDefault (or (eq $tag "latest") (eq $tag $repo)) -}}
+{{- printf "%s:v%s" $repo .Chart.AppVersion -}}
+{{- else -}}
+{{- .Values.image -}}
+{{- end -}}
+{{- end -}}

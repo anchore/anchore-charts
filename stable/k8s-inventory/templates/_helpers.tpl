@@ -69,6 +69,22 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Resolve the image, replacing "latest" tag with AppVersion for the default upstream image.
+Existing customers pinning a specific tag are unaffected.
+*/}}
+{{- define "k8sInventory.image" -}}
+{{- $repo := .Values.image.repository -}}
+{{- $tag := .Values.image.tag | default "latest" -}}
+{{- $defaultRepo := "anchore/k8s-inventory" -}}
+{{- $isDefault := or (eq $repo $defaultRepo) (eq $repo (printf "docker.io/%s" $defaultRepo)) (eq $repo (printf "docker.io/library/%s" $defaultRepo)) -}}
+{{- if and $isDefault (eq $tag "latest") -}}
+{{- printf "%s:v%s" $repo .Chart.AppVersion -}}
+{{- else -}}
+{{- printf "%s:%s" $repo $tag -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Require Anchore endpoint and Anchore credentials
 */}}
 {{- define "checkAnchoreRequisites" }}
