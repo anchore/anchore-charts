@@ -14,7 +14,18 @@ jobs:
       fail-fast: false
       matrix:
         kubernetesVersion: ["v1.29.2", "v1.30.0", "v1.31.0", "v1.32.2", "v1.33.1"]
-    runs-on: ubuntu-latest
+        # runner drives both the GitHub host arch and, via kind, the node arch.
+        # On ubuntu-24.04-arm the kind nodes are native arm64, so worker nodes
+        # pull the arm64 variant of the Anchore (and dependency) images.
+        runner: ["ubuntu-latest", "ubuntu-24.04-arm"]
+        # Run arm64 only on the newest Kubernetes version to prove the arm image
+        # deploys without paying 5x arm runner cost; x86 keeps full version coverage.
+        exclude:
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.29.2" }
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.30.0" }
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.31.0" }
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.32.2" }
+    runs-on: ${{ matrix.runner }}
     steps:
     - name: Checkout
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
