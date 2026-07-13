@@ -78,7 +78,7 @@ jobs:
     - name: Use Replicated Compatibilty Matrix for cluster creation
       if: steps.list-changed.outputs.CHANGED == 'true'
       id: create-cluster
-      uses: replicatedhq/replicated-actions/create-cluster@77121785951d05387334b773644c356885191f14 # v1
+      uses: replicatedhq/replicated-actions/create-cluster@77121785951d05387334b773644c356885191f14 # v1.16.2
       with:
         api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
         cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ github.run_id }}
@@ -137,10 +137,10 @@ jobs:
 
         if [[ "$CLUSTER_DISTRIBUTION" == "openshift" ]]; then
           echo "Installing enterprise on openshift"
-          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait
+          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait --timeout 15m
         else
           echo "Installing enterprise"
-          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
+          helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait --timeout 15m
         fi
         kubectl --namespace anchore get pods
 
@@ -213,7 +213,7 @@ jobs:
     - name: Remove Cluster
       if: steps.list-changed.outputs.CHANGED == 'true'
       id: remove-cluster
-      uses: replicatedhq/replicated-actions/remove-cluster@77121785951d05387334b773644c356885191f14 # v1
+      uses: replicatedhq/replicated-actions/remove-cluster@77121785951d05387334b773644c356885191f14 # v1.16.2
       continue-on-error: true # It could be that the cluster is already removed
       with:
         api-token: ${{ secrets.ANCHORECI_REPLICATED_API_TOKEN }}
