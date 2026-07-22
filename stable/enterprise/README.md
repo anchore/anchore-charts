@@ -1380,11 +1380,17 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v3.25.x
+  #### V3.25.0
+    - Supports using secrets for access/secret keys in object store configs
+  #### V3.25.1
+    - Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5271/) for more information.
+  #### V3.25.2
+    - Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5272/) for more information.
+
 ### v3.24.x
   #### V3.24.0
     - Deploys Anchore Enterprise v5.27.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5270/) for more information.
-  #### V3.24.1
-    - Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5271/) for more information.
 
 ### v3.23.x
   #### V3.23.0
