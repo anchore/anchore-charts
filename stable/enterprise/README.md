@@ -17,7 +17,6 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Configuration](#configuration)
   - [External Database Requirements](#external-database-requirements)
-  - [Installing on Openshift](#installing-on-openshift)
   - [Analyzer Image Layer Cache Configuration](#analyzer-image-layer-cache-configuration)
   - [Configuring Object Storage](#configuring-object-storage)
   - [Configuring Analysis Archive Storage](#configuring-analysis-archive-storage)
@@ -187,7 +186,7 @@ export RELEASE="my-release"
 helm install ${RELEASE} -n ${NAMESPACE} anchore/enterprise -f custom_values.yaml
 ```
 
-For additional guidance on customizing your Anchore Enterprise deployment, reach out to [Anchore Support](get.anchore.com/contact/).
+For additional guidance on customizing your Anchore Enterprise deployment, reach out to [Anchore Support](https://get.anchore.com/contact/).
 
 ### External Database Requirements
 
@@ -1375,107 +1374,103 @@ To restore your deployment to using your previous driver configurations:
 
 For the latest updates and features in Anchore Enterprise, see the official [Release Notes](https://docs.anchore.com/current/docs/releasenotes/).
 
-
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-### v3.25.x
-  #### V3.25.0
-    - Supports using secrets for access/secret keys in object store configs
-  #### V3.25.1
-    - Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5271/) for more information.
-  #### V3.25.2
-    - Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5272/) for more information.
+### V3.25.x
+#### V3.25.0
+- Supports using secrets for access/secret keys in object store configs
+#### V3.25.1
+- Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5271/) for more information.
+#### V3.25.2
+- Deploys Anchore Enterprise v5.27.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5272/) for more information.
 
-### v3.24.x
-  #### V3.24.0
-    - Deploys Anchore Enterprise v5.27.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5270/) for more information.
+### V3.24.x
+#### V3.24.0
+- Deploys Anchore Enterprise v5.27.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5270/) for more information.
 
-### v3.23.x
-  #### V3.23.0
-    - Deploys Anchore Enterprise v5.26.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5260/) for more information.
-    - Defaults for cpe search now set by Anchore Enterprise service
+### V3.23.x
+#### V3.23.0
+- Deploys Anchore Enterprise v5.26.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5260/) for more information.
+- Defaults for cpe search now set by Anchore Enterprise service
 
-### v3.22.x
-  #### V3.22.0
-  - Release note updates
-  - NOTES.txt notice to update anchorectl on upgrades
-  - update reference links in values.yaml
-  - update resource comments in values.yaml
-  - adding appProtocol to services
-  - adding optional serviceAccount creation
-  ### V.22.1
-    - Deploys Anchore Enterprise v5.25.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5252/) for more information.
+### V3.22.x
+#### V3.22.0
+- Release note updates
+- NOTES.txt notice to update anchorectl on upgrades
+- update reference links in values.yaml
+- update resource comments in values.yaml
+- adding appProtocol to services
+- adding optional serviceAccount creation
+#### V3.22.1
+- Deploys Anchore Enterprise v5.25.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5252/) for more information.
 
-### v3.21.x
-  #### V3.21.0
-  - Deploys Anchore Enterprise v5.25.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5250/) for more information.
-  #### V3.21.1
-  - Added ability to add extended configs to services via `extendedConfig`. Bumped admission controller, k8s-inventory, and ecs-inventory versions. Added unit tests.
-  #### V3.21.3
-  - Deploys Anchore Enterprise v5.25.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5251/) for more information.
-  - Cleaned up GitHub Action workflows.
+### V3.21.x
+#### V3.21.0
+- Deploys Anchore Enterprise v5.25.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5250/) for more information.
+#### V3.21.1
+- Added ability to add extended configs to services via `extendedConfig`. Bumped admission controller, k8s-inventory, and ecs-inventory versions. Added unit tests.
+#### V3.21.3
+- Deploys Anchore Enterprise v5.25.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5251/) for more information.
+- Cleaned up GitHub Action workflows.
 
-### v3.20.x
-  #### V3.20.0
-  - Deploys Anchore Enterprise v5.24.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5240/) for more information.
-  - Makes listen address configurable. Still defaults to 0.0.0.0 if not overriden.
-  - Added URI encoding by default ANCHORE_APPDB_URI and ANCHORE_REDIS_URI in ui_secrets.yaml
-  #### V3.20.1
-  - Updated appVersion to v5.24.0 and bumped integrations chart versions.
-  #### V3.20.2
-  - Adds support for specifying hostAliases
-  #### V3.20.3
-  - Deploys Anchore Enterprise v5.24.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5241/) for more information.
-  #### V3.20.4
-  - Deploys Anchore Enterprise v5.24.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5242/) for more information.
-  #### V3.20.5
-  - Added missing `scratchVolume` include to deployment templates that were missing it.
+### V3.20.x
+#### V3.20.0
+- Deploys Anchore Enterprise v5.24.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5240/) for more information.
+- Makes listen address configurable. Still defaults to 0.0.0.0 if not overriden.
+- Added URI encoding by default ANCHORE_APPDB_URI and ANCHORE_REDIS_URI in ui_secrets.yaml
+#### V3.20.1
+- Updated appVersion to v5.24.0 and bumped integrations chart versions.
+#### V3.20.2
+- Adds support for specifying hostAliases
+#### V3.20.3
+- Deploys Anchore Enterprise v5.24.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5241/) for more information.
+#### V3.20.4
+- Deploys Anchore Enterprise v5.24.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5242/) for more information.
+#### V3.20.5
+- Added missing `scratchVolume` include to deployment templates that were missing it.
 
-### v3.19.x
-  #### V3.19.0
-  - Adds an optional Prometheus monitoring setup to Anchore Enterprise for future internal monitoring and support
-  #### V3.19.1
-  - Adds component level containerSecurityContext. If set at both the toplevel and component level, the component level containerSecurityContext definition will be honored
-  #### V3.19.2
-  - Updated smoketest URL to use dynamic variables.
+### V3.19.x
+#### V3.19.0
+- Adds an optional Prometheus monitoring setup to Anchore Enterprise for future internal monitoring and support
+#### V3.19.1
+- Adds component level containerSecurityContext. If set at both the toplevel and component level, the component level containerSecurityContext definition will be honored
+#### V3.19.2
+- Updated smoketest URL to use dynamic variables.
 
 ### V3.18.x
-  #### V3.18.0
-  - Adds support for specifying custom init containers in deployments and jobs
+#### V3.18.0
+- Adds support for specifying custom init containers in deployments and jobs
 
 ### V3.17.x
-
-  #### V3.17.0
-  - Deploys Anchore Enterprise v5.23.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5230/) for more information.
-  #### V3.17.1
-  - Added `initialDelaySeconds` for readiness probes.
-  #### V3.17.2
-  - Fixed `initialDelaySeconds` for readiness probe on UI deployment.
+#### V3.17.0
+- Deploys Anchore Enterprise v5.23.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5230/) for more information.
+#### V3.17.1
+- Added `initialDelaySeconds` for readiness probes.
+#### V3.17.2
+- Fixed `initialDelaySeconds` for readiness probe on UI deployment.
 
 ### V3.16.x
-
-  #### V3.16.0
-  - Deploys Anchore Enterprise v5.22.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5220/) for more information.
-  - Changes the defaults of the following for new installations only (If upgrading and the value was not overridden, the old defaults will be saved in the database during the upgrade migration. If overridden, the overridden value will still be respected)
-    - anchoreConfig.reports_worker.enable_data_egress: false -> true
-    - anchoreConfig.reports_worker.data_egress_window: 0 -> 30
-  - Changes the key of the following. This was a bug in the chart and any set value was not getting respected due to being under the wrong key so this doesnt break any existing deployments
-    - anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss -> anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss
-  #### V3.16.1
-  - Adds anchoreConfig.database.dbConnectArgs to override db_connect_args
-  #### V3.16.2
-  - Adds analyzer service and exposes extraVolume/extraVolumeMounts to the analyzer and upgradeJob in the values.yaml
-  #### V3.16.3
-  - Bumped Kubernetes version compatibility to 1.34.x.
+#### V3.16.0
+- Deploys Anchore Enterprise v5.22.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5220/) for more information.
+- Changes the defaults of the following for new installations only (If upgrading and the value was not overridden, the old defaults will be saved in the database during the upgrade migration. If overridden, the overridden value will still be respected)
+  - anchoreConfig.reports_worker.enable_data_egress: false -> true
+  - anchoreConfig.reports_worker.data_egress_window: 0 -> 30
+- Changes the key of the following. This was a bug in the chart and any set value was not getting respected due to being under the wrong key so this doesnt break any existing deployments
+  - anchoreConfig.policy_engine.nvd_fallback_to_secondary_cvss -> anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss
+#### V3.16.1
+- Adds anchoreConfig.database.dbConnectArgs to override db_connect_args
+#### V3.16.2
+- Adds analyzer service and exposes extraVolume/extraVolumeMounts to the analyzer and upgradeJob in the values.yaml
+#### V3.16.3
+- Bumped Kubernetes version compatibility to 1.34.x.
 
 ### V3.15.x
-
-  #### V3.15.0
-  - Deploys Anchore Enterprise v5.21.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5210/) for more information.
-  #### V3.15.1
-  - Updates the redis image from docker.io/bitnamilegacy/redis:7.0.12-debian-11-r0 to docker.io/redis:7.4.6 to address https://redis.io/blog/security-advisory-cve-2025-49844/
+#### V3.15.0
+- Deploys Anchore Enterprise v5.21.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5210/) for more information.
+#### V3.15.1
+- Updates the redis image from docker.io/bitnamilegacy/redis:7.0.12-debian-11-r0 to docker.io/redis:7.4.6 to address https://redis.io/blog/security-advisory-cve-2025-49844/
 
 ### V3.14.x
 
@@ -1732,7 +1727,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
     ANCHORE_REDIS_URI: redis://:anchore-redis,123@anchore-ui-redis:6379
     ```
 
-### v2.0.0
+### V2.0.0
 
 - Deploys Anchore Enterprise v5.0.0
 - Anchore Enterprise v5.0.0 introduces a breaking change to the API endpoints, and requires updating any external integrations to use the new endpoints. See the [Migration Guide](https://docs.anchore.com/current/docs/deployment/upgrade/5.0/) for more information.
@@ -1743,12 +1738,12 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - `rbacManager.service.apiVersion`
   - `feeds.service.apiVersion`
 
-### v1.0.0
+### V1.0.0
 
 - This is a stable release of the Anchore Enterprise Helm chart and is recommended for production deployments.
 - Deploys Anchore Enterprise v4.9.3.
 - This version of the chart is required for the migration from the anchore-engine chart, and is a pre-requisite for Anchore Enterprise 5.0.
 
-### v0.x.x
+### V0.x.x
 
 - This is a pre-release version of the Anchore Enterprise Helm chart and is not recommended for production deployments.
