@@ -2325,6 +2325,21 @@ ui:
   ##
   serviceAccountName: ""
 
+  ## @param ui.scratchVolume.details [object] Details for the k8s volume to be created for Anchore UI scratch space
+  ## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  ##
+  scratchVolume:
+    details: {}
+      # ephemeral:
+      #   volumeClaimTemplate:
+      #     spec:
+      #       accessModes:
+      #       - ReadWriteOnce
+      #       resources:
+      #         requests:
+      #           storage: 100Gi
+      #       storageClassName: ""
+
 ##################################################
 ## @section Anchore Pre-Install Job Parameters
 ## Pre-install job uses a Helm pre-install hook
