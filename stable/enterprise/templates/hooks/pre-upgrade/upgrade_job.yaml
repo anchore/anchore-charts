@@ -103,6 +103,7 @@ spec:
           securityContext: {{ toYaml . | nindent 12 }}
         {{- end }}
           envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
           {{- if .Values.certStoreSecretName }}
             - name: certs
