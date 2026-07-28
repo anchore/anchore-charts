@@ -24,6 +24,8 @@ spec:
       {{- include "enterprise.common.podSpec" (merge (dict "component" $component) .) | indent 6 }}
       {{- include "enterprise.common.hostAliases" (merge (dict "component" $component) .) | nindent 6 }}
       volumes: {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+        - name: anchore-scratch
+          {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
         - name: anchore-license
           secret:
             {{- include "enterprise.licenseSecret" . | nindent 12 }}
@@ -41,10 +43,14 @@ spec:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
       {{- if or
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
       initContainers:
+        {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
+        {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
+        {{- end -}}
         {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
@@ -85,6 +91,8 @@ spec:
               protocol: TCP
               name: {{ $component | lower }}
           volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+            - name: anchore-scratch
+              mountPath: {{ .Values.scratchVolume.mountPath }}
             - name: anchore-license
               mountPath: /home/anchore/license.yaml
               subPath: license.yaml
