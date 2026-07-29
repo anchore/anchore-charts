@@ -405,7 +405,10 @@ tests:
           count: 1
           any: true
 
-  - it: should not render fixPermissionsInitContainer if use_volume isn't enabled
+  - it: should still render fixPermissionsInitContainer when fixGroupPermissions is set even if use_volume is disabled
+    # The scratch volume (and its mode-fixer) is now always present, so the mode-fixer is
+    # gated on scratchVolume.fixGroupPermissions + securityContext.fsGroup, independent of
+    # the reports storage volume (anchoreConfig.reports.use_volume).
     set:
       scratchVolume.fixGroupPermissions: true
       securityContext.fsGroup: 9999
@@ -414,8 +417,16 @@ tests:
       - reports_deployment.yaml
     documentIndex: 0
     asserts:
-      - notExists:
+      - contains:
           path: spec.template.spec.initContainers
+          content:
+            name: mode-fixer
+            volumeMounts:
+              - name: "anchore-scratch"
+                mountPath: /analysis_scratch
+            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
+          count: 1
+          any: true
 
   - it: should render component extraVolumes
     template: reports_deployment.yaml
@@ -611,7 +622,7 @@ tests:
                 matchLabelKeys:
                   - pod-template-hash
 
-  - it: should not render fixPermissionsInitContainer if use_volume isn't enabled but should still render the init container if cloudsql sidecar is enabled
+  - it: should render both fixPermissionsInitContainer and cloudsql init container when fixGroupPermissions and cloudsql sidecar are enabled even if use_volume is disabled
     set:
       scratchVolume.fixGroupPermissions: true
       securityContext.fsGroup: 9999
@@ -622,7 +633,7 @@ tests:
       - reports_deployment.yaml
     documentIndex: 0
     asserts:
-      - notContains:
+      - contains:
           path: spec.template.spec.initContainers
           content:
             name: mode-fixer
@@ -654,46 +665,6 @@ tests:
   - it: should render init container but not fix permissions when cloudsql sidecar is enabled but fixGroupPermissions and use_volume are disabled
     set:
       scratchVolume.fixGroupPermissions: false
-      anchoreConfig.reports.use_volume: false
-      cloudsql.enabled: true
-      cloudsql.useSideCar: true
-    templates:
-      - reports_deployment.yaml
-    documentIndex: 0
-    asserts:
-      - notContains:
-          path: spec.template.spec.initContainers
-          content:
-            name: mode-fixer
-            volumeMounts:
-              - name: "anchore-scratch"
-                mountPath: /analysis_scratch
-            command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 9999 /analysis_scratch ) ]
-          count: 1
-          any: true
-      - exists:
-          path: spec.template.spec.initContainers
-      - contains:
-          path: spec.template.spec.initContainers
-          content:
-            args:
-              - -instances==tcp:5432
-              - -use_http_health_check
-            command:
-              - /cloud_sql_proxy
-            image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
-            imagePullPolicy: IfNotPresent
-            name: cloudsql-proxy
-            ports:
-              - containerPort: 8090
-                name: cloudsql-proxy
-                protocol: TCP
-            restartPolicy: Always
-
-  - it: should render init container but not fix permissions when cloudsql sidecar and fixGroupPermissions are enabled but use_volume is disabled
-    set:
-      scratchVolume.fixGroupPermissions: true
-      securityContext.fsGroup: 9999
       anchoreConfig.reports.use_volume: false
       cloudsql.enabled: true
       cloudsql.useSideCar: true
@@ -810,10 +781,9 @@ tests:
                 protocol: TCP
             restartPolicy: Always
 
-  - it: should not render init container when cloudsql sidecar and use_volume are disabled but fixGroupPermissions is enabled
+  - it: should not render init container when fixGroupPermissions, cloudsql sidecar, and use_volume are all disabled
     set:
-      scratchVolume.fixGroupPermissions: true
-      securityContext.fsGroup: 9999
+      scratchVolume.fixGroupPermissions: false
       anchoreConfig.reports.use_volume: false
       cloudsql.enabled: false
       cloudsql.useSideCar: false

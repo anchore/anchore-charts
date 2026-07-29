@@ -1348,6 +1348,7 @@ To restore your deployment to using your previous driver configurations:
 | `ui.topologySpreadConstraints` | Topology spread constraints for Anchore UI pod assignment                                                                                                                    | `[]`                                     |
 | `ui.containerSecurityContext`  | Security context for the Anchore UI containers                                                                                                                               | `{}`                                     |
 | `ui.serviceAccountName`        | Service account name for Anchore UI pods                                                                                                                                     | `""`                                     |
+| `ui.scratchVolume.details`     | Details for the k8s volume to be created for Anchore UI scratch space                                                                                                        | `{}`                                     |
 
 ### Anchore Pre-Install Job Parameters
 
