@@ -73,8 +73,8 @@ spec:
           {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
           volumeMounts: {{- include "enterprise.common.writableVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
           {{- end }}
-          {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
+          {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
+          securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
           {{- end }}
           {{- with .Values.upgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
@@ -88,8 +88,8 @@ spec:
               while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
                 echo 'waiting for pods to go down...' && sleep 5;
               done
-        {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
+        {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
+          securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
         {{- with .Values.upgradeJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
@@ -105,8 +105,8 @@ spec:
         - name: upgrade-enterprise-db
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
+        {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
+          securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
           envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
