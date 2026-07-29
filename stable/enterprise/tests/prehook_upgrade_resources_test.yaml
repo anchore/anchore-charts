@@ -292,6 +292,41 @@ tests:
           pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_DB_USER\}\":\"\$\{ANCHORE_DB_PASSWORD\}\"@\"\$\{ANCHORE_DB_HOST\}\":\"\$\{ANCHORE_DB_PORT\}\"\/\"\$\{ANCHORE_DB_NAME\}\"\?sslmode\=verify-full\\&sslrootcert\=\/home\/anchore\/certs\/test-root\.crt upgrade --dontask;
         count: 1
 
+  - it: should mount certs into the wait-for-db init container when certStoreSecretName is set
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      certStoreSecretName: test-certs
+      upgradeJob.forceScaleDownDeployment: true
+    asserts:
+      # initContainers[0] is wait-for-db, which builds sslrootcert=/home/anchore/certs/<file>
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-db
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: certs
+            mountPath: /home/anchore/certs/
+            readOnly: true
+          count: 1
+
+  - it: should not mount certs into the wait-for-db init container when certStoreSecretName is unset
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.forceScaleDownDeployment: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-db
+      - notContains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: certs
+            mountPath: /home/anchore/certs/
+            readOnly: true
+
   - it: should render hook envFrom with hooks secret
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
     asserts:
