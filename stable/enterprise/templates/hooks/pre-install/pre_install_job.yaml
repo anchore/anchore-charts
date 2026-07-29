@@ -24,6 +24,9 @@ spec:
       {{- include "enterprise.common.hostAliases" (merge (dict "component" $component) .) | nindent 6 }}
       restartPolicy: Never
       volumes: {{- include "enterprise.common.extraVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+        - name: config-volume
+          configMap:
+            name: {{ template "enterprise.hooks.fullname" . }}-config
       {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
@@ -56,7 +59,15 @@ spec:
           securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
           envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
+          {{- $encKeyEnv := include "enterprise.dbEncryptionKeyEnv" . | trim }}
+          {{- if $encKeyEnv }}
+          env:
+            {{- $encKeyEnv | nindent 12 }}
+          {{- end }}
           volumeMounts: {{- include "enterprise.common.extraVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+            - name: config-volume
+              mountPath: /config/config.yaml
+              subPath: config.yaml
           {{- if .Values.certStoreSecretName }}
             - name: certs
               mountPath: /home/anchore/certs/
