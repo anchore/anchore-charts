@@ -596,6 +596,10 @@ should render proper initContainers:
       image: docker.io/anchore/enterprise:v6.0.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db
+      volumeMounts:
+        - mountPath: /config/config.yaml
+          name: config-volume
+          subPath: config.yaml
     - args:
         - |
           kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name=test-release-enterprise;

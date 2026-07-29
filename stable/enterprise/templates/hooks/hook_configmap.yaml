@@ -1,0 +1,30 @@
+{{- $component := "hooks" -}}
+{{/*
+A pre-install/pre-upgrade hook copy of the main Anchore config, rendered from the same
+source (enterprise.configData) as anchore_configmap.yaml so the two can never drift.
+
+The main configmap (enterprise.fullname) is an ordinary release resource, so during a
+`helm upgrade` it is not updated until after all pre-upgrade hooks have run. The upgrade
+jobs therefore cannot rely on it for fresh config (e.g. the credentials.database.encryption
+block). This hook configmap is created at hook-weight 0 — before the osaaMigrationJob
+(weight 1) and upgrade job (weight 3) — so those jobs mount the new config, not the old.
+
+Default hook-delete-policy (before-hook-creation) means it persists after the hook phase
+and is refreshed at the start of the next upgrade, so it is also present for the
+post-upgrade upgrade job.
+*/}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.hooks.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+
+data:
+  config.yaml: |
+{{ include "enterprise.configData" . | indent 4 }}

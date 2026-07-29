@@ -191,6 +191,19 @@ Allows sourcing of a specified file in the entrypoint of all containers when .Va
 {{- end }}
 
 {{/*
+Render the Anchore service config.yaml body. Shared by the main config configmap
+(anchore_configmap.yaml) and the pre-install/pre-upgrade hook config configmap
+(hooks/hook_configmap.yaml) so the config the hook jobs read can never drift from the
+config the long-running services read. Consumers indent the result under a
+`config.yaml: |` block scalar, e.g. {{ include "enterprise.configData" . | indent 4 }}.
+*/}}
+{{- define "enterprise.configData" -}}
+# Anchore Service Configuration File, mounted from a configmap
+#
+{{ if .Values.configOverride }}{{ tpl .Values.configOverride . }}{{ else }}{{ tpl (.Files.Get "files/default_config.yaml") . }}{{ end }}
+{{- end -}}
+
+{{/*
 Allows passing in a feature flag to the ui application on startup
 */}}
 {{- define "enterprise.ui.featureFlags" }}

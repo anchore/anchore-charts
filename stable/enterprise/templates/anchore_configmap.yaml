@@ -10,10 +10,4 @@ metadata:
 
 data:
   config.yaml: |
-    # Anchore Service Configuration File, mounted from a configmap
-    #
-{{- if .Values.configOverride }}
-{{ tpl .Values.configOverride . | indent 4 }}
-{{- else }}
-{{ tpl (.Files.Get "files/default_config.yaml") . | indent 4 }}
-{{- end }}
+{{ include "enterprise.configData" . | indent 4 }}
