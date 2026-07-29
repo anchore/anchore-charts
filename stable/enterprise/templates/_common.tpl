@@ -457,6 +457,7 @@ Setup the common anchore volume mounts
   mountPath: /scripts
 - name: anchore-scratch
   mountPath: {{ .Values.scratchVolume.mountPath }}
+{{- include "enterprise.common.writableVolumeMounts" (merge (dict "component" $component) .) }}
 {{- if .Values.certStoreSecretName }}
 - name: certs
   mountPath: /home/anchore/certs/
@@ -548,6 +549,7 @@ Setup the common anchore volumes
   secret:
     secretName: {{ .Values.cloudsql.serviceAccSecretName }}
 {{- end }}
+{{- include "enterprise.common.writableVolumes" (merge (dict "component" $component) .) }}
 {{- end -}}
 
 {{/*
@@ -626,6 +628,57 @@ When calling this template, .component can be included in the context for compon
   {{- toYaml $componentCtx.containerSecurityContext }}
 {{- else if .Values.containerSecurityContext }}
   {{- toYaml .Values.containerSecurityContext }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Return "true" when the effective container security context for the component enables
+readOnlyRootFilesystem. Mirrors enterprise.common.containerSecurityContext resolution:
+a component-level containerSecurityContext fully replaces the top-level one.
+Used to gate the writable emptyDir volumes Anchore requires on a read-only root filesystem.
+*/}}
+{{- define "enterprise.common.readOnlyRootFilesystem" -}}
+{{- $component := .component -}}
+{{- $componentCtx := index .Values (print $component) -}}
+{{- $ctx := dict -}}
+{{- if and $componentCtx $componentCtx.containerSecurityContext -}}
+  {{- $ctx = $componentCtx.containerSecurityContext -}}
+{{- else if .Values.containerSecurityContext -}}
+  {{- $ctx = .Values.containerSecurityContext -}}
+{{- end -}}
+{{- if $ctx.readOnlyRootFilesystem -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+Writable emptyDir volumes required when the container root filesystem is read-only.
+Anchore writes to these paths at runtime (verified against the running image):
+  /var/log/anchore        - logger touches a file here at import time (every service)
+  /tmp                    - file-logging base path (/tmp/anchore-logs) and tempfiles
+  {{ .Values.anchoreConfig.service_dir }}  - service_dir: host_id.json, default policy
+Rendered only when readOnlyRootFilesystem is enabled, so default installs are unchanged.
+*/}}
+{{- define "enterprise.common.writableVolumes" -}}
+{{- if eq (include "enterprise.common.readOnlyRootFilesystem" .) "true" }}
+- name: anchore-logs
+  emptyDir: {}
+- name: anchore-tmp
+  emptyDir: {}
+- name: anchore-service-dir
+  emptyDir: {}
+{{- end }}
+{{- end -}}
+
+{{/*
+Container mounts paired with enterprise.common.writableVolumes. Gated identically.
+*/}}
+{{- define "enterprise.common.writableVolumeMounts" -}}
+{{- if eq (include "enterprise.common.readOnlyRootFilesystem" .) "true" }}
+- name: anchore-logs
+  mountPath: /var/log/anchore
+- name: anchore-tmp
+  mountPath: /tmp
+- name: anchore-service-dir
+  mountPath: {{ .Values.anchoreConfig.service_dir }}
 {{- end }}
 {{- end -}}
 

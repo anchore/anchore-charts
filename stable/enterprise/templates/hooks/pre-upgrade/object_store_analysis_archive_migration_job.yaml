@@ -52,6 +52,9 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
         {{- end }}
+        {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+        {{- include "enterprise.common.writableVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+        {{- end }}
       initContainers:
         - name: scale-down-anchore
           image: {{ include "enterprise.kubectl.image" . | trim }}
@@ -94,6 +97,9 @@ spec:
                 echo "Database is not ready yet, sleeping 10 seconds..."
                 sleep 10
               done
+          {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+          volumeMounts: {{- include "enterprise.common.writableVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+          {{- end }}
           {{- with .Values.containerSecurityContext }}
           securityContext: {{ toYaml . | nindent 12 }}
           {{- end }}

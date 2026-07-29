@@ -34,6 +34,9 @@ spec:
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
       {{- end }}
+      {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+      {{- include "enterprise.common.writableVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+      {{- end }}
       {{- if or
             (and .Values.cloudsql.enabled .Values.cloudsql.useSideCar)
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
@@ -58,6 +61,9 @@ spec:
             - name: certs
               mountPath: /home/anchore/certs/
               readOnly: true
+          {{- end }}
+          {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+          {{- include "enterprise.common.writableVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
           {{- end }}
         {{- with .Values.preInstallJob.resources }}
           resources: {{- toYaml . | nindent 12 }}

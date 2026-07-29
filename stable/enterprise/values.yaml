@@ -210,6 +210,13 @@ securityContext:
 ## @param containerSecurityContext The securityContext for all containers
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ##
+## Setting `readOnlyRootFilesystem: true` is supported. When enabled, the chart automatically
+## mounts writable emptyDir volumes at the paths Anchore writes to at runtime
+## (/var/log/anchore, /tmp, and anchoreConfig.service_dir), in addition to the existing
+## scratch volume. No additional configuration is required.
+##   containerSecurityContext:
+##     readOnlyRootFilesystem: true
+##
 containerSecurityContext: {}
 
 ## @param probes.liveness.initialDelaySeconds Initial delay seconds for liveness probe

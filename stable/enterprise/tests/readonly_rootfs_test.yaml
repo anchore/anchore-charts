@@ -1,0 +1,150 @@
+suite: Read-only Root Filesystem Tests
+templates:
+  - api_deployment.yaml
+  - ui_deployment.yaml
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+  - envvars_configmap.yaml
+  - policybundle_configmap.yaml
+  - ui_secret.yaml
+  - ui_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
+
+tests:
+  # ---------- default (read-only OFF): writable volumes must NOT be added ----------
+  - it: does not add writable volumes to a service pod by default
+    template: api_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-logs
+            emptyDir: {}
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-logs
+            mountPath: /var/log/anchore
+
+  # ---------- read-only ON: service deployment ----------
+  - it: enforces readOnlyRootFilesystem and mounts writable volumes on a service pod
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      containerSecurityContext.readOnlyRootFilesystem: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-logs
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-tmp
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-service-dir
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-logs
+            mountPath: /var/log/anchore
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-tmp
+            mountPath: /tmp
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-service-dir
+            mountPath: /anchore_service
+
+  # ---------- read-only ON honors a custom service_dir ----------
+  - it: mounts the writable service-dir volume at the configured service_dir
+    template: api_deployment.yaml
+    documentIndex: 0
+    set:
+      containerSecurityContext.readOnlyRootFilesystem: true
+      anchoreConfig.service_dir: /custom_service_dir
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-service-dir
+            mountPath: /custom_service_dir
+
+  # ---------- read-only ON: UI deployment (node image, separate volume wiring) ----------
+  - it: mounts writable volumes and enforces readOnlyRootFilesystem on the UI pod
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      containerSecurityContext.readOnlyRootFilesystem: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-logs
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-logs
+            mountPath: /var/log/anchore
+
+  - it: does not add writable volumes to the UI pod by default
+    template: ui_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-logs
+            emptyDir: {}
+
+  # ---------- read-only ON: pre-upgrade hook job ----------
+  - it: mounts writable volumes on the pre-upgrade upgrade job under read-only
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      containerSecurityContext.readOnlyRootFilesystem: true
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-logs
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: anchore-service-dir
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: anchore-logs
+            mountPath: /var/log/anchore
