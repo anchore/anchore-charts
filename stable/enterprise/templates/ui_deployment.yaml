@@ -32,6 +32,9 @@ spec:
         - name: anchore-ui-config
           configMap:
             name: {{ template "enterprise.ui.fullname" . }}
+      {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+      {{- include "enterprise.common.writableVolumes" (merge (dict "component" $component) .) | nindent 8 }}
+      {{- end }}
       {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
@@ -103,6 +106,9 @@ spec:
             - name: certs
               mountPath: /home/anchore/certs/
               readOnly: true
+          {{- end }}
+          {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+          {{- include "enterprise.common.writableVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
           {{- end }}
           livenessProbe:
             tcpSocket:

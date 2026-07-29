@@ -1,0 +1,22 @@
+# Values for the read-only root filesystem CI test (.github/workflows/read-only-test.yaml).
+#
+# This file is intentionally NOT named "*-values.yaml" so chart-testing (ct) does not pick
+# it up as an install case; the read-only workflow references it explicitly.
+#
+# It points at the CloudNativePG Postgres the workflow provisions and turns on:
+#   - containerSecurityContext.readOnlyRootFilesystem: overrides the chart default (false) so
+#     the deploy is exercised on a read-only root filesystem.
+#   - anchoreConfig.metrics.enabled: exercises the /analysis_scratch/prometheus_multiproc write
+#     path, i.e. the exact failure customers hit on read-only rootfs.
+postgresql:
+  externalEndpoint: "anchore-db-rw.anchore.svc.cluster.local"
+  auth:
+    username: anchore
+    password: "anchore-postgres,123"
+    database: anchore
+anchoreConfig:
+  default_admin_password: foobar
+  metrics:
+    enabled: true
+containerSecurityContext:
+  readOnlyRootFilesystem: true
