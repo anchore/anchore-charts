@@ -1,0 +1,25 @@
+# Maps a product repo name (the `product` input the release automation
+# dispatches) to its target in this chart repo. Add an entry here to onboard a
+# new product to the automated chart-bump flow (.github/workflows/helm-pr.yaml).
+#
+#   chart:  REQUIRED — the chart directory under stable/. Often equals the
+#           product repo name, but not always: kubernetes-admission-controller
+#           publishes into stable/anchore-admission-controller.
+#   image:  OPTIONAL — the image name in the `anchore/<image>` reference inside
+#           the chart's values.yaml. Defaults to the product repo name, which is
+#           correct for every product today. Set it only if an image is ever
+#           named differently from its product repo.
+#
+# helm-pr.yaml fails loudly if a dispatched product is not listed here, so the
+# automation can never bump the wrong chart.
+
+k8s-inventory:
+  chart: k8s-inventory
+
+ecs-inventory:
+  chart: ecs-inventory
+
+kubernetes-admission-controller:
+  chart: anchore-admission-controller
+  # image defaults to kubernetes-admission-controller (the product name), which
+  # matches `anchore/kubernetes-admission-controller` in the chart's values.yaml.
