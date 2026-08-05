@@ -58,22 +58,41 @@ jobs:
         with:
           persist-credentials: false
 
+      # Pin yq rather than rely on whatever the runner image ships, so the bump
+      # is deterministic across runner-image changes.
+      - name: Install yq
+        env:
+          YQ_VERSION: v4.53.3
+          YQ_SHA256: fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+          echo "${YQ_SHA256}  /tmp/yq" | sha256sum -c -
+          sudo install -m 0755 /tmp/yq /usr/local/bin/yq
+          yq --version
+
       - name: Bump chart files
         id: bump
         run: |
           set -euo pipefail
           VERSION="${VERSION#v}"                 # tolerate a v-prefixed input
           MAP=".github/chart-bump-map.yaml"
+          command -v yq >/dev/null 2>&1 || { echo "yq not found on PATH" >&2; exit 1; }
+          [ -f "$MAP" ] || { echo "chart map not found: ${MAP}" >&2; exit 1; }
 
           # Resolve product repo -> chart dir (+ image name). The chart dir often
           # differs from the product repo (e.g. kubernetes-admission-controller ->
           # stable/anchore-admission-controller); the image name defaults to the
           # product name (correct for every product today, override via `image:`).
-          CHART=$(PRODUCT="$PRODUCT" yq -e '.[strenv(PRODUCT)].chart' "$MAP" 2>/dev/null) || {
-            echo "product '${PRODUCT}' is not in ${MAP} — add an entry to onboard it" >&2
+          # yq stderr is kept, so a YAML/parse error surfaces instead of looking
+          # like "not in map"; `// ""` turns an absent entry into an empty string
+          # (a clean "not mapped"), while a real yq error fails the step via set -e.
+          CHART=$(PRODUCT="$PRODUCT" yq -r '.[strenv(PRODUCT)].chart // ""' "$MAP")
+          if [ -z "$CHART" ]; then
+            echo "product '${PRODUCT}' has no chart mapping in ${MAP} — add an entry to onboard it" >&2
             exit 1
-          }
-          IMAGE=$(PRODUCT="$PRODUCT" yq '.[strenv(PRODUCT)].image // strenv(PRODUCT)' "$MAP")
+          fi
+          IMAGE=$(PRODUCT="$PRODUCT" yq -r '.[strenv(PRODUCT)].image // strenv(PRODUCT)' "$MAP")
 
           CHART_DIR="stable/${CHART}"
           CHART_FILE="${CHART_DIR}/Chart.yaml"
