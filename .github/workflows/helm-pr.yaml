@@ -83,12 +83,24 @@ jobs:
             exit 1
           fi
 
+          # Idempotency: if the chart is already at the requested appVersion, this
+          # GA was already processed — skip before mutating anything, so we don't
+          # open a redundant (chart-version-only) PR. yq reads the field directly,
+          # tolerating quoted or unquoted values.
+          if [ "$(yq '.appVersion' "$CHART_FILE")" = "$VERSION" ]; then
+            echo "chart ${CHART} already at appVersion ${VERSION}; nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           # Chart packaging version: patch-bump so chart-releaser publishes a new
-          # release on merge (^version: excludes apiVersion:/appVersion:).
-          CUR_CHART_VER=$(awk '/^version:/{print $2; exit}' "$CHART_FILE")
+          # release on merge. Read via yq (not awk $2) so a quoted version like
+          # `version: "3.25.2"` doesn't carry quotes into the numeric split. -e
+          # fails the step if the field is missing; -r forces raw scalar output.
+          CUR_CHART_VER=$(yq -e -r '.version' "$CHART_FILE")
           IFS=. read -r MA MI PA <<<"$CUR_CHART_VER"
-          if [ -z "${MA:-}" ] || [ -z "${MI:-}" ] || [ -z "${PA:-}" ]; then
-            echo "could not parse chart version '${CUR_CHART_VER}' from ${CHART_FILE}" >&2
+          if ! [ "${MA:-x}" -ge 0 ] 2>/dev/null || ! [ "${MI:-x}" -ge 0 ] 2>/dev/null || ! [ "${PA:-x}" -ge 0 ] 2>/dev/null; then
+            echo "could not parse a numeric chart version from '${CUR_CHART_VER}' in ${CHART_FILE}" >&2
             exit 1
           fi
           NEW_CHART_VER="${MA}.${MI}.$((PA + 1))"
@@ -125,6 +137,7 @@ jobs:
           grep -qE "${IMG}:v${VERSION}\"?|tag: \"v${VERSION}\"" "$VALUES" || { echo "image tag not updated in ${VALUES}" >&2; exit 1; }
 
           {
+            echo "changed=true"
             echo "chart=${CHART}"
             echo "chart_dir=${CHART_DIR}"
             echo "chart_version=${NEW_CHART_VER}"
@@ -135,17 +148,15 @@ jobs:
           git --no-pager diff -- "$CHART_FILE" "$VALUES"
 
       - name: Open pull request
+        # Skipped when the bump step found the chart already at the requested
+        # appVersion (changed=false). On the bump path there is always a diff.
+        if: steps.bump.outputs.changed == 'true'
         env:
           CHART_VERSION: ${{ steps.bump.outputs.chart_version }}
           APP_VERSION: ${{ steps.bump.outputs.version }}
         run: |
           set -euo pipefail
           BRANCH="auto/bump-${PRODUCT}-${APP_VERSION}"
-
-          if git diff --quiet; then
-            echo "no changes — ${PRODUCT} chart already at appVersion ${APP_VERSION}; nothing to open."
-            exit 0
-          fi
 
           # Match the PR author (github-actions[bot]) so the commit and PR are
           # attributed to the same identity.
