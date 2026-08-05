@@ -76,6 +76,10 @@ jobs:
         run: |
           set -euo pipefail
           VERSION="${VERSION#v}"                 # tolerate a v-prefixed input
+          # Validate dispatch inputs early — manual runs can send anything, and
+          # both get interpolated into branch names and sed/grep/awk patterns.
+          [[ "$PRODUCT" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "invalid product name: '${PRODUCT}'" >&2; exit 1; }
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "invalid version (expected N.N.N): '${VERSION}'" >&2; exit 1; }
           MAP=".github/chart-bump-map.yaml"
           command -v yq >/dev/null 2>&1 || { echo "yq not found on PATH" >&2; exit 1; }
           [ -f "$MAP" ] || { echo "chart map not found: ${MAP}" >&2; exit 1; }
@@ -187,6 +191,13 @@ jobs:
           # Feed the token to git via a credential helper (single-quoted: the
           # literal $GH_TOKEN is stored, the helper expands it from the env at
           # push time, so it never lands in argv or .git/config).
+          # Fetch the PR branch into its remote-tracking ref first: checkout does
+          # a shallow single-branch fetch, so without this --force-with-lease has
+          # no lease ref and a repeat run (branch already exists) is rejected as
+          # "stale info". Absent on the first run, hence `|| true`.
+          git -c credential.helper= \
+              -c credential.helper='!f() { echo username=x-access-token; echo "password=$GH_TOKEN"; }; f' \
+              fetch origin "+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}" || true
           git -c credential.helper= \
               -c credential.helper='!f() { echo username=x-access-token; echo "password=$GH_TOKEN"; }; f' \
               push --force-with-lease origin "$BRANCH"
