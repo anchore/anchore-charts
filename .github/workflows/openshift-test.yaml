@@ -156,10 +156,10 @@ jobs:
 
         if [[ "$CLUSTER_DISTRIBUTION" == "openshift" ]]; then
           echo "Installing enterprise on openshift"
-          helm install enterprise anchore/enterprise --namespace anchore-enterprise -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait
+          helm install enterprise anchore/enterprise --namespace anchore-enterprise -f stable/anchore-admission-controller/ci/enterprise-openshift-vals.yaml --wait --timeout 15m
         else
           echo "Installing enterprise"
-          helm install enterprise anchore/enterprise --namespace anchore-enterprise -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
+          helm install enterprise anchore/enterprise --namespace anchore-enterprise -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait --timeout 15m
         fi
         kubectl --namespace anchore get pods
         kubectl --namespace anchore-enterprise get pods

@@ -1522,6 +1522,14 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
   - **Bitnami PostgreSQL chart dependency removed.** You must provide your own PostgreSQL database (`postgresql.externalEndpoint` + auth, or existing secrets).
   - **Breaking values changes** — `helm install` template-fails on any removed or renamed key with a message pointing at its replacement. The authoritative list of guarded breaking changes is the `enterprise.deprecationChecks` helper in [`templates/_helpers.tpl`](templates/_helpers.tpl); install against this chart against a copy of your old values file to surface any required edits.
 
+### V3.25.x
+#### V3.25.0
+- Supports using secrets for access/secret keys in object store configs
+#### V3.25.1
+- Deploys Anchore Enterprise v5.27.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5271/) for more information.
+#### V3.25.2
+- Deploys Anchore Enterprise v5.27.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5272/) for more information.
+
 ### v3.24.x
   #### V3.24.0
     - Deploys Anchore Enterprise v5.27.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5270/) for more information.
