@@ -267,9 +267,9 @@ cloudsql:
 
 Anchore Enterprise can encrypt sensitive values stored in the database — registry credentials and other secrets. The values themselves are encrypted strings, so they stay encrypted on disk, in flight between services, and in memory until the point of use. This is broader than typical "encryption at rest", which only addresses the storage layer.
 
-**Encryption is opt-in** — by default `anchoreConfig.database.disable_db_encryption_unsafe` is `true`, meaning those values are stored as plaintext. This default exists so existing deployments are not broken by upgrades; new installs are encouraged to enable encryption.
+**Encryption is opt-in** — it is controlled entirely by whether you supply encryption keys. With no keys configured (the default) those values are stored as plaintext. This default exists so existing deployments are not broken by upgrades; new installs are encouraged to enable encryption.
 
-To enable encryption, set `disable_db_encryption_unsafe: false` and configure keys using one of the options below.
+To enable encryption, configure keys using one of the options below. Supplying the current key is all that is required to turn encryption on.
 
 Two encryption keys are supported: a `current` key used to encrypt new data, and an optional `previous` key retained so the application can decrypt older values during a rotation. **Order matters** — `current` is always read first.
 
@@ -301,7 +301,6 @@ stringData:
 ```yaml
 anchoreConfig:
   database:
-    disable_db_encryption_unsafe: false
     encryption:
       existingSecret: my-db-encryption-keys
       # override these if your secret uses different data keys
@@ -328,16 +327,13 @@ stringData:
 
 ```yaml
 useExistingSecrets: true
-anchoreConfig:
-  database:
-    disable_db_encryption_unsafe: false
 ```
 
-If you'd rather keep encryption keys in a *separate* secret even with `useExistingSecrets: true`, set `anchoreConfig.database.encryption.existingSecret` and the chart will source the keys from there instead.
+Adding `ANCHORE_DB_ENCRYPTION_KEY_CURRENT` to that secret is what turns encryption on. If you'd rather keep encryption keys in a *separate* secret even with `useExistingSecrets: true`, set `anchoreConfig.database.encryption.existingSecret` and the chart will source the keys from there instead.
 
 #### Leaving encryption disabled (default)
 
-By default `anchoreConfig.database.disable_db_encryption_unsafe` is `true`, which means Anchore Enterprise stores registry credentials (and other sensitive values) **as plaintext** in the database. In this mode the chart skips creating the encryption secret, omits the keys env vars from each deployment, and leaves the `keys:` list out of the rendered service config — so no key configuration is required.
+With no encryption keys configured (the default), Anchore Enterprise stores registry credentials (and other sensitive values) **as plaintext** in the database. In this mode the chart omits the key env vars from each deployment; the `keys:` list is still rendered in the service config but the unset key variables are dropped, leaving an empty keyring — so no key configuration is required.
 
 This is the default to keep existing deployments working through upgrades. For new installs, enabling encryption is recommended.
 
@@ -904,7 +900,6 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.database.dbConnectArgs`                                                                     | Set custom database connection args (legacy/psycopg2); If specified, this overrides other database connection settings                                                | `{}`                        |
 | `anchoreConfig.database.ngEngineArgs`                                                                      | Set custom database engine arguments (ng/psycopg3); If specified, this overrides pool_size and max_overflow for ng services                                           | `{}`                        |
 | `anchoreConfig.database.ngDbConnectArgs`                                                                   | Set custom database connection args (ng/psycopg3); If specified, this overrides other database connection settings for ng services                                    | `{}`                        |
-| `anchoreConfig.database.disable_db_encryption_unsafe`                                                      | Disable encryption of secrets within the database. UNSAFE.                                                                                                            | `true`                      |
 | `anchoreConfig.database.encryption.existingSecret`                                                         | Name of an existing Kubernetes secret containing the encryption keys. Ignored when useExistingSecrets=true (keys are then expected in the top-level existing secret). | `""`                        |
 | `anchoreConfig.database.encryption.currentKeySecretKey`                                                    | Key within the existing secret that holds the current encryption key.                                                                                                 | `currentKey`                |
 | `anchoreConfig.database.encryption.previousKeySecretKey`                                                   | Key within the existing secret that holds the previous encryption key.                                                                                                | `previousKey`               |

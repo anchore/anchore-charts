@@ -454,7 +454,6 @@ anchoreConfig:
   ## @param anchoreConfig.database.dbConnectArgs Set custom database connection args (legacy/psycopg2); If specified, this overrides other database connection settings
   ## @param anchoreConfig.database.ngEngineArgs Set custom database engine arguments (ng/psycopg3); If specified, this overrides pool_size and max_overflow for ng services
   ## @param anchoreConfig.database.ngDbConnectArgs Set custom database connection args (ng/psycopg3); If specified, this overrides other database connection settings for ng services
-  ## @param anchoreConfig.database.disable_db_encryption_unsafe Disable encryption of secrets within the database. UNSAFE.
   ## @param anchoreConfig.database.encryption.existingSecret Name of an existing Kubernetes secret containing the encryption keys. Ignored when useExistingSecrets=true (keys are then expected in the top-level existing secret).
   ## @param anchoreConfig.database.encryption.currentKeySecretKey Key within the existing secret that holds the current encryption key.
   ## @param anchoreConfig.database.encryption.previousKeySecretKey Key within the existing secret that holds the previous encryption key.
@@ -471,13 +470,13 @@ anchoreConfig:
     dbConnectArgs: {}
     ngEngineArgs: {}
     ngDbConnectArgs: {}
-    ## Encryption is opt-in. Set to false to encrypt sensitive values stored in the
-    ## database (registry credentials, etc.); you must then also supply keys via either
-    ## useExistingSecrets=true (keys live in the top-level existing secret as
-    ## ANCHORE_DB_ENCRYPTION_KEY_CURRENT / _PREVIOUS) or
-    ## anchoreConfig.database.encryption.existingSecret (separate user-managed secret).
-    ## When true (the default), those values are stored as plaintext.
-    disable_db_encryption_unsafe: true
+    ## Encryption of sensitive values stored in the database (registry credentials,
+    ## etc.) is opt-in and controlled entirely by whether encryption keys are
+    ## supplied. With no keys configured (the default) those values are stored as
+    ## plaintext. To opt in, provide keys via either:
+    ##   - anchoreConfig.database.encryption.existingSecret (separate user-managed secret), or
+    ##   - useExistingSecrets=true, with ANCHORE_DB_ENCRYPTION_KEY_CURRENT / _PREVIOUS
+    ##     set in the top-level existing secret.
     encryption:
       existingSecret: ""
       currentKeySecretKey: "currentKey"

@@ -1,5 +1,4 @@
 {{- include "enterprise.exclusionCheck" . -}}
-{{- include "enterprise.validateDbEncryption" . -}}
 kind: ConfigMap
 apiVersion: v1
 metadata:

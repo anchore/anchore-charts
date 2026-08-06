@@ -110,7 +110,14 @@ should render additional audit uris when additionalResourceURIs is set:
           database:
             encryption:
               provider: static
-              disable_db_encryption_unsafe: true
+              # At-rest encryption of sensitive DB columns is OFF unless keys are
+              # supplied. Leaving both slots unset (the default) leaves those columns as
+              # plaintext; populating the current key opts in. Unset/empty key env vars
+              # are dropped by the service, so listing them here is a no-op when no
+              # encryption secret is configured.
+              keys:
+                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
+                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
 
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
@@ -799,7 +806,14 @@ should render the configmaps:
           database:
             encryption:
               provider: static
-              disable_db_encryption_unsafe: true
+              # At-rest encryption of sensitive DB columns is OFF unless keys are
+              # supplied. Leaving both slots unset (the default) leaves those columns as
+              # plaintext; populating the current key opts in. Unset/empty key env vars
+              # are dropped by the service, so listing them here is a no-op when no
+              # encryption secret is configured.
+              keys:
+                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
+                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
 
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
@@ -1637,7 +1651,14 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
           database:
             encryption:
               provider: static
-              disable_db_encryption_unsafe: true
+              # At-rest encryption of sensitive DB columns is OFF unless keys are
+              # supplied. Leaving both slots unset (the default) leaves those columns as
+              # plaintext; populating the current key opts in. Unset/empty key env vars
+              # are dropped by the service, so listing them here is a no-op when no
+              # encryption secret is configured.
+              keys:
+                - ${ANCHORE_DB_ENCRYPTION_KEY_CURRENT}
+                - ${ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS}
 
             user: "${ANCHORE_DB_USER}"
             password: "${ANCHORE_DB_PASSWORD}"
