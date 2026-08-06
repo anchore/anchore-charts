@@ -110,32 +110,12 @@ jobs:
             exit 1
           fi
 
-          # Idempotency: if the chart is already at the requested appVersion, this
-          # GA was already processed — skip before mutating anything, so we don't
-          # open a redundant (chart-version-only) PR. -r forces raw scalar output
-          # so a quoted `appVersion: "1.8.4"` compares equal to an unquoted input.
-          if [ "$(yq -r '.appVersion' "$CHART_FILE")" = "$VERSION" ]; then
-            echo "chart ${CHART} already at appVersion ${VERSION}; nothing to do."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          # Chart packaging version: patch-bump so chart-releaser publishes a new
-          # release on merge. Read via yq (not awk $2) so a quoted version like
-          # `version: "3.25.2"` doesn't carry quotes into the numeric split. -e
-          # fails the step if the field is missing; -r forces raw scalar output.
-          CUR_CHART_VER=$(yq -e -r '.version' "$CHART_FILE")
-          IFS=. read -r MA MI PA <<<"$CUR_CHART_VER"
-          if ! [ "${MA:-x}" -ge 0 ] 2>/dev/null || ! [ "${MI:-x}" -ge 0 ] 2>/dev/null || ! [ "${PA:-x}" -ge 0 ] 2>/dev/null; then
-            echo "could not parse a numeric chart version from '${CUR_CHART_VER}' in ${CHART_FILE}" >&2
-            exit 1
-          fi
-          NEW_CHART_VER="${MA}.${MI}.$((PA + 1))"
-
-          # Chart.yaml: appVersion (force-quoted — valid whether the source was
-          # quoted or not) + the patch-bumped chart version.
+          # Apply the release-defining edits first: appVersion (force-quoted —
+          # valid whether the source was quoted or not) and the image tag. The
+          # chart `version` is patch-bumped later, only if these actually change
+          # something — so idempotency is based on real content, not appVersion
+          # alone (a values.yaml tag left out of sync by a manual edit is repaired).
           sed -i -E "s/^appVersion: .*/appVersion: \"${VERSION}\"/" "$CHART_FILE"
-          sed -i -E "s/^version: .*/version: ${NEW_CHART_VER}/" "$CHART_FILE"
 
           # values.yaml image tag. The image name is matched as a LITERAL substring
           # (index()/substr() in awk, grep -F for the verify) — never interpolated
@@ -168,12 +148,36 @@ jobs:
             exit 1
           fi
 
-          # Fail loudly if any substitution didn't land, rather than open a
-          # half-updated PR.
-          grep -q "appVersion: \"${VERSION}\"" "$CHART_FILE"  || { echo "appVersion not updated in ${CHART_FILE}" >&2; exit 1; }
-          grep -q "^version: ${NEW_CHART_VER}$" "$CHART_FILE"  || { echo "chart version not updated in ${CHART_FILE}" >&2; exit 1; }
+          # Fail loudly if either edit didn't land. Fixed-string (not regex), so
+          # the dots in a version aren't treated as wildcards.
+          grep -qF "appVersion: \"${VERSION}\"" "$CHART_FILE" || { echo "appVersion not updated in ${CHART_FILE}" >&2; exit 1; }
           grep -qF "${IMG}:v${VERSION}" "$VALUES" || grep -qF "tag: \"v${VERSION}\"" "$VALUES" \
             || { echo "image tag not updated in ${VALUES}" >&2; exit 1; }
+
+          # Idempotency: if appVersion + image were already in sync, those edits
+          # produced no diff — nothing to release, so don't bump the chart version
+          # or open a PR. Checked BEFORE the chart-version bump (which always
+          # diffs), and it covers values.yaml too (not just appVersion).
+          if git diff --quiet -- "$CHART_FILE" "$VALUES"; then
+            echo "chart ${CHART} already at ${VERSION} (appVersion + image tag in sync); nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Real change → patch-bump the chart `version` so chart-releaser
+          # publishes a new release on merge. Read via yq (not awk $2) so a quoted
+          # version like `version: "3.25.2"` doesn't carry quotes into the split;
+          # -e fails if the field is missing, -r forces raw scalar output.
+          CUR_CHART_VER=$(yq -e -r '.version' "$CHART_FILE")
+          IFS=. read -r MA MI PA <<<"$CUR_CHART_VER"
+          if ! [ "${MA:-x}" -ge 0 ] 2>/dev/null || ! [ "${MI:-x}" -ge 0 ] 2>/dev/null || ! [ "${PA:-x}" -ge 0 ] 2>/dev/null; then
+            echo "could not parse a numeric chart version from '${CUR_CHART_VER}' in ${CHART_FILE}" >&2
+            exit 1
+          fi
+          NEW_CHART_VER="${MA}.${MI}.$((PA + 1))"
+          sed -i -E "s/^version: .*/version: ${NEW_CHART_VER}/" "$CHART_FILE"
+          # Full-line fixed-string match — exact line, no regex wildcards.
+          grep -qxF "version: ${NEW_CHART_VER}" "$CHART_FILE" || { echo "chart version not updated in ${CHART_FILE}" >&2; exit 1; }
 
           {
             echo "changed=true"
