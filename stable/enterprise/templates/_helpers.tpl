@@ -641,34 +641,17 @@ Usage: {{ include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.
 {{- end -}}
 
 {{/*
-Fail fast if database secret encryption is enabled but no keys are configured.
-Encryption is considered enabled when anchoreConfig.database.disable_db_encryption_unsafe is false.
-When enabled, keys must be supplied via one of:
-  - anchoreConfig.database.encryption.existingSecret (separate user-managed secret)
-  - useExistingSecrets=true (keys expected in the top-level existing secret as
-    ANCHORE_DB_ENCRYPTION_KEY_CURRENT / _PREVIOUS env vars)
-Usage: {{ include "enterprise.validateDbEncryption" . }}
-*/}}
-{{- define "enterprise.validateDbEncryption" -}}
-{{- $enc := .Values.anchoreConfig.database.encryption -}}
-{{- if not .Values.anchoreConfig.database.disable_db_encryption_unsafe -}}
-{{- if and (not $enc.existingSecret) (not .Values.useExistingSecrets) -}}
-{{- fail (printf "Database secret encryption is enabled but no keys are configured. Set anchoreConfig.database.encryption.existingSecret (separate user-managed secret) or useExistingSecrets=true (with ANCHORE_DB_ENCRYPTION_KEY_CURRENT in your existing secret). To disable encryption, set anchoreConfig.database.disable_db_encryption_unsafe=true.") -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Render env vars sourced from the user-managed encryption secret.
 Order matters: ANCHORE_DB_ENCRYPTION_KEY_CURRENT is emitted first, then ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS.
 Only emits when encryption.existingSecret is set. When useExistingSecrets is true and
 existingSecret is not set, no env block is emitted - the keys are expected to flow
-through envFrom on the top-level existing secret.
+through envFrom on the top-level existing secret. When neither is configured, no keys
+are injected and the service stores those columns as plaintext (encryption is opt-in).
 Usage: {{ include "enterprise.dbEncryptionKeyEnv" . }}
 */}}
 {{- define "enterprise.dbEncryptionKeyEnv" -}}
 {{- $enc := .Values.anchoreConfig.database.encryption -}}
-{{- if and (not .Values.anchoreConfig.database.disable_db_encryption_unsafe) $enc.existingSecret }}
+{{- if $enc.existingSecret }}
 - name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
   valueFrom:
     secretKeyRef:
