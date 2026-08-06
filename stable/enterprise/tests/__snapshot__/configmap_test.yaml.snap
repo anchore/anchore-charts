@@ -1035,6 +1035,7 @@ should render the configmaps:
             max: 10
             min: 0
         log_level: 'http'
+        log_format: 'text'
         enrich_inventory_view: true
         enable_prometheus_metrics: false
         sso_auth_only: false
