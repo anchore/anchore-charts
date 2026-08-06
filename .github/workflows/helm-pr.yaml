@@ -7,12 +7,16 @@
 #
 # Inputs are exactly what the Lambda's dispatch sends:
 #   product  unqualified product repo name, e.g. "k8s-inventory"
-#            → chart is stable/<product>
 #   version  GA app version WITHOUT the v prefix, e.g. "1.8.5"
 #
-# What it changes in stable/<product>/:
+# The product repo -> chart directory is resolved via .github/chart-bump-map.yaml
+# — the chart dir often differs from the product name (e.g.
+# kubernetes-admission-controller -> stable/anchore-admission-controller). The
+# image name defaults to the product name; both are overridable in the map.
+#
+# What it changes in stable/<chart>/ (chart resolved from the map):
 #   Chart.yaml : appVersion → <version>; version (chart pkg) → patch-bumped
-#   values.yaml: the anchore/<product> image tag → v<version>
+#   values.yaml: the anchore/<image> image tag → v<version>
 # The chart `version` bump is required: chart-releaser won't publish a version
 # that already exists, so without it the eventual merge is a no-op.
 #
@@ -108,9 +112,9 @@ jobs:
 
           # Idempotency: if the chart is already at the requested appVersion, this
           # GA was already processed — skip before mutating anything, so we don't
-          # open a redundant (chart-version-only) PR. yq reads the field directly,
-          # tolerating quoted or unquoted values.
-          if [ "$(yq '.appVersion' "$CHART_FILE")" = "$VERSION" ]; then
+          # open a redundant (chart-version-only) PR. -r forces raw scalar output
+          # so a quoted `appVersion: "1.8.4"` compares equal to an unquoted input.
+          if [ "$(yq -r '.appVersion' "$CHART_FILE")" = "$VERSION" ]; then
             echo "chart ${CHART} already at appVersion ${VERSION}; nothing to do."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -133,22 +137,33 @@ jobs:
           sed -i -E "s/^appVersion: .*/appVersion: \"${VERSION}\"/" "$CHART_FILE"
           sed -i -E "s/^version: .*/version: ${NEW_CHART_VER}/" "$CHART_FILE"
 
-          # values.yaml image tag. Charts express the image two ways; both are
-          # anchored on `anchore/<image>` so sidecars (e.g. cfssl/cfssl) never
-          # match. Detect the layout and patch only that one.
+          # values.yaml image tag. The image name is matched as a LITERAL substring
+          # (index()/substr() in awk, grep -F for the verify) — never interpolated
+          # into a regex — so a metacharacter in a mapped image name can't match or
+          # replace the wrong line. Handles both layouts; anchored on the literal
+          # `anchore/<image>` so sidecars (e.g. cfssl/cfssl) are never touched.
           IMG="anchore/${IMAGE}"
-          if grep -qE "^[[:space:]]*repository:[[:space:]]*\"?.*${IMG}\"?[[:space:]]*$" "$VALUES"; then
-            FORMAT=structured   # `repository: "anchore/<image>"` then a `tag:` line
-            awk -v img="$IMG" -v ver="$VERSION" '
-              prev ~ ("repository:.*" img "\"?[[:space:]]*$") && $0 ~ /^[[:space:]]*tag:/ {
-                sub(/tag:.*/, "tag: \"v" ver "\"")
+          if awk -v img="$IMG" -v ver="v${VERSION}" '
+              function endswith(s, suf) { return length(s) >= length(suf) && substr(s, length(s) - length(suf) + 1) == suf }
+              # structured: a `repository:` line ending in the literal img, then a `tag:` line
+              prev ~ /^[[:space:]]*repository:/ && $0 ~ /^[[:space:]]*tag:/ {
+                r = prev; sub(/[[:space:]"]*$/, "", r)
+                if (endswith(r, img)) { sub(/tag:[[:space:]]*.*/, "tag: \"" ver "\""); changed = 1 }
+              }
+              # combined: an `image:` line containing the literal "<img>:"
+              $0 ~ /^[[:space:]]*image:/ {
+                i = index($0, img ":")
+                if (i > 0) {
+                  head = substr($0, 1, i - 1 + length(img)); tail = substr($0, i + length(img))
+                  sub(/^:[^"[:space:]]*/, ":" ver, tail); $0 = head tail; changed = 1
+                }
               }
               { print; prev = $0 }
-            ' "$VALUES" > "${VALUES}.tmp" && mv "${VALUES}.tmp" "$VALUES"
-          elif grep -qE "image:[[:space:]]*\"?[^\"]*${IMG}:" "$VALUES"; then
-            FORMAT=combined     # `image: "<registry?>/anchore/<image>:<tag>"`
-            sed -i -E "s|(image:[[:space:]]*\"?[^\"]*${IMG}):[^\"[:space:]]*|\1:v${VERSION}|" "$VALUES"
+              END { exit (changed ? 0 : 3) }
+            ' "$VALUES" > "${VALUES}.tmp"; then
+            mv "${VALUES}.tmp" "$VALUES"
           else
+            rm -f "${VALUES}.tmp"
             echo "no anchore/${IMAGE} image reference found in ${VALUES}" >&2
             exit 1
           fi
@@ -157,7 +172,8 @@ jobs:
           # half-updated PR.
           grep -q "appVersion: \"${VERSION}\"" "$CHART_FILE"  || { echo "appVersion not updated in ${CHART_FILE}" >&2; exit 1; }
           grep -q "^version: ${NEW_CHART_VER}$" "$CHART_FILE"  || { echo "chart version not updated in ${CHART_FILE}" >&2; exit 1; }
-          grep -qE "${IMG}:v${VERSION}\"?|tag: \"v${VERSION}\"" "$VALUES" || { echo "image tag not updated in ${VALUES}" >&2; exit 1; }
+          grep -qF "${IMG}:v${VERSION}" "$VALUES" || grep -qF "tag: \"v${VERSION}\"" "$VALUES" \
+            || { echo "image tag not updated in ${VALUES}" >&2; exit 1; }
 
           {
             echo "changed=true"
@@ -167,7 +183,7 @@ jobs:
             echo "version=${VERSION}"
           } >> "$GITHUB_OUTPUT"
 
-          echo "--- diff (${FORMAT} image) ---"
+          echo "--- diff ---"
           git --no-pager diff -- "$CHART_FILE" "$VALUES"
 
       - name: Open pull request
