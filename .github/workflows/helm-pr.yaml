@@ -122,24 +122,29 @@ jobs:
           # into a regex — so a metacharacter in a mapped image name can't match or
           # replace the wrong line. Handles both layouts; anchored on the literal
           # `anchore/<image>` so sidecars (e.g. cfssl/cfssl) are never touched.
+          #
+          # `found` means the reference was LOCATED, not that the tag changed: an
+          # already-at-target chart still matches, so awk exits 0 (not an error)
+          # and the git-diff idempotency check below decides whether to skip.
+          # Exit 3 means the reference is genuinely absent — a misconfigured chart.
           IMG="anchore/${IMAGE}"
           if awk -v img="$IMG" -v ver="v${VERSION}" '
               function endswith(s, suf) { return length(s) >= length(suf) && substr(s, length(s) - length(suf) + 1) == suf }
               # structured: a `repository:` line ending in the literal img, then a `tag:` line
               prev ~ /^[[:space:]]*repository:/ && $0 ~ /^[[:space:]]*tag:/ {
                 r = prev; sub(/[[:space:]"]*$/, "", r)
-                if (endswith(r, img)) { sub(/tag:[[:space:]]*.*/, "tag: \"" ver "\""); changed = 1 }
+                if (endswith(r, img)) { sub(/tag:[[:space:]]*.*/, "tag: \"" ver "\""); found = 1 }
               }
               # combined: an `image:` line containing the literal "<img>:"
               $0 ~ /^[[:space:]]*image:/ {
                 i = index($0, img ":")
                 if (i > 0) {
                   head = substr($0, 1, i - 1 + length(img)); tail = substr($0, i + length(img))
-                  sub(/^:[^"[:space:]]*/, ":" ver, tail); $0 = head tail; changed = 1
+                  sub(/^:[^"[:space:]]*/, ":" ver, tail); $0 = head tail; found = 1
                 }
               }
               { print; prev = $0 }
-              END { exit (changed ? 0 : 3) }
+              END { exit (found ? 0 : 3) }
             ' "$VALUES" > "${VALUES}.tmp"; then
             mv "${VALUES}.tmp" "$VALUES"
           else
@@ -197,16 +202,25 @@ jobs:
         env:
           CHART_VERSION: ${{ steps.bump.outputs.chart_version }}
           APP_VERSION: ${{ steps.bump.outputs.version }}
+          CHART_DIR: ${{ steps.bump.outputs.chart_dir }}
         run: |
           set -euo pipefail
           BRANCH="auto/bump-${PRODUCT}-${APP_VERSION}"
+          # The PRODUCT allowlist still permits values that are invalid git ref
+          # components (e.g. `..` or a `.lock` suffix); validate the computed
+          # branch so a bad ref fails clearly here, not with a cryptic checkout error.
+          git check-ref-format "refs/heads/${BRANCH}" \
+            || { echo "computed branch name is not a valid git ref: '${BRANCH}'" >&2; exit 1; }
 
           # Match the PR author (github-actions[bot]) so the commit and PR are
           # attributed to the same identity.
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git commit -asm "chore(${PRODUCT}): bump chart to ${APP_VERSION} (chart ${CHART_VERSION})"
+          # Stage ONLY the chart files this workflow edits — never `commit -a`, so
+          # an unrelated tracked change (a future step / runner) can't ride along.
+          git add "${CHART_DIR}/Chart.yaml" "${CHART_DIR}/values.yaml"
+          git commit -sm "chore(${PRODUCT}): bump chart to ${APP_VERSION} (chart ${CHART_VERSION})"
 
           # Feed the token to git via a credential helper (single-quoted: the
           # literal $GH_TOKEN is stored, the helper expands it from the env at
