@@ -12,6 +12,7 @@ logging:
   {{- include "enterprise.common.ngLogging" (merge (dict "service" "") .) | nindent 2 }}
 
 domains:
-  gc_retention_days: {{ .Values.anchoreConfig.domains.gc_retention_days }}
+  jobs:
+    gc_retention_days: {{ .Values.anchoreConfig.domains.jobs.gc_retention_days }}
 
 # Per-service overrides are in files/{component}/config_ng.yaml
