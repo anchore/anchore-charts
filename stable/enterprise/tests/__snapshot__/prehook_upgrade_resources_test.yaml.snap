@@ -593,7 +593,7 @@ should render proper initContainers:
       envFrom:
         - secretRef:
             name: test-release-enterprise-hooks
-      image: docker.io/anchore/enterprise:v6.0.0
+      image: docker.io/anchore/enterprise:v6.1.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db
       volumeMounts:
