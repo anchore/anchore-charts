@@ -280,14 +280,35 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 
 
 {{/*
-Return the proper protocol when Anchore SSL is enabled via the root server block
+Return the proper protocol (http/https) for a service, mirroring how Anchore Enterprise
+resolves SSL: per-service `anchoreConfig.<service>.server.ssl_enable` if set, otherwise the
+root `anchoreConfig.server.ssl_enable`. This keeps probe schemes, Service appProtocol, and
+inter-service URIs in lockstep with the ssl_enable that actually lands in each service's config.
+
+The target service can be identified two ways:
+  - `.anchoreService` — the anchoreConfig key directly (snake_case, e.g. "policy_engine", "apiext")
+  - `.component`      — the chart component (camelCase, e.g. "policyEngine", "api"), mapped below
+If neither is provided, or the service sets no ssl_enable of its own, it falls back to root.
+
+Usage:
+  {{- include "enterprise.setProtocol" . }}                                      # root only
+  {{- include "enterprise.setProtocol" (merge (dict "component" $component) .) }} # per-service (camelCase)
+  {{- include "enterprise.setProtocol" (merge (dict "anchoreService" "apiext") .) }} # per-service (config key)
 */}}
 {{- define "enterprise.setProtocol" -}}
-  {{- if .Values.anchoreConfig.server.ssl_enable }}
-{{- print "https" -}}
-  {{- else -}}
-{{- print "http" -}}
-  {{- end }}
+{{- $sslEnable := .Values.anchoreConfig.server.ssl_enable -}}
+{{- $svcKey := .anchoreService | default "" -}}
+{{- if and (not $svcKey) .component -}}
+{{- $componentToConfigKey := dict "api" "apiext" "catalog" "catalog" "policyEngine" "policy_engine" "simplequeue" "simplequeue" "analyzer" "analyzer" "notifications" "notifications" "reports" "reports" "reportsWorker" "reports_worker" "dataSyncer" "data_syncer" "componentCatalog" "component_catalog" -}}
+{{- $svcKey = index $componentToConfigKey .component | default "" -}}
+{{- end -}}
+{{- if $svcKey -}}
+{{- $svcCfg := index .Values.anchoreConfig $svcKey -}}
+{{- if and $svcCfg (kindIs "map" $svcCfg) $svcCfg.server (kindIs "map" $svcCfg.server) (hasKey $svcCfg.server "ssl_enable") -}}
+{{- $sslEnable = $svcCfg.server.ssl_enable -}}
+{{- end -}}
+{{- end -}}
+{{- if $sslEnable -}}https{{- else -}}http{{- end -}}
 {{- end -}}
 
 

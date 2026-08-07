@@ -66,7 +66,7 @@ spec:
             httpGet:
               path: /health
               port: {{ $portName }}
-              scheme: {{ include "enterprise.setProtocol" . | upper }}
+              scheme: {{ include "enterprise.setProtocol" (merge (dict "component" $component) .) | upper }}
             initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
             periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
@@ -76,7 +76,7 @@ spec:
             httpGet:
               path: /health
               port: {{ $portName }}
-              scheme: {{ include "enterprise.setProtocol" . | upper }}
+              scheme: {{ include "enterprise.setProtocol" (merge (dict "component" $component) .) | upper }}
             timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
             failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
@@ -104,7 +104,7 @@ spec:
       targetPort: {{ .Values.componentCatalog.service.port }}
       protocol: TCP
     {{- if .Values.setServiceAppProtocol }}
-      appProtocol: {{ include "enterprise.setProtocol" . }}
+      appProtocol: {{ include "enterprise.setProtocol" (merge (dict "component" $component) .) }}
     {{- end }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:

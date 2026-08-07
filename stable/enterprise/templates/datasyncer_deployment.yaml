@@ -80,7 +80,7 @@ spec:
       targetPort: {{ .Values.dataSyncer.service.port }}
       protocol: TCP
     {{- if .Values.setServiceAppProtocol }}
-      appProtocol: {{ include "enterprise.setProtocol" . }}
+      appProtocol: {{ include "enterprise.setProtocol" (merge (dict "component" $component) .) }}
     {{- end }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:
