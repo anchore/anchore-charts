@@ -2785,6 +2785,14 @@ osaaMigrationJob:
   ##
   enabled: false
 
+  ## @param osaaMigrationJob.rbacCreate Create RBAC resources (ServiceAccount, Role, RoleBinding) for the migration job's scale-down init container. Independent of upgradeJob.rbacCreate so the migration job works even when the upgrade job is disabled or uses the post-upgrade hook.
+  ##
+  rbacCreate: true
+
+  ## @param osaaMigrationJob.serviceAccountName Use an existing service account for the migration job instead of creating one. Takes precedence over rbacCreate. Must be able to list/get/watch pods and get/list/watch/update/patch deployments and patch deployments/scale.
+  ##
+  serviceAccountName: ""
+
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
   extraEnv: []

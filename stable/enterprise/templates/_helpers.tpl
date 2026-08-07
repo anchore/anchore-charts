@@ -268,8 +268,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- with (index .Values (print $component)).serviceAccountName }}
   {{- print . | trunc 63 | trimSuffix "-" -}}
 {{- else }}
-  {{- if and .Values.upgradeJob.rbacCreate (or (eq $component "upgradeJob") (eq $component "osaaMigrationJob") ) }}
+  {{- if and .Values.upgradeJob.rbacCreate (eq $component "upgradeJob") }}
     {{- printf "%s-%s" (include "enterprise.fullname" .) "upgrade-sa" -}}
+  {{- else if and .Values.osaaMigrationJob.rbacCreate (eq $component "osaaMigrationJob") }}
+    {{- printf "%s-%s" (include "enterprise.fullname" .) "osaa-migration-sa" -}}
   {{- else if .Values.serviceAccountName }}
     {{- print .Values.serviceAccountName | trunc 63 | trimSuffix "-" -}}
   {{- else if .Values.createServiceAccount }}

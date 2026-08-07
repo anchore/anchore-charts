@@ -98,7 +98,7 @@ migration job should match snapshot:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:
@@ -221,7 +221,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:
@@ -342,7 +342,7 @@ migration job should match snapshot analysisArchiveMigration to true:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:
@@ -462,7 +462,7 @@ migration job should match snapshot objectStoreMigration to true:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:

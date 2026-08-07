@@ -2,6 +2,7 @@ suite: PreHook Upgrade Job Tests
 templates:
   - templates/hooks/pre-upgrade/upgrade_job.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+  - templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
   - anchore_secret.yaml
   - templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
   - analyzer_deployment.yaml
@@ -622,7 +623,7 @@ tests:
           pattern:  migrate
         count: 1
 
-  - it: migration job should use the upgrade job's service account name
+  - it: migration job uses its own service account (decoupled from the upgrade job)
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
     set:
       osaaMigrationJob:
@@ -630,7 +631,70 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
-          value: test-release-enterprise-upgrade-sa
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration job still gets its service account when the upgrade job is disabled
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        enabled: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration job still gets its service account when the upgrade job uses the post-upgrade hook
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        usePostUpgradeHook: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration RBAC (SA + Role + RoleBinding) renders even when the upgrade job is disabled
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 3
+      - documentIndex: 0
+        isKind:
+          of: ServiceAccount
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration RBAC renders even when the upgrade job uses the post-upgrade hook
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        usePostUpgradeHook: true
+    asserts:
+      - hasDocuments:
+          count: 3
+
+  - it: migration RBAC is not created when disabled or when bringing your own SA
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: false
+    asserts:
+      - hasDocuments:
+          count: 0
 
   - it: migration job should use the component level service account name if set
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
