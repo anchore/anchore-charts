@@ -35,7 +35,7 @@ spec:
             defaultMode: 0755
         - name: config-volume
           configMap:
-            name: {{ template "enterprise.fullname" . }}
+            name: {{ template "enterprise.hooks.fullname" . }}-config
         - name: dest-config
           configMap:
             name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
@@ -119,7 +119,7 @@ spec:
         {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
           securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
-          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           {{- if and .Values.osaaMigrationJob.objectStoreMigration.run .Values.osaaMigrationJob.objectStoreMigration.object_store }}
             {{- include "enterprise.migrationStorageCredentialEnv" (dict "storeConfig" .Values.osaaMigrationJob.objectStoreMigration.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 12 }}

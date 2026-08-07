@@ -22,10 +22,8 @@ migration job should match snapshot:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -107,7 +105,7 @@ migration job should match snapshot:
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
@@ -144,10 +142,8 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -229,7 +225,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
@@ -264,10 +260,8 @@ migration job should match snapshot analysisArchiveMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -349,7 +343,7 @@ migration job should match snapshot analysisArchiveMigration to true:
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
@@ -383,10 +377,8 @@ migration job should match snapshot objectStoreMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -468,7 +460,7 @@ migration job should match snapshot objectStoreMigration to true:
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
