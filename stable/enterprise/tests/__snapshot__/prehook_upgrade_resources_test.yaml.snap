@@ -64,7 +64,7 @@ migration job should match snapshot:
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -87,6 +87,9 @@ migration job should match snapshot:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -184,7 +187,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -207,6 +210,9 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -302,7 +308,7 @@ migration job should match snapshot analysisArchiveMigration to true:
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -325,6 +331,9 @@ migration job should match snapshot analysisArchiveMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -419,7 +428,7 @@ migration job should match snapshot objectStoreMigration to true:
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -442,6 +451,9 @@ migration job should match snapshot objectStoreMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -572,7 +584,7 @@ should render proper initContainers:
           while true; do
             CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
             err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-            if [[ !$err ]]; then
+            if [[ -z "$err" ]]; then
               echo "Database is ready"
               exit 0
             fi

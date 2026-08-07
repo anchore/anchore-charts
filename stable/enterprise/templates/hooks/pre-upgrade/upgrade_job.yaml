@@ -83,7 +83,7 @@ spec:
               {{- end }}
               {{- end }}
                 err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-                if [[ !$err ]]; then
+                if [[ -z "$err" ]]; then
                   echo "Database is ready"
                   exit 0
                 fi
