@@ -301,7 +301,7 @@ Usage:
 {{- $sslEnable := .Values.anchoreConfig.server.ssl_enable -}}
 {{- $svcKey := .anchoreService | default "" -}}
 {{- if and (not $svcKey) .component -}}
-{{- $componentToConfigKey := dict "api" "apiext" "catalog" "catalog" "policyEngine" "policy_engine" "simplequeue" "simplequeue" "analyzer" "analyzer" "notifications" "notifications" "reports" "reports" "reportsWorker" "reports_worker" "dataSyncer" "data_syncer" "componentCatalog" "component_catalog" -}}
+{{- $componentToConfigKey := dict "api" "apiext" "catalog" "catalog" "policyEngine" "policy_engine" "simpleQueue" "simplequeue" "analyzer" "analyzer" "notifications" "notifications" "reports" "reports" "reportsWorker" "reports_worker" "dataSyncer" "data_syncer" "componentCatalog" "component_catalog" -}}
 {{- $svcKey = index $componentToConfigKey .component | default "" -}}
 {{- end -}}
 {{- if $svcKey -}}

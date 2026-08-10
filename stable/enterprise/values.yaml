@@ -2861,10 +2861,6 @@ osaaMigrationJob:
   ##
   containerSecurityContext: {}
 
-  ## @param osaaMigrationJob.serviceAccountName Service account name for Anchore Object Store and Analysis Archive migration job pods
-  ##
-  serviceAccountName: ""
-
   ## @param osaaMigrationJob.analysisArchiveMigration.bucket The name of the bucket to migrate
   ## @param osaaMigrationJob.analysisArchiveMigration.run Run the analysis_archive migration
   ## @param osaaMigrationJob.analysisArchiveMigration.mode The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'.

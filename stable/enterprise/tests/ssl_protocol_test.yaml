@@ -59,6 +59,17 @@ tests:
           path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
           value: HTTP
 
+  # simpleQueue's camelCase component name must map to the "simplequeue" config key
+  - it: simplequeue probe scheme follows its per-service override (camelCase->config-key map)
+    template: templates/simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.simplequeue.server.ssl_enable: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTPS
+
   # ---- ng service (component_catalog): probe scheme AND rendered config agree ----
   - it: ng probe scheme follows the per-service override
     template: templates/componentcatalog_deployment.yaml
