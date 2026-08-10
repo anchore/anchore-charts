@@ -54,11 +54,8 @@ spec:
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
-          {{- $encKeyEnv := include "enterprise.dbEncryptionKeyEnv" . | trim }}
-          {{- if $encKeyEnv }}
-          env:
-            {{- $encKeyEnv | nindent 12 }}
-          {{- end }}
+          {{- /* environment carries extraEnv (the only cred source under injectSecretsViaEnv) and the DB encryption key */}}
+          env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           volumeMounts:
             - name: config-volume
               mountPath: /config/config.yaml

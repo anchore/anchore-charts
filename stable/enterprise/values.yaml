@@ -2352,6 +2352,10 @@ ui:
 ## to verify database connectivity before install
 ##################################################
 preInstallJob:
+  ## @param preInstallJob.enabled Run the pre-install hook job that verifies database connectivity before installing. Disable if the chart cannot construct the DB connection (e.g. credentials injected as files rather than env vars via a Vault sidecar).
+  ##
+  enabled: true
+
   ## @param preInstallJob.resources Resource requests and limits for the Anchore pre-install job
   ##
   resources: {}
