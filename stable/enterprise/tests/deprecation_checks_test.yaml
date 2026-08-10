@@ -52,7 +52,7 @@ tests:
 
   - it: renders normally when no deprecated values are set
     set:
-      postgresql.externalEndpoint: db.example.com:5432
+      postgresql.externalEndpoint: db.example.com
       postgresql.auth.username: anchore
       postgresql.auth.password: anchore
       postgresql.auth.database: anchore

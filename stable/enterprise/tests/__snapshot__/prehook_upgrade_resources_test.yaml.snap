@@ -116,6 +116,8 @@ migration job should match snapshot:
               path: dest-config.yaml
           name: test-release-enterprise-999-osaa-migration-job
         name: dest-config
+      - emptyDir: {}
+        name: anchore-scratch
 migration job should match snapshot analysisArchiveMigration and objectStoreMigration to true:
   1: |
     containers:
@@ -239,6 +241,8 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
               path: dest-config.yaml
           name: test-release-enterprise-999-osaa-migration-job
         name: dest-config
+      - emptyDir: {}
+        name: anchore-scratch
 migration job should match snapshot analysisArchiveMigration to true:
   1: |
     containers:
@@ -360,6 +364,8 @@ migration job should match snapshot analysisArchiveMigration to true:
               path: dest-config.yaml
           name: test-release-enterprise-999-osaa-migration-job
         name: dest-config
+      - emptyDir: {}
+        name: anchore-scratch
 migration job should match snapshot objectStoreMigration to true:
   1: |
     containers:
@@ -480,6 +486,8 @@ migration job should match snapshot objectStoreMigration to true:
               path: dest-config.yaml
           name: test-release-enterprise-999-osaa-migration-job
         name: dest-config
+      - emptyDir: {}
+        name: anchore-scratch
 rbac should match snapshot:
   1: |
     apiVersion: v1

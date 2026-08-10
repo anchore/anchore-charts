@@ -53,13 +53,33 @@ jobs:
         if [[ -n "$changed" ]]; then
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
         fi
-        if echo "$changed" | grep -qE 'anchore-admission-controller|k8s-inventory'; then
+        # A chart whose ONLY changed files live under its ci/ directory (test values)
+        # doesn't need a chart version bump and shouldn't be linted/installed as if the
+        # chart itself changed. Collect those names so later steps can exclude them.
+        ci_only=""
+        enterprise_required=false
+        while IFS= read -r cp; do
+          [[ -z "$cp" ]] && continue
+          name="$(basename "$cp")"; path="stable/$name"
+          files=$(git diff --name-only "origin/$BASE_REF...HEAD" -- "$path/")
+          if [[ -n "$files" && -z "$(echo "$files" | grep -v "^$path/ci/" || true)" ]]; then
+            echo "Skipping '$name': only ci/ files changed (no chart version bump required)"
+            ci_only+="$name,"
+          elif [[ "$name" == "anchore-admission-controller" || "$name" == "k8s-inventory" ]]; then
+            enterprise_required=true
+          fi
+        done <<< "$changed"
+        echo "CI_ONLY_EXCLUDED=${ci_only%,}" >> "$GITHUB_OUTPUT"
+        if [[ "$enterprise_required" == true ]]; then
           echo "ENTERPRISE_REQUIRED=true" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Run chart-testing (lint)
       id: lint
-      run: ct lint --config 'ct-config.yaml' --target-branch "$BASE_REF"
+      run: |
+        EXCLUDE=""
+        [[ -n "${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}" ]] && EXCLUDE="--excluded-charts ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}"
+        ct lint --config 'ct-config.yaml' --target-branch "$BASE_REF" $EXCLUDE
       env:
         BASE_REF: ${{ github.event.pull_request.base.ref }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
@@ -224,16 +244,28 @@ jobs:
             popd
           fi
         done
+        CI_ONLY="${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}"
         changed_charts=$(ct list-changed --config ct-config.yaml --target-branch "$TARGET_BRANCH")
+        # Drop charts whose only changes were under ci/ — nothing to install-test for them.
+        # (ct install recomputes changes internally, so they must also be passed via
+        # --excluded-charts below to actually keep ct from installing them.)
+        if [[ -n "$CI_ONLY" ]]; then
+          IFS=',' read -ra _cio <<< "$CI_ONLY"
+          for n in "${_cio[@]}"; do changed_charts=$(echo "$changed_charts" | grep -vE "(^|/)$n$" || true); done
+        fi
         other_charts=$(echo "$changed_charts" | grep -v 'anchore-admission-controller' || true)
         if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
           if [[ -n "$other_charts" ]]; then
             echo "Admission controller changed alongside other charts. Installing other charts first, then admission controller."
-            ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --excluded-charts "anchore-admission-controller" --helm-extra-args "--timeout 600s"
+            excl="anchore-admission-controller"; [[ -n "$CI_ONLY" ]] && excl="$excl,$CI_ONLY"
+            ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --excluded-charts "$excl" --helm-extra-args "--timeout 600s"
           fi
           ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
+        elif [[ -n "$changed_charts" ]]; then
+          excl_arg=""; [[ -n "$CI_ONLY" ]] && excl_arg="--excluded-charts $CI_ONLY"
+          ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" $excl_arg --helm-extra-args "--timeout 600s"
         else
-          ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --helm-extra-args "--timeout 600s"
+          echo "No installable chart changes (only ci/ files changed) — skipping ct install."
         fi
       env:
         KUBECONFIG: ./tmp/kubeconfig

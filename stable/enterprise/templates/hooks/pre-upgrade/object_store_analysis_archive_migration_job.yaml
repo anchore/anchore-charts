@@ -42,6 +42,16 @@ spec:
             items:
             - key: "config.yaml"
               path: "dest-config.yaml"
+        # enterprise.common.volumeMounts (used by the migrate container below) always
+        # mounts anchore-scratch, so the volume must be defined here or the pod spec is
+        # invalid. osaaMigrationJob has no per-component scratchVolume, so honor the
+        # global scratchVolume.details and otherwise default to an emptyDir.
+        - name: anchore-scratch
+          {{- if .Values.scratchVolume.details }}
+          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
+          {{- else }}
+          {{- "emptyDir: {}" | nindent 10 }}
+          {{- end }}
         {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
