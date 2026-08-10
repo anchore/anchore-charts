@@ -516,12 +516,13 @@ anchoreConfig:
 
   ## Feature-domain configuration for NG services
   ## @param anchoreConfig.domains.catalog [object] Catalog domain configuration
-  ## @param anchoreConfig.domains.jobs.gc_retention_days Number of days to retain completed job records
+  ## @param anchoreConfig.domains.gc.job_framework_audit_retention_days Retention window (days) for finished job-framework audit records
   ## @param anchoreConfig.domains.jobs.pool_size Number of concurrent job workers
   domains:
     catalog: {}
+    gc:
+      job_framework_audit_retention_days: 14
     jobs:
-      gc_retention_days: 14
       pool_size: 8
 
   apiext:
