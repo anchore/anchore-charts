@@ -22,10 +22,8 @@ migration job should match snapshot:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -66,7 +64,7 @@ migration job should match snapshot:
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -89,6 +87,9 @@ migration job should match snapshot:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -97,7 +98,7 @@ migration job should match snapshot:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:
@@ -107,7 +108,7 @@ migration job should match snapshot:
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
@@ -144,10 +145,8 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -188,7 +187,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -211,6 +210,9 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -219,7 +221,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:
@@ -229,7 +231,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
@@ -264,10 +266,8 @@ migration job should match snapshot analysisArchiveMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -308,7 +308,7 @@ migration job should match snapshot analysisArchiveMigration to true:
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -331,6 +331,9 @@ migration job should match snapshot analysisArchiveMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -339,7 +342,7 @@ migration job should match snapshot analysisArchiveMigration to true:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:
@@ -349,7 +352,7 @@ migration job should match snapshot analysisArchiveMigration to true:
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
@@ -383,10 +386,8 @@ migration job should match snapshot objectStoreMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
-          - configMapRef:
-              name: test-release-enterprise-config-env-vars
           - secretRef:
-              name: test-release-enterprise
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: migrate-analysis-archive
@@ -427,7 +428,7 @@ migration job should match snapshot objectStoreMigration to true:
             while true; do
               CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
               err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ !$err ]]; then
+              if [[ -z "$err" ]]; then
                 echo "Database is ready"
                 exit 0
               fi
@@ -450,6 +451,9 @@ migration job should match snapshot objectStoreMigration to true:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
         imagePullPolicy: IfNotPresent
         name: wait-for-db
@@ -458,7 +462,7 @@ migration job should match snapshot objectStoreMigration to true:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    serviceAccountName: test-release-enterprise-upgrade-sa
+    serviceAccountName: test-release-enterprise-osaa-migration-sa
     volumes:
       - name: anchore-license
         secret:
@@ -468,7 +472,7 @@ migration job should match snapshot objectStoreMigration to true:
           name: test-release-enterprise-scripts
         name: anchore-scripts
       - configMap:
-          name: test-release-enterprise
+          name: test-release-enterprise-hooks-config
         name: config-volume
       - configMap:
           items:
@@ -580,7 +584,7 @@ should render proper initContainers:
           while true; do
             CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
             err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-            if [[ !$err ]]; then
+            if [[ -z "$err" ]]; then
               echo "Database is ready"
               exit 0
             fi
@@ -590,10 +594,23 @@ should render proper initContainers:
       command:
         - /bin/bash
         - -c
+      env:
+        - name: foo
+          value: bar
+        - name: bar
+          value: baz
+        - name: ANCHORE_ENDPOINT_HOSTNAME
+          value: test-release-enterprise-999-upgrade.test-namespace.svc.cluster.local
+        - name: ANCHORE_PORT
+          value: "null"
+        - name: ANCHORE_HOST_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       envFrom:
         - secretRef:
             name: test-release-enterprise-hooks
-      image: docker.io/anchore/enterprise:v6.0.0
+      image: docker.io/anchore/enterprise:v6.1.0
       imagePullPolicy: IfNotPresent
       name: wait-for-db
       volumeMounts:

@@ -908,7 +908,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.object_store.direct_access`                                                                 | Directly access object store from each service instead of routing via Catalog                                                                                         | `false`                     |
 | `anchoreConfig.extendedConfig`                                                                             | appends additional configs to the root config for enterprise. This should only be used with guidance from Anchore CS.                                                 | `{}`                        |
 | `anchoreConfig.domains.catalog`                                                                            | Catalog domain configuration                                                                                                                                          | `{}`                        |
-| `anchoreConfig.domains.jobs.gc_retention_days`                                                             | Number of days to retain completed job records                                                                                                                        | `14`                        |
+| `anchoreConfig.domains.gc.job_framework_audit_retention_days`                                              | Retention window (days) for finished job-framework audit records                                                                                                      | `14`                        |
 | `anchoreConfig.domains.jobs.pool_size`                                                                     | Number of concurrent job workers                                                                                                                                      | `8`                         |
 | `anchoreConfig.apiext.extendedConfig`                                                                      | appends additional configs to the apiext service's Anchore configs                                                                                                    | `{}`                        |
 | `anchoreConfig.apiext.server`                                                                              | Server configuration for the service                                                                                                                                  | `{}`                        |
@@ -1512,15 +1512,39 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-### v4.0.0
+### v4.1.0
 
-> :exclamation: **New installs only.** Anchore Enterprise v6.0.0 does not support upgrading from any previous version.
+> :exclamation: **Major breaking upgrade from the 3.x chart series.** This is the first 4.x chart release that supports upgrading from the 3.x charts (Anchore Enterprise 5.x → 6.x). Review the breaking changes below and update your values file **before** upgrading. The chart validates your values on `helm install`/`upgrade` and template-fails with a single message listing **every** offending value and its replacement, so you can fix them all in one pass.
+
+- Deploys Anchore Enterprise v6.1.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/610/) for more information.
+
+#### Breaking changes (3.x → 4.x)
+
+| Area | What changed | Action required |
+| --- | --- | --- |
+| Database | The bundled Bitnami PostgreSQL subchart was removed. Anchore Enterprise 6.x requires **PostgreSQL 17+ with the `pg_cron` extension**. | Provide your own database via `postgresql.externalEndpoint` + `postgresql.auth.*` (or existing secrets). See [External Database Requirements](#external-database-requirements). |
+| Database | `postgresql.chartEnabled` removed. | Remove it and configure an external endpoint (above). |
+| Internal TLS | `anchoreConfig.internalServicesSSL` removed. | Configure via `anchoreConfig.server` (root) or per-service `anchoreConfig.<service>.server` using `ssl_enable`, `ssl_cert`, `ssl_chain`, `ssl_key`. |
+| External endpoints | The nested `anchoreConfig.<service>.external` object (e.g. `apiext.external`) was removed. | Use the flat `external_hostname`, `external_port`, and `external_tls` fields on the service. |
+| Authentication | `anchoreConfig.user_authentication.oauth.enabled` removed. | Remove it — OAuth/token authentication is always enabled. |
+| Authentication | `anchoreConfig.user_authentication.hashed_passwords` removed. | Remove it. |
+| Webhooks | `anchoreConfig.webhooks` removed. | Remove it. |
+| Jobs | `upgradeJob.kubectlImage` and `osaaMigrationJob.kubectlImage` removed. | Use the top-level `kubectlImage`. |
+| Engine migration | `startMigrationPod`, `migrationPodImage`, and `migrationAnchoreEngineSecretName` removed. | Remove them — the anchore-engine → Anchore Enterprise database migration pod no longer exists. |
+| Analyzer | `anchoreConfig.analyzer.configFile.retrieve_files` renamed. | Use `anchoreConfig.analyzer.configFile.file_contents`. |
+| Runtime inventory | `anchoreConfig.catalog.runtime_inventory.image_ttl_days: -1` is no longer valid. | Set `inventory_ttl_days` to a value > 1 and use `inventory_ingest_overwrite: true`. |
+| Config via `extraEnv` | Many `ANCHORE_*` settings can no longer be supplied through `extraEnv` (global or per-service). | Set them directly in the values file. The failure message names each offending env var and the exact values path to use. |
+
+> :bulb: The authoritative, always-current list of guarded breaking changes is the `enterprise.deprecationChecks` helper in [`templates/_helpers.tpl`](templates/_helpers.tpl). To surface everything you need to change, run a `helm template`/`helm install --dry-run` against a copy of your existing values file and read the aggregated error.
+
+### v4.0.x
+
+> :exclamation: **New installs only.** Chart v4.0.x (Anchore Enterprise v6.0.x) does not support upgrading from any previous version. Upgrading from the 3.x chart series is supported starting in chart **v4.1.0**.
 
   #### V4.0.0
-  - Deploys Anchore Enterprise v6.0.0.
-  - **PostgreSQL 17+ with the `pg_cron` extension is now required.** See [External Database Requirements](#external-database-requirements).
-  - **Bitnami PostgreSQL chart dependency removed.** You must provide your own PostgreSQL database (`postgresql.externalEndpoint` + auth, or existing secrets).
-  - **Breaking values changes** — `helm install` template-fails on any removed or renamed key with a message pointing at its replacement. The authoritative list of guarded breaking changes is the `enterprise.deprecationChecks` helper in [`templates/_helpers.tpl`](templates/_helpers.tpl); install against this chart against a copy of your old values file to surface any required edits.
+  - Deploys Anchore Enterprise v6.0.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/600/) for more information.
+  #### V4.0.1
+  - Deploys Anchore Enterprise v6.0.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/601/) for more information.
 
 ### V3.25.x
 #### V3.25.0

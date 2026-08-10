@@ -593,8 +593,13 @@ Common server blocks — merges component-level overrides on top of anchoreConfi
 {{- $anchoreService := .anchoreService -}}
 {{- $server := deepCopy .Values.anchoreConfig.server -}}
 {{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
-{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
-  {{- $server = merge $serviceCfg.server $server -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server (kindIs "map" $serviceCfg.server) -}}
+  {{/* deepCopy the service block: merge mutates its destination in place, and $serviceCfg.server is a live .Values reference that must not be mutated (it would leak across templates). */}}
+  {{- $server = merge (deepCopy $serviceCfg.server) $server -}}
+  {{/* merge/mergo skips zero-value sources, so a per-service ssl_enable=false would be clobbered by a truthy root. Set it explicitly, presence-based, to mirror the app's per-service-then-root resolution. */}}
+  {{- if hasKey $serviceCfg.server "ssl_enable" -}}
+    {{- $_ := set $server "ssl_enable" $serviceCfg.server.ssl_enable -}}
+  {{- end -}}
 {{- end -}}
 {{- toYaml $server | nindent 6 }}
 {{- end -}}
@@ -610,8 +615,13 @@ Usage: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (di
 {{- $server := .Values.anchoreConfig.server -}}
 {{- $ngFields := dict "process_worker_count" ($server.process_worker_count) "timeout_keep_alive" ($server.timeout_keep_alive) "ssl_cert" ($server.ssl_cert) "ssl_chain" ($server.ssl_chain) "ssl_enable" ($server.ssl_enable) "ssl_key" ($server.ssl_key) }}
 {{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
-{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server -}}
-  {{- $ngFields = merge $serviceCfg.server $ngFields -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server (kindIs "map" $serviceCfg.server) -}}
+  {{/* deepCopy the service block so merge does not mutate the live .Values reference in place. */}}
+  {{- $ngFields = merge (deepCopy $serviceCfg.server) $ngFields -}}
+  {{/* set ssl_enable explicitly (presence-based) since merge/mergo would drop a per-service false. */}}
+  {{- if hasKey $serviceCfg.server "ssl_enable" -}}
+    {{- $_ := set $ngFields "ssl_enable" $serviceCfg.server.ssl_enable -}}
+  {{- end -}}
 {{- end -}}
 {{- toYaml $ngFields | nindent 6 }}
 {{- end -}}

@@ -1,4 +1,8 @@
 {{- $component := "smokeTest" -}}
+{{- /* The smoke test reads ANCHORE_ADMIN_PASSWORD from the chart-managed secret via secretKeyRef.
+       Under injectSecretsViaEnv the chart creates no such secret (creds are injected externally),
+       so skip the test in that mode rather than reference a non-existent secret. */ -}}
+{{- if not .Values.injectSecretsViaEnv -}}
 
 apiVersion: v1
 kind: Pod
@@ -76,3 +80,4 @@ spec:
 
       volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 6 }}
   restartPolicy: Never
+{{- end -}}

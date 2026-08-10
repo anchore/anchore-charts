@@ -516,12 +516,13 @@ anchoreConfig:
 
   ## Feature-domain configuration for NG services
   ## @param anchoreConfig.domains.catalog [object] Catalog domain configuration
-  ## @param anchoreConfig.domains.jobs.gc_retention_days Number of days to retain completed job records
+  ## @param anchoreConfig.domains.gc.job_framework_audit_retention_days Retention window (days) for finished job-framework audit records
   ## @param anchoreConfig.domains.jobs.pool_size Number of concurrent job workers
   domains:
     catalog: {}
+    gc:
+      job_framework_audit_retention_days: 14
     jobs:
-      gc_retention_days: 14
       pool_size: 8
 
   apiext:
@@ -2352,6 +2353,10 @@ ui:
 ## to verify database connectivity before install
 ##################################################
 preInstallJob:
+  ## @param preInstallJob.enabled Run the pre-install hook job that verifies database connectivity before installing. Disable if the chart cannot construct the DB connection (e.g. credentials injected as files rather than env vars via a Vault sidecar).
+  ##
+  enabled: true
+
   ## @param preInstallJob.resources Resource requests and limits for the Anchore pre-install job
   ##
   resources: {}
@@ -2785,6 +2790,14 @@ osaaMigrationJob:
   ##
   enabled: false
 
+  ## @param osaaMigrationJob.rbacCreate Create RBAC resources (ServiceAccount, Role, RoleBinding) for the migration job's scale-down init container. Independent of upgradeJob.rbacCreate so the migration job works even when the upgrade job is disabled or uses the post-upgrade hook.
+  ##
+  rbacCreate: true
+
+  ## @param osaaMigrationJob.serviceAccountName Use an existing service account for the migration job instead of creating one. Takes precedence over rbacCreate. Must be able to list/get/watch pods and get/list/watch/update/patch deployments and patch deployments/scale.
+  ##
+  serviceAccountName: ""
+
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
   extraEnv: []
@@ -2852,10 +2865,6 @@ osaaMigrationJob:
   ## @param osaaMigrationJob.containerSecurityContext Security context for the Anchore Object Store and Analysis Archive migration job containers
   ##
   containerSecurityContext: {}
-
-  ## @param osaaMigrationJob.serviceAccountName Service account name for Anchore Object Store and Analysis Archive migration job pods
-  ##
-  serviceAccountName: ""
 
   ## @param osaaMigrationJob.analysisArchiveMigration.bucket The name of the bucket to migrate
   ## @param osaaMigrationJob.analysisArchiveMigration.run Run the analysis_archive migration

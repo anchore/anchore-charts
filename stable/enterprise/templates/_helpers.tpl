@@ -90,35 +90,79 @@ data:
 
 {{/*
 Consolidated deprecation and validation checks for breaking changes.
+
+Every check APPENDS to a $errors list rather than failing immediately, so a single
+render collects ALL violations (removed/renamed value keys and removed extraEnv vars)
+and fails once with the complete, numbered list. This lets a user fix everything in
+one pass instead of re-running install/upgrade and discovering issues one at a time.
 */}}
 {{- define "enterprise.deprecationChecks" -}}
+{{- $errors := list -}}
 {{/* postgresql.chartEnabled was removed when the Bitnami PostgreSQL dependency was dropped */}}
-{{- if hasKey .Values.postgresql "chartEnabled" }}
-  {{- fail "postgresql.chartEnabled is no longer supported. The Bitnami PostgreSQL dependency has been removed. Please remove postgresql.chartEnabled from your values and configure postgresql.externalEndpoint, postgresql.auth.username, postgresql.auth.password, and postgresql.auth.database (or use existing secrets) to connect to your own PostgreSQL database." }}
-{{- end }}
+{{- if hasKey .Values.postgresql "chartEnabled" -}}
+{{- $errors = append $errors "postgresql.chartEnabled is no longer supported. The Bitnami PostgreSQL dependency has been removed. Please remove postgresql.chartEnabled from your values and configure postgresql.externalEndpoint, postgresql.auth.username, postgresql.auth.password, and postgresql.auth.database (or use existing secrets) to connect to your own PostgreSQL database." -}}
+{{- end -}}
 {{/* retrieve_files was renamed to file_contents */}}
-{{- if hasKey .Values.anchoreConfig.analyzer.configFile "retrieve_files" }}
-  {{- fail "anchoreConfig.analyzer.configFile.retrieve_files is no longer supported. This key has been renamed to `file_contents`. Please update your values file to use `anchoreConfig.analyzer.configFile.file_contents` instead." }}
-{{- end }}
+{{- if hasKey .Values.anchoreConfig.analyzer.configFile "retrieve_files" -}}
+{{- $errors = append $errors "anchoreConfig.analyzer.configFile.retrieve_files is no longer supported. This key has been renamed to `file_contents`. Please update your values file to use `anchoreConfig.analyzer.configFile.file_contents` instead." -}}
+{{- end -}}
 {{/* image_ttl_days=-1 is no longer valid */}}
-{{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" }}
-  {{- fail "The value `-1` is no longer valid for `anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days` must be set to a value >1." }}
-{{- end }}
+{{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" -}}
+{{- $errors = append $errors "The value `-1` is no longer valid for `anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days` must be set to a value >1." -}}
+{{- end -}}
 {{/* internalServicesSSL has been removed — SSL is now configured via the server block at the root or per-service level */}}
-{{- if hasKey .Values.anchoreConfig "internalServicesSSL" }}
-  {{- fail "anchoreConfig.internalServicesSSL is no longer supported. SSL is now configured via `anchoreConfig.server` (root level) or per-service `anchoreConfig.<service>.server` blocks using `ssl_enable`, `ssl_cert`, `ssl_chain`, and `ssl_key`." }}
-{{- end }}
+{{- if hasKey .Values.anchoreConfig "internalServicesSSL" -}}
+{{- $errors = append $errors "anchoreConfig.internalServicesSSL is no longer supported. SSL is now configured via `anchoreConfig.server` (root level) or per-service `anchoreConfig.<service>.server` blocks using `ssl_enable`, `ssl_cert`, `ssl_chain`, and `ssl_key`." -}}
+{{- end -}}
 {{/* apiext.external has been replaced by per-service external_hostname, external_port, external_tls */}}
-{{- if hasKey .Values.anchoreConfig.apiext "external" }}
-  {{- fail "anchoreConfig.apiext.external is no longer supported. Use `anchoreConfig.apiext.external_hostname`, `anchoreConfig.apiext.external_port`, and `anchoreConfig.apiext.external_tls` instead." }}
-{{- end }}
+{{- if hasKey .Values.anchoreConfig.apiext "external" -}}
+{{- $errors = append $errors "anchoreConfig.apiext.external is no longer supported. Use `anchoreConfig.apiext.external_hostname`, `anchoreConfig.apiext.external_port`, and `anchoreConfig.apiext.external_tls` instead." -}}
+{{- end -}}
+{{/* user_authentication.oauth.enabled was removed — OAuth/token auth is always enabled */}}
+{{- if ne (dig "user_authentication" "oauth" "enabled" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
+{{- $errors = append $errors "anchoreConfig.user_authentication.oauth.enabled is no longer supported. OAuth/token authentication is always enabled. Please remove it from your values file." -}}
+{{- end -}}
+{{/* user_authentication.hashed_passwords was removed */}}
+{{- if ne (dig "user_authentication" "hashed_passwords" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
+{{- $errors = append $errors "anchoreConfig.user_authentication.hashed_passwords is no longer supported. Please remove it from your values file." -}}
+{{- end -}}
+{{/* anchoreConfig.webhooks was removed */}}
+{{- if hasKey .Values.anchoreConfig "webhooks" -}}
+{{- $errors = append $errors "anchoreConfig.webhooks is no longer supported. Please remove it from your values file." -}}
+{{- end -}}
 {{/* per-job kubectlImage has been replaced by the top-level kubectlImage */}}
-{{- if hasKey .Values.upgradeJob "kubectlImage" }}
-  {{- fail "upgradeJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." }}
-{{- end }}
-{{- if hasKey .Values.osaaMigrationJob "kubectlImage" }}
-  {{- fail "osaaMigrationJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." }}
-{{- end }}
+{{- if hasKey .Values.upgradeJob "kubectlImage" -}}
+{{- $errors = append $errors "upgradeJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." -}}
+{{- end -}}
+{{- if hasKey .Values.osaaMigrationJob "kubectlImage" -}}
+{{- $errors = append $errors "osaaMigrationJob.kubectlImage is no longer supported. Use the top-level `kubectlImage` instead." -}}
+{{- end -}}
+{{/* the anchore-engine -> Anchore Enterprise DB migration pod was removed */}}
+{{- if hasKey .Values "startMigrationPod" -}}
+{{- $errors = append $errors "startMigrationPod is no longer supported. The anchore-engine to Anchore Enterprise database migration pod has been removed. Please remove it from your values file." -}}
+{{- end -}}
+{{- if hasKey .Values "migrationPodImage" -}}
+{{- $errors = append $errors "migrationPodImage is no longer supported. The anchore-engine to Anchore Enterprise database migration pod has been removed. Please remove it from your values file." -}}
+{{- end -}}
+{{- if hasKey .Values "migrationAnchoreEngineSecretName" -}}
+{{- $errors = append $errors "migrationAnchoreEngineSecretName is no longer supported. The anchore-engine to Anchore Enterprise database migration pod has been removed. Please remove it from your values file." -}}
+{{- end -}}
+{{/* removed env vars set via extraEnv (global or per-component) — collected as newline-joined string */}}
+{{- $envErrors := include "enterprise.envVarExtraEnvCheck" . -}}
+{{- range $line := splitList "\n" $envErrors -}}
+{{- if $line -}}
+{{- $errors = append $errors $line -}}
+{{- end -}}
+{{- end -}}
+{{/* fail once with the complete list */}}
+{{- if gt (len $errors) 0 -}}
+{{- $msg := "\nThe following values are no longer supported and must be updated before installing or upgrading Anchore Enterprise:\n" -}}
+{{- range $i, $e := $errors -}}
+{{- $msg = printf "%s\n  %d) %s" $msg (add1 $i) $e -}}
+{{- end -}}
+{{- $msg = printf "%s\n\nPlease update your values file to resolve all of the above, then try again.\n" $msg -}}
+{{- fail $msg -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -224,8 +268,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- with (index .Values (print $component)).serviceAccountName }}
   {{- print . | trunc 63 | trimSuffix "-" -}}
 {{- else }}
-  {{- if and .Values.upgradeJob.rbacCreate (or (eq $component "upgradeJob") (eq $component "osaaMigrationJob") ) }}
+  {{- if and .Values.upgradeJob.rbacCreate (eq $component "upgradeJob") }}
     {{- printf "%s-%s" (include "enterprise.fullname" .) "upgrade-sa" -}}
+  {{- else if and .Values.osaaMigrationJob.rbacCreate (eq $component "osaaMigrationJob") }}
+    {{- printf "%s-%s" (include "enterprise.fullname" .) "osaa-migration-sa" -}}
   {{- else if .Values.serviceAccountName }}
     {{- print .Values.serviceAccountName | trunc 63 | trimSuffix "-" -}}
   {{- else if .Values.createServiceAccount }}
@@ -236,14 +282,35 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 
 
 {{/*
-Return the proper protocol when Anchore SSL is enabled via the root server block
+Return the proper protocol (http/https) for a service, mirroring how Anchore Enterprise
+resolves SSL: per-service `anchoreConfig.<service>.server.ssl_enable` if set, otherwise the
+root `anchoreConfig.server.ssl_enable`. This keeps probe schemes, Service appProtocol, and
+inter-service URIs in lockstep with the ssl_enable that actually lands in each service's config.
+
+The target service can be identified two ways:
+  - `.anchoreService` — the anchoreConfig key directly (snake_case, e.g. "policy_engine", "apiext")
+  - `.component`      — the chart component (camelCase, e.g. "policyEngine", "api"), mapped below
+If neither is provided, or the service sets no ssl_enable of its own, it falls back to root.
+
+Usage:
+  {{- include "enterprise.setProtocol" . }}                                      # root only
+  {{- include "enterprise.setProtocol" (merge (dict "component" $component) .) }} # per-service (camelCase)
+  {{- include "enterprise.setProtocol" (merge (dict "anchoreService" "apiext") .) }} # per-service (config key)
 */}}
 {{- define "enterprise.setProtocol" -}}
-  {{- if .Values.anchoreConfig.server.ssl_enable }}
-{{- print "https" -}}
-  {{- else -}}
-{{- print "http" -}}
-  {{- end }}
+{{- $sslEnable := .Values.anchoreConfig.server.ssl_enable -}}
+{{- $svcKey := .anchoreService | default "" -}}
+{{- if and (not $svcKey) .component -}}
+{{- $componentToConfigKey := dict "api" "apiext" "catalog" "catalog" "policyEngine" "policy_engine" "simpleQueue" "simplequeue" "analyzer" "analyzer" "notifications" "notifications" "reports" "reports" "reportsWorker" "reports_worker" "dataSyncer" "data_syncer" "componentCatalog" "component_catalog" -}}
+{{- $svcKey = index $componentToConfigKey .component | default "" -}}
+{{- end -}}
+{{- if $svcKey -}}
+{{- $svcCfg := index .Values.anchoreConfig $svcKey -}}
+{{- if and $svcCfg (kindIs "map" $svcCfg) $svcCfg.server (kindIs "map" $svcCfg.server) (hasKey $svcCfg.server "ssl_enable") -}}
+{{- $sslEnable = $svcCfg.server.ssl_enable -}}
+{{- end -}}
+{{- end -}}
+{{- if $sslEnable -}}https{{- else -}}http{{- end -}}
 {{- end -}}
 
 
@@ -340,7 +407,6 @@ Checks if the feeds chart was previously disabled or if any of the drivers were 
 */}}
 {{- define "enterprise.exclusionCheck" -}}
 {{- include "enterprise.deprecationChecks" . }}
-{{- include "enterprise.envVarExtraEnvCheck" . }}
 
 {{ $notify := false }}
 
@@ -419,6 +485,7 @@ These env vars have been replaced by direct values file configuration and should
 Each entry in the list is a dict with "name" (env var name), "values_path" (replacement values path), and "components" (list of component keys to check).
 */}}
 {{- define "enterprise.envVarExtraEnvCheck" -}}
+{{- $errors := list -}}
 {{- $disallowedEnvVars := list
   (dict "name" "ANCHORE_LAYER_CACHE_ENABLED" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
   (dict "name" "ANCHORE_LAYER_CACHE_SIZE_GB" "values_path" "anchoreConfig.analyzer.layer_cache_max_gigabytes" "components" (list "analyzer"))
@@ -461,7 +528,7 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
 {{- range $disallowed := $disallowedEnvVars }}
   {{- range $envEntry := $.Values.extraEnv }}
     {{- if eq $envEntry.name $disallowed.name }}
-      {{- fail (printf "The environment variable '%s' is no longer supported via extraEnv. Please remove it from extraEnv and set it directly via the values file at '%s'." $disallowed.name $disallowed.values_path) }}
+      {{- $errors = append $errors (printf "The environment variable '%s' is no longer supported via extraEnv. Please remove it from extraEnv and set it directly via the values file at '%s'." $disallowed.name $disallowed.values_path) }}
     {{- end }}
   {{- end }}
   {{- range $comp := $disallowed.components }}
@@ -470,13 +537,14 @@ Each entry in the list is a dict with "name" (env var name), "values_path" (repl
       {{- if $compValues.extraEnv }}
         {{- range $envEntry := $compValues.extraEnv }}
           {{- if eq $envEntry.name $disallowed.name }}
-            {{- fail (printf "The environment variable '%s' is no longer supported via %s.extraEnv. Please remove it and set it directly via the values file at '%s'." $disallowed.name $comp $disallowed.values_path) }}
+            {{- $errors = append $errors (printf "The environment variable '%s' is no longer supported via %s.extraEnv. Please remove it and set it directly via the values file at '%s'." $disallowed.name $comp $disallowed.values_path) }}
           {{- end }}
         {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}
+{{- join "\n" $errors -}}
 {{- end -}}
 
 {{/*
