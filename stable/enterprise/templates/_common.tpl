@@ -137,6 +137,13 @@ Setup the common docker-entrypoint command for all Anchore Enterprise containers
 Setup the common envFrom configs
 */}}
 {{- define "enterprise.common.envFrom" -}}
+{{- if and .hook .Values.injectSecretsViaEnv -}}
+{{/* For hooks the configMapRef is skipped, and secretRefs are skipped whenever
+     secrets are injected via env. That leaves nothing to emit, so output an
+     explicit empty list to keep call sites' `envFrom:` a valid list rather than
+     rendering `envFrom: null`. */}}
+[]
+{{- else -}}
 {{- if not .hook }}
 - configMapRef:
     name: {{ .Release.Name }}-enterprise-config-env-vars
@@ -153,6 +160,7 @@ Setup the common envFrom configs
     name: {{ template "enterprise.fullname" . }}
   {{- end }}
 {{- end }}
+{{- end -}}
 {{- end -}}
 
 
