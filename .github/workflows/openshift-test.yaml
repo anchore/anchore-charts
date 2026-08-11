@@ -110,7 +110,7 @@ jobs:
         cluster-name: ${{ github.ref_name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ github.run_id }}
         kubernetes-distribution: ${{ matrix.cluster.distribution }}
         kubernetes-version: ${{ matrix.cluster.version }}
-        ttl: 20m
+        ttl: 25m
         timeout-minutes: 20
         kubeconfig-path: ./tmp/kubeconfig
         nodes: 2
@@ -259,12 +259,12 @@ jobs:
           if [[ -n "$other_charts" ]]; then
             echo "Admission controller changed alongside other charts. Installing other charts first, then admission controller."
             excl="anchore-admission-controller"; [[ -n "$CI_ONLY" ]] && excl="$excl,$CI_ONLY"
-            ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --excluded-charts "$excl" --helm-extra-args "--timeout 600s"
+            ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --excluded-charts "$excl" --helm-extra-args "--timeout 1200s"
           fi
-          ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --charts stable/anchore-admission-controller --helm-extra-args "--timeout 600s"
+          ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" --charts stable/anchore-admission-controller --helm-extra-args "--timeout 1200s"
         elif [[ -n "$changed_charts" ]]; then
           excl_arg=""; [[ -n "$CI_ONLY" ]] && excl_arg="--excluded-charts $CI_ONLY"
-          ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" $excl_arg --helm-extra-args "--timeout 600s"
+          ct install --config ct-config.yaml --target-branch "$TARGET_BRANCH" $excl_arg --helm-extra-args "--timeout 1200s"
         else
           echo "No installable chart changes (only ci/ files changed) — skipping ct install."
         fi

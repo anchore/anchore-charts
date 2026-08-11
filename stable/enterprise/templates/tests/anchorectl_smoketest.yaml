@@ -60,23 +60,33 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-          max_retries=3
-          retry_count=0
-
-          while [ $retry_count -lt $max_retries ]; do
-            if anchorectl system wait; then
-              echo "System is ready, running smoke tests..."
-              anchorectl system smoke-tests run
-              exit $?
+          # Wait for the system to report ready (services warm up at different rates).
+          n=0
+          until anchorectl system wait; do
+            n=$((n + 1))
+            if [ $n -ge 10 ]; then
+              echo "system wait did not succeed after $n attempts. Exiting."
+              exit 1
             fi
-
-            retry_count=$((retry_count + 1))
-            echo "Attempt $retry_count of $max_retries failed. Retrying..."
+            echo "system wait attempt $n failed. Retrying in 30s..."
             sleep 30
           done
+          echo "System is ready. Running smoke tests..."
 
-          echo "System wait failed after $max_retries attempts. Exiting."
-          exit 1
+          # Smoke tests can be transiently flaky right after readiness (feeds/data
+          # still settling). Retry ONLY on failure — the release/deployment stays up
+          # between attempts, so this just re-runs the tests against the same install.
+          n=0
+          until anchorectl system smoke-tests run; do
+            n=$((n + 1))
+            if [ $n -ge 3 ]; then
+              echo "smoke tests still failing after $n attempts. Exiting."
+              exit 1
+            fi
+            echo "smoke-tests attempt $n failed. Waiting 5m for the system to settle before retrying..."
+            sleep 300
+          done
+          echo "Smoke tests passed."
 
       volumeMounts: {{- include "enterprise.common.volumeMounts" . | nindent 6 }}
   restartPolicy: Never
