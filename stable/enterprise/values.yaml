@@ -21,11 +21,11 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise@sha256:e3c3cda136515a6c4ec56cad7b3ce6070cc138796ec12498f44151807b2d8aff
+image: docker.io/anchore/enterprise@sha256:ed9943194287f4240f6f2c81efcec417ba9bae206cc15aba4ae348007e066614
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v5.27.2"
-  # digest: sha256:e3c3cda136515a6c4ec56cad7b3ce6070cc138796ec12498f44151807b2d8aff
+  # tag: "v6.1.0"
+  # digest: sha256:ed9943194287f4240f6f2c81efcec417ba9bae206cc15aba4ae348007e066614
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -61,18 +61,6 @@ imageCredentials:
   username: ""
   password: ""
   email: ""
-
-## @param startMigrationPod Spin up a Database migration pod to help migrate the database to the new schema
-##
-startMigrationPod: false
-
-## @param migrationPodImage The image reference to the migration pod
-##
-migrationPodImage: docker.io/postgres:13-bookworm
-
-## @param migrationAnchoreEngineSecretName The name of the secret that has anchore-engine values
-##
-migrationAnchoreEngineSecretName: my-engine-anchore-engine
 
 ## @param createServiceAccount Create a service account for Anchore pods. The service account name will be the fullname of the release.
 ## @param serviceAccountName Name of a service account used to run all Anchore pods. If createServiceAccount is true and this is empty, the chart-generated name is used.
@@ -222,6 +210,13 @@ securityContext:
 ## @param containerSecurityContext The securityContext for all containers
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ##
+## Setting `readOnlyRootFilesystem: true` is supported. When enabled, the chart automatically
+## mounts writable emptyDir volumes at the paths Anchore writes to at runtime
+## (/var/log/anchore, /tmp, and anchoreConfig.service_dir), in addition to the existing
+## scratch volume. No additional configuration is required.
+##   containerSecurityContext:
+##     readOnlyRootFilesystem: true
+##
 containerSecurityContext: {}
 
 ## @param probes.liveness.initialDelaySeconds Initial delay seconds for liveness probe
@@ -308,7 +303,15 @@ anchoreConfig:
   ## @param anchoreConfig.log_level The log level for Anchore services: NOTE: This is deprecated, use logging.log_level
   ## options available: CRITICAL, ERROR, WARNING, SUCCESS, INFO, DEBUG, TRACE
   ##
-  log_level: "<ALLOW_API_CONFIGURATION>"  # INFOINFO
+  log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
+
+  ## @param anchoreConfig.internal_ssl_verify Enable cert verification for internal service-to-service SSL communication
+  internal_ssl_verify: false
+
+  ## @param anchoreConfig.global_client_read_timeout Global client read timeout
+  ## @param anchoreConfig.global_client_connect_timeout Global client connect timeout
+  global_client_connect_timeout: 0
+  global_client_read_timeout: 0
 
   ## @param anchoreConfig.logging.colored_logging Enable colored output in the logs
   ## @param anchoreConfig.logging.exception_backtrace_logging Enable stack traces in the logs
@@ -338,6 +341,11 @@ anchoreConfig:
   ## @param anchoreConfig.server.max_wsgi_middleware_worker_count Max number of workers to have in the ASGI2WSGI middleware worker pool
   ## @param anchoreConfig.server.timeout_graceful_shutdown Seconds to permit for graceful shutdown or false to disable
   ## @param anchoreConfig.server.timeout_keep_alive Seconds to keep a connection alive before closing
+  ## @param anchoreConfig.server.process_worker_count Number of worker processes for the server
+  ## @param anchoreConfig.server.ssl_cert Path to the SSL certificate file, or an empty string to disable
+  ## @param anchoreConfig.server.ssl_chain Path to the SSL certificate chain file, or an empty string to disable
+  ## @param anchoreConfig.server.ssl_enable Enable SSL for the server
+  ## @param anchoreConfig.server.ssl_key Path to the SSL key file, or an empty string to disable
   ##
   server:
     max_connection_backlog: 2048
@@ -345,6 +353,12 @@ anchoreConfig:
     max_wsgi_middleware_worker_count: 50
     timeout_graceful_shutdown: false
     timeout_keep_alive: 5
+
+    process_worker_count: 1
+    ssl_cert: ""
+    ssl_chain: ""
+    ssl_enable: false
+    ssl_key: ""
 
   ## @param anchoreConfig.audit.enabled Enable audit logging
   ## @param anchoreConfig.audit.additionalResourceURIs Additional resource URIs to audit
@@ -360,6 +374,21 @@ anchoreConfig:
   ##
   allow_awsecr_iam_auto: true
 
+  ## @param anchoreConfig.api_driven_configuration_enabled Enable API-driven configuration
+  api_driven_configuration_enabled: true
+
+  ## @param anchoreConfig.image_analyze_timeout_seconds Timeout in seconds for image analysis
+  image_analyze_timeout_seconds: 36000
+
+  ## @param anchoreConfig.max_compressed_image_size_mb Maximum compressed image size in MB (-1 for unlimited)
+  max_compressed_image_size_mb: -1
+
+  ## @param anchoreConfig.max_import_content_size_mb Maximum import content size in MB
+  max_import_content_size_mb: 100
+
+  ## @param anchoreConfig.max_source_import_size_mb Maximum source import size in MB
+  max_source_import_size_mb: 100
+
   ## @param anchoreConfig.keys.secret The shared secret used for signing & encryption, auto-generated by Helm if not set.
   ## If using useExistingSecrets=true, this can be set with the env var ANCHORE_SAML_SECRET
   ## @param anchoreConfig.keys.privateKeyFileName The file name of the private key used for signing & encryption, found in the k8s secret specified in .Values.certStoreSecretName
@@ -372,7 +401,6 @@ anchoreConfig:
     privateKeyFileName: ""
     publicKeyFileName: ""
 
-  ## @param anchoreConfig.user_authentication.oauth.enabled Enable OAuth for Anchore user authentication
   ## @param anchoreConfig.user_authentication.oauth.default_token_expiration_seconds The expiration, in seconds, for OAuth tokens
   ## @param anchoreConfig.user_authentication.oauth.refresh_token_expiration_seconds The expiration, in seconds, for OAuth refresh tokens
   ## @param anchoreConfig.user_authentication.allow_api_keys_for_saml_users Enable API key generation and authentication for SAML users
@@ -382,11 +410,6 @@ anchoreConfig:
   ## @param anchoreConfig.user_authentication.remove_deleted_user_api_keys_older_than_days The number of days elapsed after a user API key is deleted before it is garbage collected (-1 to disable)
   ## ref: https://docs.anchore.com/current/docs/configuration/#bearer-tokensoauth2
   ##
-  ## @param anchoreConfig.user_authentication.hashed_passwords Enable storing passwords as secure hashes in the database
-  ## This can dramatically increase CPU usage if you don't also use OAuth and tokens for internal communications
-  ## WARNING: You should not change this after a system has been initialized as it may cause a mismatch in existing passwords
-  ## ref: https://docs.anchore.com/current/docs/configuration/#configuring-hashed-passwords-and-oauth
-  ##
   ## @param anchoreConfig.user_authentication.sso_require_existing_users set to true in order to disable the SSO JIT provisioning during authentication
   ## This provides an additional layer of security and configuration for SSO users to gain access to Anchore.
   ## @param anchoreConfig.user_authentication.disallow_native_users Disallow native users to authenticate by any method. Only SSO/'saml' users will be able to access the system.
@@ -394,13 +417,11 @@ anchoreConfig:
   ##
   user_authentication:
     oauth:
-      enabled: true
       default_token_expiration_seconds: 3600
       refresh_token_expiration_seconds: 86400
     allow_api_keys_for_saml_users: false
     max_api_key_age_days: 365
     max_api_keys_per_user: 100
-    hashed_passwords: true
     sso_require_existing_users: false
     remove_deleted_user_api_keys_older_than_days: 365
     disallow_native_users: false
@@ -412,21 +433,6 @@ anchoreConfig:
   metrics:
     enabled: false
     auth_disabled: false
-
-  ## @param anchoreConfig.webhooks Enable Anchore services to provide webhooks for external system updates
-  ## Used to configure an endpoint for general notification delivery. These events are image/tag updates etc
-  ## This is globally configured and updates for all users are sent to the same host but with a different path for each user
-  ## <notification_type>/<userId> are required as documented at end of URI - only hostname:port should be configured
-  ## ref: https://docs.anchore.com/current/docs/using/cli_usage/subscriptions/#webhook-configuration
-  ##
-  webhooks: {}
-    # webhook_user: 'user'
-    # webhook_pass: 'pass'
-    # ssl_verify: true
-    # general: {}
-    #   url: "http://somehost:9090/<notification_type>/<userId>"
-    # policy_eval: {}
-    # event_log: {}
 
   ## @param anchoreConfig.default_admin_password The password for the Anchore Enterprise admin user
   ## This value is only used during creation of the admin user, cannot be used to change the password
@@ -444,8 +450,13 @@ anchoreConfig:
   ## @param anchoreConfig.database.sslRootCertFileName File name of the database root CA certificate stored in the k8s secret specified with .Values.certStoreSecretName
   ## @param anchoreConfig.database.db_pool_size The database max connection pool size
   ## @param anchoreConfig.database.db_pool_max_overflow The maximum overflow size of the database connection pool
-  ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy
-  ## @param anchoreConfig.database.dbConnectArgs Set custom database connection; If specified, this overrides other database connection settings
+  ## @param anchoreConfig.database.engineArgs Set custom database engine arguments for SQLAlchemy (legacy/psycopg2)
+  ## @param anchoreConfig.database.dbConnectArgs Set custom database connection args (legacy/psycopg2); If specified, this overrides other database connection settings
+  ## @param anchoreConfig.database.ngEngineArgs Set custom database engine arguments (ng/psycopg3); If specified, this overrides pool_size and max_overflow for ng services
+  ## @param anchoreConfig.database.ngDbConnectArgs Set custom database connection args (ng/psycopg3); If specified, this overrides other database connection settings for ng services
+  ## @param anchoreConfig.database.encryption.existingSecret Name of an existing Kubernetes secret containing the encryption keys. Ignored when useExistingSecrets=true (keys are then expected in the top-level existing secret).
+  ## @param anchoreConfig.database.encryption.currentKeySecretKey Key within the existing secret that holds the current encryption key.
+  ## @param anchoreConfig.database.encryption.previousKeySecretKey Key within the existing secret that holds the previous encryption key.
   ## ref: https://docs.sqlalchemy.org/en/14/core/engines.html#engine-creation-api
   ##
   database:
@@ -457,18 +468,19 @@ anchoreConfig:
     db_pool_max_overflow: 100
     engineArgs: {}
     dbConnectArgs: {}
-
-  ## @param anchoreConfig.internalServicesSSL.enabled Force all Enterprise services to use SSL for internal communication
-  ## @param anchoreConfig.internalServicesSSL.verifyCerts Enable cert verification against the local cert bundle, if this set to false self-signed certs are allowed
-  ## @param anchoreConfig.internalServicesSSL.certSecretKeyFileName File name of the private key used for internal SSL stored in the secret specified in .Values.certStoreSecretName
-  ## @param anchoreConfig.internalServicesSSL.certSecretCertFileName File name of the root CA certificate used for internal SSL stored in the secret specified in .Values.certStoreSecretName
-  ## ref: https://docs.anchore.com/current/docs/configuration/tls_ssl/
-  ##
-  internalServicesSSL:
-    enabled: false
-    verifyCerts: false
-    certSecretKeyFileName: ""
-    certSecretCertFileName: ""
+    ngEngineArgs: {}
+    ngDbConnectArgs: {}
+    ## Encryption of sensitive values stored in the database (registry credentials,
+    ## etc.) is opt-in and controlled entirely by whether encryption keys are
+    ## supplied. With no keys configured (the default) those values are stored as
+    ## plaintext. To opt in, provide keys via either:
+    ##   - anchoreConfig.database.encryption.existingSecret (separate user-managed secret), or
+    ##   - useExistingSecrets=true, with ANCHORE_DB_ENCRYPTION_KEY_CURRENT / _PREVIOUS
+    ##     set in the top-level existing secret.
+    encryption:
+      existingSecret: ""
+      currentKeySecretKey: "currentKey"
+      previousKeySecretKey: "previousKey"
 
   ## @param anchoreConfig.policyBundles Include custom Anchore policy bundles
   ## This object represents the data of a configmap that is mounted to <anchore_service_dir>/policies of all Anchore services
@@ -499,21 +511,39 @@ anchoreConfig:
   object_store:
     direct_access: false
 
+  ## @param anchoreConfig.extendedConfig appends additional configs to the root config for enterprise. This should only be used with guidance from Anchore CS.
+  extendedConfig: {}
+
+  ## Feature-domain configuration for NG services
+  ## @param anchoreConfig.domains.catalog [object] Catalog domain configuration
+  ## @param anchoreConfig.domains.gc.job_framework_audit_retention_days Retention window (days) for finished job-framework audit records
+  ## @param anchoreConfig.domains.jobs.pool_size Number of concurrent job workers
+  domains:
+    catalog: {}
+    gc:
+      job_framework_audit_retention_days: 14
+    jobs:
+      pool_size: 8
+
   apiext:
     ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
     extendedConfig: {}
 
-    ## TODO - get better documentation for the 'external' option
-    ## @param anchoreConfig.apiext.external.enabled Allow overrides for constructing Anchore API URLs
-    ## @param anchoreConfig.apiext.external.useTLS Enable TLS for external API access
-    ## @param anchoreConfig.apiext.external.hostname Hostname for the external Anchore API
-    ## @param anchoreConfig.apiext.external.port Port configured for external Anchore API
-    ##
-    external:
-      enabled: false
-      useTLS: true
-      hostname: ""
-      port: 8443
+    ## @param anchoreConfig.apiext.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.apiext.external_hostname External hostname for the service
+    ## @param anchoreConfig.apiext.external_port External port for the service
+    external_hostname: null
+    external_port: null
+
+    ## @param anchoreConfig.apiext.cycle_timers [object] Cycle timers for the apiext service
+    cycle_timers:
+      api_key_token_cleanup: 43200
+      oauth_token_cleanup: 21600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.apiext.image_content.remove_license_content_from_sbom_return Remove license content from SBOM downloads
     image_content:
@@ -523,12 +553,36 @@ anchoreConfig:
     ## @param anchoreConfig.analyzer.extendedConfig appends additional configs to the analyzer service's Anchore configs
     extendedConfig: {}
 
+    ## @param anchoreConfig.analyzer.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.analyzer.external_hostname External hostname for the service
+    ## @param anchoreConfig.analyzer.external_port External port for the service
+    external_hostname: null
+    external_port: null
+    ## server:
+    ##   process_worker_count: 1
+
+    ## @param anchoreConfig.analyzer.logging.log_level Log level for the analyzer service
+    logging:
+      log_level: "<ALLOW_API_CONFIGURATION>"  # INFO
+
     ## @param anchoreConfig.analyzer.cycle_timers.image_analyzer The interval between checks of the work queue for new analysis jobs
     ## @param anchoreConfig.analyzer.cycle_timers.sync_clamav_db The time in seconds between ClamAV database syncs
+    ## @param anchoreConfig.analyzer.cycle_timers.analysis_data_disk_gc Interval in seconds between analysis data disk garbage collection runs
+    ## @param anchoreConfig.analyzer.cycle_timers.handle_metrics Interval in seconds between metrics collection cycles
+    ## @param anchoreConfig.analyzer.cycle_timers.service_heartbeat Interval in seconds between service heartbeat checks
+    ## @param anchoreConfig.analyzer.cycle_timers.system_config_environment_watcher Interval in seconds between environment config watch cycles
+    ## @param anchoreConfig.analyzer.cycle_timers.system_config_refresh_watcher Interval in seconds between config refresh watch cycles
     ##
     cycle_timers:
       image_analyzer: 1
       sync_clamav_db: 60
+      analysis_data_disk_gc: 3600
+      handle_metrics: 15
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.analyzer.layer_cache_max_gigabytes Specify a cache size > 0GB to enable image layer caching
     ## This chart sets up a scratch directory for all Anchore Analyzer pods using the values found at .Values.analyzer.scratchVolume object or .Values.scratchVolume
@@ -544,20 +598,30 @@ anchoreConfig:
     enable_hints: false
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
-    ## This configuration file is used to configure regex matching, file content searching and malware scanning
+    ## Configures syft, content search, file contents, secret search, and malware scanning
     ## ref: https://docs.anchore.com/current/docs/compliance_management/policy_gates/#gate-files
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis/malware_scanning/
     ##
     configFile:
-      # Anchore Analyzer config file
-      ## WARNING - malforming this file can cause the Anchore Analyzer to fail on all image analysis
-      #
-      retrieve_files:
+      syft:
+        parallel_workers: 2
+      windows:
+        enabled: true
+      content_search:
+        enabled: true
+        layer_scope: squashed
+        match_params: []
+        regexp_match: []
+      file_contents:
+        enabled: true
         file_list:
-          - '/etc/passwd'
-          # - '/etc/services'
-          # - '/etc/sudoers'
+          - /etc/passwd
+          - /anchore_hints.json
+        layer_scope: squashed
+        max_file_size_kb: 1000
       secret_search:
+        enabled: true
+        layer_scope: squashed
         match_params:
           - MAXFILESIZE=10000
           - STOREONMATCH=n
@@ -567,26 +631,23 @@ anchoreConfig:
           - "PRIV_KEY=(?i)-+BEGIN(.*)PRIVATE KEY-+"
           - "DOCKER_AUTH=(?i).*\"auth\": *\".+\""
           - "API_KEY=(?i).*api(-|_)key( *=+ *).*(?<![A-Z0-9])[A-Z0-9]{20,60}(?![A-Z0-9]).*"
-          # - "ALPINE_NULL_ROOT=^root:::0:::::$"
-        #
-        ## Uncomment content_search: {} to configure file content searching
-        # content_search:
-        #   match_params:
-        #     - MAXFILESIZE=10000
-        #   regexp_match:
-        #     - "EXAMPLE_MATCH="
-        #
-        ## Malware scanning occurs only at analysis time when the image content itself is available
       malware:
         clamav:
           enabled: "<ALLOW_API_CONFIGURATION>"  # false
           db_update_enabled: true
-          # Maximum time in milliseconds that a ClamAV scan is allowed to run
           max_scan_time: 1800000
 
   catalog:
     ## @param anchoreConfig.catalog.extendedConfig appends additional configs to the catalog service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.catalog.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.catalog.external_hostname External hostname for the service
+    ## @param anchoreConfig.catalog.external_port External port for the service
+    external_hostname: null
+    external_port: null
 
     ## @param anchoreConfig.catalog.account_prometheus_metrics Enable per-account image status prometheus metrics.
     ## Enabling this will expose account names on the potentially unauthenticated `/metrics` route.
@@ -606,38 +667,43 @@ anchoreConfig:
       batch_size: 1
       pool_size: 1
 
-    ## @param anchoreConfig.catalog.cycle_timers.image_watcher Interval (seconds) to check for an update to a tag
-    ## @param anchoreConfig.catalog.cycle_timers.policy_eval Interval (seconds) to run a policy evaluation on images with policy_eval subscription activated
-    ## @param anchoreConfig.catalog.cycle_timers.vulnerability_scan Interval to run a vulnerability scan on images with vuln_update subscription activated
-    ## @param anchoreConfig.catalog.cycle_timers.analyzer_queue Interval to add new work on the image analysis queue
-    ## @param anchoreConfig.catalog.cycle_timers.archive_tasks Interval to trigger Anchore Catalog archive Tasks
-    ## @param anchoreConfig.catalog.cycle_timers.notifications Interval in which notifications will be processed for state changes
-    ## @param anchoreConfig.catalog.cycle_timers.service_watcher Interval of service state update poll, used for system status
-    ## @param anchoreConfig.catalog.cycle_timers.policy_bundle_sync Interval of policy bundle sync
-    ## @param anchoreConfig.catalog.cycle_timers.repo_watcher Interval between checks to repo for new tags
-    ## @param anchoreConfig.catalog.cycle_timers.image_gc Interval for garbage collection of images marked for deletion
-    ## @param anchoreConfig.catalog.cycle_timers.k8s_image_watcher Interval for the runtime inventory image analysis poll
-    ## @param anchoreConfig.catalog.cycle_timers.resource_metrics Interval (seconds) for computing metrics from the DB
-    ## @param anchoreConfig.catalog.cycle_timers.events_gc Interval (seconds) for cleaning up events in the system based on timestamp
-    ## @param anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks Interval (seconds) for running artifact lifecycle policy tasks
-    ## @param anchoreConfig.catalog.cycle_timers.syft_sbom_metadata_annotations Time in seconds between syft SBOM metadata annotations
+    ## @param anchoreConfig.catalog.cycle_timers [object] Cycle timers for the catalog service
     ##
     cycle_timers:
-      image_watcher: 3600
-      policy_eval: 3600
-      vulnerability_scan: 14400
+      account_resource_cleanup: 30
+      alerts_watcher: 600
       analyzer_queue: 1
       archive_tasks: 43200
-      notifications: 30
-      service_watcher: 15
-      policy_bundle_sync: 300
-      repo_watcher: 60
-      image_gc: 60
-      k8s_image_watcher: 150
-      resource_metrics: 60
-      events_gc: 43200
       artifact_lifecycle_policy_tasks: 43200
+      document_view_collection_prune_watcher: 43200
+      events_gc: 43200
+      handle_deployment_metrics: 300
+      handle_metrics: 60
+      image_gc: 60
+      image_watcher: 3600
+      import_gc: 60
+      integration_account_association_expiration_watcher: 300
+      integration_health_report_ttl_watcher: 86400
+      integration_status_update_watcher: 300
+      k8s_image_watcher: 150
+      legacy_syft_hybrid_view_builder: 60
+      notifications: 30
+      policy_eval: 3600
+      repo_watcher: 60
+      resource_limit_notifications: 3600
+      resource_metrics: 300
+      runtime_inventory_image_ttl_watcher: 86400
+      sbom_vuln_scan_refresh_watcher: 60
+      sbom_vuln_scan_watcher: 10
+      service_heartbeat: 60
+      service_watcher: 15
+      source_gc: 60
+      source_import_gc: 60
       syft_sbom_metadata_annotations: 150
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+      system_logs_gc: 43200
+      vulnerability_scan: 14400
 
     ## @param anchoreConfig.catalog.event_log [object] Event log for webhooks, YAML configuration
     ## ref: https://docs.anchore.com/current/docs/monitoring/events/#sending-events-as-webhook-notifications
@@ -650,6 +716,18 @@ anchoreConfig:
           - error
           # - info
 
+    ## @param anchoreConfig.catalog.document_views [object] Document views generation configuration
+    document_views:
+      generation:
+        max_document_execution_seconds: 300
+        multiprocess_count: 2
+        multiprocess_enabled: true
+        recycle_worker_processes_count: 10
+
+    ## @param anchoreConfig.catalog.system_logs [object] System logs configuration
+    system_logs:
+      expiration_days: 730
+
     ## @param anchoreConfig.catalog.analysis_archive [object] Custom analysis archive YAML configuration
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis_archive/
     ##
@@ -658,7 +736,7 @@ anchoreConfig:
     ##    enabled: true
     ##    min_size_kbytes: 100
     ##  storage_driver:
-    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    # Valid storage driver names: 'db', 's3'
     ##    name: db
     ##    config:
     ##      access_key: 'MY_ACCESS_KEY'
@@ -669,8 +747,6 @@ anchoreConfig:
     ##      create_bucket: true
     ##      # Use an existing Kubernetes secret for access_key and secret_key instead of inline values
     ##      # existingCredentialSecret: ""
-    ##      # accessKeySecretKey: access_key
-    ##      # secretKeySecretKey: secret_key
 
     ## @param anchoreConfig.catalog.object_store [object] Custom object storage YAML configuration
     ## ref: https://docs.anchore.com/current/docs/configuration/storage/object_store/
@@ -682,7 +758,7 @@ anchoreConfig:
         enabled: true
         min_size_kbytes: 100
       storage_driver:
-        # Valid storage driver names: 'db', 's3', 'swift'
+        # Valid storage driver names: 'db', 's3'
         name: db
         config: {}
         ## When using s3-compatible storage, set config to:
@@ -710,12 +786,33 @@ anchoreConfig:
 
     ## @param anchoreConfig.catalog.integrations.integration_health_report_ttl_days TTL for integration health reports.
     ##
+    ## @param anchoreConfig.catalog.image_gc.max_worker_threads Number of worker threads for image garbage collection
+    image_gc:
+      max_worker_threads: 4
+
+    ## @param anchoreConfig.catalog.import_operation_expiration_days Number of days before incomplete import operations expire
+    import_operation_expiration_days: 7
+
     integrations:
       integration_health_report_ttl_days: 2
 
+    ## @param anchoreConfig.component_catalog.global_client_connect_timeout Global timeout for client connections
+    ## @param anchoreConfig.component_catalog.global_client_read_timeout Global timeout for client reads
+    ## @param anchoreConfig.component_catalog.server [object] Server configuration for the component catalog. Falls back to anchoreConfig.server if empty.
+    ## @param anchoreConfig.component_catalog.logging [object] Logging configuration for the component catalog. Falls back to anchoreConfig.logging if empty.
+  component_catalog:
+    global_client_connect_timeout: 0
+    global_client_read_timeout: 0
+    server: {}
+    logging: {}
+
+
+  ## @param anchoreConfig.policy_engine.extendedConfig appends additional configs to the policy_engine service's Anchore configs
   policy_engine:
-    ## @param anchoreConfig.policy_engine.extendedConfig appends additional configs to the policy_engine service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.policy_engine.policy_evaluation_cache_ttl TTL in seconds for policy evaluation cache
+    policy_evaluation_cache_ttl: 3600
 
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
@@ -731,8 +828,85 @@ anchoreConfig:
         exclude:
           providers: null
           package_types: null
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.default.search.by_cpe.enabled Enable default search by CPE for vulnerability matching
+        default:
+          search:
+            by_cpe:
+              enabled: "<ALLOW_API_CONFIGURATION>"
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled Enable CPE-based vulnerability matching for dotnet packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled Enable CPE-based vulnerability matching for golang packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.java.search.by_cpe.enabled Enable CPE-based vulnerability matching for java packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.javascript.search.by_cpe.enabled Enable CPE-based vulnerability matching for javascript packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.jvm.search.by_cpe.enabled Enable CPE-based vulnerability matching for JVM packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled Enable CPE-based vulnerability matching for python packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled Enable CPE-based vulnerability matching for ruby packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled Enable CPE-based vulnerability matching for rust packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dotnet.search.by_cpe.enabled Enable CPE-based vulnerability matching for dotnet packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.dpkg.search.by_cpe.enabled Enable CPE-based vulnerability matching for dpkg packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.golang.search.by_cpe.enabled Enable CPE-based vulnerability matching for golang packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.hex.search.by_cpe.enabled Enable CPE-based vulnerability matching for hex packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.java.search.by_cpe.enabled Enable CPE-based vulnerability matching for java packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.javascript.search.by_cpe.enabled Enable CPE-based vulnerability matching for javascript packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.jvm.search.by_cpe.enabled Enable CPE-based vulnerability matching for JVM packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.python.search.by_cpe.enabled Enable CPE-based vulnerability matching for python packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rpm.search.by_cpe.enabled Enable CPE-based vulnerability matching for rpm packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.ruby.search.by_cpe.enabled Enable CPE-based vulnerability matching for ruby packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.rust.search.by_cpe.enabled Enable CPE-based vulnerability matching for rust packages
+        ## @param anchoreConfig.policy_engine.vulnerabilities.matching.ecosystem_specific.stock.search.by_cpe.enabled Enable CPE-based vulnerability matching for stock (binary-only) packages
+        ecosystem_specific:
+          dotnet:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          dpkg:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          golang:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          hex:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          java:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          javascript:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          jvm:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          python:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          rpm:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          ruby:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          rust:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
+          stock:
+            search:
+              by_cpe:
+                enabled: "<ALLOW_API_CONFIGURATION>"
       ## @param anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss Configuration to return the highest secondary CVSS score from NVD, when the primary score is unavailable
       nvd_fallback_to_secondary_cvss: "<ALLOW_API_CONFIGURATION>"  # false
+
+    ## @param anchoreConfig.policy_engine.enable_package_db_load Enable loading package data into the policy engine database
+    enable_package_db_load: false
 
     ## @param anchoreConfig.policy_engine.enable_user_base_image Enables usage of Well Known Annotation to identify base image for use in ancestry calculations
     enable_user_base_image: true
@@ -742,14 +916,38 @@ anchoreConfig:
     ## server:
     ##   process_worker_count: 1
 
+    ## @param anchoreConfig.policy_engine.external_hostname External hostname for the service
+    ## @param anchoreConfig.policy_engine.external_port External port for the service
+    external_hostname: null
+    external_port: null
+
+    ## @param anchoreConfig.policy_engine.cycle_timers [object] Cycle timers for the policy engine service
+    cycle_timers:
+      grypedb_sync: 60
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+      vulnerability_metadata_capture: 300
+
   notifications:
     ## @param anchoreConfig.notifications.extendedConfig appends additional configs to the notifications service's Anchore configs
     extendedConfig: {}
 
-    ## @param anchoreConfig.notifications.cycle_timers.notifications Interval that notifications are sent
+    ## @param anchoreConfig.notifications.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.notifications.external_hostname External hostname for the service
+    ## @param anchoreConfig.notifications.external_port External port for the service
+    external_hostname: null
+    external_port: null
+
+    ## @param anchoreConfig.notifications.cycle_timers [object] Cycle timers for the notifications service
     ##
     cycle_timers:
       notifications: 30
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.notifications.ui_url Set the UI URL that is included in the notification, defaults to the Enterprise UI service name
     ##
@@ -758,6 +956,14 @@ anchoreConfig:
   reports:
     ## @param anchoreConfig.reports.extendedConfig appends additional configs to the reports service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.reports.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.reports.external_hostname External hostname for the service
+    ## @param anchoreConfig.reports.external_port External port for the service
+    external_hostname: null
+    external_port: null
 
     ## @param anchoreConfig.reports.enable_graphiql Enable GraphiQL, a GUI for editing and testing GraphQL queries and mutations
     ## Go to http://<host>:<port>/v2/reports/graphql in a browser for the reports API
@@ -770,10 +976,16 @@ anchoreConfig:
     ## The value should be a number followed by "w", "d", or "h" to represent weeks, days or hours
     async_execution_timeout: 48h
 
-    ## @param anchoreConfig.reports.cycle_timers.reports_scheduled_queries Interval  in seconds to check for scheduled queries that need to be run
+    ## @param anchoreConfig.reports.max_async_execution_threads Maximum number of threads for async report execution
+    max_async_execution_threads: 1
+
+    ## @param anchoreConfig.reports.cycle_timers [object] Cycle timers for the reports service
     ##
     cycle_timers:
       reports_scheduled_queries: 600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
     ## @param anchoreConfig.reports.use_volume Configure the reports service to buffer report generation to disk instead of in memory
     ## This should be configured in production systems with large amounts of data (10s of thousands of images or more)
@@ -786,6 +998,14 @@ anchoreConfig:
   reports_worker:
     ## @param anchoreConfig.reports_worker.extendedConfig appends additional configs to the reports_worker service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.reports_worker.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.reports_worker.external_hostname External hostname for the service
+    ## @param anchoreConfig.reports_worker.external_port External port for the service
+    external_hostname: null
+    external_port: null
 
     ## @param anchoreConfig.reports_worker.ingress_images_max_workers The maximum number of concurrent threads to ingress images
     ##
@@ -812,39 +1032,76 @@ anchoreConfig:
     ##
     data_load_max_workers: 10
 
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_load Interval that vulnerabilities for images are synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_load Interval that vulnerabilities by tags are synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_runtime_inventory_load Interval that the runtime inventory is synced
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_extended_runtime_vuln_load Interval extended runtime reports are synched (ecs, k8s containers and namespaces)
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_refresh Interval that images are refreshed
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_refresh Interval that tags are refreshed
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_metrics Interval for how often reporting metrics are generated
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_image_egress Interval stale states are removed by image
-    ## @param anchoreConfig.reports_worker.cycle_timers.reports_tag_egress Interval stale states are removed by tag
+    ## @param anchoreConfig.reports_worker.runtime_report_generation [object] Runtime report generation configuration
+    runtime_report_generation:
+      ecs_container_vulns_per_page: 1000
+      extended_runtime_page_size: 100
+      inventory_images_by_vulnerability: true
+      k8s_container_vulns_per_page: 1000
+      k8s_namespaces_per_page: 1000
+      vulnerabilities_by_ecs_container: true
+      vulnerabilities_by_k8s_container: true
+      vulnerabilities_by_k8s_namespace: true
+
+    ## @param anchoreConfig.reports_worker.cycle_timers [object] Cycle timers for the reports worker service
     ##
     cycle_timers:
-      reports_image_load: 600
-      reports_tag_load: 600
-      reports_runtime_inventory_load: 600
+      event_stream_health: 60
       reports_extended_runtime_vuln_load: 1800
-      reports_image_refresh: 7200
-      reports_tag_refresh: 7200
-      reports_metrics: 3600
       reports_image_egress: 600
+      reports_image_load: 600
+      reports_image_refresh: 7200
+      reports_metrics: 3600
+      reports_runtime_inventory_load: 600
       reports_tag_egress: 600
-
-    ## @param anchoreConfig.reports_worker.runtime_report_generation.use_legacy_loaders_and_queries Use legacy loaders and queries for runtime report generation
-    ##
-    runtime_report_generation:
-      use_legacy_loaders_and_queries: false
+      reports_tag_load: 600
+      reports_tag_refresh: 7200
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
   simplequeue:
     ## @param anchoreConfig.simplequeue.extendedConfig appends additional configs to the simplequeue service's Anchore configs
     extendedConfig: {}
 
+    ## @param anchoreConfig.simplequeue.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.simplequeue.external_hostname External hostname for the service
+    ## @param anchoreConfig.simplequeue.external_port External port for the service
+    external_hostname: null
+    external_port: null
+
+    ## @param anchoreConfig.simplequeue.cycle_timers [object] Cycle timers for the simplequeue service
+    cycle_timers:
+      handle_metrics: 15
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
+
   data_syncer:
+    ## @param anchoreConfig.data_syncer.auto_sync_enabled Enable automatic data synchronization
+    auto_sync_enabled: true
+
     ## @param anchoreConfig.data_syncer.extendedConfig appends additional configs to the data_syncer service's Anchore configs
     extendedConfig: {}
+
+    ## @param anchoreConfig.data_syncer.server [object] Server configuration for the service
+    server: {}
+
+    ## @param anchoreConfig.data_syncer.external_hostname External hostname for the service
+    ## @param anchoreConfig.data_syncer.external_port External port for the service
+    external_hostname: null
+    external_port: null
+
+    ## @param anchoreConfig.data_syncer.cycle_timers [object] Cycle timers for the data syncer service
+    cycle_timers:
+      grypedb_sync: 120
+      scheduled_data_cleanup: 86400
+      scheduled_data_sync: 3600
+      service_heartbeat: 60
+      system_config_environment_watcher: 20
+      system_config_refresh_watcher: 20
 
   ui:
     ## @param anchoreConfig.ui.enable_proxy Trust a reverse proxy when setting secure cookies (via the `X-Forwarded-Proto` header)
@@ -950,12 +1207,12 @@ anchoreConfig:
         idle: 10000
 
     ## @param anchoreConfig.ui.dbUser allows overriding and separation of the ui database user.
-    ## The UI config defaults to postgresql.auth.username if not set
+    ## Defaults to postgresql.auth.username if not set
     ##
     dbUser: ""
 
     ## @param anchoreConfig.ui.dbPassword allows overriding and separation of the ui database user authentication
-    ## The UI config defaults to postgresql.auth.password if not set
+    ## Defaults to postgresql.auth.password if not set
     ##
     dbPassword: ""
 
@@ -1250,6 +1507,88 @@ catalog:
 
   ## @param catalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Catalog scratch space
   ## Used for the Anchore Catalog service archival process, which uses tempfile where the parent directory is the tmp_dir in the config (/analysis_scratch).
+  ##
+  scratchVolume:
+    details: {}
+
+###############################################################
+## @section Anchore Component Catalog k8s Deployment Parameters
+###############################################################
+componentCatalog:
+  ## @param componentCatalog.service.type Service type for Anchore Component Catalog
+  ## @param componentCatalog.service.port Service port for Anchore Component Catalog
+  ## @param componentCatalog.service.annotations Annotations for Anchore Component Catalog service
+  ## @param componentCatalog.service.labels Labels for Anchore Component Catalog service
+  ## @param componentCatalog.service.nodePort nodePort for Anchore Component Catalog service
+  ## @param componentCatalog.service.domainSuffix domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix
+  ##
+  service:
+    type: ClusterIP
+    port: 8228
+    annotations: {}
+    labels: {}
+    nodePort: ""
+    domainSuffix: ""
+
+  ## @param componentCatalog.extraEnv Set extra environment variables for Anchore Component Catalog pods
+  ##
+  extraEnv: []
+
+  ## @param componentCatalog.extraVolumes Define additional volumes for Anchore Component Catalog pods
+  ##
+  extraVolumes: []
+
+  ## @param componentCatalog.extraVolumeMounts Define additional volume mounts for Anchore Component Catalog pods
+  ##
+  extraVolumeMounts: []
+
+  ## @param componentCatalog.initContainers Define additional initContainer containers for Anchore Component Catalog pods
+  ##
+  initContainers: []
+
+  ## @param componentCatalog.hostAliases Define custom /etc/hosts entries for Anchore Component Catalog pods
+  ## These entries will be added in addtion to any entries defined at the top-level hostAliases value if specified
+  ##
+  hostAliases: []
+
+  ## @param componentCatalog.resources Resource requests and limits for Anchore Component Catalog pods
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  ##
+  resources: {}
+
+  ## @param componentCatalog.labels Labels for Anchore Component Catalog pods
+  ##
+  labels: {}
+
+  ## @param componentCatalog.annotations Annotation for Anchore Component Catalog pods
+  ##
+  annotations: {}
+
+  ## @param componentCatalog.nodeSelector Node labels for Anchore Component Catalog pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param componentCatalog.tolerations Tolerations for Anchore Component Catalog pod assignment
+  ##
+  tolerations: []
+
+  ## @param componentCatalog.affinity Affinity for Anchore Component Catalog pod assignment
+  ##
+  affinity: {}
+
+  ## @param componentCatalog.topologySpreadConstraints Topology spread constraints for Anchore Component Catalog pod assignment
+  ##
+  topologySpreadConstraints: []
+
+  ## @param componentCatalog.serviceAccountName Service account name for Anchore Component Catalog pods
+  ##
+  serviceAccountName: ""
+
+  ## @param componentCatalog.containerSecurityContext Security context for the Anchore Component Catalog containers
+  ##
+  containerSecurityContext: {}
+
+  ## @param componentCatalog.scratchVolume.details [object] Details for the k8s volume to be created for Anchore Component Catalog scratch space
   ##
   scratchVolume:
     details: {}
@@ -1880,12 +2219,11 @@ ui:
   ## @param ui.image Image used for the Anchore UI container
   ## Ensure tag value is quoted so it's interpreted as a string
   ##
-  image: docker.io/anchore/enterprise-ui@sha256:8fae9cda05411132a19d54e95af86751c97c777ecea5c4129a8b01f6bb5baeff
+  image: docker.io/anchore/enterprise-ui@sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b
     # registry: docker.io
     # repository: anchore/enterprise-ui
-    # tag: "v5.27.2"
-    # digest: sha256:8fae9cda05411132a19d54e95af86751c97c777ecea5c4129a8b01f6bb5baeff
-
+    # tag: "v6.1.0"
+    # digest: sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -1994,6 +2332,77 @@ ui:
   ##
   serviceAccountName: ""
 
+  ## @param ui.scratchVolume.details [object] Details for the k8s volume to be created for Anchore UI scratch space
+  ## ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  ##
+  scratchVolume:
+    details: {}
+      # ephemeral:
+      #   volumeClaimTemplate:
+      #     spec:
+      #       accessModes:
+      #       - ReadWriteOnce
+      #       resources:
+      #         requests:
+      #           storage: 100Gi
+      #       storageClassName: ""
+
+##################################################
+## @section Anchore Pre-Install Job Parameters
+## Pre-install job uses a Helm pre-install hook
+## to verify database connectivity before install
+##################################################
+preInstallJob:
+  ## @param preInstallJob.enabled Run the pre-install hook job that verifies database connectivity before installing. Disable if the chart cannot construct the DB connection (e.g. credentials injected as files rather than env vars via a Vault sidecar).
+  ##
+  enabled: true
+
+  ## @param preInstallJob.resources Resource requests and limits for the Anchore pre-install job
+  ##
+  resources: {}
+
+  ## @param preInstallJob.nodeSelector Node labels for the Anchore pre-install job pod assignment
+  ##
+  nodeSelector: {}
+
+  ## @param preInstallJob.tolerations Tolerations for the Anchore pre-install job pod assignment
+  ##
+  tolerations: []
+
+  ## @param preInstallJob.affinity Affinity for the Anchore pre-install job pod assignment
+  ##
+  affinity: {}
+
+  ## @param preInstallJob.annotations Annotations for the Anchore pre-install job
+  ##
+  annotations: {}
+
+  ## @param preInstallJob.labels Labels for the Anchore pre-install job
+  ##
+  labels: {}
+
+  ## @param preInstallJob.extraVolumes Define additional volumes for Anchore pre-install job pods
+  ##
+  extraVolumes: []
+
+  ## @param preInstallJob.extraVolumeMounts Define additional volume mounts for Anchore pre-install job pods
+  ##
+  extraVolumeMounts: []
+
+  ## @param preInstallJob.initContainers Add custom initContainer containers to the Anchore pre-install job pods
+  ##
+  initContainers: []
+
+  ## @param preInstallJob.hostAliases Define custom /etc/hosts entries for Anchore pre-install job pods
+  ##
+  hostAliases: []
+
+  ## @param preInstallJob.ttlSecondsAfterFinished The time period in seconds the pre-install job, and its related pods should be retained for
+  ## 0 == immediate deletion after completion
+  ## Set this to -1 to disable deleting the job automatically
+  ##
+  ttlSecondsAfterFinished: -1
+
 ############################################
 ## @section Anchore Upgrade Job Parameters
 ## Upgrade job uses a Helm post-install-hook
@@ -2026,11 +2435,6 @@ upgradeJob:
   ## Uses the same mechanism for upgrades as the legacy anchore-engine chart. Not compatible with `helm upgrade --wait` or ArgoCD.
   ##
   usePostUpgradeHook: false
-
-  ## @param upgradeJob.kubectlImage The image to use for the upgrade job's init container that uses kubectl to scale down deployments before an upgrade
-  ## This is only used in the preupgrade job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
-  ##
-  kubectlImage: bitnamilegacy/kubectl:1.30
 
   ## @param upgradeJob.nodeSelector Node labels for the Anchore upgrade job pod assignment
   ##
@@ -2150,6 +2554,123 @@ ingress:
   ##
   ingressClassName: nginx
 
+###########################################
+## @section Kubernetes Gateway API Parameters
+###########################################
+## Gateway API support for Anchore Enterprise
+## ref: https://gateway-api.sigs.k8s.io/
+##
+gatewayApi:
+  ## @param gatewayApi.enabled Enable Gateway API resources (HTTPRoutes and optionally Gateway)
+  ##
+  enabled: false
+
+  ## @param gatewayApi.labels Common labels to add to all Gateway API resources
+  ##
+  labels: {}
+
+  ## @param gatewayApi.annotations Common annotations to add to all Gateway API resources
+  ##
+  annotations: {}
+
+  ## Gateway configuration - reference existing or create new
+  ##
+  gateway:
+    ## @param gatewayApi.gateway.create Create a new Gateway resource. If false, reference an existing Gateway
+    ##
+    create: false
+
+    ## @param gatewayApi.gateway.name Name of existing Gateway to reference (required if create=false)
+    ##
+    name: ""
+
+    ## @param gatewayApi.gateway.namespace Namespace of existing Gateway (for cross-namespace references)
+    ##
+    namespace: ""
+
+    ## @param gatewayApi.gateway.sectionName Specific listener section name on the Gateway
+    ##
+    sectionName: ""
+
+    ## @param gatewayApi.gateway.gatewayClassName Gateway class name (required if create=true)
+    ## Examples: istio, cilium, nginx, contour, gke-l7-global-external-managed
+    ##
+    gatewayClassName: ""
+
+    ## @param gatewayApi.gateway.listeners Listener configuration when creating a Gateway
+    ## Example:
+    ## listeners:
+    ##   - name: http
+    ##     port: 80
+    ##     protocol: HTTP
+    ##     allowedRoutes:
+    ##       namespaces:
+    ##         from: Same
+    ##
+    listeners: []
+
+    ## @param gatewayApi.gateway.addresses Gateway addresses configuration
+    ##
+    addresses: []
+
+  ## @param gatewayApi.routes HTTPRoute definitions - each key creates an HTTPRoute resource
+  ## The key becomes the HTTPRoute name suffix, and the value is rendered directly as the HTTPRoute spec
+  ## (parentRefs is automatically injected from gateway config above)
+  ##
+  ## Example - separate hosts for API and UI:
+  ##   routes:
+  ##     api:
+  ##       hostnames:
+  ##         - api.anchore.example.com
+  ##       rules:
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /v2/
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /version/
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /exp/
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-api
+  ##               port: 8228
+  ##     ui:
+  ##       hostnames:
+  ##         - anchore.example.com
+  ##       rules:
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-ui
+  ##               port: 80
+  ##
+  ## Example - single host with path-based routing:
+  ##   routes:
+  ##     anchore:
+  ##       hostnames:
+  ##         - anchore.example.com
+  ##       rules:
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /v2/
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-api
+  ##               port: 8228
+  ##         - matches:
+  ##             - path:
+  ##                 type: PathPrefix
+  ##                 value: /
+  ##           backendRefs:
+  ##             - name: my-release-enterprise-ui
+  ##               port: 80
+  ##
+  routes: {}
+
 #########################################
 ## @section Google CloudSQL DB Parameters
 #########################################
@@ -2239,12 +2760,8 @@ ui-redis:
 ## @section Anchore Database Parameters
 #######################################
 postgresql:
-  ## @param postgresql.chartEnabled Use the dependent chart for Postgresql deployment
-  ##
-  chartEnabled: true
-
-  ## @param postgresql.externalEndpoint External Postgresql hostname when not using Helm managed chart (eg. mypostgres.myserver.io)
-  ## externalEndpoint, auth.username, auth.password, auth.database, & primary.service.ports.postgresql are required values for external Postgres
+  ## @param postgresql.externalEndpoint External Postgresql hostname (eg. mypostgres.myserver.io)
+  ## This is required when not using an existing secret for database credentials
   ##
   externalEndpoint: ""
 
@@ -2253,50 +2770,13 @@ postgresql:
   ## @param postgresql.auth.database Database name used when connecting to postgresql
   ##
   auth:
-    username: anchore
-    password: anchore-postgres,123
-    database: anchore
+    username: ""
+    password: ""
+    database: ""
 
-  primary:
-    ## PostgreSQL Primary resource requests and limits
-    ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-    ## @param postgresql.primary.resources The resource limits & requests for the PostgreSQL Primary containers
-    ##
-    resources: {}
-      # limits: {}
-      # requests:
-      #   memory: 512Mi
-      #   cpu: 2
-
-    ## @param postgresql.primary.service.ports.postgresql Port used to connect to Postgresql
-    ##
-    service:
-      ports:
-        postgresql: 5432
-
-    ## @param postgresql.primary.persistence.size Configure size of the persistent volume for PostgreSQL Primary data volume
-    ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
-    ## NOTE: If your storage class does not allow dynamic resizing then be sure to set the size appropriately!!
-    ##
-    persistence:
-      size: 20Gi
-      storageClass: ""
-
-    ## @param postgresql.primary.extraEnvVars An array to add extra environment variables
-    ##
-    extraEnvVars: []
-
-  ## @param postgresql.image.repository Specifies the image repository to use for this chart.
-  ## @param postgresql.image.registry Specifies the image registry to use for this chart.
-  ## @param postgresql.image.tag Specifies the image to use for this chart.
-  ## @param postgresql.image.pullSecrets Specifies the image pull secrets to use for this chart.
+  ## @param postgresql.port Port used to connect to Postgresql
   ##
-  image:
-    repository: bitnamilegacy/postgresql
-    registry: docker.io
-    tag: 13.11.0-debian-11-r15
-    pullSecrets:
-      - anchore-enterprise-pullcreds
+  port: 5432
 
 ########################################################################################
 ## @section Anchore Object Store and Analysis Archive Migration
@@ -2310,10 +2790,13 @@ osaaMigrationJob:
   ##
   enabled: false
 
-  ## @param osaaMigrationJob.kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration
-  ## This is only used in the osaaMigrationJob job. NOTE: This is deprecated. Please use `common.kubectlImage` instead.
+  ## @param osaaMigrationJob.rbacCreate Create RBAC resources (ServiceAccount, Role, RoleBinding) for the migration job's scale-down init container. Independent of upgradeJob.rbacCreate so the migration job works even when the upgrade job is disabled or uses the post-upgrade hook.
   ##
-  kubectlImage: bitnamilegacy/kubectl:1.30
+  rbacCreate: true
+
+  ## @param osaaMigrationJob.serviceAccountName Use an existing service account for the migration job instead of creating one. Takes precedence over rbacCreate. Must be able to list/get/watch pods and get/list/watch/update/patch deployments and patch deployments/scale.
+  ##
+  serviceAccountName: ""
 
   ## @param osaaMigrationJob.extraEnv An array to add extra environment variables
   ##
@@ -2383,10 +2866,6 @@ osaaMigrationJob:
   ##
   containerSecurityContext: {}
 
-  ## @param osaaMigrationJob.serviceAccountName Service account name for Anchore Object Store and Analysis Archive migration job pods
-  ##
-  serviceAccountName: ""
-
   ## @param osaaMigrationJob.analysisArchiveMigration.bucket The name of the bucket to migrate
   ## @param osaaMigrationJob.analysisArchiveMigration.run Run the analysis_archive migration
   ## @param osaaMigrationJob.analysisArchiveMigration.mode The mode for the analysis_archive migration. valid values are 'to_analysis_archive' and 'from_analysis_archive'.
@@ -2402,7 +2881,7 @@ osaaMigrationJob:
     ##    enabled: true
     ##    min_size_kbytes: 100
     ##  storage_driver:
-    ##    # Valid storage driver names: 'db', 's3', 'swift'
+    ##    # Valid storage driver names: 'db', 's3'
     ##    name: db
     ##    config: {}
 

@@ -9,6 +9,11 @@ chart:
 
 values:
   - values.yaml
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
 
 tests:
   - it: does not render when prometheus is disabled

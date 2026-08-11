@@ -1,0 +1,262 @@
+suite: NG Config Tests
+templates:
+  - templates/configmaps/componentcatalog_configmap.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+tests:
+  # ── NG Server ──────────────────────────────────────────────────────────
+  - it: should use global server defaults when no component override is set
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 1"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: 'ssl_cert: ""'
+
+  - it: should allow a component to override an existing server field
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server.process_worker_count: 8
+      anchoreConfig.component_catalog.server.timeout_keep_alive: 30
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 8"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 30"
+      # ssl fields should still come from global server defaults
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: 'ssl_cert: ""'
+
+  - it: should merge a partial component server override with global server defaults
+    documentIndex: 0
+    set:
+      # component only overrides one field — all other ng fields should come from global server
+      anchoreConfig.component_catalog.server.process_worker_count: 4
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 4"
+      # remaining fields inherit from global server
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: 'ssl_cert: ""'
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: 'ssl_chain: ""'
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: 'ssl_key: ""'
+
+  - it: should allow a component to add new server fields via override
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server.custom_timeout: 60
+    asserts:
+      # new field from component override should appear
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "custom_timeout: 60"
+      # global defaults still present
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 1"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+
+  # ── NG Logging ─────────────────────────────────────────────────────────
+  - it: should use global logging defaults for ng logging when no component override is set
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "structured_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_retention_rule: 10"
+      # legacy-only fields should not appear
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_access_logging"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_response_debug_logging"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_log_level"
+
+  - it: should allow a component to override an existing logging field
+    documentIndex: 1
+    set:
+      anchoreConfig.component_catalog.logging.structured_logging: true
+      anchoreConfig.component_catalog.logging.colored_logging: true
+    asserts:
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "structured_logging: true"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: true"
+      # other ng fields still from global
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_retention_rule: 10"
+
+  - it: should merge a partial component logging override with global logging defaults
+    documentIndex: 1
+    set:
+      anchoreConfig.component_catalog.logging.structured_logging: true
+    asserts:
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "structured_logging: true"
+      # remaining fields inherit from global logging
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "exception_backtrace_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "exception_diagnose_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_rotation_rule: 10 MB"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_retention_rule: 10"
+
+  - it: should allow a component to add new logging fields like log_level via override
+    documentIndex: 1
+    set:
+      anchoreConfig.component_catalog.logging.log_level: DEBUG
+    asserts:
+      # new field from component override should appear
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "log_level: DEBUG"
+      # ng defaults still present
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "structured_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_retention_rule: 10"
+
+  # ── NG Logging — legacy field filtering ────────────────────────────────
+  - it: should not leak legacy-only logging fields into ng output even when changed globally
+    documentIndex: 1
+    set:
+      anchoreConfig.logging.server_access_logging: false
+      anchoreConfig.logging.server_log_level: debug
+      anchoreConfig.logging.server_response_debug_logging: true
+    asserts:
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_access_logging"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_log_level"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_response_debug_logging"
+      # ng fields should still reflect global values
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: false"
+
+  # ── NG Server — legacy field filtering ─────────────────────────────────
+  - it: should not leak legacy-only server fields into ng server output
+    documentIndex: 0
+    asserts:
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "max_connection_backlog"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "max_wsgi_middleware_worker_count"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "max_wsgi_middleware_worker_queue_size"
+      - notMatchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_graceful_shutdown"
+
+  # ── Empty override fallback ────────────────────────────────────────────
+  - it: should fall back to global server defaults when component server is empty
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server: {}
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "process_worker_count: 1"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "timeout_keep_alive: 5"
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: false"
+
+  - it: should fall back to global logging defaults when component logging is empty
+    documentIndex: 1
+    set:
+      anchoreConfig.component_catalog.logging: {}
+    asserts:
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "colored_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "structured_logging: false"
+      - matchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "file_retention_rule: 10"
+      - notMatchRegex:
+          path: data["config_ng.yaml"]
+          pattern: "server_access_logging"

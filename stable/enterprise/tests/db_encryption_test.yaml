@@ -1,0 +1,171 @@
+suite: Database Secret Encryption Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+  # Encryption is opt-in by supplying keys. Most tests below exercise the
+  # opt-in path, so point at a user-managed secret here. Individual tests can
+  # override this back to "" to exercise the default (encryption off) path.
+  anchoreConfig.database.encryption.existingSecret: user-managed-keys
+
+tests:
+  # --- Deployment env vars (existingSecret path) ----------------------------
+
+  - it: should inject db encryption env vars from existingSecret with currentKey first
+    templates:
+      - analyzer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                name: user-managed-keys
+                key: currentKey
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS
+            valueFrom:
+              secretKeyRef:
+                name: user-managed-keys
+                key: previousKey
+                optional: true
+
+  - it: should honor custom secret key names when existingSecret uses non-default keys
+    templates:
+      - api_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.database.encryption.currentKeySecretKey: my_current
+      anchoreConfig.database.encryption.previousKeySecretKey: my_previous
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                name: user-managed-keys
+                key: my_current
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS
+            valueFrom:
+              secretKeyRef:
+                name: user-managed-keys
+                key: my_previous
+                optional: true
+
+  # --- useExistingSecrets path ---------------------------------------------
+
+  - it: should not emit explicit env vars when useExistingSecrets is true and no encryption.existingSecret set
+    templates:
+      - analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      useExistingSecrets: true
+      anchoreConfig.database.encryption.existingSecret: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+          any: true
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS
+          any: true
+
+  - it: should emit env vars referencing existingSecret even when useExistingSecrets is true
+    templates:
+      - analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      useExistingSecrets: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+            valueFrom:
+              secretKeyRef:
+                name: user-managed-keys
+                key: currentKey
+
+  # --- default (encryption off) path ----------------------------------------
+
+  - it: should not emit key env vars by default when no encryption secret is configured
+    templates:
+      - analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.database.encryption.existingSecret: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_CURRENT
+          any: true
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS
+          any: true
+
+  # --- Rendered config (default_config.yaml / osaa_config.yaml) ------------
+  # The keys list is always rendered; unset/empty key env vars are dropped by
+  # the service, so an install with no encryption secret simply gets an empty
+  # keyring (plaintext). The removed disable_db_encryption_unsafe field must
+  # never reappear in the rendered config.
+
+  - it: should render encryption keys list with current first in default_config.yaml
+    templates:
+      - anchore_configmap.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "keys:\\s*\\n\\s*- \\$\\{ANCHORE_DB_ENCRYPTION_KEY_CURRENT\\}\\s*\\n\\s*- \\$\\{ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS\\}"
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "disable_db_encryption_unsafe"
+
+  - it: should render encryption keys list even when no encryption secret is configured
+    templates:
+      - anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.database.encryption.existingSecret: ""
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "keys:\\s*\\n\\s*- \\$\\{ANCHORE_DB_ENCRYPTION_KEY_CURRENT\\}\\s*\\n\\s*- \\$\\{ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS\\}"
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "disable_db_encryption_unsafe"
+
+  - it: should render encryption keys list with current first in osaa_config.yaml
+    templates:
+      - osaa_configmap.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob.enabled: true
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "keys:\\s*\\n\\s*- \\$\\{ANCHORE_DB_ENCRYPTION_KEY_CURRENT\\}\\s*\\n\\s*- \\$\\{ANCHORE_DB_ENCRYPTION_KEY_PREVIOUS\\}"
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "disable_db_encryption_unsafe"

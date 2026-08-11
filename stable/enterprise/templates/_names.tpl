@@ -52,6 +52,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s-%s" .Release.Name $name "reportsworker"| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "enterprise.componentCatalog.fullname" -}}
+{{- $name := default .Chart.Name .Values.global.nameOverride -}}
+{{- printf "%s-%s-%s" .Release.Name $name "componentcatalog"| trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "enterprise.simpleQueue.fullname" -}}
 {{- $name := default .Chart.Name .Values.global.nameOverride -}}
 {{- printf "%s-%s-%s" .Release.Name $name "simplequeue"| trunc 63 | trimSuffix "-" -}}
@@ -71,6 +76,16 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s-%s-%s%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "upgrade" $forcedRevision| trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "enterprise.hooks.fullname" -}}
+{{- $name := default .Chart.Name .Values.global.nameOverride -}}
+{{- printf "%s-%s-%s" .Release.Name $name "hooks" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "enterprise.preInstallJob.fullname" -}}
+{{- $name := default .Chart.Name .Values.global.nameOverride -}}
+{{- printf "%s-%s-%s" .Release.Name $name "pre-install" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "enterprise.osaaMigrationJob.fullname" -}}
 {{- $name := default .Chart.Name .Values.global.nameOverride -}}
 {{- printf "%s-%s-%s-%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "osaa-migration-job" | trunc 63 | trimSuffix "-" -}}
@@ -79,10 +94,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "enterprise.smokeTest.fullname" -}}
 {{- $name := default .Chart.Name .Values.global.nameOverride -}}
 {{- printf "%s-%s-%s-%s" .Release.Name $name (.Chart.AppVersion | replace "." "") "smoke-test" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "postgres.fullname" -}}
-{{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{- define "redis.fullname" -}}

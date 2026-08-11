@@ -28,6 +28,7 @@ spec:
         - name: "anchore-scratch"
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
       {{- if or
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
@@ -35,19 +36,17 @@ spec:
         {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
         {{- end -}}
-        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
         {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
+        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
       {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
-      {{- end }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- if or .Values.containerSecurityContext .Values.api.containerSecurityContext }}
+        {{- if or .Values.containerSecurityContext .Values.notifications.containerSecurityContext }}
           securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
           command: ["/bin/sh", "-c"]
@@ -81,7 +80,7 @@ spec:
       targetPort: {{ .Values.notifications.service.port }}
       protocol: TCP
     {{- if .Values.setServiceAppProtocol }}
-      appProtocol: {{ include "enterprise.setProtocol" . }}
+      appProtocol: {{ include "enterprise.setProtocol" (merge (dict "component" $component) .) }}
     {{- end }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:

@@ -29,27 +29,25 @@ spec:
           {{- include "enterprise.common.scratchVolume.details" (merge (dict "component" $component) .) | nindent 10 }}
 
       {{- if or
-            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup .Values.anchoreConfig.reports.use_volume)
+            (and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup)
             (and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar))
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
       initContainers:
-        {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup .Values.anchoreConfig.reports.use_volume }}
+        {{- if and .Values.scratchVolume.fixGroupPermissions .Values.securityContext.fsGroup }}
         {{- include "enterprise.common.fixPermissionsInitContainer" . | nindent 8 }}
         {{- end -}}
-        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
         {{- if and .Values.cloudsql.enabled .Values.cloudsql.useSideCar }}
         {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
+        {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
     {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
-      {{- end }}
         - name: "{{ .Chart.Name }}-{{ $component | lower }}"
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- if or .Values.containerSecurityContext .Values.api.containerSecurityContext }}
+        {{- if or .Values.containerSecurityContext .Values.reports.containerSecurityContext }}
           securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
           command: ["/bin/sh", "-c"]
@@ -61,10 +59,6 @@ spec:
           envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           volumeMounts: {{- include "enterprise.common.volumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
-          {{- if .Values.anchoreConfig.reports.use_volume }}
-            - name: "anchore-scratch"
-              mountPath: {{ .Values.scratchVolume.mountPath }}
-          {{- end }}
           livenessProbe: {{- include "enterprise.common.livenessProbe" (merge (dict "component" $component) .) | nindent 12 }}
           readinessProbe: {{- include "enterprise.common.readinessProbe" (merge (dict "component" $component) .) | nindent 12 }}
         {{- with .Values.reports.resources }}
@@ -87,7 +81,7 @@ spec:
       targetPort: {{ .Values.reports.service.port }}
       protocol: TCP
     {{- if .Values.setServiceAppProtocol }}
-      appProtocol: {{ include "enterprise.setProtocol" . }}
+      appProtocol: {{ include "enterprise.setProtocol" (merge (dict "component" $component) .) }}
     {{- end }}
       {{ include "enterprise.service.nodePort" (merge (dict "component" $component) .) }}
   selector:

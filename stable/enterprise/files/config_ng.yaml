@@ -1,0 +1,18 @@
+# Anchore Enterprise NG Application Configuration
+#
+# Contains all configuration that can be reconciled with DB-stored config
+# by the config compiler.  Values here follow the priority:
+#   CONFIG_FILE > API > INHERITED_DEFAULT > DEFAULT
+#
+# Load this ALONGSIDE the bootstrap config (bootstrap.yaml).  The two are
+# deep-merged before validation.
+
+# Global logging settings (can be overridden per service under `services.*.logging`)
+logging:
+  {{- include "enterprise.common.ngLogging" (merge (dict "service" "") .) | nindent 2 }}
+
+domains:
+  gc:
+    job_framework_audit_retention_days: {{ .Values.anchoreConfig.domains.gc.job_framework_audit_retention_days }}
+
+# Per-service overrides are in files/{component}/config_ng.yaml

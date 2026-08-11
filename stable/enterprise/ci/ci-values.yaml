@@ -1,0 +1,11 @@
+postgresql:
+  externalEndpoint: "anchore-db-rw.anchore.svc.cluster.local"
+  auth:
+    username: anchore
+    password: anchore-postgres,123
+    database: anchore
+anchoreConfig:
+  default_admin_password: foobar
+# NOTE: no `image`/`ui.image` override here on purpose. ct install then uses the
+# default image from values.yaml. The workflows append a dev image only when the
+# PR targets the rc6x or nightly branches (see .github/workflows/*.yaml).

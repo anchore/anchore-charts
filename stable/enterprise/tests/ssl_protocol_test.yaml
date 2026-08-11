@@ -1,0 +1,93 @@
+suite: Per-service SSL protocol resolution
+# Anchore Enterprise resolves ssl_enable per-service first, then falls back to the root
+# anchoreConfig.server block (mirrors get_service_priority_config_value in the app). These
+# tests lock in that probe schemes / appProtocol / configs stay in lockstep with that rule,
+# including the "per-service false overrides a true root" case that plain dict merge drops.
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+tests:
+  # ---- probe scheme (legacy service: policy_engine); Deployment is document 0 ----
+  - it: legacy probe scheme is HTTP by default (root ssl off)
+    template: templates/policyengine_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTP
+
+  - it: legacy probe scheme follows root ssl_enable
+    template: templates/policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.server.ssl_enable: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTPS
+
+  - it: legacy probe scheme follows a per-service override (root off, service on)
+    template: templates/policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policy_engine.server.ssl_enable: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTPS
+
+  - it: a per-service false overrides a true root (probe goes back to HTTP)
+    template: templates/policyengine_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.server.ssl_enable: true
+      anchoreConfig.policy_engine.server.ssl_enable: false
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTP
+
+  - it: a per-service override does not affect a sibling service
+    template: templates/catalog_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.policy_engine.server.ssl_enable: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTP
+
+  # simpleQueue's camelCase component name must map to the "simplequeue" config key
+  - it: simplequeue probe scheme follows its per-service override (camelCase->config-key map)
+    template: templates/simplequeue_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.simplequeue.server.ssl_enable: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTPS
+
+  # ---- ng service (component_catalog): probe scheme AND rendered config agree ----
+  - it: ng probe scheme follows the per-service override
+    template: templates/componentcatalog_deployment.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server.ssl_enable: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTPS
+
+  # bootstrap configmap (document 0) carries the server block with ssl_enable
+  - it: ng rendered config ssl_enable matches the per-service override
+    template: templates/configmaps/componentcatalog_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.component_catalog.server.ssl_enable: true
+    asserts:
+      - matchRegex:
+          path: data["bootstrap_ng.yaml"]
+          pattern: "ssl_enable: true"

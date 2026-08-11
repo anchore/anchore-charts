@@ -24,6 +24,10 @@ chart:
   version: 9.9.9
   appVersion: 9.9.9
 set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 
@@ -48,7 +52,6 @@ test_templates: &test_templates
   - reportsworker_deployment.yaml
   - simplequeue_deployment.yaml
   - ui_deployment.yaml
-  - hooks/pre-upgrade/upgrade_job.yaml
   - datasyncer_deployment.yaml
 
 deployment_templates: &deployment_templates
@@ -142,7 +145,6 @@ tests:
       - policyengine_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
-      - hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -166,7 +168,6 @@ tests:
       - policyengine_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
-      - hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
       - isSubset:
@@ -191,7 +192,6 @@ tests:
       - policyengine_deployment.yaml
       - reports_deployment.yaml
       - simplequeue_deployment.yaml
-      - hooks/pre-upgrade/upgrade_job.yaml
     documentIndex: 0
     asserts:
       - isNotSubset:
@@ -200,6 +200,31 @@ tests:
             envFrom:
               - configMapRef:
                   name: test-release-enterprise-config-env-vars
+              - secretRef:
+                  name: myExistingSecretName
+
+  - it: should render hook envFrom with hooks secret
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - secretRef:
+                  name: test-release-enterprise-hooks
+
+  - it: should render hook envFrom with existing secret
+    set:
+      useExistingSecrets: true
+      existingSecretName: "myExistingSecretName"
+    template: hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
               - secretRef:
                   name: myExistingSecretName
 
@@ -878,7 +903,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_DB_HOST: test-release-postgresql
+            ANCHORE_DB_HOST: test-postgresql
         count: 1
         any: true
 
@@ -887,8 +912,6 @@ tests:
     set:
       postgresql:
         externalEndpoint: my-endpoint
-        cloudsql:
-          enabled: true
     templates:
       - anchore_secret.yaml
     documentIndex: 0
@@ -899,10 +922,6 @@ tests:
             ANCHORE_DB_HOST: my-endpoint
         count: 1
         any: true
-      - isNotSubset:
-          path: stringData
-          content:
-            ANCHORE_DB_HOST: localhost
 
   - it: should render dbHostname with cloudsql enabled
     set:
@@ -919,43 +938,10 @@ tests:
         count: 1
         any: true
 
-  - it: should render default dbHostname with postgresql disabled, postgresql externalEndpoint not defined, and cloudsql disabled
-    set:
-      postgresql:
-        enabled: false
-        externalEndpoint: ""
-      cloudsql:
-        enabled: false
-    templates:
-      - anchore_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_DB_HOST: test-release-postgresql
-        count: 1
-        any: true
-
-  - it: should render dbHostname for ui_secret.yaml
-    templates:
-      - ui_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@test-release-postgresql/anchore
-        count: 1
-        any: true
-
-  - it: should render dbHostname with externalEndpoint defined and postgresql enabled for ui_secret.yaml
+  - it: should render dbHostname with externalEndpoint defined for ui_secret.yaml
     set:
       postgresql:
         externalEndpoint: my-endpoint
-        chartEnabled: true
-        cloudsql:
-          enabled: true
     templates:
       - ui_secret.yaml
     documentIndex: 0
@@ -963,34 +949,12 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@my-endpoint/anchore
-        count: 1
-        any: true
-      - isNotSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@localhost/anchore
-
-  - it: should render dbHostname with externalEndpoint defined and postgresql disabled for ui_secret.yaml
-    set:
-      postgresql:
-        externalEndpoint: my-endpoint
-
-    templates:
-      - ui_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@my-endpoint/anchore
+            ANCHORE_APPDB_URI: postgresql://test-user:test-password@my-endpoint/test-db
         count: 1
         any: true
 
-  - it: should render dbHostname with cloudsql enabled and postgresql disabled for ui_secret.yaml
+  - it: should render dbHostname with cloudsql enabled for ui_secret.yaml
     set:
-      postgresql:
-        chartEnabled: false
       cloudsql:
         enabled: true
     templates:
@@ -1000,25 +964,7 @@ tests:
       - isSubset:
           path: stringData
           content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@127.0.0.1/anchore
-        count: 1
-        any: true
-
-  - it: should render default dbHostname with postgresql disabled, postgresql externalEndpoint not defined, and cloudsql disabled for ui_secret.yaml
-    set:
-      postgresql:
-        enabled: false
-        externalEndpoint: ""
-      cloudsql:
-        enabled: false
-    templates:
-      - ui_secret.yaml
-    documentIndex: 0
-    asserts:
-      - isSubset:
-          path: stringData
-          content:
-            ANCHORE_APPDB_URI: postgresql://anchore:anchore-postgres%2C123@test-release-postgresql/anchore
+            ANCHORE_APPDB_URI: postgresql://test-user:test-password@127.0.0.1/test-db
         count: 1
         any: true
 
@@ -1033,7 +979,6 @@ tests:
           path: stringData
           content:
             ANCHORE_ADMIN_PASSWORD: my-password
-            ANCHORECTL_PASSWORD: my-password
         count: 1
         any: true
 
@@ -1046,9 +991,9 @@ tests:
           path: stringData["ANCHORE_ADMIN_PASSWORD"]
           pattern: ^[a-zA-Z0-9]{32}$
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for deployments
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to true for deployments
     set:
-      anchoreConfig.internalServicesSSL.enabled: true
+      anchoreConfig.server.ssl_enable: true
     templates:
       - catalog_deployment.yaml
       - policyengine_deployment.yaml
@@ -1062,9 +1007,9 @@ tests:
           content:
             scheme: HTTPS
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for deployments
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to false for deployments
     set:
-      anchoreConfig.internalServicesSSL.enabled: false
+      anchoreConfig.server.ssl_enable: false
     templates:
       - catalog_deployment.yaml
       - policyengine_deployment.yaml
@@ -1078,9 +1023,9 @@ tests:
           content:
             scheme: HTTP
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to false for ui_configmap.yaml
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to false for ui_configmap.yaml
     set:
-      anchoreConfig.internalServicesSSL.enabled: false
+      anchoreConfig.server.ssl_enable: false
     templates:
       - ui_configmap.yaml
     documentIndex: 0
@@ -1095,9 +1040,9 @@ tests:
           path: data["config-ui.yaml"]
           pattern: "reports_uri: 'http://test-release-enterprise-api:8228/v2'"
 
-  - it: should set the correct protocol with anchoreConfig.internalServicesSSL.enabled to true for ui_configmap.yaml
+  - it: should set the correct protocol with anchoreConfig.server.ssl_enable to true for ui_configmap.yaml
     set:
-      anchoreConfig.internalServicesSSL.enabled: true
+      anchoreConfig.server.ssl_enable: true
     templates:
       - ui_configmap.yaml
     documentIndex: 0
@@ -1257,15 +1202,16 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "server:\\s*\\n\\s*process_worker_count: 453"
-          # this matches:
-          # server:
-          #   process_worker_count: 453
+          pattern: "process_worker_count: 453"
+      # global defaults should still be present via merge
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
 
-  - it: should render the service level server config as {} if not set (enterprise.anchoreConfig.anchoreService.server)
+  - it: should fall back to global server config if not set on service (enterprise.anchoreConfig.anchoreService.server)
     template: anchore_configmap.yaml
     documentIndex: 0
-    # default value is {}, so this is equivalent to
+    # default value is {}, so this falls back to anchoreConfig.server
     # set:
     #   anchoreConfig:
     #     policy_engine:
@@ -1273,9 +1219,145 @@ tests:
     asserts:
       - matchRegex:
           path: data["config.yaml"]
-          pattern: "server: {}"
-          # this matches:
-          # server: {}
+          pattern: "server:\\s*\\n\\s*max_connection_backlog: 2048"
+          # this matches the global anchoreConfig.server defaults falling through
+          # when no service-level server block is set
+
+  - it: should allow a service to add new server fields that merge with global defaults
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        policy_engine:
+          server:
+            custom_field: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "custom_field: custom_value"
+      # global defaults still present
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "process_worker_count: 1"
+
+  - it: should fall back to global server defaults when service server is empty
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.apiext.server: {}
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "process_worker_count: 1"
+
+  # ── Legacy Logging Merge ───────────────────────────────────────────────
+  - it: should merge a partial service logging override with global logging defaults
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        apiext:
+          logging:
+            log_level: DEBUG
+    asserts:
+      # overridden field
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?log_level: DEBUG"
+      # global defaults still present for apiext
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?colored_logging: false"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_access_logging: true"
+
+  - it: should fall back to global logging defaults when service logging is empty
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig.apiext.logging: {}
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?colored_logging: false"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_access_logging: true"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?structured_logging: false"
+
+  - it: should allow a service to add new logging fields that merge with global defaults
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        policy_engine:
+          logging:
+            custom_log_field: custom_value
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "custom_log_field: custom_value"
+      # global defaults still present
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "policy_engine:[\\s\\S]*?colored_logging: false"
+
+  # ── Combined logging + server override ─────────────────────────────────
+  - it: should merge both logging and server overrides independently on the same service
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        policy_engine:
+          logging:
+            log_level: WARNING
+          server:
+            process_worker_count: 10
+    asserts:
+      # logging override + global logging defaults
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "policy_engine:[\\s\\S]*?log_level: WARNING"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "policy_engine:[\\s\\S]*?colored_logging: false"
+      # server override + global server defaults
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "process_worker_count: 10"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "max_connection_backlog: 2048"
+
+  # ── Legacy vs NG coexistence ───────────────────────────────────────────
+  - it: legacy services should include legacy-only logging fields
+    template: anchore_configmap.yaml
+    documentIndex: 0
+    set:
+      anchoreConfig:
+        apiext:
+          logging:
+            log_level: DEBUG
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_access_logging"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_log_level"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "apiext:[\\s\\S]*?server_response_debug_logging"
+
 
   - it: should render the containerSecurityContext when set at a component level
     template: api_deployment.yaml

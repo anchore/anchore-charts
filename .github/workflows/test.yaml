@@ -13,18 +13,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetesVersion: ["v1.28.7", "v1.29.2", "v1.30.0", "v1.31.0", "v1.32.2", "v1.33.1"]
-    runs-on: ubuntu-latest
+        kubernetesVersion: ["v1.29.2", "v1.30.0", "v1.31.0", "v1.32.2", "v1.33.1"]
+        # runner drives both the GitHub host arch and, via kind, the node arch.
+        # On ubuntu-24.04-arm the kind nodes are native arm64, so worker nodes
+        # pull the arm64 variant of the Anchore (and dependency) images.
+        runner: ["ubuntu-latest", "ubuntu-24.04-arm"]
+        # Run arm64 only on the newest Kubernetes version to prove the arm image
+        # deploys without paying 5x arm runner cost; x86 keeps full version coverage.
+        exclude:
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.29.2" }
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.30.0" }
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.31.0" }
+          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.32.2" }
+    runs-on: ${{ matrix.runner }}
     steps:
     - name: Checkout
       uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
       with:
+        fetch-depth: 0
         persist-credentials: false
 
-    - name: Fetch history
-      run: git fetch --prune --unshallow
-
     - name: Shellcheck
+      # ludeeus/action-shellcheck ships an amd64 binary; it fails with
+      # "Exec format error" on arm64 runners. ShellCheck is arch-independent,
+      # so run it only on the x86 leg.
+      if: matrix.runner == 'ubuntu-latest'
       uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
 
     - uses: actions/setup-python@e9aba2c848f5ebd159c070c61ea2c4e2b122355e # v2.3.4
@@ -48,15 +61,43 @@ jobs:
         if [[ -n "$changed" ]]; then
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
         fi
+        # A chart whose ONLY changed files live under its ci/ directory (test values)
+        # doesn't need a chart version bump and shouldn't be linted/installed as if the
+        # chart itself changed. Collect those names so later steps can exclude them.
+        ci_only=""
+        enterprise_required=false
+        while IFS= read -r cp; do
+          [[ -z "$cp" ]] && continue
+          name="$(basename "$cp")"; path="stable/$name"
+          files=$(git diff --name-only "origin/$BASE_REF...HEAD" -- "$path/")
+          if [[ -n "$files" && -z "$(echo "$files" | grep -v "^$path/ci/" || true)" ]]; then
+            echo "Skipping '$name': only ci/ files changed (no chart version bump required)"
+            ci_only+="$name,"
+          elif [[ "$name" == "anchore-admission-controller" || "$name" == "k8s-inventory" ]]; then
+            enterprise_required=true
+          fi
+        done <<< "$changed"
+        echo "CI_ONLY_EXCLUDED=${ci_only%,}" >> "$GITHUB_OUTPUT"
+        if [[ "$enterprise_required" == true ]]; then
+          echo "ENTERPRISE_REQUIRED=true" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Run chart-testing (lint)
       id: lint
-      run: ct lint --config 'ct-config.yaml'
+      run: |
+        EXCLUDE=""
+        [[ -n "$CI_ONLY_EXCLUDED" ]] && EXCLUDE="--excluded-charts $CI_ONLY_EXCLUDED"
+        ct lint --config 'ct-config.yaml' --target-branch "$BASE_REF" $EXCLUDE
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
+        CI_ONLY_EXCLUDED: ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
 
     - name: Run chart-testing but skip version check (lint)
       id: lintskipversion
-      run: ct lint --config 'ct-config.yaml' --check-version-increment=false
+      run: ct lint --config 'ct-config.yaml' --check-version-increment=false --target-branch "$BASE_REF"
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref != 'main'
 
     - name: Install kind
@@ -83,47 +124,52 @@ jobs:
         DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
         DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
 
-    - name: Check if anchore-enterprise endpoint is required for admission controller chart
-      id: enterprise_required
-      env:
-        BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        HEAD_SHA: ${{ github.sha }}
-        HEAD_REF: ${{ github.event.pull_request.head.ref }}
+    - name: Install CNPG operator
+      if: steps.list-changed.outputs.CHANGED == 'true'
       run: |
-        if [[ -n $(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'anchore-admission-controller') ]]; then
-          echo "File in the 'stable/anchore-admission-controller' directory was changed. We need an Enterprise deployment"
-          echo "::set-output name=changed::true"
-        elif [[ -n $(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep 'k8s-inventory') ]]; then
-          echo "Branch: $HEAD_REF"
-          echo "File in the 'stable/k8s-inventory' directory was changed. We need an enterprise deployment"
-          echo "::set-output name=changed::true"
-        else
-          echo "No files in 'stable/anchore-admission-controller' or 'stable/k8s-inventory' directory were changed. Skipping enterprise deployment"
-          echo "::set-output name=changed::false"
-        fi
-      shell: bash
+        helm repo add cnpg https://cloudnative-pg.github.io/charts
+        helm repo update
+        helm install cnpg cnpg/cloudnative-pg --namespace cnpg-system --create-namespace --wait
 
-    - name: Deploy enterprise
-      if: steps.enterprise_required.outputs.changed == 'true'
+    - name: Deploy CNPG PostgreSQL cluster
+      if: steps.list-changed.outputs.CHANGED == 'true'
       run: |
+        kubectl apply -f scripts/cnpg/cnpg-cluster.yaml
+        kubectl wait --for=condition=Ready cluster/anchore-db -n anchore --timeout=300s
+        kubectl --namespace anchore get pods
+
+    - name: Deploy enterprise for admission-controller/k8s-inventory testing
+      if: steps.list-changed.outputs.ENTERPRISE_REQUIRED == 'true'
+      run: |
+        kubectl create namespace anchore-enterprise
+        echo "${ANCHORE_LICENSE}" | base64 --decode > /tmp/anchore-license
+        kubectl --namespace anchore-enterprise create secret generic anchore-enterprise-license --from-file=license.yaml=/tmp/anchore-license
+        kubectl --namespace anchore-enterprise create secret docker-registry anchore-enterprise-pullcreds --docker-server=docker.io --docker-username="${DOCKER_USER}" --docker-password="${DOCKER_PASS}"
+
+        kubectl apply -f scripts/cnpg/cnpg-cluster-ci-enterprise.yaml
+        kubectl wait --for=condition=Ready cluster/anchore-db -n anchore-enterprise --timeout=300s
 
         helm repo add anchore https://charts.anchore.io || echo "anchore repo already added"
         helm repo add bitnami https://charts.bitnami.com/bitnami || echo "bitnami repo already added"
         helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || echo "prometheus-community repo already added"
         helm repo update
-        helm install enterprise anchore/enterprise --namespace anchore -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
-        kubectl --namespace anchore get pods
+        helm install enterprise anchore/enterprise --namespace anchore-enterprise -f stable/anchore-admission-controller/ci/enterprise-vals.yaml --wait
+        kubectl --namespace anchore-enterprise get pods
+      env:
+        ANCHORE_LICENSE: ${{ secrets.B64_ANCHORE_LICENSE }}
+        DOCKER_USER: ${{ secrets.ANCHOREREADONLY_DH_USERNAME }}
+        DOCKER_PASS: ${{ secrets.ANCHOREREADONLY_DH_PAT }}
 
     - name: Update to rc image if needed
-      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x'  }}
+      if: ${{ github.event.pull_request.base.ref == 'rc6x' || github.ref_name == 'rc6x'  }}
       env:
         HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
         echo "Branch: $HEAD_REF"
-        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
-        echo 'ui:' >> stable/enterprise/ci/rc-values.yaml
-        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/rc-values.yaml
-        echo "Appended to stable/enterprise/ci/rc-values.yaml"
+        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/ci-values.yaml
+        echo 'ui:' >> stable/enterprise/ci/ci-values.yaml
+        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/ci-values.yaml
+        echo "Appended to stable/enterprise/ci/ci-values.yaml"
 
     - name: Update to nightly image if needed
       if: ${{ github.event.pull_request.base.ref == 'nightly' || github.ref_name == 'nightly' }}
@@ -131,11 +177,37 @@ jobs:
         HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
         echo "Branch: $HEAD_REF"
-        echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
-        echo 'ui:' >> stable/enterprise/ci/nightly-values.yaml
-        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/nightly-values.yaml
-        echo "Appended to stable/enterprise/ci/nightly-values.yaml"
+        echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/ci-values.yaml
+        echo 'ui:' >> stable/enterprise/ci/ci-values.yaml
+        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/ci-values.yaml
+        echo "Appended to stable/enterprise/ci/ci-values.yaml"
 
     - name: Run chart-testing
       if: steps.list-changed.outputs.CHANGED == 'true'
-      run: ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+      env:
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
+        CI_ONLY_EXCLUDED: ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}
+      run: |
+        CI_ONLY="$CI_ONLY_EXCLUDED"
+        changed_charts=$(ct list-changed --config ct-config.yaml --target-branch "$BASE_REF")
+        # Drop charts whose only changes were under ci/ — nothing to install-test for them.
+        # (ct install recomputes changes internally, so they must also be passed via
+        # --excluded-charts below to actually keep ct from installing them.)
+        if [[ -n "$CI_ONLY" ]]; then
+          IFS=',' read -ra _cio <<< "$CI_ONLY"
+          for n in "${_cio[@]}"; do changed_charts=$(echo "$changed_charts" | grep -vE "(^|/)$n$" || true); done
+        fi
+        other_charts=$(echo "$changed_charts" | grep -v 'anchore-admission-controller' || true)
+        if echo "$changed_charts" | grep -q 'anchore-admission-controller'; then
+          if [[ -n "$other_charts" ]]; then
+            echo "Admission controller changed alongside other charts. Installing other charts first, then admission controller."
+            excl="anchore-admission-controller"; [[ -n "$CI_ONLY" ]] && excl="$excl,$CI_ONLY"
+            ct install --config ct-config.yaml --target-branch "$BASE_REF" --excluded-charts "$excl" --helm-extra-args "--timeout 1200s"
+          fi
+          ct install --config ct-config.yaml --target-branch "$BASE_REF" --charts stable/anchore-admission-controller --helm-extra-args "--timeout 1200s"
+        elif [[ -n "$changed_charts" ]]; then
+          excl_arg=""; [[ -n "$CI_ONLY" ]] && excl_arg="--excluded-charts $CI_ONLY"
+          ct install --config ct-config.yaml --target-branch "$BASE_REF" $excl_arg --helm-extra-args "--timeout 1200s"
+        else
+          echo "No installable chart changes (only ci/ files changed) — skipping ct install."
+        fi

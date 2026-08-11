@@ -2,6 +2,7 @@ suite: PreHook Upgrade Job Tests
 templates:
   - templates/hooks/pre-upgrade/upgrade_job.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml
+  - templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
   - anchore_secret.yaml
   - templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
   - analyzer_deployment.yaml
@@ -39,6 +40,10 @@ chart:
   version: 9.9.9
   appVersion: 9.9.9
 set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
 upgrade-resource: &upgrade-resources
@@ -166,10 +171,10 @@ tests:
             "helm.sh/hook": pre-upgrade
             "helm.sh/hook-weight": "3"
 
-  - it: should render file checksum/secret annotation
+  - it: should not render file checksum/secret annotation
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
     asserts:
-      - exists:
+      - notExists:
           path: spec.template.metadata.annotations['checksum/secrets']
 
   - it: should render component serviceAccountName
@@ -288,26 +293,50 @@ tests:
           pattern:  anchore-enterprise-manager db --db-use-ssl --db-connect postgresql:\/\/\"\$\{ANCHORE_DB_USER\}\":\"\$\{ANCHORE_DB_PASSWORD\}\"@\"\$\{ANCHORE_DB_HOST\}\":\"\$\{ANCHORE_DB_PORT\}\"\/\"\$\{ANCHORE_DB_NAME\}\"\?sslmode\=verify-full\\&sslrootcert\=\/home\/anchore\/certs\/test-root\.crt upgrade --dontask;
         count: 1
 
-  - it: should render upgradeJob component environment variables
+  - it: should mount certs into the wait-for-db init container when certStoreSecretName is set
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
     set:
-      upgradeJob.extraEnv:
-        - name: upgradeJob
-          value: test
-        - name: test
-          value: foobar
+      certStoreSecretName: test-certs
+      upgradeJob.forceScaleDownDeployment: true
     asserts:
+      # initContainers[0] is wait-for-db, which builds sslrootcert=/home/anchore/certs/<file>
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-db
       - contains:
-          path: spec.template.spec.containers[0].env
+          path: spec.template.spec.initContainers[0].volumeMounts
           content:
-            name: upgradeJob
-            value: test
-        count: 1
-      - contains:
-          path: spec.template.spec.containers[0].env
+            name: certs
+            mountPath: /home/anchore/certs/
+            readOnly: true
+          count: 1
+
+  - it: should not mount certs into the wait-for-db init container when certStoreSecretName is unset
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.forceScaleDownDeployment: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-db
+      - notContains:
+          path: spec.template.spec.initContainers[0].volumeMounts
           content:
-            name: test
-            value: foobar
+            name: certs
+            mountPath: /home/anchore/certs/
+            readOnly: true
+
+  - it: should render hook envFrom with hooks secret
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - secretRef:
+                  name: test-release-enterprise-hooks
 
   - it: should render component resource requests & limits
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
@@ -594,7 +623,7 @@ tests:
           pattern:  migrate
         count: 1
 
-  - it: migration job should use the upgrade job's service account name
+  - it: migration job uses its own service account (decoupled from the upgrade job)
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
     set:
       osaaMigrationJob:
@@ -602,7 +631,70 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
-          value: test-release-enterprise-upgrade-sa
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration job still gets its service account when the upgrade job is disabled
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        enabled: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration job still gets its service account when the upgrade job uses the post-upgrade hook
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        usePostUpgradeHook: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration RBAC (SA + Role + RoleBinding) renders even when the upgrade job is disabled
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        enabled: false
+    asserts:
+      - hasDocuments:
+          count: 3
+      - documentIndex: 0
+        isKind:
+          of: ServiceAccount
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: test-release-enterprise-osaa-migration-sa
+
+  - it: migration RBAC renders even when the upgrade job uses the post-upgrade hook
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+      upgradeJob:
+        usePostUpgradeHook: true
+    asserts:
+      - hasDocuments:
+          count: 3
+
+  - it: migration RBAC is not created when disabled or when bringing your own SA
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: false
+    asserts:
+      - hasDocuments:
+          count: 0
 
   - it: migration job should use the component level service account name if set
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml

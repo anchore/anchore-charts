@@ -35,13 +35,23 @@ spec:
             defaultMode: 0755
         - name: config-volume
           configMap:
-            name: {{ template "enterprise.fullname" . }}
+            name: {{ template "enterprise.hooks.fullname" . }}-config
         - name: dest-config
           configMap:
             name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
             items:
             - key: "config.yaml"
               path: "dest-config.yaml"
+        # enterprise.common.volumeMounts (used by the migrate container below) always
+        # mounts anchore-scratch, so the volume must be defined here or the pod spec is
+        # invalid. osaaMigrationJob has no per-component scratchVolume, so honor the
+        # global scratchVolume.details and otherwise default to an emptyDir.
+        - name: anchore-scratch
+          {{- if .Values.scratchVolume.details }}
+          {{- toYaml .Values.scratchVolume.details | nindent 10 }}
+          {{- else }}
+          {{- "emptyDir: {}" | nindent 10 }}
+          {{- end }}
         {{- with .Values.certStoreSecretName }}
         - name: certs
           secret:
@@ -51,6 +61,9 @@ spec:
         - name: {{ .Values.cloudsql.serviceAccSecretName }}
           secret:
             secretName: {{ .Values.cloudsql.serviceAccSecretName }}
+        {{- end }}
+        {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+        {{- include "enterprise.common.writableVolumes" (merge (dict "component" $component) .) | nindent 8 }}
         {{- end }}
       initContainers:
         - name: scale-down-anchore
@@ -62,40 +75,44 @@ spec:
               while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
                 echo 'waiting for pods to go down...' && sleep 5;
               done
-        {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
+        {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
+          securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
         {{- with .Values.osaaMigrationJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
         {{- end }}
         {{- if .Values.cloudsql.enabled  }}
-        {{- include "enterprise.common.initCloudsqlContainer" . | nindent 8 }}
+        {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
         {{- end }}
         - name: wait-for-db
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           command: ["/bin/bash", "-c"]
           args:
             - |
               while true; do
                 CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-                if [[ ${ANCHORE_DB_SSL_MODE} != null ]]; then
-                  CONNSTR=${CONNSTR}?sslmode=${ANCHORE_DB_SSL_MODE}
-                fi
-                if [[ ${ANCHORE_DB_SSL_ROOT_CERT} != null ]]; then
-                  CONNSTR=${CONNSTR}\&sslrootcert=${ANCHORE_DB_SSL_ROOT_CERT}
-                fi
+              {{- if .Values.anchoreConfig.database.ssl }}
+                CONNSTR=${CONNSTR}?sslmode={{ .Values.anchoreConfig.database.sslMode }}
+              {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
+                CONNSTR=${CONNSTR}\&sslrootcert=/home/anchore/certs/{{ . }}
+              {{- end }}
+              {{- end }}
                 err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-                if [[ !$err ]]; then
+                if [[ -z "$err" ]]; then
                   echo "Database is ready"
                   exit 0
                 fi
                 echo "Database is not ready yet, sleeping 10 seconds..."
                 sleep 10
               done
-          {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
+          {{- if eq (include "enterprise.common.readOnlyRootFilesystem" (merge (dict "component" $component) .)) "true" }}
+          volumeMounts: {{- include "enterprise.common.writableVolumeMounts" (merge (dict "component" $component) .) | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
+          securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
           {{- end }}
           {{- with .Values.osaaMigrationJob.resources }}
           resources: {{- toYaml . | nindent 12 }}
@@ -110,10 +127,10 @@ spec:
         - name: migrate-analysis-archive
           image: {{ include "enterprise.common.image" . | trim }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-        {{- with .Values.containerSecurityContext }}
-          securityContext: {{ toYaml . | nindent 12 }}
+        {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
+          securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
-          envFrom: {{- include "enterprise.common.envFrom" . | nindent 12 }}
+          envFrom: {{- include "enterprise.common.envFrom" (merge (dict "hook" true) .) | nindent 12 }}
           env: {{- include "enterprise.common.environment" (merge (dict "component" $component) .) | nindent 12 }}
           {{- if and .Values.osaaMigrationJob.objectStoreMigration.run .Values.osaaMigrationJob.objectStoreMigration.object_store }}
             {{- include "enterprise.migrationStorageCredentialEnv" (dict "storeConfig" .Values.osaaMigrationJob.objectStoreMigration.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) | nindent 12 }}
