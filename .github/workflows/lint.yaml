@@ -37,10 +37,27 @@ jobs:
         if [[ -n "$changed" ]]; then
           echo "CHANGED=true" >> "$GITHUB_OUTPUT"
         fi
+        # A chart whose ONLY changed files live under its ci/ directory (test values)
+        # doesn't need a chart version bump and shouldn't be version-checked. Collect
+        # those names so the lint step below can exclude them.
+        ci_only=""
+        while IFS= read -r cp; do
+          [[ -z "$cp" ]] && continue
+          name="$(basename "$cp")"; path="stable/$name"
+          files=$(git diff --name-only "origin/$BASE_REF...HEAD" -- "$path/")
+          if [[ -n "$files" && -z "$(echo "$files" | grep -v "^$path/ci/" || true)" ]]; then
+            echo "Skipping '$name': only ci/ files changed (no chart version bump required)"
+            ci_only+="$name,"
+          fi
+        done <<< "$changed"
+        echo "CI_ONLY_EXCLUDED=${ci_only%,}" >> "$GITHUB_OUTPUT"
 
     - name: Run chart-testing (lint)
       id: lint
-      run: ct lint --config 'ct-config.yaml'
+      run: |
+        EXCLUDE=""
+        [[ -n "${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}" ]] && EXCLUDE="--excluded-charts ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}"
+        ct lint --config 'ct-config.yaml' $EXCLUDE
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
 
     - name: Run chart-testing but skip version check (lint)
