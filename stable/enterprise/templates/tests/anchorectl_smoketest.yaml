@@ -83,8 +83,20 @@ spec:
               echo "smoke tests still failing after $n attempts. Exiting."
               exit 1
             fi
-            echo "smoke-tests attempt $n failed. Waiting 5m for the system to settle before retrying..."
-            sleep 300
+            # A failed run leaves the 'smoke-test-account' behind; the rerun can't
+            # recreate it until the system finishes deleting it. Poll account list and
+            # only retry once that account is gone (bounded so we never hang forever).
+            echo "smoke-tests attempt $n failed. Waiting for 'smoke-test-account' to be removed before retrying..."
+            waited=0
+            while anchorectl account list | grep -q 'smoke-test-account'; do
+              if [ $waited -ge 600 ]; then
+                echo "'smoke-test-account' still present after ${waited}s; retrying anyway."
+                break
+              fi
+              echo "'smoke-test-account' still present; re-checking in 15s..."
+              sleep 15
+              waited=$((waited + 15))
+            done
           done
           echo "Smoke tests passed."
 
