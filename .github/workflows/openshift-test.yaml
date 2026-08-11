@@ -78,10 +78,11 @@ jobs:
       id: lint
       run: |
         EXCLUDE=""
-        [[ -n "${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}" ]] && EXCLUDE="--excluded-charts ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}"
+        [[ -n "$CI_ONLY_EXCLUDED" ]] && EXCLUDE="--excluded-charts $CI_ONLY_EXCLUDED"
         ct lint --config 'ct-config.yaml' --target-branch "$BASE_REF" $EXCLUDE
       env:
         BASE_REF: ${{ github.event.pull_request.base.ref }}
+        CI_ONLY_EXCLUDED: ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
 
     - name: Run chart-testing but skip version check (lint)
@@ -185,7 +186,7 @@ jobs:
         kubectl --namespace anchore-enterprise get pods
 
     - name: Update to rc image if needed
-      if: ${{ github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x' }}
+      if: ${{ github.event.pull_request.base.ref == 'rc6x' || github.ref_name == 'rc6x' }}
       env:
         HEAD_REF: ${{ github.event.pull_request.head.ref }}
         CLUSTER_DISTRIBUTION: ${{ matrix.cluster.distribution }}
@@ -244,7 +245,7 @@ jobs:
             popd
           fi
         done
-        CI_ONLY="${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}"
+        CI_ONLY="$CI_ONLY_EXCLUDED"
         changed_charts=$(ct list-changed --config ct-config.yaml --target-branch "$TARGET_BRANCH")
         # Drop charts whose only changes were under ci/ — nothing to install-test for them.
         # (ct install recomputes changes internally, so they must also be passed via
@@ -271,6 +272,7 @@ jobs:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
         CLUSTER_DISTRIBUTION: ${{ matrix.cluster.distribution }}
+        CI_ONLY_EXCLUDED: ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}
 
     - name: Remove Cluster
       if: steps.list-changed.outputs.CHANGED == 'true'

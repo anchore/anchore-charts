@@ -6,6 +6,6 @@ postgresql:
     database: anchore
 anchoreConfig:
   default_admin_password: foobar
-image: anchore/enterprise-dev:nightly
-ui:
-  image: anchore/anchore-on-prem-ui-dev:nightly
+# NOTE: no `image`/`ui.image` override here on purpose. ct install then uses the
+# default image from values.yaml. The workflows append a dev image only when the
+# PR targets the rc6x or nightly branches (see .github/workflows/*.yaml).

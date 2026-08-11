@@ -54,9 +54,11 @@ jobs:
 
     - name: Run chart-testing (lint)
       id: lint
+      env:
+        CI_ONLY_EXCLUDED: ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}
       run: |
         EXCLUDE=""
-        [[ -n "${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}" ]] && EXCLUDE="--excluded-charts ${{ steps.list-changed.outputs.CI_ONLY_EXCLUDED }}"
+        [[ -n "$CI_ONLY_EXCLUDED" ]] && EXCLUDE="--excluded-charts $CI_ONLY_EXCLUDED"
         ct lint --config 'ct-config.yaml' $EXCLUDE
       if: steps.list-changed.outputs.CHANGED == 'true' && github.event.pull_request.base.ref == 'main'
 

@@ -86,10 +86,10 @@ jobs:
         helm repo update
         helm dependency build ./stable/enterprise
 
-    # Match how the kind test.yaml selects dev images for the rc5x / nightly branches, so the
+    # Match how the kind test.yaml selects dev images for the rc6x / nightly branches, so the
     # read-only test exercises the same image the rest of CI does.
     - name: Update to rc image if needed
-      if: ${{ steps.changed.outputs.CHANGED == 'true' && (github.event.pull_request.base.ref == 'rc5x' || github.ref_name == 'rc5x') }}
+      if: ${{ steps.changed.outputs.CHANGED == 'true' && (github.event.pull_request.base.ref == 'rc6x' || github.ref_name == 'rc6x') }}
       run: |
         {
           echo 'image: "docker.io/anchore/enterprise-dev:rc"'
