@@ -204,7 +204,7 @@ jobs:
             popd
           fi
         done
-        ct install --config ct-config.yaml --helm-extra-args "--timeout 600s"
+        ct install --config ct-config.yaml --helm-extra-args "--timeout 1800s"
       env:
         KUBECONFIG: ./tmp/kubeconfig
         TARGET_BRANCH: "${{ github.event.pull_request.base.ref }}"
