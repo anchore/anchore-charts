@@ -618,7 +618,7 @@ should render proper initContainers:
       envFrom:
         - secretRef:
             name: test-release-enterprise-hooks
-      image: docker.io/anchore/enterprise@sha256:ed9943194287f4240f6f2c81efcec417ba9bae206cc15aba4ae348007e066614
+      image: docker.io/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
       imagePullPolicy: IfNotPresent
       name: wait-for-db
       volumeMounts:
