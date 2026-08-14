@@ -21,11 +21,11 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise@sha256:<v6.1.1 sha>
+image: docker.io/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
   # registry: docker.io
   # repository: anchore/enterprise
   # tag: "v6.1.1"
-  # digest: sha256:<v6.1.1 sha>
+  # digest: sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
