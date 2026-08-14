@@ -1,7 +1,7 @@
 apiVersion: v2
 name: enterprise
-version: "3.26.0"
-appVersion: "5.27.2"
+version: "4.2.0"
+appVersion: "6.1.0"
 kubeVersion: 1.23.x - 1.36.x || 1.23.x-x - 1.36.x-x
 description: |
   Anchore Enterprise is a complete container security workflow solution for professional teams. Easily integrating with CI/CD systems,
@@ -29,10 +29,6 @@ maintainers:
     email: jesse.tamburino@anchore.com
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
 dependencies:
-  - name: postgresql
-    version: "~12.5"
-    repository: "oci://registry-1.docker.io/bitnamicharts"
-    condition: postgresql.chartEnabled
   - name: redis
     version: "~17.11"
     repository: "oci://registry-1.docker.io/bitnamicharts"

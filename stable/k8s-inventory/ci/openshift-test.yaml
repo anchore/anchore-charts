@@ -9,6 +9,6 @@ podSecurityContext:
 
 k8sInventory:
   anchore:
-    url: http://enterprise-enterprise-api:8228
+    url: http://enterprise-enterprise-api.anchore-enterprise.svc.cluster.local:8228
     user: admin
     password: foobar

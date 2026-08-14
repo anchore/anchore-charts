@@ -1,2 +1,8 @@
 anchoreConfig:
   default_admin_password: foobar
+postgresql:
+  externalEndpoint: "anchore-db-rw.anchore-enterprise.svc.cluster.local"
+  auth:
+    username: anchore
+    password: anchore-postgres,123
+    database: anchore

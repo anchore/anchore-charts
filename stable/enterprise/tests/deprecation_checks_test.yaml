@@ -1,0 +1,63 @@
+suite: Deprecation and removed-value checks
+templates:
+  - templates/anchore_configmap.yaml
+tests:
+  - it: reports every deprecated value and removed extraEnv var in a single aggregated failure
+    set:
+      postgresql.chartEnabled: true
+      anchoreConfig.apiext.external:
+        enabled: true
+      anchoreConfig.user_authentication.oauth.enabled: true
+      anchoreConfig.user_authentication.hashed_passwords: true
+      anchoreConfig.webhooks:
+        example: value
+      upgradeJob.kubectlImage: some/kubectl:1.30
+      osaaMigrationJob.kubectlImage: some/kubectl:1.30
+      startMigrationPod: true
+      migrationPodImage: some/postgres:13
+      migrationAnchoreEngineSecretName: engine-secret
+      extraEnv:
+        - name: ANCHORE_DB_SSL
+          value: "true"
+      analyzer:
+        extraEnv:
+          - name: ANCHORE_HINTS_ENABLED
+            value: "true"
+    asserts:
+      # A single render must surface ALL of the following at once (not one-by-one):
+      - failedTemplate:
+          errorPattern: "postgresql.chartEnabled is no longer supported"
+      - failedTemplate:
+          errorPattern: "anchoreConfig.apiext.external is no longer supported"
+      - failedTemplate:
+          errorPattern: "user_authentication.oauth.enabled is no longer supported"
+      - failedTemplate:
+          errorPattern: "user_authentication.hashed_passwords is no longer supported"
+      - failedTemplate:
+          errorPattern: "anchoreConfig.webhooks is no longer supported"
+      - failedTemplate:
+          errorPattern: "upgradeJob.kubectlImage is no longer supported"
+      - failedTemplate:
+          errorPattern: "osaaMigrationJob.kubectlImage is no longer supported"
+      - failedTemplate:
+          errorPattern: "startMigrationPod is no longer supported"
+      - failedTemplate:
+          errorPattern: "migrationPodImage is no longer supported"
+      - failedTemplate:
+          errorPattern: "migrationAnchoreEngineSecretName is no longer supported"
+      - failedTemplate:
+          errorPattern: "ANCHORE_HINTS_ENABLED. is no longer supported via analyzer.extraEnv"
+      - failedTemplate:
+          errorPattern: "ANCHORE_DB_SSL. is no longer supported via extraEnv"
+
+  - it: renders normally when no deprecated values are set
+    set:
+      postgresql.externalEndpoint: db.example.com
+      postgresql.auth.username: anchore
+      postgresql.auth.password: anchore
+      postgresql.auth.database: anchore
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap

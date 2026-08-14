@@ -1,0 +1,5 @@
+{{- $component := "componentCatalog" -}}
+
+{{ include "enterprise.bootstrapConfigMap" (merge (dict "component" $component "configComponent" "component_catalog") .) }}
+---
+{{ include "enterprise.ngConfigMap" (merge (dict "component" $component "configComponent" "component_catalog") .) }}

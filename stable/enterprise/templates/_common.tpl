@@ -137,17 +137,30 @@ Setup the common docker-entrypoint command for all Anchore Enterprise containers
 Setup the common envFrom configs
 */}}
 {{- define "enterprise.common.envFrom" -}}
+{{- if and .hook .Values.injectSecretsViaEnv -}}
+{{/* For hooks the configMapRef is skipped, and secretRefs are skipped whenever
+     secrets are injected via env. That leaves nothing to emit, so output an
+     explicit empty list to keep call sites' `envFrom:` a valid list rather than
+     rendering `envFrom: null`. */}}
+[]
+{{- else -}}
+{{- if not .hook }}
 - configMapRef:
     name: {{ .Release.Name }}-enterprise-config-env-vars
+{{- end }}
 {{- if not .Values.injectSecretsViaEnv }}
   {{- if .Values.useExistingSecrets }}
 - secretRef:
     name: {{ .Values.existingSecretName }}
+  {{- else if .hook }}
+- secretRef:
+    name: {{ template "enterprise.hooks.fullname" . }}
   {{- else }}
 - secretRef:
     name: {{ template "enterprise.fullname" . }}
   {{- end }}
 {{- end }}
+{{- end -}}
 {{- end -}}
 
 
@@ -193,6 +206,7 @@ When calling this template, .component can be included in the context for compon
       fieldPath: metadata.name
 {{- include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.anchoreConfig.catalog.object_store "envPrefix" "ANCHORE_OBJECT_STORE" "storeName" "object_store" "context" .) }}
 {{- include "enterprise.storageCredentialEnv" (dict "storeConfig" .Values.anchoreConfig.catalog.analysis_archive "envPrefix" "ANCHORE_ANALYSIS_ARCHIVE" "storeName" "analysis_archive" "context" .) }}
+{{- include "enterprise.dbEncryptionKeyEnv" . }}
 {{- end -}}
 
 
@@ -346,34 +360,10 @@ based on component-specific or global settings
 
 
 {{/*
-Create an image specification template for kubectl that can override the default image
-based on component-specific or global settings
+Create an image specification template for kubectl
 */}}
 {{- define "enterprise.kubectl.image" -}}
-{{- $kubectlImage := .Values.kubectlImage }}
-{{- $legacyOsaa := .Values.osaaMigrationJob.kubectlImage }}
-{{- $legacyUpgrade := .Values.upgradeJob.kubectlImage }}
-{{- if $kubectlImage }}
-  {{ include "enterprise.renderImage" (dict "image" $kubectlImage) }}
-{{- else if and $legacyOsaa (eq (printf "%T" $legacyOsaa) "string") }}
-  {{ $legacyOsaa | trim }}
-{{- else if and $legacyUpgrade (eq (printf "%T" $legacyUpgrade) "string") }}
-  {{ $legacyUpgrade | trim }}
-{{- else }}
-  {{ fail "No valid kubectlImage found in Values." }}
-{{- end }}
-{{- end }}
-
-{{/*
-Display deprecation warnings if legacy kubectlImage values are set
-*/}}
-{{- define "enterprise.kubectl.deprecationWarnings" -}}
-{{- if .Values.osaaMigrationJob.kubectlImage }}
-{{ printf "NOTICE: 'osaaMigrationJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
-{{- if .Values.upgradeJob.kubectlImage }}
-{{ printf "NOTICE: 'upgradeJob.kubectlImage' is deprecated and will be removed in a future release. Use 'global.kubectlImage' instead." }}
-{{- end }}
+  {{ include "enterprise.renderImage" (dict "image" .Values.kubectlImage) }}
 {{- end }}
 
 {{/*
@@ -458,11 +448,24 @@ Setup the common anchore volume mounts
 - name: anchore-license
   mountPath: /home/anchore/license.yaml
   subPath: license.yaml
+{{- $ngComponents := list "componentCatalog" }}
+{{- if has $component $ngComponents }}
+- name: bootstrap-config-volume
+  mountPath: /config/bootstrap_ng.yaml
+  subPath: bootstrap_ng.yaml
+- name: config-volume
+  mountPath: /config/config_ng.yaml
+  subPath: config_ng.yaml
+{{- else }}
 - name: config-volume
   mountPath: /config/config.yaml
   subPath: config.yaml
+{{- end }}
 - name: anchore-scripts
   mountPath: /scripts
+- name: anchore-scratch
+  mountPath: {{ .Values.scratchVolume.mountPath }}
+{{- include "enterprise.common.writableVolumeMounts" (merge (dict "component" $component) .) }}
 {{- if .Values.certStoreSecretName }}
 - name: certs
   mountPath: /home/anchore/certs/
@@ -527,7 +530,15 @@ Setup the common anchore volumes
   configMap:
     name: {{ .Release.Name }}-enterprise-scripts
     defaultMode: 0755
-{{- if .Values.osaaMigrationJob.enabled }}
+{{- $ngComponents := list "componentCatalog" }}
+{{- if has $component $ngComponents }}
+- name: bootstrap-config-volume
+  configMap:
+    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }}-bootstrap
+- name: config-volume
+  configMap:
+    name: {{ template "enterprise.fullname" . }}-{{ $component | lower }}
+{{- else if .Values.osaaMigrationJob.enabled }}
 - name: config-volume
   configMap:
     name: {{ template "enterprise.osaaMigrationJob.fullname" . }}
@@ -546,6 +557,7 @@ Setup the common anchore volumes
   secret:
     secretName: {{ .Values.cloudsql.serviceAccSecretName }}
 {{- end }}
+{{- include "enterprise.common.writableVolumes" (merge (dict "component" $component) .) }}
 {{- end -}}
 
 {{/*
@@ -556,18 +568,71 @@ type: Recreate
 {{- end -}}
 
 {{/*
-Common server blocks
-When calling this template, .anchoreService can be included in the context for anchoreService specific server blocks
+External access configuration for a service.
+Renders external_hostname and external_port from the service's anchoreConfig.
+external_tls is derived from the root anchoreConfig.server.ssl_enable so it tracks
+the chart-wide TLS toggle without per-service duplication.
+{{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "apiext") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.external" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
+external_hostname: {{ $serviceConfig.external_hostname | toYaml }}
+external_port: {{ $serviceConfig.external_port | toYaml }}
+external_tls: {{ .Values.anchoreConfig.server.ssl_enable }}
+{{- end -}}
+
+{{/*
+Cycle timers configuration for a service.
+Renders cycle_timers from the service's anchoreConfig.
+{{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "analyzer") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.cycleTimers" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $serviceConfig := index .Values.anchoreConfig (print $anchoreService) -}}
+cycle_timers: {{- toYaml $serviceConfig.cycle_timers | nindent 2 }}
+{{- end -}}
+
+{{/*
+Common server blocks — merges component-level overrides on top of anchoreConfig.server.
 {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "policy_engine") .) }}
 */}}
 {{- define "enterprise.anchoreConfig.anchoreService.server" -}}
 {{- $anchoreService := .anchoreService -}}
-{{- $server := (index .Values.anchoreConfig (print $anchoreService)).server }}
-{{- if $server }}
+{{- $server := deepCopy .Values.anchoreConfig.server -}}
+{{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server (kindIs "map" $serviceCfg.server) -}}
+  {{/* deepCopy the service block: merge mutates its destination in place, and $serviceCfg.server is a live .Values reference that must not be mutated (it would leak across templates). */}}
+  {{- $server = merge (deepCopy $serviceCfg.server) $server -}}
+  {{/* merge/mergo skips zero-value sources, so a per-service ssl_enable=false would be clobbered by a truthy root. Set it explicitly, presence-based, to mirror the app's per-service-then-root resolution. */}}
+  {{- if hasKey $serviceCfg.server "ssl_enable" -}}
+    {{- $_ := set $server "ssl_enable" $serviceCfg.server.ssl_enable -}}
+  {{- end -}}
+{{- end -}}
 {{- toYaml $server | nindent 6 }}
-{{- else -}}
-{}{{- end }}
-{{- end }}
+{{- end -}}
+
+{{/*
+Return the ng-relevant server config for a service.
+Starts with the ng subset of anchoreConfig.server, then merges any component-level overrides on top.
+Component overrides can both override existing ng fields and add new ones (e.g. custom timeouts).
+Usage: {{- include "enterprise.anchoreConfig.anchoreService.ngServer" (merge (dict "anchoreService" "component_catalog") .) }}
+*/}}
+{{- define "enterprise.anchoreConfig.anchoreService.ngServer" -}}
+{{- $anchoreService := .anchoreService -}}
+{{- $server := .Values.anchoreConfig.server -}}
+{{- $ngFields := dict "process_worker_count" ($server.process_worker_count) "timeout_keep_alive" ($server.timeout_keep_alive) "ssl_cert" ($server.ssl_cert) "ssl_chain" ($server.ssl_chain) "ssl_enable" ($server.ssl_enable) "ssl_key" ($server.ssl_key) }}
+{{- $serviceCfg := index .Values.anchoreConfig (print $anchoreService) -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "server") $serviceCfg.server (kindIs "map" $serviceCfg.server) -}}
+  {{/* deepCopy the service block so merge does not mutate the live .Values reference in place. */}}
+  {{- $ngFields = merge (deepCopy $serviceCfg.server) $ngFields -}}
+  {{/* set ssl_enable explicitly (presence-based) since merge/mergo would drop a per-service false. */}}
+  {{- if hasKey $serviceCfg.server "ssl_enable" -}}
+    {{- $_ := set $ngFields "ssl_enable" $serviceCfg.server.ssl_enable -}}
+  {{- end -}}
+{{- end -}}
+{{- toYaml $ngFields | nindent 6 }}
+{{- end -}}
 
 {{/*
 containerSecurityContext helper to include security context if defined. service level context takes precedence over toplevel context.
@@ -582,6 +647,90 @@ When calling this template, .component can be included in the context for compon
 {{- else if .Values.containerSecurityContext }}
   {{- toYaml .Values.containerSecurityContext }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Return "true" when the effective container security context for the component enables
+readOnlyRootFilesystem. Mirrors enterprise.common.containerSecurityContext resolution:
+a component-level containerSecurityContext fully replaces the top-level one.
+Used to gate the writable emptyDir volumes Anchore requires on a read-only root filesystem.
+*/}}
+{{- define "enterprise.common.readOnlyRootFilesystem" -}}
+{{- $component := .component -}}
+{{- $componentCtx := index .Values (print $component) -}}
+{{- $ctx := dict -}}
+{{- if and $componentCtx $componentCtx.containerSecurityContext -}}
+  {{- $ctx = $componentCtx.containerSecurityContext -}}
+{{- else if .Values.containerSecurityContext -}}
+  {{- $ctx = .Values.containerSecurityContext -}}
+{{- end -}}
+{{- if $ctx.readOnlyRootFilesystem -}}true{{- end -}}
+{{- end -}}
+
+{{/*
+Writable emptyDir volumes required when the container root filesystem is read-only.
+Anchore writes to these paths at runtime (verified against the running image):
+  /var/log/anchore        - logger touches a file here at import time (every service)
+  /tmp                    - file-logging base path (/tmp/anchore-logs) and tempfiles
+  {{ .Values.anchoreConfig.service_dir }}  - service_dir: host_id.json, default policy
+Rendered only when readOnlyRootFilesystem is enabled, so default installs are unchanged.
+*/}}
+{{- define "enterprise.common.writableVolumes" -}}
+{{- if eq (include "enterprise.common.readOnlyRootFilesystem" .) "true" }}
+- name: anchore-logs
+  emptyDir: {}
+- name: anchore-tmp
+  emptyDir: {}
+- name: anchore-service-dir
+  emptyDir: {}
+{{- end }}
+{{- end -}}
+
+{{/*
+Container mounts paired with enterprise.common.writableVolumes. Gated identically.
+*/}}
+{{- define "enterprise.common.writableVolumeMounts" -}}
+{{- if eq (include "enterprise.common.readOnlyRootFilesystem" .) "true" }}
+- name: anchore-logs
+  mountPath: /var/log/anchore
+- name: anchore-tmp
+  mountPath: /tmp
+- name: anchore-service-dir
+  mountPath: {{ .Values.anchoreConfig.service_dir }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Return the logging config for a service — merges component-level overrides on top of anchoreConfig.logging.
+Usage: {{ include "enterprise.common.logging" (merge (dict "service" "apiext") .) }}
+*/}}
+{{- define "enterprise.common.logging" -}}
+{{- $service := .service -}}
+{{- $logging := deepCopy .Values.anchoreConfig.logging -}}
+{{- $serviceCfg := index .Values.anchoreConfig $service -}}
+{{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
+  {{- $logging = merge $serviceCfg.logging $logging -}}
+{{- end -}}
+  {{- toYaml $logging -}}
+{{- end -}}
+
+{{/*
+Return the ng-relevant logging config for a service.
+Starts with the ng subset of anchoreConfig.logging, then merges any component-level overrides on top.
+Component overrides can both override existing ng fields and add new ones (e.g. log_level).
+Usage: {{ include "enterprise.common.ngLogging" (merge (dict "service" "component_catalog") .) }}
+*/}}
+{{- define "enterprise.common.ngLogging" -}}
+{{- $service := .service -}}
+{{- $logging := .Values.anchoreConfig.logging -}}
+{{- $ngFields := dict "colored_logging" ($logging.colored_logging) "exception_backtrace_logging" ($logging.exception_backtrace_logging) "exception_diagnose_logging" ($logging.exception_diagnose_logging) "file_rotation_rule" ($logging.file_rotation_rule) "file_retention_rule" ($logging.file_retention_rule) "structured_logging" ($logging.structured_logging) -}}
+{{- if $service -}}
+  {{- $serviceCfg := index .Values.anchoreConfig $service -}}
+  {{- if and $serviceCfg (kindIs "map" $serviceCfg) (hasKey $serviceCfg "logging") $serviceCfg.logging -}}
+    {{- $ngFields = merge $serviceCfg.logging $ngFields -}}
+  {{- end -}}
+{{- end -}}
+  {{- toYaml $ngFields -}}
 {{- end -}}
 
 {{- define "enterprise.common.listenAddress" -}}
