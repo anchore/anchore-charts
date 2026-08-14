@@ -1515,7 +1515,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 > :exclamation: **Major breaking upgrade from the 3.x chart series.** This is the first 4.x chart release that supports upgrading from the 3.x charts (Anchore Enterprise 5.x → 6.x). Review the breaking changes below and update your values file **before** upgrading. The chart validates your values on `helm install`/`upgrade` and template-fails with a single message listing **every** offending value and its replacement, so you can fix them all in one pass.
 
-- Deploys Anchore Enterprise v6.1.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/610/) for more information.
+- Deploys Anchore Enterprise v6.1.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/611/) for more information.
 
 #### Breaking changes (3.x → 4.x)
 
