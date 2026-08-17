@@ -56,6 +56,12 @@ See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more 
 
 ## Parameters
 
+### Global Resource Parameters
+
+| Name                       | Description                                                           | Value |
+| -------------------------- | --------------------------------------------------------------------- | ----- |
+| `global.imageRegistryHost` | overrides the registry host on all Anchore image values in this chart | `""`  |
+
 ### Common Resource Parameters
 
 | Name                                  | Description                                                          | Value                                    |

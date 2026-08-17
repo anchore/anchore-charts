@@ -1,0 +1,60 @@
+suite: Global Image Registry Host Tests
+templates:
+  - deployment.yaml
+  - init-ca/init-ca-hook.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should leave images untouched when global.imageRegistryHost is not set
+    template: deployment.yaml
+    set:
+      image: anchore/kubernetes-admission-controller:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore/kubernetes-admission-controller:v9.9.9"
+
+  - it: should prefix an image that has no registry host
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: anchore/kubernetes-admission-controller:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/kubernetes-admission-controller:v9.9.9"
+
+  - it: should replace an existing registry host on the image
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: docker.io/anchore/kubernetes-admission-controller:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/kubernetes-admission-controller:v9.9.9"
+
+  - it: should not double up slashes when the registry host has a trailing slash
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com/
+      image: docker.io/anchore/kubernetes-admission-controller:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/kubernetes-admission-controller:v9.9.9"
+
+  - it: should replace the registry host on the init-ca image
+    template: init-ca/init-ca-hook.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      initCa.image: cfssl/cfssl:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/cfssl/cfssl:v9.9.9"

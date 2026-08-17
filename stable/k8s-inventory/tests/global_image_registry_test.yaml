@@ -1,0 +1,70 @@
+suite: Global Image Registry Host Tests
+templates:
+  - deployment.yaml
+  - secrets.yaml
+  - configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  k8sInventory.anchore.url: http://anchore.example.com
+  k8sInventory.anchore.user: test-user
+  k8sInventory.anchore.password: test-password
+
+tests:
+  - it: should leave the image untouched when global.imageRegistryHost is not set
+    template: deployment.yaml
+    set:
+      image.repository: anchore/k8s-inventory
+      image.tag: v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "anchore/k8s-inventory:v9.9.9"
+
+  - it: should prefix an image that has no registry host
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image.repository: anchore/k8s-inventory
+      image.tag: v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/k8s-inventory:v9.9.9"
+
+  - it: should replace an existing registry host on the image
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image.repository: docker.io/anchore/k8s-inventory
+      image.tag: v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/k8s-inventory:v9.9.9"
+
+  - it: should not double up slashes when the registry host has a trailing slash
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com/
+      image.repository: anchore/k8s-inventory
+      image.tag: v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/k8s-inventory:v9.9.9"
+
+  - it: should fall back to the chart appVersion when no tag is set
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image.repository: anchore/k8s-inventory
+      image.tag: null
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/k8s-inventory:9.9.9"
