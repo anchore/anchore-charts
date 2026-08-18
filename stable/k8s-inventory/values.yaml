@@ -1,4 +1,17 @@
 ###################################################
+## @section Global Resource Parameters
+## Global params used by all K8s Inventory resources
+###################################################
+global:
+  ## @param global.imageRegistryHost overrides the registry host on all Anchore image values in this chart
+  ## Setting this replaces the registry host of the image the chart manages (`image.repository`), so a mirrored
+  ## registry only has to be set once. Only the registry host is replaced; the repository and tag are preserved.
+  ## eg. `global.imageRegistryHost: harbor.example.com` pulls `anchore/k8s-inventory:v1.8.4` from
+  ## `harbor.example.com/anchore/k8s-inventory:v1.8.4`
+  ##
+  imageRegistryHost: ""
+
+###################################################
 ## @section Common Resource Parameters
 ## Common params used by all K8s Inventory resources
 ###################################################

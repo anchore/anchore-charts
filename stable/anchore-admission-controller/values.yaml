@@ -5,6 +5,13 @@ fullnameOverride: Null
 replicaCount: 1
 logVerbosity: 3
 
+global:
+  # Setting this overrides the registry host on all image values in this chart (image, initCa.image), so a
+  # mirrored registry only has to be set once. Only the registry host is replaced; the repository and tag are
+  # preserved. eg. with imageRegistryHost: harbor.example.com, anchore/kubernetes-admission-controller:v0.8.4
+  # is pulled from harbor.example.com/anchore/kubernetes-admission-controller:v0.8.4
+  imageRegistryHost: ""
+
 image: "anchore/kubernetes-admission-controller:v0.8.4"
 imagePullPolicy: IfNotPresent
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

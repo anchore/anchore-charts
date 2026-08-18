@@ -1,0 +1,238 @@
+suite: Global Image Registry Host Tests
+templates:
+  - analyzer_deployment.yaml
+  - api_deployment.yaml
+  - catalog_deployment.yaml
+  - notifications_deployment.yaml
+  - policyengine_deployment.yaml
+  - reports_deployment.yaml
+  - reportsworker_deployment.yaml
+  - simplequeue_deployment.yaml
+  - datasyncer_deployment.yaml
+  - ui_deployment.yaml
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+  - anchore_configmap.yaml
+  - analyzer_configmap.yaml
+  - ui_configmap.yaml
+  - anchore_secret.yaml
+  - ui_secret.yaml
+  - envvars_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+
+backend_test_templates: &backend_test_templates
+  - analyzer_deployment.yaml
+  - api_deployment.yaml
+  - catalog_deployment.yaml
+  - notifications_deployment.yaml
+  - policyengine_deployment.yaml
+  - reports_deployment.yaml
+  - reportsworker_deployment.yaml
+  - simplequeue_deployment.yaml
+  - datasyncer_deployment.yaml
+
+tests:
+  - it: should leave images untouched when global.imageRegistryHost is not set
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      image: "docker.io/anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "docker.io/anchore/enterprise:9.9.9"
+
+  - it: should replace the registry host on the enterprise image
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: "docker.io/anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/enterprise:9.9.9"
+
+  - it: should preserve the digest when replacing the registry host
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: "docker.io/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8"
+
+  - it: should prefix images that have no registry host
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: "anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/enterprise:9.9.9"
+
+  - it: should prefix single segment images that have no registry host
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: "enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/enterprise:9.9.9"
+
+  - it: should support a registry host with a path
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/anchore
+      image: "docker.io/anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/anchore/enterprise:9.9.9"
+
+  - it: should not double up slashes when the registry host has a trailing slash
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/
+      image: "docker.io/anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/enterprise:9.9.9"
+
+  - it: should strip a registry host that includes a port
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: "localhost:5000"
+      image: "registry.example.com:5000/anchore/enterprise:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "localhost:5000/anchore/enterprise:9.9.9"
+
+  - it: should replace the registry on an image passed in as a dict
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image:
+        registry: docker.io
+        repository: anchore/enterprise
+        tag: "9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/enterprise:9.9.9"
+
+  - it: should supply the registry for an image dict that omits one
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image:
+        repository: anchore/enterprise
+        digest: sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8"
+
+  - it: should replace the registry host on the ui image
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      ui.image: "docker.io/anchore/enterprise-ui:9.9.9"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/enterprise-ui:9.9.9"
+
+  - it: should replace the registry host on the kubectl image
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      upgradeJob.forceScaleDownDeployment: true
+      kubectlImage: "bitnamilegacy/kubectl:1.30"
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: scale-down-anchore
+      - equal:
+          path: spec.template.spec.initContainers[1].image
+          value: "harbor.example.com/bitnamilegacy/kubectl:1.30"
+
+  - it: should replace the registry host on the scratch volume mode-fixer image
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      scratchVolume.fixGroupPermissions: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: mode-fixer
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: "harbor.example.com/alpine"
+
+  - it: should replace the registry host on the cloudsql proxy container
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      cloudsql.enabled: true
+      cloudsql.useSideCar: false
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: cloudsql-proxy
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/cloudsql-docker/gce-proxy:1.37.8"
+
+  - it: should replace the registry host on the cloudsql proxy init container
+    templates: *backend_test_templates
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      cloudsql.enabled: true
+      cloudsql.useSideCar: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: cloudsql-proxy
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: "harbor.example.com/cloudsql-docker/gce-proxy:1.37.8"
+
+  - it: should not rewrite user supplied init container images
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      analyzer.initContainers:
+        - name: my-init-container
+          image: example/initContainer:latest
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: "example/initContainer:latest"

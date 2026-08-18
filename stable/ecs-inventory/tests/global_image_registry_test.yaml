@@ -1,0 +1,71 @@
+suite: Global Image Registry Host Tests
+templates:
+  - deployment.yaml
+  - secrets.yaml
+  - configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  - it: should leave the image untouched when global.imageRegistryHost is not set
+    template: deployment.yaml
+    set:
+      image: docker.io/anchore/ecs-inventory:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "docker.io/anchore/ecs-inventory:v9.9.9"
+
+  - it: should replace the registry host on the image
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: docker.io/anchore/ecs-inventory:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/ecs-inventory:v9.9.9"
+
+  - it: should prefix an image that has no registry host
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: anchore/ecs-inventory:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/ecs-inventory:v9.9.9"
+
+  - it: should preserve a digest when replacing the registry host
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: docker.io/anchore/ecs-inventory@sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/ecs-inventory@sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b"
+
+  - it: should not double up slashes when the registry host has a trailing slash
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com/
+      image: docker.io/anchore/ecs-inventory:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/ecs-inventory:v9.9.9"
+
+  - it: should strip a registry host that includes a port
+    template: deployment.yaml
+    set:
+      global.imageRegistryHost: "localhost:5000"
+      image: registry.example.com:5000/anchore/ecs-inventory:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "localhost:5000/anchore/ecs-inventory:v9.9.9"

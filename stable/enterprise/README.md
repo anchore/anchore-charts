@@ -19,6 +19,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
   - [External Database Requirements](#external-database-requirements)
   - [Installing on Openshift](#installing-on-openshift)
   - [Database Secret Encryption](#database-secret-encryption)
+  - [Using a Private Registry](#using-a-private-registry)
   - [Analyzer Image Layer Cache Configuration](#analyzer-image-layer-cache-configuration)
   - [Configuring Object Storage](#configuring-object-storage)
   - [Configuring Analysis Archive Storage](#configuring-analysis-archive-storage)
@@ -336,6 +337,34 @@ Adding `ANCHORE_DB_ENCRYPTION_KEY_CURRENT` to that secret is what turns encrypti
 With no encryption keys configured (the default), Anchore Enterprise stores registry credentials (and other sensitive values) **as plaintext** in the database. In this mode the chart omits the key env vars from each deployment; the `keys:` list is still rendered in the service config but the unset key variables are dropped, leaving an empty keyring — so no key configuration is required.
 
 This is the default to keep existing deployments working through upgrades. For new installs, enabling encryption is recommended.
+
+### Using a Private Registry
+
+If you mirror the Anchore images into your own registry, set `global.imageRegistryHost` once instead of overriding each image value:
+
+```yaml
+global:
+  imageRegistryHost: harbor.example.com
+```
+
+This replaces the **registry host** on every image the chart deploys — `image`, `ui.image`, `kubectlImage`, `cloudsql.image` and `scratchVolume.fixerInitContainerImage` — while preserving the repository, tag and digest each of those values specifies:
+
+| Image value                                        | Rendered as                                     |
+| -------------------------------------------------- | ----------------------------------------------- |
+| `docker.io/anchore/enterprise:v6.1.1`              | `harbor.example.com/anchore/enterprise:v6.1.1`  |
+| `bitnamilegacy/kubectl:1.30` (no host)             | `harbor.example.com/bitnamilegacy/kubectl:1.30` |
+| `alpine` (no host)                                 | `harbor.example.com/alpine`                     |
+
+The leading path segment of an image value is treated as a registry host when it contains a `.` or a `:`, or when it is `localhost` — the same rule the docker/OCI reference parsers use. Values without a host are prefixed rather than rewritten.
+
+`global.imageRegistryHost` may itself include a path (`harbor.example.com/anchore`), which is prepended in place of the original host — so `docker.io/anchore/enterprise:v6.1.1` becomes `harbor.example.com/anchore/anchore/enterprise:v6.1.1`. If your mirror is flat (one image name per project), override the individual image values instead.
+
+Two things this does **not** cover:
+
+- The bundled `ui-redis` and `prometheus` subcharts. Set those with `ui-redis.image.registry` and the prometheus subchart's own image values.
+- Images you supply yourself in `initContainers` / `extraInitContainers` — those are passed through to the pod spec verbatim.
+
+Credentials for the registry are configured separately, via `imagePullSecretName` and `imageCredentials`.
 
 ### Analyzer Image Layer Cache Configuration
 
@@ -773,10 +802,11 @@ To restore your deployment to using your previous driver configurations:
 
 ### Global Resource Parameters
 
-| Name                      | Description                             | Value |
-| ------------------------- | --------------------------------------- | ----- |
-| `global.fullnameOverride` | overrides the fullname set on resources | `""`  |
-| `global.nameOverride`     | overrides the name set on resources     | `""`  |
+| Name                       | Description                                                              | Value |
+| -------------------------- | ------------------------------------------------------------------------ | ----- |
+| `global.fullnameOverride`  | overrides the fullname set on resources                                  | `""`  |
+| `global.nameOverride`      | overrides the name set on resources                                      | `""`  |
+| `global.imageRegistryHost` | overrides the registry host on all Anchore image values in this chart    | `""`  |
 
 ### Common Resource Parameters
 
@@ -1510,6 +1540,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.1.3
+
+- Adds `global.imageRegistryHost`, which overrides the registry host on every Anchore image the chart deploys. See [Using a Private Registry](#using-a-private-registry).
 
 ### v4.1.2
 

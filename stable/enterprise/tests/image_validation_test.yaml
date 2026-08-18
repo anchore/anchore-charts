@@ -1,0 +1,41 @@
+## A `fail` in the image helper aborts the render of the whole chart, so this suite is scoped to a
+## single template to keep the error attributed to a predictable document.
+suite: Image Validation Tests
+templates:
+  - analyzer_deployment.yaml
+  - anchore_configmap.yaml
+  - analyzer_configmap.yaml
+  - anchore_secret.yaml
+  - envvars_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+
+tests:
+  - it: should fail on an image dict that omits the registry when no global registry host is set
+    template: analyzer_deployment.yaml
+    set:
+      image:
+        repository: anchore/enterprise
+        tag: "9.9.9"
+    asserts:
+      - failedTemplate:
+          errorPattern: "Invalid image: must include registry, repository, and either tag or digest"
+
+  - it: should fail on an image dict that omits the tag and digest
+    template: analyzer_deployment.yaml
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image:
+        repository: anchore/enterprise
+    asserts:
+      - failedTemplate:
+          errorPattern: "Invalid image: must include registry, repository, and either tag or digest"

@@ -12,6 +12,18 @@ global:
   ##
   nameOverride: ""
 
+  ## @param global.imageRegistryHost overrides the registry host on all Anchore image values in this chart
+  ## Setting this replaces the registry host of every image the chart manages - `image`, `ui.image`, `kubectlImage`,
+  ## `cloudsql.image` and `scratchVolume.fixerInitContainerImage` - so a mirrored registry only has to be set once.
+  ## Only the registry host is replaced; the repository, tag and digest set on each image value are preserved.
+  ## eg. `global.imageRegistryHost: harbor.example.com` pulls `docker.io/anchore/enterprise:v6.1.1` from
+  ## `harbor.example.com/anchore/enterprise:v6.1.1`. Image values with no registry host (eg. `alpine`) are prefixed
+  ## with it instead.
+  ## This does not apply to the bundled ui-redis or prometheus subcharts, or to any images set in initContainers /
+  ## extraInitContainers - set those registries with the subchart's own image values.
+  ##
+  imageRegistryHost: ""
+
 ###################################################
 ## @section Common Resource Parameters
 ## Common params used by all Anchore k8s resources

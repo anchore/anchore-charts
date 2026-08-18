@@ -23,6 +23,44 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
+Returns the global image registry host override, or an empty string when it isn't set.
+*/}}
+{{- define "anchore-admission-controller.globalImageRegistryHost" -}}
+{{- $global := default dict .Values.global -}}
+{{- default "" $global.imageRegistryHost | trimSuffix "/" -}}
+{{- end -}}
+
+{{/*
+Strips the registry host from a string image reference, returning everything after it.
+The leading path segment is treated as a registry host when it contains a '.' or a ':', or when it
+is 'localhost' - the same rule the docker/OCI reference parsers use. References that don't include a
+registry host (eg. 'anchore/kubernetes-admission-controller') are returned unchanged.
+*/}}
+{{- define "anchore-admission-controller.imageWithoutRegistryHost" -}}
+{{- $ref := trim . -}}
+{{- $parts := splitList "/" $ref -}}
+{{- $host := first $parts -}}
+{{- if and (gt (len $parts) 1) (or (contains "." $host) (contains ":" $host) (eq $host "localhost")) -}}
+{{- join "/" (rest $parts) -}}
+{{- else -}}
+{{- $ref -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Renders an image reference with its registry host replaced by global.imageRegistryHost when that is
+set. Accepts: dict "image" <image value> "context" <root context>
+*/}}
+{{- define "anchore-admission-controller.renderImage" -}}
+{{- $globalHost := include "anchore-admission-controller.globalImageRegistryHost" .context -}}
+{{- if $globalHost -}}
+{{- printf "%s/%s" $globalHost (include "anchore-admission-controller.imageWithoutRegistryHost" .image) -}}
+{{- else -}}
+{{- .image | trim -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "anchore-admission-controller.labels" -}}

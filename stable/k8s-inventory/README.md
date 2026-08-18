@@ -47,6 +47,12 @@ See the [K8s Inventory repo](https://github.com/anchore/k8s-inventory) for more 
 
 ## Parameters
 
+### Global Resource Parameters
+
+| Name                       | Description                                                           | Value |
+| -------------------------- | --------------------------------------------------------------------- | ----- |
+| `global.imageRegistryHost` | overrides the registry host on all Anchore image values in this chart | `""`  |
+
 ### Common Resource Parameters
 
 | Name                                  | Description                                                                                                             | Value                   |
