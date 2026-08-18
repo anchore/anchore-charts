@@ -15,9 +15,18 @@ data:
     export PATH=$PATH:/tmp/.bin
     cd /tmp/.bin
 
-    curl -L -o jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64
+    # The tools below are fetched per-architecture. Downloading the amd64 builds on an
+    # arm64 node passes the `which` checks further down but fails with an exec format
+    # error the first time kubectl actually runs.
+    case "$(uname -m)" in
+      x86_64)        ARCH=amd64 ;;
+      aarch64|arm64) ARCH=arm64 ;;
+      *) echo "unsupported architecture: $(uname -m)"; exit 1 ;;
+    esac
+
+    curl -L -o jq https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-${ARCH}
     chmod +x jq
-    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/${ARCH}/kubectl
     chmod +x ./kubectl
 
     # creates a client CA, args are sudo, dest-dir, ca-id, purpose
