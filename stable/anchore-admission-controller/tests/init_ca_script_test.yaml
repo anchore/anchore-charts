@@ -1,0 +1,34 @@
+suite: Init CA Script Tests
+templates:
+  - init-ca/init-ca-script.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+
+tests:
+  ## The hook downloads kubectl and jq at install time. Hardcoding the amd64 builds passes the
+  ## `which` guards on an arm64 node and then fails with an exec format error the first time
+  ## kubectl runs, which surfaces as a pre-install job hitting BackoffLimitExceeded.
+  - it: should select the download architecture at runtime
+    asserts:
+      - matchRegex:
+          path: data["init-ca.sh"]
+          pattern: 'case "\$\(uname -m\)" in'
+      - matchRegex:
+          path: data["init-ca.sh"]
+          pattern: 'aarch64\|arm64\) ARCH=arm64'
+
+  - it: should not hardcode an architecture in the download urls
+    asserts:
+      - matchRegex:
+          path: data["init-ca.sh"]
+          pattern: 'jq-linux-\$\{ARCH\}'
+      - matchRegex:
+          path: data["init-ca.sh"]
+          pattern: 'bin/linux/\$\{ARCH\}/kubectl'
+      - notMatchRegex:
+          path: data["init-ca.sh"]
+          pattern: 'linux-amd64|linux/amd64'
