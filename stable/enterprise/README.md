@@ -1040,6 +1040,7 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.ui.custom_message`                                                                          | Custom message to display on the login page                                                                                                                           | `{}`                        |
 | `anchoreConfig.ui.banners`                                                                                 | Provide messages that will be displayed as a banner at the top and/or bottom of the application or only the login page.                                               | `{}`                        |
 | `anchoreConfig.ui.log_level`                                                                               | Descriptive detail of the application log output                                                                                                                      | `http`                      |
+| `anchoreConfig.ui.log_format`                                                                              | Rendering of the application log output (text or json)                                                                                                                | `text`                      |
 | `anchoreConfig.ui.enrich_inventory_view`                                                                   | aggregate and include compliance and vulnerability data from the reports service.                                                                                     | `true`                      |
 | `anchoreConfig.ui.appdb_config.native`                                                                     | toggle the postgreSQL drivers used to connect to the database between the native and the NodeJS drivers.                                                              | `true`                      |
 | `anchoreConfig.ui.appdb_config.pool.max`                                                                   | maximum number of simultaneous connections allowed in the connection pool                                                                                             | `10`                        |
@@ -1510,6 +1511,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.1.3
+
+- Added `anchoreConfig.ui.log_format` to configure the rendering of the UI application log output (`text` or `json`).
 
 ### v4.1.2
 

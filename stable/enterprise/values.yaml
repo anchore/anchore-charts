@@ -1188,6 +1188,11 @@ anchoreConfig:
     ##
     log_level: http
 
+    ## @param anchoreConfig.ui.log_format Rendering of the application log output
+    ## valid values are text, json
+    ##
+    log_format: text
+
     ## @param anchoreConfig.ui.enrich_inventory_view aggregate and include compliance and vulnerability data from the reports service.
     ##
     enrich_inventory_view: true

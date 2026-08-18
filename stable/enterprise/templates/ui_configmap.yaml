@@ -65,6 +65,7 @@ data:
       expires: {{ .Values.anchoreConfig.ui.authentication_lock.expires }}
     appdb_config: {{- toYaml .Values.anchoreConfig.ui.appdb_config | nindent 6}}
     log_level: {{ .Values.anchoreConfig.ui.log_level | squote }}
+    log_format: {{ .Values.anchoreConfig.ui.log_format | squote }}
     enrich_inventory_view: {{ .Values.anchoreConfig.ui.enrich_inventory_view  }}
     enable_prometheus_metrics: {{ .Values.anchoreConfig.metrics.enabled }}
     sso_auth_only: {{ .Values.anchoreConfig.ui.sso_auth_only }}

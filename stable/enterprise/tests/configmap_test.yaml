@@ -41,6 +41,15 @@ tests:
             tmp_dir: /test
 
             log_level: DEBUG
+  - it: should render the ui log format when anchoreConfig.ui.log_format is set
+    template: templates/ui_configmap.yaml
+    set:
+      anchoreConfig.ui.log_format: json
+    asserts:
+      - matchRegex:
+          path: data["config-ui.yaml"]
+          pattern: "log_format: 'json'"
+
   - it: should render additional audit uris when additionalResourceURIs is set
     template: templates/anchore_configmap.yaml
     set:
