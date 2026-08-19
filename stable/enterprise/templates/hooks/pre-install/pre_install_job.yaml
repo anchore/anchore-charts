@@ -80,20 +80,20 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-              while true; do
-                CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              {{- if .Values.anchoreConfig.database.ssl }}
-                CONNSTR=${CONNSTR}?sslmode={{ .Values.anchoreConfig.database.sslMode }}
-              {{- with .Values.anchoreConfig.database.sslRootCertFileName }}
-                CONNSTR=${CONNSTR}\&sslrootcert=/home/anchore/certs/{{ . }}
-              {{- end }}
-              {{- end }}
-                err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-                if [[ -z "$err" ]]; then
-                  echo "Database is ready"
-                  exit 0
+              # Fresh installs point at an as-yet-uninitialized database, so this
+              # hook only waits for the database to become reachable (TCP). The
+              # full pre-upgrade preflight (schema state, pg_cron, keyring) is
+              # enforced by the pre-upgrade hooks, which run once the schema exists.
+              attempt=1
+              max_attempts=60
+              until (exec 3<>/dev/tcp/"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_PORT}") 2>/dev/null; do
+                if [ "${attempt}" -ge "${max_attempts}" ]; then
+                  echo "Database ${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT} still unreachable after ${max_attempts} attempts; giving up." >&2
+                  exit 1
                 fi
-                echo "Database is not ready yet, sleeping 10 seconds..."
+                echo "Database not reachable yet; attempt ${attempt}/${max_attempts}, retrying in 10s..."
+                attempt=$((attempt + 1))
                 sleep 10
               done
+              echo "Database ${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT} is reachable."
 {{- end -}}
