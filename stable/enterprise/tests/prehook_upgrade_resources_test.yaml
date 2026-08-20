@@ -471,6 +471,27 @@ tests:
       - hasDocuments:
           count: 1
 
+  - it: migration job should set backoffLimit to 0 so k8s does not respawn pods on failure
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+    asserts:
+      - equal:
+          path: spec.backoffLimit
+          value: 0
+
+  - it: migration job should retry the pre-upgrade check up to 30 times (~5m budget)
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[1].args[0]
+          pattern: max_attempts=30
+        count: 1
+
   - it: migration job should match snapshot
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
     set:
