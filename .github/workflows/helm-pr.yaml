@@ -1,0 +1,258 @@
+# Opens a PR bumping an integration product's chart to a newly-GA'd version.
+#
+# Dispatched by the platform-int-releaser Lambda (release.OnGA) when a product
+# publishes a GA release; can also be run manually. It ONLY opens a PR — it does
+# NOT merge and does NOT release. Merging the PR to main is what triggers
+# chart-releaser (see deploy.yaml), and that stays a human decision.
+#
+# Inputs are exactly what the Lambda's dispatch sends:
+#   product  unqualified product repo name, e.g. "k8s-inventory"
+#   version  GA app version WITHOUT the v prefix, e.g. "1.8.5"
+#
+# The product repo -> chart directory is resolved via .github/chart-bump-map.yaml
+# — the chart dir often differs from the product name (e.g.
+# kubernetes-admission-controller -> stable/anchore-admission-controller). The
+# image name defaults to the product name; both are overridable in the map.
+#
+# What it changes in stable/<chart>/ (chart resolved from the map):
+#   Chart.yaml : appVersion → <version>; version (chart pkg) → patch-bumped
+#   values.yaml: the anchore/<image> image tag → v<version>
+# The chart `version` bump is required: chart-releaser won't publish a version
+# that already exists, so without it the eventual merge is a no-op.
+#
+# Auth: the PR is created with the default GITHUB_TOKEN, so it is authored by
+# github-actions[bot]. GitHub treats bot-authored PRs as untrusted, so the
+# repo's CI (lint / helm-unittests / test / openshift-test) is queued but held
+# for maintainer approval — deliberately. A human clicks "Approve and run" to
+# run the checks, putting a person in the loop on every bump PR and on every
+# later push to it. No PAT, GitHub App, or pr-broker is involved.
+#
+# (If you ever want CI to run automatically with no approval step, author the PR
+# under a trusted identity instead — a PAT or a GitHub App installation token.)
+
+name: helm-pr
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: product repo whose chart to bump (e.g. k8s-inventory)
+        required: true
+      version:
+        description: GA app version, no v prefix (e.g. 1.8.5)
+        required: true
+
+permissions: {}
+
+jobs:
+  open-bump-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # push the bump branch
+      pull-requests: write   # open the PR
+    env:
+      PRODUCT: ${{ inputs.product }}
+      VERSION: ${{ inputs.version }}
+      # The default token. The PR it creates is authored by github-actions[bot],
+      # so the PR's CI is approval-gated — a maintainer clicks "Approve and run".
+      # Used for the git push AND `gh pr create`.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Pin yq rather than rely on whatever the runner image ships, so the bump
+      # is deterministic across runner-image changes.
+      - name: Install yq
+        env:
+          YQ_VERSION: v4.53.3
+          YQ_SHA256: fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64"
+          echo "${YQ_SHA256}  /tmp/yq" | sha256sum -c -
+          sudo install -m 0755 /tmp/yq /usr/local/bin/yq
+          yq --version
+
+      - name: Bump chart files
+        id: bump
+        run: |
+          set -euo pipefail
+          VERSION="${VERSION#v}"                 # tolerate a v-prefixed input
+          # Validate dispatch inputs early — manual runs can send anything, and
+          # both get interpolated into branch names and sed/grep/awk patterns.
+          [[ "$PRODUCT" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "invalid product name: '${PRODUCT}'" >&2; exit 1; }
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "invalid version (expected N.N.N): '${VERSION}'" >&2; exit 1; }
+          MAP=".github/chart-bump-map.yaml"
+          command -v yq >/dev/null 2>&1 || { echo "yq not found on PATH" >&2; exit 1; }
+          [ -f "$MAP" ] || { echo "chart map not found: ${MAP}" >&2; exit 1; }
+
+          # Resolve product repo -> chart dir (+ image name). The chart dir often
+          # differs from the product repo (e.g. kubernetes-admission-controller ->
+          # stable/anchore-admission-controller); the image name defaults to the
+          # product name (correct for every product today, override via `image:`).
+          # yq stderr is kept, so a YAML/parse error surfaces instead of looking
+          # like "not in map"; `// ""` turns an absent entry into an empty string
+          # (a clean "not mapped"), while a real yq error fails the step via set -e.
+          CHART=$(PRODUCT="$PRODUCT" yq -r '.[strenv(PRODUCT)].chart // ""' "$MAP")
+          if [ -z "$CHART" ]; then
+            echo "product '${PRODUCT}' has no chart mapping in ${MAP} — add an entry to onboard it" >&2
+            exit 1
+          fi
+          IMAGE=$(PRODUCT="$PRODUCT" yq -r '.[strenv(PRODUCT)].image // strenv(PRODUCT)' "$MAP")
+
+          CHART_DIR="stable/${CHART}"
+          CHART_FILE="${CHART_DIR}/Chart.yaml"
+          VALUES="${CHART_DIR}/values.yaml"
+          if [ ! -f "$CHART_FILE" ] || [ ! -f "$VALUES" ]; then
+            echo "mapped chart '${CHART}' has no ${CHART_FILE} / values.yaml" >&2
+            exit 1
+          fi
+
+          # Apply the release-defining edits first: appVersion (force-quoted —
+          # valid whether the source was quoted or not) and the image tag. The
+          # chart `version` is patch-bumped later, only if these actually change
+          # something — so idempotency is based on real content, not appVersion
+          # alone (a values.yaml tag left out of sync by a manual edit is repaired).
+          sed -i -E "s/^appVersion: .*/appVersion: \"${VERSION}\"/" "$CHART_FILE"
+
+          # values.yaml image tag. The image name is matched as a LITERAL substring
+          # (index()/substr() in awk, grep -F for the verify) — never interpolated
+          # into a regex — so a metacharacter in a mapped image name can't match or
+          # replace the wrong line. Handles both layouts; anchored on the literal
+          # `anchore/<image>` so sidecars (e.g. cfssl/cfssl) are never touched.
+          #
+          # `found` means the reference was LOCATED, not that the tag changed: an
+          # already-at-target chart still matches, so awk exits 0 (not an error)
+          # and the git-diff idempotency check below decides whether to skip.
+          # Exit 3 means the reference is genuinely absent — a misconfigured chart.
+          IMG="anchore/${IMAGE}"
+          if awk -v img="$IMG" -v ver="v${VERSION}" '
+              function endswith(s, suf) { return length(s) >= length(suf) && substr(s, length(s) - length(suf) + 1) == suf }
+              # structured: a `repository:` line ending in the literal img, then a `tag:` line
+              prev ~ /^[[:space:]]*repository:/ && $0 ~ /^[[:space:]]*tag:/ {
+                r = prev; sub(/[[:space:]"]*$/, "", r)
+                if (endswith(r, img)) { sub(/tag:[[:space:]]*.*/, "tag: \"" ver "\""); found = 1 }
+              }
+              # combined: an `image:` line containing the literal "<img>:"
+              $0 ~ /^[[:space:]]*image:/ {
+                i = index($0, img ":")
+                if (i > 0) {
+                  head = substr($0, 1, i - 1 + length(img)); tail = substr($0, i + length(img))
+                  sub(/^:[^"[:space:]]*/, ":" ver, tail); $0 = head tail; found = 1
+                }
+              }
+              { print; prev = $0 }
+              END { exit (found ? 0 : 3) }
+            ' "$VALUES" > "${VALUES}.tmp"; then
+            mv "${VALUES}.tmp" "$VALUES"
+          else
+            rm -f "${VALUES}.tmp"
+            echo "no anchore/${IMAGE} image reference found in ${VALUES}" >&2
+            exit 1
+          fi
+
+          # Fail loudly if either edit didn't land. Fixed-string (not regex), so
+          # the dots in a version aren't treated as wildcards.
+          grep -qF "appVersion: \"${VERSION}\"" "$CHART_FILE" || { echo "appVersion not updated in ${CHART_FILE}" >&2; exit 1; }
+          grep -qF "${IMG}:v${VERSION}" "$VALUES" || grep -qF "tag: \"v${VERSION}\"" "$VALUES" \
+            || { echo "image tag not updated in ${VALUES}" >&2; exit 1; }
+
+          # Idempotency: if appVersion + image were already in sync, those edits
+          # produced no diff — nothing to release, so don't bump the chart version
+          # or open a PR. Checked BEFORE the chart-version bump (which always
+          # diffs), and it covers values.yaml too (not just appVersion).
+          if git diff --quiet -- "$CHART_FILE" "$VALUES"; then
+            echo "chart ${CHART} already at ${VERSION} (appVersion + image tag in sync); nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Real change → patch-bump the chart `version` so chart-releaser
+          # publishes a new release on merge. Read via yq (not awk $2) so a quoted
+          # version like `version: "3.25.2"` doesn't carry quotes into the split;
+          # -e fails if the field is missing, -r forces raw scalar output.
+          CUR_CHART_VER=$(yq -e -r '.version' "$CHART_FILE")
+          IFS=. read -r MA MI PA <<<"$CUR_CHART_VER"
+          if ! [ "${MA:-x}" -ge 0 ] 2>/dev/null || ! [ "${MI:-x}" -ge 0 ] 2>/dev/null || ! [ "${PA:-x}" -ge 0 ] 2>/dev/null; then
+            echo "could not parse a numeric chart version from '${CUR_CHART_VER}' in ${CHART_FILE}" >&2
+            exit 1
+          fi
+          NEW_CHART_VER="${MA}.${MI}.$((PA + 1))"
+          sed -i -E "s/^version: .*/version: ${NEW_CHART_VER}/" "$CHART_FILE"
+          # Full-line fixed-string match — exact line, no regex wildcards.
+          grep -qxF "version: ${NEW_CHART_VER}" "$CHART_FILE" || { echo "chart version not updated in ${CHART_FILE}" >&2; exit 1; }
+
+          {
+            echo "changed=true"
+            echo "chart=${CHART}"
+            echo "chart_dir=${CHART_DIR}"
+            echo "chart_version=${NEW_CHART_VER}"
+            echo "version=${VERSION}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "--- diff ---"
+          git --no-pager diff -- "$CHART_FILE" "$VALUES"
+
+      - name: Open pull request
+        # Skipped when the bump step found the chart already at the requested
+        # appVersion (changed=false). On the bump path there is always a diff.
+        if: steps.bump.outputs.changed == 'true'
+        env:
+          CHART_VERSION: ${{ steps.bump.outputs.chart_version }}
+          APP_VERSION: ${{ steps.bump.outputs.version }}
+          CHART_DIR: ${{ steps.bump.outputs.chart_dir }}
+        run: |
+          set -euo pipefail
+          BRANCH="auto/bump-${PRODUCT}-${APP_VERSION}"
+          # The PRODUCT allowlist still permits values that are invalid git ref
+          # components (e.g. `..` or a `.lock` suffix); validate the computed
+          # branch so a bad ref fails clearly here, not with a cryptic checkout error.
+          git check-ref-format "refs/heads/${BRANCH}" \
+            || { echo "computed branch name is not a valid git ref: '${BRANCH}'" >&2; exit 1; }
+
+          # Match the PR author (github-actions[bot]) so the commit and PR are
+          # attributed to the same identity.
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          # Stage ONLY the chart files this workflow edits — never `commit -a`, so
+          # an unrelated tracked change (a future step / runner) can't ride along.
+          git add "${CHART_DIR}/Chart.yaml" "${CHART_DIR}/values.yaml"
+          git commit -sm "chore(${PRODUCT}): bump chart to ${APP_VERSION} (chart ${CHART_VERSION})"
+
+          # Feed the token to git via a credential helper (single-quoted: the
+          # literal $GH_TOKEN is stored, the helper expands it from the env at
+          # push time, so it never lands in argv or .git/config).
+          # Fetch the PR branch into its remote-tracking ref first: checkout does
+          # a shallow single-branch fetch, so without this --force-with-lease has
+          # no lease ref and a repeat run (branch already exists) is rejected as
+          # "stale info". Absent on the first run, hence `|| true`.
+          git -c credential.helper= \
+              -c credential.helper='!f() { echo username=x-access-token; echo "password=$GH_TOKEN"; }; f' \
+              fetch origin "+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}" || true
+          git -c credential.helper= \
+              -c credential.helper='!f() { echo username=x-access-token; echo "password=$GH_TOKEN"; }; f' \
+              push --force-with-lease origin "$BRANCH"
+
+          printf '%s\n' \
+            "Automated chart bump for the **${PRODUCT}** ${APP_VERSION} GA release." \
+            "" \
+            "- \`appVersion\` → \`${APP_VERSION}\`" \
+            "- image \`tag\` → \`v${APP_VERSION}\`" \
+            "- chart \`version\` → \`${CHART_VERSION}\` (patch bump so chart-releaser publishes on merge)" \
+            "" \
+            "Opened by the release automation (github-actions[bot]). Its CI is held for approval — click **Approve and run** to run the checks, then review and merge to release the chart. **Not auto-merged.**" \
+            > /tmp/pr-body.md
+
+          # Reuse an existing open PR for this branch if a prior run created one.
+          if gh pr view "$BRANCH" --json number >/dev/null 2>&1; then
+            echo "PR for $BRANCH already exists; branch updated."
+          else
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore(${PRODUCT}): bump chart to ${APP_VERSION}" \
+              --body-file /tmp/pr-body.md
+          fi
