@@ -12,6 +12,10 @@ metadata:
     "helm.sh/hook-weight": "3"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
+  # Fail the hook outright once the pod's own retry budget is exhausted;
+  # do not let Kubernetes spin up fresh pods to retry (default backoffLimit
+  # is 6, which would multiply the wait budget several times over).
+  backoffLimit: 0
   {{- if ne (.Values.preInstallJob.ttlSecondsAfterFinished | quote) (-1 | quote) }}
   ttlSecondsAfterFinished: {{ .Values.preInstallJob.ttlSecondsAfterFinished }}
   {{- end }}
@@ -84,11 +88,16 @@ spec:
               # hook only waits for the database to become reachable (TCP). The
               # full pre-upgrade preflight (schema state, pg_cron, keyring) is
               # enforced by the pre-upgrade hooks, which run once the schema exists.
+              #
+              # Retry for up to ~5 minutes (30 attempts, 10s apart). This budget is
+              # kept just inside Helm's default --timeout of 5m so that, if the
+              # database never becomes reachable, the hook fails with its own error
+              # rather than Helm aborting first.
               attempt=1
-              max_attempts=60
+              max_attempts=30
               until (exec 3<>/dev/tcp/"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_PORT}") 2>/dev/null; do
                 if [ "${attempt}" -ge "${max_attempts}" ]; then
-                  echo "Database ${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT} still unreachable after ${max_attempts} attempts; giving up." >&2
+                  echo "Database ${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT} still unreachable after ${max_attempts} attempts (~5m); giving up." >&2
                   exit 1
                 fi
                 echo "Database not reachable yet; attempt ${attempt}/${max_attempts}, retrying in 10s..."
