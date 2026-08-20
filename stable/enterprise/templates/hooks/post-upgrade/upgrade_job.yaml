@@ -13,6 +13,9 @@ metadata:
     "helm.sh/hook-weight": "0"
   {{- end }}
 spec:
+  # Fail the hook outright if the upgrade command errors; do not let
+  # Kubernetes spin up fresh pods to retry (default backoffLimit is 6).
+  backoffLimit: 0
   template:
     metadata:
       name: {{ template "enterprise.upgradeJob.fullname" . }}

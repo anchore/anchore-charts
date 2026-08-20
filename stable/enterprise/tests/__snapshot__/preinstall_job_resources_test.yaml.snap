@@ -1,0 +1,67 @@
+pre-install job should match snapshot:
+  1: |
+    containers:
+      - args:
+          - |-
+            # Fresh installs point at an as-yet-uninitialized database, so this
+            # hook only waits for the database to become reachable (TCP). The
+            # full pre-upgrade preflight (schema state, pg_cron, keyring) is
+            # enforced by the pre-upgrade hooks, which run once the schema exists.
+            #
+            # Retry for up to ~5 minutes (30 attempts, 10s apart). This budget is
+            # kept just inside Helm's default --timeout of 5m so that, if the
+            # database never becomes reachable, the hook fails with its own error
+            # rather than Helm aborting first.
+            attempt=1
+            max_attempts=30
+            until (exec 3<>/dev/tcp/"${ANCHORE_DB_HOST}"/"${ANCHORE_DB_PORT}") 2>/dev/null; do
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Database ${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT} still unreachable after ${max_attempts} attempts (~5m); giving up." >&2
+                exit 1
+              fi
+              echo "Database not reachable yet; attempt ${attempt}/${max_attempts}, retrying in 10s..."
+              attempt=$((attempt + 1))
+              sleep 10
+            done
+            echo "Database ${ANCHORE_DB_HOST}:${ANCHORE_DB_PORT} is reachable."
+        command:
+          - /bin/bash
+          - -c
+        env:
+          - name: foo
+            value: bar
+          - name: bar
+            value: baz
+          - name: ANCHORE_ENDPOINT_HOSTNAME
+            value: test-release-enterprise-pre-install.test-namespace.svc.cluster.local
+          - name: ANCHORE_PORT
+            value: "null"
+          - name: ANCHORE_HOST_ID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: test-release-enterprise-hooks
+        image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
+        imagePullPolicy: IfNotPresent
+        name: wait-for-db
+        volumeMounts:
+          - mountPath: /config/config.yaml
+            name: config-volume
+            subPath: config.yaml
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "2"
+    imagePullSecrets:
+      - name: anchore-enterprise-pullcreds
+    restartPolicy: Never
+    securityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    volumes:
+      - configMap:
+          name: test-release-enterprise-hooks-config
+        name: config-volume

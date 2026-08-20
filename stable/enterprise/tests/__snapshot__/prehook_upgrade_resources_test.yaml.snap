@@ -61,16 +61,28 @@ migration job should match snapshot:
         name: scale-down-anchore
       - args:
           - |
-            while true; do
-              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ -z "$err" ]]; then
-                echo "Database is ready"
-                exit 0
+            CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+            # Wait for the database to pass the pre-upgrade check, gating on the
+            # command's exit code (0 = ready to upgrade). Retry for up to ~5
+            # minutes (30 attempts, 10s apart) to absorb transient startup (DB
+            # not yet reachable, pg_cron launcher warm-up); a persistent failure
+            # (e.g. pg_cron missing, keyring mismatch) exhausts the retries and
+            # fails the hook with the real exit code instead of silently
+            # proceeding. The budget is kept just inside Helm's default --timeout
+            # of 5m so the hook's own error surfaces before Helm aborts.
+            attempt=1
+            max_attempts=30
+            until anchore-enterprise-manager db --db-connect "${CONNSTR}" pre-upgrade-check; do
+              rc=$?
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Pre-upgrade check still failing after ${max_attempts} attempts (~5m, last exit code ${rc}); giving up." >&2
+                exit "${rc}"
               fi
-              echo "Database is not ready yet, sleeping 10 seconds..."
+              echo "Pre-upgrade check did not pass yet (exit ${rc}); attempt ${attempt}/${max_attempts}, retrying in 10s..."
+              attempt=$((attempt + 1))
               sleep 10
             done
+            echo "Pre-upgrade check passed; database is ready to upgrade."
         command:
           - /bin/bash
           - -c
@@ -186,16 +198,28 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
         name: scale-down-anchore
       - args:
           - |
-            while true; do
-              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ -z "$err" ]]; then
-                echo "Database is ready"
-                exit 0
+            CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+            # Wait for the database to pass the pre-upgrade check, gating on the
+            # command's exit code (0 = ready to upgrade). Retry for up to ~5
+            # minutes (30 attempts, 10s apart) to absorb transient startup (DB
+            # not yet reachable, pg_cron launcher warm-up); a persistent failure
+            # (e.g. pg_cron missing, keyring mismatch) exhausts the retries and
+            # fails the hook with the real exit code instead of silently
+            # proceeding. The budget is kept just inside Helm's default --timeout
+            # of 5m so the hook's own error surfaces before Helm aborts.
+            attempt=1
+            max_attempts=30
+            until anchore-enterprise-manager db --db-connect "${CONNSTR}" pre-upgrade-check; do
+              rc=$?
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Pre-upgrade check still failing after ${max_attempts} attempts (~5m, last exit code ${rc}); giving up." >&2
+                exit "${rc}"
               fi
-              echo "Database is not ready yet, sleeping 10 seconds..."
+              echo "Pre-upgrade check did not pass yet (exit ${rc}); attempt ${attempt}/${max_attempts}, retrying in 10s..."
+              attempt=$((attempt + 1))
               sleep 10
             done
+            echo "Pre-upgrade check passed; database is ready to upgrade."
         command:
           - /bin/bash
           - -c
@@ -309,16 +333,28 @@ migration job should match snapshot analysisArchiveMigration to true:
         name: scale-down-anchore
       - args:
           - |
-            while true; do
-              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ -z "$err" ]]; then
-                echo "Database is ready"
-                exit 0
+            CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+            # Wait for the database to pass the pre-upgrade check, gating on the
+            # command's exit code (0 = ready to upgrade). Retry for up to ~5
+            # minutes (30 attempts, 10s apart) to absorb transient startup (DB
+            # not yet reachable, pg_cron launcher warm-up); a persistent failure
+            # (e.g. pg_cron missing, keyring mismatch) exhausts the retries and
+            # fails the hook with the real exit code instead of silently
+            # proceeding. The budget is kept just inside Helm's default --timeout
+            # of 5m so the hook's own error surfaces before Helm aborts.
+            attempt=1
+            max_attempts=30
+            until anchore-enterprise-manager db --db-connect "${CONNSTR}" pre-upgrade-check; do
+              rc=$?
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Pre-upgrade check still failing after ${max_attempts} attempts (~5m, last exit code ${rc}); giving up." >&2
+                exit "${rc}"
               fi
-              echo "Database is not ready yet, sleeping 10 seconds..."
+              echo "Pre-upgrade check did not pass yet (exit ${rc}); attempt ${attempt}/${max_attempts}, retrying in 10s..."
+              attempt=$((attempt + 1))
               sleep 10
             done
+            echo "Pre-upgrade check passed; database is ready to upgrade."
         command:
           - /bin/bash
           - -c
@@ -431,16 +467,28 @@ migration job should match snapshot objectStoreMigration to true:
         name: scale-down-anchore
       - args:
           - |
-            while true; do
-              CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-              err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-              if [[ -z "$err" ]]; then
-                echo "Database is ready"
-                exit 0
+            CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+            # Wait for the database to pass the pre-upgrade check, gating on the
+            # command's exit code (0 = ready to upgrade). Retry for up to ~5
+            # minutes (30 attempts, 10s apart) to absorb transient startup (DB
+            # not yet reachable, pg_cron launcher warm-up); a persistent failure
+            # (e.g. pg_cron missing, keyring mismatch) exhausts the retries and
+            # fails the hook with the real exit code instead of silently
+            # proceeding. The budget is kept just inside Helm's default --timeout
+            # of 5m so the hook's own error surfaces before Helm aborts.
+            attempt=1
+            max_attempts=30
+            until anchore-enterprise-manager db --db-connect "${CONNSTR}" pre-upgrade-check; do
+              rc=$?
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Pre-upgrade check still failing after ${max_attempts} attempts (~5m, last exit code ${rc}); giving up." >&2
+                exit "${rc}"
               fi
-              echo "Database is not ready yet, sleeping 10 seconds..."
+              echo "Pre-upgrade check did not pass yet (exit ${rc}); attempt ${attempt}/${max_attempts}, retrying in 10s..."
+              attempt=$((attempt + 1))
               sleep 10
             done
+            echo "Pre-upgrade check passed; database is ready to upgrade."
         command:
           - /bin/bash
           - -c
@@ -589,16 +637,28 @@ should render proper initContainers:
   1: |
     - args:
         - |
-          while true; do
-            CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
-            err=$(anchore-enterprise-manager db --db-connect ${CONNSTR} pre-upgrade-check 2>&1 > /dev/null)
-            if [[ -z "$err" ]]; then
-              echo "Database is ready"
-              exit 0
+          CONNSTR=postgresql://"${ANCHORE_DB_USER}":"${ANCHORE_DB_PASSWORD}"@"${ANCHORE_DB_HOST}":"${ANCHORE_DB_PORT}"/"${ANCHORE_DB_NAME}"
+          # Wait for the database to pass the pre-upgrade check, gating on the
+          # command's exit code (0 = ready to upgrade). Retry for up to ~5
+          # minutes (30 attempts, 10s apart) to absorb transient startup (DB
+          # not yet reachable, pg_cron launcher warm-up); a persistent failure
+          # (e.g. pg_cron missing, keyring mismatch) exhausts the retries and
+          # fails the hook with the real exit code instead of silently
+          # proceeding. The budget is kept just inside Helm's default --timeout
+          # of 5m so the hook's own error surfaces before Helm aborts.
+          attempt=1
+          max_attempts=30
+          until anchore-enterprise-manager db --db-connect "${CONNSTR}" pre-upgrade-check; do
+            rc=$?
+            if [ "${attempt}" -ge "${max_attempts}" ]; then
+              echo "Pre-upgrade check still failing after ${max_attempts} attempts (~5m, last exit code ${rc}); giving up." >&2
+              exit "${rc}"
             fi
-            echo "Database is not ready yet, sleeping 10 seconds..."
+            echo "Pre-upgrade check did not pass yet (exit ${rc}); attempt ${attempt}/${max_attempts}, retrying in 10s..."
+            attempt=$((attempt + 1))
             sleep 10
           done
+          echo "Pre-upgrade check passed; database is ready to upgrade."
       command:
         - /bin/bash
         - -c

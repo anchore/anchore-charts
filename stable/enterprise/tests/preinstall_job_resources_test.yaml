@@ -1,0 +1,334 @@
+suite: PreInstall Job Tests
+templates:
+  - templates/hooks/pre-install/pre_install_job.yaml
+  - templates/hooks/hook_configmap.yaml
+  - templates/hooks/hook_secret.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+
+tests:
+  - it: pre-install job gets created by default
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - containsDocument:
+          kind: Job
+          apiVersion: batch/v1
+          name: test-release-enterprise-pre-install
+          namespace: test-namespace
+
+  - it: pre-install job does not get created when preInstallJob.enabled is false
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render helm hook annotations
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            "helm.sh/hook": pre-install
+            "helm.sh/hook-weight": "3"
+            "helm.sh/hook-delete-policy": before-hook-creation
+
+  - it: should set restartPolicy to Never
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.restartPolicy
+          value: Never
+
+  - it: should set backoffLimit to 0 so k8s does not respawn pods on failure
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - equal:
+          path: spec.backoffLimit
+          value: 0
+
+  - it: should retry the DB reachability check up to 30 times (~5m budget)
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: max_attempts=30
+        count: 1
+
+  - it: should not render ttlSecondsAfterFinished by default (-1 disables it)
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - notExists:
+          path: spec.ttlSecondsAfterFinished
+
+  - it: should render ttlSecondsAfterFinished when set to a non-negative value
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.ttlSecondsAfterFinished: 120
+    asserts:
+      - equal:
+          path: spec.ttlSecondsAfterFinished
+          value: 120
+
+  - it: should render component labels
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.labels:
+        preInstallJob: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.labels
+          content:
+            preInstallJob: test
+            test: foobar
+
+  - it: should render component annotations
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.annotations:
+        preInstallJob: test
+        test: foobar
+    asserts:
+      - isSubset:
+          path: metadata.annotations
+          content:
+            preInstallJob: test
+            test: foobar
+
+  - it: should render component nodeSelector
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.nodeSelector:
+        preInstallJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.nodeSelector
+          content:
+            preInstallJob: test
+
+  - it: should render component affinity
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.affinity:
+        preInstallJob: test
+    asserts:
+      - isSubset:
+          path: spec.template.spec.affinity
+          content:
+            preInstallJob: test
+
+  - it: should render component tolerations
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.tolerations:
+        - key: "preInstallJob"
+          operator: "Equal"
+          value: "test"
+          effect: "NoSchedule"
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "preInstallJob"
+            operator: "Equal"
+            value: "test"
+            effect: "NoSchedule"
+          count: 1
+
+  - it: should render component resource requests & limits
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.requests
+          content:
+            cpu: 100m
+            memory: 128Mi
+        count: 1
+      - isSubset:
+          path: spec.template.spec.containers[0].resources.limits
+          content:
+            cpu: 200m
+            memory: 256Mi
+        count: 1
+
+  - it: should mount the hooks config volume
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: config-volume
+            configMap:
+              name: test-release-enterprise-hooks-config
+          count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: config-volume
+            mountPath: /config/config.yaml
+            subPath: config.yaml
+          count: 1
+
+  - it: should render hook envFrom with hooks secret
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - isSubset:
+          path: spec.template.spec.containers[0]
+          content:
+            envFrom:
+              - secretRef:
+                  name: test-release-enterprise-hooks
+
+  - it: should mount certs into the wait-for-db container when certStoreSecretName is set
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      certStoreSecretName: test-certs
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: wait-for-db
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: certs
+            secret:
+              secretName: test-certs
+          count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: certs
+            mountPath: /home/anchore/certs/
+            readOnly: true
+          count: 1
+
+  - it: should not mount certs into the wait-for-db container when certStoreSecretName is unset
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: certs
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: certs
+            mountPath: /home/anchore/certs/
+            readOnly: true
+
+  - it: should render the wait-for-db TCP connectivity check in the container args
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: exec 3<>/dev/tcp/"\$\{ANCHORE_DB_HOST\}"/"\$\{ANCHORE_DB_PORT\}"
+        count: 1
+
+  - it: should render component extraVolumes
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component extraVolumeMounts
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+
+  - it: should render component and global extraVolumes
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.extraVolumes:
+        - name: extra-vol
+          emptyDir: {}
+      extraVolumes:
+        - name: global-extra-vol
+          emptyDir: {}
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: extra-vol
+            emptyDir: {}
+        count: 1
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: global-extra-vol
+            emptyDir: {}
+        count: 1
+
+  - it: should render component and global extraVolumeMounts
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      preInstallJob.extraVolumeMounts:
+        - name: extra-vol
+          mountPath: /mnt/extra-vol
+          readOnly: false
+      extraVolumeMounts:
+        - name: global-extra-vol
+          mountPath: /mnt/global-extra-vol
+          readOnly: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: extra-vol
+            mountPath: /mnt/extra-vol
+            readOnly: false
+        count: 1
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: global-extra-vol
+            mountPath: /mnt/global-extra-vol
+            readOnly: false
+        count: 1
+
+  - it: pre-install job should match snapshot
+    template: templates/hooks/pre-install/pre_install_job.yaml
+    set:
+      image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
+    asserts:
+      - matchSnapshot:
+          path: spec.template.spec
