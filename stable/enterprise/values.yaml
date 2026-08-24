@@ -36,7 +36,7 @@ global:
 ## @param image.tag Tag for the Anchore Enterprise image. Set it to deploy a specific version instead of the digest the chart pins; quote the value so it is read as a string
 ## Only one of digest or tag should be set; if both are set the tag is used. Setting a tag therefore
 ## overrides the digest the chart ships, which is what you want when selecting a specific version.
-## An image may also be given as a complete reference string, eg. `image: docker.io/anchore/enterprise:v6.1.1`,
+## An image may also be given as a complete reference string, eg. `image: docker.io/anchore/enterprise:v6.2.0`,
 ## which is used as written unless it states no registry host.
 ##
 image:
