@@ -12,20 +12,38 @@ global:
   ##
   nameOverride: ""
 
+  ## @param global.imageRegistryHost registry host used by every image value that does not set its own
+  ## Every image the chart deploys takes its registry from here unless that image sets a `registry` of its
+  ## own (dict form) or is written as a reference that already includes a host (string form). Mirroring the
+  ## Anchore images therefore only needs this one value; the repository, tag and digest stay with the chart,
+  ## so chart upgrades keep moving them. May include a path, eg. `harbor.example.com/anchore`.
+  ## To pull a single image from somewhere else, set that image's `registry` - see `cloudsql.image`, which
+  ## ships with `registry: gcr.io` because it is not a Docker Hub image.
+  ## This does not apply to the bundled ui-redis or prometheus subcharts (set `ui-redis.image.registry` and
+  ## the prometheus subchart's own image values), nor to images supplied in initContainers /
+  ## extraInitContainers, which are passed to the pod spec verbatim.
+  ##
+  imageRegistryHost: docker.io
+
 ###################################################
 ## @section Common Resource Parameters
 ## Common params used by all Anchore k8s resources
 ###################################################
 
-## @param image Image used for all Anchore Enterprise deployments, excluding Anchore UI
-## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
-## Ensure tag value is quoted so it's interpreted as a string
+## @param image.registry Registry for the Anchore Enterprise image. Empty means take it from global.imageRegistryHost; set it to pull this one image from a different registry
+## @param image.repository Repository for the Anchore Enterprise image
+## @param image.digest Digest for the Anchore Enterprise image. Used when image.tag is not set
+## @param image.tag Tag for the Anchore Enterprise image. Set it to deploy a specific version instead of the digest the chart pins; quote the value so it is read as a string
+## Only one of digest or tag should be set; if both are set the tag is used. Setting a tag therefore
+## overrides the digest the chart ships, which is what you want when selecting a specific version.
+## An image may also be given as a complete reference string, eg. `image: docker.io/anchore/enterprise:v6.1.1`,
+## which is used as written unless it states no registry host.
 ##
-image: docker.io/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
-  # registry: docker.io
-  # repository: anchore/enterprise
-  # tag: "v6.1.1"
-  # digest: sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+image:
+  registry: ""
+  repository: anchore/enterprise
+  digest: sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+  tag: ""
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -38,13 +56,15 @@ imagePullPolicy: IfNotPresent
 ##
 imagePullSecretName: anchore-enterprise-pullcreds
 
-## @param kubectlImage The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade
-## This is only used in the osaaMigration and upgrade jobs.
+## @param kubectlImage.registry Registry for the kubectl image. Empty means take it from global.imageRegistryHost
+## @param kubectlImage.repository Repository for the kubectl image
+## @param kubectlImage.tag Tag for the kubectl image
+## Only used by the osaaMigration and upgrade jobs.
 ##
-kubectlImage: bitnamilegacy/kubectl:1.30
-  # registry: docker.io
-  # repository: bitnamilegacy/kubectl
-  # tag: "1.30"
+kubectlImage:
+  registry: ""
+  repository: bitnamilegacy/kubectl
+  tag: "1.30"
   # digest: sha256:abcdef123456
 
 ## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
@@ -149,7 +169,9 @@ topologySpreadConstraints: []
 
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space. This top level value will set it for ALL anchore pods. For specific components, you can override this value using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume.details)
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
-## @param scratchVolume.fixerInitContainerImage The image to use for the mode-fixer initContainer
+## @param scratchVolume.fixerInitContainerImage.registry Registry for the mode-fixer initContainer image. Empty means take it from global.imageRegistryHost
+## @param scratchVolume.fixerInitContainerImage.repository Repository for the mode-fixer initContainer image
+## @param scratchVolume.fixerInitContainerImage.tag Tag for the mode-fixer initContainer image
 ## @param scratchVolume.details [object] Details for the k8s volume to be created (defaults to default emptyDir)
 ## Scratch volume details can be specified per component using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume)
 ## Generally speaking you need to provision 3x the size of the largest image (uncompressed) that you want to analyze
@@ -158,7 +180,10 @@ topologySpreadConstraints: []
 scratchVolume:
   mountPath: /analysis_scratch
   fixGroupPermissions: false
-  fixerInitContainerImage: alpine
+  fixerInitContainerImage:
+    registry: ""
+    repository: library/alpine
+    tag: "3.21"
   details: {}
 
 ## @param extraVolumes mounts additional volumes to each pod
@@ -2221,14 +2246,16 @@ simpleQueue:
 ## @section Anchore UI Parameters
 #################################
 ui:
-  ## @param ui.image Image used for the Anchore UI container
-  ## Ensure tag value is quoted so it's interpreted as a string
+  ## @param ui.image.registry Registry for the Anchore UI image. Empty means take it from global.imageRegistryHost; set it to pull this one image from a different registry
+  ## @param ui.image.repository Repository for the Anchore UI image
+  ## @param ui.image.digest Digest for the Anchore UI image. Used when ui.image.tag is not set
+  ## @param ui.image.tag Tag for the Anchore UI image. Set it to deploy a specific version instead of the digest the chart pins; quote the value so it is read as a string
   ##
-  image: docker.io/anchore/enterprise-ui@sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b
-    # registry: docker.io
-    # repository: anchore/enterprise-ui
-    # tag: "v6.1.0"
-    # digest: sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b
+  image:
+    registry: ""
+    repository: anchore/enterprise-ui
+    digest: sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b
+    tag: ""
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
@@ -2684,9 +2711,14 @@ cloudsql:
   ##
   enabled: false
 
-  ## @param cloudsql.image Image to use for GCE CloudSQL Proxy
+  ## @param cloudsql.image.registry Registry for the GCE CloudSQL Proxy image. Stated because this is not a Docker Hub image, so global.imageRegistryHost does not apply to it. Override it to pull the proxy from a mirror
+  ## @param cloudsql.image.repository Repository for the GCE CloudSQL Proxy image
+  ## @param cloudsql.image.tag Tag for the GCE CloudSQL Proxy image
   ##
-  image: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+  image:
+    registry: gcr.io
+    repository: cloudsql-docker/gce-proxy
+    tag: "1.37.8"
 
   ## @param cloudsql.imagePullPolicy Image Pull Policy to use for CloudSQL image
   ##

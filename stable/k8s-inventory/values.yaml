@@ -1,4 +1,18 @@
 ###################################################
+## @section Global Resource Parameters
+## Global params used by all K8s Inventory resources
+###################################################
+global:
+  ## @param global.imageRegistryHost registry host used by every image value that does not set its own
+  ## Every image the chart deploys takes its registry from here unless that image sets a `registry` of its
+  ## own (dict form) or is written as a reference that already includes a host (string form). Mirroring the
+  ## Anchore images therefore only needs this one value; the repository and tag stay with the chart, so
+  ## chart upgrades keep moving them. May include a path, eg. `harbor.example.com/anchore`.
+  ## To pull the image from somewhere else, set `image.registry`.
+  ##
+  imageRegistryHost: docker.io
+
+###################################################
 ## @section Common Resource Parameters
 ## Common params used by all K8s Inventory resources
 ###################################################
@@ -8,12 +22,14 @@
 replicaCount: 1
 
 ## @param image.pullPolicy Image pull policy used by the K8s Inventory deployment
-## @param image.repository Image used for the K8s Inventory deployment
-## @param image.tag Image tag used for the K8s Inventory deployment
+## @param image.registry Registry for the K8s Inventory image. Empty means take it from global.imageRegistryHost
+## @param image.repository Repository for the K8s Inventory image
+## @param image.tag Image tag used for the K8s Inventory deployment. Defaults to the chart appVersion when unset
 ## use tag v1.8.4-fips-amd64 if you want an image built for fips use
 ##
 image:
   pullPolicy: "IfNotPresent"
+  registry: ""
   repository: "anchore/k8s-inventory"
   tag: "v1.8.4"
 

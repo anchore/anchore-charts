@@ -47,14 +47,26 @@ See the [K8s Inventory repo](https://github.com/anchore/k8s-inventory) for more 
 
 ## Parameters
 
+### Global Resource Parameters
+
+| Name                       | Description                                                        | Value       |
+| -------------------------- | ------------------------------------------------------------------ | ----------- |
+| `global.imageRegistryHost` | registry host used by every image value that does not set its own   | `docker.io` |
+
+Setting `global.imageRegistryHost` re-homes the chart's image without touching its repository or tag, so
+chart upgrades keep moving the version. To point the image at a different registry than the global, set
+`image.registry`. See the enterprise chart's [Using a Private Registry](../enterprise/README.md#using-a-private-registry)
+section for the full rule.
+
 ### Common Resource Parameters
 
 | Name                                  | Description                                                                                                             | Value                   |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | `replicaCount`                        | Number of replicas for the K8s Inventory deployment                                                                     | `1`                     |
 | `image.pullPolicy`                    | Image pull policy used by the K8s Inventory deployment                                                                  | `IfNotPresent`          |
-| `image.repository`                    | Image used for the K8s Inventory deployment                                                                             | `anchore/k8s-inventory` |
-| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.6.0`                |
+| `image.registry`                      | Registry for the K8s Inventory image. Empty means take it from global.imageRegistryHost                                 | `""`                    |
+| `image.repository`                    | Repository for the K8s Inventory image                                                                                  | `anchore/k8s-inventory` |
+| `image.tag`                           | Image tag used for the K8s Inventory deployment. Defaults to the chart appVersion when unset                            | `v1.8.4`                |
 | `imagePullSecrets`                    | secrets where Kubernetes should get the credentials for pulling private images                                          | `[]`                    |
 | `nameOverride`                        | overrides the name set on resources                                                                                     | `""`                    |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                 | `""`                    |

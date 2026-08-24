@@ -45,7 +45,7 @@ Setup a container for the cloudsql proxy to run in all pods when .Values.cloudsq
 {{- define "enterprise.common.cloudsqlContainer" -}}
 {{- if and (.Values.cloudsql.enabled) (not .Values.cloudsql.useSideCar) -}}
 - name: cloudsql-proxy
-  image: {{ .Values.cloudsql.image }}
+  image: {{ include "enterprise.renderImage" (dict "image" .Values.cloudsql.image "context" .) | trim }}
   imagePullPolicy: {{ .Values.cloudsql.imagePullPolicy }}
 {{- with .Values.containerSecurityContext }}
   securityContext:
@@ -76,7 +76,7 @@ Setup a sidecar container for the cloudsql proxy to run in all pods when .Values
 {{- define "enterprise.common.cloudsqlInitContainer" -}}
 {{- if and (.Values.cloudsql.enabled) (.Values.cloudsql.useSideCar) -}}
 - name: cloudsql-proxy
-  image: {{ .Values.cloudsql.image }}
+  image: {{ include "enterprise.renderImage" (dict "image" .Values.cloudsql.image "context" .) | trim }}
   imagePullPolicy: {{ .Values.cloudsql.imagePullPolicy }}
   restartPolicy: Always
   ports:
@@ -251,7 +251,7 @@ Setup the common fix permissions init container for all pods using a scratch vol
 */}}
 {{- define "enterprise.common.fixPermissionsInitContainer" -}}
 - name: mode-fixer
-  image: {{ .Values.scratchVolume.fixerInitContainerImage }}
+  image: {{ include "enterprise.renderImage" (dict "image" .Values.scratchVolume.fixerInitContainerImage "context" .) | trim }}
   securityContext:
     runAsUser: 0
   volumeMounts:
@@ -320,25 +320,64 @@ app.kubernetes.io/component: {{ $component | lower }}
 {{- end -}}
 
 {{/*
+Returns the global image registry host, with any trailing slash removed.
+Defaults to docker.io via values.yaml; the default dict guards a values file that sets
+`global:` with nothing under it, which would otherwise be a nil dereference.
+*/}}
+{{- define "enterprise.globalImageRegistryHost" -}}
+{{- $global := default dict .Values.global -}}
+{{- default "" $global.imageRegistryHost | trimSuffix "/" -}}
+{{- end }}
+
+{{/*
+Reports whether a string image reference states a registry host of its own.
+The leading path segment is a registry host when it contains a '.' or a ':', or when it is
+'localhost' - the same rule the docker/OCI reference parsers use, so this always agrees with
+what the container runtime does with the same string.
+*/}}
+{{- define "enterprise.imageStatesRegistry" -}}
+{{- $parts := splitList "/" (trim .) -}}
+{{- $head := first $parts -}}
+{{- if and (gt (len $parts) 1) (or (contains "." $head) (contains ":" $head) (eq $head "localhost")) -}}
+true
+{{- end -}}
+{{- end }}
+
+{{/*
 Generic image rendering helper.
 Reusable image specification template for Anchore Enterprise
 Accepts:
-- dict "image" <image value>
+- dict "image" <image value> "context" <root context>
 Handles:
-- string values
 - dicts with tag or digest
+- string values
 - fails if incomplete
+
+An image value that states no registry of its own - a dict without `registry`, or a string
+without a registry host - takes one from global.imageRegistryHost. An image value that does
+state one keeps it, so a single image can be pointed at a different mirror than the rest.
 */}}
 {{- define "enterprise.renderImage" -}}
 {{- $image := .image }}
+{{- $globalHost := include "enterprise.globalImageRegistryHost" .context }}
 {{- if eq (printf "%T" $image) "string" }}
-  {{ $image | trim }}
-{{- else if and $image.digest $image.registry $image.repository }}
-  {{ printf "%s/%s@%s" $image.registry $image.repository $image.digest | trim }}
-{{- else if and $image.tag $image.registry $image.repository }}
-  {{ printf "%s/%s:%s" $image.registry $image.repository $image.tag | trim }}
+  {{- $ref := trim $image }}
+  {{- if or (include "enterprise.imageStatesRegistry" $ref) (not $globalHost) }}
+  {{ $ref }}
+  {{- else }}
+  {{ printf "%s/%s" $globalHost $ref }}
+  {{- end }}
 {{- else }}
-  {{ fail (printf "Invalid image: must include registry, repository, and either tag or digest. Got: %#v" $image) }}
+  {{- $registry := default $globalHost $image.registry }}
+  {{/* tag before digest: the shipped defaults pin a digest, and Helm merges a user's `tag` into
+       that default rather than replacing it, so digest-precedence would silently ignore the tag */}}
+  {{- if and $image.tag $registry $image.repository }}
+  {{ printf "%s/%s:%s" $registry $image.repository $image.tag | trim }}
+  {{- else if and $image.digest $registry $image.repository }}
+  {{ printf "%s/%s@%s" $registry $image.repository $image.digest | trim }}
+  {{- else }}
+  {{ fail (printf "Invalid image: must include repository, either tag or digest, and a registry (set it on the image or via global.imageRegistryHost). Got: %#v" $image) }}
+  {{- end }}
 {{- end }}
 {{- end }}
 
@@ -347,7 +386,7 @@ Create an image specification template that can override the default image
 based on global settings
 */}}
 {{- define "enterprise.common.image" -}}
-{{ include "enterprise.renderImage" (dict "image" .Values.image) }}
+{{ include "enterprise.renderImage" (dict "image" .Values.image "context" .) }}
 {{- end }}
 
 {{/*
@@ -355,7 +394,7 @@ Create an image specification template for the UI that can override the default 
 based on component-specific or global settings
 */}}
 {{- define "enterprise.ui.image" -}}
-{{ include "enterprise.renderImage" (dict "image" .Values.ui.image) }}
+{{ include "enterprise.renderImage" (dict "image" .Values.ui.image "context" .) }}
 {{- end }}
 
 
@@ -363,7 +402,7 @@ based on component-specific or global settings
 Create an image specification template for kubectl
 */}}
 {{- define "enterprise.kubectl.image" -}}
-  {{ include "enterprise.renderImage" (dict "image" .Values.kubectlImage) }}
+  {{ include "enterprise.renderImage" (dict "image" .Values.kubectlImage "context" .) }}
 {{- end }}
 
 {{/*

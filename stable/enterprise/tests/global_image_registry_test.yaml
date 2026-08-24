@@ -1,0 +1,197 @@
+## global.imageRegistryHost supplies the registry for any image value that states none of its own.
+## An image value that does state one - a dict with `registry`, or a string that already includes a
+## registry host - keeps it, so a single image can be pointed at a different mirror than the rest.
+suite: Global Image Registry Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+
+tests:
+  - it: should render the shipped defaults through docker.io
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+
+  - it: should supply the registry for the enterprise image
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: harbor.example.com/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+
+  - it: should supply the registry for the ui image
+    template: ui_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: harbor.example.com/anchore/enterprise-ui@sha256:0d0ceda52f9958f3c9d173801df77b17ee84e1de6be5c8bc921402991fea853b
+
+  - it: should supply the registry for the kubectl image
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].image
+          value: harbor.example.com/bitnamilegacy/kubectl:1.30
+
+  - it: should supply the registry for the mode-fixer image
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      scratchVolume.fixGroupPermissions: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: harbor.example.com/library/alpine:3.21
+
+  - it: should support a registry host that includes a path
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/anchore
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: harbor.example.com/anchore/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+
+  - it: should not double the slash when the registry host has a trailing one
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: harbor.example.com/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+
+  ## The point of the design: one image can be pointed somewhere else without restating its
+  ## version, so chart upgrades keep moving the tag.
+  - it: should let a single image state its own registry while the rest follow the global
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/anchore-licensed
+      kubectlImage.registry: harbor.example.com/dockerhub
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].image
+          value: harbor.example.com/dockerhub/bitnamilegacy/kubectl:1.30
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: harbor.example.com/anchore-licensed/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+
+  - it: should leave the cloudsql proxy on gcr.io because its default states a registry
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      cloudsql.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: gcr.io/cloudsql-docker/gce-proxy:1.37.8
+
+  - it: should mirror the cloudsql proxy when its registry is overridden
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      cloudsql.enabled: true
+      cloudsql.image.registry: harbor.example.com/gcr
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: harbor.example.com/gcr/cloudsql-docker/gce-proxy:1.37.8
+
+  - it: should take the registry from the global for a string image that states none
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: anchore/enterprise:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: harbor.example.com/anchore/enterprise:v9.9.9
+
+  - it: should leave a string image that states its own registry alone
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: myregistry.local/anchore/enterprise:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: myregistry.local/anchore/enterprise:v9.9.9
+
+  - it: should treat a registry host with a port as a registry host
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: localhost:5000/anchore/enterprise:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: localhost:5000/anchore/enterprise:v9.9.9
+
+  ## Helm merges a user-supplied `tag` into the shipped default, which pins a digest. The tag has
+  ## to win or selecting a version would silently deploy the digest instead.
+  - it: should prefer a user supplied tag over the digest the chart ships
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      image.tag: v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/anchore/enterprise:v9.9.9
+
+  - it: should not rewrite images supplied in extraInitContainers
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      scratchVolume.fixGroupPermissions: true
+      initContainers:
+        - name: custom
+          image: example/custom:latest
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: custom
+            image: example/custom:latest
+          any: true
+
+  - it: should fail with an actionable message when nothing supplies a registry
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      global.imageRegistryHost: ""
+      image:
+        repository: anchore/enterprise
+        tag: "9.9.9"
+    asserts:
+      - failedTemplate:
+          errorPattern: "must include repository, either tag or digest, and a registry"

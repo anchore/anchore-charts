@@ -1,0 +1,65 @@
+## global.imageRegistryHost supplies the registry for any image value that states none of its own.
+## An image value that states a `registry` of its own keeps it, so a single image can be pointed at a
+## different mirror than the rest. This chart takes the dict form only - `image.pullPolicy` lives
+## inside the same dict, so a bare reference string was never a valid value here.
+suite: Global Image Registry Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  k8sInventory.anchore.url: http://anchore:8228
+  k8sInventory.anchore.user: admin
+  k8sInventory.anchore.password: pw
+
+tests:
+  - it: should render the shipped default through docker.io
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "docker.io/anchore/k8s-inventory:v1.8.4"
+
+  - it: should supply the registry from the global
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/k8s-inventory:v1.8.4"
+
+  - it: should support a registry host that includes a path
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/anchore
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/anchore/k8s-inventory:v1.8.4"
+
+  - it: should not double the slash when the registry host has a trailing one
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/k8s-inventory:v1.8.4"
+
+  - it: should keep a registry the image states itself
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image.registry: myregistry.local
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "myregistry.local/anchore/k8s-inventory:v1.8.4"
