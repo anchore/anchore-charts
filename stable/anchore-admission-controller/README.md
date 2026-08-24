@@ -77,7 +77,19 @@ It will remove kubernetes objects which are not removed by a helm delete. Pass t
 |---|---|---|---|
 |logVerbosity | int | 6 | log verbosity of controller, 1 = error, 2 warn, 3 debug....
 |---|---|---|---|
-|image | str | release tag | Tag including registry and repository for image to use
+|global.imageRegistryHost | str | docker.io | Registry host used by every image value in this chart that does not set its own. Only the registry is taken from here, so the repository and tag stay with the chart
+|---|---|---|---|
+|image.registry | str | "" | Registry for the controller image. Empty means take it from global.imageRegistryHost; set it to pull this image from a different registry
+|---|---|---|---|
+|image.repository | str | anchore/kubernetes-admission-controller | Repository for the controller image
+|---|---|---|---|
+|image.tag | str | release tag | Tag for the controller image
+|---|---|---|---|
+|initCa.image.registry | str | "" | Registry for the init-ca image. Empty means take it from global.imageRegistryHost
+|---|---|---|---|
+|initCa.image.repository | str | cfssl/cfssl | Repository for the init-ca image
+|---|---|---|---|
+|initCa.image.tag | str | v1.6.5 | Tag for the init-ca image
 |---|---|---|---|
 |imagePullPolicy | str | IfNotPresent | Standard k8s pull policy setting
 |---|---|---|---|

@@ -1130,7 +1130,7 @@ tests:
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: DoNotSchedule
 
-  - it: should render enterprise image when passed in as a string
+  - it: should take the registry from the global when a string image states none
     templates: *backend_test_templates
     documentIndex: 0
     set:
@@ -1138,18 +1138,18 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "anchore/enterprise:9.9.9"
+          value: "docker.io/anchore/enterprise:9.9.9"
 
-
-  - it: should render enterprise image when passed in as a string
+  - it: should leave a string image that states its own registry alone
     templates: *backend_test_templates
     documentIndex: 0
     set:
-      image: "anchore/enterprise:9.9.9"
+      global.imageRegistryHost: harbor.example.com
+      image: "anchore.com/anchore/enterprise:9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "anchore/enterprise:9.9.9"
+          value: "anchore.com/anchore/enterprise:9.9.9"
 
   - it: should render enterprise image when passed in as a dict
     templates: *backend_test_templates

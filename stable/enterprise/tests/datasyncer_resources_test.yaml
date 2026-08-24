@@ -169,7 +169,7 @@ tests:
               - name: "anchore-scratch"
                 mountPath: /analysis_scratch
             command: [ sh, -c, (chmod 0775 /analysis_scratch; chgrp 1001 /analysis_scratch ) ]
-            image: alpine
+            image: docker.io/library/alpine:3.21
             name: mode-fixer
             securityContext:
               runAsUser: 0
@@ -219,7 +219,7 @@ tests:
           value: "enterprise-datasyncer"
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "test-image:latest"
+          value: "docker.io/test-image:latest"
       - equal:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: "Always"
