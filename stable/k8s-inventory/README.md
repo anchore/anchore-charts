@@ -45,6 +45,41 @@ Note: the Anchore API Password can be provided via a kubernetes secret, or injec
 
 See the [K8s Inventory repo](https://github.com/anchore/k8s-inventory) for more information about the K8s Inventory specific configuration
 
+## Image Registry
+
+The chart's image is a set of parts rather than one string:
+
+```yaml
+image:
+  registry: ""            # empty -> taken from global.imageRegistryHost
+  repository: anchore/k8s-inventory
+  tag: "v1.8.4"
+```
+
+The registry is chosen from three levels, most specific first:
+
+| Level | Where | Wins over |
+| --- | --- | --- |
+| 1. Per-image `registry` | `image.registry` | everything below |
+| 2. `global.imageRegistryHost` | one value for the whole chart | the chart defaults |
+| 3. Chart default | `docker.io` | — |
+
+Stated as one rule:
+
+> **An image value that states no registry of its own takes one from `global.imageRegistryHost`. An image value that does state one keeps it.**
+
+To mirror the image, set the global once:
+
+```yaml
+global:
+  imageRegistryHost: harbor.example.com
+```
+
+Only the registry comes from the global — the repository and tag stay with the chart, so chart upgrades keep moving the version. `global.imageRegistryHost` may include a path, eg. `harbor.example.com/anchore`.
+
+This chart takes the dict form only — `image.pullPolicy` lives in the same dict, so a bare reference string is not a valid value here.
+
+
 ## Parameters
 
 ### Global Resource Parameters
@@ -145,3 +180,19 @@ section for the full rule.
 | `k8sInventory.anchore.account`                                          | the account to send data to                                                                                                         | `admin`          |
 | `k8sInventory.anchore.http.insecure`                                    | whether or not anchore is using ssl/tls                                                                                             | `true`           |
 | `k8sInventory.anchore.http.timeoutSeconds`                              | the amount of time in seconds before timing out                                                                                     | `10`             |
+
+## Release Notes
+
+- **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
+- **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
+- **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v0.7.0
+
+**The image value is now a dict, and the registry can be set once for the whole chart.**
+
+- Adds `global.imageRegistryHost`. An image value that states no registry of its own takes one from it, so mirroring the Anchore images is a single setting. See [Image Registry](#image-registry).
+- `image` is now `registry` / `repository` / `tag` rather than `repository` / `tag` alone. Setting `registry` points that image at a different registry without pinning its version, so chart upgrades keep moving the tag.
+- Rendered image references now always include the registry host, so `anchore/k8s-inventory:v1.8.4` renders as `docker.io/anchore/k8s-inventory:v1.8.4`. This resolves to the same image and is a no-op for pulls, but it changes the pod spec, so an upgrade will show a diff and roll the pods.
+
+No values changes are required to upgrade.

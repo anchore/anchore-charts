@@ -20,7 +20,7 @@ maintainers:
     email: hung.nguyen@anchore.com
 
 type: application
-version: 0.0.18
+version: 0.1.0
 appVersion: "1.4.3"
 
 icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png

@@ -340,24 +340,51 @@ This is the default to keep existing deployments working through upgrades. For n
 
 ### Using a Private Registry
 
-If you mirror the Anchore images into your own registry, set the registry once with `global.imageRegistryHost` instead of overriding each image value:
+Every image this chart deploys is a set of parts rather than one opaque string:
+
+```yaml
+image:
+  registry: ""                  # empty -> taken from global.imageRegistryHost
+  repository: anchore/enterprise
+  digest: sha256:5d61...
+  tag: ""                       # set this to deploy a tag instead of the pinned digest
+```
+
+#### How the registry is chosen
+
+There are three levels, most specific first:
+
+| Level | Where | Wins over |
+| --- | --- | --- |
+| 1. Per-image `registry` | `image.registry`, `ui.image.registry`, `kubectlImage.registry`, `cloudsql.image.registry`, `scratchVolume.fixerInitContainerImage.registry` | everything below |
+| 2. `global.imageRegistryHost` | one value for the whole chart | the chart defaults |
+| 3. Chart default | `docker.io`, or the image's real upstream where that differs (`cloudsql.image` ships `registry: gcr.io`) | — |
+
+Stated as one rule:
+
+> **An image value that states no registry of its own takes one from `global.imageRegistryHost`. An image value that does state one keeps it.**
+
+Because only the registry comes from the global, the repository and the pinned tag or digest stay with the chart — so chart upgrades keep moving them. That is the difference between setting `registry` and pasting a whole reference: a pasted reference pins the version too, and the chart can never upgrade it for you again.
+
+#### Mirroring every image
 
 ```yaml
 global:
   imageRegistryHost: harbor.example.com
 ```
 
-Every image value in this chart is a set of parts — `registry`, `repository`, and either `tag` or `digest`. The rule is:
-
-> **An image value that states no registry of its own takes one from `global.imageRegistryHost`. An image value that does state one keeps it.**
-
-Because only the registry comes from the global, the repository and the pinned tag or digest stay with the chart — so chart upgrades keep moving them. That is the difference between setting `registry` and pasting a whole reference: a pasted reference pins the version too, and the chart can never upgrade it for you again.
+| Chart default | Renders as |
+| --- | --- |
+| `anchore/enterprise@sha256:5d61...` | `harbor.example.com/anchore/enterprise@sha256:5d61...` |
+| `bitnamilegacy/kubectl:1.30` | `harbor.example.com/bitnamilegacy/kubectl:1.30` |
+| `library/alpine:3.21` | `harbor.example.com/library/alpine:3.21` |
+| `gcr.io/cloudsql-docker/gce-proxy:1.37.8` | unchanged — it states its own registry |
 
 `global.imageRegistryHost` may include a path, which is prepended in place of the registry: `harbor.example.com/anchore` renders `anchore/enterprise` as `harbor.example.com/anchore/anchore/enterprise`.
 
 #### Pointing one image somewhere else
 
-Mirrors are often split by upstream, because a proxy-cache project can only hold one set of upstream credentials. Anchore's own images are entitlement-gated and the helper images are public, so they usually cannot share a project. Set `registry` on the images that differ:
+Mirrors are often split by upstream, because a proxy-cache project holds one set of upstream credentials. Anchore's own images are entitlement-gated while the helper images are public, so they usually cannot share a project. Set `registry` on the images that differ:
 
 ```yaml
 global:
@@ -373,11 +400,22 @@ cloudsql:
     registry: harbor.example.com/gcr
 ```
 
-Note that `cloudsql.image` ships with `registry: gcr.io`, because the CloudSQL proxy is not a Docker Hub image. Values that state a registry are never rewritten, so the proxy keeps coming from GCR until you point it at a mirror yourself.
+No tags or digests are restated, so every version is still the chart's to manage.
 
-#### Complete references
+#### Selecting a version
 
-An image value may also be given as a single reference string, which is used as written:
+`image` and `ui.image` ship a pinned `digest` and an empty `tag`. Setting `tag` deploys that tag instead:
+
+```yaml
+image:
+  tag: "v6.1.1"    # used instead of the digest the chart pins
+```
+
+If both `tag` and `digest` are set, the tag is used.
+
+#### Complete reference strings
+
+An image value may also be a single reference string, which is used as written:
 
 ```yaml
 image: myregistry.example.com/anchore/enterprise:v6.1.1
@@ -385,14 +423,14 @@ image: myregistry.example.com/anchore/enterprise:v6.1.1
 
 A string that includes a registry host is left alone. A string that does not — `anchore/enterprise:v6.1.1` — states no registry, so it takes one from `global.imageRegistryHost` like any other value. The leading path segment counts as a registry host when it contains a `.` or a `:`, or when it is `localhost`, which is the same rule the container runtime applies to the same string.
 
-Setting a string pins the tag or digest as well, so prefer setting `registry` unless you really do mean to take ownership of the version.
+Setting a string pins the tag or digest as well, so prefer setting `registry` unless you mean to take ownership of the version.
 
 #### Not covered
 
 - The bundled `ui-redis` and `prometheus` subcharts. Set those with `ui-redis.image.registry` and the prometheus subchart's own image values.
 - Images you supply in `initContainers` / `extraInitContainers`, which are passed to the pod spec verbatim.
 
-Registry credentials are configured separately, via `imagePullSecretName` and `imageCredentials`. Note that the chart attaches a single pull secret, so mirrors split across projects need credentials that can read all of them.
+Registry credentials are configured separately, via `imagePullSecretName` and `imageCredentials`. The chart attaches a single pull secret, so mirrors split across projects need credentials that can read all of them.
 
 ### Analyzer Image Layer Cache Configuration
 
@@ -1584,13 +1622,18 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-### v4.1.5
+### v4.2.0
 
-- Adds `global.imageRegistryHost`, which supplies the registry for every image value that does not state one of its own. See [Using a Private Registry](#using-a-private-registry).
-- Image values are now expressed as `registry` / `repository` / `tag` or `digest`. A complete reference string is still accepted and is used as written. Setting `registry` on a single image points just that image at a different registry, without pinning its version.
-- `scratchVolume.fixerInitContainerImage` now defaults to `library/alpine` at tag `3.21`, rather than the untagged `alpine`. The implicit `library` namespace is a Docker Hub client convenience and does not resolve through a mirror, and the image was previously floating on `latest`.
-- When an image value sets both `tag` and `digest`, the tag is now used. This matches what the chart has always documented, and is what makes setting `image.tag` select a version rather than silently deploying the pinned digest.
-- Rendered image references now always include the registry host, so `anchore/k8s-inventory:v1.8.4` renders as `docker.io/anchore/k8s-inventory:v1.8.4`. This resolves to the same image and is a no-op for pulls, but it will show up as a diff on upgrade.
+**Image values are now dicts, and the registry can be set once for the whole chart.**
+
+- Adds `global.imageRegistryHost`. Every image value that states no registry of its own takes one from it, so mirroring the Anchore images is a single setting. See [Using a Private Registry](#using-a-private-registry).
+- `image`, `ui.image`, `kubectlImage`, `cloudsql.image` and `scratchVolume.fixerInitContainerImage` are now `registry` / `repository` / `tag` or `digest` rather than reference strings. Setting `registry` on one image points just that image at a different registry without pinning its version, so chart upgrades keep moving tags and digests. A complete reference string is still accepted and is used as written, so existing values files continue to work.
+- `cloudsql.image` ships `registry: gcr.io` because it is not a Docker Hub image, so it is exempt from the global until pointed at a mirror deliberately.
+- **When an image sets both `tag` and `digest`, the tag is now used.** This matches what the chart has always documented. It is also what makes `image.tag` select a version: Helm merges a user-supplied tag into the shipped default rather than replacing it, so under the previous digest-first behaviour setting a tag silently deployed the pinned digest instead.
+- `scratchVolume.fixerInitContainerImage` now defaults to `library/alpine` at tag `3.21` rather than the untagged `alpine`. The implicit `library` namespace is a Docker Hub client convenience that does not resolve through a mirror, and the image was previously floating on `latest`.
+- Rendered image references now always include the registry host, so `anchore/enterprise:v6.1.1` renders as `docker.io/anchore/enterprise:v6.1.1`. This resolves to the same image and is a no-op for pulls, but it changes the pod spec, so an upgrade will show a diff and roll the pods.
+
+No values changes are required to upgrade.
 
 ### v4.1.4
 
