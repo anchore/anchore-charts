@@ -74,6 +74,16 @@ tests:
           path: spec.template.spec.containers[0].image
           value: harbor.example.com/anchore/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
 
+  - it: should not double the slash when a per-image registry has a trailing one
+    template: analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      image.registry: harbor.example.com/anchore-licensed/
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: harbor.example.com/anchore-licensed/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
+
   - it: should not double the slash when the registry host has a trailing one
     template: analyzer_deployment.yaml
     documentIndex: 0

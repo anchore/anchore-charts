@@ -368,7 +368,7 @@ state one keeps it, so a single image can be pointed at a different mirror than 
   {{ printf "%s/%s" $globalHost $ref }}
   {{- end }}
 {{- else }}
-  {{- $registry := default $globalHost $image.registry }}
+  {{- $registry := trimSuffix "/" (default $globalHost $image.registry) }}
   {{/* tag before digest: the shipped defaults pin a digest, and Helm merges a user's `tag` into
        that default rather than replacing it, so digest-precedence would silently ignore the tag */}}
   {{- if and $image.tag $registry $image.repository }}
