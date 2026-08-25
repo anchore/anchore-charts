@@ -425,6 +425,22 @@ A string that includes a registry host is left alone. A string that does not —
 
 Setting a string pins the tag or digest as well, so prefer setting `registry` unless you mean to take ownership of the version.
 
+Overriding a **nested** image value with a reference string — ``ui.image`, `cloudsql.image`, `scratchVolume.fixerInitContainerImage`` — makes Helm print a warning:
+
+```
+coalesce.go:298: warning: cannot overwrite table with non table for ...
+```
+
+The string is still used; Helm is noting that it replaced the default's parts wholesale. Top-level values (`image`, `kubectlImage`) do not warn. Writing the dict form instead avoids it:
+
+```yaml
+ui:
+  image:
+    registry: myregistry.example.com
+    repository: anchore/enterprise-ui
+    tag: "v6.1.1"
+```
+
 #### Not covered
 
 - The bundled `ui-redis` and `prometheus` subcharts. Set those with `ui-redis.image.registry` and the prometheus subchart's own image values.

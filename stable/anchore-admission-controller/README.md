@@ -113,6 +113,22 @@ initCa:
 
 An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/kubernetes-admission-controller:v0.8.4`), which is used as written. A string that states no registry host takes one from the global like any other value.
 
+Overriding a **nested** image value with a reference string — ``initCa.image`` — makes Helm print a warning:
+
+```
+coalesce.go:298: warning: cannot overwrite table with non table for ...
+```
+
+The string is still used; Helm is noting that it replaced the default's parts wholesale. Top-level values (`image`) do not warn. Writing the dict form instead avoids it:
+
+```yaml
+initCa:
+  image:
+    registry: myregistry.example.com
+    repository: cfssl/cfssl
+    tag: "v1.6.5"
+```
+
 Note that the chart attaches a single image pull secret, so images split across registries need credentials that can read all of them.
 
 
