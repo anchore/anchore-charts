@@ -204,6 +204,7 @@ Using the '--recreate-pods' is not required to get updates of config to the runn
 
 - Adds `global.imageRegistryHost`. An image value that states no registry of its own takes one from it, so mirroring the Anchore images is a single setting. See [Image Registry](#image-registry).
 - `image` and `initCa.image` are now `registry` / `repository` / `tag` rather than reference strings. Setting `registry` points that image at a different registry without pinning its version, so chart upgrades keep moving the tag. Complete reference strings are still accepted and are used as written, so existing values files continue to work.
+- Overriding a **nested** image value with a reference string (`initCa.image`) makes Helm print `cannot overwrite table with non table` on every render. **The string is still used** — the message means Helm kept your scalar instead of the default's parts, not that your setting was discarded. Top-level values (`image`) do not warn. Set `registry` / `tag` instead of a full reference to avoid it.
 - Rendered image references now always include the registry host, so `anchore/kubernetes-admission-controller:v0.8.4` renders as `docker.io/anchore/kubernetes-admission-controller:v0.8.4`. This resolves to the same image and is a no-op for pulls, but it changes the pod spec, so an upgrade will show a diff and roll the pods.
 
 No values changes are required to upgrade.

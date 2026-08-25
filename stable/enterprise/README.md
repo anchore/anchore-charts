@@ -441,10 +441,17 @@ ui:
     tag: "v6.1.1"
 ```
 
-#### Not covered
+#### Mirroring everything: the complete list
 
-- The bundled `ui-redis` and `prometheus` subcharts. Set those with `ui-redis.image.registry` and the prometheus subchart's own image values.
-- Images you supply in `initContainers` / `extraInitContainers`, which are passed to the pod spec verbatim.
+`global.imageRegistryHost` covers every image the chart itself deploys. These are the only other values a fully-mirrored install has to touch — if you set all of them, nothing reaches a public registry:
+
+| Value | When it applies | Why the global doesn't cover it |
+| --- | --- | --- |
+| `global.imageRegistryHost` | always | — |
+| `cloudsql.image.registry` | `cloudsql.enabled: true` | ships `registry: gcr.io`, so it states its own registry and is exempt. **It is also not rendered at all while cloudsql is disabled**, so a mirrored install can look complete and only fail to pull once the proxy is turned on |
+| `ui-redis.image.registry` | `ui-redis.chartEnabled: true` | separate subchart with its own values |
+| the prometheus subchart's image values | `prometheus.chartEnabled: true` | separate subchart with its own values |
+| any `image` in `initContainers` / `extraInitContainers` | if you set them | passed to the pod spec verbatim, never rewritten |
 
 Registry credentials are configured separately, via `imagePullSecretName` and `imageCredentials`. The chart attaches a single pull secret, so mirrors split across projects need credentials that can read all of them.
 
@@ -1647,6 +1654,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - `cloudsql.image` ships `registry: gcr.io` because it is not a Docker Hub image, so it is exempt from the global until pointed at a mirror deliberately.
 - **When an image sets both `tag` and `digest`, the tag is now used.** This matches what the chart has always documented. It is also what makes `image.tag` select a version: Helm merges a user-supplied tag into the shipped default rather than replacing it, so under the previous digest-first behaviour setting a tag silently deployed the pinned digest instead.
 - `scratchVolume.fixerInitContainerImage` now defaults to `library/alpine` at tag `3.21` rather than the untagged `alpine`. The implicit `library` namespace is a Docker Hub client convenience that does not resolve through a mirror, and the image was previously floating on `latest`.
+- Overriding a **nested** image value with a reference string (`ui.image`, `cloudsql.image`, `scratchVolume.fixerInitContainerImage`) makes Helm print `cannot overwrite table with non table` on every render. **The string is still used** — the message means Helm kept your scalar instead of the default's parts, not that your setting was discarded. Top-level values (`image`, `kubectlImage`) do not warn. Set `registry` / `tag` instead of a full reference to avoid it.
 - Rendered image references now always include the registry host, so `anchore/enterprise:v6.1.1` renders as `docker.io/anchore/enterprise:v6.1.1`. This resolves to the same image and is a no-op for pulls, but it changes the pod spec, so an upgrade will show a diff and roll the pods.
 
 No values changes are required to upgrade.
