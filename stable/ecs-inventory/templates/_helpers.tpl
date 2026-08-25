@@ -42,7 +42,7 @@ state one keeps it, so a single image can be pointed at a different mirror than 
   {{ printf "%s/%s" $globalHost $ref }}
   {{- end }}
 {{- else }}
-  {{- $registry := default $globalHost $image.registry }}
+  {{- $registry := trimSuffix "/" (default $globalHost $image.registry) }}
   {{- if and $image.digest $registry $image.repository }}
   {{ printf "%s/%s@%s" $registry $image.repository $image.digest | trim }}
   {{- else if and $image.tag $registry $image.repository }}

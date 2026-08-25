@@ -189,10 +189,10 @@ section for the full rule.
 
 ### v0.7.0
 
-**The image value is now a dict, and the registry can be set once for the whole chart.**
+**The image value gains a `registry` key, and the registry can be set once for the whole chart.**
 
 - Adds `global.imageRegistryHost`. An image value that states no registry of its own takes one from it, so mirroring the Anchore images is a single setting. See [Image Registry](#image-registry).
-- `image` is now `registry` / `repository` / `tag` rather than `repository` / `tag` alone. Setting `registry` points that image at a different registry without pinning its version, so chart upgrades keep moving the tag.
+- `image` gains a `registry` key alongside the existing `repository` and `tag`. Setting `registry` points that image at a different registry without pinning its version, so chart upgrades keep moving the tag.
 - Rendered image references now always include the registry host, so `anchore/k8s-inventory:v1.8.4` renders as `docker.io/anchore/k8s-inventory:v1.8.4`. This resolves to the same image and is a no-op for pulls, but it changes the pod spec, so an upgrade will show a diff and roll the pods.
 
 No values changes are required to upgrade.
