@@ -42,4 +42,4 @@ dependencies:
   - name: prometheus-adapter
     version: "~4.11"
     repository: "https://prometheus-community.github.io/helm-charts"
-    condition: prometheus-adapter.enabled
+    condition: prometheus-adapter.chartEnabled

@@ -779,7 +779,7 @@ Usage: {{- include "enterprise.prometheusAdapterCheck" . }}
 */}}
 
 {{- define "enterprise.prometheusAdapterCheck" -}}
-{{- if index .Values "prometheus-adapter" "enabled" }}
+{{- if index .Values "prometheus-adapter" "chartEnabled" }}
   {{- if or (not (index .Values "prometheus-adapter" "prometheus")) (not (index .Values "prometheus-adapter" "prometheus" "url")) (eq (index .Values "prometheus-adapter" "prometheus" "url") "") }}
     {{- fail "prometheus-adapter is enabled but prometheus.url is not set. Please set prometheus.url to the Prometheus server that is collecting Anchore metrics." -}}
   {{- end -}}

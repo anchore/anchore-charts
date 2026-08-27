@@ -624,6 +624,150 @@ policyEngine:
   replicaCount: 3
 ```
 
+#### Autoscaling
+
+Any of the scalable services can instead be managed by a HorizontalPodAutoscaler. When
+`autoscaling.enabled` is set for a service, the chart stops setting `replicas` on that
+Deployment and creates an HPA for it, so the two never fight over the replica count.
+
+A metric is enabled by configuring it: set `targetCPUUtilizationPercentage` and the HPA
+scales on CPU, leave it unset and it does not. At least one metric must be configured,
+otherwise the chart fails with an error rather than creating an HPA that has nothing to
+scale on. All are unset by default.
+
+```yaml
+policyEngine:
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+```
+
+> **Note:** CPU and memory are rarely the right signal for Anchore. A service can sit at
+> low CPU while blocked on I/O with a deep queue, so resource based scaling tends to add
+> capacity late and remove it early. Prefer queue based scaling, described below.
+
+#### Autoscaling on Anchore Metrics
+
+CPU and memory scaling work on their own. Scaling on an Anchore metric needs four things wired
+together.
+
+**1. Anchore must export metrics.**
+
+```yaml
+anchoreConfig:
+  metrics:
+    enabled: true
+    auth_disabled: true
+```
+
+**2. Prometheus must scrape Anchore.** The bundled Prometheus already ships an `anchore-enterprise`
+scrape job, so enabling it is enough. If you already run your own Prometheus, skip this and point the
+adapter at that one instead.
+
+```yaml
+prometheus:
+  chartEnabled: true
+```
+
+**3. The Prometheus Adapter must translate the series into a Kubernetes metrics API.** This step has
+no default &mdash; until you add a rule, the adapter serves nothing and the HPA has no metric to read.
+
+Two properties of Anchore queue metrics drive the shape of the rule:
+
+- They are exported by the **simplequeue** service, not by the pods being scaled. They therefore
+  belong under `rules.external` (the External Metrics API) and are referenced with `type: External`.
+  Placing them under `rules.custom` leaves the HPA unable to resolve the metric.
+- Every simplequeue replica reports the same queue-wide value, so the query must aggregate across
+  them. Use `max` for the age metric and `avg` for depth; `sum` would multiply the value by the
+  number of simplequeue pods.
+
+```yaml
+prometheus-adapter:
+  chartEnabled: true
+  prometheus:
+    url: http://<release-name>-prometheus-server
+  rules:
+    external:
+      - seriesQuery: 'anchore_queue_oldest_item_age_seconds{queue_name="analyzer_tasks"}'
+        resources:
+          overrides:
+            namespace:
+              resource: namespace
+        name:
+          matches: "anchore_queue_oldest_item_age_seconds"
+          as: "anchore_analyzer_queue_wait_seconds"
+        metricsQuery: 'max(anchore_queue_oldest_item_age_seconds{queue_name="analyzer_tasks"})'
+```
+
+**4. The service references the renamed metric.** Here the target says "scale until nothing has been
+waiting more than five minutes".
+
+```yaml
+analyzer:
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 20
+    customMetrics:
+      - type: External
+        external:
+          metric:
+            name: anchore_analyzer_queue_wait_seconds
+          target:
+            type: AverageValue
+            averageValue: "300"
+```
+
+##### Why wait time rather than queue depth
+
+`anchore_queue_oldest_item_age_seconds` is how long the longest-waiting task has been waiting. It is
+the better autoscaling signal because it is independent of how expensive each task is: a thousand
+tasks that each take a second never let the queue get old, while a handful of slow ones will. Queue
+depth cannot tell those apart, so a depth target silently encodes an assumption about how long an
+analysis takes.
+
+If you do want to scale on depth, use `count="available"` rather than `count="total"`:
+
+| `count` label | Meaning |
+| ------------- | ------------------------------------------------------------------- |
+| `available`   | Waiting to be picked up. This is the backlog.                       |
+| `in_flight`   | Dequeued and being worked on right now.                             |
+| `total`       | `available` + `in_flight`. Has a floor of roughly one per consumer. |
+| `priority`    | Subset of `total` queued at priority.                               |
+
+Because `total` counts tasks already being worked on, a depth target set against it over-provisions:
+each new replica picks up a task that keeps counting toward the metric it is supposed to reduce.
+
+Available `queue_name` values are `analyzer_tasks`, `ng_analyzer_tasks`, `catalog_tasks`,
+`data_syncer_tasks`, `reports_tasks`, `reports_worker_tasks`, `feed_sync_tasks`, `event_log` and
+`scheduled_report_task`.
+
+Custom metrics and CPU/memory scaling can be combined; all configured metrics are added to the HPA and
+Kubernetes scales on whichever demands the most replicas.
+
+Once deployed, confirm the metric is actually reachable through the metrics API:
+
+```bash
+kubectl get --raw \
+  "/apis/external.metrics.k8s.io/v1beta1/namespaces/<namespace>/anchore_analyzer_queue_wait_seconds"
+```
+
+#### Scaling Down Safely
+
+On SIGTERM an Anchore service stops taking on new work and finishes what it is already doing, so a
+scale-down does not interrupt an analysis that is already under way. A task picked up just as
+termination begins is handed straight back to the queue for another analyzer to take.
+
+This only holds if the pod is given long enough to finish. `analyzer.terminationGracePeriodSeconds`
+defaults to `600` for that reason, matching the analyzer queue's visibility timeout; the Kubernetes
+default of 30 seconds is far shorter than a typical image analysis. Nothing is lost if the grace
+period does elapse &mdash; the task is redelivered once its visibility timeout expires &mdash; but the
+analysis restarts from the beginning, so the work done so far is wasted.
+
+> **Note:** The Anchore UI is not autoscaled, as it holds session state in Redis.
+
 > **Note:** Contact [Anchore Support](https://get.anchore.com/contact/) for assistance in scaling and tuning your Anchore Enterprise installation.
 
 ### Using TLS Internally
@@ -807,6 +951,7 @@ To restore your deployment to using your previous driver configurations:
 | `tolerations`                           | Common tolerations set on all Kubernetes pods                                                                                                                                                                                                                | `[]`                                                                                                   |
 | `affinity`                              | Common affinity set on all Kubernetes pods                                                                                                                                                                                                                   | `{}`                                                                                                   |
 | `topologySpreadConstraints`             | Common topologySpreadConstraints set on all Kubernetes pods.                                                                                                                                                                                                 | `[]`                                                                                                   |
+| `terminationGracePeriodSeconds`         | How long Kubernetes waits for a pod to finish its current work before killing it. Service level values override this                                                                                                                                         | `30`                                                                                                   |
 | `scratchVolume.mountPath`               | The mount path of an external volume for scratch space. This top level value will set it for ALL anchore pods. For specific components, you can override this value using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume.details) | `/analysis_scratch`                                                                                    |
 | `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions on all scratch volumes                                                                                                                                                                         | `false`                                                                                                |
 | `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                                                                                                                                                                                            | `alpine`                                                                                               |
@@ -1052,268 +1197,340 @@ To restore your deployment to using your previous driver configurations:
 
 ### Anchore Analyzer k8s Deployment Parameters
 
-| Name                                 | Description                                                                                                                                                                  | Value  |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `analyzer.replicaCount`              | Number of replicas for the Anchore Analyzer deployment                                                                                                                       | `1`    |
-| `analyzer.service.port`              | The port used for gatherings metrics when .Values.metricsEnabled=true                                                                                                        | `8084` |
-| `analyzer.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`   |
-| `analyzer.extraEnv`                  | Set extra environment variables for Anchore Analyzer pods                                                                                                                    | `[]`   |
-| `analyzer.extraVolumes`              | Define additional volumes for Anchore Analyzer pods                                                                                                                          | `[]`   |
-| `analyzer.extraVolumeMounts`         | Define additional volume mounts for Anchore Analyzer pods                                                                                                                    | `[]`   |
-| `analyzer.initContainers`            | Define additional initContainer containers for Anchore Analyzer pods                                                                                                         | `[]`   |
-| `analyzer.hostAliases`               | Define custom /etc/hosts entries for Anchore Analyzer pods                                                                                                                   | `[]`   |
-| `analyzer.resources`                 | Resource requests and limits for Anchore Analyzer pods                                                                                                                       | `{}`   |
-| `analyzer.labels`                    | Labels for Anchore Analyzer pods                                                                                                                                             | `{}`   |
-| `analyzer.annotations`               | Annotation for Anchore Analyzer pods                                                                                                                                         | `{}`   |
-| `analyzer.nodeSelector`              | Node labels for Anchore Analyzer pod assignment                                                                                                                              | `{}`   |
-| `analyzer.tolerations`               | Tolerations for Anchore Analyzer pod assignment                                                                                                                              | `[]`   |
-| `analyzer.affinity`                  | Affinity for Anchore Analyzer pod assignment                                                                                                                                 | `{}`   |
-| `analyzer.topologySpreadConstraints` | Topology spread constraints for Anchore Analyzer pod assignment                                                                                                              | `[]`   |
-| `analyzer.serviceAccountName`        | Service account name for Anchore API pods                                                                                                                                    | `""`   |
-| `analyzer.containerSecurityContext`  | Security context for the Anchore Analyzer containers                                                                                                                         | `{}`   |
-| `analyzer.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Analyzer scratch space                                                                                                  | `{}`   |
+| Name                                                     | Description                                                                                                                                                                  | Value   |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `analyzer.replicaCount`                                  | Number of replicas for the Anchore Analyzer deployment                                                                                                                       | `1`     |
+| `analyzer.terminationGracePeriodSeconds`                 | How long Kubernetes waits for an analyzer to finish the analysis in progress before killing it                                                                               | `600`   |
+| `analyzer.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Analyzer deployment                                                                                                        | `false` |
+| `analyzer.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Analyzer deployment when autoscaling is enabled                                                                                   | `1`     |
+| `analyzer.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Analyzer deployment when autoscaling is enabled                                                                                   | `10`    |
+| `analyzer.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`    |
+| `analyzer.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`    |
+| `analyzer.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`    |
+| `analyzer.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}` |
+| `analyzer.service.port`                                  | The port used for gatherings metrics when .Values.metricsEnabled=true                                                                                                        | `8084`  |
+| `analyzer.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`    |
+| `analyzer.extraEnv`                                      | Set extra environment variables for Anchore Analyzer pods                                                                                                                    | `[]`    |
+| `analyzer.extraVolumes`                                  | Define additional volumes for Anchore Analyzer pods                                                                                                                          | `[]`    |
+| `analyzer.extraVolumeMounts`                             | Define additional volume mounts for Anchore Analyzer pods                                                                                                                    | `[]`    |
+| `analyzer.initContainers`                                | Define additional initContainer containers for Anchore Analyzer pods                                                                                                         | `[]`    |
+| `analyzer.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Analyzer pods                                                                                                                   | `[]`    |
+| `analyzer.resources`                                     | Resource requests and limits for Anchore Analyzer pods                                                                                                                       | `{}`    |
+| `analyzer.labels`                                        | Labels for Anchore Analyzer pods                                                                                                                                             | `{}`    |
+| `analyzer.annotations`                                   | Annotation for Anchore Analyzer pods                                                                                                                                         | `{}`    |
+| `analyzer.nodeSelector`                                  | Node labels for Anchore Analyzer pod assignment                                                                                                                              | `{}`    |
+| `analyzer.tolerations`                                   | Tolerations for Anchore Analyzer pod assignment                                                                                                                              | `[]`    |
+| `analyzer.affinity`                                      | Affinity for Anchore Analyzer pod assignment                                                                                                                                 | `{}`    |
+| `analyzer.topologySpreadConstraints`                     | Topology spread constraints for Anchore Analyzer pod assignment                                                                                                              | `[]`    |
+| `analyzer.serviceAccountName`                            | Service account name for Anchore API pods                                                                                                                                    | `""`    |
+| `analyzer.containerSecurityContext`                      | Security context for the Anchore Analyzer containers                                                                                                                         | `{}`    |
+| `analyzer.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Analyzer scratch space                                                                                                  | `{}`    |
 
 ### Anchore API k8s Deployment Parameters
 
-| Name                            | Description                                                                                                                                                                  | Value       |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `api.replicaCount`              | Number of replicas for Anchore API deployment                                                                                                                                | `1`         |
-| `api.service.type`              | Service type for Anchore API                                                                                                                                                 | `ClusterIP` |
-| `api.service.port`              | Service port for Anchore API                                                                                                                                                 | `8228`      |
-| `api.service.annotations`       | Annotations for Anchore API service                                                                                                                                          | `{}`        |
-| `api.service.labels`            | Labels for Anchore API service                                                                                                                                               | `{}`        |
-| `api.service.nodePort`          | nodePort for Anchore API service                                                                                                                                             | `""`        |
-| `api.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `api.extraEnv`                  | Set extra environment variables for Anchore API pods                                                                                                                         | `[]`        |
-| `api.extraVolumes`              | Define additional volumes for Anchore API pods                                                                                                                               | `[]`        |
-| `api.extraVolumeMounts`         | Define additional volume mounts for Anchore API pods                                                                                                                         | `[]`        |
-| `api.initContainers`            | Define additional initContainer containers for Anchore API pods                                                                                                              | `[]`        |
-| `api.hostAliases`               | Define custom /etc/hosts entries for Anchore API pods                                                                                                                        | `[]`        |
-| `api.resources`                 | Resource requests and limits for Anchore API pods                                                                                                                            | `{}`        |
-| `api.labels`                    | Labels for Anchore API pods                                                                                                                                                  | `{}`        |
-| `api.annotations`               | Annotation for Anchore API pods                                                                                                                                              | `{}`        |
-| `api.nodeSelector`              | Node labels for Anchore API pod assignment                                                                                                                                   | `{}`        |
-| `api.tolerations`               | Tolerations for Anchore API pod assignment                                                                                                                                   | `[]`        |
-| `api.affinity`                  | Affinity for Anchore API pod assignment                                                                                                                                      | `{}`        |
-| `api.topologySpreadConstraints` | Topology spread constraints for Anchore API pod assignment                                                                                                                   | `[]`        |
-| `api.serviceAccountName`        | Service account name for Anchore API pods                                                                                                                                    | `""`        |
-| `api.containerSecurityContext`  | Security context for the Anchore API containers                                                                                                                              | `{}`        |
-| `api.scratchVolume.details`     | Details for the k8s volume to be created for Anchore API scratch space                                                                                                       | `{}`        |
+| Name                                                | Description                                                                                                                                                                  | Value       |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `api.replicaCount`                                  | Number of replicas for Anchore API deployment                                                                                                                                | `1`         |
+| `api.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore API deployment                                                                                                             | `false`     |
+| `api.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore API deployment when autoscaling is enabled                                                                                        | `1`         |
+| `api.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore API deployment when autoscaling is enabled                                                                                        | `10`        |
+| `api.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `api.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `api.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `api.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `api.service.type`                                  | Service type for Anchore API                                                                                                                                                 | `ClusterIP` |
+| `api.service.port`                                  | Service port for Anchore API                                                                                                                                                 | `8228`      |
+| `api.service.annotations`                           | Annotations for Anchore API service                                                                                                                                          | `{}`        |
+| `api.service.labels`                                | Labels for Anchore API service                                                                                                                                               | `{}`        |
+| `api.service.nodePort`                              | nodePort for Anchore API service                                                                                                                                             | `""`        |
+| `api.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `api.extraEnv`                                      | Set extra environment variables for Anchore API pods                                                                                                                         | `[]`        |
+| `api.extraVolumes`                                  | Define additional volumes for Anchore API pods                                                                                                                               | `[]`        |
+| `api.extraVolumeMounts`                             | Define additional volume mounts for Anchore API pods                                                                                                                         | `[]`        |
+| `api.initContainers`                                | Define additional initContainer containers for Anchore API pods                                                                                                              | `[]`        |
+| `api.hostAliases`                                   | Define custom /etc/hosts entries for Anchore API pods                                                                                                                        | `[]`        |
+| `api.resources`                                     | Resource requests and limits for Anchore API pods                                                                                                                            | `{}`        |
+| `api.labels`                                        | Labels for Anchore API pods                                                                                                                                                  | `{}`        |
+| `api.annotations`                                   | Annotation for Anchore API pods                                                                                                                                              | `{}`        |
+| `api.nodeSelector`                                  | Node labels for Anchore API pod assignment                                                                                                                                   | `{}`        |
+| `api.tolerations`                                   | Tolerations for Anchore API pod assignment                                                                                                                                   | `[]`        |
+| `api.affinity`                                      | Affinity for Anchore API pod assignment                                                                                                                                      | `{}`        |
+| `api.topologySpreadConstraints`                     | Topology spread constraints for Anchore API pod assignment                                                                                                                   | `[]`        |
+| `api.serviceAccountName`                            | Service account name for Anchore API pods                                                                                                                                    | `""`        |
+| `api.containerSecurityContext`                      | Security context for the Anchore API containers                                                                                                                              | `{}`        |
+| `api.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore API scratch space                                                                                                       | `{}`        |
 
 ### Anchore Catalog k8s Deployment Parameters
 
-| Name                                | Description                                                                                                                                                                  | Value       |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `catalog.replicaCount`              | Number of replicas for the Anchore Catalog deployment                                                                                                                        | `1`         |
-| `catalog.service.type`              | Service type for Anchore Catalog                                                                                                                                             | `ClusterIP` |
-| `catalog.service.port`              | Service port for Anchore Catalog                                                                                                                                             | `8082`      |
-| `catalog.service.annotations`       | Annotations for Anchore Catalog service                                                                                                                                      | `{}`        |
-| `catalog.service.labels`            | Labels for Anchore Catalog service                                                                                                                                           | `{}`        |
-| `catalog.service.nodePort`          | nodePort for Anchore Catalog service                                                                                                                                         | `""`        |
-| `catalog.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `catalog.extraEnv`                  | Set extra environment variables for Anchore Catalog pods                                                                                                                     | `[]`        |
-| `catalog.extraVolumes`              | Define additional volumes for Anchore Catalog pods                                                                                                                           | `[]`        |
-| `catalog.extraVolumeMounts`         | Define additional volume mounts for Anchore Catalog pods                                                                                                                     | `[]`        |
-| `catalog.initContainers`            | Define additional initContainer containers for Anchore Catalog pods                                                                                                          | `[]`        |
-| `catalog.hostAliases`               | Define custom /etc/hosts entries for Anchore Catalog pods                                                                                                                    | `[]`        |
-| `catalog.resources`                 | Resource requests and limits for Anchore Catalog pods                                                                                                                        | `{}`        |
-| `catalog.labels`                    | Labels for Anchore Catalog pods                                                                                                                                              | `{}`        |
-| `catalog.annotations`               | Annotation for Anchore Catalog pods                                                                                                                                          | `{}`        |
-| `catalog.nodeSelector`              | Node labels for Anchore Catalog pod assignment                                                                                                                               | `{}`        |
-| `catalog.tolerations`               | Tolerations for Anchore Catalog pod assignment                                                                                                                               | `[]`        |
-| `catalog.affinity`                  | Affinity for Anchore Catalog pod assignment                                                                                                                                  | `{}`        |
-| `catalog.topologySpreadConstraints` | Topology spread constraints for Anchore Catalog pod assignment                                                                                                               | `[]`        |
-| `catalog.serviceAccountName`        | Service account name for Anchore Catalog pods                                                                                                                                | `""`        |
-| `catalog.containerSecurityContext`  | Security context for the Anchore Catalog containers                                                                                                                          | `{}`        |
-| `catalog.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Catalog scratch space                                                                                                   | `{}`        |
+| Name                                                    | Description                                                                                                                                                                  | Value       |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `catalog.replicaCount`                                  | Number of replicas for the Anchore Catalog deployment                                                                                                                        | `1`         |
+| `catalog.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Catalog deployment                                                                                                         | `false`     |
+| `catalog.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Catalog deployment when autoscaling is enabled                                                                                    | `1`         |
+| `catalog.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Catalog deployment when autoscaling is enabled                                                                                    | `10`        |
+| `catalog.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `catalog.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `catalog.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `catalog.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `catalog.service.type`                                  | Service type for Anchore Catalog                                                                                                                                             | `ClusterIP` |
+| `catalog.service.port`                                  | Service port for Anchore Catalog                                                                                                                                             | `8082`      |
+| `catalog.service.annotations`                           | Annotations for Anchore Catalog service                                                                                                                                      | `{}`        |
+| `catalog.service.labels`                                | Labels for Anchore Catalog service                                                                                                                                           | `{}`        |
+| `catalog.service.nodePort`                              | nodePort for Anchore Catalog service                                                                                                                                         | `""`        |
+| `catalog.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `catalog.extraEnv`                                      | Set extra environment variables for Anchore Catalog pods                                                                                                                     | `[]`        |
+| `catalog.extraVolumes`                                  | Define additional volumes for Anchore Catalog pods                                                                                                                           | `[]`        |
+| `catalog.extraVolumeMounts`                             | Define additional volume mounts for Anchore Catalog pods                                                                                                                     | `[]`        |
+| `catalog.initContainers`                                | Define additional initContainer containers for Anchore Catalog pods                                                                                                          | `[]`        |
+| `catalog.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Catalog pods                                                                                                                    | `[]`        |
+| `catalog.resources`                                     | Resource requests and limits for Anchore Catalog pods                                                                                                                        | `{}`        |
+| `catalog.labels`                                        | Labels for Anchore Catalog pods                                                                                                                                              | `{}`        |
+| `catalog.annotations`                                   | Annotation for Anchore Catalog pods                                                                                                                                          | `{}`        |
+| `catalog.nodeSelector`                                  | Node labels for Anchore Catalog pod assignment                                                                                                                               | `{}`        |
+| `catalog.tolerations`                                   | Tolerations for Anchore Catalog pod assignment                                                                                                                               | `[]`        |
+| `catalog.affinity`                                      | Affinity for Anchore Catalog pod assignment                                                                                                                                  | `{}`        |
+| `catalog.topologySpreadConstraints`                     | Topology spread constraints for Anchore Catalog pod assignment                                                                                                               | `[]`        |
+| `catalog.serviceAccountName`                            | Service account name for Anchore Catalog pods                                                                                                                                | `""`        |
+| `catalog.containerSecurityContext`                      | Security context for the Anchore Catalog containers                                                                                                                          | `{}`        |
+| `catalog.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Catalog scratch space                                                                                                   | `{}`        |
 
 ### Anchore Component Catalog k8s Deployment Parameters
 
-| Name                                         | Description                                                                                                                                                                  | Value       |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `componentCatalog.service.type`              | Service type for Anchore Component Catalog                                                                                                                                   | `ClusterIP` |
-| `componentCatalog.service.port`              | Service port for Anchore Component Catalog                                                                                                                                   | `8228`      |
-| `componentCatalog.service.annotations`       | Annotations for Anchore Component Catalog service                                                                                                                            | `{}`        |
-| `componentCatalog.service.labels`            | Labels for Anchore Component Catalog service                                                                                                                                 | `{}`        |
-| `componentCatalog.service.nodePort`          | nodePort for Anchore Component Catalog service                                                                                                                               | `""`        |
-| `componentCatalog.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `componentCatalog.extraEnv`                  | Set extra environment variables for Anchore Component Catalog pods                                                                                                           | `[]`        |
-| `componentCatalog.extraVolumes`              | Define additional volumes for Anchore Component Catalog pods                                                                                                                 | `[]`        |
-| `componentCatalog.extraVolumeMounts`         | Define additional volume mounts for Anchore Component Catalog pods                                                                                                           | `[]`        |
-| `componentCatalog.initContainers`            | Define additional initContainer containers for Anchore Component Catalog pods                                                                                                | `[]`        |
-| `componentCatalog.hostAliases`               | Define custom /etc/hosts entries for Anchore Component Catalog pods                                                                                                          | `[]`        |
-| `componentCatalog.resources`                 | Resource requests and limits for Anchore Component Catalog pods                                                                                                              | `{}`        |
-| `componentCatalog.labels`                    | Labels for Anchore Component Catalog pods                                                                                                                                    | `{}`        |
-| `componentCatalog.annotations`               | Annotation for Anchore Component Catalog pods                                                                                                                                | `{}`        |
-| `componentCatalog.nodeSelector`              | Node labels for Anchore Component Catalog pod assignment                                                                                                                     | `{}`        |
-| `componentCatalog.tolerations`               | Tolerations for Anchore Component Catalog pod assignment                                                                                                                     | `[]`        |
-| `componentCatalog.affinity`                  | Affinity for Anchore Component Catalog pod assignment                                                                                                                        | `{}`        |
-| `componentCatalog.topologySpreadConstraints` | Topology spread constraints for Anchore Component Catalog pod assignment                                                                                                     | `[]`        |
-| `componentCatalog.serviceAccountName`        | Service account name for Anchore Component Catalog pods                                                                                                                      | `""`        |
-| `componentCatalog.containerSecurityContext`  | Security context for the Anchore Component Catalog containers                                                                                                                | `{}`        |
-| `componentCatalog.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Component Catalog scratch space                                                                                         | `{}`        |
+| Name                                                             | Description                                                                                                                                                                  | Value       |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `componentCatalog.replicaCount`                                  | Number of replicas for the Anchore Component Catalog deployment                                                                                                              | `1`         |
+| `componentCatalog.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Component Catalog deployment                                                                                               | `false`     |
+| `componentCatalog.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Component Catalog deployment when autoscaling is enabled                                                                          | `1`         |
+| `componentCatalog.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Component Catalog deployment when autoscaling is enabled                                                                          | `10`        |
+| `componentCatalog.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `componentCatalog.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `componentCatalog.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `componentCatalog.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `componentCatalog.service.type`                                  | Service type for Anchore Component Catalog                                                                                                                                   | `ClusterIP` |
+| `componentCatalog.service.port`                                  | Service port for Anchore Component Catalog                                                                                                                                   | `8228`      |
+| `componentCatalog.service.annotations`                           | Annotations for Anchore Component Catalog service                                                                                                                            | `{}`        |
+| `componentCatalog.service.labels`                                | Labels for Anchore Component Catalog service                                                                                                                                 | `{}`        |
+| `componentCatalog.service.nodePort`                              | nodePort for Anchore Component Catalog service                                                                                                                               | `""`        |
+| `componentCatalog.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `componentCatalog.extraEnv`                                      | Set extra environment variables for Anchore Component Catalog pods                                                                                                           | `[]`        |
+| `componentCatalog.extraVolumes`                                  | Define additional volumes for Anchore Component Catalog pods                                                                                                                 | `[]`        |
+| `componentCatalog.extraVolumeMounts`                             | Define additional volume mounts for Anchore Component Catalog pods                                                                                                           | `[]`        |
+| `componentCatalog.initContainers`                                | Define additional initContainer containers for Anchore Component Catalog pods                                                                                                | `[]`        |
+| `componentCatalog.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Component Catalog pods                                                                                                          | `[]`        |
+| `componentCatalog.resources`                                     | Resource requests and limits for Anchore Component Catalog pods                                                                                                              | `{}`        |
+| `componentCatalog.labels`                                        | Labels for Anchore Component Catalog pods                                                                                                                                    | `{}`        |
+| `componentCatalog.annotations`                                   | Annotation for Anchore Component Catalog pods                                                                                                                                | `{}`        |
+| `componentCatalog.nodeSelector`                                  | Node labels for Anchore Component Catalog pod assignment                                                                                                                     | `{}`        |
+| `componentCatalog.tolerations`                                   | Tolerations for Anchore Component Catalog pod assignment                                                                                                                     | `[]`        |
+| `componentCatalog.affinity`                                      | Affinity for Anchore Component Catalog pod assignment                                                                                                                        | `{}`        |
+| `componentCatalog.topologySpreadConstraints`                     | Topology spread constraints for Anchore Component Catalog pod assignment                                                                                                     | `[]`        |
+| `componentCatalog.serviceAccountName`                            | Service account name for Anchore Component Catalog pods                                                                                                                      | `""`        |
+| `componentCatalog.containerSecurityContext`                      | Security context for the Anchore Component Catalog containers                                                                                                                | `{}`        |
+| `componentCatalog.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Component Catalog scratch space                                                                                         | `{}`        |
 
 ### Anchore DataSyncer k8s Deployment Parameters
 
-| Name                                   | Description                                                                                                                                                                  | Value       |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `dataSyncer.replicaCount`              | Number of replicas for the Anchore DataSyncer deployment                                                                                                                     | `1`         |
-| `dataSyncer.service.type`              | Service type for Anchore DataSyncer                                                                                                                                          | `ClusterIP` |
-| `dataSyncer.service.port`              | Service port for Anchore DataSyncer                                                                                                                                          | `8778`      |
-| `dataSyncer.service.annotations`       | Annotations for Anchore DataSyncer service                                                                                                                                   | `{}`        |
-| `dataSyncer.service.labels`            | Labels for Anchore DataSyncer service                                                                                                                                        | `{}`        |
-| `dataSyncer.service.nodePort`          | nodePort for Anchore DataSyncer service                                                                                                                                      | `""`        |
-| `dataSyncer.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `dataSyncer.extraEnv`                  | Set extra environment variables for Anchore DataSyncer pods                                                                                                                  | `[]`        |
-| `dataSyncer.extraVolumes`              | Define additional volumes for Anchore DataSyncer pods                                                                                                                        | `[]`        |
-| `dataSyncer.extraVolumeMounts`         | Define additional volume mounts for Anchore DataSyncer pods                                                                                                                  | `[]`        |
-| `dataSyncer.initContainers`            | Define additional initContainer containers for Anchore Data Syncer pods                                                                                                      | `[]`        |
-| `dataSyncer.hostAliases`               | Define custom /etc/hosts entries for Anchore Data Syncer pods                                                                                                                | `[]`        |
-| `dataSyncer.resources`                 | Resource requests and limits for Anchore DataSyncer pods                                                                                                                     | `{}`        |
-| `dataSyncer.labels`                    | Labels for Anchore DataSyncer pods                                                                                                                                           | `{}`        |
-| `dataSyncer.annotations`               | Annotation for Anchore DataSyncer pods                                                                                                                                       | `{}`        |
-| `dataSyncer.nodeSelector`              | Node labels for Anchore DataSyncer pod assignment                                                                                                                            | `{}`        |
-| `dataSyncer.tolerations`               | Tolerations for Anchore DataSyncer pod assignment                                                                                                                            | `[]`        |
-| `dataSyncer.affinity`                  | Affinity for Anchore DataSyncer pod assignment                                                                                                                               | `{}`        |
-| `dataSyncer.topologySpreadConstraints` | Topology spread constraints for Anchore DataSyncer pod assignment                                                                                                            | `[]`        |
-| `dataSyncer.serviceAccountName`        | Service account name for Anchore DataSyncer pods                                                                                                                             | `""`        |
-| `dataSyncer.containerSecurityContext`  | Security context for the Anchore DataSyncer containers                                                                                                                       | `{}`        |
-| `dataSyncer.scratchVolume.details`     | Details for the k8s volume to be created for Anchore DataSyncer scratch space                                                                                                | `{}`        |
+| Name                                                       | Description                                                                                                                                                                  | Value       |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `dataSyncer.replicaCount`                                  | Number of replicas for the Anchore DataSyncer deployment                                                                                                                     | `1`         |
+| `dataSyncer.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore DataSyncer deployment                                                                                                      | `false`     |
+| `dataSyncer.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore DataSyncer deployment when autoscaling is enabled                                                                                 | `1`         |
+| `dataSyncer.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore DataSyncer deployment when autoscaling is enabled                                                                                 | `10`        |
+| `dataSyncer.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `dataSyncer.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `dataSyncer.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `dataSyncer.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `dataSyncer.service.type`                                  | Service type for Anchore DataSyncer                                                                                                                                          | `ClusterIP` |
+| `dataSyncer.service.port`                                  | Service port for Anchore DataSyncer                                                                                                                                          | `8778`      |
+| `dataSyncer.service.annotations`                           | Annotations for Anchore DataSyncer service                                                                                                                                   | `{}`        |
+| `dataSyncer.service.labels`                                | Labels for Anchore DataSyncer service                                                                                                                                        | `{}`        |
+| `dataSyncer.service.nodePort`                              | nodePort for Anchore DataSyncer service                                                                                                                                      | `""`        |
+| `dataSyncer.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `dataSyncer.extraEnv`                                      | Set extra environment variables for Anchore DataSyncer pods                                                                                                                  | `[]`        |
+| `dataSyncer.extraVolumes`                                  | Define additional volumes for Anchore DataSyncer pods                                                                                                                        | `[]`        |
+| `dataSyncer.extraVolumeMounts`                             | Define additional volume mounts for Anchore DataSyncer pods                                                                                                                  | `[]`        |
+| `dataSyncer.initContainers`                                | Define additional initContainer containers for Anchore Data Syncer pods                                                                                                      | `[]`        |
+| `dataSyncer.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Data Syncer pods                                                                                                                | `[]`        |
+| `dataSyncer.resources`                                     | Resource requests and limits for Anchore DataSyncer pods                                                                                                                     | `{}`        |
+| `dataSyncer.labels`                                        | Labels for Anchore DataSyncer pods                                                                                                                                           | `{}`        |
+| `dataSyncer.annotations`                                   | Annotation for Anchore DataSyncer pods                                                                                                                                       | `{}`        |
+| `dataSyncer.nodeSelector`                                  | Node labels for Anchore DataSyncer pod assignment                                                                                                                            | `{}`        |
+| `dataSyncer.tolerations`                                   | Tolerations for Anchore DataSyncer pod assignment                                                                                                                            | `[]`        |
+| `dataSyncer.affinity`                                      | Affinity for Anchore DataSyncer pod assignment                                                                                                                               | `{}`        |
+| `dataSyncer.topologySpreadConstraints`                     | Topology spread constraints for Anchore DataSyncer pod assignment                                                                                                            | `[]`        |
+| `dataSyncer.serviceAccountName`                            | Service account name for Anchore DataSyncer pods                                                                                                                             | `""`        |
+| `dataSyncer.containerSecurityContext`                      | Security context for the Anchore DataSyncer containers                                                                                                                       | `{}`        |
+| `dataSyncer.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore DataSyncer scratch space                                                                                                | `{}`        |
 
 ### Anchore Notifications Parameters
 
-| Name                                      | Description                                                                                                                                                                  | Value       |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `notifications.replicaCount`              | Number of replicas for the Anchore Notifications deployment                                                                                                                  | `1`         |
-| `notifications.service.type`              | Service type for Anchore Notifications                                                                                                                                       | `ClusterIP` |
-| `notifications.service.port`              | Service port for Anchore Notifications                                                                                                                                       | `8668`      |
-| `notifications.service.annotations`       | Annotations for Anchore Notifications service                                                                                                                                | `{}`        |
-| `notifications.service.labels`            | Labels for Anchore Notifications service                                                                                                                                     | `{}`        |
-| `notifications.service.nodePort`          | nodePort for Anchore Notifications service                                                                                                                                   | `""`        |
-| `notifications.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `notifications.extraEnv`                  | Set extra environment variables for Anchore Notifications pods                                                                                                               | `[]`        |
-| `notifications.extraVolumes`              | Define additional volumes for Anchore Notifications pods                                                                                                                     | `[]`        |
-| `notifications.extraVolumeMounts`         | Define additional volume mounts for Anchore Notifications pods                                                                                                               | `[]`        |
-| `notifications.initContainers`            | Define additional initContainer containers for Anchore Notification pods                                                                                                     | `[]`        |
-| `notifications.hostAliases`               | Define custom /etc/hosts entries for Anchore Notifications pods                                                                                                              | `[]`        |
-| `notifications.resources`                 | Resource requests and limits for Anchore Notifications pods                                                                                                                  | `{}`        |
-| `notifications.labels`                    | Labels for Anchore Notifications pods                                                                                                                                        | `{}`        |
-| `notifications.annotations`               | Annotation for Anchore Notifications pods                                                                                                                                    | `{}`        |
-| `notifications.nodeSelector`              | Node labels for Anchore Notifications pod assignment                                                                                                                         | `{}`        |
-| `notifications.tolerations`               | Tolerations for Anchore Notifications pod assignment                                                                                                                         | `[]`        |
-| `notifications.affinity`                  | Affinity for Anchore Notifications pod assignment                                                                                                                            | `{}`        |
-| `notifications.topologySpreadConstraints` | Topology spread constraints for Anchore Notifications pod assignment                                                                                                         | `[]`        |
-| `notifications.containerSecurityContext`  | Security context for the Anchore Notifications containers                                                                                                                    | `{}`        |
-| `notifications.serviceAccountName`        | Service account name for Anchore Notifications pods                                                                                                                          | `""`        |
-| `notifications.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Notifications scratch space                                                                                             | `{}`        |
+| Name                                                          | Description                                                                                                                                                                  | Value       |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `notifications.replicaCount`                                  | Number of replicas for the Anchore Notifications deployment                                                                                                                  | `1`         |
+| `notifications.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Notifications deployment                                                                                                   | `false`     |
+| `notifications.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Notifications deployment when autoscaling is enabled                                                                              | `1`         |
+| `notifications.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Notifications deployment when autoscaling is enabled                                                                              | `10`        |
+| `notifications.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `notifications.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `notifications.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `notifications.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `notifications.service.type`                                  | Service type for Anchore Notifications                                                                                                                                       | `ClusterIP` |
+| `notifications.service.port`                                  | Service port for Anchore Notifications                                                                                                                                       | `8668`      |
+| `notifications.service.annotations`                           | Annotations for Anchore Notifications service                                                                                                                                | `{}`        |
+| `notifications.service.labels`                                | Labels for Anchore Notifications service                                                                                                                                     | `{}`        |
+| `notifications.service.nodePort`                              | nodePort for Anchore Notifications service                                                                                                                                   | `""`        |
+| `notifications.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `notifications.extraEnv`                                      | Set extra environment variables for Anchore Notifications pods                                                                                                               | `[]`        |
+| `notifications.extraVolumes`                                  | Define additional volumes for Anchore Notifications pods                                                                                                                     | `[]`        |
+| `notifications.extraVolumeMounts`                             | Define additional volume mounts for Anchore Notifications pods                                                                                                               | `[]`        |
+| `notifications.initContainers`                                | Define additional initContainer containers for Anchore Notification pods                                                                                                     | `[]`        |
+| `notifications.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Notifications pods                                                                                                              | `[]`        |
+| `notifications.resources`                                     | Resource requests and limits for Anchore Notifications pods                                                                                                                  | `{}`        |
+| `notifications.labels`                                        | Labels for Anchore Notifications pods                                                                                                                                        | `{}`        |
+| `notifications.annotations`                                   | Annotation for Anchore Notifications pods                                                                                                                                    | `{}`        |
+| `notifications.nodeSelector`                                  | Node labels for Anchore Notifications pod assignment                                                                                                                         | `{}`        |
+| `notifications.tolerations`                                   | Tolerations for Anchore Notifications pod assignment                                                                                                                         | `[]`        |
+| `notifications.affinity`                                      | Affinity for Anchore Notifications pod assignment                                                                                                                            | `{}`        |
+| `notifications.topologySpreadConstraints`                     | Topology spread constraints for Anchore Notifications pod assignment                                                                                                         | `[]`        |
+| `notifications.containerSecurityContext`                      | Security context for the Anchore Notifications containers                                                                                                                    | `{}`        |
+| `notifications.serviceAccountName`                            | Service account name for Anchore Notifications pods                                                                                                                          | `""`        |
+| `notifications.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Notifications scratch space                                                                                             | `{}`        |
 
 ### Anchore Policy Engine k8s Deployment Parameters
 
-| Name                                     | Description                                                                                                                                                                  | Value       |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `policyEngine.replicaCount`              | Number of replicas for the Anchore Policy Engine deployment                                                                                                                  | `1`         |
-| `policyEngine.service.type`              | Service type for Anchore Policy Engine                                                                                                                                       | `ClusterIP` |
-| `policyEngine.service.port`              | Service port for Anchore Policy Engine                                                                                                                                       | `8087`      |
-| `policyEngine.service.annotations`       | Annotations for Anchore Policy Engine service                                                                                                                                | `{}`        |
-| `policyEngine.service.labels`            | Labels for Anchore Policy Engine service                                                                                                                                     | `{}`        |
-| `policyEngine.service.nodePort`          | nodePort for Anchore Policy Engine service                                                                                                                                   | `""`        |
-| `policyEngine.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `policyEngine.extraEnv`                  | Set extra environment variables for Anchore Policy Engine pods                                                                                                               | `[]`        |
-| `policyEngine.extraVolumes`              | Define additional volumes for Anchore Policy Engine pods                                                                                                                     | `[]`        |
-| `policyEngine.extraVolumeMounts`         | Define additional volume mounts for Anchore Policy Engine pods                                                                                                               | `[]`        |
-| `policyEngine.initContainers`            | Define additional initContainer containers for Anchore Policy Engine pods                                                                                                    | `[]`        |
-| `policyEngine.hostAliases`               | Define custom /etc/hosts entries for Anchore Policy Engine pods                                                                                                              | `[]`        |
-| `policyEngine.resources`                 | Resource requests and limits for Anchore Policy Engine pods                                                                                                                  | `{}`        |
-| `policyEngine.labels`                    | Labels for Anchore Policy Engine pods                                                                                                                                        | `{}`        |
-| `policyEngine.annotations`               | Annotation for Anchore Policy Engine pods                                                                                                                                    | `{}`        |
-| `policyEngine.nodeSelector`              | Node labels for Anchore Policy Engine pod assignment                                                                                                                         | `{}`        |
-| `policyEngine.tolerations`               | Tolerations for Anchore Policy Engine pod assignment                                                                                                                         | `[]`        |
-| `policyEngine.affinity`                  | Affinity for Anchore Policy Engine pod assignment                                                                                                                            | `{}`        |
-| `policyEngine.topologySpreadConstraints` | Topology spread constraints for Anchore Policy Engine pod assignment                                                                                                         | `[]`        |
-| `policyEngine.serviceAccountName`        | Service account name for Anchore Policy Engine pods                                                                                                                          | `""`        |
-| `policyEngine.containerSecurityContext`  | Security context for the Anchore Policy Engine containers                                                                                                                    | `{}`        |
-| `policyEngine.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Policy Engine scratch space                                                                                             | `{}`        |
+| Name                                                         | Description                                                                                                                                                                  | Value       |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `policyEngine.replicaCount`                                  | Number of replicas for the Anchore Policy Engine deployment                                                                                                                  | `1`         |
+| `policyEngine.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Policy Engine deployment                                                                                                   | `false`     |
+| `policyEngine.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Policy Engine deployment when autoscaling is enabled                                                                              | `1`         |
+| `policyEngine.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Policy Engine deployment when autoscaling is enabled                                                                              | `10`        |
+| `policyEngine.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `policyEngine.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `policyEngine.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `policyEngine.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `policyEngine.service.type`                                  | Service type for Anchore Policy Engine                                                                                                                                       | `ClusterIP` |
+| `policyEngine.service.port`                                  | Service port for Anchore Policy Engine                                                                                                                                       | `8087`      |
+| `policyEngine.service.annotations`                           | Annotations for Anchore Policy Engine service                                                                                                                                | `{}`        |
+| `policyEngine.service.labels`                                | Labels for Anchore Policy Engine service                                                                                                                                     | `{}`        |
+| `policyEngine.service.nodePort`                              | nodePort for Anchore Policy Engine service                                                                                                                                   | `""`        |
+| `policyEngine.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `policyEngine.extraEnv`                                      | Set extra environment variables for Anchore Policy Engine pods                                                                                                               | `[]`        |
+| `policyEngine.extraVolumes`                                  | Define additional volumes for Anchore Policy Engine pods                                                                                                                     | `[]`        |
+| `policyEngine.extraVolumeMounts`                             | Define additional volume mounts for Anchore Policy Engine pods                                                                                                               | `[]`        |
+| `policyEngine.initContainers`                                | Define additional initContainer containers for Anchore Policy Engine pods                                                                                                    | `[]`        |
+| `policyEngine.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Policy Engine pods                                                                                                              | `[]`        |
+| `policyEngine.resources`                                     | Resource requests and limits for Anchore Policy Engine pods                                                                                                                  | `{}`        |
+| `policyEngine.labels`                                        | Labels for Anchore Policy Engine pods                                                                                                                                        | `{}`        |
+| `policyEngine.annotations`                                   | Annotation for Anchore Policy Engine pods                                                                                                                                    | `{}`        |
+| `policyEngine.nodeSelector`                                  | Node labels for Anchore Policy Engine pod assignment                                                                                                                         | `{}`        |
+| `policyEngine.tolerations`                                   | Tolerations for Anchore Policy Engine pod assignment                                                                                                                         | `[]`        |
+| `policyEngine.affinity`                                      | Affinity for Anchore Policy Engine pod assignment                                                                                                                            | `{}`        |
+| `policyEngine.topologySpreadConstraints`                     | Topology spread constraints for Anchore Policy Engine pod assignment                                                                                                         | `[]`        |
+| `policyEngine.serviceAccountName`                            | Service account name for Anchore Policy Engine pods                                                                                                                          | `""`        |
+| `policyEngine.containerSecurityContext`                      | Security context for the Anchore Policy Engine containers                                                                                                                    | `{}`        |
+| `policyEngine.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Policy Engine scratch space                                                                                             | `{}`        |
 
 ### Anchore Reports Parameters
 
-| Name                                | Description                                                                                                                                                                  | Value       |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `reports.replicaCount`              | Number of replicas for the Anchore Reports deployment                                                                                                                        | `1`         |
-| `reports.service.type`              | Service type for Anchore Reports                                                                                                                                             | `ClusterIP` |
-| `reports.service.port`              | Service port for Anchore Reports                                                                                                                                             | `8558`      |
-| `reports.service.annotations`       | Annotations for Anchore Reports service                                                                                                                                      | `{}`        |
-| `reports.service.labels`            | Labels for Anchore Reports service                                                                                                                                           | `{}`        |
-| `reports.service.nodePort`          | nodePort for Anchore Reports service                                                                                                                                         | `""`        |
-| `reports.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `reports.extraEnv`                  | Set extra environment variables for Anchore Reports pods                                                                                                                     | `[]`        |
-| `reports.extraVolumes`              | Define additional volumes for Anchore Reports pods                                                                                                                           | `[]`        |
-| `reports.extraVolumeMounts`         | Define additional volume mounts for Anchore Reports pods                                                                                                                     | `[]`        |
-| `reports.initContainers`            | Define additional initContainer containers for Anchore Reports pods                                                                                                          | `[]`        |
-| `reports.hostAliases`               | Define custom /etc/hosts entries for Anchore Reports pods                                                                                                                    | `[]`        |
-| `reports.resources`                 | Resource requests and limits for Anchore Reports pods                                                                                                                        | `{}`        |
-| `reports.labels`                    | Labels for Anchore Reports pods                                                                                                                                              | `{}`        |
-| `reports.annotations`               | Annotation for Anchore Reports pods                                                                                                                                          | `{}`        |
-| `reports.nodeSelector`              | Node labels for Anchore Reports pod assignment                                                                                                                               | `{}`        |
-| `reports.tolerations`               | Tolerations for Anchore Reports pod assignment                                                                                                                               | `[]`        |
-| `reports.affinity`                  | Affinity for Anchore Reports pod assignment                                                                                                                                  | `{}`        |
-| `reports.topologySpreadConstraints` | Topology spread constraints for Anchore Reports pod assignment                                                                                                               | `[]`        |
-| `reports.serviceAccountName`        | Service account name for Anchore Reports pods                                                                                                                                | `""`        |
-| `reports.containerSecurityContext`  | Security context for the Anchore Reports containers                                                                                                                          | `{}`        |
-| `reports.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Reports scratch space                                                                                                   | `{}`        |
+| Name                                                    | Description                                                                                                                                                                  | Value       |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `reports.replicaCount`                                  | Number of replicas for the Anchore Reports deployment                                                                                                                        | `1`         |
+| `reports.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Reports deployment                                                                                                         | `false`     |
+| `reports.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Reports deployment when autoscaling is enabled                                                                                    | `1`         |
+| `reports.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Reports deployment when autoscaling is enabled                                                                                    | `10`        |
+| `reports.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `reports.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `reports.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `reports.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `reports.service.type`                                  | Service type for Anchore Reports                                                                                                                                             | `ClusterIP` |
+| `reports.service.port`                                  | Service port for Anchore Reports                                                                                                                                             | `8558`      |
+| `reports.service.annotations`                           | Annotations for Anchore Reports service                                                                                                                                      | `{}`        |
+| `reports.service.labels`                                | Labels for Anchore Reports service                                                                                                                                           | `{}`        |
+| `reports.service.nodePort`                              | nodePort for Anchore Reports service                                                                                                                                         | `""`        |
+| `reports.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `reports.extraEnv`                                      | Set extra environment variables for Anchore Reports pods                                                                                                                     | `[]`        |
+| `reports.extraVolumes`                                  | Define additional volumes for Anchore Reports pods                                                                                                                           | `[]`        |
+| `reports.extraVolumeMounts`                             | Define additional volume mounts for Anchore Reports pods                                                                                                                     | `[]`        |
+| `reports.initContainers`                                | Define additional initContainer containers for Anchore Reports pods                                                                                                          | `[]`        |
+| `reports.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Reports pods                                                                                                                    | `[]`        |
+| `reports.resources`                                     | Resource requests and limits for Anchore Reports pods                                                                                                                        | `{}`        |
+| `reports.labels`                                        | Labels for Anchore Reports pods                                                                                                                                              | `{}`        |
+| `reports.annotations`                                   | Annotation for Anchore Reports pods                                                                                                                                          | `{}`        |
+| `reports.nodeSelector`                                  | Node labels for Anchore Reports pod assignment                                                                                                                               | `{}`        |
+| `reports.tolerations`                                   | Tolerations for Anchore Reports pod assignment                                                                                                                               | `[]`        |
+| `reports.affinity`                                      | Affinity for Anchore Reports pod assignment                                                                                                                                  | `{}`        |
+| `reports.topologySpreadConstraints`                     | Topology spread constraints for Anchore Reports pod assignment                                                                                                               | `[]`        |
+| `reports.serviceAccountName`                            | Service account name for Anchore Reports pods                                                                                                                                | `""`        |
+| `reports.containerSecurityContext`                      | Security context for the Anchore Reports containers                                                                                                                          | `{}`        |
+| `reports.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Reports scratch space                                                                                                   | `{}`        |
 
 ### Anchore Reports Worker Parameters
 
-| Name                                      | Description                                                                                                                                                                  | Value       |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `reportsWorker.replicaCount`              | Number of replicas for the Anchore Reports deployment                                                                                                                        | `1`         |
-| `reportsWorker.service.type`              | Service type for Anchore Reports Worker                                                                                                                                      | `ClusterIP` |
-| `reportsWorker.service.port`              | Service port for Anchore Reports Worker                                                                                                                                      | `8559`      |
-| `reportsWorker.service.annotations`       | Annotations for Anchore Reports Worker service                                                                                                                               | `{}`        |
-| `reportsWorker.service.labels`            | Labels for Anchore Reports Worker service                                                                                                                                    | `{}`        |
-| `reportsWorker.service.nodePort`          | nodePort for Anchore Reports Worker service                                                                                                                                  | `""`        |
-| `reportsWorker.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `reportsWorker.extraEnv`                  | Set extra environment variables for Anchore Reports Worker pods                                                                                                              | `[]`        |
-| `reportsWorker.extraVolumes`              | Define additional volumes for Anchore Reports Worker pods                                                                                                                    | `[]`        |
-| `reportsWorker.extraVolumeMounts`         | Define additional volume mounts for Anchore Reports Worker pods                                                                                                              | `[]`        |
-| `reportsWorker.initContainers`            | Define additional initContainer containers for Anchore Reports Worker pods                                                                                                   | `[]`        |
-| `reportsWorker.hostAliases`               | Define custom /etc/hosts entries for Anchore Reports Worker pods                                                                                                             | `[]`        |
-| `reportsWorker.resources`                 | Resource requests and limits for Anchore Reports Worker pods                                                                                                                 | `{}`        |
-| `reportsWorker.labels`                    | Labels for Anchore Reports Worker pods                                                                                                                                       | `{}`        |
-| `reportsWorker.annotations`               | Annotation for Anchore Reports Worker pods                                                                                                                                   | `{}`        |
-| `reportsWorker.nodeSelector`              | Node labels for Anchore Reports Worker pod assignment                                                                                                                        | `{}`        |
-| `reportsWorker.tolerations`               | Tolerations for Anchore Reports Worker pod assignment                                                                                                                        | `[]`        |
-| `reportsWorker.affinity`                  | Affinity for Anchore Reports Worker pod assignment                                                                                                                           | `{}`        |
-| `reportsWorker.topologySpreadConstraints` | Topology spread constraints for Anchore Reports Worker pod assignment                                                                                                        | `[]`        |
-| `reportsWorker.serviceAccountName`        | Service account name for Anchore Reports Worker pods                                                                                                                         | `""`        |
-| `reportsWorker.containerSecurityContext`  | Security context for the Anchore Reports Worker containers                                                                                                                   | `{}`        |
-| `reportsWorker.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Reports Worker scratch space                                                                                            | `{}`        |
+| Name                                                          | Description                                                                                                                                                                  | Value       |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `reportsWorker.replicaCount`                                  | Number of replicas for the Anchore Reports deployment                                                                                                                        | `1`         |
+| `reportsWorker.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Reports Worker deployment                                                                                                  | `false`     |
+| `reportsWorker.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Reports Worker deployment when autoscaling is enabled                                                                             | `1`         |
+| `reportsWorker.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Reports Worker deployment when autoscaling is enabled                                                                             | `10`        |
+| `reportsWorker.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `reportsWorker.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `reportsWorker.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `reportsWorker.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `reportsWorker.service.type`                                  | Service type for Anchore Reports Worker                                                                                                                                      | `ClusterIP` |
+| `reportsWorker.service.port`                                  | Service port for Anchore Reports Worker                                                                                                                                      | `8559`      |
+| `reportsWorker.service.annotations`                           | Annotations for Anchore Reports Worker service                                                                                                                               | `{}`        |
+| `reportsWorker.service.labels`                                | Labels for Anchore Reports Worker service                                                                                                                                    | `{}`        |
+| `reportsWorker.service.nodePort`                              | nodePort for Anchore Reports Worker service                                                                                                                                  | `""`        |
+| `reportsWorker.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `reportsWorker.extraEnv`                                      | Set extra environment variables for Anchore Reports Worker pods                                                                                                              | `[]`        |
+| `reportsWorker.extraVolumes`                                  | Define additional volumes for Anchore Reports Worker pods                                                                                                                    | `[]`        |
+| `reportsWorker.extraVolumeMounts`                             | Define additional volume mounts for Anchore Reports Worker pods                                                                                                              | `[]`        |
+| `reportsWorker.initContainers`                                | Define additional initContainer containers for Anchore Reports Worker pods                                                                                                   | `[]`        |
+| `reportsWorker.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Reports Worker pods                                                                                                             | `[]`        |
+| `reportsWorker.resources`                                     | Resource requests and limits for Anchore Reports Worker pods                                                                                                                 | `{}`        |
+| `reportsWorker.labels`                                        | Labels for Anchore Reports Worker pods                                                                                                                                       | `{}`        |
+| `reportsWorker.annotations`                                   | Annotation for Anchore Reports Worker pods                                                                                                                                   | `{}`        |
+| `reportsWorker.nodeSelector`                                  | Node labels for Anchore Reports Worker pod assignment                                                                                                                        | `{}`        |
+| `reportsWorker.tolerations`                                   | Tolerations for Anchore Reports Worker pod assignment                                                                                                                        | `[]`        |
+| `reportsWorker.affinity`                                      | Affinity for Anchore Reports Worker pod assignment                                                                                                                           | `{}`        |
+| `reportsWorker.topologySpreadConstraints`                     | Topology spread constraints for Anchore Reports Worker pod assignment                                                                                                        | `[]`        |
+| `reportsWorker.serviceAccountName`                            | Service account name for Anchore Reports Worker pods                                                                                                                         | `""`        |
+| `reportsWorker.containerSecurityContext`                      | Security context for the Anchore Reports Worker containers                                                                                                                   | `{}`        |
+| `reportsWorker.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Reports Worker scratch space                                                                                            | `{}`        |
 
 ### Anchore Simple Queue Parameters
 
-| Name                                    | Description                                                                                                                                                                  | Value       |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `simpleQueue.replicaCount`              | Number of replicas for the Anchore Simple Queue deployment                                                                                                                   | `1`         |
-| `simpleQueue.service.type`              | Service type for Anchore Simple Queue                                                                                                                                        | `ClusterIP` |
-| `simpleQueue.service.port`              | Service port for Anchore Simple Queue                                                                                                                                        | `8083`      |
-| `simpleQueue.service.annotations`       | Annotations for Anchore Simple Queue service                                                                                                                                 | `{}`        |
-| `simpleQueue.service.labels`            | Labels for Anchore Simple Queue service                                                                                                                                      | `{}`        |
-| `simpleQueue.service.nodePort`          | nodePort for Anchore Simple Queue service                                                                                                                                    | `""`        |
-| `simpleQueue.service.domainSuffix`      | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
-| `simpleQueue.extraEnv`                  | Set extra environment variables for Anchore Simple Queue pods                                                                                                                | `[]`        |
-| `simpleQueue.extraVolumes`              | Define additional volumes for Anchore Simple Queue pods                                                                                                                      | `[]`        |
-| `simpleQueue.extraVolumeMounts`         | Define additional volume mounts for Anchore Simple Queue pods                                                                                                                | `[]`        |
-| `simpleQueue.initContainers`            | Define additional initContainer containers for Anchore Simple Queue pods                                                                                                     | `[]`        |
-| `simpleQueue.hostAliases`               | Define custom /etc/hosts entries for Anchore Simple Queue pods                                                                                                               | `[]`        |
-| `simpleQueue.resources`                 | Resource requests and limits for Anchore Simple Queue pods                                                                                                                   | `{}`        |
-| `simpleQueue.labels`                    | Labels for Anchore Simple Queue pods                                                                                                                                         | `{}`        |
-| `simpleQueue.annotations`               | Annotation for Anchore Simple Queue pods                                                                                                                                     | `{}`        |
-| `simpleQueue.nodeSelector`              | Node labels for Anchore Simple Queue pod assignment                                                                                                                          | `{}`        |
-| `simpleQueue.tolerations`               | Tolerations for Anchore Simple Queue pod assignment                                                                                                                          | `[]`        |
-| `simpleQueue.affinity`                  | Affinity for Anchore Simple Queue pod assignment                                                                                                                             | `{}`        |
-| `simpleQueue.topologySpreadConstraints` | Topology spread constraints for Anchore Simple Queue pod assignment                                                                                                          | `[]`        |
-| `simpleQueue.serviceAccountName`        | Service account name for Anchore Simple Queue pods                                                                                                                           | `""`        |
-| `simpleQueue.containerSecurityContext`  | Security context for the Anchore Simple Queue containers                                                                                                                     | `{}`        |
-| `simpleQueue.scratchVolume.details`     | Details for the k8s volume to be created for Anchore Simple Queue scratch space                                                                                              | `{}`        |
+| Name                                                        | Description                                                                                                                                                                  | Value       |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `simpleQueue.replicaCount`                                  | Number of replicas for the Anchore Simple Queue deployment                                                                                                                   | `1`         |
+| `simpleQueue.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Simple Queue deployment                                                                                                    | `false`     |
+| `simpleQueue.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Simple Queue deployment when autoscaling is enabled                                                                               | `1`         |
+| `simpleQueue.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Simple Queue deployment when autoscaling is enabled                                                                               | `10`        |
+| `simpleQueue.autoscaling.targetCPUUtilizationPercentage`    | Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it                                                                         | `""`        |
+| `simpleQueue.autoscaling.targetMemoryUtilizationPercentage` | Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it                                                                   | `""`        |
+| `simpleQueue.autoscaling.customMetrics`                     | Custom or external metrics for the HPA to scale on, eg. Anchore queue length                                                                                                 | `[]`        |
+| `simpleQueue.autoscaling.behavior`                          | HPA scaling behavior; defaults to scaling down by 50% and up by 100% per 60s window                                                                                          | `{...}`     |
+| `simpleQueue.service.type`                                  | Service type for Anchore Simple Queue                                                                                                                                        | `ClusterIP` |
+| `simpleQueue.service.port`                                  | Service port for Anchore Simple Queue                                                                                                                                        | `8083`      |
+| `simpleQueue.service.annotations`                           | Annotations for Anchore Simple Queue service                                                                                                                                 | `{}`        |
+| `simpleQueue.service.labels`                                | Labels for Anchore Simple Queue service                                                                                                                                      | `{}`        |
+| `simpleQueue.service.nodePort`                              | nodePort for Anchore Simple Queue service                                                                                                                                    | `""`        |
+| `simpleQueue.service.domainSuffix`                          | domain suffix for appending to the ANCHORE_ENDPOINT_HOSTNAME. If blank, domainSuffix will be "namespace.svc.cluster.local". Takes precedence over the top level domainSuffix | `""`        |
+| `simpleQueue.extraEnv`                                      | Set extra environment variables for Anchore Simple Queue pods                                                                                                                | `[]`        |
+| `simpleQueue.extraVolumes`                                  | Define additional volumes for Anchore Simple Queue pods                                                                                                                      | `[]`        |
+| `simpleQueue.extraVolumeMounts`                             | Define additional volume mounts for Anchore Simple Queue pods                                                                                                                | `[]`        |
+| `simpleQueue.initContainers`                                | Define additional initContainer containers for Anchore Simple Queue pods                                                                                                     | `[]`        |
+| `simpleQueue.hostAliases`                                   | Define custom /etc/hosts entries for Anchore Simple Queue pods                                                                                                               | `[]`        |
+| `simpleQueue.resources`                                     | Resource requests and limits for Anchore Simple Queue pods                                                                                                                   | `{}`        |
+| `simpleQueue.labels`                                        | Labels for Anchore Simple Queue pods                                                                                                                                         | `{}`        |
+| `simpleQueue.annotations`                                   | Annotation for Anchore Simple Queue pods                                                                                                                                     | `{}`        |
+| `simpleQueue.nodeSelector`                                  | Node labels for Anchore Simple Queue pod assignment                                                                                                                          | `{}`        |
+| `simpleQueue.tolerations`                                   | Tolerations for Anchore Simple Queue pod assignment                                                                                                                          | `[]`        |
+| `simpleQueue.affinity`                                      | Affinity for Anchore Simple Queue pod assignment                                                                                                                             | `{}`        |
+| `simpleQueue.topologySpreadConstraints`                     | Topology spread constraints for Anchore Simple Queue pod assignment                                                                                                          | `[]`        |
+| `simpleQueue.serviceAccountName`                            | Service account name for Anchore Simple Queue pods                                                                                                                           | `""`        |
+| `simpleQueue.containerSecurityContext`                      | Security context for the Anchore Simple Queue containers                                                                                                                     | `{}`        |
+| `simpleQueue.scratchVolume.details`                         | Details for the k8s volume to be created for Anchore Simple Queue scratch space                                                                                              | `{}`        |
 
 ### Anchore UI Parameters
 
@@ -1505,6 +1722,22 @@ To restore your deployment to using your previous driver configurations:
 | `prometheus.prometheus-node-exporter.service.name`       | Service name for node-exporter                                                        | `enterprise-prometheus-node-exporter`  |
 | `prometheus.prometheus-node-exporter.service.port`       | Service port for node-exporter                                                        | `9120`                                 |
 | `prometheus.prometheus-node-exporter.service.targetPort` | Target port on the node-exporter pod the Service forwards to                          | `9120`                                 |
+
+### Prometheus Adapter Parameters
+
+The Prometheus Adapter exposes Prometheus metrics through the Kubernetes Custom Metrics API so that
+an HPA can scale on Anchore metrics such as queue depth. It is only needed if you set
+`<service>.autoscaling.customMetrics`; CPU and memory based scaling work without it.
+
+| Name                                 | Description                                                                                                                             | Value   |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `prometheus-adapter.chartEnabled`    | Deploy Prometheus Adapter to expose Prometheus metrics to the Kubernetes Custom Metrics API, required for HPA scaling on custom metrics | `false` |
+| `prometheus-adapter.prometheus.url`  | URL of the Prometheus server collecting Anchore metrics; required when the adapter is enabled                                           | `""`    |
+| `prometheus-adapter.prometheus.port` | Port of the Prometheus server                                                                                                           | `80`    |
+| `prometheus-adapter.rules.default`   | Enable the adapter's default metric discovery rules                                                                                     | `false` |
+| `prometheus-adapter.rules.custom`    | Custom rules mapping Prometheus metrics to the Custom Metrics API                                                                       | `[]`    |
+| `prometheus-adapter.rules.external`  | Rules mapping Prometheus metrics to the External Metrics API                                                                            | `[]`    |
+| `prometheus-adapter.resources`       | Resource requests and limits for the Prometheus Adapter pod                                                                             | `{...}` |
 
 ## Release Notes
 

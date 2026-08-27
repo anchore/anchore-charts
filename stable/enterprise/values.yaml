@@ -147,6 +147,15 @@ affinity: {}
 ##
 topologySpreadConstraints: []
 
+## @param terminationGracePeriodSeconds How long Kubernetes waits for a pod to exit before killing it.
+## On SIGTERM an Anchore service stops picking up new work and finishes what it already has. Anything
+## still running when this elapses is killed; queued work is not lost, but it is redelivered only after
+## the queue's visibility timeout and then redone from scratch.
+## Service level terminationGracePeriodSeconds will override this one. The analyzer sets its own, since
+## an image analysis takes far longer than the Kubernetes default of 30 seconds.
+##
+terminationGracePeriodSeconds: 30
+
 ## @param scratchVolume.mountPath The mount path of an external volume for scratch space. This top level value will set it for ALL anchore pods. For specific components, you can override this value using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume.details)
 ## @param scratchVolume.fixGroupPermissions Enable an initContainer that will fix the fsGroup permissions on all scratch volumes
 ## @param scratchVolume.fixerInitContainerImage The image to use for the mode-fixer initContainer
@@ -1230,6 +1239,13 @@ analyzer:
   ##
   replicaCount: 1
 
+  ## @param analyzer.terminationGracePeriodSeconds How long Kubernetes waits for an analyzer to exit.
+  ## Set to match the analyzer queue's visibility timeout: on SIGTERM the analyzer stops taking new
+  ## work and finishes the analysis in progress, and there is no value in waiting longer than the
+  ## point at which the task would be redelivered to another analyzer anyway.
+  ##
+  terminationGracePeriodSeconds: 600
+
   autoscaling:
     ## @param analyzer.autoscaling.enabled Enable autoscaling for Anchore Analyzer deployment
     ##
@@ -1241,30 +1257,18 @@ analyzer:
     ##
     maxReplicas: 10
 
-    ## @param analyzer.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore Analyzer deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param analyzer.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore Analyzer deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param analyzer.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param analyzer.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param analyzer.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param analyzer.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param analyzer.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
-      # - type: External
-      #   external:
-      #     metric:
-      #       name: anchore_queue_length_total_analyzer_tasks
-      #     target:
-      #       type: AverageValue
-      #       averageValue: "25"
 
     ## @param analyzer.autoscaling.behavior HPA scaling behavior configuration
     ## this lets hpa scale down up to half the pods every 60 seconds window, or scale up to double the pods every 60 seconds window
@@ -1386,22 +1390,17 @@ api:
     ##
     maxReplicas: 10
 
-    ## @param api.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore API deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param api.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore API deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param api.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param api.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param api.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param api.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param api.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param api.autoscaling.behavior HPA scaling behavior configuration
@@ -1531,22 +1530,17 @@ catalog:
     ##
     maxReplicas: 10
 
-    ## @param catalog.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore Catalog deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param catalog.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore Catalog deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param catalog.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param catalog.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param catalog.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param catalog.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param catalog.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param catalog.autoscaling.behavior HPA scaling behavior configuration
@@ -1662,6 +1656,50 @@ catalog:
 ## @section Anchore Component Catalog k8s Deployment Parameters
 ###############################################################
 componentCatalog:
+  ## @param componentCatalog.replicaCount Number of replicas for the Anchore Component Catalog deployment
+  ##
+  replicaCount: 1
+
+  autoscaling:
+    ## @param componentCatalog.autoscaling.enabled Enable autoscaling for Anchore Component Catalog deployment
+    ##
+    enabled: false
+    ## @param componentCatalog.autoscaling.minReplicas Minimum number of replicas for Anchore Component Catalog deployment when autoscaling is enabled
+    ##
+    minReplicas: 1
+    ## @param componentCatalog.autoscaling.maxReplicas Maximum number of replicas for Anchore Component Catalog deployment when autoscaling is enabled
+    ##
+    maxReplicas: 10
+
+    ## @param componentCatalog.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
+    ##
+    targetCPUUtilizationPercentage: ""
+
+    ## @param componentCatalog.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
+    ##
+    targetMemoryUtilizationPercentage: ""
+
+    ## @param componentCatalog.autoscaling.customMetrics Custom metrics for autoscaling
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
+    customMetrics: []
+
+    ## @param componentCatalog.autoscaling.behavior HPA scaling behavior configuration
+    ## this lets hpa scale down up to half the pods every 60 seconds window, or scale up to double the pods every 60 seconds window
+    behavior:
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+      scaleUp:
+        stabilizationWindowSeconds: 60
+        policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+
   ## @param componentCatalog.service.type Service type for Anchore Component Catalog
   ## @param componentCatalog.service.port Service port for Anchore Component Catalog
   ## @param componentCatalog.service.annotations Annotations for Anchore Component Catalog service
@@ -1759,22 +1797,17 @@ dataSyncer:
     ##
     maxReplicas: 10
 
-    ## @param dataSyncer.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore DataSyncer deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param dataSyncer.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore DataSyncer deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param dataSyncer.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param dataSyncer.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param dataSyncer.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param dataSyncer.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param dataSyncer.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param dataSyncer.autoscaling.behavior HPA scaling behavior configuration
@@ -1906,22 +1939,17 @@ notifications:
     ##
     maxReplicas: 10
 
-    ## @param notifications.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore Notifications deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param notifications.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore Notifications deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param notifications.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param notifications.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param notifications.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param notifications.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param notifications.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param notifications.autoscaling.behavior HPA scaling behavior configuration
@@ -2052,22 +2080,17 @@ policyEngine:
     ##
     maxReplicas: 10
 
-    ## @param policyEngine.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore Policy Engine deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param policyEngine.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore Policy Engine deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param policyEngine.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param policyEngine.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param policyEngine.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param policyEngine.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param policyEngine.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param policyEngine.autoscaling.behavior HPA scaling behavior configuration
@@ -2198,22 +2221,17 @@ reports:
     ##
     maxReplicas: 10
 
-    ## @param reports.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore Reports deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param reports.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore Reports deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param reports.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param reports.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param reports.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param reports.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param reports.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param reports.autoscaling.behavior HPA scaling behavior configuration
@@ -2356,22 +2374,17 @@ reportsWorker:
     ##
     maxReplicas: 10
 
-    ## @param reportsWorker.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore Reports Worker deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param reportsWorker.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore Reports Worker deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param reportsWorker.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param reportsWorker.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param reportsWorker.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param reportsWorker.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param reportsWorker.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param reportsWorker.autoscaling.behavior HPA scaling behavior configuration
@@ -2502,22 +2515,17 @@ simpleQueue:
     ##
     maxReplicas: 10
 
-    ## @param simpleQueue.autoscaling.enableMemoryBasedScaling Enable memory based scaling for Anchore Simple Queue deployment when autoscaling is enabled
-    enableMemoryBasedScaling: false
-
-    ## @param simpleQueue.autoscaling.enableCPUBasedScaling Enable CPU based scaling for Anchore Simple Queue deployment when autoscaling is enabled
-    enableCPUBasedScaling: false
-
-    ## @param simpleQueue.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage for autoscaling
+    ## @param simpleQueue.autoscaling.targetCPUUtilizationPercentage Target CPU utilization percentage. Setting this enables CPU based scaling; leave unset to disable it
     ##
-    targetCPUUtilizationPercentage: 70
+    targetCPUUtilizationPercentage: ""
 
-    ## @param simpleQueue.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage for autoscaling
+    ## @param simpleQueue.autoscaling.targetMemoryUtilizationPercentage Target memory utilization percentage. Setting this enables memory based scaling; leave unset to disable it
     ##
-    targetMemoryUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ""
 
     ## @param simpleQueue.autoscaling.customMetrics Custom metrics for autoscaling
-    ## Example:
+    ## See "Autoscaling on Anchore Metrics" in the README for a complete working example
+    ##
     customMetrics: []
 
     ## @param simpleQueue.autoscaling.behavior HPA scaling behavior configuration
@@ -3179,11 +3187,11 @@ ui-redis:
 ## This enables HPA to autoscale based on custom metrics like queue_length
 ###################################################
 prometheus-adapter:
-  ## @param prometheus-adapter.enabled Deploy Prometheus Adapter to expose custom metrics to Kubernetes
+  ## @param prometheus-adapter.chartEnabled Deploy Prometheus Adapter to expose custom metrics to Kubernetes
   ## Required for HPA autoscaling based on custom metrics (e.g., anchore_queue_length)
   ## Requires prometheus.chartEnabled: true
   ##
-  enabled: false
+  chartEnabled: false
 
   ## @param prometheus-adapter.prometheus.url URL of Prometheus service
   ## This should point to the Prometheus server that is collecting Anchore metrics
@@ -3193,21 +3201,15 @@ prometheus-adapter:
     url: ""
     port: 80
 
-  ## @param prometheus-adapter.rules Rules for transforming Prometheus metrics into Custom Metrics API
-  ## These rules map Prometheus metrics to Kubernetes custom metrics that HPA can use
+  ## @param prometheus-adapter.rules Rules that map Prometheus series into the Kubernetes metrics APIs
+  ## Anchore queue metrics are exported by the simplequeue service rather than by the pods being
+  ## scaled, so they belong under `external` and are referenced with `type: External` in an HPA.
+  ## See "Autoscaling on Anchore Metrics" in the README for a complete working example.
   ##
   rules:
     default: false
     custom: []
     external: []
-    # - seriesQuery: 'anchore_queue_length{queue_name="analyzer_tasks",count="total"}'
-    #   resources:
-    #     overrides:
-    #       namespace: {resource: "namespace"}
-    #   name:
-    #     matches: "anchore_queue_length"
-    #     as: "anchore_queue_length_total_analyzer_tasks"
-    #   metricsQuery: 'avg(anchore_queue_length{queue_name="analyzer_tasks",count="total"})'
 
   ## @param prometheus-adapter.resources Resource requests and limits for Prometheus Adapter
   ##
