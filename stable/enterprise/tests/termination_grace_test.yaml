@@ -1,6 +1,7 @@
 suite: Termination grace period
-# On SIGTERM a service stops taking new work and finishes what it has. The analyzer needs
-# far longer than the Kubernetes default of 30s, since an image analysis runs for minutes.
+# Anchore services do not drain on SIGTERM yet, so every service stays at the Kubernetes
+# default; raising it would only slow pod deletion down. The plumbing is here so it can be
+# raised per service once they do drain.
 release:
   name: test-release
   namespace: test-namespace
@@ -21,13 +22,13 @@ tests:
           path: spec.template.spec.terminationGracePeriodSeconds
           value: 30
 
-  - it: should give the analyzer long enough to finish an analysis
+  - it: should leave the analyzer at the default until analyzers drain on SIGTERM
     template: templates/analyzer_deployment.yaml
     documentIndex: 0
     asserts:
       - equal:
           path: spec.template.spec.terminationGracePeriodSeconds
-          value: 600
+          value: 30
 
   - it: should let the global value be overridden per service
     template: templates/api_deployment.yaml
@@ -50,11 +51,11 @@ tests:
           path: spec.template.spec.terminationGracePeriodSeconds
           value: 90
 
-  - it: should keep the analyzer override when the global value changes
+  - it: should allow the analyzer to be raised on its own
     template: templates/analyzer_deployment.yaml
     documentIndex: 0
     set:
-      terminationGracePeriodSeconds: 45
+      analyzer.terminationGracePeriodSeconds: 600
     asserts:
       - equal:
           path: spec.template.spec.terminationGracePeriodSeconds

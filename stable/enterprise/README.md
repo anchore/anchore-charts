@@ -676,12 +676,18 @@ no default &mdash; until you add a rule, the adapter serves nothing and the HPA 
 
 Two properties of Anchore queue metrics drive the shape of the rule:
 
-- They are exported by the **simplequeue** service, not by the pods being scaled. They therefore
-  belong under `rules.external` (the External Metrics API) and are referenced with `type: External`.
-  Placing them under `rules.custom` leaves the HPA unable to resolve the metric.
-- Every simplequeue replica reports the same queue-wide value, so the query must aggregate across
-  them. Use `max` for the age metric and `avg` for depth; `sum` would multiply the value by the
-  number of simplequeue pods.
+- `anchore_queue_length` is exported by the **simplequeue** service, not by the pods being scaled. It
+  therefore belongs under `rules.external` (the External Metrics API) and is referenced with
+  `type: External`. Placing it under `rules.custom` leaves the HPA unable to resolve the metric.
+- Every simplequeue replica reports the same queue-wide value, so the query must aggregate with `avg`
+  across them. Using `sum` would multiply the queue depth by the number of simplequeue pods, and would
+  couple analyzer scaling to how many simplequeue replicas happen to be running.
+
+Rather than scaling on raw queue depth, this rule converts the queue into **seconds of outstanding
+work** by multiplying depth by the mean analysis time Anchore reports. Depth alone cannot tell a large
+backlog of cheap images from a small backlog of expensive ones, so a depth target silently encodes an
+assumption about how long an analysis takes. Multiplying by the measured mean removes that assumption
+and adapts on its own as image sizes change.
 
 ```yaml
 prometheus-adapter:
@@ -690,19 +696,22 @@ prometheus-adapter:
     url: http://<release-name>-prometheus-server
   rules:
     external:
-      - seriesQuery: 'anchore_queue_oldest_item_age_seconds{queue_name="analyzer_tasks"}'
+      - seriesQuery: 'anchore_queue_length{queue_name="analyzer_tasks",count="total"}'
         resources:
           overrides:
             namespace:
               resource: namespace
         name:
-          matches: "anchore_queue_oldest_item_age_seconds"
-          as: "anchore_analyzer_queue_wait_seconds"
-        metricsQuery: 'max(anchore_queue_oldest_item_age_seconds{queue_name="analyzer_tasks"})'
+          matches: "anchore_queue_length"
+          as: "anchore_analyzer_backlog_seconds"
+        metricsQuery: >-
+          avg(anchore_queue_length{queue_name="analyzer_tasks",count="total"})
+          * scalar(avg(anchore_analysis_total_duration_seconds_sum{status="success"}
+                     / anchore_analysis_total_duration_seconds_count{status="success"}))
 ```
 
-**4. The service references the renamed metric.** Here the target says "scale until nothing has been
-waiting more than five minutes".
+**4. The service references the renamed metric.** Here the target says "scale until no more than ten
+minutes of analysis work is outstanding per analyzer".
 
 ```yaml
 analyzer:
@@ -714,35 +723,31 @@ analyzer:
       - type: External
         external:
           metric:
-            name: anchore_analyzer_queue_wait_seconds
+            name: anchore_analyzer_backlog_seconds
           target:
             type: AverageValue
-            averageValue: "300"
+            averageValue: "600"
 ```
 
-##### Why wait time rather than queue depth
+##### Choosing a target
 
-`anchore_queue_oldest_item_age_seconds` is how long the longest-waiting task has been waiting. It is
-the better autoscaling signal because it is independent of how expensive each task is: a thousand
-tasks that each take a second never let the queue get old, while a handful of slow ones will. Queue
-depth cannot tell those apart, so a depth target silently encodes an assumption about how long an
-analysis takes.
+Because the metric is expressed in seconds, the target is a delay budget rather than an opaque count:
+`600` means "add analyzers until the queue represents no more than ten minutes of work each". Divide
+your acceptable delay by nothing &mdash; the number *is* the delay.
 
-If you do want to scale on depth, use `count="available"` rather than `count="total"`:
+Two caveats are worth knowing before tuning it:
 
-| `count` label | Meaning |
-| ------------- | ------------------------------------------------------------------- |
-| `available`   | Waiting to be picked up. This is the backlog.                       |
-| `in_flight`   | Dequeued and being worked on right now.                             |
-| `total`       | `available` + `in_flight`. Has a floor of roughly one per consumer. |
-| `priority`    | Subset of `total` queued at priority.                               |
-
-Because `total` counts tasks already being worked on, a depth target set against it over-provisions:
-each new replica picks up a task that keeps counting toward the metric it is supposed to reduce.
+- `anchore_queue_length{count="total"}` counts messages that are currently being analyzed as well as
+  those waiting, so it has a floor of roughly one per running analyzer. That biases the metric upward
+  and will over-provision slightly; the effect is small at a target of ten minutes and grows as the
+  target shrinks. Avoid very small targets for this reason.
+- The mean analysis time is cumulative over the life of the process, so it moves slowly. That is
+  deliberate: a windowed average is undefined while the cluster is idle and would break the rule
+  exactly when nothing is running.
 
 Available `queue_name` values are `analyzer_tasks`, `ng_analyzer_tasks`, `catalog_tasks`,
 `data_syncer_tasks`, `reports_tasks`, `reports_worker_tasks`, `feed_sync_tasks`, `event_log` and
-`scheduled_report_task`.
+`scheduled_report_task`. The `count` label is either `total` or `priority`.
 
 Custom metrics and CPU/memory scaling can be combined; all configured metrics are added to the HPA and
 Kubernetes scales on whichever demands the most replicas.
@@ -751,20 +756,24 @@ Once deployed, confirm the metric is actually reachable through the metrics API:
 
 ```bash
 kubectl get --raw \
-  "/apis/external.metrics.k8s.io/v1beta1/namespaces/<namespace>/anchore_analyzer_queue_wait_seconds"
+  "/apis/external.metrics.k8s.io/v1beta1/namespaces/<namespace>/anchore_analyzer_backlog_seconds"
 ```
 
 #### Scaling Down Safely
 
-On SIGTERM an Anchore service stops taking on new work and finishes what it is already doing, so a
-scale-down does not interrupt an analysis that is already under way. A task picked up just as
-termination begins is handed straight back to the queue for another analyzer to take.
+Anchore services do not currently stop work when Kubernetes asks them to terminate, so an analyzer
+scaled down part-way through an image is killed mid-analysis. Nothing is lost: the task stays invisible
+for the analyzer queue's visibility timeout and is then redelivered to another analyzer. It is, however,
+redone from the beginning, so the work already spent on it is wasted and the image is delayed by that
+timeout.
 
-This only holds if the pod is given long enough to finish. `analyzer.terminationGracePeriodSeconds`
-defaults to `600` for that reason, matching the analyzer queue's visibility timeout; the Kubernetes
-default of 30 seconds is far shorter than a typical image analysis. Nothing is lost if the grace
-period does elapse &mdash; the task is redelivered once its visibility timeout expires &mdash; but the
-analysis restarts from the beginning, so the work done so far is wasted.
+Raising `analyzer.terminationGracePeriodSeconds` does **not** avoid this today, since the analyzer will
+not use the extra time to finish; it only delays the kill and makes every pod deletion, node drain and
+rolling upgrade slower. It is left at the Kubernetes default of 30 seconds for that reason.
+
+To reduce how often a scale-down interrupts an analysis, prefer a conservative
+`analyzer.autoscaling.behavior.scaleDown` &mdash; the chart defaults to a five minute stabilization
+window, which keeps the HPA from reacting to brief dips in the queue.
 
 > **Note:** The Anchore UI is not autoscaled, as it holds session state in Redis.
 
@@ -951,7 +960,7 @@ To restore your deployment to using your previous driver configurations:
 | `tolerations`                           | Common tolerations set on all Kubernetes pods                                                                                                                                                                                                                | `[]`                                                                                                   |
 | `affinity`                              | Common affinity set on all Kubernetes pods                                                                                                                                                                                                                   | `{}`                                                                                                   |
 | `topologySpreadConstraints`             | Common topologySpreadConstraints set on all Kubernetes pods.                                                                                                                                                                                                 | `[]`                                                                                                   |
-| `terminationGracePeriodSeconds`         | How long Kubernetes waits for a pod to finish its current work before killing it. Service level values override this                                                                                                                                         | `30`                                                                                                   |
+| `terminationGracePeriodSeconds`         | How long Kubernetes waits for a pod to exit before killing it. Service level values override this                                                                                                                                                            | `30`                                                                                                   |
 | `scratchVolume.mountPath`               | The mount path of an external volume for scratch space. This top level value will set it for ALL anchore pods. For specific components, you can override this value using the component's scratchVolume object (e.g. .Values.analyzer.scratchVolume.details) | `/analysis_scratch`                                                                                    |
 | `scratchVolume.fixGroupPermissions`     | Enable an initContainer that will fix the fsGroup permissions on all scratch volumes                                                                                                                                                                         | `false`                                                                                                |
 | `scratchVolume.fixerInitContainerImage` | The image to use for the mode-fixer initContainer                                                                                                                                                                                                            | `alpine`                                                                                               |
@@ -1200,7 +1209,7 @@ To restore your deployment to using your previous driver configurations:
 | Name                                                     | Description                                                                                                                                                                  | Value   |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | `analyzer.replicaCount`                                  | Number of replicas for the Anchore Analyzer deployment                                                                                                                       | `1`     |
-| `analyzer.terminationGracePeriodSeconds`                 | How long Kubernetes waits for an analyzer to finish the analysis in progress before killing it                                                                               | `600`   |
+| `analyzer.terminationGracePeriodSeconds`                 | How long Kubernetes waits for an analyzer to exit. Not raised today, as analyzers do not drain on SIGTERM                                                                    | `30`    |
 | `analyzer.autoscaling.enabled`                           | Enable Horizontal Pod Autoscaling for the Anchore Analyzer deployment                                                                                                        | `false` |
 | `analyzer.autoscaling.minReplicas`                       | Minimum number of replicas for the Anchore Analyzer deployment when autoscaling is enabled                                                                                   | `1`     |
 | `analyzer.autoscaling.maxReplicas`                       | Maximum number of replicas for the Anchore Analyzer deployment when autoscaling is enabled                                                                                   | `10`    |

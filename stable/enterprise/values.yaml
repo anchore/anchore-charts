@@ -148,11 +148,10 @@ affinity: {}
 topologySpreadConstraints: []
 
 ## @param terminationGracePeriodSeconds How long Kubernetes waits for a pod to exit before killing it.
-## On SIGTERM an Anchore service stops picking up new work and finishes what it already has. Anything
-## still running when this elapses is killed; queued work is not lost, but it is redelivered only after
-## the queue's visibility timeout and then redone from scratch.
-## Service level terminationGracePeriodSeconds will override this one. The analyzer sets its own, since
-## an image analysis takes far longer than the Kubernetes default of 30 seconds.
+## Anchore services do not currently drain on SIGTERM, so raising this does not let an analyzer finish
+## the image it is working on; it only delays the kill. Work in progress when a pod is terminated is
+## not lost, but it is redelivered after the queue's visibility timeout and redone from scratch.
+## Service level terminationGracePeriodSeconds will override this one.
 ##
 terminationGracePeriodSeconds: 30
 
@@ -1240,11 +1239,12 @@ analyzer:
   replicaCount: 1
 
   ## @param analyzer.terminationGracePeriodSeconds How long Kubernetes waits for an analyzer to exit.
-  ## Set to match the analyzer queue's visibility timeout: on SIGTERM the analyzer stops taking new
-  ## work and finishes the analysis in progress, and there is no value in waiting longer than the
-  ## point at which the task would be redelivered to another analyzer anyway.
+  ## Left at the Kubernetes default deliberately. An analyzer does not yet stop work on SIGTERM, so a
+  ## longer grace period would not let it finish the image it is analyzing; it would only make every
+  ## pod deletion, node drain and rolling upgrade take that much longer. Once analyzers drain on
+  ## SIGTERM this is worth raising to 600 to match the analyzer queue's visibility timeout.
   ##
-  terminationGracePeriodSeconds: 600
+  terminationGracePeriodSeconds: 30
 
   autoscaling:
     ## @param analyzer.autoscaling.enabled Enable autoscaling for Anchore Analyzer deployment
