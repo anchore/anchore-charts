@@ -1370,8 +1370,8 @@ To restore your deployment to using your previous driver configurations:
 | `upgradeJob.enabled`                   | Enable the Anchore Enterprise database upgrade job                                                                                              | `true`  |
 | `upgradeJob.force`                     | Force the Anchore database upgrade job to run as a regular job instead of as a Helm hook                                                        | `false` |
 | `upgradeJob.forceScaleDownDeployment`  | Force the Anchore upgrade job to scale down the anchore deployments before running the upgrade. By default                                      | `false` |
-| `upgradeJob.rbacCreate`                | Create RBAC resources for the Anchore upgrade job                                                                                               | `true`  |
-| `upgradeJob.serviceAccountName`        | Use an existing service account for the Anchore upgrade job                                                                                     | `""`    |
+| `upgradeJob.rbacCreate`                | Create the ServiceAccount, Role and RoleBinding for the Anchore upgrade job                                                                     | `true`  |
+| `upgradeJob.serviceAccountName`        | Name of the service account for the Anchore upgrade job                                                                                         | `""`    |
 | `upgradeJob.usePostUpgradeHook`        | Use a Helm post-upgrade hook to run the upgrade job instead of the default pre-upgrade hook. This job does not require creating RBAC resources. | `false` |
 | `upgradeJob.nodeSelector`              | Node labels for the Anchore upgrade job pod assignment                                                                                          | `{}`    |
 | `upgradeJob.tolerations`               | Tolerations for the Anchore upgrade job pod assignment                                                                                          | `[]`    |

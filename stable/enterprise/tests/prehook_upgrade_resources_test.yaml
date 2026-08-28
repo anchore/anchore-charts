@@ -196,6 +196,9 @@ tests:
           path: spec.template.spec.serviceAccountName
           value: test-release-enterprise-upgrade-sa
 
+  # rbacCreate=false: the chart creates and grants nothing. Whatever account the pod ends
+  # up with is assumed to already carry the scale-down permissions — including the global
+  # serviceAccountName, and including the namespace default when nothing is set at all.
   - it: should render global serviceAccountName when upgradeJob.rbacCreate is false
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
     set:
@@ -205,6 +208,74 @@ tests:
       - equal:
           path: spec.template.spec.serviceAccountName
           value: upgradeJob-global-test
+
+  - it: should render an empty serviceAccountName when rbacCreate is false and no name is set
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.rbacCreate: false
+    asserts:
+      - isNullOrEmpty:
+          path: spec.template.spec.serviceAccountName
+
+  - it: should render the component serviceAccountName when rbacCreate is false
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.rbacCreate: false
+      upgradeJob.serviceAccountName: byo-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: byo-sa
+
+  - it: should create no RBAC resources when upgradeJob.rbacCreate is false
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    set:
+      upgradeJob.rbacCreate: false
+      upgradeJob.serviceAccountName: byo-sa
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # rbacCreate=true with a user-supplied name: the chart creates that ServiceAccount and
+  # binds the Role to it, so the account the pod runs as is the one holding the permissions.
+  - it: should create the ServiceAccount under the user-supplied name when rbacCreate is true
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.rbacCreate: true
+      upgradeJob.serviceAccountName: my-irsa-sa
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: my-irsa-sa
+
+  - it: should bind the Role to the user-supplied ServiceAccount when rbacCreate is true
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 1
+    set:
+      upgradeJob.rbacCreate: true
+      upgradeJob.serviceAccountName: my-irsa-sa
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: subjects[0].name
+          value: my-irsa-sa
+
+  # rbacCreate=true with no name: chart-generated name, used for both the SA and the binding.
+  - it: should bind the Role to the generated ServiceAccount when no name is supplied
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 1
+    set:
+      upgradeJob.rbacCreate: true
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: subjects[0].name
+          value: test-release-enterprise-upgrade-sa
 
   - it: should render component serviceAccountName even when global serviceAccountName is set
     template: templates/hooks/pre-upgrade/upgrade_job.yaml

@@ -2426,13 +2426,27 @@ upgradeJob:
   ##
   forceScaleDownDeployment: false
 
-  ## @param upgradeJob.rbacCreate Create RBAC resources for the Anchore upgrade job
-  ## By default, the anchore upgrade job utilizes a service account that will be created to call kubectl to scale down the deployment before running the upgrade job.
-  ## The service account is granted deployment, deployment/scale, and pod permissions. See templates/hooks/pre-upgrade/db-upgrade-rbac.yaml for the full list of permissions
+  ## @param upgradeJob.rbacCreate Create the ServiceAccount, Role and RoleBinding for the Anchore upgrade job
+  ## The upgrade job calls kubectl to scale the Anchore deployments down before upgrading the database, which
+  ## requires permissions on deployments, deployments/scale, and pods. See templates/hooks/pre-upgrade/upgrade_rbac.yaml
+  ## for the full list.
+  ##
+  ## true  - the chart creates and owns all three resources. The ServiceAccount is named after
+  ##         upgradeJob.serviceAccountName when set, otherwise a generated name is used.
+  ##         Do not point serviceAccountName at a ServiceAccount managed outside this chart: the resources are
+  ##         Helm hooks and are deleted and recreated on each upgrade, which would drop any annotations
+  ##         (e.g. an IRSA eks.amazonaws.com/role-arn) that the chart does not know about.
+  ## false - the chart creates nothing. The account the job runs as is assumed to already carry the permissions
+  ##         above. Use this when you manage the ServiceAccount and its RBAC yourself.
   ##
   rbacCreate: true
 
-  ## @param upgradeJob.serviceAccountName Use an existing service account for the Anchore upgrade job
+  ## @param upgradeJob.serviceAccountName Name of the service account for the Anchore upgrade job
+  ## With upgradeJob.rbacCreate=true this is the name the chart gives the ServiceAccount it creates.
+  ## With upgradeJob.rbacCreate=false this must be an existing ServiceAccount that already has the
+  ## scale-down permissions listed above.
+  ## When empty: rbacCreate=true uses a generated name; rbacCreate=false falls back to the global
+  ## serviceAccountName, or the namespace default ServiceAccount if that is also unset.
   ##
   serviceAccountName: ""
 
