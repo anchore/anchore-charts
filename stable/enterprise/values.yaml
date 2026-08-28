@@ -2809,11 +2809,27 @@ osaaMigrationJob:
   ##
   enabled: false
 
-  ## @param osaaMigrationJob.rbacCreate Create RBAC resources (ServiceAccount, Role, RoleBinding) for the migration job's scale-down init container. Independent of upgradeJob.rbacCreate so the migration job works even when the upgrade job is disabled or uses the post-upgrade hook.
+  ## @param osaaMigrationJob.rbacCreate Create the ServiceAccount, Role and RoleBinding for the migration job's scale-down init container
+  ## Independent of upgradeJob.rbacCreate so the migration job works even when the upgrade job is disabled or uses
+  ## the post-upgrade hook. The permissions granted are get/list/watch/update/patch on deployments, patch on
+  ## deployments/scale, and get/list/watch on pods.
+  ##
+  ## true  - the chart creates and owns all three resources. The ServiceAccount is named after
+  ##         osaaMigrationJob.serviceAccountName when set, otherwise a generated name is used.
+  ##         Do not point serviceAccountName at a ServiceAccount managed outside this chart: the resources are
+  ##         Helm hooks and are deleted and recreated on each upgrade, which would drop any annotations
+  ##         (e.g. an IRSA eks.amazonaws.com/role-arn) that the chart does not know about.
+  ## false - the chart creates nothing. The account the job runs as is assumed to already carry the permissions
+  ##         above. Use this when you manage the ServiceAccount and its RBAC yourself.
   ##
   rbacCreate: true
 
-  ## @param osaaMigrationJob.serviceAccountName Use an existing service account for the migration job instead of creating one. Takes precedence over rbacCreate. Must be able to list/get/watch pods and get/list/watch/update/patch deployments and patch deployments/scale.
+  ## @param osaaMigrationJob.serviceAccountName Name of the service account for the migration job
+  ## With osaaMigrationJob.rbacCreate=true this is the name the chart gives the ServiceAccount it creates.
+  ## With osaaMigrationJob.rbacCreate=false this must be an existing ServiceAccount that can list/get/watch pods
+  ## and get/list/watch/update/patch deployments and patch deployments/scale.
+  ## When empty: rbacCreate=true uses a generated name; rbacCreate=false falls back to the global
+  ## serviceAccountName, or the namespace default ServiceAccount if that is also unset.
   ##
   serviceAccountName: ""
 

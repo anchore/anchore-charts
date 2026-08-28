@@ -114,10 +114,57 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-              kubectl scale deployments --all --replicas=0 -l app.kubernetes.io/name={{ template "enterprise.fullname" . }};
-              while [[ $(kubectl get pods -l app.kubernetes.io/name={{ template "enterprise.fullname" . }} --field-selector=status.phase=Running --no-headers | tee /dev/stderr | wc -l) -gt 0 ]]; do
-                echo 'waiting for pods to go down...' && sleep 5;
+              set -uo pipefail
+              SELECTOR="app.kubernetes.io/name={{ template "enterprise.fullname" . }}"
+
+              # List the deployments before scaling them. `kubectl scale` reports both "no
+              # deployments exist" and "not allowed to list deployments" as the same
+              # `no objects passed to scale` error, so it cannot distinguish a missing RBAC
+              # grant from an empty result. An explicit list can: it exits non-zero when the
+              # request is denied, and exits 0 with no output when nothing matches.
+              # stderr is intentionally left unredirected so any API error lands in the pod log.
+              deployments=$(kubectl get deployments -l "${SELECTOR}" --no-headers -o name) && rc=0 || rc=$?
+              if [ "${rc}" -ne 0 ]; then
+                echo "Unable to list the Anchore deployments (exit ${rc}); refusing to continue, because the services cannot be confirmed to be scaled down." >&2
+                echo "The service account this job runs as needs get/list/watch on deployments, patch on deployments/scale, and get/list/watch on pods." >&2
+                exit "${rc}"
+              fi
+
+              # No deployments matched. This is a normal state, not a failure: the release may
+              # have had its deployments deleted and be relying on this upgrade to recreate
+              # them. There is nothing running to scale down, so let the upgrade proceed.
+              if [ -z "${deployments}" ]; then
+                echo "No deployments matched ${SELECTOR}; nothing to scale down."
+                exit 0
+              fi
+
+              kubectl scale deployments --all --replicas=0 -l "${SELECTOR}" && rc=0 || rc=$?
+              if [ "${rc}" -ne 0 ]; then
+                echo "Failed to scale the Anchore deployments down (exit ${rc})." >&2
+                exit "${rc}"
+              fi
+
+              # Wait for the pods to drain. Deliberately unbounded: a large deployment can take
+              # a long time to drain, and a job that keeps reporting which pods it is still
+              # waiting on is more useful than one that gives up. Failing to *list* the pods is
+              # a different condition from pods still running, and exits rather than being
+              # counted as zero — that miscount is what previously let the migration and upgrade
+              # proceed against services that were never scaled down.
+              while true; do
+                pods=$(kubectl get pods -l "${SELECTOR}" --field-selector=status.phase=Running --no-headers) && rc=0 || rc=$?
+                if [ "${rc}" -ne 0 ]; then
+                  echo "Unable to list pods (exit ${rc}); cannot confirm the Anchore services are down." >&2
+                  exit "${rc}"
+                fi
+                running=$(printf '%s' "${pods}" | grep -c .)
+                if [ "${running}" -eq 0 ]; then
+                  break
+                fi
+                printf '%s\n' "${pods}" >&2
+                echo "waiting for ${running} pod(s) to go down..."
+                sleep 5
               done
+              echo "All Anchore pods are down."
         {{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext }}
           securityContext: {{- include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) | nindent 12 }}
         {{- end }}
