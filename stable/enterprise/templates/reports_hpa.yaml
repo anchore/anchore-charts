@@ -1,0 +1,2 @@
+{{- $component := "reports" -}}
+{{- include "enterprise.hpa" (merge (dict "component" $component) .) }}
