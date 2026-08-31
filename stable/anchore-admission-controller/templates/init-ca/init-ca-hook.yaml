@@ -32,7 +32,7 @@ spec:
       {{- end }}
       containers:
       - name: create-ca
-        image:  "{{ .Values.initCa.image }}"
+        image: "{{ include "anchore-admission-controller.renderImage" (dict "image" .Values.initCa.image "context" .) | trim }}"
       {{- with .Values.containerSecurityContext }}
         securityContext: {{- toYaml . | nindent 10 }}
       {{- end }}

@@ -1,4 +1,18 @@
 ###################################################
+## @section Global Resource Parameters
+## Global params used by all ECS Inventory resources
+###################################################
+global:
+  ## @param global.imageRegistryHost registry host used by every image value that does not set its own
+  ## Every image the chart deploys takes its registry from here unless that image sets a `registry` of its
+  ## own (dict form) or is written as a reference that already includes a host (string form). Mirroring the
+  ## Anchore images therefore only needs this one value; the repository and tag stay with the chart, so
+  ## chart upgrades keep moving them. May include a path, eg. `harbor.example.com/anchore`.
+  ## To pull a single image from somewhere else, set that image's `registry`.
+  ##
+  imageRegistryHost: docker.io
+
+###################################################
 ## @section Common Resource Parameters
 ## Common params used by all ECS Inventory resources
 ###################################################
@@ -7,10 +21,15 @@
 ##
 replicaCount: 1
 
-## @param image Image used for all Ecs Inventory deployment deployments
-## use docker.io/anchore/ecs-inventory:v1.4.3-fips-amd64 if you want an image built for fips use
+## @param image.registry Registry for the ECS Inventory image. Empty means take it from global.imageRegistryHost
+## @param image.repository Repository for the ECS Inventory image
+## @param image.tag Tag for the ECS Inventory image
+## use tag v1.4.3-fips-amd64 if you want an image built for fips use
 ##
-image: "docker.io/anchore/ecs-inventory:v1.4.3"
+image:
+  registry: ""
+  repository: anchore/ecs-inventory
+  tag: "v1.4.3"
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy

@@ -5,7 +5,18 @@ fullnameOverride: Null
 replicaCount: 1
 logVerbosity: 3
 
-image: "anchore/kubernetes-admission-controller:v0.8.4"
+# Registry host used by every image value in this chart (image, initCa.image) that does not set
+# its own. An image that sets a `registry` of its own, or is written as a reference that already
+# includes a host, keeps it - so a single image can come from a different mirror than the rest.
+# Only the registry is taken from here; the repository and tag stay with the chart, so chart
+# upgrades keep moving them. May include a path, eg. harbor.example.com/anchore.
+global:
+  imageRegistryHost: docker.io
+
+image:
+  registry: ""
+  repository: anchore/kubernetes-admission-controller
+  tag: "v0.8.4"
 imagePullPolicy: IfNotPresent
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -127,7 +138,10 @@ credentials: {}
 
 # Settings related to init-ca pod
 initCa:
-  image: cfssl/cfssl:v1.6.5
+  image:
+    registry: ""
+    repository: cfssl/cfssl
+    tag: "v1.6.5"
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
   # - name: FOO

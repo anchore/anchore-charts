@@ -1,0 +1,86 @@
+## global.imageRegistryHost supplies the registry for any image value that states none of its own.
+## An image value that does state one - a dict with `registry`, or a string that already includes a
+## registry host - keeps it, so a single image can be pointed at a different mirror than the rest.
+suite: Global Image Registry Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  ecsInventory.anchore.url: http://anchore:8228
+  ecsInventory.anchore.user: admin
+  ecsInventory.anchore.password: pw
+
+tests:
+  - it: should render the shipped default through docker.io
+    template: deployment.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "docker.io/anchore/ecs-inventory:v1.4.3"
+
+  - it: should supply the registry from the global
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/ecs-inventory:v1.4.3"
+
+  - it: should support a registry host that includes a path
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/anchore
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/anchore/ecs-inventory:v1.4.3"
+
+  - it: should not double the slash when the registry host has a trailing one
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com/
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/ecs-inventory:v1.4.3"
+
+  - it: should keep a registry the image states itself
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image.registry: myregistry.local
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "myregistry.local/anchore/ecs-inventory:v1.4.3"
+
+  - it: should keep a complete reference given as a string
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: myregistry.local/anchore/thing:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "myregistry.local/anchore/thing:v9.9.9"
+
+  - it: should supply the registry for a string that states none
+    template: deployment.yaml
+    documentIndex: 0
+    set:
+      global.imageRegistryHost: harbor.example.com
+      image: anchore/thing:v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "harbor.example.com/anchore/thing:v9.9.9"

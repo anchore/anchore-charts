@@ -52,43 +52,86 @@ The Anchore API Password and required AWS secret values can also be injected int
     injectSecretsViaEnv=true
   ```
 
-See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more information about the ECS Inventory specific configuration## Parameters
+See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more information about the ECS Inventory specific configuration.
+
+## Image Registry
+
+The chart's image is a set of parts rather than one string:
+
+```yaml
+image:
+  registry: ""            # empty -> taken from global.imageRegistryHost
+  repository: anchore/ecs-inventory
+  tag: "v1.4.3"
+```
+
+The registry is chosen from three levels, most specific first:
+
+| Level | Where | Wins over |
+| --- | --- | --- |
+| 1. Per-image `registry` | `image.registry` | everything below |
+| 2. `global.imageRegistryHost` | one value for the whole chart | the chart defaults |
+| 3. Chart default | `docker.io` | — |
+
+Stated as one rule:
+
+> **An image value that states no registry of its own takes one from `global.imageRegistryHost`. An image value that does state one keeps it.**
+
+To mirror the image, set the global once:
+
+```yaml
+global:
+  imageRegistryHost: harbor.example.com
+```
+
+Only the registry comes from the global — the repository and tag stay with the chart, so chart upgrades keep moving the version. `global.imageRegistryHost` may include a path, eg. `harbor.example.com/anchore`.
+
+An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/ecs-inventory:v1.4.3`), which is used as written. A string that states no registry host takes one from the global like any other value.
+
 
 ## Parameters
 
+### Global Resource Parameters
+
+| Name                       | Description                                                       | Value       |
+| -------------------------- | ----------------------------------------------------------------- | ----------- |
+| `global.imageRegistryHost` | registry host used by every image value that does not set its own | `docker.io` |
+
 ### Common Resource Parameters
 
-| Name                                  | Description                                                          | Value                                    |
-| ------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- |
-| `replicaCount`                        | Number of replicas for the Ecs Inventory deployment                  | `1`                                      |
-| `image`                               | Image used for all Ecs Inventory deployment deployments              | `docker.io/anchore/ecs-inventory:v1.1.0` |
-| `imagePullPolicy`                     | Image pull policy used by all deployments                            | `IfNotPresent`                           |
-| `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos        | `""`                                     |
-| `serviceAccountName`                  | Name of a service account used to run all Anchore Ecs Inventory pods | `""`                                     |
-| `useExistingSecret`                   | set to true to use an existing/precreated secret                     | `false`                                  |
-| `existingSecretName`                  | the name of the precreated secret                                    | `""`                                     |
-| `injectSecretsViaEnv`                 | Enable secret injection into pod environment variables               | `false`                                  |
-| `extraEnv`                            | extra environment variables. These will be set on all containers.    | `[]`                                     |
-| `annotations`                         | Common annotations set on all Kubernetes resources                   | `{}`                                     |
-| `deploymentAnnotations`               | annotations to set on the ecs-inventory deployment                   | `{}`                                     |
-| `securityContext.runAsUser`           | The securityContext runAsUser for all Anchore ECS Inventory pods     | `1000`                                   |
-| `securityContext.runAsGroup`          | The securityContext runAsGroup for all Anchore ECS Inventory pods    | `1000`                                   |
-| `securityContext.fsGroup`             | The securityContext fsGroup for all Anchore ECS Inventory pods       | `1000`                                   |
-| `resources`                           | Resource requests and limits for Anchore ECS Inventory pods          | `{}`                                     |
-| `nodeSelector`                        | Node labels for pod assignment                                       | `{}`                                     |
-| `tolerations`                         | Tolerations for pod assignment                                       | `[]`                                     |
-| `affinity`                            | Affinity for pod assignment                                          | `{}`                                     |
-| `labels`                              | Adds additionnal labels to all kubernetes resources                  | `{}`                                     |
-| `probes.liveness.initialDelaySeconds` | Initial delay seconds for liveness probe                             | `1`                                      |
-| `probes.liveness.timeoutSeconds`      | Timeout seconds for liveness probe                                   | `10`                                     |
-| `probes.liveness.periodSeconds`       | Period seconds for liveness probe                                    | `5`                                      |
-| `probes.liveness.failureThreshold`    | Failure threshold for liveness probe                                 | `6`                                      |
-| `probes.liveness.successThreshold`    | Success threshold for liveness probe                                 | `1`                                      |
-| `probes.readiness.timeoutSeconds`     | Timeout seconds for the readiness probe                              | `10`                                     |
-| `probes.readiness.periodSeconds`      | Period seconds for the readiness probe                               | `15`                                     |
-| `probes.readiness.failureThreshold`   | Failure threshold for the readiness probe                            | `3`                                      |
-| `probes.readiness.successThreshold`   | Success threshold for the readiness probe                            | `1`                                      |
-
+| Name                                  | Description                                                                             | Value                   |
+| ------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------- |
+| `replicaCount`                        | Number of replicas for the Ecs Inventory deployment                                     | `1`                     |
+| `image.registry`                      | Registry for the ECS Inventory image. Empty means take it from global.imageRegistryHost | `""`                    |
+| `image.repository`                    | Repository for the ECS Inventory image                                                  | `anchore/ecs-inventory` |
+| `image.tag`                           | Tag for the ECS Inventory image                                                         | `v1.4.3`                |
+| `imagePullPolicy`                     | Image pull policy used by all deployments                                               | `IfNotPresent`          |
+| `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                           | `""`                    |
+| `serviceAccountName`                  | Name of a service account used to run all Anchore Ecs Inventory pods                    | `""`                    |
+| `useExistingSecret`                   | set to true to use an existing/precreated secret                                        | `false`                 |
+| `existingSecretName`                  | the name of the precreated secret                                                       | `""`                    |
+| `injectSecretsViaEnv`                 | Enable secret injection into pod environment variables                                  | `false`                 |
+| `extraEnv`                            | extra environment variables. These will be set on all containers.                       | `[]`                    |
+| `annotations`                         | Common annotations set on all Kubernetes resources                                      | `{}`                    |
+| `deploymentAnnotations`               | annotations to set on the ecs-inventory deployment                                      | `{}`                    |
+| `containerSecurityContext`            | The securityContext for all Anchore ECS Inventory containers                            | `{}`                    |
+| `securityContext.runAsUser`           | The securityContext runAsUser for all Anchore ECS Inventory pods                        | `1000`                  |
+| `securityContext.runAsGroup`          | The securityContext runAsGroup for all Anchore ECS Inventory pods                       | `1000`                  |
+| `securityContext.fsGroup`             | The securityContext fsGroup for all Anchore ECS Inventory pods                          | `1000`                  |
+| `resources`                           | Resource requests and limits for Anchore ECS Inventory pods                             | `{}`                    |
+| `nodeSelector`                        | Node labels for pod assignment                                                          | `{}`                    |
+| `tolerations`                         | Tolerations for pod assignment                                                          | `[]`                    |
+| `affinity`                            | Affinity for pod assignment                                                             | `{}`                    |
+| `labels`                              | Adds additionnal labels to all kubernetes resources                                     | `{}`                    |
+| `probes.liveness.initialDelaySeconds` | Initial delay seconds for liveness probe                                                | `1`                     |
+| `probes.liveness.timeoutSeconds`      | Timeout seconds for liveness probe                                                      | `10`                    |
+| `probes.liveness.periodSeconds`       | Period seconds for liveness probe                                                       | `5`                     |
+| `probes.liveness.failureThreshold`    | Failure threshold for liveness probe                                                    | `6`                     |
+| `probes.liveness.successThreshold`    | Success threshold for liveness probe                                                    | `1`                     |
+| `probes.readiness.timeoutSeconds`     | Timeout seconds for the readiness probe                                                 | `10`                    |
+| `probes.readiness.periodSeconds`      | Period seconds for the readiness probe                                                  | `15`                    |
+| `probes.readiness.failureThreshold`   | Failure threshold for the readiness probe                                               | `3`                     |
+| `probes.readiness.successThreshold`   | Success threshold for the readiness probe                                               | `1`                     |
 
 ### ecsInventory Parameters ##
 
@@ -108,3 +151,19 @@ See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more 
 | `ecsInventory.awsAccessKeyId`            | the AWS Access Key ID                                              | `foobar`                |
 | `ecsInventory.awsSecretAccessKey`        | the AWS Secret Access Key                                          | `foobar`                |
 | `ecsInventory.awsRegion`                 | the AWS Region                                                     | `us-west-2`             |
+
+## Release Notes
+
+- **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
+- **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
+- **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v0.1.0
+
+**The image value is now a dict, and the registry can be set once for the whole chart.**
+
+- Adds `global.imageRegistryHost`. An image value that states no registry of its own takes one from it, so mirroring the Anchore images is a single setting. See [Image Registry](#image-registry).
+- `image` is now `registry` / `repository` / `tag` rather than a reference string. Setting `registry` points that image at a different registry without pinning its version, so chart upgrades keep moving the tag. A complete reference string is still accepted and is used as written, so existing values files continue to work.
+- Rendered image references now always include the registry host, so `anchore/ecs-inventory:v1.4.3` renders as `docker.io/anchore/ecs-inventory:v1.4.3`. This resolves to the same image and is a no-op for pulls, but it changes the pod spec, so an upgrade will show a diff and roll the pods.
+
+No values changes are required to upgrade.
