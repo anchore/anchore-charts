@@ -17,14 +17,14 @@ jobs:
         # runner drives both the GitHub host arch and, via kind, the node arch.
         # On ubuntu-24.04-arm the kind nodes are native arm64, so worker nodes
         # pull the arm64 variant of the Anchore (and dependency) images.
-        runner: ["ubuntu-latest", "ubuntu-24.04-arm"]
-        # Run arm64 only on the newest Kubernetes version to prove the arm image
-        # deploys without paying 5x arm runner cost; x86 keeps full version coverage.
-        exclude:
-          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.29.2" }
-          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.30.0" }
-          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.31.0" }
-          - { runner: "ubuntu-24.04-arm", kubernetesVersion: "v1.32.2" }
+        #
+        # arm64 is the default and fans out over every kubernetesVersion above, so
+        # adding or removing a version needs no other edit here. x86 gets exactly
+        # one extra job, pinned below, just to prove the amd64 image still deploys
+        # (and to host Shellcheck, which has no arm64 binary).
+        runner: ["ubuntu-24.04-arm"]
+        include:
+          - { runner: "ubuntu-latest", kubernetesVersion: "v1.33.1" }
     runs-on: ${{ matrix.runner }}
     steps:
     - name: Checkout
