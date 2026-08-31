@@ -914,6 +914,31 @@ tests:
           path: metadata.name
           value: shared-sa
 
+  # upgradeJob.force strips the hook annotations off the upgrade job's RBAC, so those become
+  # ordinary release resources applied after the pre-upgrade hooks. This job is always a
+  # pre-upgrade hook, so it cannot defer its ServiceAccount to one that will not exist yet.
+  - it: migration RBAC keeps its ServiceAccount when upgradeJob.force is set
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+      upgradeJob:
+        enabled: true
+        rbacCreate: true
+        force: true
+        serviceAccountName: shared-sa
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: shared-sa
+
   - it: migration RBAC keeps its ServiceAccount when the names differ
     template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
     documentIndex: 0
