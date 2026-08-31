@@ -209,12 +209,16 @@ tests:
           path: spec.template.spec.serviceAccountName
           value: upgradeJob-global-test
 
-  - it: should render an empty serviceAccountName when rbacCreate is false and no name is set
+  # No account resolves, so the key is omitted entirely and the pod falls back to the
+  # namespace default ServiceAccount. Emitting `serviceAccountName:` with no value would also
+  # work (Kubernetes decodes the null to "" and admission substitutes `default`), but omitting
+  # it states the same intent without depending on that.
+  - it: should omit serviceAccountName when rbacCreate is false and no name is set
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
     set:
       upgradeJob.rbacCreate: false
     asserts:
-      - isNullOrEmpty:
+      - notExists:
           path: spec.template.spec.serviceAccountName
 
   - it: should render the component serviceAccountName when rbacCreate is false
