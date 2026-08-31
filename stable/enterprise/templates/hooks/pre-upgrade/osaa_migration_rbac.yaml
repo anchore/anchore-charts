@@ -1,4 +1,4 @@
-{{- if and .Values.osaaMigrationJob.enabled .Values.osaaMigrationJob.rbacCreate (not .Values.osaaMigrationJob.serviceAccountName) -}}
+{{- if and .Values.osaaMigrationJob.enabled .Values.osaaMigrationJob.rbacCreate -}}
 {{- $component := "osaaMigrationJob" -}}
 {{/*
 RBAC for the object-store/analysis-archive migration job's scale-down init container.
@@ -6,18 +6,51 @@ Intentionally independent of the upgrade job's RBAC (upgrade_rbac.yaml): the mig
 is always a pre-upgrade hook and needs a ServiceAccount that can scale deployments down,
 even when the upgrade job is disabled or configured to use the post-upgrade hook. Created at
 hook-weight 0 so it exists before the migration job (hook-weight 1).
-*/}}
 
+rbacCreate=true: the chart owns the ServiceAccount, Role and RoleBinding. The ServiceAccount
+is named after osaaMigrationJob.serviceAccountName when the user set one, otherwise a
+generated name — and the RoleBinding always targets that same name, so the account the pod
+runs as is the account that holds the permissions. Previously setting serviceAccountName
+suppressed this whole file, leaving that account with no permission to scale anything down
+while the migration ran against live services.
+
+rbacCreate=false: nothing is created here and the account the job runs as is assumed to
+already carry the permissions.
+*/}}
+{{- $serviceAccountName := include "enterprise.serviceAccountName" (merge (dict "component" $component) .) -}}
+{{/*
+Both this job and the upgrade job create their RBAC at hook-weight 0, so if they are pointed
+at the same ServiceAccount name they would emit two ServiceAccount manifests with the same
+name in the same hook phase. That happens to resolve — Helm's default before-hook-creation
+policy makes the second delete and recreate the first — but it relies on duplicate hook
+resources behaving benignly and deletes/recreates the account mid-phase. Emit the
+ServiceAccount only once instead. The Role and RoleBinding below are always emitted, so the
+shared account still ends up bound to both Roles and holds the union of the permissions.
+*/}}
+{{/*
+upgradeJob.force strips the hook annotations off the upgrade job's RBAC, making those
+resources ordinary release resources that Helm applies *after* the pre-upgrade hooks. This
+migration job is always a pre-upgrade hook, so in that case the upgrade job's ServiceAccount
+does not exist yet when this job runs and cannot be deferred to.
+*/}}
+{{- $upgradeCreatesServiceAccount := and .Values.upgradeJob.enabled .Values.upgradeJob.rbacCreate (not .Values.upgradeJob.usePostUpgradeHook) (not .Values.upgradeJob.force) -}}
+{{- $serviceAccountAlreadyCreated := false -}}
+{{- if $upgradeCreatesServiceAccount -}}
+{{- $serviceAccountAlreadyCreated = eq $serviceAccountName (include "enterprise.serviceAccountName" (merge (dict "component" "upgradeJob") .)) -}}
+{{- end -}}
+
+{{- if not $serviceAccountAlreadyCreated }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "enterprise.fullname" . }}-osaa-migration-sa
+  name: {{ $serviceAccountName }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "0"
+{{- end }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -35,7 +68,7 @@ roleRef:
   name: {{ template "enterprise.fullname" . }}-osaa-migration-role
 subjects:
   - kind: ServiceAccount
-    name: {{ template "enterprise.fullname" . }}-osaa-migration-sa
+    name: {{ $serviceAccountName }}
     namespace: {{ .Release.Namespace }}
 
 ---
