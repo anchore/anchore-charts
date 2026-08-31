@@ -374,8 +374,15 @@ Setup the common pod spec configs
 {{- with .Values.securityContext }}
 securityContext: {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if or .Values.createServiceAccount .Values.serviceAccountName (index .Values (print $component)).serviceAccountName (eq $component "upgradeJob") (eq $component "osaaMigrationJob") }}
-serviceAccountName: {{ include "enterprise.serviceAccountName" (merge (dict "component" $component) .) }}
+{{/*
+Emit serviceAccountName only when one actually resolves. The upgrade and migration jobs used
+to emit the key unconditionally, so with rbacCreate=false and no name set anywhere it rendered
+`serviceAccountName:` with no value. Kubernetes accepts that (the null decodes to "" and the
+ServiceAccount admission plugin substitutes `default`), but omitting the key expresses the same
+intent without relying on that normalization.
+*/}}
+{{- with (include "enterprise.serviceAccountName" (merge (dict "component" $component) .) | trim) }}
+serviceAccountName: {{ . }}
 {{- end }}
 {{- if .Values.useExistingPullCredSecret }}
 {{- with .Values.imagePullSecretName }}
