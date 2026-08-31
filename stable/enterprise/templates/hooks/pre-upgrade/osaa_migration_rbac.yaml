@@ -27,7 +27,13 @@ resources behaving benignly and deletes/recreates the account mid-phase. Emit th
 ServiceAccount only once instead. The Role and RoleBinding below are always emitted, so the
 shared account still ends up bound to both Roles and holds the union of the permissions.
 */}}
-{{- $upgradeCreatesServiceAccount := and .Values.upgradeJob.enabled .Values.upgradeJob.rbacCreate (not .Values.upgradeJob.usePostUpgradeHook) -}}
+{{/*
+upgradeJob.force strips the hook annotations off the upgrade job's RBAC, making those
+resources ordinary release resources that Helm applies *after* the pre-upgrade hooks. This
+migration job is always a pre-upgrade hook, so in that case the upgrade job's ServiceAccount
+does not exist yet when this job runs and cannot be deferred to.
+*/}}
+{{- $upgradeCreatesServiceAccount := and .Values.upgradeJob.enabled .Values.upgradeJob.rbacCreate (not .Values.upgradeJob.usePostUpgradeHook) (not .Values.upgradeJob.force) -}}
 {{- $serviceAccountAlreadyCreated := false -}}
 {{- if $upgradeCreatesServiceAccount -}}
 {{- $serviceAccountAlreadyCreated = eq $serviceAccountName (include "enterprise.serviceAccountName" (merge (dict "component" "upgradeJob") .)) -}}
