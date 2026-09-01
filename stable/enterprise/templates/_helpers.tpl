@@ -110,6 +110,16 @@ one pass instead of re-running install/upgrade and discovering issues one at a t
 {{- if eq (toString .Values.anchoreConfig.catalog.runtime_inventory.image_ttl_days) "-1" -}}
 {{- $errors = append $errors "The value `-1` is no longer valid for `anchoreConfig.catalog.runtime_inventory.image_ttl_days`. Please use `anchoreConfig.catalog.runtime_inventory.inventory_ingest_overwrite=true` to force runtime inventory to be overwritten upon every update for that reported context. `anchoreConfig.catalog.runtime_inventory.inventory_ttl_days` must be set to a value >1." -}}
 {{- end -}}
+{{/* catalog.sbom_vuln_scan and its cycle timers were removed in Anchore Enterprise 6.2.0 */}}
+{{- if ne (dig "catalog" "sbom_vuln_scan" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
+{{- $errors = append $errors "anchoreConfig.catalog.sbom_vuln_scan is no longer supported. SBOM vulnerability scan configuration was removed in Anchore Enterprise 6.2.0. Please remove it from your values file." -}}
+{{- end -}}
+{{- if ne (dig "catalog" "cycle_timers" "sbom_vuln_scan_watcher" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
+{{- $errors = append $errors "anchoreConfig.catalog.cycle_timers.sbom_vuln_scan_watcher is no longer supported. This cycle timer was removed in Anchore Enterprise 6.2.0. Please remove it from your values file." -}}
+{{- end -}}
+{{- if ne (dig "catalog" "cycle_timers" "sbom_vuln_scan_refresh_watcher" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
+{{- $errors = append $errors "anchoreConfig.catalog.cycle_timers.sbom_vuln_scan_refresh_watcher is no longer supported. This cycle timer was removed in Anchore Enterprise 6.2.0. Please remove it from your values file." -}}
+{{- end -}}
 {{/* internalServicesSSL has been removed — SSL is now configured via the server block at the root or per-service level */}}
 {{- if hasKey .Values.anchoreConfig "internalServicesSSL" -}}
 {{- $errors = append $errors "anchoreConfig.internalServicesSSL is no longer supported. SSL is now configured via `anchoreConfig.server` (root level) or per-service `anchoreConfig.<service>.server` blocks using `ssl_enable`, `ssl_cert`, `ssl_chain`, and `ssl_key`." -}}

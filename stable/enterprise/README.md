@@ -937,9 +937,6 @@ To restore your deployment to using your previous driver configurations:
 | `anchoreConfig.catalog.external_port`                                                                      | External port for the service                                                                                                                                         | `nil`                       |
 | `anchoreConfig.catalog.account_prometheus_metrics`                                                         | Enable per-account image status prometheus metrics.                                                                                                                   | `<ALLOW_API_CONFIGURATION>` |
 | `anchoreConfig.catalog.analysis_queue_priority`                                                            | Allow prioritization of new analysis jobs based on the ingress method.                                                                                                | `<ALLOW_API_CONFIGURATION>` |
-| `anchoreConfig.catalog.sbom_vuln_scan.auto_scale`                                                          | Automatically scale batch_size and pool_size. Disable to configure manually.                                                                                          | `true`                      |
-| `anchoreConfig.catalog.sbom_vuln_scan.batch_size`                                                          | The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled                                                                            | `1`                         |
-| `anchoreConfig.catalog.sbom_vuln_scan.pool_size`                                                           | The number of concurrent vulnerability scans to dispatch from each catalog instance                                                                                   | `1`                         |
 | `anchoreConfig.catalog.cycle_timers`                                                                       | Cycle timers for the catalog service                                                                                                                                  | `{}`                        |
 | `anchoreConfig.catalog.event_log`                                                                          | Event log for webhooks, YAML configuration                                                                                                                            | `{}`                        |
 | `anchoreConfig.catalog.document_views`                                                                     | Document views generation configuration                                                                                                                               | `{}`                        |
@@ -1513,6 +1510,15 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.2.0
+
+- Deploys Anchore Enterprise v6.2.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/620/) for more information.
+- Removed `anchoreConfig.catalog.sbom_vuln_scan` (`auto_scale`, `batch_size`, `pool_size`). SBOM vulnerability scan configuration was removed in Anchore Enterprise v6.2.0.
+- Removed the `anchoreConfig.catalog.cycle_timers.sbom_vuln_scan_watcher` and `anchoreConfig.catalog.cycle_timers.sbom_vuln_scan_refresh_watcher` cycle timers.
+- Added `anchoreConfig.analyzer.configFile.golang.capture_symbols` to configure Go binary symbol capture during analysis. Defaults to `null` (unset).
+
+> :exclamation: If your values file sets any of the removed `sbom_vuln_scan` values above, `helm install`/`upgrade` will fail with a message naming each one. Remove them before upgrading.
 
 ### v4.1.4
 
