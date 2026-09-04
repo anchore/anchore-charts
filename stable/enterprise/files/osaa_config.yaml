@@ -180,10 +180,6 @@ services:
       object_store_bucket: "runtime_compliance_check"
     import_operation_expiration_days: {{ .Values.anchoreConfig.catalog.import_operation_expiration_days }}
     analysis_queue_priority: {{ .Values.anchoreConfig.catalog.analysis_queue_priority }}
-    sbom_vuln_scan:
-      auto_scale: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.auto_scale }}
-      batch_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.batch_size }}
-      pool_size: {{ .Values.anchoreConfig.catalog.sbom_vuln_scan.pool_size }}
   {{- if and .Values.osaaMigrationJob.enabled .Values.osaaMigrationJob.analysisArchiveMigration.run }}
     analysis_archive: {{- include "enterprise.storageConfig" (dict "storeConfig" .Values.osaaMigrationJob.analysisArchiveMigration.analysis_archive "envPrefix" "ANCHORE_ANALYSIS_ARCHIVE" "storeName" "analysis_archive" "context" .) | nindent 6 }}
   {{- else }}

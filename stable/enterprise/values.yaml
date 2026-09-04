@@ -21,11 +21,14 @@ global:
 ## Only one of digest or tag should be used if using image.tag / image.digest, if both are specified it will default to using tag
 ## Ensure tag value is quoted so it's interpreted as a string
 ##
-image: docker.io/anchore/enterprise@sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+## RELEASE BLOCKER: replace <placeholder> with the real v6.2.0 image digest before releasing.
+## Left unset deliberately so a deploy fails fast with ImagePullBackOff rather than
+## silently running the previous release's image.
+image: docker.io/anchore/enterprise@sha256:<placeholder>
   # registry: docker.io
   # repository: anchore/enterprise
-  # tag: "v6.1.1"
-  # digest: sha256:5d6111c2b752eeaf0feee1ba324f98dc879f3fe3fffedaa0d74e73457bf8dfc8
+  # tag: "v6.2.0"
+  # digest: sha256:<placeholder>
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -619,6 +622,8 @@ anchoreConfig:
           - /anchore_hints.json
         layer_scope: squashed
         max_file_size_kb: 1000
+      golang:
+        capture_symbols: null
       secret_search:
         enabled: true
         layer_scope: squashed
@@ -659,14 +664,6 @@ anchoreConfig:
     ## 'api' will prioritize API requested image/source adds or imports over subscription based jobs such as repo watcher, tag watcher, or runtime inventory watcher.
     analysis_queue_priority: "<ALLOW_API_CONFIGURATION>"  # fair
 
-    ## @param anchoreConfig.catalog.sbom_vuln_scan.auto_scale Automatically scale batch_size and pool_size. Disable to configure manually.
-    ## @param anchoreConfig.catalog.sbom_vuln_scan.batch_size The number of SBOMs to select to scan within a single batch, when 'auto_scale' is disabled
-    ## @param anchoreConfig.catalog.sbom_vuln_scan.pool_size The number of concurrent vulnerability scans to dispatch from each catalog instance
-    sbom_vuln_scan:
-      auto_scale: true
-      batch_size: 1
-      pool_size: 1
-
     ## @param anchoreConfig.catalog.cycle_timers [object] Cycle timers for the catalog service
     ##
     cycle_timers:
@@ -693,8 +690,6 @@ anchoreConfig:
       resource_limit_notifications: 3600
       resource_metrics: 300
       runtime_inventory_image_ttl_watcher: 86400
-      sbom_vuln_scan_refresh_watcher: 60
-      sbom_vuln_scan_watcher: 10
       service_heartbeat: 60
       service_watcher: 15
       source_gc: 60

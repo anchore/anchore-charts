@@ -193,6 +193,8 @@ should render additional audit uris when additionalResourceURIs is set:
                 - /anchore_hints.json
                 layer_scope: squashed
                 max_file_size_kb: 1000
+              golang:
+                capture_symbols: null
               malware:
                 clamav:
                   db_update_enabled: true
@@ -299,8 +301,6 @@ should render additional audit uris when additionalResourceURIs is set:
               resource_limit_notifications: 3600
               resource_metrics: 300
               runtime_inventory_image_ttl_watcher: 86400
-              sbom_vuln_scan_refresh_watcher: 60
-              sbom_vuln_scan_watcher: 10
               service_heartbeat: 60
               service_watcher: 15
               source_gc: 60
@@ -327,10 +327,6 @@ should render additional audit uris when additionalResourceURIs is set:
               object_store_bucket: "runtime_compliance_check"
             import_operation_expiration_days: 7
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
-            sbom_vuln_scan:
-              auto_scale: true
-              batch_size: 1
-              pool_size: 1
             analysis_archive:
               {}
             object_store:
@@ -889,6 +885,8 @@ should render the configmaps:
                 - /anchore_hints.json
                 layer_scope: squashed
                 max_file_size_kb: 1000
+              golang:
+                capture_symbols: null
               malware:
                 clamav:
                   db_update_enabled: true
@@ -995,8 +993,6 @@ should render the configmaps:
               resource_limit_notifications: 3600
               resource_metrics: 300
               runtime_inventory_image_ttl_watcher: 86400
-              sbom_vuln_scan_refresh_watcher: 60
-              sbom_vuln_scan_watcher: 10
               service_heartbeat: 60
               service_watcher: 15
               source_gc: 60
@@ -1023,10 +1019,6 @@ should render the configmaps:
               object_store_bucket: "runtime_compliance_check"
             import_operation_expiration_days: 7
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
-            sbom_vuln_scan:
-              auto_scale: true
-              batch_size: 1
-              pool_size: 1
             analysis_archive:
               {}
             object_store:
@@ -1738,6 +1730,8 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
                 - /anchore_hints.json
                 layer_scope: squashed
                 max_file_size_kb: 1000
+              golang:
+                capture_symbols: null
               malware:
                 clamav:
                   db_update_enabled: true
@@ -1844,8 +1838,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               resource_limit_notifications: 3600
               resource_metrics: 300
               runtime_inventory_image_ttl_watcher: 86400
-              sbom_vuln_scan_refresh_watcher: 60
-              sbom_vuln_scan_watcher: 10
               service_heartbeat: 60
               service_watcher: 15
               source_gc: 60
@@ -1872,10 +1864,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               object_store_bucket: "runtime_compliance_check"
             import_operation_expiration_days: 7
             analysis_queue_priority: <ALLOW_API_CONFIGURATION>
-            sbom_vuln_scan:
-              auto_scale: true
-              batch_size: 1
-              pool_size: 1
             analysis_archive:
               {}
             object_store:
