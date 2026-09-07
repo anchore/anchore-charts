@@ -1,0 +1,44 @@
+suite: Prometheus Adapter validation
+# The adapter can only serve custom metrics to the HPA if it knows where Prometheus
+# lives, so an enabled adapter with no prometheus.url is a hard configuration error.
+templates:
+  - templates/anchore_configmap.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+tests:
+  - it: should not complain when the adapter is disabled
+    asserts:
+      - isKind:
+          of: ConfigMap
+
+  - it: should fail when the adapter is enabled without a prometheus url
+    set:
+      prometheus-adapter.chartEnabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: prometheus-adapter is enabled but prometheus.url is not set. Please set prometheus.url to the Prometheus server that is collecting Anchore metrics.
+
+  - it: should fail when the adapter is enabled with an empty prometheus url
+    set:
+      prometheus-adapter.chartEnabled: true
+      prometheus-adapter.prometheus.url: ""
+    asserts:
+      - failedTemplate:
+          errorMessage: prometheus-adapter is enabled but prometheus.url is not set. Please set prometheus.url to the Prometheus server that is collecting Anchore metrics.
+
+  - it: should render normally when the adapter is enabled with a prometheus url
+    set:
+      prometheus-adapter.chartEnabled: true
+      prometheus-adapter.prometheus.url: http://test-release-prometheus-server
+    asserts:
+      - isKind:
+          of: ConfigMap

@@ -61,6 +61,7 @@ pre-install job should match snapshot:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
+    terminationGracePeriodSeconds: 30
     volumes:
       - configMap:
           name: test-release-enterprise-hooks-config

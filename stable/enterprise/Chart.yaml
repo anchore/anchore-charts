@@ -39,3 +39,7 @@ dependencies:
     repository: "https://prometheus-community.github.io/helm-charts"
     condition: prometheus.chartEnabled
     alias: prometheus
+  - name: prometheus-adapter
+    version: "~4.11"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: prometheus-adapter.chartEnabled

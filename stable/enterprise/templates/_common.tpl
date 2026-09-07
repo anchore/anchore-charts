@@ -398,6 +398,9 @@ topologySpreadConstraints: {{- toYaml . | nindent 2 }}
 {{- with (default .Values.tolerations (index .Values (print $component)).tolerations) }}
 tolerations: {{- toYaml . | nindent 2 }}
 {{- end }}
+{{- with (default .Values.terminationGracePeriodSeconds (index .Values (print $component)).terminationGracePeriodSeconds) }}
+terminationGracePeriodSeconds: {{ . }}
+{{- end }}
 dnsConfig:
   options:
     - name: ndots

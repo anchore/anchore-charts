@@ -1,0 +1,262 @@
+suite: Autoscaling / HPA Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  postgresql.auth.database: test-db
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
+  anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
+tests:
+  - it: should not render any HPA by default
+    templates:
+      - templates/analyzer_hpa.yaml
+      - templates/api_hpa.yaml
+      - templates/catalog_hpa.yaml
+      - templates/componentcatalog_hpa.yaml
+      - templates/datasyncer_hpa.yaml
+      - templates/notifications_hpa.yaml
+      - templates/policyengine_hpa.yaml
+      - templates/reports_hpa.yaml
+      - templates/reportsworker_hpa.yaml
+      - templates/simplequeue_hpa.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should keep replicas on the deployment when autoscaling is disabled
+    template: templates/analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      analyzer.replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: should omit replicas from the deployment when autoscaling is enabled
+    template: templates/analyzer_deployment.yaml
+    documentIndex: 0
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.targetCPUUtilizationPercentage: 70
+    asserts:
+      - notExists:
+          path: spec.replicas
+
+  - it: should render a correctly targeted HPA for the analyzer
+    template: templates/analyzer_hpa.yaml
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.targetCPUUtilizationPercentage: 70
+      analyzer.autoscaling.minReplicas: 2
+      analyzer.autoscaling.maxReplicas: 7
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: HorizontalPodAutoscaler
+      - equal:
+          path: apiVersion
+          value: autoscaling/v2
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-analyzer
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: test-release-enterprise-analyzer
+      - equal:
+          path: spec.scaleTargetRef.kind
+          value: Deployment
+      - equal:
+          path: spec.minReplicas
+          value: 2
+      - equal:
+          path: spec.maxReplicas
+          value: 7
+
+  - it: should render CPU and memory metrics when both are enabled
+    template: templates/analyzer_hpa.yaml
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.targetCPUUtilizationPercentage: 55
+      analyzer.autoscaling.targetMemoryUtilizationPercentage: 65
+    asserts:
+      - lengthEqual:
+          path: spec.metrics
+          count: 2
+      - contains:
+          path: spec.metrics
+          content:
+            type: Resource
+            resource:
+              name: cpu
+              target:
+                type: Utilization
+                averageUtilization: 55
+      - contains:
+          path: spec.metrics
+          content:
+            type: Resource
+            resource:
+              name: memory
+              target:
+                type: Utilization
+                averageUtilization: 65
+
+  - it: should skip a resource metric whose target is left unset
+    template: templates/analyzer_hpa.yaml
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.targetMemoryUtilizationPercentage: 65
+      analyzer.autoscaling.targetCPUUtilizationPercentage: ""
+    asserts:
+      - lengthEqual:
+          path: spec.metrics
+          count: 1
+      - equal:
+          path: spec.metrics[0].resource.name
+          value: memory
+
+  - it: should combine custom metrics with resource metrics in a single valid list
+    template: templates/analyzer_hpa.yaml
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.targetCPUUtilizationPercentage: 70
+      analyzer.autoscaling.customMetrics:
+        - type: External
+          external:
+            metric:
+              name: anchore_queue_length_total_analyzer_tasks
+            target:
+              type: AverageValue
+              averageValue: "25"
+    asserts:
+      - lengthEqual:
+          path: spec.metrics
+          count: 2
+      - equal:
+          path: spec.metrics[0].type
+          value: External
+      - equal:
+          path: spec.metrics[0].external.metric.name
+          value: anchore_queue_length_total_analyzer_tasks
+      - equal:
+          path: spec.metrics[1].resource.name
+          value: cpu
+
+  - it: should render custom metrics alone without any resource metrics
+    template: templates/analyzer_hpa.yaml
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.customMetrics:
+        - type: External
+          external:
+            metric:
+              name: anchore_queue_length_total_analyzer_tasks
+            target:
+              type: AverageValue
+              averageValue: "25"
+    asserts:
+      - lengthEqual:
+          path: spec.metrics
+          count: 1
+      - equal:
+          path: spec.metrics[0].type
+          value: External
+
+  - it: should fail when autoscaling is enabled but no metric source is configured
+    template: templates/analyzer_hpa.yaml
+    set:
+      analyzer.autoscaling.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: analyzer.autoscaling.enabled is true but no scaling metric is configured; an HPA with no metrics cannot scale. Set analyzer.autoscaling.customMetrics, or analyzer.autoscaling.targetCPUUtilizationPercentage / targetMemoryUtilizationPercentage.
+
+  - it: should render the configured scaling behavior
+    template: templates/analyzer_hpa.yaml
+    set:
+      analyzer.autoscaling.enabled: true
+      analyzer.autoscaling.targetCPUUtilizationPercentage: 70
+    asserts:
+      - equal:
+          path: spec.behavior.scaleDown.stabilizationWindowSeconds
+          value: 300
+      - equal:
+          path: spec.behavior.scaleUp.stabilizationWindowSeconds
+          value: 60
+
+  - it: should support autoscaling the component catalog
+    template: templates/componentcatalog_hpa.yaml
+    set:
+      componentCatalog.autoscaling.enabled: true
+      componentCatalog.autoscaling.targetCPUUtilizationPercentage: 70
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: test-release-enterprise-componentcatalog
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: test-release-enterprise-componentcatalog
+
+  - it: should honor the component catalog replicaCount when autoscaling is disabled
+    template: templates/componentcatalog_deployment.yaml
+    documentIndex: 0
+    set:
+      componentCatalog.replicaCount: 4
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 4
+
+  - it: should omit replicas from the component catalog deployment when autoscaling is enabled
+    template: templates/componentcatalog_deployment.yaml
+    documentIndex: 0
+    set:
+      componentCatalog.autoscaling.enabled: true
+      componentCatalog.autoscaling.targetCPUUtilizationPercentage: 70
+    asserts:
+      - notExists:
+          path: spec.replicas
+
+  - it: should scale each service independently
+    template: templates/simplequeue_hpa.yaml
+    set:
+      simpleQueue.autoscaling.enabled: true
+      simpleQueue.autoscaling.targetCPUUtilizationPercentage: 70
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: test-release-enterprise-simplequeue
+
+  - it: should render an HPA for every scalable service
+    templates:
+      - templates/api_hpa.yaml
+      - templates/catalog_hpa.yaml
+      - templates/datasyncer_hpa.yaml
+      - templates/notifications_hpa.yaml
+      - templates/policyengine_hpa.yaml
+      - templates/reports_hpa.yaml
+      - templates/reportsworker_hpa.yaml
+    set:
+      api.autoscaling: {enabled: true, targetCPUUtilizationPercentage: 70}
+      catalog.autoscaling: {enabled: true, targetCPUUtilizationPercentage: 70}
+      dataSyncer.autoscaling: {enabled: true, targetCPUUtilizationPercentage: 70}
+      notifications.autoscaling: {enabled: true, targetCPUUtilizationPercentage: 70}
+      policyEngine.autoscaling: {enabled: true, targetCPUUtilizationPercentage: 70}
+      reports.autoscaling: {enabled: true, targetCPUUtilizationPercentage: 70}
+      reportsWorker.autoscaling: {enabled: true, targetCPUUtilizationPercentage: 70}
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: HorizontalPodAutoscaler
