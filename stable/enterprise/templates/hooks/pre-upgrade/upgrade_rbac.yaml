@@ -1,11 +1,24 @@
 {{- if and .Values.upgradeJob.enabled .Values.upgradeJob.rbacCreate (not .Values.upgradeJob.usePostUpgradeHook) -}}
 {{- $component := "upgradeJob" -}}
+{{/*
+rbacCreate=true: the chart owns the ServiceAccount, Role and RoleBinding for the upgrade
+job's scale-down init container. The ServiceAccount is named after
+upgradeJob.serviceAccountName when the user set one, otherwise a generated name — and the
+RoleBinding always targets that same name, so the account the pod actually runs as is the
+account that holds the permissions. Previously the binding was hardcoded to the generated
+name, so setting upgradeJob.serviceAccountName produced a Role bound to an account nothing
+used and a job pod with no permission to scale anything down.
+
+rbacCreate=false is handled in the job template: nothing is created here and the named
+ServiceAccount is assumed to already carry the permissions.
+*/}}
+{{- $serviceAccountName := include "enterprise.serviceAccountName" (merge (dict "component" $component) .) -}}
 
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "enterprise.fullname" . }}-upgrade-sa
+  name: {{ $serviceAccountName }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
   annotations: {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
@@ -32,7 +45,7 @@ roleRef:
   name: {{ template "enterprise.fullname" . }}-upgrade-role
 subjects:
   - kind: ServiceAccount
-    name: {{ template "enterprise.fullname" . }}-upgrade-sa
+    name: {{ $serviceAccountName }}
     namespace: {{ .Release.Namespace }}
 
 ---

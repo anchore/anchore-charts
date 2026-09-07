@@ -196,6 +196,9 @@ tests:
           path: spec.template.spec.serviceAccountName
           value: test-release-enterprise-upgrade-sa
 
+  # rbacCreate=false: the chart creates and grants nothing. Whatever account the pod ends
+  # up with is assumed to already carry the scale-down permissions — including the global
+  # serviceAccountName, and including the namespace default when nothing is set at all.
   - it: should render global serviceAccountName when upgradeJob.rbacCreate is false
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
     set:
@@ -205,6 +208,78 @@ tests:
       - equal:
           path: spec.template.spec.serviceAccountName
           value: upgradeJob-global-test
+
+  # No account resolves, so the key is omitted entirely and the pod falls back to the
+  # namespace default ServiceAccount. Emitting `serviceAccountName:` with no value would also
+  # work (Kubernetes decodes the null to "" and admission substitutes `default`), but omitting
+  # it states the same intent without depending on that.
+  - it: should omit serviceAccountName when rbacCreate is false and no name is set
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.rbacCreate: false
+    asserts:
+      - notExists:
+          path: spec.template.spec.serviceAccountName
+
+  - it: should render the component serviceAccountName when rbacCreate is false
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      upgradeJob.rbacCreate: false
+      upgradeJob.serviceAccountName: byo-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: byo-sa
+
+  - it: should create no RBAC resources when upgradeJob.rbacCreate is false
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    set:
+      upgradeJob.rbacCreate: false
+      upgradeJob.serviceAccountName: byo-sa
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # rbacCreate=true with a user-supplied name: the chart creates that ServiceAccount and
+  # binds the Role to it, so the account the pod runs as is the one holding the permissions.
+  - it: should create the ServiceAccount under the user-supplied name when rbacCreate is true
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 0
+    set:
+      upgradeJob.rbacCreate: true
+      upgradeJob.serviceAccountName: my-irsa-sa
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: my-irsa-sa
+
+  - it: should bind the Role to the user-supplied ServiceAccount when rbacCreate is true
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 1
+    set:
+      upgradeJob.rbacCreate: true
+      upgradeJob.serviceAccountName: my-irsa-sa
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: subjects[0].name
+          value: my-irsa-sa
+
+  # rbacCreate=true with no name: chart-generated name, used for both the SA and the binding.
+  - it: should bind the Role to the generated ServiceAccount when no name is supplied
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 1
+    set:
+      upgradeJob.rbacCreate: true
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: subjects[0].name
+          value: test-release-enterprise-upgrade-sa
 
   - it: should render component serviceAccountName even when global serviceAccountName is set
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
@@ -722,7 +797,9 @@ tests:
       - hasDocuments:
           count: 3
 
-  - it: migration RBAC is not created when disabled or when bringing your own SA
+  # rbacCreate=false: the chart creates nothing and the account the job runs as is assumed
+  # to already carry the scale-down permissions.
+  - it: migration RBAC is not created when rbacCreate is false
     template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
     set:
       osaaMigrationJob:
@@ -731,6 +808,228 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: migration RBAC is not created when rbacCreate is false even with a serviceAccountName
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: false
+        serviceAccountName: byo-sa
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # rbacCreate=true with a user-supplied name: the chart creates that ServiceAccount and
+  # binds the Role to it, so the account the pod runs as is the one holding the permissions.
+  # Previously a serviceAccountName suppressed this file entirely, leaving the job unable to
+  # scale the deployments down.
+  - it: migration RBAC creates the ServiceAccount under the user-supplied name
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: my-irsa-sa
+    asserts:
+      - hasDocuments:
+          count: 3
+      - documentIndex: 0
+        isKind:
+          of: ServiceAccount
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: my-irsa-sa
+
+  - it: migration RBAC binds the Role to the user-supplied ServiceAccount
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 1
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: my-irsa-sa
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: subjects[0].name
+          value: my-irsa-sa
+
+  - it: migration RBAC binds the Role to the generated ServiceAccount when no name is supplied
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 1
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+    asserts:
+      - isKind:
+          of: RoleBinding
+      - equal:
+          path: subjects[0].name
+          value: test-release-enterprise-osaa-migration-sa
+
+  # Both RBAC sets are pre-upgrade hooks at weight 0. When they resolve to the same
+  # ServiceAccount name, only the upgrade job emits the ServiceAccount; the migration job
+  # still emits its Role and RoleBinding, so the shared account holds both sets of verbs.
+  - it: migration RBAC omits the ServiceAccount when the upgrade job creates the same name
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+      upgradeJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+    asserts:
+      - hasDocuments:
+          count: 2
+      - documentIndex: 0
+        isKind:
+          of: RoleBinding
+      - documentIndex: 0
+        equal:
+          path: subjects[0].name
+          value: shared-sa
+      - documentIndex: 1
+        isKind:
+          of: Role
+
+  - it: upgrade RBAC still emits the shared ServiceAccount
+    template: templates/hooks/pre-upgrade/upgrade_rbac.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+      upgradeJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: shared-sa
+
+  # upgradeJob.force strips the hook annotations off the upgrade job's RBAC, so those become
+  # ordinary release resources applied after the pre-upgrade hooks. This job is always a
+  # pre-upgrade hook, so it cannot defer its ServiceAccount to one that will not exist yet.
+  - it: migration RBAC keeps its ServiceAccount when upgradeJob.force is set
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+      upgradeJob:
+        enabled: true
+        rbacCreate: true
+        force: true
+        serviceAccountName: shared-sa
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: shared-sa
+
+  - it: migration RBAC keeps its ServiceAccount when the names differ
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: osaa-sa
+      upgradeJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: upgrade-only-sa
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: osaa-sa
+
+  # the upgrade job is not creating anything in these cases, so the migration job must not
+  # defer to it — otherwise the shared account would exist nowhere
+  - it: migration RBAC keeps its ServiceAccount when the upgrade job is disabled
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+      upgradeJob:
+        enabled: false
+        serviceAccountName: shared-sa
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: shared-sa
+
+  - it: migration RBAC keeps its ServiceAccount when the upgrade job uses the post-upgrade hook
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+      upgradeJob:
+        usePostUpgradeHook: true
+        serviceAccountName: shared-sa
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: shared-sa
+
+  - it: migration RBAC keeps its ServiceAccount when the upgrade job has rbacCreate false
+    template: templates/hooks/pre-upgrade/osaa_migration_rbac.yaml
+    documentIndex: 0
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: shared-sa
+      upgradeJob:
+        rbacCreate: false
+        serviceAccountName: shared-sa
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: shared-sa
+
+  # the pod must run as whichever account the RBAC above targets
+  - it: migration job runs as the user-supplied ServiceAccount when rbacCreate is true
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob:
+        enabled: true
+        rbacCreate: true
+        serviceAccountName: my-irsa-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: my-irsa-sa
 
   - it: migration job should use the component level service account name if set
     template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
