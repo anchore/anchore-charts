@@ -189,6 +189,8 @@ snapshot - S3 legacy configmap:
               - /anchore_hints.json
               layer_scope: squashed
               max_file_size_kb: 1000
+            golang:
+              capture_symbols: null
             malware:
               clamav:
                 db_update_enabled: true
@@ -295,8 +297,6 @@ snapshot - S3 legacy configmap:
             resource_limit_notifications: 3600
             resource_metrics: 300
             runtime_inventory_image_ttl_watcher: 86400
-            sbom_vuln_scan_refresh_watcher: 60
-            sbom_vuln_scan_watcher: 10
             service_heartbeat: 60
             service_watcher: 15
             source_gc: 60
@@ -323,10 +323,6 @@ snapshot - S3 legacy configmap:
             object_store_bucket: "runtime_compliance_check"
           import_operation_expiration_days: 7
           analysis_queue_priority: <ALLOW_API_CONFIGURATION>
-          sbom_vuln_scan:
-            auto_scale: true
-            batch_size: 1
-            pool_size: 1
           analysis_archive:
             {}
           object_store:
