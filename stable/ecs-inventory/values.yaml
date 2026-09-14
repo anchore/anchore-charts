@@ -7,7 +7,7 @@
 ##
 replicaCount: 1
 
-## @param image Image used for all Ecs Inventory deployment deployments
+## @param image Image used for the ECS Inventory deployment
 ## use docker.io/anchore/ecs-inventory:v1.5.0-fips-amd64 if you want an image built for fips use
 ##
 image: "docker.io/anchore/ecs-inventory:v1.5.0"

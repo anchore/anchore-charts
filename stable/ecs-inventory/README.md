@@ -61,7 +61,7 @@ See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more 
 | Name                                  | Description                                                          | Value                                    |
 | ------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- |
 | `replicaCount`                        | Number of replicas for the Ecs Inventory deployment                  | `1`                                      |
-| `image`                               | Image used for all Ecs Inventory deployment deployments              | `docker.io/anchore/ecs-inventory:v1.1.0` |
+| `image`                               | Image used for the ECS Inventory deployment                          | `docker.io/anchore/ecs-inventory:v1.5.0` |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                            | `IfNotPresent`                           |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos        | `""`                                     |
 | `serviceAccountName`                  | Name of a service account used to run all Anchore Ecs Inventory pods | `""`                                     |
@@ -71,6 +71,7 @@ See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more 
 | `extraEnv`                            | extra environment variables. These will be set on all containers.    | `[]`                                     |
 | `annotations`                         | Common annotations set on all Kubernetes resources                   | `{}`                                     |
 | `deploymentAnnotations`               | annotations to set on the ecs-inventory deployment                   | `{}`                                     |
+| `containerSecurityContext`            | The securityContext for all Anchore ECS Inventory containers         | `{}`                                     |
 | `securityContext.runAsUser`           | The securityContext runAsUser for all Anchore ECS Inventory pods     | `1000`                                   |
 | `securityContext.runAsGroup`          | The securityContext runAsGroup for all Anchore ECS Inventory pods    | `1000`                                   |
 | `securityContext.fsGroup`             | The securityContext fsGroup for all Anchore ECS Inventory pods       | `1000`                                   |
@@ -88,7 +89,6 @@ See the [ecs-inventory repo](https://github.com/anchore/ecs-inventory) for more 
 | `probes.readiness.periodSeconds`      | Period seconds for the readiness probe                               | `15`                                     |
 | `probes.readiness.failureThreshold`   | Failure threshold for the readiness probe                            | `3`                                      |
 | `probes.readiness.successThreshold`   | Success threshold for the readiness probe                            | `1`                                      |
-
 
 ### ecsInventory Parameters ##
 
