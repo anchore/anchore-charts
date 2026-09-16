@@ -166,9 +166,20 @@ jobs:
         HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
         echo "Branch: $HEAD_REF"
-        echo 'image: "docker.io/anchore/enterprise-dev:rc"' >> stable/enterprise/ci/ci-values.yaml
-        echo 'ui:' >> stable/enterprise/ci/ci-values.yaml
-        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:rc"' >> stable/enterprise/ci/ci-values.yaml
+        # Written as the chart's dict image form. A bare reference string still works, but
+        # overwriting the default table with a scalar makes Helm warn on every render.
+        # digest is blanked because the chart pins one and it would otherwise be merged in.
+        {
+          echo 'image:'
+          echo '  repository: anchore/enterprise-dev'
+          echo '  tag: "rc"'
+          echo '  digest: ""'
+          echo 'ui:'
+          echo '  image:'
+          echo '    repository: anchore/anchore-on-prem-ui-dev'
+          echo '    tag: "rc"'
+          echo '    digest: ""'
+        } >> stable/enterprise/ci/ci-values.yaml
         echo "Appended to stable/enterprise/ci/ci-values.yaml"
 
     - name: Update to nightly image if needed
@@ -177,9 +188,20 @@ jobs:
         HEAD_REF: ${{ github.event.pull_request.head.ref }}
       run: |
         echo "Branch: $HEAD_REF"
-        echo 'image: "docker.io/anchore/enterprise-dev:nightly"' >> stable/enterprise/ci/ci-values.yaml
-        echo 'ui:' >> stable/enterprise/ci/ci-values.yaml
-        echo '  image: "docker.io/anchore/anchore-on-prem-ui-dev:nightly"' >> stable/enterprise/ci/ci-values.yaml
+        # Written as the chart's dict image form. A bare reference string still works, but
+        # overwriting the default table with a scalar makes Helm warn on every render.
+        # digest is blanked because the chart pins one and it would otherwise be merged in.
+        {
+          echo 'image:'
+          echo '  repository: anchore/enterprise-dev'
+          echo '  tag: "nightly"'
+          echo '  digest: ""'
+          echo 'ui:'
+          echo '  image:'
+          echo '    repository: anchore/anchore-on-prem-ui-dev'
+          echo '    tag: "nightly"'
+          echo '    digest: ""'
+        } >> stable/enterprise/ci/ci-values.yaml
         echo "Appended to stable/enterprise/ci/ci-values.yaml"
 
     - name: Run chart-testing
