@@ -2464,8 +2464,12 @@ upgradeJob:
   ## With upgradeJob.rbacCreate=true this is the name the chart gives the ServiceAccount it creates.
   ## With upgradeJob.rbacCreate=false this must be an existing ServiceAccount that already has the
   ## scale-down permissions listed above.
-  ## When empty: rbacCreate=true uses a generated name; rbacCreate=false falls back to the global
-  ## serviceAccountName, or the namespace default ServiceAccount if that is also unset.
+  ## When empty and rbacCreate=true a generated name is used. When empty and rbacCreate=false
+  ## the account resolves via the chart's fallback chain: the global serviceAccountName, then
+  ## (with createServiceAccount=true, the chart default) the application ServiceAccount
+  ## <fullname>-sa which does NOT carry scale-down permissions, then the namespace default
+  ## ServiceAccount. To avoid the app-SA landing spot, set rbacCreate=true, name a
+  ## ServiceAccount explicitly, or grant the app SA the permissions in upgrade_rbac.yaml.
   ##
   serviceAccountName: ""
 
@@ -2852,8 +2856,12 @@ osaaMigrationJob:
   ## With osaaMigrationJob.rbacCreate=true this is the name the chart gives the ServiceAccount it creates.
   ## With osaaMigrationJob.rbacCreate=false this must be an existing ServiceAccount that can list/get/watch pods
   ## and get/list/watch/update/patch deployments and patch deployments/scale.
-  ## When empty: rbacCreate=true uses a generated name; rbacCreate=false falls back to the global
-  ## serviceAccountName, or the namespace default ServiceAccount if that is also unset.
+  ## When empty and rbacCreate=true a generated name is used. When empty and rbacCreate=false
+  ## the account resolves via the chart's fallback chain: the global serviceAccountName, then
+  ## (with createServiceAccount=true, the chart default) the application ServiceAccount
+  ## <fullname>-sa which does NOT carry scale-down permissions, then the namespace default
+  ## ServiceAccount. To avoid the app-SA landing spot, set rbacCreate=true, name a
+  ## ServiceAccount explicitly, or grant the app SA the permissions in upgrade_rbac.yaml.
   ##
   serviceAccountName: ""
 
