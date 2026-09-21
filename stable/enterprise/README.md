@@ -1642,7 +1642,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
-### v4.3.1
+### v4.4.0
 
 - Fixed the upgrade job and the object store / analysis archive migration job creating RBAC that did not apply to the service account the job pod actually ran as. When `upgradeJob.rbacCreate` or `osaaMigrationJob.rbacCreate` is `true` and a `serviceAccountName` is set, the chart now creates the ServiceAccount under that name and binds the Role to it. Previously the upgrade job bound its Role to a generated name the pod did not use, and the migration job skipped RBAC creation entirely — in both cases the job's scale-down step was denied, and because the step does not propagate `kubectl`'s exit code it still reported success while the upgrade or migration ran against services that were never scaled down.
 - The scale-down step in the upgrade job and the migration job now fails the hook when it cannot scale the Anchore deployments down, instead of reporting success. Previously a denied `kubectl` call was counted as "no pods running", so the database upgrade or object store migration proceeded against services that were still running. A denied request now exits with `kubectl`'s exit code and the API error is shown in the job's log. When no deployments match the release, the step reports that and continues, so an upgrade that is recreating deleted deployments is not blocked. Waiting for pods to drain remains unbounded so that large deployments are not cut short.
