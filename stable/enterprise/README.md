@@ -1642,6 +1642,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v4.1.2
+
+- Deploys Anchore Enterprise v6.2.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/621/) for more information.
+
 ### v4.4.0
 
 - Fixed the upgrade job and the object store / analysis archive migration job creating RBAC that did not apply to the service account the job pod actually ran as. When `upgradeJob.rbacCreate` or `osaaMigrationJob.rbacCreate` is `true` and a `serviceAccountName` is set, the chart now creates the ServiceAccount under that name and binds the Role to it. Previously the upgrade job bound its Role to a generated name the pod did not use, and the migration job skipped RBAC creation entirely — in both cases the job's scale-down step was denied, and because the step does not propagate `kubectl`'s exit code it still reported success while the upgrade or migration ran against services that were never scaled down.
