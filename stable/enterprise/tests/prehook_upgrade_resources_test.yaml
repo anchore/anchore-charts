@@ -46,6 +46,9 @@ set:
   postgresql.auth.database: test-db
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers: []
   anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types: []
+  ## Pin the image digest so the release workflow can bump image.digest in values.yaml
+  ## without regenerating this suite's snapshots.
+  image.digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
 upgrade-resource: &upgrade-resources
   - templates/hooks/pre-upgrade/upgrade_job.yaml
   - templates/hooks/pre-upgrade/upgrade_rbac.yaml

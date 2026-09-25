@@ -8,11 +8,15 @@ release:
 chart:
   version: 9.9.9
   appVersion: 9.9.9
+## Pin the image digests here so the release workflow can bump image.digest / ui.image.digest in
+## values.yaml without dragging every test's expected value along with it.
 set:
   postgresql.externalEndpoint: test-postgresql
   postgresql.auth.username: test-user
   postgresql.auth.password: test-password
   postgresql.auth.database: test-db
+  image.digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  ui.image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
 
 tests:
   - it: should render the shipped defaults through docker.io
@@ -21,7 +25,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
+          value: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
 
   - it: should supply the registry for the enterprise image
     template: analyzer_deployment.yaml
@@ -31,7 +35,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: harbor.example.com/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
+          value: harbor.example.com/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
 
   - it: should supply the registry for the ui image
     template: ui_deployment.yaml
@@ -41,7 +45,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: harbor.example.com/anchore/enterprise-ui@sha256:6e1beda2983f3a9c2b9ca69fd1275bd3f403f5d6df562425ab75b75adc408af4
+          value: harbor.example.com/anchore/enterprise-ui@sha256:1111111111111111111111111111111111111111111111111111111111111111
 
   - it: should supply the registry for the kubectl image
     template: templates/hooks/pre-upgrade/upgrade_job.yaml
@@ -72,7 +76,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: harbor.example.com/anchore/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
+          value: harbor.example.com/anchore/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
 
   - it: should not double the slash when a per-image registry has a trailing one
     template: analyzer_deployment.yaml
@@ -82,7 +86,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: harbor.example.com/anchore-licensed/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
+          value: harbor.example.com/anchore-licensed/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
 
   - it: should not double the slash when the registry host has a trailing one
     template: analyzer_deployment.yaml
@@ -92,7 +96,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: harbor.example.com/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
+          value: harbor.example.com/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
 
   ## The point of the design: one image can be pointed somewhere else without restating its
   ## version, so chart upgrades keep moving the tag.
@@ -108,7 +112,7 @@ tests:
           value: harbor.example.com/dockerhub/bitnamilegacy/kubectl:1.30
       - equal:
           path: spec.template.spec.initContainers[0].image
-          value: harbor.example.com/anchore-licensed/anchore/enterprise@sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
+          value: harbor.example.com/anchore-licensed/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
 
   - it: should leave the cloudsql proxy on gcr.io because its default states a registry
     template: analyzer_deployment.yaml
