@@ -36,14 +36,14 @@ global:
 ## @param image.tag Tag for the Anchore Enterprise image. Set it to deploy a specific version instead of the digest the chart pins; quote the value so it is read as a string
 ## Only one of digest or tag should be set; if both are set the tag is used. Setting a tag therefore
 ## overrides the digest the chart ships, which is what you want when selecting a specific version.
-## An image may also be given as a complete reference string, eg. `image: docker.io/anchore/enterprise:v6.2.0`,
+## An image may also be given as a complete reference string, eg. `image: docker.io/anchore/enterprise:vX.Y.Z`,
 ## which is used as written unless it states no registry host.
 ##
 image:
   registry: ""
   repository: anchore/enterprise
-  digest: sha256:19339361a617e4a9dbdd466ce4ea23958ea98160ee61e1f3cdfb56fbeb0052bc
-  tag: ""
+  digest: sha256:9230318d67a027ced10606cb9f232e679fbb0a39ab03d6014f7ffc452dac69c7
+  tag: ""  # v6.2.1
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -2247,7 +2247,7 @@ ui:
     registry: ""
     repository: anchore/enterprise-ui
     digest: sha256:6e1beda2983f3a9c2b9ca69fd1275bd3f403f5d6df562425ab75b75adc408af4
-    tag: ""
+    tag: ""  # v6.2.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##

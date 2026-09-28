@@ -408,7 +408,7 @@ No tags or digests are restated, so every version is still the chart's to manage
 
 ```yaml
 image:
-  tag: "v6.2.0"    # used instead of the digest the chart pins
+  tag: "vX.Y.Z"    # used instead of the digest the chart pins
 ```
 
 If both `tag` and `digest` are set, the tag is used.
@@ -418,10 +418,10 @@ If both `tag` and `digest` are set, the tag is used.
 An image value may also be a single reference string, which is used as written:
 
 ```yaml
-image: myregistry.example.com/anchore/enterprise:v6.2.0
+image: myregistry.example.com/anchore/enterprise:vX.Y.Z
 ```
 
-A string that includes a registry host is left alone. A string that does not — `anchore/enterprise:v6.2.0` — states no registry, so it takes one from `global.imageRegistryHost` like any other value. The leading path segment counts as a registry host when it contains a `.` or a `:`, or when it is `localhost`, which is the same rule the container runtime applies to the same string.
+A string that includes a registry host is left alone. A string that does not — `anchore/enterprise:vX.Y.Z` — states no registry, so it takes one from `global.imageRegistryHost` like any other value. The leading path segment counts as a registry host when it contains a `.` or a `:`, or when it is `localhost`, which is the same rule the container runtime applies to the same string.
 
 Setting a string pins the tag or digest as well, so prefer setting `registry` unless you mean to take ownership of the version.
 
@@ -438,7 +438,7 @@ ui:
   image:
     registry: myregistry.example.com
     repository: anchore/enterprise-ui
-    tag: "v6.2.0"
+    tag: "vX.Y.Z"
 ```
 
 #### Mirroring everything: the complete list
@@ -1641,6 +1641,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.4.1
+
+- Deploys Anchore Enterprise v6.2.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/621/) for more information.
 
 ### v4.4.0
 
