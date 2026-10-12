@@ -42,7 +42,7 @@ global:
 image:
   registry: ""
   repository: anchore/enterprise
-  digest: <tbd>
+  digest: sha256:5c7456a84d0b32c47f28380903fa966eaf4fca38158ef90ecfc0a5c5a0380291
   tag: ""  # v6.2.2
 
 ## @param imagePullPolicy Image pull policy used by all deployments
