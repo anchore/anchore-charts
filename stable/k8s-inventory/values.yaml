@@ -31,7 +31,7 @@ image:
   pullPolicy: "IfNotPresent"
   registry: ""
   repository: "anchore/k8s-inventory"
-  tag: "v1.8.5"
+  tag: "v1.8.6"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
