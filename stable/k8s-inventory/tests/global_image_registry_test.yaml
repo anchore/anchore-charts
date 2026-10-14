@@ -13,6 +13,10 @@ set:
   k8sInventory.anchore.url: http://anchore:8228
   k8sInventory.anchore.user: admin
   k8sInventory.anchore.password: pw
+  # Dummy tag so these registry-resolution tests don't pin the real release
+  # version (which the automated bump moves). The suite checks registry prefixing,
+  # not the specific tag.
+  image.tag: "v9.9.9"
 
 tests:
   - it: should render the shipped default through docker.io
@@ -21,7 +25,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "docker.io/anchore/k8s-inventory:v1.8.5"
+          value: "docker.io/anchore/k8s-inventory:v9.9.9"
 
   - it: should supply the registry from the global
     template: deployment.yaml
@@ -31,7 +35,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/k8s-inventory:v1.8.5"
+          value: "harbor.example.com/anchore/k8s-inventory:v9.9.9"
 
   - it: should support a registry host that includes a path
     template: deployment.yaml
@@ -41,7 +45,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/anchore/k8s-inventory:v1.8.5"
+          value: "harbor.example.com/anchore/anchore/k8s-inventory:v9.9.9"
 
   - it: should not double the slash when the registry host has a trailing one
     template: deployment.yaml
@@ -51,7 +55,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/k8s-inventory:v1.8.5"
+          value: "harbor.example.com/anchore/k8s-inventory:v9.9.9"
 
   - it: should keep a registry the image states itself
     template: deployment.yaml
@@ -62,9 +66,9 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "myregistry.local/anchore/k8s-inventory:v1.8.5"
+          value: "myregistry.local/anchore/k8s-inventory:v9.9.9"
 
-  ## The chart appVersion is `1.8.5` while the published tags are `v1.8.5`, so defaulting an empty
+  ## The chart appVersion has no leading `v` while the published image tags do, so defaulting an empty
   ## tag to the appVersion would render a tag that does not exist on Docker Hub. Fail instead.
   - it: should fail rather than fall back to the chart appVersion when the tag is empty
     template: deployment.yaml
@@ -85,4 +89,4 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "docker.io/anchore/k8s-inventory:v1.8.5"
+          value: "docker.io/anchore/k8s-inventory:v9.9.9"
