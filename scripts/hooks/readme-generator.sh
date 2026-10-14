@@ -15,7 +15,7 @@ if [[ ! $(which readme-generator) ]]; then
         echo "npm not found. Please install npm and try again"
         exit 1
     fi
-    npm install -g @bitnami/readme-generator-for-helm
+    npm install -g @bitnami/readme-generator-for-helm@2.7.2
 fi
 
 files_changed="$(git diff --name-only origin/main | sort | uniq)"

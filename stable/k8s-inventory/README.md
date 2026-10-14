@@ -75,7 +75,7 @@ global:
   imageRegistryHost: harbor.example.com
 ```
 
-Only the registry comes from the global — the repository and tag stay with the chart, so chart upgrades keep moving the version. `global.imageRegistryHost` may include a path, eg. `harbor.example.com/anchore`.
+Only the registry comes from the global — the repository and tag stay with the chart, so chart upgrades keep moving the version. `global.imageRegistryHost` may include a path, eg. `harbor.example.com/anchore`. See the enterprise chart's [Using a Private Registry](../enterprise/README.md#using-a-private-registry) section for the full rule.
 
 This chart takes the dict form only — `image.pullPolicy` lives in the same dict, so a bare reference string is not a valid value here.
 
