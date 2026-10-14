@@ -184,6 +184,10 @@ This chart takes the dict form only — `image.pullPolicy` lives in the same dic
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v0.7.2
+
+- Documentation and test maintenance: regenerated the README parameters table and de-pinned the chart tests from the release version. No deployment changes.
+
 ### v0.7.0
 
 **The image value gains a `registry` key, and the registry can be set once for the whole chart.**

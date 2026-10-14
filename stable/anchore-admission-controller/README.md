@@ -198,6 +198,10 @@ Using the '--recreate-pods' is not required to get updates of config to the runn
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v0.9.2
+
+- Documentation maintenance: README image-example cleanup. No deployment changes.
+
 ### v0.9.0
 
 **The image value is now a dict, and the registry can be set once for the whole chart.**
