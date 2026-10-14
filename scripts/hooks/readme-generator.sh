@@ -22,7 +22,7 @@ files_changed="$(git diff --name-only origin/main | sort | uniq)"
 # Adding || true to avoid "Process exited with code 1" errors
 charts_dirs_changed="$(echo "$files_changed" | xargs dirname | grep -o "stable/[^/]*" | sort | uniq || true)"
 
-chart_with_metadata=("stable/enterprise" "stable/feeds" "stable/ecs-inventory")
+chart_with_metadata=("stable/enterprise" "stable/feeds" "stable/ecs-inventory" "stable/k8s-inventory")
 
 for chart in ${charts_dirs_changed}; do
     for chart_with_metadata in "${chart_with_metadata[@]}"; do
