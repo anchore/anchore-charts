@@ -77,7 +77,7 @@ The chart's image is a set of parts rather than one string:
 image:
   registry: ""            # empty -> taken from global.imageRegistryHost
   repository: anchore/kubernetes-admission-controller
-  tag: "v0.8.5"
+  tag: "vX.Y.Z"
 ```
 
 The registry is chosen from three levels, most specific first:
@@ -111,7 +111,7 @@ initCa:
     registry: harbor.example.com/dockerhub
 ```
 
-An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/kubernetes-admission-controller:v0.8.5`), which is used as written. A string that states no registry host takes one from the global like any other value.
+An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/kubernetes-admission-controller:vX.Y.Z`), which is used as written. A string that states no registry host takes one from the global like any other value.
 
 Overriding a **nested** image value with a reference string — ``initCa.image`` — makes Helm print a warning:
 
