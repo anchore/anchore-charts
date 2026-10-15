@@ -195,6 +195,26 @@ jobs:
           echo "--- diff ---"
           git --no-pager diff -- "$CHART_FILE" "$VALUES"
 
+      # Regenerate the README Parameters table so its image.tag matches the bump.
+      # Only charts whose values.yaml is fully @param-annotated are generator-
+      # managed (keep this list in sync with scripts/hooks/readme-generator.sh).
+      # Charts not listed — e.g. anchore-admission-controller, whose values.yaml
+      # isn't annotated — keep their hand-maintained README untouched.
+      - name: Regenerate chart README (parameters table)
+        if: steps.bump.outputs.changed == 'true'
+        env:
+          CHART: ${{ steps.bump.outputs.chart }}
+          CHART_DIR: ${{ steps.bump.outputs.chart_dir }}
+        run: |
+          set -euo pipefail
+          case "$CHART" in
+            k8s-inventory|ecs-inventory) ;;
+            *) echo "readme-generator: skipping '${CHART}' (README table not generator-managed)"; exit 0 ;;
+          esac
+          npm install -g @bitnami/readme-generator-for-helm@2.7.2
+          readme-generator --values "${CHART_DIR}/values.yaml" --readme "${CHART_DIR}/README.md"
+          git --no-pager diff -- "${CHART_DIR}/README.md" || true
+
       - name: Open pull request
         # Skipped when the bump step found the chart already at the requested
         # appVersion (changed=false). On the bump path there is always a diff.
@@ -219,7 +239,9 @@ jobs:
           git checkout -b "$BRANCH"
           # Stage ONLY the chart files this workflow edits — never `commit -a`, so
           # an unrelated tracked change (a future step / runner) can't ride along.
-          git add "${CHART_DIR}/Chart.yaml" "${CHART_DIR}/values.yaml"
+          # README.md is included for generator-managed charts (regenerated above);
+          # for others it's unchanged, so `git add` stages nothing extra.
+          git add "${CHART_DIR}/Chart.yaml" "${CHART_DIR}/values.yaml" "${CHART_DIR}/README.md"
           git commit -sm "chore(${PRODUCT}): bump chart to ${APP_VERSION} (chart ${CHART_VERSION})"
 
           # Feed the token to git via a credential helper (single-quoted: the

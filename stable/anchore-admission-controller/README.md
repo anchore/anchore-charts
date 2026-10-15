@@ -77,7 +77,7 @@ The chart's image is a set of parts rather than one string:
 image:
   registry: ""            # empty -> taken from global.imageRegistryHost
   repository: anchore/kubernetes-admission-controller
-  tag: "v0.8.5"
+  tag: "vX.Y.Z"
 ```
 
 The registry is chosen from three levels, most specific first:
@@ -111,7 +111,7 @@ initCa:
     registry: harbor.example.com/dockerhub
 ```
 
-An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/kubernetes-admission-controller:v0.8.5`), which is used as written. A string that states no registry host takes one from the global like any other value.
+An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/kubernetes-admission-controller:vX.Y.Z`), which is used as written. A string that states no registry host takes one from the global like any other value.
 
 Overriding a **nested** image value with a reference string — ``initCa.image`` — makes Helm print a warning:
 
@@ -197,6 +197,10 @@ Using the '--recreate-pods' is not required to get updates of config to the runn
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v0.9.2
+
+- Documentation maintenance: README image-example cleanup. No deployment changes.
 
 ### v0.9.0
 

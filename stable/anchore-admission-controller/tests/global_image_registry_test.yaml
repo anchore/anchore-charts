@@ -13,40 +13,45 @@ tests:
   - it: should render the shipped default through docker.io
     template: deployment.yaml
     documentIndex: 0
+    set:
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "docker.io/anchore/kubernetes-admission-controller:v0.8.5"
+          value: "docker.io/anchore/kubernetes-admission-controller:v9.9.9"
 
   - it: should supply the registry from the global
     template: deployment.yaml
     documentIndex: 0
     set:
       global.imageRegistryHost: harbor.example.com
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/kubernetes-admission-controller:v0.8.5"
+          value: "harbor.example.com/anchore/kubernetes-admission-controller:v9.9.9"
 
   - it: should support a registry host that includes a path
     template: deployment.yaml
     documentIndex: 0
     set:
       global.imageRegistryHost: harbor.example.com/anchore
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/anchore/kubernetes-admission-controller:v0.8.5"
+          value: "harbor.example.com/anchore/anchore/kubernetes-admission-controller:v9.9.9"
 
   - it: should not double the slash when the registry host has a trailing one
     template: deployment.yaml
     documentIndex: 0
     set:
       global.imageRegistryHost: harbor.example.com/
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/kubernetes-admission-controller:v0.8.5"
+          value: "harbor.example.com/anchore/kubernetes-admission-controller:v9.9.9"
 
   - it: should keep a registry the image states itself
     template: deployment.yaml
@@ -54,10 +59,11 @@ tests:
     set:
       global.imageRegistryHost: harbor.example.com
       image.registry: myregistry.local
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "myregistry.local/anchore/kubernetes-admission-controller:v0.8.5"
+          value: "myregistry.local/anchore/kubernetes-admission-controller:v9.9.9"
 
   - it: should keep a complete reference given as a string
     template: deployment.yaml
@@ -89,7 +95,8 @@ tests:
     documentIndex: 0
     set:
       image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "docker.io/anchore/kubernetes-admission-controller:v0.8.5"
+          value: "docker.io/anchore/kubernetes-admission-controller:v9.9.9"

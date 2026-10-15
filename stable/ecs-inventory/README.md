@@ -62,7 +62,7 @@ The chart's image is a set of parts rather than one string:
 image:
   registry: ""            # empty -> taken from global.imageRegistryHost
   repository: anchore/ecs-inventory
-  tag: "v1.5.1"
+  tag: "vX.Y.Z"
 ```
 
 The registry is chosen from three levels, most specific first:
@@ -86,7 +86,7 @@ global:
 
 Only the registry comes from the global — the repository and tag stay with the chart, so chart upgrades keep moving the version. `global.imageRegistryHost` may include a path, eg. `harbor.example.com/anchore`.
 
-An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/ecs-inventory:v1.5.1`), which is used as written. A string that states no registry host takes one from the global like any other value.
+An image value may also be given as a complete reference string (`image: myregistry.example.com/anchore/ecs-inventory:vX.Y.Z`), which is used as written. A string that states no registry host takes one from the global like any other value.
 
 
 ## Parameters
@@ -104,7 +104,7 @@ An image value may also be given as a complete reference string (`image: myregis
 | `replicaCount`                        | Number of replicas for the Ecs Inventory deployment                                     | `1`                     |
 | `image.registry`                      | Registry for the ECS Inventory image. Empty means take it from global.imageRegistryHost | `""`                    |
 | `image.repository`                    | Repository for the ECS Inventory image                                                  | `anchore/ecs-inventory` |
-| `image.tag`                           | Tag for the ECS Inventory image                                                         | `v1.5.1`                |
+| `image.tag`                           | Tag for the ECS Inventory image                                                         | `v1.5.2`                |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                               | `IfNotPresent`          |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                           | `""`                    |
 | `serviceAccountName`                  | Name of a service account used to run all Anchore Ecs Inventory pods                    | `""`                    |
@@ -157,6 +157,10 @@ An image value may also be given as a complete reference string (`image: myregis
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v0.1.2
+
+- Documentation and test maintenance: regenerated the README parameters table and de-pinned the chart tests from the release version. No deployment changes.
 
 ### v0.1.0
 

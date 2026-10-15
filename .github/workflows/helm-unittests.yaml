@@ -8,6 +8,9 @@ on:
     paths:
       - 'stable/enterprise/Chart.yaml'
       - 'stable/feeds/Chart.yaml'
+      - 'stable/k8s-inventory/Chart.yaml'
+      - 'stable/ecs-inventory/Chart.yaml'
+      - 'stable/anchore-admission-controller/Chart.yaml'
 
 # Remove all permissions by default
 permissions: {}

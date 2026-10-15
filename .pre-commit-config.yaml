@@ -12,7 +12,7 @@ repos:
     name: readme-generator
     entry: scripts/hooks/readme-generator.sh
     language: script
-    files: ^stable/(enterprise|feeds|ecs-inventory)/values\.yaml$
+    files: ^stable/(enterprise|feeds|ecs-inventory|k8s-inventory)/values\.yaml$
 - repo: https://github.com/gitleaks/gitleaks
   rev: v8.16.3
   hooks:

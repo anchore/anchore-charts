@@ -53,7 +53,7 @@ The chart's image is a set of parts rather than one string:
 image:
   registry: ""            # empty -> taken from global.imageRegistryHost
   repository: anchore/k8s-inventory
-  tag: "v1.8.5"
+  tag: "vX.Y.Z"
 ```
 
 The registry is chosen from three levels, most specific first:
@@ -75,7 +75,7 @@ global:
   imageRegistryHost: harbor.example.com
 ```
 
-Only the registry comes from the global — the repository and tag stay with the chart, so chart upgrades keep moving the version. `global.imageRegistryHost` may include a path, eg. `harbor.example.com/anchore`.
+Only the registry comes from the global — the repository and tag stay with the chart, so chart upgrades keep moving the version. `global.imageRegistryHost` may include a path, eg. `harbor.example.com/anchore`. See the enterprise chart's [Using a Private Registry](../enterprise/README.md#using-a-private-registry) section for the full rule.
 
 This chart takes the dict form only — `image.pullPolicy` lives in the same dict, so a bare reference string is not a valid value here.
 
@@ -84,14 +84,9 @@ This chart takes the dict form only — `image.pullPolicy` lives in the same dic
 
 ### Global Resource Parameters
 
-| Name                       | Description                                                        | Value       |
-| -------------------------- | ------------------------------------------------------------------ | ----------- |
-| `global.imageRegistryHost` | registry host used by every image value that does not set its own   | `docker.io` |
-
-Setting `global.imageRegistryHost` re-homes the chart's image without touching its repository or tag, so
-chart upgrades keep moving the version. To point the image at a different registry than the global, set
-`image.registry`. See the enterprise chart's [Using a Private Registry](../enterprise/README.md#using-a-private-registry)
-section for the full rule.
+| Name                       | Description                                                       | Value       |
+| -------------------------- | ----------------------------------------------------------------- | ----------- |
+| `global.imageRegistryHost` | registry host used by every image value that does not set its own | `docker.io` |
 
 ### Common Resource Parameters
 
@@ -101,7 +96,7 @@ section for the full rule.
 | `image.pullPolicy`                    | Image pull policy used by the K8s Inventory deployment                                                                  | `IfNotPresent`          |
 | `image.registry`                      | Registry for the K8s Inventory image. Empty means take it from global.imageRegistryHost                                 | `""`                    |
 | `image.repository`                    | Repository for the K8s Inventory image                                                                                  | `anchore/k8s-inventory` |
-| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.8.5`                |
+| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.8.6`                |
 | `imagePullSecrets`                    | secrets where Kubernetes should get the credentials for pulling private images                                          | `[]`                    |
 | `nameOverride`                        | overrides the name set on resources                                                                                     | `""`                    |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                 | `""`                    |
@@ -136,56 +131,62 @@ section for the full rule.
 
 ### k8sInventory Parameters ##
 
-| Name                                                                    | Description                                                                                                                         | Value            |
-|-------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|------------------|
-| `k8sInventory.output`                                                   | The output format of the report (options: table, json)                                                                              | `json`           |
-| `k8sInventory.quiet`                                                    | Determine whether or not to log the inventory report to stdout                                                                      | `false`          |
-| `k8sInventory.verboseInventoryReports`                                  | Determine whether or not to log the inventory report to stdout                                                                      | `false`          |
-| `k8sInventory.log.structured`                                           | Determine whether or not to use structured logs                                                                                     | `false`          |
-| `k8sInventory.log.level`                                                | the level of verbosity for logs                                                                                                     | `debug`          |
-| `k8sInventory.log.file`                                                 | location to write the log file (default is not to have a log file)                                                                  | `""`             |
-| `k8sInventory.anchore-registration.registration-id`                     | Identifier that the integration uses when registering. Can normally be left empty.                                                  | `""`             |
-| `k8sInventory.anchore-registration.integration-name`                    | Name of the integration instance                                                                                                    | `""`             |
-| `k8sInventory.anchore-registration.integration-description`             | Short description of the integration instance                                                                                       | `""`             |
-| `k8sInventory.kubeconfig.path`                                          | Path should not be changed                                                                                                          | `use-in-cluster` |
-| `k8sInventory.kubeconfig.cluster`                                       | Tells Anchore which cluster this inventory is coming from                                                                           | `docker-desktop` |
-| `k8sInventory.namespaceSelectors.include`                               | Which namespaces to search as explicit strings, not regex; Will search all namespaces if empty array                                | `[]`             |
-| `k8sInventory.namespaceSelectors.exclude`                               | Which namespaces to exclude can use explicit strings and/or regexes.                                                                | `[]`             |
-| `k8sInventory.mode`                                                     | Can be one of adhoc, periodic (defaults to adhoc)                                                                                   | `periodic`       |
-| `k8sInventory.pollingIntervalSeconds`                                   | Only respected if mode is periodic                                                                                                  | `60`             |
-| `k8sInventory.healthReportIntervalSeconds`                              | Only respected if mode is periodic                                                                                                  | `60`             |
-| `k8sInventory.kubernetes.requestTimeoutSeconds`                         | Sets the request timeout for kubernetes API requests                                                                                | `60`             |
-| `k8sInventory.kubernetes.requestBatchSize`                              | Sets the number of objects to iteratively return when listing resources                                                             | `100`            |
-| `k8sInventory.kubernetes.workerPoolSize`                                | Worker pool size for collecting pods from namespaces. Adjust this if the api-server gets overwhelmed                                | `100`            |
-| `k8sInventory.missingTagPolicy.policy`                                  | One of the following options [digest, insert, drop]. Default is 'digest'                                                            | `digest`         |
-| `k8sInventory.missingTagPolicy.tag`                                     | Dummy tag to use. Only applicable if policy is 'insert'. Defaults to UNKNOWN                                                        | `UNKNOWN`        |
-| `k8sInventory.missingRegistryOverride`                                  |                                                                                                                                     | `""`             |
-| `k8sInventory.ignoreNotRunning`                                         | Ignore images out of pods that are not in a Running state                                                                           | `true`           |
-| `k8sInventory.accountRouteByNamespaceLabel.key`                         | Kubernetes label key to use for determining Anchore account to send to                                                              | `""`             |
-| `k8sInventory.accountRouteByNamespaceLabel.defaultAccount`              | Fallback account to send to if Anchore account or label is not found                                                                | `admin`          |
-| `k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel` | If true exclude sending inventory of namespaces that are missing the label                                                          | `false`          |
-| `k8sInventory.metadataCollection.nodes.annotations`                     | List of annotations to include (explicit or regex)                                                                                  | `[]`             |
-| `k8sInventory.metadataCollection.nodes.labels`                          | List of labels to include (explicit or regex)                                                                                       | `[]`             |
-| `k8sInventory.metadataCollection.nodes.disable`                         | Remove all optional node metadata from the inventory report                                                                         | `false`          |
-| `k8sInventory.metadataCollection.namespaces.annotations`                | List of annotations to include (explicit or regex)                                                                                  | `[]`             |
-| `k8sInventory.metadataCollection.namespaces.labels`                     | List of labels to include (explicit or regex)                                                                                       | `[]`             |
-| `k8sInventory.metadataCollection.namespaces.disable`                    | Remove all optional namespace metadata from the inventory report                                                                    | `false`          |
-| `k8sInventory.metadataCollection.pods.annotations`                      | List of annotations to include (explicit or regex)                                                                                  | `[]`             |
-| `k8sInventory.metadataCollection.pods.labels`                           | List of labels to include (explicit or regex)                                                                                       | `[]`             |
-| `k8sInventory.metadataCollection.pods.disable`                          | Remove all optional pod metadata from the inventory report                                                                          | `false`          |
-| `k8sInventory.inventoryReportLimits.namespaces`                         | Maximum number of namespaces to include in a single report. Default of 0 means no limit                                             | `0`              |
-| `k8sInventory.anchore.url`                                              | the url of the anchore platform                                                                                                     | `""`             |
-| `k8sInventory.anchore.user`                                             | the username of the anchore platform. The user specified must be an admin user or have full-control, or read-write RBAC permissions | `""`             |
-| `k8sInventory.anchore.password`                                         | the password of the anchore platform                                                                                                | `""`             |
-| `k8sInventory.anchore.account`                                          | the account to send data to                                                                                                         | `admin`          |
-| `k8sInventory.anchore.http.insecure`                                    | whether or not anchore is using ssl/tls                                                                                             | `true`           |
-| `k8sInventory.anchore.http.timeoutSeconds`                              | the amount of time in seconds before timing out                                                                                     | `10`             |
+| Name                                                                    | Description                                                                                                                                                   | Value            |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `k8sInventory.output`                                                   | The output format of the report (options: table, json)                                                                                                        | `json`           |
+| `k8sInventory.quiet`                                                    | Determine whether or not to log the inventory report to stdout                                                                                                | `false`          |
+| `k8sInventory.verboseInventoryReports`                                  | Determine whether or not to log the inventory report to stdout                                                                                                | `false`          |
+| `k8sInventory.log.structured`                                           | Determine whether or not to use structured logs                                                                                                               | `false`          |
+| `k8sInventory.log.level`                                                | the level of verbosity for logs                                                                                                                               | `debug`          |
+| `k8sInventory.log.file`                                                 | location to write the log file (default is not to have a log file)                                                                                            | `""`             |
+| `k8sInventory.anchoreRegistration.RegistrationId`                       | Identifier that the integration uses when registering. Can                                                                                                    | `""`             |
+| `k8sInventory.anchoreRegistration.IntegrationName`                      | Name of the integration instance. If left empty the agent                                                                                                     | `""`             |
+| `k8sInventory.anchoreRegistration.IntegrationDescription`               | Short description of the integration instance                                                                                                                 | `""`             |
+| `k8sInventory.kubeconfig.path`                                          | Path should not be changed                                                                                                                                    | `use-in-cluster` |
+| `k8sInventory.kubeconfig.cluster`                                       | Tells Anchore which cluster this inventory is coming from                                                                                                     | `docker-desktop` |
+| `k8sInventory.namespaceSelectors.include`                               | Which namespaces to search as explicit strings, not regex; Will search all namespaces if empty array                                                          | `[]`             |
+| `k8sInventory.namespaceSelectors.exclude`                               | Which namespaces to exclude can use explicit strings and/or regexes.                                                                                          | `[]`             |
+| `k8sInventory.accountRoutes`                                            | Specifies the accounts to route different namespaces (optionally along with user credentials to use)                                                          | `nil`            |
+| `k8sInventory.mode`                                                     | Can be one of adhoc, periodic (defaults to adhoc)                                                                                                             | `periodic`       |
+| `k8sInventory.pollingIntervalSeconds`                                   | Only respected if mode is periodic                                                                                                                            | `60`             |
+| `k8sInventory.healthReportIntervalSeconds`                              | Only respected if mode is periodic                                                                                                                            | `60`             |
+| `k8sInventory.kubernetes.requestTimeoutSeconds`                         | Sets the request timeout for kubernetes API requests                                                                                                          | `60`             |
+| `k8sInventory.kubernetes.requestBatchSize`                              | Sets the number of objects to iteratively return when listing resources                                                                                       | `100`            |
+| `k8sInventory.kubernetes.workerPoolSize`                                | Worker pool size for collecting pods from namespaces. Adjust this if the api-server gets overwhelmed                                                          | `100`            |
+| `k8sInventory.missingTagPolicy.policy`                                  | One of the following options [digest, insert, drop]. Default is 'digest'                                                                                      | `digest`         |
+| `k8sInventory.missingTagPolicy.tag`                                     | Dummy tag to use. Only applicable if policy is 'insert'. Defaults to UNKNOWN                                                                                  | `UNKNOWN`        |
+| `k8sInventory.missingRegistryOverride`                                  |                                                                                                                                                               | `""`             |
+| `k8sInventory.ignoreNotRunning`                                         | Ignore images out of pods that are not in a Running state                                                                                                     | `true`           |
+| `k8sInventory.accountRouteByNamespaceLabel.key`                         | Kubernetes label key to use for determining Anchore account to send to                                                                                        | `""`             |
+| `k8sInventory.accountRouteByNamespaceLabel.defaultAccount`              | Fallback account to send to if Anchore account or label is not found                                                                                          | `admin`          |
+| `k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel` | If true exclude sending inventory of namespaces that are missing the label                                                                                    | `false`          |
+| `k8sInventory.metadataCollection.nodes.annotations`                     | List of annotations to include (explicit or regex)                                                                                                            | `[]`             |
+| `k8sInventory.metadataCollection.nodes.labels`                          | List of labels to include (explicit or regex)                                                                                                                 | `[]`             |
+| `k8sInventory.metadataCollection.nodes.disable`                         | Remove all optional node metadata from the inventory report                                                                                                   | `false`          |
+| `k8sInventory.metadataCollection.namespaces.annotations`                | List of annotations to include (explicit or regex)                                                                                                            | `[]`             |
+| `k8sInventory.metadataCollection.namespaces.labels`                     | List of labels to include (explicit or regex)                                                                                                                 | `[]`             |
+| `k8sInventory.metadataCollection.namespaces.disable`                    | Remove all optional namespace metadata from the inventory report                                                                                              | `false`          |
+| `k8sInventory.metadataCollection.pods.annotations`                      | List of annotations to include (explicit or regex)                                                                                                            | `[]`             |
+| `k8sInventory.metadataCollection.pods.labels`                           | List of labels to include (explicit or regex)                                                                                                                 | `[]`             |
+| `k8sInventory.metadataCollection.pods.disable`                          | Remove all optional pod metadata from the inventory report                                                                                                    | `false`          |
+| `k8sInventory.inventoryReportLimits.namespaces`                         | Maximum number of namespaces to include in a single report. Default of 0 means no limit                                                                       | `0`              |
+| `k8sInventory.inventoryReportLimits.payloadThresholdBytes`              | default of 0 means no limit per report                                                                                                                        | `0`              |
+| `k8sInventory.anchore.url`                                              | the url of the anchore platform                                                                                                                               | `""`             |
+| `k8sInventory.anchore.user`                                             | the username of the anchore platform. The user specified should have the inventory-agent RBAC permissions but could also be admin full-control, or read-write | `""`             |
+| `k8sInventory.anchore.password`                                         | the password of the anchore platform                                                                                                                          | `""`             |
+| `k8sInventory.anchore.account`                                          | the account to send data to                                                                                                                                   | `admin`          |
+| `k8sInventory.anchore.http.insecure`                                    | whether or not anchore is using ssl/tls                                                                                                                       | `true`           |
+| `k8sInventory.anchore.http.timeoutSeconds`                              | the amount of time in seconds before timing out                                                                                                               | `10`             |
 
 ## Release Notes
 
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v0.7.2
+
+- Documentation and test maintenance: regenerated the README parameters table and de-pinned the chart tests from the release version. No deployment changes.
 
 ### v0.7.0
 

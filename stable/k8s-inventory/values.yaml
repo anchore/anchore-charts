@@ -208,7 +208,7 @@ k8sInventory:
     include: []
     exclude: []
 
-  ## @param accountRoutes Specifies the accounts to route different namespaces (optionally along with user credentials to use)
+  ## @param k8sInventory.accountRoutes Specifies the accounts to route different namespaces (optionally along with user credentials to use)
   accountRoutes:
 
   ## @param k8sInventory.mode Can be one of adhoc, periodic (defaults to adhoc)
@@ -285,7 +285,7 @@ k8sInventory:
 
   ## k8sInventory.inventoryReportLimits Specify size limits of individual reports. If report size exceeds limits it will be broken into multiple batches up to the specified size.
   ## @param k8sInventory.inventoryReportLimits.namespaces Maximum number of namespaces to include in a single report. Default of 0 means no limit
-  ## @param k8sInventory.inventoryReportLimits.payload-threshold-bytes default of 0 means no limit per report
+  ## @param k8sInventory.inventoryReportLimits.payloadThresholdBytes default of 0 means no limit per report
   inventoryReportLimits:
     namespaces: 0
     payloadThresholdBytes: 0

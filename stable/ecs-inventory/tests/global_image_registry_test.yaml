@@ -13,44 +13,53 @@ set:
   ecsInventory.anchore.user: admin
   ecsInventory.anchore.password: pw
 
+# Default-tag cases set a dummy `image.tag` per-test (not suite-wide) so they
+# don't pin the real release version the automated bump moves — and so they don't
+# collide with the string-reference cases below, which replace `image` wholesale.
+
 tests:
   - it: should render the shipped default through docker.io
     template: deployment.yaml
     documentIndex: 0
+    set:
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "docker.io/anchore/ecs-inventory:v1.5.1"
+          value: "docker.io/anchore/ecs-inventory:v9.9.9"
 
   - it: should supply the registry from the global
     template: deployment.yaml
     documentIndex: 0
     set:
       global.imageRegistryHost: harbor.example.com
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/ecs-inventory:v1.5.1"
+          value: "harbor.example.com/anchore/ecs-inventory:v9.9.9"
 
   - it: should support a registry host that includes a path
     template: deployment.yaml
     documentIndex: 0
     set:
       global.imageRegistryHost: harbor.example.com/anchore
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/anchore/ecs-inventory:v1.5.1"
+          value: "harbor.example.com/anchore/anchore/ecs-inventory:v9.9.9"
 
   - it: should not double the slash when the registry host has a trailing one
     template: deployment.yaml
     documentIndex: 0
     set:
       global.imageRegistryHost: harbor.example.com/
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "harbor.example.com/anchore/ecs-inventory:v1.5.1"
+          value: "harbor.example.com/anchore/ecs-inventory:v9.9.9"
 
   - it: should keep a registry the image states itself
     template: deployment.yaml
@@ -58,10 +67,11 @@ tests:
     set:
       global.imageRegistryHost: harbor.example.com
       image.registry: myregistry.local
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "myregistry.local/anchore/ecs-inventory:v1.5.1"
+          value: "myregistry.local/anchore/ecs-inventory:v9.9.9"
 
   - it: should keep a complete reference given as a string
     template: deployment.yaml
@@ -93,7 +103,8 @@ tests:
     documentIndex: 0
     set:
       image.digest: sha256:1111111111111111111111111111111111111111111111111111111111111111
+      image.tag: "v9.9.9"
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: "docker.io/anchore/ecs-inventory:v1.5.1"
+          value: "docker.io/anchore/ecs-inventory:v9.9.9"
