@@ -5,8 +5,9 @@ metadata:
   labels:
     app: {{ template "anchore-admission-controller.fullname" . }}
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": {{ include "anchore-admission-controller.initCaHookPhases" . }}
     "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
 data:
   init-ca.sh: |-
     #!/bin/bash -xe
@@ -40,8 +41,8 @@ data:
         # Create client ca
         ${sudo} /bin/bash -e <<EOF
         rm -f "${dest_dir}/${id}-ca.crt" "${dest_dir}/${id}-ca.key"
-        openssl req -x509 -sha256 -new -nodes -days 365 -newkey rsa:2048 -keyout "${dest_dir}/${id}-ca.key" -out "${dest_dir}/${id}-ca.crt" -subj "/C=xx/ST=x/L=x/O=x/OU=x/CN=ca/emailAddress=x/"
-        echo '{"signing":{"default":{"expiry":"43800h","usages":["signing","key encipherment",${purpose}]}}}' > "${dest_dir}/${id}-ca-config.json"
+        openssl req -x509 -sha256 -new -nodes -days {{ .Values.initCa.caDays | default 3650 }} -newkey rsa:2048 -keyout "${dest_dir}/${id}-ca.key" -out "${dest_dir}/${id}-ca.crt" -subj "/C=xx/ST=x/L=x/O=x/OU=x/CN=ca/emailAddress=x/"
+        echo '{"signing":{"default":{"expiry":"{{ mul (int (.Values.initCa.certDays | default 3650)) 24 }}h","usages":["signing","key encipherment",${purpose}]}}}' > "${dest_dir}/${id}-ca-config.json"
     EOF
     }
 
@@ -71,6 +72,25 @@ data:
 
     which jq &>/dev/null || { echo "Please install jq (https://stedolan.github.io/jq/)."; exit 1; }
     which cfssljson &>/dev/null || { echo "Please install cfssljson (https://github.com/cloudflare/cfssl))."; exit 1; }
+
+    # Idempotency: on upgrade, skip regeneration if the existing APIService
+    # caBundle still has >{{ .Values.initCa.renewBeforeDays | default 30 }} days of validity. This lets the
+    # hook run on every helm upgrade without churning certs. The APIService
+    # caBundle is the source of truth - the leaf serving cert in the Secret
+    # may outlive its CA, so the Secret alone is not safe to check.
+    APISERVICE_NAME={{ .Values.apiService.version }}.{{ .Values.apiService.group }}
+    EXISTING_CA_B64=$(kubectl get apiservice "$APISERVICE_NAME" -o jsonpath='{.spec.caBundle}' 2>/dev/null || true)
+    if [ -n "$EXISTING_CA_B64" ]; then
+      echo "$EXISTING_CA_B64" | base64 -d > /tmp/existing-ca.crt 2>/dev/null || true
+      RENEW_SECS=$(( {{ .Values.initCa.renewBeforeDays | default 30 }} * 24 * 3600 ))
+      if [ -s /tmp/existing-ca.crt ] && openssl x509 -in /tmp/existing-ca.crt -noout -checkend "$RENEW_SECS" 2>/dev/null; then
+        echo "Existing APIService caBundle has >{{ .Values.initCa.renewBeforeDays | default 30 }}d of validity; skipping regeneration."
+        exit 0
+      fi
+      echo "Existing APIService caBundle is missing, expired, or expires within {{ .Values.initCa.renewBeforeDays | default 30 }}d; regenerating."
+    else
+      echo "No existing APIService caBundle; generating fresh CA and cert."
+    fi
 
     # create necessary TLS certificates:
     # - a local CA key and cert
