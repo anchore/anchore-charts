@@ -6,8 +6,8 @@ metadata:
     app: {{ template "anchore-admission-controller.fullname" . }}
     component: admission-server
   annotations:
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook": {{ include "anchore-admission-controller.initCaHookPhases" . }}
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
     metadata:

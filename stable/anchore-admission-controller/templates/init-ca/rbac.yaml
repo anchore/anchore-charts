@@ -3,8 +3,9 @@ kind: ServiceAccount
 metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": {{ include "anchore-admission-controller.initCaHookPhases" . }}
     "helm.sh/hook-weight": "-6"
+    "helm.sh/hook-delete-policy": before-hook-creation
   name: {{ template "anchore-admission-controller.fullname" . }}-init-ca
 ---
 kind: Role
@@ -13,8 +14,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ template "anchore-admission-controller.fullname" . }}-init-ca
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": {{ include "anchore-admission-controller.initCaHookPhases" . }}
     "helm.sh/hook-weight": "-6"
+    "helm.sh/hook-delete-policy": before-hook-creation
 rules:
 - apiGroups: [""] # "" indicates the core API group
   resources: ["secrets", "deployments"]
@@ -24,8 +26,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": {{ include "anchore-admission-controller.initCaHookPhases" . }}
     "helm.sh/hook-weight": "-6"
+    "helm.sh/hook-delete-policy": before-hook-creation
   namespace: {{ .Release.Namespace }}
   name: extension-{{ template "anchore-admission-controller.fullname" . }}-init-ca-admin
 roleRef:
@@ -41,8 +44,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "anchore-admission-controller.fullname" . }}-init-ca-cluster
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": {{ include "anchore-admission-controller.initCaHookPhases" . }}
     "helm.sh/hook-weight": "-6"
+    "helm.sh/hook-delete-policy": before-hook-creation
 rules:
 - apiGroups: ["admissionregistration.k8s.io"]
   resources: ["validatingwebhookconfigurations"]
@@ -55,8 +59,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   annotations:
-    "helm.sh/hook": pre-install
+    "helm.sh/hook": {{ include "anchore-admission-controller.initCaHookPhases" . }}
     "helm.sh/hook-weight": "-6"
+    "helm.sh/hook-delete-policy": before-hook-creation
   name: extension-{{ template "anchore-admission-controller.fullname" . }}-init-ca-cluster
 roleRef:
   kind: ClusterRole

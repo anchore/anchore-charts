@@ -142,6 +142,28 @@ initCa:
     registry: ""
     repository: cfssl/cfssl
     tag: "v1.6.5"
+  # Rotate the self-signed CA + serving cert automatically on `helm upgrade`.
+  # Default: false (preserves pre-0.10.0 behavior where the init-ca Job only
+  # runs on install and never touches certs again). Enabling this adds the
+  # pre-upgrade hook so the Job also runs on every upgrade; it is idempotent
+  # and re-mints the CA + leaf only when the current APIService caBundle is
+  # missing, expired, or within `renewBeforeDays` of expiring. Opt-in because
+  # the regeneration bounces the admission controller pod (brief interruption,
+  # covered by failurePolicy=Ignore) and overwrites any manually-rotated certs.
+  rotateOnUpgrade: false
+  # Validity of the self-signed CA that signs the admission controller's
+  # serving cert. The CA cert is written into the APIService caBundle; once
+  # it expires, the API server rejects discovery of admission.anchore.io and
+  # the webhook stops working. Applied on install, and on upgrade only when
+  # rotateOnUpgrade is true and the hook decides to regenerate.
+  caDays: 3650
+  # Validity of the serving leaf cert signed by the CA above. Should not exceed
+  # caDays - the leaf is useless once its CA expires.
+  certDays: 3650
+  # When rotateOnUpgrade is true, the init-ca Job reads the current APIService
+  # caBundle on upgrade and skips regeneration if it still has at least this
+  # many days of validity. Ignored when rotateOnUpgrade is false.
+  renewBeforeDays: 30
   # Define custom environment variables to pass to init-ca pod
   extraEnv: []
   # - name: FOO

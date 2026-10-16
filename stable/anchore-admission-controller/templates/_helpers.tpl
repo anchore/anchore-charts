@@ -1,4 +1,18 @@
 {{/*
+Returns the Helm hook phases that the init-ca Job (and its supporting
+resources) should fire on. Always fires pre-install so fresh installs mint
+their TLS material; adds pre-upgrade only when initCa.rotateOnUpgrade is true
+so existing installs opt in to automatic cert rotation.
+*/}}
+{{- define "anchore-admission-controller.initCaHookPhases" -}}
+{{- if .Values.initCa.rotateOnUpgrade -}}
+pre-install,pre-upgrade
+{{- else -}}
+pre-install
+{{- end -}}
+{{- end }}
+
+{{/*
 Returns the global image registry host, with any trailing slash removed.
 Defaults to docker.io via values.yaml; the default dict guards a values file that sets
 `global:` with nothing under it, which would otherwise be a nil dereference.

@@ -182,6 +182,14 @@ Note that the chart attaches a single image pull secret, so images split across 
 |---|---|---|---|
 |initCa.extraEnv | array | [] | Define custom environment variables to pass to init-ca pod |
 |---|---|---|---|
+|initCa.rotateOnUpgrade | bool | false | Opt-in: when true, the init-ca Job also runs on `helm upgrade` and automatically regenerates the self-signed CA + leaf before they expire. Default false preserves pre-0.10.0 behavior (install-only). See the v0.10.0 release notes for details.
+|---|---|---|---|
+|initCa.caDays | int | 3650 | Validity (days) of the self-signed CA that signs the webhook serving cert. The CA cert is written into the APIService caBundle; once it expires, API discovery for `admission.anchore.io` fails. Default 10 years. Applied on install, and on upgrade only when `rotateOnUpgrade` is true and the hook decides to regenerate.
+|---|---|---|---|
+|initCa.certDays | int | 3650 | Validity (days) of the serving leaf cert signed by the CA above. Should not exceed `caDays` — the leaf is useless once its CA expires.
+|---|---|---|---|
+|initCa.renewBeforeDays | int | 30 | When `rotateOnUpgrade` is true, the init-ca Job reads the current APIService caBundle on upgrade and skips regeneration if it still has at least this many days of validity. Ignored when `rotateOnUpgrade` is false.
+|---|---|---|---|
 
 ## Updating configuration
 
@@ -197,6 +205,33 @@ Using the '--recreate-pods' is not required to get updates of config to the runn
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v0.10.0
+
+**Optional automatic rotation of the self-signed CA on `helm upgrade`, plus longer default cert validity.**
+
+Previous chart versions generated the admission controller's self-signed CA only on `helm install` and the CA cert was valid for 365 days. On the one-year anniversary the CA cert embedded in the `APIService` caBundle expired, API discovery for `admission.anchore.io` started returning `ServiceUnavailable`, and anything that iterates the full discovery API (notably `kubectl delete namespace`) would stall. Nothing in the chart would rotate the cert on `helm upgrade`.
+
+- **Default install behavior is unchanged.** The init-ca Job still runs only on `helm install` by default; existing installs that upgrade to 0.10.0 without opting in see no cert changes, no regeneration, and no new reconciliation on their TLS Secret or APIService.
+- **New opt-in flag `initCa.rotateOnUpgrade` (default `false`).** Setting it to `true` adds `pre-upgrade` to the init-ca hook, so the Job also runs on every `helm upgrade`. The script is idempotent: it reads the current `APIService.spec.caBundle`, decodes it, and regenerates the CA + leaf only when the current CA is missing, expired, or expires within `initCa.renewBeforeDays`.
+- **New values** `initCa.caDays` (default 3650) and `initCa.certDays` (default 3650) parameterize the CA and leaf validity. Fresh installs now get a 10-year CA by default instead of 1 year, so new installs do not hit the recurring 1-year outage even without opting into rotation.
+- **New value** `initCa.renewBeforeDays` (default 30) controls the renewal window checked on upgrade. Ignored when `rotateOnUpgrade` is false.
+- **No new RBAC.** The existing init-ca Role/ClusterRole already covered the `get`/`patch` on `secrets`, `apiservices`, and `validatingwebhookconfigurations` the rotation flow needs.
+
+**Upgrading from 0.9.x (default behavior):**
+
+No values changes required. The first `helm upgrade` to 0.10.0 runs the Job on install only (as before) and leaves your existing TLS Secret, APIService caBundle, and ValidatingWebhookConfiguration untouched. If your current install already has an expired CA, you will still need to rotate it out of band (see below) until you opt into automatic rotation.
+
+**Opting into automatic rotation on upgrade:**
+
+Set `initCa.rotateOnUpgrade: true` in your values. The next `helm upgrade` will:
+
+- Detect that the existing CA is near or past expiry and regenerate a fresh CA + leaf.
+- Overwrite the `anchore-admission-controller-certs` Secret and the `APIService` caBundle in place (the Job uses `kubectl apply`, not Helm-managed resources).
+- Restart the admission controller Deployment to pick up the new leaf (brief interruption; `failurePolicy: Ignore` means admissions proceed without validation during the restart).
+- On every subsequent upgrade, the hook re-runs but exits early when the CA still has `>initCa.renewBeforeDays` of validity — no churn.
+
+If you manually rotated the CA on a stuck install (hand-patched Secret + APIService caBundle), the hook sees `>renewBeforeDays` of validity and leaves your manual rotation in place.
 
 ### v0.9.2
 
