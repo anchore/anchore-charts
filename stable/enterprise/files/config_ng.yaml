@@ -14,5 +14,7 @@ logging:
 domains:
   gc:
     job_framework_audit_retention_days: {{ .Values.anchoreConfig.domains.gc.job_framework_audit_retention_days }}
+  artifact_lifecycle:
+    evaluation_cycle_seconds: {{ .Values.anchoreConfig.domains.artifact_lifecycle.evaluation_cycle_seconds }}
 
 # Per-service overrides are in files/{component}/config_ng.yaml
