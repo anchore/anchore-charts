@@ -16,7 +16,7 @@ global:
 image:
   registry: ""
   repository: anchore/kubernetes-admission-controller
-  tag: "v0.8.6"
+  tag: "v0.8.7"
 imagePullPolicy: IfNotPresent
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
