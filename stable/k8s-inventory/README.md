@@ -96,7 +96,7 @@ This chart takes the dict form only — `image.pullPolicy` lives in the same dic
 | `image.pullPolicy`                    | Image pull policy used by the K8s Inventory deployment                                                                  | `IfNotPresent`          |
 | `image.registry`                      | Registry for the K8s Inventory image. Empty means take it from global.imageRegistryHost                                 | `""`                    |
 | `image.repository`                    | Repository for the K8s Inventory image                                                                                  | `anchore/k8s-inventory` |
-| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.8.6`                |
+| `image.tag`                           | Image tag used for the K8s Inventory deployment                                                                         | `v1.8.7`                |
 | `imagePullSecrets`                    | secrets where Kubernetes should get the credentials for pulling private images                                          | `[]`                    |
 | `nameOverride`                        | overrides the name set on resources                                                                                     | `""`                    |
 | `fullnameOverride`                    | overrides the fullname set on resources                                                                                 | `""`                    |
