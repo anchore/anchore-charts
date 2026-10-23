@@ -42,8 +42,8 @@ global:
 image:
   registry: ""
   repository: anchore/enterprise
-  digest: sha256:5c7456a84d0b32c47f28380903fa966eaf4fca38158ef90ecfc0a5c5a0380291
-  tag: ""  # v6.2.2
+  digest: sha256:tbd
+  tag: ""  # v6.3.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
@@ -543,12 +543,15 @@ anchoreConfig:
   ## @param anchoreConfig.domains.catalog [object] Catalog domain configuration
   ## @param anchoreConfig.domains.gc.job_framework_audit_retention_days Retention window (days) for finished job-framework audit records
   ## @param anchoreConfig.domains.jobs.pool_size Number of concurrent job workers
+  ## @param anchoreConfig.domains.artifact_lifecycle.evaluation_cycle_seconds Seconds between artifact lifecycle policy evaluation cycles (replaces legacy catalog.cycle_timers.artifact_lifecycle_policy_tasks)
   domains:
     catalog: {}
     gc:
       job_framework_audit_retention_days: 14
     jobs:
       pool_size: 8
+    artifact_lifecycle:
+      evaluation_cycle_seconds: 43200
 
   apiext:
     ## @param anchoreConfig.apiext.extendedConfig appends additional configs to the apiext service's Anchore configs
@@ -624,12 +627,17 @@ anchoreConfig:
 
     ## @param anchoreConfig.analyzer.configFile [object] Custom Anchore Analyzer configuration file contents in YAML
     ## Configures syft, content search, file contents, secret search, and malware scanning
+    ## image_read.layer_fetch_concurrency: Max image layers downloaded+decompressed concurrently during an image read; lower reduces peak memory. null = 1 for registry sources, else one-per-CPU capped at 8
+    ## image_read.layer_index_concurrency: Max image layers indexed concurrently during an image read; lower reduces peak memory. null = one-per-CPU capped at 8
     ## ref: https://docs.anchore.com/current/docs/compliance_management/policy_gates/#gate-files
     ## ref: https://docs.anchore.com/current/docs/overview/concepts/images/analysis/malware_scanning/
     ##
     configFile:
       syft:
         parallel_workers: 2
+      image_read:
+        layer_fetch_concurrency: null
+        layer_index_concurrency: null
       windows:
         enabled: true
       content_search:
@@ -693,7 +701,6 @@ anchoreConfig:
       alerts_watcher: 600
       analyzer_queue: 1
       archive_tasks: 43200
-      artifact_lifecycle_policy_tasks: 43200
       document_view_collection_prune_watcher: 43200
       events_gc: 43200
       handle_deployment_metrics: 300
@@ -831,16 +838,26 @@ anchoreConfig:
     ## @param anchoreConfig.policy_engine.policy_evaluation_cache_ttl TTL in seconds for policy evaluation cache
     policy_evaluation_cache_ttl: 3600
 
+    ## @param anchoreConfig.policy_engine.sbom_memory_budget_mb Soft cap (MiB) on concurrent SBOM load+scan memory in the policy engine. 0 disables; a positive value sets MiB (around 85% of container memory, at least 1 GiB headroom); -1 auto-sizes from the container memory limit at startup
+    sbom_memory_budget_mb: 0
+
+    ## @param anchoreConfig.policy_engine.vulnerabilities.scan_wait_timeout_seconds Max seconds a request waits for an in-flight vulnerability scan of the same image before scanning on its own; 0 disables waiting so concurrent requests always scan concurrently
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers List of providers to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.matching.exclude.package_types List of package types to exclude from matching
     ## @param anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled Account for RHEL Extended Update Support (EUS) releases when matching vulnerabilities
     ## @param anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions RHEL versions for which to apply Extended Update Support (EUS) releases when matching
+    ## @param anchoreConfig.policy_engine.vulnerabilities.extended_support.ubuntu.enabled Account for Ubuntu Expanded Security Maintenance (ESM) releases when matching vulnerabilities
+    ## @param anchoreConfig.policy_engine.vulnerabilities.extended_support.ubuntu.versions Ubuntu versions for which to apply Expanded Security Maintenance (ESM) releases when matching vulnerabilities
     ##
     vulnerabilities:
+      scan_wait_timeout_seconds: 1800
       extended_support:
         rhel:
           enabled: "<ALLOW_API_CONFIGURATION>"  # auto
           versions: "<ALLOW_API_CONFIGURATION>"  # '>=8'
+        ubuntu:
+          enabled: "<ALLOW_API_CONFIGURATION>"  # auto
+          versions: "<ALLOW_API_CONFIGURATION>"  # ''
       matching:
         exclude:
           providers: null
@@ -2246,8 +2263,8 @@ ui:
   image:
     registry: ""
     repository: anchore/enterprise-ui
-    digest: sha256:6e1beda2983f3a9c2b9ca69fd1275bd3f403f5d6df562425ab75b75adc408af4
-    tag: ""  # v6.2.0
+    digest: sha256:tbd
+    tag: ""  # v6.3.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##

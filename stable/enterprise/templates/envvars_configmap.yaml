@@ -19,3 +19,7 @@ data:
   ANCHORE_SAML_SECRET: "null"
   ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
   ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
+
+  ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL: "86400"
+  ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED: "false"
+  ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL: "https://security-metadata.canonical.com/vex/vex-all.tar.xz"
