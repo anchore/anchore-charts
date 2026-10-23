@@ -29,7 +29,7 @@ replicaCount: 1
 image:
   registry: ""
   repository: anchore/ecs-inventory
-  tag: "v1.5.2"
+  tag: "v1.5.3"
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
