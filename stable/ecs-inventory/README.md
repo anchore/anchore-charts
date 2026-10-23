@@ -104,7 +104,7 @@ An image value may also be given as a complete reference string (`image: myregis
 | `replicaCount`                        | Number of replicas for the Ecs Inventory deployment                                     | `1`                     |
 | `image.registry`                      | Registry for the ECS Inventory image. Empty means take it from global.imageRegistryHost | `""`                    |
 | `image.repository`                    | Repository for the ECS Inventory image                                                  | `anchore/ecs-inventory` |
-| `image.tag`                           | Tag for the ECS Inventory image                                                         | `v1.5.2`                |
+| `image.tag`                           | Tag for the ECS Inventory image                                                         | `v1.5.3`                |
 | `imagePullPolicy`                     | Image pull policy used by all deployments                                               | `IfNotPresent`          |
 | `imagePullSecretName`                 | Name of Docker credentials secret for access to private repos                           | `""`                    |
 | `serviceAccountName`                  | Name of a service account used to run all Anchore Ecs Inventory pods                    | `""`                    |
