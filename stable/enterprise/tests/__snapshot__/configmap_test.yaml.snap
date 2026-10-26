@@ -424,10 +424,10 @@ should render additional audit uris when additionalResourceURIs is set:
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
                 ubuntu:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
               matching:
                 exclude:
                   providers: []
@@ -1128,10 +1128,10 @@ should render the configmaps:
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
                 ubuntu:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
               matching:
                 exclude:
                   providers: []
@@ -1988,10 +1988,10 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
                 ubuntu:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
               matching:
                 exclude:
                   providers: []

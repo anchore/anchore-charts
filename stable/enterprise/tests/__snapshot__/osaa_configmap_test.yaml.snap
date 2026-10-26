@@ -422,10 +422,10 @@ should render the configmaps for osaa migration if enabled:
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
                 ubuntu:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
               matching:
                 exclude:
                   providers: []

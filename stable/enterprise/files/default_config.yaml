@@ -217,10 +217,10 @@ services:
       extended_support:
         rhel:
           enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled }}
-          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions }}
+          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions | quote }}
         ubuntu:
           enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.ubuntu.enabled }}
-          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.ubuntu.versions }}
+          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.ubuntu.versions | quote }}
       matching:
         exclude:
           {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}

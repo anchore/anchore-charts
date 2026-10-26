@@ -425,10 +425,10 @@ snapshot - S3 legacy configmap:
             extended_support:
               rhel:
                 enabled: <ALLOW_API_CONFIGURATION>
-                versions: <ALLOW_API_CONFIGURATION>
+                versions: "<ALLOW_API_CONFIGURATION>"
               ubuntu:
                 enabled: <ALLOW_API_CONFIGURATION>
-                versions: <ALLOW_API_CONFIGURATION>
+                versions: "<ALLOW_API_CONFIGURATION>"
             matching:
               exclude:
                 providers: []
