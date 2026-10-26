@@ -191,6 +191,9 @@ snapshot - S3 legacy configmap:
               max_file_size_kb: 1000
             golang:
               capture_symbols: null
+            image_read:
+              layer_fetch_concurrency: null
+              layer_index_concurrency: null
             malware:
               clamav:
                 db_update_enabled: true
@@ -278,7 +281,6 @@ snapshot - S3 legacy configmap:
             alerts_watcher: 600
             analyzer_queue: 1
             archive_tasks: 43200
-            artifact_lifecycle_policy_tasks: 43200
             document_view_collection_prune_watcher: 43200
             events_gc: 43200
             handle_deployment_metrics: 300
@@ -416,10 +418,15 @@ snapshot - S3 legacy configmap:
           policy_evaluation_cache_ttl: 3600
           enable_package_db_load: false
           enable_user_base_image: true
+          sbom_memory_budget_mb: 0
           vulnerabilities:
             nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
+            scan_wait_timeout_seconds: 1800
             extended_support:
               rhel:
+                enabled: <ALLOW_API_CONFIGURATION>
+                versions: <ALLOW_API_CONFIGURATION>
+              ubuntu:
                 enabled: <ALLOW_API_CONFIGURATION>
                 versions: <ALLOW_API_CONFIGURATION>
             matching:
@@ -663,6 +670,11 @@ snapshot - S3 legacy configmap:
             service_heartbeat: 60
             system_config_environment_watcher: 20
             system_config_refresh_watcher: 20
+            vendor_vex_sync: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL}
+          datasets:
+            vendor_vex_canonical:
+              enabled: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED}
+              url: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL}
           external_hostname: null
           external_port: null
           external_tls: false

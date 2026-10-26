@@ -41,6 +41,8 @@ pre-install job should match snapshot:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
