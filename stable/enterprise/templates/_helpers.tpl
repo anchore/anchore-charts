@@ -120,6 +120,10 @@ one pass instead of re-running install/upgrade and discovering issues one at a t
 {{- if ne (dig "catalog" "cycle_timers" "sbom_vuln_scan_refresh_watcher" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
 {{- $errors = append $errors "anchoreConfig.catalog.cycle_timers.sbom_vuln_scan_refresh_watcher is no longer supported. This cycle timer was removed in Anchore Enterprise 6.2.0. Please remove it from your values file." -}}
 {{- end -}}
+{{/* catalog.cycle_timers.artifact_lifecycle_policy_tasks was removed in Anchore Enterprise 6.3.0 */}}
+{{- if ne (dig "catalog" "cycle_timers" "artifact_lifecycle_policy_tasks" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
+{{- $errors = append $errors "anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks is no longer supported. This cycle timer was removed in Anchore Enterprise 6.3.0 and replaced by `anchoreConfig.domains.artifact_lifecycle.evaluation_cycle_seconds`. Please update your values file." -}}
+{{- end -}}
 {{/* internalServicesSSL has been removed — SSL is now configured via the server block at the root or per-service level */}}
 {{- if hasKey .Values.anchoreConfig "internalServicesSSL" -}}
 {{- $errors = append $errors "anchoreConfig.internalServicesSSL is no longer supported. SSL is now configured via `anchoreConfig.server` (root level) or per-service `anchoreConfig.<service>.server` blocks using `ssl_enable`, `ssl_cert`, `ssl_chain`, and `ssl_key`." -}}

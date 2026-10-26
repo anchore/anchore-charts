@@ -42,7 +42,7 @@ global:
 image:
   registry: ""
   repository: anchore/enterprise
-  digest: sha256:tbd
+  digest: sha256:ec08fe37553413a8de3f2727531f2e5325ebbd8de2ec33d64b1a87fb03729362
   tag: ""  # v6.3.0
 
 ## @param imagePullPolicy Image pull policy used by all deployments
@@ -2263,7 +2263,7 @@ ui:
   image:
     registry: ""
     repository: anchore/enterprise-ui
-    digest: sha256:tbd
+    digest: sha256:fcd806deadf87d913216bd0d4a64d9e40c1443785a4dfaead422cd9f3b2d4b44
     tag: ""  # v6.3.0
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
