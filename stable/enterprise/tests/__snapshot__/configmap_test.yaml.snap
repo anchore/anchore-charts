@@ -195,6 +195,9 @@ should render additional audit uris when additionalResourceURIs is set:
                 max_file_size_kb: 1000
               golang:
                 capture_symbols: null
+              image_read:
+                layer_fetch_concurrency: null
+                layer_index_concurrency: null
               malware:
                 clamav:
                   db_update_enabled: true
@@ -282,7 +285,6 @@ should render additional audit uris when additionalResourceURIs is set:
               alerts_watcher: 600
               analyzer_queue: 1
               archive_tasks: 43200
-              artifact_lifecycle_policy_tasks: 43200
               document_view_collection_prune_watcher: 43200
               events_gc: 43200
               handle_deployment_metrics: 300
@@ -415,12 +417,17 @@ should render additional audit uris when additionalResourceURIs is set:
             policy_evaluation_cache_ttl: 3600
             enable_package_db_load: false
             enable_user_base_image: true
+            sbom_memory_budget_mb: 0
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
+              scan_wait_timeout_seconds: 1800
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
+                ubuntu:
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
               matching:
                 exclude:
                   providers: []
@@ -662,6 +669,11 @@ should render additional audit uris when additionalResourceURIs is set:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
+              vendor_vex_sync: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL}
+            datasets:
+              vendor_vex_canonical:
+                enabled: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED}
+                url: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL}
             external_hostname: null
             external_port: null
             external_tls: false
@@ -887,6 +899,9 @@ should render the configmaps:
                 max_file_size_kb: 1000
               golang:
                 capture_symbols: null
+              image_read:
+                layer_fetch_concurrency: null
+                layer_index_concurrency: null
               malware:
                 clamav:
                   db_update_enabled: true
@@ -974,7 +989,6 @@ should render the configmaps:
               alerts_watcher: 600
               analyzer_queue: 1
               archive_tasks: 43200
-              artifact_lifecycle_policy_tasks: 43200
               document_view_collection_prune_watcher: 43200
               events_gc: 43200
               handle_deployment_metrics: 300
@@ -1107,12 +1121,17 @@ should render the configmaps:
             policy_evaluation_cache_ttl: 3600
             enable_package_db_load: false
             enable_user_base_image: true
+            sbom_memory_budget_mb: 0
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
+              scan_wait_timeout_seconds: 1800
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
+                ubuntu:
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
               matching:
                 exclude:
                   providers: []
@@ -1354,6 +1373,11 @@ should render the configmaps:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
+              vendor_vex_sync: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL}
+            datasets:
+              vendor_vex_canonical:
+                enabled: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED}
+                url: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL}
             external_hostname: null
             external_port: null
             external_tls: false
@@ -1387,6 +1411,9 @@ should render the configmaps:
   2: |
     apiVersion: v1
     data:
+      ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED: "false"
+      ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL: https://security-metadata.canonical.com/vex/vex-all.tar.xz
+      ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL: "86400"
       ANCHORE_DB_POOL_MAX_OVERFLOW: "100"
       ANCHORE_DB_POOL_SIZE: "30"
       ANCHORE_DB_TIMEOUT: "120"
@@ -1732,6 +1759,9 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
                 max_file_size_kb: 1000
               golang:
                 capture_symbols: null
+              image_read:
+                layer_fetch_concurrency: null
+                layer_index_concurrency: null
               malware:
                 clamav:
                   db_update_enabled: true
@@ -1819,7 +1849,6 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               alerts_watcher: 600
               analyzer_queue: 1
               archive_tasks: 43200
-              artifact_lifecycle_policy_tasks: 43200
               document_view_collection_prune_watcher: 43200
               events_gc: 43200
               handle_deployment_metrics: 300
@@ -1952,12 +1981,17 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
             policy_evaluation_cache_ttl: 3600
             enable_package_db_load: false
             enable_user_base_image: true
+            sbom_memory_budget_mb: 0
             vulnerabilities:
               nvd_fallback_to_secondary_cvss: <ALLOW_API_CONFIGURATION>
+              scan_wait_timeout_seconds: 1800
               extended_support:
                 rhel:
                   enabled: <ALLOW_API_CONFIGURATION>
-                  versions: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
+                ubuntu:
+                  enabled: <ALLOW_API_CONFIGURATION>
+                  versions: "<ALLOW_API_CONFIGURATION>"
               matching:
                 exclude:
                   providers: []
@@ -2199,6 +2233,11 @@ should render the correct dbConnectArgs when dbConnectArgs is set:
               service_heartbeat: 60
               system_config_environment_watcher: 20
               system_config_refresh_watcher: 20
+              vendor_vex_sync: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL}
+            datasets:
+              vendor_vex_canonical:
+                enabled: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED}
+                url: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL}
             external_hostname: null
             external_port: null
             external_tls: false

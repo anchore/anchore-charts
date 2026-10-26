@@ -1,0 +1,35 @@
+{{- $component := "hooks" -}}
+{{/*
+A pre-install/pre-upgrade hook copy of the non-secret env-var defaults, rendered from
+the same source (enterprise.envVarsData) as envvars_configmap.yaml so the two can
+never drift.
+
+The main env-vars configmap ({{ .Release.Name }}-enterprise-config-env-vars) is an
+ordinary release resource, so during a `helm upgrade` it is not updated until after
+all pre-upgrade hooks have run — and on fresh installs it does not exist at all when
+pre-install hooks fire. Hook pods therefore cannot rely on it to resolve ${…}
+placeholders in config.yaml (e.g. ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL added
+in Enterprise 6.3.0).
+
+This hook configmap is created at hook-weight 0 — before the osaaMigrationJob
+(weight 1) and upgrade job (weight 3) — so those jobs mount the new env-var defaults,
+not the old (or none at all on fresh installs).
+
+Default hook-delete-policy (before-hook-creation) means it persists after the hook
+phase and is refreshed at the start of the next upgrade, so it is also present for
+the post-upgrade upgrade job.
+*/}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "enterprise.hooks.fullname" . }}-env-vars
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "enterprise.common.labels" (merge (dict "component" $component) .) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{- include "enterprise.common.annotations" (merge (dict "component" $component "nil" true) .) | nindent 4 }}
+
+data:
+{{ include "enterprise.envVarsData" . | indent 2 }}

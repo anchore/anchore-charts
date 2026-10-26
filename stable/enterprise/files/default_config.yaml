@@ -210,12 +210,17 @@ services:
     policy_evaluation_cache_ttl: {{ .Values.anchoreConfig.policy_engine.policy_evaluation_cache_ttl }}
     enable_package_db_load: {{ .Values.anchoreConfig.policy_engine.enable_package_db_load }}
     enable_user_base_image: {{ .Values.anchoreConfig.policy_engine.enable_user_base_image }}
+    sbom_memory_budget_mb: {{ .Values.anchoreConfig.policy_engine.sbom_memory_budget_mb }}
     vulnerabilities:
       nvd_fallback_to_secondary_cvss: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.nvd_fallback_to_secondary_cvss }}
+      scan_wait_timeout_seconds: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.scan_wait_timeout_seconds }}
       extended_support:
         rhel:
           enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.enabled }}
-          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions }}
+          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.rhel.versions | quote }}
+        ubuntu:
+          enabled: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.ubuntu.enabled }}
+          versions: {{ .Values.anchoreConfig.policy_engine.vulnerabilities.extended_support.ubuntu.versions | quote }}
       matching:
         exclude:
           {{- if .Values.anchoreConfig.policy_engine.vulnerabilities.matching.exclude.providers }}
@@ -345,6 +350,11 @@ services:
     auto_sync_enabled: {{ .Values.anchoreConfig.data_syncer.auto_sync_enabled }}
     upload_dir: {{ .Values.scratchVolume.mountPath }}
 {{- include "enterprise.anchoreConfig.anchoreService.cycleTimers" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
+      vendor_vex_sync: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL}
+    datasets:
+      vendor_vex_canonical:
+        enabled: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED}
+        url: ${ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL}
 {{- include "enterprise.anchoreConfig.anchoreService.external" (merge (dict "anchoreService" "data_syncer") .) | nindent 4 }}
     server: {{- include "enterprise.anchoreConfig.anchoreService.server" (merge (dict "anchoreService" "data_syncer") .) }}
   {{- include "enterprise.serviceExtendedConfig" (merge (dict "serviceName" "data_syncer") .) }}

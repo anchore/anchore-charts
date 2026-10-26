@@ -120,6 +120,10 @@ one pass instead of re-running install/upgrade and discovering issues one at a t
 {{- if ne (dig "catalog" "cycle_timers" "sbom_vuln_scan_refresh_watcher" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
 {{- $errors = append $errors "anchoreConfig.catalog.cycle_timers.sbom_vuln_scan_refresh_watcher is no longer supported. This cycle timer was removed in Anchore Enterprise 6.2.0. Please remove it from your values file." -}}
 {{- end -}}
+{{/* catalog.cycle_timers.artifact_lifecycle_policy_tasks was removed in Anchore Enterprise 6.3.0 */}}
+{{- if ne (dig "catalog" "cycle_timers" "artifact_lifecycle_policy_tasks" "__unset__" .Values.anchoreConfig | toString) "__unset__" -}}
+{{- $errors = append $errors "anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks is no longer supported. This cycle timer was removed in Anchore Enterprise 6.3.0 and replaced by `anchoreConfig.domains.artifact_lifecycle.evaluation_cycle_seconds`. Please update your values file." -}}
+{{- end -}}
 {{/* internalServicesSSL has been removed — SSL is now configured via the server block at the root or per-service level */}}
 {{- if hasKey .Values.anchoreConfig "internalServicesSSL" -}}
 {{- $errors = append $errors "anchoreConfig.internalServicesSSL is no longer supported. SSL is now configured via `anchoreConfig.server` (root level) or per-service `anchoreConfig.<service>.server` blocks using `ssl_enable`, `ssl_cert`, `ssl_chain`, and `ssl_key`." -}}
@@ -255,6 +259,33 @@ config the long-running services read. Consumers indent the result under a
 # Anchore Service Configuration File, mounted from a configmap
 #
 {{ if .Values.configOverride }}{{ tpl .Values.configOverride . }}{{ else }}{{ tpl (.Files.Get "files/default_config.yaml") . }}{{ end }}
+{{- end -}}
+
+{{/*
+Render the non-secret env-var defaults used to resolve ${…} placeholders in config.yaml.
+Shared by the main env-vars configmap (envvars_configmap.yaml) and the pre-install /
+pre-upgrade hook sibling (hooks/hook_envvars_configmap.yaml) so hook pods resolve
+placeholders against the exact same values the long-running services use. Consumers
+drop the result straight under `data:` (no indent), e.g.
+{{ include "enterprise.envVarsData" . }}.
+*/}}
+{{- define "enterprise.envVarsData" -}}
+ANCHORE_DB_POOL_MAX_OVERFLOW: "{{ .Values.anchoreConfig.database.db_pool_max_overflow }}"
+ANCHORE_DB_POOL_SIZE: "{{ .Values.anchoreConfig.database.db_pool_size }}"
+ANCHORE_DB_TIMEOUT: "{{ .Values.anchoreConfig.database.timeout }}"
+ANCHORE_GLOBAL_CLIENT_CONNECT_TIMEOUT: "0"
+ANCHORE_GLOBAL_CLIENT_READ_TIMEOUT: "0"
+ANCHORE_GLOBAL_SERVER_REQUEST_TIMEOUT_SEC: "180"
+
+ANCHORE_LICENSE_FILE: "/home/anchore/license.yaml"
+ANCHORE_KEEP_IMAGE_ANALYSIS_TMPFILES: "false"
+ANCHORE_SAML_SECRET: "null"
+ANCHORE_SERVICE_DIR: "{{ .Values.anchoreConfig.service_dir }}"
+ANCHORE_TMP_DIR: "{{ .Values.scratchVolume.mountPath }}"
+
+ANCHORE_DATA_SYNCER_VENDOR_VEX_SYNC_INTERVAL: "86400"
+ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_ENABLED: "false"
+ANCHORE_DATA_SYNCER_VENDOR_VEX_CANONICAL_URL: "https://security-metadata.canonical.com/vex/vex-all.tar.xz"
 {{- end -}}
 
 {{/*

@@ -22,6 +22,8 @@ migration job should match snapshot:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -147,6 +149,8 @@ migration job should match snapshot:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -206,6 +210,8 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -331,6 +337,8 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -388,6 +396,8 @@ migration job should match snapshot analysisArchiveMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -513,6 +523,8 @@ migration job should match snapshot analysisArchiveMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -569,6 +581,8 @@ migration job should match snapshot objectStoreMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -694,6 +708,8 @@ migration job should match snapshot objectStoreMigration to true:
               fieldRef:
                 fieldPath: metadata.name
         envFrom:
+          - configMapRef:
+              name: test-release-enterprise-hooks-env-vars
           - secretRef:
               name: test-release-enterprise-hooks
         image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000
@@ -864,6 +880,8 @@ should render proper initContainers:
             fieldRef:
               fieldPath: metadata.name
       envFrom:
+        - configMapRef:
+            name: test-release-enterprise-hooks-env-vars
         - secretRef:
             name: test-release-enterprise-hooks
       image: docker.io/anchore/enterprise@sha256:0000000000000000000000000000000000000000000000000000000000000000

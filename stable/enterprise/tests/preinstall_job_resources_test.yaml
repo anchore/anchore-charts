@@ -200,6 +200,8 @@ tests:
           path: spec.template.spec.containers[0]
           content:
             envFrom:
+              - configMapRef:
+                  name: test-release-enterprise-hooks-env-vars
               - secretRef:
                   name: test-release-enterprise-hooks
 
