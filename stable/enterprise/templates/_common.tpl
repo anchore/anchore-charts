@@ -138,16 +138,25 @@ Setup the common envFrom configs
 */}}
 {{- define "enterprise.common.envFrom" -}}
 {{- if and .hook .Values.injectSecretsViaEnv -}}
-{{/* For hooks the configMapRef is skipped, and secretRefs are skipped whenever
-     secrets are injected via env. That leaves nothing to emit, so output an
-     explicit empty list to keep call sites' `envFrom:` a valid list rather than
-     rendering `envFrom: null`. */}}
+{{/* Hook pods with injectSecretsViaEnv provide every env var themselves
+     (creds and the config.yaml placeholder defaults alike) via extraEnv,
+     so the chart's configMapRef/secretRef are both skipped. Emit an explicit
+     empty list so the call site's `envFrom:` stays a valid list. */}}
 []
 {{- else -}}
-{{- if not .hook }}
+{{/* The env-vars ConfigMap holds only non-secret defaults for ${...} placeholders
+     in config.yaml (e.g. ANCHORE_DATA_SYNCER_VENDOR_VEX_*). Hook pods render the
+     same config.yaml so they need it too, but the regular release configmap is
+     either not present yet (fresh install) or still stale (upgrade — not updated
+     until after pre-upgrade hooks). Hook pods therefore mount the hook sibling
+     from templates/hooks/hook_envvars_configmap.yaml, which is managed at
+     hook-weight 0 so it always reflects the new release. */}}
 - configMapRef:
-    name: {{ .Release.Name }}-enterprise-config-env-vars
-{{- end }}
+    name: {{ if .hook -}}
+      {{ template "enterprise.hooks.fullname" . }}-env-vars
+    {{- else -}}
+      {{ .Release.Name }}-enterprise-config-env-vars
+    {{- end }}
 {{- if not .Values.injectSecretsViaEnv }}
   {{- if .Values.useExistingSecrets }}
 - secretRef:
