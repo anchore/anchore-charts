@@ -1449,7 +1449,7 @@ To restore your deployment to using your previous driver configurations:
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | `ui.image.registry`            | Registry for the Anchore UI image. Empty means take it from global.imageRegistryHost; set it to pull this one image from a different registry                                | `""`                                                                      |
 | `ui.image.repository`          | Repository for the Anchore UI image                                                                                                                                          | `anchore/enterprise-ui`                                                   |
-| `ui.image.digest`              | Digest for the Anchore UI image. Used when ui.image.tag is not set                                                                                                           | `sha256:fcd806deadf87d913216bd0d4a64d9e40c1443785a4dfaead422cd9f3b2d4b44` |
+| `ui.image.digest`              | Digest for the Anchore UI image. Used when ui.image.tag is not set                                                                                                           | `sha256:57e5adbf2a023c32db7678f3bd3ae0188db3428c6143b626a3c1cb0227e666cb` |
 | `ui.image.tag`                 | Tag for the Anchore UI image. Set it to deploy a specific version instead of the digest the chart pins; quote the value so it is read as a string                            | `""`                                                                      |
 | `ui.imagePullPolicy`           | Image pull policy for Anchore UI image                                                                                                                                       | `IfNotPresent`                                                            |
 | `ui.existingSecretName`        | Name of an existing secret to be used for Anchore UI DB and Redis endpoints                                                                                                  | `anchore-enterprise-ui-env`                                               |
@@ -1646,6 +1646,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.5.1
+
+- Updates Anchore Enterprise UI to v6.3.1.
 
 ### v4.5.0
 
