@@ -2263,8 +2263,8 @@ ui:
   image:
     registry: ""
     repository: anchore/enterprise-ui
-    digest: sha256:fcd806deadf87d913216bd0d4a64d9e40c1443785a4dfaead422cd9f3b2d4b44
-    tag: ""  # v6.3.0
+    digest: sha256:57e5adbf2a023c32db7678f3bd3ae0188db3428c6143b626a3c1cb0227e666cb
+    tag: ""  # v6.3.1
 
   ## @param ui.imagePullPolicy Image pull policy for Anchore UI image
   ##
