@@ -1647,6 +1647,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v4.5.2
+
+- Deploys Anchore Enterprise v6.3.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/631/) for more information.
+
 ### v4.5.1
 
 - Updates Anchore Enterprise UI to v6.3.1.
