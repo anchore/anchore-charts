@@ -903,7 +903,7 @@ To restore your deployment to using your previous driver configurations:
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
 | `image.registry`                                   | Registry for the Anchore Enterprise image. Empty means take it from global.imageRegistryHost; set it to pull this one image from a different registry                                                                                                        | `""`                                                                      |
 | `image.repository`                                 | Repository for the Anchore Enterprise image                                                                                                                                                                                                                  | `anchore/enterprise`                                                      |
-| `image.digest`                                     | Digest for the Anchore Enterprise image. Used when image.tag is not set                                                                                                                                                                                      | `sha256:ec08fe37553413a8de3f2727531f2e5325ebbd8de2ec33d64b1a87fb03729362` |
+| `image.digest`                                     | Digest for the Anchore Enterprise image. Used when image.tag is not set                                                                                                                                                                                      | `sha256:a3063e88253685aab971d4998a1b8fffd576738d2ac1d2dfd07ce35a13249a3b` |
 | `image.tag`                                        | Tag for the Anchore Enterprise image. Set it to deploy a specific version instead of the digest the chart pins; quote the value so it is read as a string                                                                                                    | `""`                                                                      |
 | `imagePullPolicy`                                  | Image pull policy used by all deployments                                                                                                                                                                                                                    | `IfNotPresent`                                                            |
 | `imagePullSecretName`                              | Name of Docker credentials secret for access to private repos                                                                                                                                                                                                | `anchore-enterprise-pullcreds`                                            |
@@ -1647,13 +1647,17 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
 
+### v4.5.2
+
+- Deploys Anchore Enterprise v6.3.1. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/631/) for more information.
+
 ### v4.5.1
 
 - Updates Anchore Enterprise UI to v6.3.1.
 
 ### v4.5.0
 
-- Deploys Anchore Enterprise v6.3.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/630/) for more information.
+- Deploys Anchore Enterprise v6.3.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/630/) for more information including upgrade duration expectations.
 - Removed `anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks`, replaced by `anchoreConfig.domains.artifact_lifecycle.evaluation_cycle_seconds`.
 - The chart now emits a pre-install / pre-upgrade sibling of the env-vars ConfigMap and mounts it into the hook pods. The main env-vars ConfigMap is a post-install resource, so hook pods previously started before it existed and resolved `${…}` placeholders in `config.yaml` to empty strings; the hook ConfigMap is rendered from the same shared helper, so hooks now resolve placeholders against the exact same values the long-running services use.
 
