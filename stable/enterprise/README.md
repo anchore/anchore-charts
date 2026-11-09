@@ -1657,7 +1657,7 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 
 ### v4.5.0
 
-- Deploys Anchore Enterprise v6.3.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/630/) for more information.
+- Deploys Anchore Enterprise v6.3.0. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/630/) for more information including upgrade duration expectations.
 - Removed `anchoreConfig.catalog.cycle_timers.artifact_lifecycle_policy_tasks`, replaced by `anchoreConfig.domains.artifact_lifecycle.evaluation_cycle_seconds`.
 - The chart now emits a pre-install / pre-upgrade sibling of the env-vars ConfigMap and mounts it into the hook pods. The main env-vars ConfigMap is a post-install resource, so hook pods previously started before it existed and resolved `${…}` placeholders in `config.yaml` to empty strings; the hook ConfigMap is rendered from the same shared helper, so hooks now resolve placeholders against the exact same values the long-running services use.
 
