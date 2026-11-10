@@ -31,7 +31,7 @@ image:
   pullPolicy: "IfNotPresent"
   registry: ""
   repository: "anchore/k8s-inventory"
-  tag: "v1.8.7"
+  tag: "v1.9.0-alpha.0"
 
 ## @param imagePullSecrets secrets where Kubernetes should get the credentials for pulling private images
 ##
@@ -249,6 +249,14 @@ k8sInventory:
   ## @param k8sInventory.ignoreNotRunning Ignore images out of pods that are not in a Running state
   ##
   ignoreNotRunning: true
+
+  ## @param k8sInventory.createApplicationsFromDeployments Create Anchore applications and versions from Deployments. Needs Anchore Enterprise v6+ and readApplications, createApplications, createAssets permissions
+  ## Each Deployment becomes an Anchore application and each rollout an application version, with the running images as assets.
+  ## Requires Anchore Enterprise v6 or later, and the Anchore user (k8sInventory.anchore.user or the accountRoutes users) needs the
+  ## readApplications, createApplications and createAssets permissions. When true, the chart also grants the agent list/watch on
+  ## Deployments and ReplicaSets. Requires a k8s-inventory version that supports create-applications-from-deployments.
+  ##
+  createApplicationsFromDeployments: false
 
   ### k8sInventory.accountRouteByNamespaceLabel Allow routing of Kubernetes namespaces to different Anchore accounts based on a label on the namespace
   ## @param k8sInventory.accountRouteByNamespaceLabel.key Kubernetes label key to use for determining Anchore account to send to

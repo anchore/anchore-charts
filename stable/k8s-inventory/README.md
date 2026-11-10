@@ -157,6 +157,7 @@ This chart takes the dict form only — `image.pullPolicy` lives in the same dic
 | `k8sInventory.missingTagPolicy.tag`                                     | Dummy tag to use. Only applicable if policy is 'insert'. Defaults to UNKNOWN                                                                                  | `UNKNOWN`        |
 | `k8sInventory.missingRegistryOverride`                                  |                                                                                                                                                               | `""`             |
 | `k8sInventory.ignoreNotRunning`                                         | Ignore images out of pods that are not in a Running state                                                                                                     | `true`           |
+| `k8sInventory.createApplicationsFromDeployments`                        | Create Anchore applications and versions from Deployments. Needs Anchore Enterprise v6+ and readApplications, createApplications, createAssets permissions    | `false`          |
 | `k8sInventory.accountRouteByNamespaceLabel.key`                         | Kubernetes label key to use for determining Anchore account to send to                                                                                        | `""`             |
 | `k8sInventory.accountRouteByNamespaceLabel.defaultAccount`              | Fallback account to send to if Anchore account or label is not found                                                                                          | `admin`          |
 | `k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel` | If true exclude sending inventory of namespaces that are missing the label                                                                                    | `false`          |
@@ -183,6 +184,15 @@ This chart takes the dict form only — `image.pullPolicy` lives in the same dic
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v0.8.0
+
+- Adds `k8sInventory.createApplicationsFromDeployments` (default `false`), rendered as `create-applications-from-deployments` in the agent config. When enabled, the agent creates Anchore applications and application versions from Kubernetes Deployments. See [Create applications from Deployments](https://github.com/anchore/k8s-inventory#create-applications-from-deployments).
+- Requires Anchore Enterprise v6 or later, a K8s Inventory version that supports the setting, and the `readApplications`, `createApplications` and `createAssets` permissions for the Anchore user.
+- When enabled, the chart's ClusterRole also grants `list` and `watch` on `apps` Deployments and ReplicaSets. With the default (`false`) the ClusterRole is unchanged.
+- The new line in the agent config changes the `checksum/config` pod annotation, so an upgrade rolls the pods even with the default value.
+
+No values changes are required to upgrade.
 
 ### v0.7.2
 

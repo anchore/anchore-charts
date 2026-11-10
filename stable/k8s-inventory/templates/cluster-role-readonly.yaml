@@ -16,4 +16,8 @@ rules:
   verbs: ["get", "watch", "list"]
 - apiGroups: ["apps"]
   resources: ["replicasets", "deployments"]
+  {{- if .Values.k8sInventory.createApplicationsFromDeployments }}
+  verbs: ["get", "watch", "list"]
+  {{- else }}
   verbs: ["get"]
+  {{- end }}
