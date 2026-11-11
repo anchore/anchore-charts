@@ -250,11 +250,18 @@ k8sInventory:
   ##
   ignoreNotRunning: true
 
-  ## @param k8sInventory.createApplicationsFromDeployments Create Anchore applications and versions from Deployments. Needs Anchore Enterprise v6+ and readApplications, createApplications, createAssets permissions
-  ## Each Deployment becomes an Anchore application and each rollout an application version, with the running images as assets.
-  ## Requires Anchore Enterprise v6 or later, and the Anchore user (k8sInventory.anchore.user or the accountRoutes users) needs the
-  ## readApplications, createApplications and createAssets permissions. When true, the chart also grants the agent list/watch on
-  ## Deployments and ReplicaSets. Requires a k8s-inventory version that supports create-applications-from-deployments.
+  ## @param k8sInventory.createApplicationsFrom Workload kinds to create Anchore applications and versions from: deployments, statefulsets, daemonsets. Needs Anchore Enterprise v6+ and readApplications, createApplications, createAssets permissions
+  ## Each workload becomes an Anchore application named <cluster>/<namespace>/<kind>/<name>, and each rollout an application version, with the running
+  ## images as assets. Requires Anchore Enterprise v6 or later, and the Anchore user (k8sInventory.anchore.user or the accountRoutes users) needs the
+  ## readApplications, createApplications and createAssets permissions. For each listed kind the chart grants the agent list/watch on those workloads
+  ## (and on ReplicaSets for deployments, ControllerRevisions for statefulsets and daemonsets). Requires a k8s-inventory version that supports
+  ## create-applications-from.
+  ## e.g.
+  ## createApplicationsFrom: [deployments, statefulsets, daemonsets]
+  ##
+  createApplicationsFrom: []
+
+  ## @param k8sInventory.createApplicationsFromDeployments Deprecated: the same as adding deployments to k8sInventory.createApplicationsFrom
   ##
   createApplicationsFromDeployments: false
 

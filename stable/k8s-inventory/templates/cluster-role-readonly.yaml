@@ -14,10 +14,22 @@ rules:
 - apiGroups: [""]
   resources: ["pods","namespaces", "nodes"]
   verbs: ["get", "watch", "list"]
+{{- $kinds := include "k8sInventory.createApplicationsFrom" . | fromJsonArray }}
 - apiGroups: ["apps"]
   resources: ["replicasets", "deployments"]
-  {{- if .Values.k8sInventory.createApplicationsFromDeployments }}
+  {{- if has "deployments" $kinds }}
   verbs: ["get", "watch", "list"]
   {{- else }}
   verbs: ["get"]
   {{- end }}
+{{- $revisionKinds := list }}
+{{- range (list "statefulsets" "daemonsets") }}
+{{- if has . $kinds }}
+{{- $revisionKinds = append $revisionKinds . }}
+{{- end }}
+{{- end }}
+{{- if $revisionKinds }}
+- apiGroups: ["apps"]
+  resources: {{ append $revisionKinds "controllerrevisions" | toJson }}
+  verbs: ["get", "watch", "list"]
+{{- end }}

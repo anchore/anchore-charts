@@ -145,3 +145,18 @@ that does not exist.
 {{- define "k8sInventory.image" -}}
 {{- include "k8sInventory.renderImage" (dict "image" .Values.image "context" .) | trim -}}
 {{- end }}
+
+{{/*
+Workload kinds the agent creates Anchore applications from, as a JSON list: k8sInventory.createApplicationsFrom
+(lower-cased, de-duplicated) plus deployments when the deprecated k8sInventory.createApplicationsFromDeployments is set.
+*/}}
+{{- define "k8sInventory.createApplicationsFrom" -}}
+{{- $kinds := list -}}
+{{- range .Values.k8sInventory.createApplicationsFrom -}}
+{{- $kinds = append $kinds (lower (trim .)) -}}
+{{- end -}}
+{{- if .Values.k8sInventory.createApplicationsFromDeployments -}}
+{{- $kinds = append $kinds "deployments" -}}
+{{- end -}}
+{{- $kinds | uniq | toJson -}}
+{{- end -}}

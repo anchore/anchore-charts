@@ -1,0 +1,127 @@
+## k8sInventory.createApplicationsFrom turns on the agent's create-applications-from setting for the listed workload
+## kinds. The agent then lists and watches those workloads (and ReplicaSets for deployments, ControllerRevisions for
+## statefulsets and daemonsets), so the ClusterRole only gains list/watch for the listed kinds; otherwise it keeps the
+## get on deployments and replicasets it needs for registration. The deprecated createApplicationsFromDeployments
+## adds deployments to the list.
+suite: Create Applications From Workloads Tests
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  k8sInventory.anchore.url: http://anchore:8228
+  k8sInventory.anchore.user: admin
+  k8sInventory.anchore.password: pw
+
+tests:
+  - it: should render an empty list by default
+    template: configmap.yaml
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "(?m)^create-applications-from: \\[\\]$"
+
+  - it: should render the listed kinds lower-cased and de-duplicated
+    template: configmap.yaml
+    set:
+      k8sInventory.createApplicationsFrom: [Deployments, statefulsets, daemonsets, deployments]
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '(?m)^create-applications-from: \["deployments","statefulsets","daemonsets"\]$'
+
+  - it: should add deployments for the deprecated createApplicationsFromDeployments
+    template: configmap.yaml
+    set:
+      k8sInventory.createApplicationsFromDeployments: true
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '(?m)^create-applications-from: \["deployments"\]$'
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "create-applications-from-deployments"
+
+  - it: should only grant get on deployments and replicasets by default
+    template: cluster-role-readonly.yaml
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["replicasets", "deployments"]
+            verbs: ["get"]
+      - lengthEqual:
+          path: rules
+          count: 2
+
+  - it: should grant get, list and watch on deployments and replicasets for deployments
+    template: cluster-role-readonly.yaml
+    set:
+      k8sInventory.createApplicationsFrom: [deployments]
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["replicasets", "deployments"]
+            verbs: ["get", "watch", "list"]
+      - lengthEqual:
+          path: rules
+          count: 2
+
+  - it: should grant list and watch on statefulsets and controllerrevisions for statefulsets only
+    template: cluster-role-readonly.yaml
+    set:
+      k8sInventory.createApplicationsFrom: [statefulsets]
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["replicasets", "deployments"]
+            verbs: ["get"]
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["statefulsets", "controllerrevisions"]
+            verbs: ["get", "watch", "list"]
+      - lengthEqual:
+          path: rules
+          count: 3
+
+  - it: should grant every kind when all are listed
+    template: cluster-role-readonly.yaml
+    set:
+      k8sInventory.createApplicationsFrom: [deployments, statefulsets, daemonsets]
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["replicasets", "deployments"]
+            verbs: ["get", "watch", "list"]
+      - contains:
+          path: rules
+          content:
+            apiGroups: ["apps"]
+            resources: ["statefulsets", "daemonsets", "controllerrevisions"]
+            verbs: ["get", "watch", "list"]
+      - lengthEqual:
+          path: rules
+          count: 3
+
+  - it: should keep the core rule unchanged when enabled
+    template: cluster-role-readonly.yaml
+    set:
+      k8sInventory.createApplicationsFrom: [deployments, statefulsets, daemonsets]
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [""]
+            resources: ["pods", "namespaces", "nodes"]
+            verbs: ["get", "watch", "list"]
