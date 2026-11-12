@@ -157,7 +157,8 @@ This chart takes the dict form only — `image.pullPolicy` lives in the same dic
 | `k8sInventory.missingTagPolicy.tag`                                     | Dummy tag to use. Only applicable if policy is 'insert'. Defaults to UNKNOWN                                                                                  | `UNKNOWN`        |
 | `k8sInventory.missingRegistryOverride`                                  |                                                                                                                                                               | `""`             |
 | `k8sInventory.ignoreNotRunning`                                         | Ignore images out of pods that are not in a Running state                                                                                                     | `true`           |
-| `k8sInventory.createApplicationsFromDeployments`                        | Create Anchore applications and versions from Deployments. Needs Anchore Enterprise v6+ and readApplications, createApplications, createAssets permissions    | `false`          |
+| `k8sInventory.createApplicationsFrom`                                   | Workload kinds to create Anchore applications and versions from: deployments, statefulsets, daemonsets. Needs Anchore Enterprise v6+ and readApplications, createApplications, createAssets permissions| `[]`             |
+| `k8sInventory.createApplicationsFromDeployments`                        | Deprecated: the same as adding deployments to k8sInventory.createApplicationsFrom                                                                             | `false`          |
 | `k8sInventory.accountRouteByNamespaceLabel.key`                         | Kubernetes label key to use for determining Anchore account to send to                                                                                        | `""`             |
 | `k8sInventory.accountRouteByNamespaceLabel.defaultAccount`              | Fallback account to send to if Anchore account or label is not found                                                                                          | `admin`          |
 | `k8sInventory.accountRouteByNamespaceLabel.ignoreNamespaceMissingLabel` | If true exclude sending inventory of namespaces that are missing the label                                                                                    | `false`          |
@@ -187,9 +188,10 @@ This chart takes the dict form only — `image.pullPolicy` lives in the same dic
 
 ### v0.8.0
 
-- Adds `k8sInventory.createApplicationsFromDeployments` (default `false`), rendered as `create-applications-from-deployments` in the agent config. When enabled, the agent creates Anchore applications and application versions from Kubernetes Deployments. See [Create applications from Deployments](https://github.com/anchore/k8s-inventory#create-applications-from-deployments).
-- Requires Anchore Enterprise v6 or later, a K8s Inventory version that supports the setting, and the `readApplications`, `createApplications` and `createAssets` permissions for the Anchore user.
-- When enabled, the chart's ClusterRole also grants `list` and `watch` on `apps` Deployments and ReplicaSets. With the default (`false`) the ClusterRole is unchanged.
+- Adds `k8sInventory.createApplicationsFrom` (default `[]`), rendered as `create-applications-from` in the agent config. List any of `deployments`, `statefulsets` and `daemonsets`, and the agent creates Anchore applications and application versions from those Kubernetes workloads, named `<cluster>/<namespace>/<kind>/<name>`. See [Create applications from workloads](https://github.com/anchore/k8s-inventory#create-applications-from-workloads).
+- `k8sInventory.createApplicationsFromDeployments: true` is deprecated and is the same as adding `deployments` to the list.
+- Requires Anchore Enterprise v6 or later, a K8s Inventory version that supports `create-applications-from`, and the `readApplications`, `createApplications` and `createAssets` permissions for the Anchore user.
+- For each listed kind, the chart's ClusterRole also grants `list` and `watch` on it: `apps` Deployments and ReplicaSets for `deployments`, and `apps` StatefulSets or DaemonSets plus ControllerRevisions for `statefulsets` and `daemonsets`. With the default (`[]`) the ClusterRole is unchanged.
 - The new line in the agent config changes the `checksum/config` pod annotation, so an upgrade rolls the pods even with the default value.
 
 No values changes are required to upgrade.
