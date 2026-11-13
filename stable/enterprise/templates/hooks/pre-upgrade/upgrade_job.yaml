@@ -53,6 +53,7 @@ spec:
             (include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .))
         }}
       initContainers:
+      {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
       {{- if eq (include "enterprise.appVersionChanged" .) "true" }}
         - name: wait-for-db
           image: {{ include "enterprise.common.image" . | trim }}
@@ -175,7 +176,6 @@ spec:
           {{- if include "enterprise.common.hasInitContainers" (merge (dict "component" $component) .) }}
           {{- include "enterprise.common.initContainers" (merge (dict "component" $component) .) | nindent 8 }}
           {{- end }}
-          {{- include "enterprise.common.cloudsqlInitContainer" . | nindent 8 }}
       {{- end }}
       containers:
         {{- include "enterprise.common.cloudsqlContainer" . | nindent 8 }}
