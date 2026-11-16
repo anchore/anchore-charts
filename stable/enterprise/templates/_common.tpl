@@ -432,6 +432,15 @@ The shell-free path is not a free substitution. `kubectl scale` exits non-zero w
 "no objects passed to scale" when the selector matches nothing, and has no
 --ignore-not-found, so that mode cannot treat an empty result as the normal state the
 script treats it as. See the chart README.
+
+Known asymmetry, left alone deliberately: the scripted drain below selects on
+app.kubernetes.io/name plus phase=Running and excludes no hook components, so a
+smoke-test pod left Running by a concurrent `helm test` is counted as an undrained
+service and waited on. The shell-free path excludes those components. This is
+pre-existing behaviour, character-identical to every released chart, and reachable only
+by running `helm test` and `helm upgrade` against one release at the same time. Changing
+the selector here would alter the default upgrade path for every existing customer,
+which this change is specifically written not to do. It is worth fixing on its own.
 */}}
 {{- define "enterprise.common.scaleDownInitContainers" -}}
 {{- $component := .component -}}
@@ -440,18 +449,30 @@ script treats it as. See the chart README.
 {{/* The drain step must wait only on Anchore's service pods, never on a hook job's pod.
      Every hook job carries app.kubernetes.io/name=<fullname>, same as the services.
 
-     preInstallJob is excluded for a reason that is easy to miss: pre_install_job.yaml uses
-     hook-delete-policy: before-hook-creation, so its pod outlives the install. A *completed*
-     one is already excluded by the phase filter below, but one left Pending by a failed
-     install (unschedulable, or stuck pulling) is not, and nothing will ever delete it, so
-     the drain would wait out its full --timeout on a pod that is not a service.
+     This list must name EVERY hook component in the chart that produces a pod. As of 4.6.0
+     that is four components across five templates: the two upgrade-path jobs above,
+     pre_install_job.yaml, anchorectl_smoketest.yaml, and hooks/post-upgrade/upgrade_job.yaml,
+     which needs no entry of its own because it reuses $component "upgradeJob". If you add
+     another, add it here too, or the shell-free drain will wait on it.
+
+     The last two are excluded for a reason that is easy to miss, because neither is deleted
+     when it finishes: pre_install_job.yaml uses hook-delete-policy: before-hook-creation,
+     and the smoke-test Pod has no delete policy at all. A *completed* one of either is
+     already excluded by the phase filter below, but one left Pending - a failed install that
+     could not schedule, or a `helm test` that timed out in ImagePullBackOff - is not, and
+     nothing will ever delete it, so the drain would wait out its full --timeout on a pod
+     that is not a service.
+
+     Only pods carrying app.kubernetes.io/name=<fullname> matter here. The postgresql and
+     ui-redis subcharts label their pods with their own names, so they never match and are
+     never drained.
 
      Listed explicitly and in a fixed order so the rendered selector is stable between the
      jobs. The calling component is appended if it is not already here, so a future hook job
      that includes this helper still excludes its own pod. Lowercased because
      enterprise.common.matchLabels renders the label as `{{ $component | lower }}`. */}}
 {{- $hookComponents := list -}}
-{{- range list "upgradeJob" "osaaMigrationJob" "preInstallJob" -}}
+{{- range list "upgradeJob" "osaaMigrationJob" "preInstallJob" "smokeTest" -}}
 {{- $hookComponents = append $hookComponents (lower .) -}}
 {{- end -}}
 {{- if not (has (lower $component) $hookComponents) -}}

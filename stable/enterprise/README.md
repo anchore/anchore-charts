@@ -184,7 +184,19 @@ kubectlImage:
 
 First, `kubectl scale` treats a label selector that matches no deployments as an error, and it has no `--ignore-not-found`, so there is no way to express "scale these down if any exist" in one invocation. A scripted mode treats an empty result as normal, because a release whose deployments have been deleted is expected to have them recreated by the upgrade. Shell-free mode fails that case with `no objects passed to scale`.
 
-This is not a one-off. A release whose deployments do not exist, because an install failed partway or they were deleted, stays in that state until something recreates them, so in shell-free mode *every* `helm upgrade` fails at the scale-down until you intervene. With `osaaMigrationJob.enabled`, which renders its own scale-down on every upgrade, that applies there too. Recovering means setting `kubectlImage.shell` back to a shell for one upgrade, or scaling a deployment up by hand.
+This is not a one-off. A release whose deployments do not exist, because an install failed partway or they were deleted, stays in that state until something recreates them, so in shell-free mode *every* `helm upgrade` fails at the scale-down until you intervene. With `osaaMigrationJob.enabled`, which renders its own scale-down on every upgrade, that applies there too.
+
+To recover, point `kubectlImage` back at a shell-capable image **and** set `shell` to a shell that image actually has, then run the upgrade once. Both have to change together: leaving a distroless image in place and setting `shell: /bin/bash` fails at run time with `exec: "/bin/bash": not found`. The chart defaults are one such pair:
+
+```yaml
+kubectlImage:
+  registry: ""
+  repository: bitnamilegacy/kubectl
+  tag: "1.30"
+  shell: /bin/bash
+```
+
+That upgrade recreates the deployments, after which you can switch back. `kubectl scale` is not a way out of this: it cannot recreate a Deployment that does not exist.
 
 Second, the two modes are strict about different things while draining, and neither covers everything:
 
