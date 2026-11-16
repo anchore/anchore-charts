@@ -14,6 +14,7 @@ See the [Anchore Enterprise Documentation](https://docs.anchore.com) for more de
 - [Installing the Chart](#installing-the-chart)
 - [Installing on Openshift](#installing-on-openshift)
 - [Upgrading](#upgrading-the-chart)
+  - [The kubectl Image Used by Upgrades](#the-kubectl-image-used-by-upgrades)
 - [Uninstalling the Chart](#uninstalling-the-chart)
 - [Configuration](#configuration)
   - [External Database Requirements](#external-database-requirements)
@@ -150,6 +151,54 @@ The Helm upgrade is marked as successful only upon the job's completion. This pr
   ```
 
 An optional post-upgrade hook is available to perform Anchore Enterprise upgrades without forcing all pods to terminate prior to running the upgrade. This is the same upgrade behavior that was enabled by default in the legacy anchore-engine chart. To enable the post-upgrade hook, set `upgradeJob.usePostUpgradeHook=true` in your values file.
+
+### The kubectl Image Used by Upgrades
+
+The pre-upgrade hook (and the object storage migration job) scales the Anchore deployments down before touching the database, and it needs a `kubectl` binary to do it. `kubectlImage` selects that image and `kubectlImage.shell` tells the chart what the image contains, because kubectl images differ in whether they ship a shell at all.
+
+| `kubectlImage.shell` | Use with | How the scale-down runs |
+| --- | --- | --- |
+| `/bin/bash` (default) | `bitnami/kubectl`, `alpine/k8s`, `dtzar/helm-kubectl` | one init container running a script |
+| `/bin/sh` | `alpine/kubectl` and other slim images whose only shell is busybox ash | the same script, which is POSIX |
+| `""` | any kubectl image, including distroless ones such as `registry.k8s.io/kubectl` and `rancher/kubectl` | three init containers, each a single `kubectl` invocation |
+
+`""` is the setting that works with the widest range of images: it only requires `kubectl` to be on the image's `PATH`, which every kubectl image provides, so it is the one to reach for if you do not know what is inside the image you are pointing at. It is not the most forgiving setting at run time, though. Read the trade-offs below before choosing it, particularly if you enable `osaaMigrationJob`. A scripted mode remains the default because it is the existing behaviour, unchanged.
+
+The chart ships `bitnamilegacy/kubectl` as the default. Bitnami has frozen that repository, so it no longer receives updates and you will want to point this value somewhere else. Nothing in the upgrade depends on Bitnami specifically.
+
+Note that `shell:` written bare is YAML `null`, not an empty string, and selects the `/bin/bash` default. Against a distroless image that fails at run time with `exec: "/bin/bash": not found`. Quote it: `shell: ""`.
+
+`kubectlImage` also still accepts a plain reference string, such as `kubectlImage: bitnamilegacy/kubectl:1.30`. That form has nowhere to carry a shell, so it keeps the `/bin/bash` default and behaves exactly as it did before this value existed. Move to the dict form to select another mode.
+
+To use the upstream Kubernetes image, which contains the `kubectl` binary and nothing else:
+
+```yaml
+kubectlImage:
+  registry: registry.k8s.io
+  repository: kubectl
+  tag: v1.33.4
+  shell: ""
+```
+
+**Shell-free mode gives up two behaviours.** Both follow from a single `kubectl` call having no way to branch or loop.
+
+First, `kubectl scale` treats a label selector that matches no deployments as an error, and it has no `--ignore-not-found`, so there is no way to express "scale these down if any exist" in one invocation. A scripted mode treats an empty result as normal, because a release whose deployments have been deleted is expected to have them recreated by the upgrade. Shell-free mode fails that case with `no objects passed to scale`.
+
+This is not a one-off. A release whose deployments do not exist, because an install failed partway or they were deleted, stays in that state until something recreates them, so in shell-free mode *every* `helm upgrade` fails at the scale-down until you intervene. With `osaaMigrationJob.enabled`, which renders its own scale-down on every upgrade, that applies there too. Recovering means setting `kubectlImage.shell` back to a shell for one upgrade, or scaling a deployment up by hand.
+
+Second, the two modes are strict about different things while draining, and neither covers everything:
+
+| | scripted (`/bin/bash`, `/bin/sh`) | shell-free (`""`) |
+| --- | --- | --- |
+| a pod created *during* the drain | waited on, it re-lists every 5s | **not waited on**, `kubectl wait` fixes its set at the start |
+| a pod still starting (phase `Pending`) when the drain begins | **not waited on**, it counts only `Running` pods | waited on |
+| a pod that can never start (unschedulable) | carries on | blocks until Helm times out |
+
+In practice the deployments have been scaled to zero before the drain begins, so nothing should be creating pods; a controller that reconciles the release back, such as Argo CD self-heal, is the case that would. Both modes fail the upgrade rather than proceeding if they cannot confirm the services are down.
+
+If the first row matters to you, keep a shell. `alpine/kubectl` works with `/bin/sh` and is a small, maintained image.
+
+One smaller difference: an RBAC failure surfaces as kubectl's own `Forbidden` message rather than the script's explanation of which permissions the service account needs, and the drain reports progress through `kubectl wait` rather than listing the pods it is still waiting on.
 
 ## Uninstalling the Chart
 
@@ -910,6 +959,7 @@ To restore your deployment to using your previous driver configurations:
 | `kubectlImage.registry`                            | Registry for the kubectl image. Empty means take it from global.imageRegistryHost                                                                                                                                                                            | `""`                                                                      |
 | `kubectlImage.repository`                          | Repository for the kubectl image                                                                                                                                                                                                                             | `bitnamilegacy/kubectl`                                                   |
 | `kubectlImage.tag`                                 | Tag for the kubectl image                                                                                                                                                                                                                                    | `1.30`                                                                    |
+| `kubectlImage.shell`                               | Shell used by the scale-down step. Set to `""` for a distroless kubectl image                                                                                                                                                                                | `/bin/bash`                                                               |
 | `useExistingPullCredSecret`                        | forgoes pullcred secret creation and uses the secret defined in imagePullSecretName                                                                                                                                                                          | `true`                                                                    |
 | `imageCredentials.registry`                        | The registry URL for the image pull secret                                                                                                                                                                                                                   | `""`                                                                      |
 | `imageCredentials.username`                        | The username for the image pull secret                                                                                                                                                                                                                       | `""`                                                                      |
@@ -1646,6 +1696,11 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.6.0
+
+- Added `kubectlImage.shell`, so the upgrade and object storage migration jobs can use a kubectl image that has no shell. Set it to `""` for a distroless image such as `registry.k8s.io/kubectl`, or to `/bin/sh` for a slim image such as `alpine/kubectl`. The default is unchanged. See [The kubectl Image Used by Upgrades](#the-kubectl-image-used-by-upgrades) for what shell-free mode gives up.
+- The scale-down script no longer uses `set -o pipefail`, so it runs under any `/bin/sh`. Behaviour is unchanged.
 
 ### v4.5.4
 

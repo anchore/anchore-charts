@@ -1,0 +1,320 @@
+suite: kubectl image shell mode tests
+templates:
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+  - templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+  # the migration job renders the secret and configmaps inline for its checksum annotations
+  - anchore_secret.yaml
+  - anchore_configmap.yaml
+  - envvars_configmap.yaml
+  - ui_configmap.yaml
+  - ui_secret.yaml
+  - policybundle_configmap.yaml
+  - analyzer_configmap.yaml
+values:
+  - values.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+chart:
+  version: 9.9.9
+  appVersion: 9.9.9
+set:
+  postgresql.externalEndpoint: test-postgresql
+  postgresql.auth.database: test-database
+  postgresql.auth.username: test-user
+  postgresql.auth.password: test-password
+  osaaMigrationJob.enabled: true
+
+scale-down-jobs: &scale-down-jobs
+  - templates/hooks/pre-upgrade/upgrade_job.yaml
+  - templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+
+tests:
+  # ---------------------------------------------------------------- shell mode
+  - it: defaults the upgrade job's scale-down step to /bin/bash
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: scale-down-anchore
+      - equal:
+          path: spec.template.spec.initContainers[1].command
+          value: ["/bin/bash", "-c"]
+
+  - it: defaults the migration job's scale-down step to /bin/bash
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: scale-down-anchore
+      - equal:
+          path: spec.template.spec.initContainers[0].command
+          value: ["/bin/bash", "-c"]
+
+  - it: runs the scale-down script under /bin/sh when asked, for slim kubectl images
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: /bin/sh
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].command
+          value: ["/bin/sh", "-c"]
+
+  # The script must stay POSIX so /bin/sh works on any base, not only busybox ash.
+  # `set -o pipefail` is the one construct dash rejects outright.
+  - it: keeps the scale-down script free of pipefail
+    templates: *scale-down-jobs
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].args[0]
+          pattern: "^set -u\n"
+      - notMatchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].args[0]
+          pattern: "pipefail"
+
+  - it: still tolerates a selector matching no deployments in shell mode
+    templates: *scale-down-jobs
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].args[0]
+          pattern: "nothing to scale down"
+
+  # ----------------------------------------------------------- shell-free mode
+  - it: renders three bare kubectl containers for the upgrade job when shell is empty
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: list-deployments
+      - equal:
+          path: spec.template.spec.initContainers[2].name
+          value: scale-down-anchore
+      - equal:
+          path: spec.template.spec.initContainers[3].name
+          value: wait-for-drain
+
+  - it: renders three bare kubectl containers for the migration job when shell is empty
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: list-deployments
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: scale-down-anchore
+      - equal:
+          path: spec.template.spec.initContainers[2].name
+          value: wait-for-drain
+
+  # A distroless image has no shell to interpret anything, so every container must
+  # invoke the kubectl binary directly and pass arguments as a list.
+  - it: invokes kubectl directly with no shell in shell-free mode
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="list-deployments")].command
+          value: ["kubectl"]
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].command
+          value: ["kubectl"]
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].command
+          value: ["kubectl"]
+
+  - it: passes the release selector to each shell-free kubectl call
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="list-deployments")].args
+          value: ["get", "deployments", "-l", "app.kubernetes.io/name=test-release-enterprise", "--no-headers", "-o", "name"]
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].args
+          value: ["scale", "deployments", "--all", "--replicas=0", "-l", "app.kubernetes.io/name=test-release-enterprise"]
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args
+          value: ["wait", "--for=delete", "pod", "-l", "app.kubernetes.io/name=test-release-enterprise,app.kubernetes.io/component notin (upgradejob,osaamigrationjob,preinstalljob)", "--field-selector=status.phase!=Succeeded,status.phase!=Failed", "--timeout=-1s"]
+
+  - it: works with the upstream distroless kubectl image
+    templates: *scale-down-jobs
+    set:
+      kubectlImage:
+        registry: registry.k8s.io
+        repository: kubectl
+        tag: v1.33.4
+        shell: ""
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].image
+          value: registry.k8s.io/kubectl:v1.33.4
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].image
+          value: registry.k8s.io/kubectl:v1.33.4
+
+  - it: applies securityContext and resources to every shell-free container
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      kubectlImage.shell: ""
+      containerSecurityContext:
+        runAsNonRoot: true
+        readOnlyRootFilesystem: true
+      upgradeJob.resources:
+        limits:
+          memory: 256Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="list-deployments")].securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].resources.limits.memory
+          value: 256Mi
+
+  # Helm deletes a key set to null, so this is the one way the chart can see no
+  # `shell` key at all - a user values file that removes it. It must keep the
+  # historical bash behaviour rather than silently switching to shell-free, which
+  # would then fail on a release whose deployments have already been deleted.
+  - it: falls back to /bin/bash when the shell key is removed entirely
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      kubectlImage.shell: null
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].command
+          value: ["/bin/bash", "-c"]
+      - lengthEqual:
+          path: spec.template.spec.initContainers
+          count: 2
+
+  # The job's own pod carries the same app.kubernetes.io/name label as the services it
+  # drains, and is in phase Pending while its init containers run. Without the phase
+  # filter the drain step waits for its own pod to be deleted and the upgrade hangs.
+  - it: excludes the hook jobs' own pods from the shell-free drain
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      # the job carries the very label it drains on, so it must exclude itself by component
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: test-release-enterprise
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args[4]
+          pattern: "app.kubernetes.io/component notin \\(upgradejob,osaamigrationjob,preinstalljob\\)"
+
+  # A release accumulates Succeeded hook pods - the pre-install job uses
+  # hook-delete-policy: before-hook-creation, so its pod carries the release name label
+  # forever and is not excluded by component. Waiting for it to be deleted never returns.
+  - it: ignores completed pods during the shell-free drain
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args
+          content: "--field-selector=status.phase!=Succeeded,status.phase!=Failed"
+
+  # kubectl wait resolves its pod set once. Filtering to phase=Running would drop a pod
+  # that is still ContainerCreating when the drain starts, and that pod could outlive the
+  # wait. Pending must stay in scope.
+  - it: does not restrict the shell-free drain to Running pods
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args
+          content: "--field-selector=status.phase=Running"
+
+  # enterprise.renderImage accepts kubectlImage as a plain reference string, the README
+  # documents it, and the v3.13.0 Bitnami workaround tells customers to write exactly this.
+  # `hasKey` against a string is a template error, not a false result, so without a kindIs
+  # guard every render fails for those values files. No test covered the string form, which
+  # is why a green suite hid it.
+  - it: still renders when kubectlImage is a reference string
+    templates: *scale-down-jobs
+    set:
+      kubectlImage: bitnamilegacy/kubectl:1.33.4
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].image
+          value: docker.io/bitnamilegacy/kubectl:1.33.4
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].command
+          value: ["/bin/bash", "-c"]
+
+  - it: honours global.imageRegistryHost with a string kubectlImage
+    templates: *scale-down-jobs
+    set:
+      kubectlImage: bitnamilegacy/kubectl:1.33.4
+      global.imageRegistryHost: harbor.example.com/dockerhub
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].image
+          value: harbor.example.com/dockerhub/bitnamilegacy/kubectl:1.33.4
+
+  # Both hook jobs must exclude their own pod, and the rendered selector must be stable
+  # between them so the exclusion cannot depend on which job is rendering.
+  - it: excludes both hook components from the drain in the migration job too
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args[4]
+          value: "app.kubernetes.io/name=test-release-enterprise,app.kubernetes.io/component notin (upgradejob,osaamigrationjob,preinstalljob)"
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: osaamigrationjob
+
+  # pre_install_job.yaml uses hook-delete-policy: before-hook-creation, so its pod outlives
+  # the install. A completed one is excluded by the phase filter, but one left Pending by a
+  # failed install is not, and nothing will ever delete it - the drain would wait out its
+  # full timeout on a pod that is not an Anchore service.
+  - it: excludes the pre-install hook pod from the shell-free drain
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args[4]
+          pattern: "preinstalljob"
+
+  # The de-duplication into one helper means a wrong $component would silently give both
+  # jobs the upgrade job's resources. The OSAA default is empty, so no snapshot catches it.
+  - it: takes resources from each job's own component
+    template: templates/hooks/pre-upgrade/object_store_analysis_archive_migration_job.yaml
+    set:
+      osaaMigrationJob.resources:
+        limits:
+          memory: 321Mi
+      upgradeJob.resources:
+        limits:
+          memory: 123Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].resources.limits.memory
+          value: 321Mi
+
+  - it: takes resources from the upgrade job's own component
+    template: templates/hooks/pre-upgrade/upgrade_job.yaml
+    set:
+      osaaMigrationJob.resources:
+        limits:
+          memory: 321Mi
+      upgradeJob.resources:
+        limits:
+          memory: 123Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].resources.limits.memory
+          value: 123Mi

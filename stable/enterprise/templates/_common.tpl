@@ -415,6 +415,202 @@ Create an image specification template for kubectl
 {{- end }}
 
 {{/*
+Render the scale-down init container(s) shared by the upgrade and osaaMigration jobs.
+
+`kubectlImage.shell` selects how the scale-down runs, because kubectl images differ in what
+they contain:
+
+  - A shell path (default "/bin/bash") renders one container running the script below.
+    "/bin/sh" works equally well - the script is POSIX, deliberately - which covers slim
+    images such as alpine/kubectl whose only shell is busybox ash.
+  - "" renders three containers, each a bare kubectl invocation with no shell at all, for
+    distroless images such as registry.k8s.io/kubectl. Those images contain the kubectl
+    binary and nothing else: no bash, no sh, no coreutils. A script of any kind is
+    impossible there, so the branching has to become container ordering instead.
+
+The shell-free path is not a free substitution. `kubectl scale` exits non-zero with
+"no objects passed to scale" when the selector matches nothing, and has no
+--ignore-not-found, so that mode cannot treat an empty result as the normal state the
+script treats it as. See the chart README.
+*/}}
+{{- define "enterprise.common.scaleDownInitContainers" -}}
+{{- $component := .component -}}
+{{- $image := include "enterprise.kubectl.image" . | trim -}}
+{{- $selector := printf "app.kubernetes.io/name=%s" (include "enterprise.fullname" .) -}}
+{{/* The drain step must wait only on Anchore's service pods, never on a hook job's pod.
+     Every hook job carries app.kubernetes.io/name=<fullname>, same as the services.
+
+     preInstallJob is excluded for a reason that is easy to miss: pre_install_job.yaml uses
+     hook-delete-policy: before-hook-creation, so its pod outlives the install. A *completed*
+     one is already excluded by the phase filter below, but one left Pending by a failed
+     install (unschedulable, or stuck pulling) is not, and nothing will ever delete it, so
+     the drain would wait out its full --timeout on a pod that is not a service.
+
+     Listed explicitly and in a fixed order so the rendered selector is stable between the
+     jobs. The calling component is appended if it is not already here, so a future hook job
+     that includes this helper still excludes its own pod. Lowercased because
+     enterprise.common.matchLabels renders the label as `{{ $component | lower }}`. */}}
+{{- $hookComponents := list -}}
+{{- range list "upgradeJob" "osaaMigrationJob" "preInstallJob" -}}
+{{- $hookComponents = append $hookComponents (lower .) -}}
+{{- end -}}
+{{- if not (has (lower $component) $hookComponents) -}}
+{{- $hookComponents = append $hookComponents (lower $component) -}}
+{{- end -}}
+{{- $drainSelector := printf "%s,app.kubernetes.io/component notin (%s)" $selector (join "," $hookComponents) -}}
+{{/* Only an explicit "" selects shell-free. A missing key keeps the historical /bin/bash,
+     and because Helm deletes a null-valued key, `shell: null` also lands here as /bin/bash.
+
+     The kindIs guard is required, not defensive. enterprise.renderImage accepts kubectlImage
+     as a plain reference string, the README documents that form as supported, and the v3.13.0
+     Bitnami workaround tells customers to write exactly that. hasKey against a string is a
+     template error rather than a false result, so without this guard every render fails for
+     those values files. A string carries nowhere to put a shell, so it keeps /bin/bash;
+     selecting another mode means moving to the dict form. */}}
+{{- $shell := "/bin/bash" -}}
+{{- if and (kindIs "map" .Values.kubectlImage) (hasKey .Values.kubectlImage "shell") -}}
+{{- $shell = default "" .Values.kubectlImage.shell -}}
+{{- end -}}
+{{- $securityContext := "" -}}
+{{- if or .Values.containerSecurityContext (index .Values $component).containerSecurityContext -}}
+{{- $securityContext = include "enterprise.common.containerSecurityContext" (merge (dict "component" $component) .) -}}
+{{- end -}}
+{{- $resources := (index .Values $component).resources -}}
+{{- if $shell -}}
+- name: scale-down-anchore
+  image: {{ $image }}
+  command: [{{ $shell | quote }}, "-c"]
+  args:
+    - |
+      set -u
+      SELECTOR="{{ $selector }}"
+
+      # List the deployments before scaling them. `kubectl scale` reports both "no
+      # deployments exist" and "not allowed to list deployments" as the same
+      # `no objects passed to scale` error, so it cannot distinguish a missing RBAC
+      # grant from an empty result. An explicit list can: it exits non-zero when the
+      # request is denied, and exits 0 with no output when nothing matches.
+      # stderr is intentionally left unredirected so any API error lands in the pod log.
+      deployments=$(kubectl get deployments -l "${SELECTOR}" --no-headers -o name) && rc=0 || rc=$?
+      if [ "${rc}" -ne 0 ]; then
+        echo "Unable to list the Anchore deployments (exit ${rc}); refusing to continue, because the services cannot be confirmed to be scaled down." >&2
+        echo "The service account this job runs as needs get/list/watch on deployments, patch on deployments/scale, and get/list/watch on pods." >&2
+        exit "${rc}"
+      fi
+
+      # No deployments matched. This is a normal state, not a failure: the release may
+      # have had its deployments deleted and be relying on this upgrade to recreate
+      # them. There is nothing running to scale down, so let the upgrade proceed.
+      if [ -z "${deployments}" ]; then
+        echo "No deployments matched ${SELECTOR}; nothing to scale down."
+        exit 0
+      fi
+
+      kubectl scale deployments --all --replicas=0 -l "${SELECTOR}" && rc=0 || rc=$?
+      if [ "${rc}" -ne 0 ]; then
+        echo "Failed to scale the Anchore deployments down (exit ${rc})." >&2
+        exit "${rc}"
+      fi
+
+      # Wait for the pods to drain. Deliberately unbounded: a large deployment can take
+      # a long time to drain, and a job that keeps reporting which pods it is still
+      # waiting on is more useful than one that gives up. Failing to *list* the pods is
+      # a different condition from pods still running, and exits rather than being
+      # counted as zero — that miscount is what previously let the migration and upgrade
+      # proceed against services that were never scaled down.
+      while true; do
+        pods=$(kubectl get pods -l "${SELECTOR}" --field-selector=status.phase=Running --no-headers) && rc=0 || rc=$?
+        if [ "${rc}" -ne 0 ]; then
+          echo "Unable to list pods (exit ${rc}); cannot confirm the Anchore services are down." >&2
+          exit "${rc}"
+        fi
+        running=$(printf '%s' "${pods}" | grep -c .)
+        if [ "${running}" -eq 0 ]; then
+          break
+        fi
+        printf '%s\n' "${pods}" >&2
+        echo "waiting for ${running} pod(s) to go down..."
+        sleep 5
+      done
+      echo "All Anchore pods are down."
+  {{- if $securityContext }}
+  securityContext: {{- $securityContext | nindent 4 }}
+  {{- end }}
+  {{- with $resources }}
+  resources: {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- else -}}
+{{/*
+Shell-free: one kubectl call per container, run in order. Any non-zero exit fails the pod,
+which is the only control flow available without a shell.
+*/}}
+- name: list-deployments
+  {{/* Exists to turn an ambiguous failure into a readable one. `kubectl scale` reports "no
+       deployments exist" and "not allowed to list deployments" with the same
+       `no objects passed to scale` message; an explicit list exits non-zero with the API's
+       own Forbidden text when the request is denied, and 0 with no output when nothing
+       matches. It proves only that deployments are listable: permission to patch
+       deployments/scale, and to list and watch pods, is not checked here and will surface
+       in the two containers below. */}}
+  image: {{ $image }}
+  command: ["kubectl"]
+  args: ["get", "deployments", "-l", {{ $selector | quote }}, "--no-headers", "-o", "name"]
+  {{- if $securityContext }}
+  securityContext: {{- $securityContext | nindent 4 }}
+  {{- end }}
+  {{- with $resources }}
+  resources: {{- toYaml . | nindent 4 }}
+  {{- end }}
+- name: scale-down-anchore
+  image: {{ $image }}
+  command: ["kubectl"]
+  args: ["scale", "deployments", "--all", "--replicas=0", "-l", {{ $selector | quote }}]
+  {{- if $securityContext }}
+  securityContext: {{- $securityContext | nindent 4 }}
+  {{- end }}
+  {{- with $resources }}
+  resources: {{- toYaml . | nindent 4 }}
+  {{- end }}
+- name: wait-for-drain
+  {{/* Both exclusions are load-bearing, and each fixes a different hang.
+
+       The label exclusion: this job's own pod carries the same app.kubernetes.io/name label
+       as the services it drains, and sits in phase Pending while its init containers run.
+       Without it this step waits for itself to be deleted and the upgrade hangs until Helm
+       times out.
+
+       The phase exclusion: a release accumulates Succeeded hook pods. The pre-install job
+       uses hook-delete-policy before-hook-creation, so its pod is still there, carries the
+       release's name label, and is not one of the components excluded above. Waiting for a
+       completed pod that nothing will ever delete hangs just as hard.
+
+       What is deliberately NOT filtered is phase Pending. kubectl wait resolves its pod set
+       once and then watches those objects, so anything missing from that first list is never
+       waited on. Filtering to phase=Running would drop a pod that is still ContainerCreating
+       when this starts, and that pod can go on to run out its full termination grace period
+       after this step has already returned 0.
+
+       Note that the scripted path does not handle this case either: it counts only Running
+       pods and breaks as soon as that count is zero, so a pod still coming up lets it exit
+       early too. Verified in a cluster. The two paths are strict about different things -
+       this one waits for pods that are still starting but cannot see pods created after it
+       begins; the script is the other way round. Neither is a superset of the other.
+
+       A negative --timeout means "wait for a week", the closest this mode gets to the
+       scripted path's deliberately unbounded wait. It exits 0 when nothing matches. */}}
+  image: {{ $image }}
+  command: ["kubectl"]
+  args: ["wait", "--for=delete", "pod", "-l", {{ $drainSelector | quote }}, "--field-selector=status.phase!=Succeeded,status.phase!=Failed", "--timeout=-1s"]
+  {{- if $securityContext }}
+  securityContext: {{- $securityContext | nindent 4 }}
+  {{- end }}
+  {{- with $resources }}
+  resources: {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Setup the common pod spec configs
 */}}
 {{- define "enterprise.common.podSpec" -}}
