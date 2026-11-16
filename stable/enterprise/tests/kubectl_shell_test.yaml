@@ -140,7 +140,7 @@ tests:
           value: ["scale", "deployments", "--all", "--replicas=0", "-l", "app.kubernetes.io/name=test-release-enterprise"]
       - equal:
           path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args
-          value: ["wait", "--for=delete", "pod", "-l", "app.kubernetes.io/name=test-release-enterprise,app.kubernetes.io/component notin (upgradejob,osaamigrationjob,preinstalljob)", "--field-selector=status.phase!=Succeeded,status.phase!=Failed", "--timeout=-1s"]
+          value: ["wait", "--for=delete", "pod", "-l", "app.kubernetes.io/name=test-release-enterprise,app.kubernetes.io/component notin (upgradejob,osaamigrationjob,preinstalljob,smoketest)", "--field-selector=status.phase!=Succeeded,status.phase!=Failed", "--timeout=-1s"]
 
   - it: works with the upstream distroless kubectl image
     templates: *scale-down-jobs
@@ -195,21 +195,24 @@ tests:
           path: spec.template.spec.initContainers
           count: 2
 
-  # The job's own pod carries the same app.kubernetes.io/name label as the services it
-  # drains, and is in phase Pending while its init containers run. Without the phase
-  # filter the drain step waits for its own pod to be deleted and the upgrade hangs.
+  # The job's own POD carries the same app.kubernetes.io/name label as the services it
+  # drains, and sits in phase Pending while its init containers run. It is the component
+  # exclusion below that keeps the drain off it - NOT the phase filter, which deliberately
+  # leaves Pending in scope so pods that are still starting are waited on. Dropping the
+  # `notin` clause reintroduces a drain that waits for its own pod and never returns.
+  # The assertion is on the pod template, not the Job, because that is where the label
+  # that causes the deadlock actually lives.
   - it: excludes the hook jobs' own pods from the shell-free drain
     templates: *scale-down-jobs
     set:
       kubectlImage.shell: ""
     asserts:
-      # the job carries the very label it drains on, so it must exclude itself by component
       - equal:
-          path: metadata.labels["app.kubernetes.io/name"]
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
           value: test-release-enterprise
       - matchRegex:
           path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args[4]
-          pattern: "app.kubernetes.io/component notin \\(upgradejob,osaamigrationjob,preinstalljob\\)"
+          pattern: "app.kubernetes.io/component notin \\(upgradejob,osaamigrationjob,preinstalljob,smoketest\\)"
 
   # A release accumulates Succeeded hook pods - the pre-install job uses
   # hook-delete-policy: before-hook-creation, so its pod carries the release name label
@@ -271,7 +274,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args[4]
-          value: "app.kubernetes.io/name=test-release-enterprise,app.kubernetes.io/component notin (upgradejob,osaamigrationjob,preinstalljob)"
+          value: "app.kubernetes.io/name=test-release-enterprise,app.kubernetes.io/component notin (upgradejob,osaamigrationjob,preinstalljob,smoketest)"
       - equal:
           path: metadata.labels["app.kubernetes.io/component"]
           value: osaamigrationjob
@@ -318,3 +321,15 @@ tests:
       - equal:
           path: spec.template.spec.initContainers[?(@.name=="scale-down-anchore")].resources.limits.memory
           value: 123Mi
+
+  # The smoke-test Pod has no hook-delete-policy, so it survives `helm test`. A run that
+  # timed out in ImagePullBackOff leaves it Pending, where the phase filter does not catch
+  # it and nothing will ever delete it. It is the fourth and last pod-producing hook.
+  - it: excludes the smoke-test pod from the shell-free drain
+    templates: *scale-down-jobs
+    set:
+      kubectlImage.shell: ""
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[?(@.name=="wait-for-drain")].args[4]
+          pattern: "smoketest"
