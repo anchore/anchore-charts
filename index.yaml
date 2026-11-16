@@ -6758,6 +6758,52 @@ entries:
   enterprise:
   - apiVersion: v2
     appVersion: 6.3.1
+    created: "2026-11-16T11:57:46.242753984Z"
+    dependencies:
+    - alias: ui-redis
+      condition: ui-redis.chartEnabled
+      name: redis
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: ~17.11
+    - alias: prometheus
+      condition: prometheus.chartEnabled
+      name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: ~27.30.0
+    description: 'Anchore Enterprise is a complete container security workflow solution
+      for professional teams. Easily integrating with CI/CD systems, it allows developers
+      to bolster security without compromising velocity and enables security teams
+      to audit and verify compliance in real-time. It is based on Anchore Engine,
+      an open-source image inspection and scanning tool. '
+    digest: 2d0ab1b02096b35cd4d4af40b5ea941b343e9805a23eb81d97c7b2541c082059
+    home: https://anchore.com
+    icon: https://anchore.com/wp-content/uploads/2016/08/anchore.png
+    keywords:
+    - analysis
+    - docker
+    - anchore
+    - anchore-engine
+    - anchore-enterprise
+    - image
+    - security
+    - vulnerability
+    - scanner
+    kubeVersion: 1.23.x - 1.37.x || 1.23.x-x - 1.37.x-x
+    maintainers:
+    - email: zach@anchore.com
+      name: zhill
+    - email: hung.nguyen@anchore.com
+      name: hn23
+    - email: jesse.tamburino@anchore.com
+      name: infrainnovator
+    name: enterprise
+    sources:
+    - https://github.com/anchore/anchore-charts/tree/master/stable/enterprise
+    urls:
+    - https://github.com/anchore/anchore-charts/releases/download/enterprise-4.5.3/enterprise-4.5.3.tgz
+    version: 4.5.3
+  - apiVersion: v2
+    appVersion: 6.3.1
     created: "2026-11-09T19:37:04.973070749Z"
     dependencies:
     - alias: ui-redis
@@ -16329,4 +16375,4 @@ entries:
     urls:
     - https://github.com/anchore/anchore-charts/releases/download/kai-0.1.0/kai-0.1.0.tgz
     version: 0.1.0
-generated: "2026-11-09T21:06:34.766908977Z"
+generated: "2026-11-16T11:57:46.243584699Z"
