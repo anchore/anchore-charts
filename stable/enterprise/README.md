@@ -752,7 +752,7 @@ To restore your deployment to using your previous driver configurations:
 
 | Name                                    | Description                                                                                                                                                                                                                                                  | Value                                               |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                                                                                                                                                      | `docker.io/anchore/enterprise@sha256:61a4f2341167157bf31a2cf776973cc4017967daafee4e6c9bd453b038374534` |
+| `image`                                 | Image used for all Anchore Enterprise deployments, excluding Anchore UI                                                                                                                                                                                      | `docker.io/anchore/enterprise@sha256:a285112668a82053bd963eeb7afe29784dfec32a802b9a94feb425367f99c0a0` |
 | `imagePullPolicy`                       | Image pull policy used by all deployments                                                                                                                                                                                                                    | `IfNotPresent`                                      |
 | `imagePullSecretName`                   | Name of Docker credentials secret for access to private repos                                                                                                                                                                                                | `anchore-enterprise-pullcreds`                      |
 | `kubectlImage`                          | The image to use for the job's init container that uses kubectl to scale down deployments for the migration / upgrade                                                                                                                                        | `bitnamilegacy/kubectl:1.30`                        |
@@ -1395,6 +1395,8 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - Updates Anchore Enterprise UI to v5.27.4.
 #### V3.25.6
 - Deploys Anchore Enterprise v5.27.6. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5276/) for more information.
+#### V3.25.7
+- Deploys Anchore Enterprise v5.27.7. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/5277/) for more information.
 
 ### V3.24.x
 #### V3.24.0
