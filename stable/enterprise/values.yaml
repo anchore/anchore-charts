@@ -42,8 +42,8 @@ global:
 image:
   registry: ""
   repository: anchore/enterprise
-  digest: sha256:a3063e88253685aab971d4998a1b8fffd576738d2ac1d2dfd07ce35a13249a3b
-  tag: ""  # v6.3.1
+  digest: sha256:9662d794631757f9f3846eb45123e025604b675572a7b4133b7bdb421a09e4e7
+  tag: ""  # v6.3.2
 
 ## @param imagePullPolicy Image pull policy used by all deployments
 ## ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
