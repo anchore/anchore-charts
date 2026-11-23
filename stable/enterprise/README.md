@@ -158,7 +158,7 @@ The pre-upgrade hook (and the object storage migration job) scales the Anchore d
 
 | `kubectlImage.shell` | Use with | How the scale-down runs |
 | --- | --- | --- |
-| `/bin/bash` (default) | `bitnami/kubectl`, `alpine/k8s`, `dtzar/helm-kubectl` | one init container running a script |
+| `/bin/bash` (default) | `bitnamilegacy/kubectl` (the chart default), `alpine/k8s`, `dtzar/helm-kubectl` | one init container running a script |
 | `/bin/sh` | `alpine/kubectl` and other slim images whose only shell is busybox ash | the same script, which is POSIX |
 | `""` | any kubectl image, including distroless ones such as `registry.k8s.io/kubectl` and `rancher/kubectl` | three init containers, each a single `kubectl` invocation |
 
@@ -204,9 +204,11 @@ Second, the two modes are strict about different things while draining, and neit
 | --- | --- | --- |
 | a pod created *during* the drain | waited on, it re-lists every 5s | **not waited on**, `kubectl wait` fixes its set at the start |
 | a pod still starting (phase `Pending`) when the drain begins | **not waited on**, it counts only `Running` pods | waited on |
-| a pod that can never start (unschedulable) | carries on | blocks until Helm times out |
+| a pod that can never start (unschedulable) | carries on | **blocks**, and Helm timing out does not end it (see below) |
 
 In practice the deployments have been scaled to zero before the drain begins, so nothing should be creating pods; a controller that reconciles the release back, such as Argo CD self-heal, is the case that would. Both modes fail the upgrade rather than proceeding if they cannot confirm the services are down.
+
+The third row is the one worth planning for, because the shell-free drain waits indefinitely by design and Helm giving up does not stop it. If one Anchore pod cannot be scheduled (node pressure, an unbound PVC), the scripted modes count only `Running` pods, see zero and carry on, while the shell-free drain blocks. Helm then aborts at its own timeout, but the hook job keeps running: the hook is annotated `hook-delete-policy: before-hook-creation`, which removes the previous job when the next upgrade starts rather than cleaning up a failed one. Because the deployments are already at zero replicas, Anchore stays down until someone resolves what is blocking the pod and deletes the hook job by hand. That is the safer failure of the two, since the alternative is a database upgrade running against live services, but it is not self-clearing.
 
 If the first row matters to you, keep a shell. `alpine/kubectl` works with `/bin/sh` and is a small, maintained image.
 
