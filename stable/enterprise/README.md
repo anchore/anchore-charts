@@ -903,7 +903,7 @@ To restore your deployment to using your previous driver configurations:
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
 | `image.registry`                                   | Registry for the Anchore Enterprise image. Empty means take it from global.imageRegistryHost; set it to pull this one image from a different registry                                                                                                        | `""`                                                                      |
 | `image.repository`                                 | Repository for the Anchore Enterprise image                                                                                                                                                                                                                  | `anchore/enterprise`                                                      |
-| `image.digest`                                     | Digest for the Anchore Enterprise image. Used when image.tag is not set                                                                                                                                                                                      | `sha256:a3063e88253685aab971d4998a1b8fffd576738d2ac1d2dfd07ce35a13249a3b` |
+| `image.digest`                                     | Digest for the Anchore Enterprise image. Used when image.tag is not set                                                                                                                                                                                      | `sha256:9662d794631757f9f3846eb45123e025604b675572a7b4133b7bdb421a09e4e7` |
 | `image.tag`                                        | Tag for the Anchore Enterprise image. Set it to deploy a specific version instead of the digest the chart pins; quote the value so it is read as a string                                                                                                    | `""`                                                                      |
 | `imagePullPolicy`                                  | Image pull policy used by all deployments                                                                                                                                                                                                                    | `IfNotPresent`                                                            |
 | `imagePullSecretName`                              | Name of Docker credentials secret for access to private repos                                                                                                                                                                                                | `anchore-enterprise-pullcreds`                                            |
@@ -1646,6 +1646,10 @@ For the latest updates and features in Anchore Enterprise, see the official [Rel
 - **Major Chart Version Change (e.g., v0.1.2 -> v1.0.0)**: Signifies an incompatible breaking change that necessitates manual intervention, such as updates to your values file or data migrations.
 - **Minor Chart Version Change (e.g., v0.1.2 -> v0.2.0)**: Indicates a significant change to the deployment that does not require manual intervention.
 - **Patch Chart Version Change (e.g., v0.1.2 -> v0.1.3)**: Indicates a backwards-compatible bug fix or documentation update.
+
+### v4.5.4
+
+- Deploys Anchore Enterprise v6.3.2. See the [Release Notes](https://docs.anchore.com/current/docs/releasenotes/632/) for more information.
 
 ### v4.5.3
 
