@@ -59,13 +59,31 @@ imagePullSecretName: anchore-enterprise-pullcreds
 ## @param kubectlImage.registry Registry for the kubectl image. Empty means take it from global.imageRegistryHost
 ## @param kubectlImage.repository Repository for the kubectl image
 ## @param kubectlImage.tag Tag for the kubectl image
+## @param kubectlImage.shell Shell used by the scale-down step. Set to `""` for a distroless kubectl image
 ## Only used by the osaaMigration and upgrade jobs.
+##
+## kubectlImage.shell must match what the image you point at actually contains:
+##   /bin/bash  the default, and what bitnami/*, alpine/k8s and dtzar/helm-kubectl provide
+##   /bin/sh    slim images whose only shell is busybox ash, such as alpine/kubectl
+##   ""         distroless images that contain no shell at all, such as
+##              registry.k8s.io/kubectl or rancher/kubectl. The scale-down then runs as
+##              three plain kubectl invocations instead of a script.
+##
+## Shell-free mode trades away two behaviours: `kubectl scale` treats a selector that
+## matches no deployments as an error, so an upgrade of a release whose deployments have
+## already been deleted will fail there, and the drain does not notice pods created while
+## it runs. The scripted modes handle both. See the README for the full comparison.
+##
+## kubectlImage also still accepts a plain reference string ("bitnamilegacy/kubectl:1.30").
+## That form has nowhere to carry a shell, so it keeps /bin/bash; use the dict form below
+## to select another mode.
 ##
 kubectlImage:
   registry: ""
   repository: bitnamilegacy/kubectl
   tag: "1.30"
   # digest: sha256:abcdef123456
+  shell: /bin/bash
 
 ## @param useExistingPullCredSecret forgoes pullcred secret creation and uses the secret defined in imagePullSecretName
 ##

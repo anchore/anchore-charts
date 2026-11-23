@@ -52,7 +52,7 @@ migration job should match snapshot:
     initContainers:
       - args:
           - |
-            set -uo pipefail
+            set -u
             SELECTOR="app.kubernetes.io/name=test-release-enterprise"
 
             # List the deployments before scaling them. `kubectl scale` reports both "no
@@ -240,7 +240,7 @@ migration job should match snapshot analysisArchiveMigration and objectStoreMigr
     initContainers:
       - args:
           - |
-            set -uo pipefail
+            set -u
             SELECTOR="app.kubernetes.io/name=test-release-enterprise"
 
             # List the deployments before scaling them. `kubectl scale` reports both "no
@@ -426,7 +426,7 @@ migration job should match snapshot analysisArchiveMigration to true:
     initContainers:
       - args:
           - |
-            set -uo pipefail
+            set -u
             SELECTOR="app.kubernetes.io/name=test-release-enterprise"
 
             # List the deployments before scaling them. `kubectl scale` reports both "no
@@ -611,7 +611,7 @@ migration job should match snapshot objectStoreMigration to true:
     initContainers:
       - args:
           - |
-            set -uo pipefail
+            set -u
             SELECTOR="app.kubernetes.io/name=test-release-enterprise"
 
             # List the deployments before scaling them. `kubectl scale` reports both "no
@@ -893,7 +893,7 @@ should render proper initContainers:
           subPath: config.yaml
     - args:
         - |
-          set -uo pipefail
+          set -u
           SELECTOR="app.kubernetes.io/name=test-release-enterprise"
 
           # List the deployments before scaling them. `kubectl scale` reports both "no
